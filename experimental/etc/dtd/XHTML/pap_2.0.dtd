@@ -1,0 +1,223 @@
+<!--
+Push Access Protocol (PAP) v2.0 Document Type Definition.
+
+Copyright Wireless Application Protocol Forum Ltd., 1998-2001.
+                      All rights reserved.  
+
+PAP is an XML language. Typical usage:
+   <?xml version="1.0"?>
+   <!DOCTYPE pap PUBLIC "-//WAPFORUM//DTD PAP 2.0//EN"
+             "http://www.wapforum.org/DTD/pap_2.0.dtd"
+             [<?wap-pap-ver supported-versions="2.0,1.*"?>]>
+   <pap>
+      ...
+   </pap>
+
+Terms and conditions of use are available from the Wireless 
+Application Protocol Forum Ltd. web site at
+http://www.wapforum.org/docs/copyright.htm.
+-->
+
+<!ENTITY % Datetime "CDATA">     <!-- ISO date and time -->
+<!ENTITY % State  "(rejected | pending 
+                  | delivered | undeliverable 
+                  | expired | aborted 
+                  | timeout | cancelled | unknown)">        
+                                 <!-- PPG Message State -->
+
+
+<!ELEMENT pap                    ( push-message
+                                 | push-response
+                                 | cancel-message
+                                 | cancel-response
+                                 | resultnotification-message
+                                 | resultnotification-response
+                                 | statusquery-message
+                                 | statusquery-response
+                                 | ccq-message
+                                 | ccq-response 
+                                 | badmessage-response) >
+<!ATTLIST pap
+          product-name           CDATA             #IMPLIED
+>
+
+
+<!-- ========================================= -->
+<!-- Declaration of push submission message    -->
+<!-- ========================================= -->
+
+<!--this message goes from the Push Initiator to the push proxy gateway-->
+
+<!ELEMENT push-message ( address+, quality-of-service? ) >
+<!ATTLIST push-message
+          push-id                    CDATA             #REQUIRED
+          replace-push-id            CDATA             #IMPLIED
+          replace-method             ( pending-only 
+                                     | all )           "all"
+          deliver-before-timestamp   %Datetime;        #IMPLIED
+          deliver-after-timestamp    %Datetime;        #IMPLIED
+          source-reference           CDATA             #IMPLIED
+          ppg-notify-requested-to    CDATA             #IMPLIED 
+          progress-notes-requested   ( true | false )  "false"
+>
+
+<!ELEMENT address EMPTY >
+<!ATTLIST address
+          address-value          CDATA             #REQUIRED 
+>
+
+<!ELEMENT quality-of-service EMPTY >
+<!ATTLIST quality-of-service
+          priority               ( high | medium | low )        "medium"
+          delivery-method        ( confirmed | preferconfirmed 
+                                 | unconfirmed | notspecified ) "notspecified"
+          network                CDATA                          #IMPLIED
+          network-required       ( true | false )               "false"
+          bearer                 CDATA                          #IMPLIED
+          bearer-required        ( true | false )               "false"
+>
+
+
+
+<!--this message goes from the push proxy gateway to the Push Initiator-->
+
+<!ELEMENT push-response ( progress-note*, response-result ) >
+<!ATTLIST push-response
+          push-id                CDATA             #REQUIRED
+          sender-address         CDATA             #IMPLIED
+          sender-name            CDATA             #IMPLIED
+          reply-time             %Datetime;        #IMPLIED
+>
+
+<!ELEMENT progress-note EMPTY >
+<!ATTLIST progress-note
+          stage                  CDATA             #REQUIRED
+          note                   CDATA             #IMPLIED
+          time                   %Datetime;        #IMPLIED
+>
+
+<!ELEMENT response-result EMPTY >
+<!ATTLIST response-result
+          code                   CDATA             #REQUIRED
+          desc                   CDATA             #IMPLIED
+>
+
+
+<!-- ========================================= -->
+<!-- Declaration of cancel operation           -->
+<!-- ========================================= -->
+
+<!--this message goes from the Push Initiator to the push proxy gateway-->
+
+<!ELEMENT cancel-message ( address* ) >
+<!ATTLIST cancel-message
+          push-id                CDATA             #REQUIRED
+>
+
+<!--this message goes from the push proxy gateway to the Push Initiator-->
+
+<!ELEMENT cancel-response ( cancel-result+ ) >
+<!ATTLIST cancel-response
+          push-id                CDATA             #REQUIRED
+>
+
+<!ELEMENT cancel-result ( address* ) >
+<!ATTLIST cancel-result
+          code                   CDATA             #REQUIRED
+          desc                   CDATA             #IMPLIED
+>
+
+
+<!-- ========================================= -->
+<!-- Declaration of notify result operation    -->
+<!-- ========================================= -->
+
+<!--this message goes from the push proxy gateway to the Push Initiator-->
+
+<!ELEMENT resultnotification-message ( address, quality-of-service? ) >
+<!ATTLIST resultnotification-message
+          push-id                CDATA             #REQUIRED
+          sender-address         CDATA             #IMPLIED
+          sender-name            CDATA             #IMPLIED
+          received-time          %Datetime;        #IMPLIED
+          event-time             %Datetime;        #IMPLIED
+          message-state          %State;           #REQUIRED
+          code                   CDATA             #REQUIRED
+          desc                   CDATA             #IMPLIED
+>
+
+<!--this message goes from the Push Initiator to the push proxy gateway-->
+
+<!ELEMENT resultnotification-response ( address ) >
+<!ATTLIST resultnotification-response
+          push-id                CDATA             #REQUIRED
+          code                   CDATA             #REQUIRED
+          desc                   CDATA             #IMPLIED
+>
+
+
+<!-- ========================================= -->
+<!-- Declaration of statusquery operation      -->
+<!-- ========================================= -->
+
+<!--this message goes from the Push Initiator to the push proxy gateway-->
+
+<!ELEMENT statusquery-message ( address* ) >
+<!ATTLIST statusquery-message
+          push-id                CDATA             #REQUIRED
+>
+
+<!--this message goes from the push proxy gateway to the Push Initiator-->
+
+<!ELEMENT statusquery-response ( statusquery-result+ ) >
+<!ATTLIST statusquery-response
+          push-id                CDATA             #REQUIRED
+>
+
+<!ELEMENT statusquery-result ( address*, quality-of-service? ) >
+<!ATTLIST statusquery-result
+          event-time             %Datetime;        #IMPLIED
+          message-state          %State;           #REQUIRED
+          code                   CDATA             #REQUIRED
+          desc                   CDATA             #IMPLIED
+>
+
+
+<!-- ============================================== -->
+<!-- Declaration of capabilities query operation    -->
+<!-- ============================================== -->
+
+<!--this message goes from the Push Initiator to the push proxy gateway-->
+
+<!ELEMENT ccq-message ( address ) >
+<!ATTLIST ccq-message
+          query-id               CDATA             #IMPLIED
+          app-id                 CDATA             #IMPLIED
+>
+
+<!--this message goes from the push proxy gateway to the Push Initiator-->
+
+<!ELEMENT ccq-response ( address ) >
+<!ATTLIST ccq-response
+          query-id               CDATA             #IMPLIED
+          code                   CDATA             #REQUIRED
+          desc                   CDATA             #IMPLIED
+>
+<!-- ============================================== -->
+<!-- Declaration of bad message response message    -->
+<!-- ============================================== -->
+
+
+<!--this message goes from the push proxy gateway to the Push Initiator-->
+
+<!ELEMENT badmessage-response EMPTY >
+<!ATTLIST badmessage-response
+          code                   CDATA             #REQUIRED
+          desc                   CDATA             #IMPLIED
+          bad-message-fragment   CDATA             #IMPLIED
+>
+
+<!--
+Copyright Wireless Application Protocol Forum Ltd., 1998-2001.
+                      All rights reserved.  
+-->

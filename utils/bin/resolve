@@ -1,0 +1,23 @@
+#!/usr/bin/python2.4
+# vim:ts=4:sw=4
+
+"""
+Use getaddrinfo to resolve a host name.
+
+Usage:
+
+    resolve <hostname>
+
+"""
+
+
+import sys
+from pycopia import ipv4
+
+# Takes advantage of the ipV4 object's automatic name resolution.
+def main(argv):
+    for name in argv[1:]:
+        print ipv4.IPv4(name)
+
+
+main(sys.argv)

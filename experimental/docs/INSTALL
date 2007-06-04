@@ -1,0 +1,33 @@
+Installing the Python Network Management System (pyNMS)
+-----------------------------------------------
+
+1. Grab the pyNMS.tgz tarball and untar it. You have probably already
+   done this. 
+
+2. Look at pyNMS/etc/setup.sh  -- copy that into your own .profile
+   startup script (or .bash_profile).  If you untarred pyNMS into some
+   place other than your home directory, then adjust the PYNMS_HOME
+   variable accordingly. 
+
+3. Once those are set in your shell environment, you can then import the
+   Python modules that are contained there. You should also be able to
+   run the scripts in $PYNMS_HOME/bin. However, some scripts require
+   other third-party Python modules that are not supplied here. Those
+   need to be installed separately for your Python environment. That
+   would include the Gnome/Gtk GUI interface.
+
+4. Some modules require some external C utilities. If you are installing
+   this the first time on a new machine, go to the $PYNMS_HOME/src/utils
+   directory and do the following: 
+   
+       ./configure
+       make
+       su
+       make sinstall
+
+5. The SMI module requires that the libsmi library be installed first,
+   and then the Python wrapper be build for it. To build the wrapper,
+   run "make install" in the $PYNMS_HOME/src/SMI directory.
+
+6. Enjoy.
+

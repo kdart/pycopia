@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# test framework trap reception performance. Is it fast enough?
+# $Id: trapblast,v 1.1 2005/08/02 23:59:00 kdart Exp $
+
+if [ $# -lt 1 ] ; then
+    echo "Usage: trapblast <destination>"
+    echo "Send a bunch of warmStart traps to the destination."
+    exit
+fi
+
+DEST=$1
+
+i=1
+c=0
+
+printc () {
+	echo "sent $c traps."
+	exit
+}
+
+trap printc 2
+
+# group sending traps to make it a bit faster
+while [ $i -lt 1000 ] ; do
+	snmptrap -v 2c -c idstest $DEST $i  1.3.6.1.6.3.1.1.5.2
+	c=$((c+1))
+	snmptrap -v 2c -c idstest $DEST $(($i+1))  1.3.6.1.6.3.1.1.5.2
+	c=$((c+1))
+	snmptrap -v 2c -c idstest $DEST $(($i+2))  1.3.6.1.6.3.1.1.5.2
+	c=$((c+1))
+	snmptrap -v 2c -c idstest $DEST $(($i+3))  1.3.6.1.6.3.1.1.5.2
+	c=$((c+1))
+	snmptrap -v 2c -c idstest $DEST $(($i+4))  1.3.6.1.6.3.1.1.5.2
+	c=$((c+1))
+	i=$((i+5))
+done
+printc
+

@@ -1,0 +1,58 @@
+#	$OpenBSD$
+
+# This is the ssh client configuration file for Pycopia.  See ssh_config(5) for
+# more information on its contents.  This file provides configuration for users
+# running ssh from the sshlib module from Pycopia. This is needed to provide
+# consistent behavior of ssh for the sshlib wrapper, and simplify automation
+# using ssh.
+
+
+# Configuration data is parsed as follows:
+#  1. command line options
+#  2. user-specific file
+#  3. system-wide file
+# Any configuration value is only changed the first time it is set.
+# Thus, host-specific definitions should be at the beginning of the
+# configuration file, and defaults at the end.
+
+# Site-wide defaults for various options
+
+# Host *
+#   ForwardAgent no
+#   ForwardX11 no
+#   RhostsRSAAuthentication no
+#   RSAAuthentication yes
+#   PasswordAuthentication yes
+#   HostbasedAuthentication no
+#   BatchMode no
+#   CheckHostIP yes
+#   AddressFamily any
+#   ConnectTimeout 0
+#   StrictHostKeyChecking ask
+#   IdentityFile ~/.ssh/identity
+#   IdentityFile ~/.ssh/id_rsa
+#   IdentityFile ~/.ssh/id_dsa
+#   Port 22
+#   Protocol 2,1
+#   Cipher 3des
+#   Ciphers aes128-cbc,3des-cbc,blowfish-cbc,cast128-cbc,arcfour,aes192-cbc,aes256-cbc
+#   EscapeChar ~
+#   X509rsaSigType=md5
+#   AllowedCertPurpose sslserver
+#   CACertificateFile /etc/ssh/ca/ca-bundle.crt
+#   CACertificatePath /etc/ssh/ca/crt
+#   CARevocationFile /etc/ssh/ca/ca-bundle.crl
+#   CARevocationPath /etc/ssh/ca/crl
+#   UserCACertificateFile ~/.ssh/ca-bundle.crt
+#   UserCACertificatePath ~/.ssh/crt
+#   UserCARevocationFile ~/.ssh/ca-bundle.crl
+#   UserCARevocationPath ~/.ssh/crl
+
+Host *
+  Protocol 2,1
+  ForwardX11 no
+  CheckHostIP no
+  StrictHostKeyChecking no
+  PasswordAuthentication yes
+  EscapeChar none
+

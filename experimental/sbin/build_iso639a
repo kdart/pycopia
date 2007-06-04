@@ -1,0 +1,15 @@
+#!/usr/bin/python2.4
+
+"""
+rebuilds the ISO.iso639a module from the ISO web site.
+"""
+
+import os
+import ISO
+
+FILE = os.path.join(ISO.__path__[0], "iso639a.py")
+
+ISO.build_iso639a(FILE)
+
+# to force compilation
+import ISO.iso639a

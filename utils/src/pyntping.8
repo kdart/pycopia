@@ -1,0 +1,132 @@
+.TH NTPING 8 "Jan 93" "Handmade"
+.SH NAME
+pyntping \- send icmp messages (ping, mask, timestamp) to one or more hosts or trace a route
+.SH SYNOPSIS
+.B pyntping
+[
+.B "-V"
+] [
+.BI "-s size"
+] [
+.B "-b"
+] [
+.BI "-r retries"
+] [
+.BI "-t timeout"
+] [
+.BI "-ttl [hop]"
+] [
+.BI "-trace [hop]"
+] [
+.B "-mask"
+] [
+.B "-tstamp"
+] [
+.B "host1 ..."
+]
+.SH DESCRIPTION
+Ntping sends one or more pings (or icmp netmask, timestamp or trace
+probes) to the given host(s) and reports the ping-time in ms (or
+netmask, timestamp, trace hop) to stdout. If no host is specified,
+options and hostnames are read from stdin, each on a line, until EOF
+is read.
+.br
+With one or more hosts specified on the commandline, pyntping tries to
+behave like ping (with repeated output every -t(imeout) seconds) or
+traceroute (with displayed hops 1 to ttl/trace parameter). In opposite
+to ping(8) every output is collected from <n> tries over the interval.
+.SH OPTIONS
+.TP
+.B "-V"
+Print version string and exit.
+.TP
+.B "-s(cotty)"
+Read input for scotty Tcl/Tk processing. An appropriate input would be:
+.br
+ { foobar nasi.goerg.de gna.nase.edu }
+.br
+Well, this is the known input, the brackets are simply ignored :-) The
+output looks like:
+.br
+ {foobar 20} {nasi.goerg.de 534} {gna.nase.edu -1}
+.br 
+or the command
+ \-ttl 2 foo.bar.de gna.nase.edu
+.br
+will be answered by something like
+.br
+ {134.88.12.9  176} {192.77.18.5  53} 
+.br
+The options can be sent at the start of each input line. 
+Bad values are silently adjusted or ignored.
+.TP
+.B "-b(ones)"
+Same as -s(cotty), but times are changing ;-)
+.TP
+.BI "-s(ize) size"
+Use
+.I size
+bytes large packets. Default is 64 bytes and the maximum is 2020
+bytes.
+.TP
+.BI "-r(retries) retries"
+Resend the packet
+.I retries
+times. 0 means send only one probe. Default is 4 retries (== 5 probes).
+.TP
+.BI "-t(imeout) timeout"
+Set timeout to
+.I timeout
+seconds for all retries. Default is 5 seconds. If a large number of
+hosts is given, it may take at all longer (eg. due to hostname lookups).
+.TP
+.BI "-d(elay) delaytime"
+Set the delaytime after a packet has been sent to delaytime
+milliseconds.  Default is no delay. If your host or network seems to
+loose packets when running for more than one host parallel, try a
+delay of 10 or 20 ms give some them time to relax.
+.TP
+.B "-nocheckswap"
+Don't check byte-swapped src/dest ports in a icmp-reply (with a
+udp-header in the data section). Default is to check and therefore to
+find even hops, which send wrong answers (some synoptics at least
+reply with buggy packets).
+.TP
+.BI "-ttl hops"
+Do a trace with time-to-live set to
+.I nhops
+hops. There is no default. The maximum is 30 hops.
+.TP
+.BI "-trace hops"
+Should do the same as
+.B "-ttl"
+, but returns the given
+.I "host"
+if the destination is reached (should be in dotted notation for that).
+.TP
+.B "-mask"
+Send an icmp probe with a mask-request. This is similar to the default
+ping probe, but the mask is reported (in dot notation). Unknown masks
+are returned as 0.0.0.0.
+.TP
+.B "-tstamp"
+Send an icmp timestamp request. This is similar to the default ping
+probe, but the difference of the localtime and the remotetime is
+reported (in milliseconds). Unknown stamps are returned as an empty
+list element within scotty-mode .
+.br
+Please note: To fetch the real time difference, you have to deal
+with the runtime of the packet.
+.SH SEE ALSO
+ping(8),traceroute(8)
+.SH DIAGNOSTICS
+Especially root permission is needed to send and receive icmp-datagrams.
+This is complained, if not given.
+.SH BUGS
+Very large argument lists (eg. 1000 or more hosts) cause pyntping to
+consume a noteable amount of memory and an additional time
+requirments when running.
+.SH AUTHORS
+Bert Nase (schoenfr@ibr.cs.tu-bs.de)
+.br
+Kaept'n James T. Koerg (james@ibr.cs.tu-bs.de)

@@ -1,0 +1,27 @@
+# testdefaults section
+autoneg	"Enable/disable auto negotiation? (Only at start of test.)"	no	(no, yes)
+checkallcards	"Should SAI check all cards included in the test to make sure they are of the type specified in the SAI file before running the test?"	no	(yes, no)
+checknodes	"Yes enables a higher level of error checking when SAI is reading in the node numbers on a node statement."	no	(yes, no)
+crc	"Size of CRC (bits)"	16	(16, 32)
+encap	"Encapsulation Type"	"ppp"	("cisco", "ppp")
+erroraction	"What should the test do when an error is encountered?"	None	("ABORT", "IGNORE")
+flowcontrol	"Enable/Disable flow control for all ports."	no	(yes, no)
+interactive	"Used only when the SAI file calls for capture."	no	(yes, no)
+learningcount	"Used to specify the number of learning frames (per stream) sent out before a test."	1	Integer
+learningrate	'Number of frames per second to send when the DUT is  being "trained." This setting is used for both Layer 2 training (Ethernet frames) and Layer 3 ARP resolution (ARP frames).'	200	Integer
+magic	"Magic Number"	None	Integer
+offeredload	"Enable/disable use of offered load to run tests."	no	(yes, no)
+readbackdelay	"Normally results will be read back as soon as the test time has elapsed. But some devices will be unable to forward all frames in the allotted time. The readbackdelay parameter allows you to specify a delay, so that the application will wait for the specified time before attempting to read the cards."	0	Float
+readframes	"Used only when the SAI file calls for capture. Should the individual bytes of each frame be read back into the capture file, or only statistical information about the capture?"	yes	(yes, no)
+scramble	"Turn Scrambling On or Off."	off	(on, off, yes, no)
+sizewcrc	"Normally all framesizes in SAI are interpreted as without CRC. If your testdefaults section contains the line sizewcrc yes, all frame sizes in your file (in flows or in framesize arrays) will be interpreted as the size with CRC."	no	(yes, no)
+socketlinkport	"Normally SAI links to a chassis using the port 16385. Under certain very rare circumstances, you may wish to specify a different port by using this parameter."	16385	Integer
+testinteractive	"Enables you to specify a default error action, instead of being prompted for input on error."	yes	(yes, no)
+txprompt	"Should the user be prompted to press <Return> before test frames are transmitted?"	no	(yes, no)
+definethruput	"The RFC definition of throughput is the point beyond which zero frame loss can no longer be sustained. You may redefine the throughput threshold by specifying a non-zero argument for this parameter, interpreted as a percentage of frame loss, but strictly speaking the test is then no longer a throughput test as defined by the RFC."	None	Float
+thruputgranularity	"Normally, throughput is found for all flows in a test (by system). Itcan also be found by flow or by group. One, two, or three of: system, group, flow,orall. system:By allflows in a test. group: By individual groups. flow: By individual flows. all: By individual flows, individual groups, and all flows in a test."	None	("system", "group", "flow", "all")
+thruputRSB	"These three booleans specify the search type: Range, Step or Binary. The legal combinations are: 0:0:1, 0:1:0, 1:1:0, 1:0:1, 0:1:1."	None	thruputRSBType
+thruputscale	"Normally during a binary search, when frames are dropped at a single iteration, the next iteration will run at half that rate (or half the difference between the lowest fail and the highest pass). This corresponds to a thruputscale of 0.5."	None	Float
+thruputSMMR	"This parameter sets the Start rate, Minimum rate, Maximum rate, and Resolution. Start: Search will start at this rate. Min: The test first searches in the range Max: Min to Max. Resolution: Test will stop when throughput is found to be within this range. A set of four percentages separated by colons."	None	thruputSMMRType
+thruputstepcount	"Used only if a step search is specified. Specifies the number of steps in the test. A nonzero integer."	None	Integer
+thruputstepload	"Used only if a step search is specified. Each iteration will step by this percentage. A positive percentage between 0 and 100."	None	Integer

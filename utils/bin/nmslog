@@ -1,0 +1,11 @@
+#!/usr/bin/python2.4
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+# License: LGPL
+
+
+import sys
+from pycopia import slogsink
+
+
+slogsink.nmslog(sys.argv)
+

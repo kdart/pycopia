@@ -1,0 +1,41 @@
+#!/usr/bin/python2.4
+
+"""
+pybenchmark - use the benchmark module to time functions and measure relative
+performance.
+
+pybenchmark module.function [args]
+
+"""
+
+import sys
+import benchmarks
+
+def _get_object(name):
+    i = name.rfind(".")
+    if i >= 0:
+        repmod = __import__(name[:i])
+        func = getattr(repmod, name[i+1:])
+        return repmod, func
+    else:
+        raise ValueError, "%s is not a valid function name" % (name,)
+
+def pybenchmark(argv):
+
+	mod, fut = _get_object(argv[1])
+	if len(argv) > 2:
+		args = eval(argv[2], vars(mod))
+	else:
+		args = ()
+	#fname2 = fname+"2"
+	#F2 = getattr(sys.modules[__name__], fname2)
+	bc = benchmarks.BenchMarker(fut, 10000)
+	res = bc(*args)
+	print res
+	#print res.get_ratios()
+
+try:
+	pybenchmark(sys.argv)
+except IndexError:
+	print __doc__
+

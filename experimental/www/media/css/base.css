@@ -1,0 +1,69 @@
+/* pyNMS main page. */
+
+html,body {margin:0; padding:1pt}
+
+body {background: #fee url(/media/images/pynms_logo.png) no-repeat top center; 
+font: Helvetica,sans-serif}
+
+p {margin:0 10px 10px}
+a {display:block; color: #981793; padding:10px}
+
+div.container {
+}
+
+div#header { height:80px;
+}
+
+div#header h1 {height:80px; 
+  line-height:80px; 
+  margin:0; margin-top:135px;
+  padding-left:10px; 
+  background: #E99; 
+  color: #B22222}
+
+div#wrapper {
+  width:100%; 
+  float:right; 
+  margin-left:-200px}
+
+div#content {margin-left:200px}
+div#content p {line-height:1.4}
+
+div#navigation {
+  background:#BACAEE; 
+  float:left; 
+  width:200px}
+
+div#extra {background:#FF8539; 
+  clear:left; 
+  float:left; 
+  width:200px}
+
+div#footer {clear:both; 
+  width:100%; 
+  background: #333; 
+  color: #FFF}
+div#footer p {font-size: 80%; margin:0; padding:5px 10px}
+
+
+a:link {
+    background-color: transparent;
+    text-decoration:none;
+}
+a:visited {
+    background-color: transparent;
+    color: #ee0022;
+    text-decoration:none;
+}
+a:active {
+    background-color: transparent;
+    color: #ff0000;
+}
+a:hover {
+    background-color: transparent;
+    color: #ee0000;
+    text-decoration:underline;
+}
+img {
+    border:0;
+}

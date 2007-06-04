@@ -1,0 +1,22 @@
+#!/usr/bin/env python2.4
+
+"""
+Determine if scanned hosts are responding to SNMP. 
+Usage:
+discover_snmp [community]
+
+"""
+
+import sys, os
+import nettools
+
+if len(sys.argv) > 1:
+	community = sys.argv[1]
+else:
+	community = "public"
+
+hostlist = nettools.discover_snmp(community)
+print "Found these hosts:"
+for name, value in hostlist.items():
+	print name, value
+

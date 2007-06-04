@@ -1,0 +1,5 @@
+include test.py
+include ez_setup.py
+include GNUmakefile
+include libsmi*
+recursive-include bin *

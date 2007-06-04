@@ -1,0 +1,68 @@
+'\"
+'\" Copyright (c) 1994-1996 Technical University of Braunschweig.
+'\"
+'\" See the file "license.terms" for information on usage and redistribution
+'\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+'\" 
+.so man.macros
+.TH slogsink 8 "" Tnm "Tnm Tcl Extension"
+.BS
+'\" Note:  do not modify the .SH NAME line immediately below!
+.SH NAME
+slogsink \- A simple syslog multiplexer.
+.SH SYNOPSIS
+.B slogsink
+[
+.I "port"
+]
+.BE
+
+.SH DESCRIPTION
+
+The \fBslogsink\fR trap daemon listens on the syslog port (usually port
+514/udp) for incoming syslog messages and forwards them to all connected
+clients. The optional \fIport\fR argument allows you to use the slogsink daemon
+to forward messages received on a non standard port. However, port numbers
+below 1024 will be rejected.
+
+Clients connect to the \fBslogsink\fR daemon by opening the AF_UNIX
+domain stream socket /tmp/.slog-\fIport\fR. Thus, the default
+AF_UNIX domain stream socket is named /tmp/.slogsink-514.
+
+Received messages are forwarded using the following format:
+
+.RS
+.TP 10
+4 byte
+IP address of the sender (network-byte-order).
+.TP
+2 byte
+Port number of the sender (network byte order).
+.TP
+4 byte
+Length of the trap message (host-byte-order).
+.TP
+n bytes
+The trap message itself.
+.RE
+
+The \fBslogsink\fR daemon must be installed setuid root because normal
+operating systems require root permissions to open the standard syslog
+port 514/udp. The \fBslogsink\fR daemon rejects all \fIport\fR
+numbers below 1024 in order to protect the system security.
+
+.SH SEE ALSO
+scotty(1), tkined(1), Tnm(n)
+
+.SH AUTHORS
+Keith Dart <kdart@cosinecom.com>
+This code is basically the straps(8) code modified for use with syslog. The
+original straps daemon was written by:
+.br
+
+.SH STRAPS AUTHORS
+Erik Schoenfelder <schoenfr@gaertner.de>
+.br
+Juergen Schoenwaelder <schoenw@cs.utwente.nl>
+.br
+

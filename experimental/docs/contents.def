@@ -1,0 +1,16 @@
+.---------------------------------------------------------------------
+.-  contents.def  Create table of contents for document
+.-
+.-  Written:      96/03/11  Pieter Hintjens
+.-  Revised:      96/06/28  Pieter Hintjens
+.---------------------------------------------------------------------
+.block toc_open
+<MENU>
+.block toc_entry
+<LI><A HREF="$(TOC_HREF)">$(TOC_TITLE)</A></LI>
+.block toc_close
+</MENU>
+.end
+<P>
+.build toc
+</P>

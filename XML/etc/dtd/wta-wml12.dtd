@@ -1,0 +1,20 @@
+<!--
+Wireless Telephony Applications Wireless Markup Language (WTA-WML) Document Type Definition.
+WTA-WML is an XML language. Typical usage:
+<?xml version="1.0"?>
+<!DOCTYPE wta-wml PUBLIC "-//WAPFORUM//DTD WTA-WML 1.2//EN"
+    "http://www.wapforum.org/DTD/wta-wml12.dtd">
+<wta-wml>
+...
+</wta-wml>
+-->
+
+<!ENTITY % wml-dtd PUBLIC "-//WAPFORUM//DTD WML 1.2//EN" "wml12.dtd">
+
+%wml-dtd;
+
+<!ELEMENT wta-wml ( head?, template?, card+ )>
+<!ATTLIST wta-wml
+    xml:lang        NMTOKEN #IMPLIED
+    %coreattrs;
+>

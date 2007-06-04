@@ -1,0 +1,13 @@
+#!/usr/bin/python2.4
+# License: LGPL
+# Keith Dart <kdart@kdart.com>
+
+"""
+Control the ALSA volume with the power knob, showing the volume via OSD.
+
+"""
+
+import sys
+from pycopia.OS.Linux import mastervolume
+
+mastervolume.main(sys.argv)

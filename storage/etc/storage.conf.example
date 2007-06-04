@@ -1,0 +1,15 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+# License: LGPL
+# Keith Dart <kdart@kdart.com>
+
+# location shared storage server.
+host = "localhost"
+
+# TCP port server is listening on. Default will be used if not specified.
+#port = 2972
+
+
+dbfile = "/var/tmp/nmsstore.dfs"
+dblog =  "/var/tmp/storage.log"
+

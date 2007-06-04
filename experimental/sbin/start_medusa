@@ -1,0 +1,10 @@
+#!/usr/bin/python2.4
+
+import sys
+import medusa.Medusa
+try:
+	medusa.Medusa.loop()
+except KeyboardInterrupt:
+	sys.exit(0)
+
+

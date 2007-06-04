@@ -1,0 +1,27 @@
+#!/usr/bin/env python2.4
+
+"""
+pytelnet <devname> [<port>]
+
+Open a TELNET session to the given host. An optional port name or number
+may be given.
+
+"""
+
+import sys, os
+
+import Console
+
+def main(argv):
+	if len(argv) > 2:
+		Console.telnet(argv[1], argv[2])
+	elif len(argv) > 1:
+		Console.telnet(argv[1])
+	else:
+		print __doc__
+
+try:
+	main(sys.argv)
+except Exception, err:
+	print err
+

@@ -1,0 +1,6 @@
+#!/usr/bin/env python2.4
+
+import sys
+from pycopia.OS import procfs
+
+procfs.ps(sys.argv[1:])

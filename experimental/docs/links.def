@@ -1,0 +1,52 @@
+.- Put all the hyperlink URLs in one place so if one changes we can update or
+.- documentation easily. Just change it here and rebuild!
+
+.- product references
+.define linux           http://www.linux.org/
+.define htmlpp		http://www.imatix.com/
+.define tkined          http://wwwsnmp.cs.utwente.nl/~schoenw/scotty/
+.define isdn4linux      http://www.lrz-muenchen.de/~ui161ab/www/isdn/faq_e.html
+.define cyclades        http://www.cyclades.com/
+.define cyclades-z      http://www.cyclades.com/z-series.html
+.define trenton         http://www.trentonprocessors.com/
+.define trentonboard    http://www.trentonprocessors.com/procdir/5690spec.htm
+.define trimap          http://www.trimapintl.com/
+.define trimapchassis   http://www.trimapintl.com/chassis5u.html
+.define pulizzi         http://www.pulizzi.com/ipc3xxx.html
+.define NPS             http://www.wti.com/nps.htm
+.define usrobotics      http://www.3com.com/carrier/nsd/products/400355.html
+.define netperf		http://www.netperf.org/netperf/NetperfPage.html
+.define atlas800	http://www.adtran.com/products/enterprise/atlas/atlas_800/index.html
+.define pcihssi		http://www.etinc.com/ethssi.htm
+.define pcisync		http://www.etinc.com/pcisync.htm
+.define quadether	http://www.znyx.com/products/netblaster/zx340q.htm
+.define baystack	http://www.nortelnetworks.com/products/02/datasheets/2979.html
+
+
+.- informational
+.define python		http://www.python.org/
+.define fnorb		http://www.fnorb.org/
+.define openssl		http://www.openssl.org/
+.define amkcrypto	ftp://XXX/pub/python/amkCrypto-0.1.3.tgz
+.define zebra		http://www.zebra.org/
+.define pyimaging	http://www.pythonware.com/products/pil/
+.define gtk		http://www.gtk.org/
+.define gnome		http://www.gnome.org/
+.define pygtk		http://www.daa.com.au/~james/pygtk/
+.define numeric		http://numpy.sourceforge.net/
+
+
+.- local references
+.define dtradius	radius-dt-1.19.tgz
+.define linuxreadme	README.linux.html
+.define cycladesreadme	README.cyclades.html
+.- .define searchpage      wgindex.html
+.define manpagebase     /cgi-bin/man2html?
+.define pppdmanpage     $(manpagebase)pppd
+.define scottymanpage   $(manpagebase)scotty
+.define tkinedmanpage   $(manpagebase)tkined
+
+.- script references
+.define scriptbase      /smslab/
+.define tapowerscript   $(scriptbase)TApower
+

@@ -1,0 +1,37 @@
+<!-- testbed network -->
+
+<!ELEMENT Testbed (Device* | Network*)>
+
+<!ELEMENT Device (RouteTable*, Interface*) >
+
+<!ELEMENT RouteTable (StaticRoute*) >
+
+<!ELEMENT StaticRoute EMPTY >
+<!ATTLIST StaticRoute
+dest CDATA #REQUIRED 
+nexthop CDATA #IMPLIED 
+cost NMTOKEN #FIXED "1"
+>
+
+<!ELEMENT Interface (IPaddress*)>
+<!ATTLIST Interface
+id ID #REQUIRED
+name CDATA #REQUIRED
+connectedTo IDREF #IMPLIED
+>
+<!-- connectedTo is the ID of the network this interface is connected to. -->
+
+<!ELEMENT IPaddress EMPTY >
+<!ATTLIST IPaddress
+addr CDATA #REQUIRED 
+mask CDATA #IMPLIED 
+>
+
+<!ELEMENT Network (Subnet*) >
+<!ATTLIST Network
+id ID #REQUIRED  
+type NMTOKEN #IMPLIED
+>
+
+<!ELEMENT Subnet (IPaddress+) >
+

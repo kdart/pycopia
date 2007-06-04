@@ -1,0 +1,7 @@
+H1, H2, H3, H4 {color: blue}
+A:link {color: red; font-style: normal; text-decoration: none}
+A:active {color: red; font-weight: bold}
+A:visited {color: maroon; font-style: normal; text-decoration: none}
+P.main_title {color: blue font-size: 18pt; font-weight: bold; font-family: sans-serif}
+
+

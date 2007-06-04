@@ -1,0 +1,20 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+# 
+
+PORT = 80
+
+SITEROOT = "/var/www"
+# user website services runs as:
+SITEUSER = "lighttpd"
+
+# user that owns the website files:
+SITEOWNER = "you"
+
+# VHOSTS format is a dictionary where key names are the site (virtual host)
+# names, and values are lists of servers to start.
+
+VHOSTS = {
+    # virtual host names: list of fcgi servers to start.
+    "www.sample.biz": ["myapp"],
+}

@@ -1,0 +1,26 @@
+#1 all
+SrcDst	"Source, Destination endpoints. (Flow object)"	None	Flow
+#2 all
+FlowName	"Arbitrary user-defined name. Arbitrary string. "	None	String
+#2a all
+LspsetName	"Name of an lspset pattern specified in an index statement."	None	String
+#3 all
+frmsz	"Frame size (octets) .Size does not include CRC."	128	Integer
+#4 all
+TOS	"Type of Service, interpreted as hexadecimal. This is the entire eight bits."	0	HexInteger
+#5 all
+TTL	"Time To Live. Integer. "	64	Integer
+#6 all
+VarFld	"Variant Field (ranges only). none or any combination of the characters iImMpP where lower case signifies source and upper case signifies destination: i Src IP I Dst IP m Src MAC M Dst MAC p Src Port P Dst Port "	"none"	VariantField
+#7 all except LIP and LUDP
+VLANid	"VLAN ID. Integer. "	1	Integer
+#8 all except LIP and LUDP
+VLANp	"VLAN Priority. Integer."	6	Integer
+#9 TCP only
+Ack	"Acknowledgement Number (32 bits). Integer. "	123456	Integer
+#10 TCP only
+Seq	"Sequence Number (32 bits). Integer. "	654321	Integer
+#11 TCP only
+Wnd	"Window (16 bits). Integer. "	4096	Integer
+#12 TCP only
+Flg	"Code Bits (6 bits), interpreted as hexadecimal. The bits are: URG, ACK, PSH, RST, SYN, FIN. Integer."	TCPFlag(0)	TCPFlag

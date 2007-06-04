@@ -1,0 +1,33 @@
+#!/usr/bin/python2.4
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+
+"""
+Simple SMTP reciever that simply prints SMTP messages to stdout.
+
+"""
+
+import sys
+
+from pycopia.inet import ssmtpd
+
+
+def _print_env(env):
+    print env
+    print "### EOM ###\n"
+
+if len(sys.argv) > 1:
+    port = int(sys.argv[1])
+else:
+    port = 8025
+
+server = ssmtpd.SMTPServer(port)
+try:
+    try:
+        print "Listening on port %d for SMTP." % (port,)
+        server.run(_print_env)
+    except KeyboardInterrupt:
+        pass
+finally:
+    server.close()
+

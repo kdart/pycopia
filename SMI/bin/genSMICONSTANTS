@@ -1,0 +1,24 @@
+#!/usr/bin/python2.4
+
+"""
+This utility generates the SMICONSTANTS module for the SMI library. This
+should rarely, if ever, need to be run once its run once. It pulls the SMI
+library constants that the mib mobules enumerate. 
+
+
+"""
+
+import sys, os
+from SMI import SMI
+
+
+cfile = open (os.path.join("/", "var", "tmp", "SMICONSTANTS.py"), "w")
+cfile.write("#!/usr/bin/python\n\n")
+
+for name, obj in sys.modules[SMI.__name__].__dict__.items():
+    if len(name) > 4 and name.startswith("SMI_"):
+        cfile.write("%s = %r\n" % (name, obj))
+
+print "New SMICONSTANTS.py file:", cfile.name
+
+cfile.close()

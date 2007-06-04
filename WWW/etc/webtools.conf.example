@@ -1,0 +1,48 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+
+
+# User to run handler as. Main server must be run as root for this to have
+# any effect.
+USERNAME = "lighttpd"
+
+ADMINS = [
+    ('keith@dartworks.biz', 'Keith Dart'),
+]
+
+
+# Language code for this installation. All choices can be found here:
+# http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+LANGUAGE_CODE = 'en-us'
+
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = 'pyNMSkj3sd%$***ni1U-Toosl9yo8&p63fOewrt*&(w2358@^+'
+
+MIDDLEWARE_CLASSES = ()
+
+# Map pattern to handler functions. 
+LOCATIONMAP = (
+  (r"^/?$", "webtools.base.views.main"),
+  (r"^/headers$", "webtools.base.views.headers"),
+  (r"^/headers/mail$", "webtools.base.views.emailrequest"),
+    # aliases don't have a dot in the name.
+  (r'/media/css/(?P<name>\S+)', "css"),
+  (r'/media/js/(?P<name>\S+)', "js"),
+  (r'/media/images/(?P<name>\S+)', "images"),
+)
+
+DEFAULTNAV = [
+    # location                name in menu
+  ("webtools.base.views.main", "Main"),
+  ("webtools.base.views.headers", "Headers"),
+]
+
+
+ICONMAP = {
+# simplename     active         inactive (base state)
+#"xxx": ("icon_xxx_active.png", "icon_xxx_inactive.png"),
+}
+
+
+

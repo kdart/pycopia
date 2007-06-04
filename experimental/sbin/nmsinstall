@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# sync your runtime location from the SVN repository. Basically, this means
+# installation. Run this, then run "pynms_install" when a change is made to
+# your development workspace.
+
+# $Id$
+
+PYNMS_SRC=${PYNMS_SOURCE:-$ALTHOME/src/pyNMS}
+
+if [ ! -d "$PYNMS_SRC" ] ; then
+   echo "Could not find pyNMS source. set PYNMS_SOURCE."
+   exit
+fi
+
+if [ -z "$PYNMS_HOME" ] ; then
+   echo "PYNMS_HOME is not set."
+   exit
+fi
+
+rsync -avu --exclude=".svn" --exclude="CVS" --exclude="*.py[co]" --delete $PYNMS_SRC/ $PYNMS_HOME/

@@ -1,0 +1,16 @@
+#!/usr/bin/env python2.4 
+
+import pydoc
+import nmsconfig
+cf = nmsconfig.get_nms_config().get_section("pydoc")
+
+
+def ready(server):
+	print 'pydoc server ready at %s' % server.url
+
+def stopped():
+	print 'pydoc server stopped'
+
+pydoc.serve(int(cf.port), ready, stopped)
+
+ 

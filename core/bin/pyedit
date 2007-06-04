@@ -1,0 +1,46 @@
+#!/usr/bin/env python2.4
+
+"""pyedit <modname>...
+Opens your editor with the source files corresponding to the given Python
+modules.
+"""
+
+import sys, os
+from pycopia import cliutils
+
+
+try:
+    rcfile = os.path.expandvars("$HOME/.pyinteractiverc")
+    env = {}
+    execfile(rcfile, env, env) 
+    del env["__builtins__"]
+    os.environ.update(env)
+    del env
+except:
+    pass
+    # then just hope user had right environment vars set.
+
+
+def exec_editor(names):
+    if os.environ.has_key("DISPLAY"):
+        ed = os.environ.get("XEDITOR", None)
+    else:
+        ed = os.environ.get("EDITOR", None)
+    if ed is None:
+        print "Can't determine editor."
+        return
+    names.insert(0, ed)
+    if ed.find("/") >= 0:
+        os.execv(ed, tuple(names))
+    else:
+        os.execvp(ed, tuple(names))
+
+
+def main(argv):
+    if len(argv) < 2:
+        print __doc__
+        return
+    files = filter(None, map(cliutils.find_source_file, argv[1:]))
+    exec_editor(files)
+
+main(sys.argv)

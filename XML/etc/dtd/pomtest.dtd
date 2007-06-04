@@ -1,0 +1,26 @@
+<!-- representative set of elements to test POM module  -->
+
+<!ENTITY ename "ename value" >
+
+<!ELEMENT toplevel (seclist*) >
+<!ATTLIST toplevel
+idval ID #REQUIRED 
+cdataimp CDATA #IMPLIED
+>
+
+<!ELEMENT seclist (contentspec) >
+
+<!ELEMENT termdef (sample) >
+<!ATTLIST termdef
+          id      ID      #REQUIRED
+          name    CDATA   #IMPLIED>
+
+<!ELEMENT list (sample) >
+<!ATTLIST list
+          type    (bullets|ordered|glossary)  "ordered">
+
+<!ELEMENT form (formelement*) >
+<!ATTLIST form
+          method  CDATA   #FIXED "POST">
+
+<!ELEMENT formelement EMPTY>

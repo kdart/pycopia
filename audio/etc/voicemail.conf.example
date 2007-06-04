@@ -1,0 +1,39 @@
+# python basicconfig file
+# vim:ts=4:sw=4:softtabstop=0:smarttab:ft=python
+
+# configuration for the voicemail program.
+
+
+from pycopia.aid import mapstr
+
+# base directory for voicemail data files.
+VOICEDIR = "/var/spool/voice"
+
+# base name of log file. Make sure the directory exists.
+#LOGFILE = "/var/log/voicemail/voicemail2.log"
+LOGFILE = None
+
+# the subdir from VOICEDIR that contains outgoing messages in .rmd format.
+MESSAGEDIR = "messages"
+
+# the subdir from VOICEDIR where new messages will be placed.
+SPOOLDIR = "incoming"
+
+# the file (in MESSAGEDIR) for the primary outgoing message.
+GREETING = "greeting.rmd"
+
+
+lines = SECTION("lines")
+lines.ttyS0 = "xxx-xxx-xxxx"
+lines.ttyACM0 = "xxx-xxx-xxxx"
+
+# mailer config
+mail = SECTION("mail")
+mail.To = None
+# these mapstr's must have attributes 'caller_id', 'caller_name', and 'line'.
+mail.Subject = mapstr("Voice message from %(caller_id)s/%(caller_name)s on line %(line)s.")
+mail.body = mapstr("""
+Your answering machine on line %(line)s, recorded the attached message from
+%(caller_name)s (%(caller_id)s).
+""")
+

@@ -1,0 +1,14 @@
+#1 
+endpoint	"One endpoint or a range of endpoints."	None	Endpoint
+#2 -- matches ports port name
+Port	"User-defined port name."	None	String
+#3 
+MAC	"MAC address (hex) associated with an endpoint."	None	MACAddress
+#4 
+IP	"IP address (decimal) associated with an endpoint."	None	IPAddress
+#5 
+Gwy	"Gateway address associated with this endpoint. Any legal IP address. "	None	IPAddress
+#6 
+UDP_TCPport	"UDP or TCP port associated with this endpoint."	INETPort(9)	INETPort
+#6a 
+VLAN_ID	"(Optional) VLAN ID associated with (destination) endpoint."	None	Integer

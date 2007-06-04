@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>This is the title.
+    </title>
+    <link rel="stylesheet" type="text/css" href="pythondoc.css" />
+  </head>
+  <body>
+    <h1>Main document &amp; &quot;stuff&quot;
+    </h1>
+    <p>This is a test. This is text.
+    </p>
+    <ul>
+      <li>List line one.
+      </li>
+      <li>list line two.
+      </li>
+    </ul>
+    <p><a href="somelink.html">some link</a> This is <b>bold</b> text. using  &lt;b&gt;bold tags&lt;/b&gt;</p>
+      <table border="1" summary="This is a test table.">
+        <caption>table caption
+        </caption>
+        <tr>
+          <th>heading col 1
+          </th>
+          <th class="headerclass">heading col 2
+          </th>
+        </tr>
+        <tr>
+          <td>row 1, col 1
+          </td>
+          <td>row 1, col 2
+          </td>
+        </tr>
+        <tr>
+          <td>row 2, col 1
+          </td>
+          <td>row 2, col 2
+          </td>
+        </tr>
+      </table>
+      <div class="section1">
+        <h1>Div heading.
+        </h1>
+        <p>First div para.
+        </p>
+        <div class="section2">
+          <p>Second div para
+          </p>
+        </div>
+        <dl>
+          <dt>def1
+          </dt>
+          <dd>The definition of 1
+          </dd>
+          <dt>def2
+          </dt>
+          <dd>The definition of 2
+          </dd>
+        </dl>
+      </div>
+      <ul>
+        <li>line 1
+        </li>
+        <li>line 2
+        </li>
+      </ul><!-- the name attribute is required for all but submit &amp; reset -->
+      <ol>
+        <li>Justjust/
+        </li>
+        <li>How will this turn out?
+        </li>
+        <li>
+          <ol>
+            <li>It is hard to tell.
+            </li>
+            <li>Well, not too hard.
+            </li>
+          </ol>
+        </li>
+      </ol>
+      <form action="http://localhost:4001/cgi-bin/testing.py" method="post" enctype="multipart/form-data"><textarea rows="4" cols="60" name="mytextarea">Default text in the textarea.
+      </textarea>
+      <br />
+      <input type="text" name="mytext" value="mytext text" />
+      <br />
+      <input src="button.png" type="button" name="button1" value="Button" />
+      <br />
+      <input src="submit.png" type="submit" name="submit1" value="Ok" />
+      <br />
+      <input checked="checked" type="radio" id="id_radlist0" value="0" name="radlist" /><label for="id_radlist0">one
+    </label>
+    <input type="radio" id="id_radlist1" value="1" name="radlist" /><label for="id_radlist1">two
+  </label>
+  <input type="radio" id="id_radlist2" value="2" name="radlist" /><label for="id_radlist2">three
+</label>
+<input type="radio" id="id_radlist3" value="3" name="radlist" /><label for="id_radlist3">four
+</label>
+<br />
+<input type="checkbox" id="id_checks0" value="0" name="checks" /><label for="id_checks0">one
+</label>
+<br />
+<input type="checkbox" id="id_checks1" value="1" name="checks" /><label for="id_checks1">two
+</label>
+<br />
+<input type="checkbox" id="id_checks2" value="2" name="checks" /><label for="id_checks2">three
+</label>
+<br />
+<input type="checkbox" id="id_checks3" value="3" name="checks" /><label for="id_checks3">four
+</label>
+<br />
+<br />
+<input type="file" name="myfile" value="/etc/hosts" />
+<br /><label for="id_mytext">Enter text
+</label>
+<input id="id_mytext" type="text" name="mytext" value="" maxlength="80" />
+<br />
+<fieldset class="yes_no">
+<legend>What&apos;s it gonna be?
+</legend>
+<input checked="checked" type="radio" name="yes_no" value="0" />Yes
+<input type="radio" name="yes_no" value="1" />No
+</fieldset><select name="myselect">
+<option value="one">one
+</option>
+<option value="two">two
+</option>
+<option selected="selected" value="three">three
+</option>
+<option value="four">four
+</option>
+<optgroup label="agroup">
+<option value="group1">group1
+</option>
+<option value="group2">group2
+</option>
+</optgroup>
+</select>
+<br /><select name="useenums">
+<optgroup label="Group1">
+<option value="g1one">g1one
+</option>
+<option value="g1two">g1two
+</option>
+<option value="g1three">g1three
+</option>
+<option selected="selected" value="g1four">g1four
+</option>
+</optgroup>
+<optgroup label="Group3">
+<option value="3">g3one
+</option>
+<option value="4">g3two
+</option>
+<option value="5">g3three
+</option>
+</optgroup>
+<optgroup label="Group2">
+<option value="6">g2one
+</option>
+<option value="7">g2two
+</option>
+<option value="8">g2three
+</option>
+</optgroup>
+</select>
+<br /><select multiple="multiple" name="multiselect">
+<option value="mone">mone
+</option>
+<option value="mtwo">mtwo
+</option>
+<option selected="selected" value="mthree">mthree
+</option>
+<option selected="selected" value="mfour">mfour
+</option>
+</select>
+<br />
+<fieldset>
+<legend>afieldset
+</legend><label for="id_settext">Enter set text
+</label>
+<input id="id_settext" type="text" name="settext" value="" maxlength="80" /><label for="id_settext2">Enter set text 2
+</label>
+<input id="id_settext2" type="text" name="settext2" value="Default text." maxlength="80" />
+<br />
+</fieldset>
+</form>
+<table width="100%" summary="autogenerated">
+<tr>
+<th>col1
+</th>
+<th>col2
+</th>
+<th>col3
+</th>
+</tr>
+<tr class="row1">
+<td>1
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+</tr>
+<tr class="row2">
+<td>2
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+</tr>
+<tr class="row1">
+<td>3
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+</tr>
+<tr class="row2">
+<td>4
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+</tr>
+<tr class="row1">
+<td>5
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+<td>&nbsp;
+</td>
+</tr>
+</table>
+</body>
+</html>

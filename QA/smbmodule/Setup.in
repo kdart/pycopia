@@ -1,0 +1,4 @@
+*shared*
+# smartbits_structc smartbits_struct_wrap.c -letsmb
+smartbits_funcc smartbits_func_wrap.c -letsmb
+

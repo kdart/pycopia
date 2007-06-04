@@ -1,0 +1,49 @@
+#!/usr/bin/python2.4
+# -*- coding: ascii -*-
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+# License: LGPL
+# Keith Dart <kdart@kdart.com>
+# $Id: debugger,v 1.1 2005/07/25 21:25:16 kdart Exp $
+
+"""
+Runs python debugger on a python script.
+
+"""
+
+
+import sys, os, debugger
+
+def which(basename):
+    # First, look in current directory
+    if os.path.isfile(basename):
+		return basename
+    for pe in os.environ["PATH"].split(os.pathsep):
+        testname = os.path.join(pe, basename)
+        if os.access(testname, os.X_OK):
+            return testname
+    # if not found, try a module name
+    try:
+        mod = __import__(basename)
+    except (ValueError, ImportError):
+        return None
+    return mod.__file__
+
+
+if not sys.argv[1:]:
+    print "usage: debugger scriptfile [arg] ..."
+    sys.exit(2)
+
+debugger.mainpyfile = filename = which(sys.argv[1])     # Get script filename
+
+if filename is None:
+    print 'Error: %r could not be found in PATH, or sys.path.' % (sys.argv[1])
+    sys.exit(1)
+
+debugger.mainmodule = os.path.basename(filename)
+del sys.argv[0]         # Hide "debugger.py" from argument list
+
+# Insert script directory in front of module search path
+sys.path.insert(0, os.path.dirname(filename))
+
+debugger.run('execfile(' + `filename` + ')')
+

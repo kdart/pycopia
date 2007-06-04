@@ -1,0 +1,25 @@
+#!/usr/bin/python2.4
+
+"""
+A simple HTTP server. also handles CGI scripts. Used for unit testing.
+
+"""
+
+import os, sys
+from BaseHTTPServer import HTTPServer
+from CGIHTTPServer import CGIHTTPRequestHandler
+
+port = 4001
+ROOT = os.path.join(sys.prefix, "share", "pycopia", "docs", "html")
+
+
+def main(argv):
+  os.chdir(ROOT)
+  serv = HTTPServer(("", port), CGIHTTPRequestHandler)
+  print "serving files from", ROOT
+  try:
+    serv.serve_forever()
+  except KeyboardInterrupt:
+    sys.exit(0)
+
+main(sys.argv)

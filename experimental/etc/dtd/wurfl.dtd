@@ -1,0 +1,39 @@
+<!ELEMENT wurfl ( version, devices ) >
+
+<!ELEMENT version ( ver, last_updated, official_url, maintainers, authors, contributors, statement ) >
+<!ELEMENT ver ( #PCDATA ) >
+<!ELEMENT last_updated ( #PCDATA ) >
+<!ELEMENT official_url ( #PCDATA ) >
+<!ELEMENT statement ( #PCDATA ) >
+
+<!ELEMENT maintainers ( maintainer ) >
+<!ELEMENT maintainer EMPTY >
+<!ATTLIST maintainer email CDATA #REQUIRED >
+<!ATTLIST maintainer home_page CDATA #REQUIRED >
+<!ATTLIST maintainer name CDATA #REQUIRED >
+
+<!ELEMENT authors ( author+ ) >
+<!ELEMENT author EMPTY >
+<!ATTLIST author name CDATA #REQUIRED >
+<!ATTLIST author email CDATA #REQUIRED >
+<!ATTLIST author home_page CDATA #IMPLIED >
+
+<!ELEMENT contributors ( contributor+ ) >
+<!ELEMENT contributor EMPTY >
+<!ATTLIST contributor name CDATA #REQUIRED >
+<!ATTLIST contributor email CDATA #REQUIRED >
+
+<!ELEMENT devices ( device+ ) >
+<!ELEMENT device ( group* ) >
+<!ATTLIST device id NMTOKEN #REQUIRED >
+<!ATTLIST device fall_back NMTOKEN #REQUIRED >
+<!ATTLIST device user_agent CDATA #REQUIRED >
+<!ATTLIST device actual_device_root CDATA #IMPLIED >
+
+<!ELEMENT group ( capability+ ) >
+<!ATTLIST group id NMTOKEN #REQUIRED >
+
+<!ELEMENT capability EMPTY >
+<!ATTLIST capability name NMTOKEN #REQUIRED >
+<!ATTLIST capability value NMTOKEN #REQUIRED >
+

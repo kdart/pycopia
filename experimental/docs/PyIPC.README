@@ -1,0 +1,241 @@
+PyIPC:  Python Interface to Inter-Process Communication
+Copyright (C) 2001, Neil Macneale <mac4-pyipc@theory.org>
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or (at
+your option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+
+___________________________________________________________________________
+PyIPC module overview -----------------------------------------------------
+    This package allows pythons to easily use the functionality provided by
+the basic System V system calls. Low level system calls are wrpped in the
+ipcmod shared library, and those functions are wrapped with a python class
+implemetation in pyipc.py
+
+    IPC stands for Inter Process Communication.  The three components of
+unix ipc are message queues, shared memory, and Semaphores.  The queues are 
+synchronized by the kernal, but the shared memory is synchronized by use 
+of the semaphores.  By using the struct module, python can interact with
+any process which uses binary message and memory sharing.
+
+    If both the sender and reciever are python programs, it is easy to 
+send pickled objects through the message queue to make communication easier.
+
+    This package obviously only works on systems which implement System V
+ipc functionality (most *nix systems, all that I know of).  Sorry Windows
+users.
+
+Author:  Neil Macneale <mac4-pyipc@theory.org>
+
+_________________________________________________________________________
+Other reading you should do first ---------------------------------------
+Before you make this module, you should know what the System V system calls
+are capable of.  The 'ipc' man page lists several other man pages that you
+should be familiar with.  This module is basically a wrapper for these
+calls, so in order to use this module correctly, you should understand the
+system calls.
+
+__________________________________________________________________________
+Enough talk, how do you get this to work ---------------------------------
+
+1: I assume you got this far by unpacking the tar file. I will also assume,
+   since you are reading this file, you have moved into the PyIPC directory. 
+   Good going, champ.
+2: command% python setup.py install
+
+That should create a build directory in the PyIPC directory.  Something you
+may be interested in doing is setting your PYTHONHOME environment variable.
+If you have a local build of python, you can set PYTHONPATH to that, and
+the install will be done locally.  This is common for people who do not
+have root access.  If you want to install to a location that is only
+writable by root, then you will need to become the super user before you
+install.
+
+The easiest way to determine if the files are in your path after you have
+done the above is to start the python interpreter and try: 
+>>> import pyipc
+
+_________________________________________________________________________
+Now that it's installed, lets use this thing. ---------------------------
+
+---------------------- pyipc.MessageQueue class -------------------------
+command% python
+>>> import pyipc
+>>> mq = pyipc.MessageQueue(100)
+>>> mq.send("\x00\x00\x00\x01Hello Other process")
+>>> control-d
+
+Now you can use the ipcs command to see the message you just sent...
+command% ipcs
+------ Shared Memory Segments --------
+key       shmid     owner     perms     bytes     nattch    status      
+
+------ Semaphore Arrays --------
+key       semid     owner     perms     nsems     status      
+
+------ Message Queues --------
+key       msqid     owner     perms     used-bytes  messages    
+0x64      1408      mac4      0600      20          1
+
+
+You can see that a message is waiting for someone to read.  So lets read it
+with python....
+command% python
+>>> import pyipc
+>>> mq = pyipc.MessageQueue(100)
+>>> mq.receive()
+'\x00\x00\x00\x01Hello Other process'
+>>> control-d
+
+run the ipcs command now, and you will see there is no message waiting.
+
+The constructor takes in at least one argument, the message queue key.  The
+key should be a unique number greater than 0.  0 is legal, it just produces
+a message queue which is always unique.  So if you want to be assured that
+you are creating a new message queue, use 0 as the key.  This is not such a
+good idea though, since other processes will have a hard time accessing
+that queue.
+
+A second argument to the constructor specifies the permissions and other
+flags.  the default is (0600 | IPC_CREAT) which states that only the user
+will be able to access the queue, and if the queue does not exist at this
+time, create it.
+
+The send and receive methods are pretty raw.  The bytes that you want to
+send must be placed in a string object, try struct.pack().  The string
+represents the msgbuf struct which has a long int first, then an
+unspecified number of bytes after that.  These two components are called
+the type and text respectively.  The type of the message is important.  It
+must be greater than 0, or the message queue will reject it.  The receiving
+end can specify what type of message they want to take next, which is one
+of the main advantages to using message queues over pipes or sockets.
+
+There are two additional methods which are of use if you are sending
+message to and from python processes.  the send_p and receive_p functions
+will send and receive python pickled objects.
+
+>>>mq.send_p(["a list", 5, 90] , 50)
+>>>mq.receive_p(50)
+(50, ["a list", 5, 90])
+>>>
+
+The item returned is a tuple with the type and the object.
+
+This is a pretty uninteresting example, but recognize that you can send
+these message to programs which have not even been started yet, or you can
+send message with the type as you process id so that the receiver can
+screen which messages to take by message type.  Or you can use the message
+queue in one process as a priority queue (thought there are better modules
+for that :)
+
+There is one resriction worth noting for message queues:  They have a a 
+message size limit, usualy a little under 4k.  You may not be able to fit a 
+very large object in to the queue. 4K is a pretty big object though.
+
+That is the quick overview of messages.  In order to really understand what
+you are doing, try the msgget man page.
+
+Another source of documentation is pyipc itself.  The code is pretty simple,
+and all functions and classes have __doc__ comments.
+
+
+-------------------- pyipc.SharedMemory class ---------------------------
+    This class allows you to create a memory block that can be viewed and
+modified by multiple processes. As it stands now, you must copy values out
+and back into the block.  (In the future, when I get more comfortable with
+the python/C api, I will try and implement python objects which live in the
+shared memory.)
+
+First create a memory block.
+
+>>> mem = pyipc.SharedMemory(1024)
+
+By default, the block allocated is SHMLBA, which is one page. (on most
+architectures that is 4K of memory. You should note that using a size less
+than that still alocates a full page, you just will not have access to it
+all.)
+
+The default contructor gives the following flags: 0600 | IPC_CREAT.
+
+Now that you have the memory, you can read and write to it.  To write the
+characters "HELLO" starting at the 5th byte, try:
+
+>>> mem[4] = "HELLO"
+
+Then to see the byte 0 throught 9,
+
+>>> mem[:10]
+'\x00\x00\x00\x00HELLO\x00'
+
+Note that the memory is read and written to with strings, so it would make
+sense to use the struct.pack() and struct.unpack() methods to make the data
+more compact.  It will also make life easier if the other process you are
+interacting with is written in C.  Note that the memory is raw, so there is
+no requirement that the other process be written in any particular
+language.
+
+There are also a few helper functiosn for reating and writing numbers. You 
+can read and write bytes, shorts, and ints with their respective functions,
+such as this:
+
+>>> mem.writeUShort(64, 71)
+>>> mem.readUShort(64)
+71
+
+Also note that everytime I have used shared memory blocks, all byts have 
+been 0 initialy.  I don't believe this is a guarantee, since I have not 
+seen any mention of it in man pages.
+
+Performance note:  realize that every time you write or read something, at
+some point there is a memory copy of the string.  This takes linear time in
+relation to the size of the string.  The reason for this is that we need to
+get things in and out of the shared memory space into python's memory
+space.  C programs which use the shared memory directly do not have this
+problem, and as a result, shared memory has a reputation for being the
+fastest inter process communication.  When interfacing python to shared
+memory, we don't get those benefits. If you cared about speed though, you
+wouldn't be using python :)
+
+--------------------- pyipc.SemaphoreGroup class ---------------------------
+    The complexity in this class is a result of the system semaphore's
+complexity.  In order to understand what you are doing, you should read the
+semget man page.
+
+    Semaphores are a low level way of locking a resource, such a shared
+memory block.  They also allow a process to wait on a resource, which is
+more efficient than polling.
+
+    The constructor's default values give basic functionality though. By
+default, a SemaphoreGroup has one semaphore which is readable and writable
+by the owner (0600).  If the constructor can create the group as exclusive
+(IPC_EXCL), then it will initialize all semaphores to 1. Otherwise, the
+constuctor assumes that another process has initialized the semaphores.
+
+    To use semaphores effectivly, you must use them correctly.  Determine 
+where race conditions occure, then surround the section with a call to wait
+and signal.
+
+>>> sem = pyipc.SemaphoreGroup(42)
+>>> sem.wait()
+>>> CRITICAL SECTION ... 
+...
+>>> sem.signal()
+
+    Note that these semaphores should only be used for shared system 
+resources. Python has Locks and Semaphores built in.
+
+-------------------- SharedObject.py --------------------------------------
+The SharedObject module is not really part of PyIPC, it is an example class
+which shows how to use SharedMemory and Semaphores in conjunction to allow
+two python processes to use the some object. It's a pretty simplistic
+implementation, but it gets the job done for the most part.

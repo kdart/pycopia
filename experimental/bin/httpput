@@ -1,0 +1,257 @@
+#!/usr/bin/env python2.4
+# vim:ts=4:sw=4
+# $Id: httpget,v 1.1 2005/07/25 21:25:16 kdart Exp $
+
+"""
+httpget [-m <method>] [-u|--user-agent <useragentkey>] [-g|--use-gzip] ...
+        [-h|--headers] [-d|--debug] [-f|--bodyfile <bodyfile>] 
+        [-L|--list-user-agents] [-e|--encoding] <encoding>]
+        [-l|--language] <language>] <url>
+httpput
+httppost
+
+Fetches a web page and prints the contents, including the headers.
+
+Where:
+    url == url to use. May contain user name and password elements.
+    bodyfile == optional filename to send with PUT or POST.
+
+    -f or --bodyfile reads in the named file for a PUT or POST request.
+
+    -m or --method must be one of GET, PUT, or POST. This overrides the method
+    determined by the program name. 
+
+    -u or --user-agent is the User Agent (browser) to masqaurade as. This is
+    the short name. Use "?" too see a list of possible choices.
+
+    -g or --use-gzip tells the client to allow gzip compressed content.
+
+    -h or --headers emits the HTTP header values only, no content.
+
+    -d or --debug will cause this agent to drop into the Python debugger on error.
+
+    -e or --encoding Request the given encoding.
+
+    -l or --language Request the given language.
+
+"""
+
+import sys, os
+import getopt
+import urllib
+
+import inet.HTTP as httplib
+import inet.httputils as httputils
+from WWW.useragents import USER_AGENTS
+import urlparseplus
+from timelib import now
+
+
+DEFAULT_UA = "mozilla5"
+
+class FetchError(RuntimeError):
+    pass
+
+
+class RequestContext(object):
+    pass
+
+def make_request(url, ua, use_gzip, bodyfile=None, debug=0, 
+            encoding="utf-8", language="en"):
+    rc = RequestContext()
+    scheme, netloc, path, params, query, fragment = urlparseplus.urlparse(url)
+    user, password, rc.host, port = urlparseplus.serverparse(netloc)
+    rc.port = int(port or 80)
+    rc.debug = debug
+    rc.encoding = encoding
+    rc.language = language
+    headers = {
+        "Host": rc.host,
+        "Accept": "text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,text/css",
+        "Accept-Language": language,
+        "User-Agent": ua,
+        "Accept-Charset": "%s;q=0.9,*;q=0.7" % (encoding,),
+    }
+    if user is not None:
+        if password is None:
+            import getpass
+            password = getpass.getpass()
+        auth = httputils.BasicAuth(user, password)
+        auth_n, auth_v = auth.get_header()
+        headers[auth_n] = auth_v
+    if bodyfile:
+        if bodyfile == "-":
+            headers["content-type"] = "application/octet-stream"
+            body = sys.stdin.read()
+
+        elif os.path.isfile(bodyfile):
+            import mimetypes
+            mt, ce = mimetypes.guess_type(bodyfile)
+            headers["content-type"] = mt or "application/octet-stream"
+            if ce:
+                headers["content-encoding"] = ce
+            body = open(bodyfile).read()
+
+        else: # use text as-is
+            headers["content-type"] = "text/plain"
+            body = bodyfile+"\n"
+
+        rc.body = body.replace("\n", "\r\n")
+        headers["content-length"] = str(len(rc.body))
+    else:
+        rc.body=None
+
+    rc.location = urlparseplus.urlunparse((None, None, path, params, query, fragment))
+    rc.headers = headers
+    rc.use_gzip = use_gzip
+    return rc
+    
+
+def httpget(context):
+    httpclient = httplib.HTTPConnection(context.host, context.port)
+    httpclient.set_debuglevel(context.debug)
+    httpclient.request("GET", context.location, headers=context.headers, use_gzip=context.use_gzip)
+    resp = httpclient.getresponse()
+    resp.encoding = context.encoding
+    return resp
+
+def httpput(context):
+    httpclient = httplib.HTTPConnection(context.host, context.port)
+    httpclient.set_debuglevel(context.debug)
+    httpclient.request("PUT", context.location, body=context.body, headers=context.headers, use_gzip=context.use_gzip)
+    resp = httpclient.getresponse()
+    return resp
+
+def httppost(context):
+    httpclient = httplib.HTTPConnection(context.host, context.port)
+    httpclient.set_debuglevel(context.debug)
+    form = map(lambda s: tuple(s.split("=", 1)), context.body.split())
+    body = urllib.urlencode(form)
+    context.headers['Content-type'] = 'application/x-www-form-urlencoded'
+    context.headers['Content-length'] = '%d' % (len(body),)
+    httpclient.request("POST", context.location, body=body, headers=context.headers, use_gzip=context.use_gzip)
+    resp = httpclient.getresponse()
+    return resp
+
+
+def print_response(url, resp):
+    print_headers(url, resp)
+    print_doc(resp)
+
+def print_doc(resp):
+    print unicode(resp.read(), resp.encoding)
+    #sys.stdout.write(pg)
+
+def print_headers(url, resp):
+    headers = resp.msg.items()
+    print "-------- %s" % url
+    print "Response status: %d\n" % (resp.status)
+    for name, val in headers:
+        print "%20s: %s" %(name, val) 
+    print
+
+def _print_ua_list():
+    print "Possible User-Agent key values:"
+    for name in USER_AGENTS.keys():
+        print "   ", name
+
+# maps to different functions depending on our program name, or selected method.
+FUNCTIONMAP = {
+    "httpget": httpget,
+    "httpput": httpput,
+    "httppost": httppost,
+    "GET": httpget,
+    "PUT": httpput,
+    "POST": httppost,
+}
+
+def main(argv):
+    argc = len(argv)
+    myname = os.path.basename(argv[0])
+    if argc < 2:
+        print __doc__
+        sys.exit()
+
+    # default option values
+    ua = USER_AGENTS[DEFAULT_UA]
+    methodfunc = FUNCTIONMAP[myname]
+    use_gzip = 0
+    debug = 0
+    headersonly = 0
+    bodyfile = None
+    encoding="utf-8"
+    language="en"
+
+    # check commandline options
+    try:
+        optlist, args = getopt.getopt(argv[1:], "m:u:gdhLf:e:l:", 
+         ["method=", "user-agent=", "use-gzip", "debug", "headers",
+         "bodyfile=", "user-agent-list", "language=", "encoding="])
+
+    except getopt.GetoptError:
+        print __doc__
+        sys.exit()
+    for opt, optarg in optlist:
+        if opt in ["-u", "--user-agent"]:
+            if optarg == "?":
+                _print_ua_list()
+                return
+            try:
+                ua = USER_AGENTS[optarg]
+            except KeyError:
+                print "Invalid user-agent key. Use -l to see a list."
+                return
+        elif opt in ["-L", "--user-agent-list"]:
+            _print_ua_list()
+            return
+        elif opt in ["-g", "--use-gzip"]:
+            use_gzip = 1
+        elif opt in ["-d", "--debug"]:
+            debug = 1
+        elif opt in ["-f", "--bodyfile"]:
+            bodyfile = optarg
+        elif opt in ["-e", "--encoding"]:
+            encoding = optarg
+        elif opt in ["-l", "--language"]:
+            language = optarg
+        elif opt in ["-h", "--headers"]:
+            headersonly = 1
+        elif opt in ["-m", "--method"]:
+            try:
+                methodfunc = FUNCTIONMAP[optarg]
+            except KeyError:
+                print __doc__
+                sys.exit()
+
+    # go do it
+    
+    try:
+        if len(args) > 0:
+            url = args[0]
+            if len(args) > 1:
+                bodyfile = " ".join(args[1:])
+            context = make_request(url, ua, use_gzip, bodyfile, debug, 
+                    encoding, language)
+            starttime = now()
+            resp = methodfunc(context)
+            endtime = now()
+            print "Operation took %f seconds." % (endtime-starttime)
+            if headersonly:
+                print_headers(url, resp)
+            else:
+                print_response(url, resp)
+        else:
+            print __doc__
+
+    except:
+        ex, val, tb = sys.exc_info()
+        if debug:
+            import debugger
+            debugger.post_mortem(ex, val, tb)
+        else:
+            print ex, val
+            sys.exit(1)
+
+
+main(sys.argv)
+

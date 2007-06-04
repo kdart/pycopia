@@ -1,0 +1,7 @@
+#!/usr/bin/python2.4 -i
+# vim:ts=4:sw=4
+# $Id: pysh,v 1.1 2005/07/25 21:25:16 kdart Exp $
+# License: LGPL
+# Keith Dart <kdart@kdart.com>
+
+import pyshell

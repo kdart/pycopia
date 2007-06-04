@@ -1,0 +1,16 @@
+#!/usr/bin/env python2.4
+
+import sys, os, pydoc
+
+PORT = 8080
+
+# reduce the sys.path to a minimal set when running so that pydoc won't
+# show too much.
+def set_server_path(server):
+	import sys, os
+	print server.url
+	pylib = "%s/lib/python%d.%d" % (sys.prefix, sys.version_info[0], sys.version_info[1])
+	sys.path = [os.environ["PYNMS_HOME"]+"/lib", pylib, pylib+"/lib-dynload"]
+
+#pydoc.serve(PORT, set_server_path)
+pydoc.serve(PORT)

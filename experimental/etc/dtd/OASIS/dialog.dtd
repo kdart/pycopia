@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+        $Id: dialog.dtd 2 2006-09-04 07:04:02Z keith.dart $
+
+   The Contents of this file are made available subject to the terms of
+   either of the following licenses
+
+          - GNU Lesser General Public License Version 2.1
+          - Sun Industry Standards Source License Version 1.1
+
+   Sun Microsystems Inc., October, 2000
+
+   GNU Lesser General Public License Version 2.1
+   =============================================
+   Copyright 2000 by Sun Microsystems, Inc.
+   901 San Antonio Road, Palo Alto, CA 94303, USA
+
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License version 2.1, as published by the Free Software Foundation.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+   MA  02111-1307  USA
+
+
+   Sun Industry Standards Source License Version 1.1
+   =================================================
+   The contents of this file are subject to the Sun Industry Standards
+   Source License Version 1.1 (the "License"); You may not use this file
+   except in compliance with the License. You may obtain a copy of the
+   License at http://www.openoffice.org/license.html.
+
+   Software provided under this License is provided on an "AS IS" basis,
+   WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING,
+   WITHOUT LIMITATION, WARRANTIES THAT THE SOFTWARE IS FREE OF DEFECTS,
+   MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE, OR NON-INFRINGING.
+   See the License for the specific provisions governing your rights and
+   obligations concerning the Software.
+
+   The Initial Developer of the Original Code is: Sun Microsystems, Inc.
+
+   Copyright: 2000 by Sun Microsystems, Inc.
+
+   All Rights Reserved.
+
+   Contributor(s): _______________________________________
+
+-->
+
+<!ENTITY % boolean "(true|false)">
+<!ENTITY % numeric "CDATA">
+
+<!ENTITY % default-attributes "dlg:id CDATA #REQUIRED
+                               dlg:left %numeric; #REQUIRED
+                               dlg:top %numeric; #REQUIRED
+                               dlg:width %numeric; #REQUIRED
+                               dlg:height %numeric; #REQUIRED
+                               dlg:style-id CDATA #IMPLIED
+                               dlg:tab-index %numeric; #IMPLIED
+                               dlg:disabled %boolean; #IMPLIED
+                               dlg:printable %boolean; #IMPLIED
+                               dlg:page %numeric; #IMPLIED
+                               dlg:tag CDATA #IMPLIED
+                               dlg:help-text CDATA #IMPLIED
+                               dlg:help-url CDATA #IMPLIED
+                               ">
+
+<!ENTITY % event "(script:event|
+                   script:listener-event|
+                   dlg:event
+                  )">
+
+<!ENTITY % control "(dlg:bulletinboard|
+                     dlg:button|
+                     dlg:checkbox|
+                     dlg:combobox|
+                     dlg:menulist|
+                     dlg:radiogroup|
+                     dlg:titledbox|
+                     dlg:textfield|
+                     dlg:text|
+                     dlg:filecontrol|
+                     dlg:img|
+                     dlg:timefield|
+                     dlg:datefield|
+                     dlg:numericfield|
+                     dlg:currencyfield|
+                     dlg:patternfield|
+                     dlg:formattedfield|
+                     dlg:fixedline|
+                     dlg:progressmeter|
+                     dlg:scrollbar
+                    )">
+
+<!ELEMENT dlg:window (dlg:styles*, (%event;)*, dlg:bulletinboard*)>
+<!ATTLIST dlg:window %default-attributes;
+		     dlg:closeable %boolean; #IMPLIED
+		     dlg:moveable %boolean; #IMPLIED
+		     dlg:resizeable %boolean; #IMPLIED
+                     dlg:title CDATA #IMPLIED
+                     xmlns:dlg CDATA #FIXED "http://openoffice.org/2000/dialog"
+                     xmlns:script CDATA #FIXED "http://openoffice.org/2000/script"
+                     >
+
+<!ELEMENT dlg:styles (dlg:style+)>
+
+<!ELEMENT dlg:style EMPTY>
+<!ATTLIST dlg:style dlg:style-id CDATA #REQUIRED
+                    dlg:background-color %numeric; #IMPLIED
+                    dlg:text-color %numeric; #IMPLIED
+                    dlg:textline-color %numeric; #IMPLIED
+                    dlg:fill-color %numeric; #IMPLIED
+                    dlg:border (none|3d|simple) #IMPLIED
+                    dlg:font-name CDATA #IMPLIED
+                    dlg:font-height %numeric; #IMPLIED
+                    dlg:font-width %numeric; #IMPLIED
+                    dlg:font-stylename CDATA #IMPLIED
+                    dlg:font-family (decorative|modern|roman|script|swiss|system) #IMPLIED
+                    dlg:font-charset (ansi|mac|ibmpc_437|ibmpc_850|ibmpc_860|ibmpc_861|ibmpc_863|ibmpc_865|system|symbol) #IMPLIED
+                    dlg:font-pitch (fixed|variable) #IMPLIED
+                    dlg:font-charwidth %numeric; #IMPLIED
+                    dlg:font-weight %numeric; #IMPLIED
+                    dlg:font-slant (oblique|italic|reverse_oblique|reverse_italic) #IMPLIED
+                    dlg:font-underline (single|double|dotted|dash|longdash|dashdot|dashdotdot|smallwave|wave|doublewave|bold|bolddotted|bolddash|boldlongdash|bolddashdot|bolddashdotdot|boldwave) #IMPLIED
+                    dlg:font-strikeout (single|double|bold|slash|x) #IMPLIED
+                    dlg:font-orientation CDATA #IMPLIED
+                    dlg:font-kerning %boolean; #IMPLIED
+                    dlg:font-wordlinemode %boolean; #IMPLIED
+                    dlg:font-type (raster|device|scalable) #IMPLIED
+		    dialog:font-relief (none|embossed|engraved) #IMPLIED
+		    dialog:font-emphasismark (none|dot|circle|disc|accent|above|below) #IMPLIED
+                    >
+
+<!ELEMENT script:event EMPTY>
+<!ATTLIST script:event script:location CDATA #IMPLIED
+                       script:language CDATA #REQUIRED
+                       script:macro-name CDATA #REQUIRED
+                       script:event-name CDATA #REQUIRED
+                       >
+<!ELEMENT script:listener-event EMPTY>
+<!ATTLIST script:listener-event script:location CDATA #IMPLIED
+                                script:language CDATA #REQUIRED
+                                script:macro-name CDATA #REQUIRED
+                                script:listener-type CDATA #REQUIRED
+                                script:listener-method CDATA #REQUIRED
+                                script:listener-param CDATA #IMPLIED
+                                >
+<!-- deprecated -->
+<!ELEMENT dlg:event EMPTY>
+<!ATTLIST dlg:event dlg:listener-type CDATA #REQUIRED
+                    dlg:event-method CDATA #REQUIRED
+                    dlg:script-type CDATA #IMPLIED
+                    dlg:script-code CDATA #IMPLIED
+                    dlg:param CDATA #IMPLIED
+                    >
+<!-- /deprecated -->
+                        
+<!ELEMENT dlg:bulletinboard ((%control;)*)>
+<!ATTLIST dlg:bulletinboard dlg:left %numeric; #IMPLIED
+                            dlg:top %numeric; #IMPLIED
+                            >
+
+<!ELEMENT dlg:button ((%event;)*)>
+<!ATTLIST dlg:button %default-attributes;
+                     dlg:value CDATA #IMPLIED
+                     dlg:default %boolean; #IMPLIED
+                     dlg:tabstop %boolean; #IMPLIED
+                     dlg:image-src CDATA #IMPLIED
+                     dlg:image-align (top|left|right|bottom) #IMPLIED
+		     dlg:button-type (standard|ok|cancel|help) #IMPLIED
+                     >
+
+<!ELEMENT dlg:checkbox ((%event;)*)>
+<!ATTLIST dlg:checkbox %default-attributes;
+                       dlg:value CDATA #IMPLIED
+                       dlg:checked %boolean; #IMPLIED
+                       dlg:tristate %boolean; #IMPLIED
+                       dlg:tabstop %boolean; #IMPLIED
+                       >
+
+<!ELEMENT dlg:combobox (dlg:menupopup?, (%event;)*)>
+<!ATTLIST dlg:combobox %default-attributes;
+                       dlg:tabstop %boolean; #IMPLIED
+                       dlg:readonly %boolean; #IMPLIED
+                       dlg:autocomplete %boolean; #IMPLIED
+                       dlg:spin %boolean; #IMPLIED
+                       dlg:maxlength %numeric; #IMPLIED
+                       dlg:linecount %numeric; #IMPLIED
+                       dlg:value CDATA #IMPLIED
+                       >
+
+<!ELEMENT dlg:menulist (dlg:menupopup?, (%event;)*)>
+<!ATTLIST dlg:menulist %default-attributes;
+                       dlg:tabstop %boolean; #IMPLIED
+                       dlg:spin %boolean; #IMPLIED
+                       dlg:multiselection %boolean; #IMPLIED
+                       dlg:readonly %boolean; #IMPLIED
+                       dlg:linecount %numeric; #IMPLIED
+                       >
+
+<!ELEMENT dlg:menupopup (dlg:menuitem+)>
+<!ELEMENT dlg:menuitem EMPTY>
+<!ATTLIST dlg:menuitem dlg:value CDATA #REQUIRED
+                       dlg:selected %boolean; #IMPLIED
+                       >
+
+<!ELEMENT dlg:radiogroup (dlg:radio+)>
+<!ELEMENT dlg:radio ((%event;)*)>
+<!ATTLIST dlg:radio %default-attributes;
+                    dlg:value CDATA #IMPLIED
+                    dlg:checked %boolean; #IMPLIED
+                    dlg:tabstop %boolean; #IMPLIED
+                    >
+
+<!ELEMENT dlg:titledbox (dlg:title?, dlg:radio*, (%control;)*, (%event;)*)>
+<!ATTLIST dlg:titledbox %default-attributes;
+                        >
+<!ELEMENT dlg:title EMPTY>
+<!ATTLIST dlg:title dlg:value CDATA #IMPLIED
+                    >
+
+<!ELEMENT dlg:text ((%event;)*)>
+<!ATTLIST dlg:text %default-attributes;
+                   dlg:align (left|center|right) #IMPLIED
+                   dlg:multiline %boolean; #IMPLIED
+                   dlg:tabstop %boolean; #IMPLIED
+                   dlg:value CDATA #IMPLIED
+                   >
+
+<!ELEMENT dlg:textfield ((%event;)*)>
+<!ATTLIST dlg:textfield %default-attributes;
+                        dlg:tabstop %boolean; #IMPLIED
+                        dlg:align (left|center|right) #IMPLIED
+                        dlg:readonly %boolean; #IMPLIED
+                        dlg:echochar CDATA #IMPLIED
+                        dlg:hard-linebreaks %boolean; #IMPLIED
+                        dlg:hscroll %boolean; #IMPLIED
+                        dlg:vscroll %boolean; #IMPLIED
+                        dlg:maxlength %numeric; #IMPLIED
+                        dlg:multiline %boolean; #IMPLIED
+                        dlg:value CDATA #IMPLIED
+                        >
+
+<!ELEMENT dlg:img ((%event;)*)>
+<!ATTLIST dlg:img %default-attributes;
+                  dlg:src CDATA #IMPLIED
+                  dlg:scale-image %boolean; #IMPLIED
+                  >
+
+<!ELEMENT dlg:filecontrol ((%event;)*)>
+<!ATTLIST dlg:filecontrol %default-attributes;
+                          dlg:tabstop %boolean; #IMPLIED
+                          dlg:value CDATA #IMPLIED
+                          >
+
+<!ELEMENT dlg:currencyfield ((%event;)*)>
+<!ATTLIST dlg:currencyfield %default-attributes;
+                            dlg:tabstop %boolean; #IMPLIED
+                            dlg:readonly %boolean; #IMPLIED
+                            dlg:currency-symbol CDATA #IMPLIED
+                            dlg:strict-format %boolean; #IMPLIED
+                            dlg:decimal-accuracy %numeric; #IMPLIED
+                            dlg:thousands-separator %boolean; #IMPLIED
+                            dlg:value %numeric; #IMPLIED
+                            dlg:value-min %numeric; #IMPLIED
+                            dlg:value-max %numeric; #IMPLIED
+                            dlg:value-step %numeric; #IMPLIED
+                            dlg:spin %boolean; #IMPLIED
+                            dlg:prepend-symbol %boolean; #IMPLIED
+                            >
+
+<!ELEMENT dlg:datefield ((%event;)*)>
+<!ATTLIST dlg:datefield %default-attributes;
+                        dlg:tabstop %boolean; #IMPLIED
+                        dlg:readonly %boolean; #IMPLIED
+                        dlg:strict-format %boolean; #IMPLIED
+                        dlg:date-format (system_short|system_short_YY|system_short_YYYY|system_long|short_DDMMYY|short_MMDDYY|short_YYMMDD|short_DDMMYYYY|short_MMDDYYYY|short_YYYYMMDD|short_YYMMDD_DIN5008|short_YYYYMMDD_DIN5008) #IMPLIED
+                        dlg:show-century %boolean; #IMPLIED
+                        dlg:value CDATA #IMPLIED
+                        dlg:value-min CDATA #IMPLIED
+                        dlg:value-max CDATA #IMPLIED
+                        dlg:spin %boolean; #IMPLIED
+                        dlg:dropdown %boolean; #IMPLIED
+                        >
+
+<!ELEMENT dlg:numericfield ((%event;)*)>
+<!ATTLIST dlg:numericfield %default-attributes;
+                           dlg:tabstop %boolean; #IMPLIED
+                           dlg:readonly %boolean; #IMPLIED
+                           dlg:strict-format %boolean; #IMPLIED
+                           dlg:decimal-accuracy %numeric; #IMPLIED
+                           dlg:thousands-separator %boolean; #IMPLIED
+                           dlg:value %numeric; #IMPLIED
+                           dlg:value-min %numeric; #IMPLIED
+                           dlg:value-max %numeric; #IMPLIED
+                           dlg:value-step %numeric; #IMPLIED
+                           dlg:spin %boolean; #IMPLIED
+                           >
+
+<!ELEMENT dlg:timefield ((%event;)*)>
+<!ATTLIST dlg:timefield %default-attributes;
+                        dlg:tabstop %boolean; #IMPLIED
+                        dlg:readonly %boolean; #IMPLIED
+                        dlg:strict-format %boolean; #IMPLIED
+                        dlg:time-format (24h_short|24h_long|12h_short|12h_long|Duration_short|Duration_long) #IMPLIED
+                        dlg:value CDATA #IMPLIED
+                        dlg:value-min CDATA #IMPLIED
+                        dlg:value-max CDATA #IMPLIED
+                        dlg:spin %boolean; #IMPLIED
+                        >
+
+<!ELEMENT dlg:patternfield ((%event;)*)>
+<!ATTLIST dlg:patternfield %default-attributes;
+                           dlg:tabstop %boolean; #IMPLIED
+                           dlg:readonly %boolean; #IMPLIED
+                           dlg:strict-format %boolean; #IMPLIED
+                           dlg:value CDATA #IMPLIED
+                           dlg:maxlength %numeric; #IMPLIED
+                           dlg:edit-mask CDATA #IMPLIED
+                           dlg:literal-mask CDATA #IMPLIED
+                           >
+
+<!ELEMENT dlg:formattedfield ((%event;)*)>
+<!ATTLIST dlg:formattedfield %default-attributes;
+			     dlg:tabstop %boolean; #IMPLIED
+			     dlg:readonly %boolean; #IMPLIED
+			     dlg:align (left|center|right) #IMPLIED
+			     dlg:format-code CDATA #IMPLIED
+			     dlg:format-locale CDATA #IMPLIED
+			     dlg:treat-as-number %boolean; #IMPLIED
+			     dlg:strict-format %boolean; #IMPLIED
+			     dlg:value-default CDATA #IMPLIED
+			     dlg:value-max %numeric; #IMPLIED
+			     dlg:value-min %numeric; #IMPLIED
+			     dlg:value %numeric; #IMPLIED
+			     dlg:maxlength %numeric; #IMPLIED
+			     dlg:spin %boolean; #IMPLIED
+			     dlg:text CDATA #IMPLIED
+			     >
+
+<!ELEMENT dlg:fixedline ((%event;)*)>
+<!ATTLIST dlg:fixedline %default-attributes;
+                        dlg:align (horizontal|vertical) #IMPLIED
+                        dlg:value CDATA #IMPLIED
+                        >
+
+<!ELEMENT dlg:scrollbar ((%event;)*)>
+<!ATTLIST dlg:scrollbar %default-attributes;
+                        dlg:align (horizontal|vertical) #IMPLIED
+                        dlg:curpos %numeric; #IMPLIED
+                        dlg:maxpos %numeric; #IMPLIED
+                        dlg:increment %numeric; #IMPLIED
+                        dlg:pageincrement %numeric; #IMPLIED
+                        dlg:visible-size %numeric; #IMPLIED
+                        >
+
+<!ELEMENT dlg:progressmeter ((%event;)*)>
+<!ATTLIST dlg:progressmeter %default-attributes;
+                            dlg:value %numeric; #IMPLIED
+                            dlg:value-min %numeric; #IMPLIED
+                            dlg:value-max %numeric; #IMPLIED
+                            >

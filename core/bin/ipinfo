@@ -1,0 +1,26 @@
+#!/usr/bin/python2.4
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+import sys
+
+from pycopia import socket
+from pycopia.ipv4 import *
+
+def main(argv):
+    if len(argv) > 1:
+        if len(argv) > 2:
+            a = IPv4(argv[1], argv[2])
+        else:
+            a = IPv4(argv[1])
+    else:
+        a = IPv4(socket.gethostbyname(socket.gethostname()))
+
+    print "Breakdown of IP address: ", a
+    print "                   Mask: ", itodq(a.mask)
+    print "                Network: ", itodq(a.network)
+    print "                   Host: ", itodq(a.host)
+    print "              Broadcast: ", itodq(a.broadcast)
+
+
+main(sys.argv)
+

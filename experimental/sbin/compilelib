@@ -1,0 +1,29 @@
+#!/usr/bin/env python2.4
+"""
+Use the python bytecode compiler to pre-compile all library modules.
+
+"""
+
+import sys, os, compileall
+
+if not os.environ.has_key("PYNMS_HOME"):
+	print """
+PYNMS_HOME environment variable is not set. Please set it to the location of
+your PYNMS installation before running this.
+"""
+
+	sys.exit(1)
+
+# The __debug__ internal variable is not set when in optimize mode.
+if __debug__:
+	print "Byte-code compiling .pyc files..."
+else:
+	print "Byte-code compiling optimized .pyo files..."
+
+compileall.compile_dir(os.environ["PYNMS_HOME"] + "/lib")
+
+if __debug__:
+# now, run myself with python in optimize mode.
+	pycommand = sys.executable + " -OO " + sys.argv[0]
+	os.system(pycommand)
+

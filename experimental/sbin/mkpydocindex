@@ -1,0 +1,80 @@
+#!/usr/bin/python2.4
+# -*- coding: ascii -*-
+# vim:ts=4:sw=4
+# License: LGPL
+# Keith Dart <kdart@kdart.com>
+# $Id: mkpydocindex,v 1.1 2005/07/25 21:25:18 kdart Exp $
+
+"""
+mkpydocindex
+Creates the docs/pydocindex.py file. This is a table of Python libarary kewords.
+It is used by the interactive and vim modules to find online help URLs.
+
+"""
+
+import sys, os
+import re, pprint
+import HTML.hrefgetter
+
+# get the the PYTHONDOCS value
+import interactive
+
+BASEDIR = os.environ["PYTHONDOCS"]
+SUBDIRS = ["api", "lib", "ref" ]
+INDEXNAME = "genindex.html"
+OUTFILENAME = interactive.PYDOCINDEXFILE
+
+
+
+class HrefWriter:
+	def __init__(self):
+		self.currentdir = None
+		self.ident_re = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)")
+		self.keywords = {}
+
+	def setdir(self, dirname):
+		self.currentdir = dirname
+
+	def __call__(self, href, kw):
+		kw = self._ident_stripper(kw)
+		if kw:
+			try:
+				l = self.keywords[kw]
+			except KeyError:
+				l = self.keywords[kw] = []
+			href = "%s/%s" % (self.currentdir, href)
+			if href not in l:
+				l.append( href)
+
+	def _ident_stripper(self, data): # also a filter for unwanted "shorties" etc
+		if data[:6] == "[Link]" or len(data) <= 2:
+			return None
+		mo = self.ident_re.search(data)
+		if mo:
+			rv = mo.group(0)
+			if len(rv) == 1: # dont use index letters
+				return None
+			else:
+				return rv
+		else:
+			return None
+
+	def write(self, fo):
+		pprint.pprint(self.keywords, fo)
+
+
+outfile = open(OUTFILENAME, "w")
+outfile.write("\nPYINDEX = ")
+writer = HrefWriter()
+hget = HTML.hrefgetter.HrefGetter(writer)
+for subdir in SUBDIRS:
+	writer.setdir(subdir)
+	infile = open("%s/%s/%s" % ( BASEDIR, subdir, INDEXNAME), "r")
+	for line in infile:
+		hget.feed(line)
+	hget.reset()
+	infile.close()
+
+writer.write(outfile)
+outfile.close()
+

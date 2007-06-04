@@ -1,0 +1,32 @@
+#!/usr/bin/env python2.4
+
+import sys, string, os
+import urllib
+
+if len(sys.argv) < 2:
+	print "Usage: %s <symbols>" % (sys.argv[0])
+	sys.exit(1)
+
+BaseURL = "http://quote.yahoo.com/d?f=snl1d1t1c1p2va2bapomwerr1dyj1&s="
+fieldNames = ["Symbol","Name","Last","Trade Date","Trade Time","Change",
+	"% Change", "Volume","Avg. Daily Volume","Bid","Ask","Prev. Close",
+	"Open", "Day's Range","52-Week Range","EPS","P/E Ratio","Div. Pay Date", 
+	"Div/Share","Div. Yield","Mkt. Cap" ]
+
+symbols = string.join(sys.argv[1:], "+")
+
+try:
+	ef = urllib.urlopen(BaseURL + symbols)
+except:
+	print "Cannot open URL."
+	sys.exit(1)
+quotes = ef.readlines()
+ef.close()
+
+for quote in quotes:
+	parts = string.split(quote, ",")
+	header_parts = map(None, fieldNames, parts)
+	for part in header_parts:
+		print "%18s: %s" % part
+
+# vim:ts=4:sw=4

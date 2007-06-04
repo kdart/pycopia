@@ -1,0 +1,4 @@
+# there is not really a table in the manual for this, but adding one makes
+# the interface more consistent.
+name	"Name of the group that you define. A string."	None	String
+flows	"A set of flow names."	None	FlowList

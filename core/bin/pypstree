@@ -1,0 +1,5 @@
+#!/usr/bin/env python2.4
+
+from pycopia.OS import procfs
+
+procfs.pstree()

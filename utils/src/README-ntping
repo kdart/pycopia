@@ -1,0 +1,182 @@
+The pyntping program is a modified version of the ntping program. The original
+REAME folows.
+
+
+==================================================================
+
+
+	pyntping/README					Jan 1993
+							Sep 1997
+
+Copyright (c) 1993-1997
+	by Erik Schoenfelder and Juergen Schoenwaelder 
+	TU Braunschweig, Germany,
+	Institute for Operating Systems and Computer Networks
+
+
+This is a ping/traceroute program for use with Tkined's Scotty
+interpreter up to scotty version 2.1.7 and probably for any 2.1.x
+versions.
+
+With scotty v2.2.0 and greater, nmicmpd(8) will be used, which is
+derived from ntping, but has a binary interface.
+
+Ntping itself remain useable as a cmd-line tool with an ascii
+interface (see ntping(8) for more).
+
+Quick Install:
+	Run ``./configure'' followed by ``make'' for compilation, and
+	type ``make sinstall'' as root for installation.  
+	If you are using ntping within the scotty distribution, the
+	toplevel configure, will do this for you.  
+
+This program works asynchron for the given hosts and, if no host is
+specified, it reads from stdin. It can query pings, timestamps,
+netmasks and traceroute-like hops.  Ntping is not a plug-in
+replacement for ping, or traceroute, but works similar.
+
+Ntping is still around version 0.9m.
+
+I may note, that you loose, if your kernel ignores the time-to-live
+parameter in raw-ip packets and sets the own default.  I would guess:
+If your traceroute works, ntping should be able to traceroute too.  If
+your system provides a IP_TTL option, ntping uses this to send a
+udp-packet with ttl set accordingly; if not avail a raw-ip packet is
+created and sent.
+
+
+Use : ntping [<options>] [<hosts>] 
+options are:
+	-V              show version and exit.
+	-b(ones)        run in `scotty' mode.
+options which may be specified on stdin or the cmdline:
+	-s(ize) <n>     set size of packets.
+	-r(etries) <n>  set # of retries.
+	-t(imeout) <n>  set timeout for an answer.
+	-d(elay) <n>    set the send delay to <n> ms.
+	-ttl <n>        trace a hop with time-to-live set to n.
+	-trace <n>      same as -ttl, but the destination is returned
+	                for the last hop, if it is a dotted number.
+	-mask           send an icmp-mask request.
+	-tstamp         send a icmp-timestamp request.
+
+
+Available platforms:
+	- SunOS 4.1.x
+	- Linux 2.x and above.  
+	- Hpux 9.0x	 thanks to matthieu@sys.mfg.canadair.ca,
+			 iztoku@fer.uni-lj.si and the author of
+			 traceroute for hp-ux - that was a great help.
+	- 386BSD	 thanks to <karl@sugar.NeoSoft.COM> Karl Lehenbauer
+	- DEC Alpha	 thanks to <mosedale@genome.stanford.edu> Dan
+			 Mosedale and <grunwald@foobar.cs.colorado.edu> 
+			 Dirk Grunwald
+	- Mach 2.6	 (not very extensively tested on a Sun3)
+	- AIX 3.2	 thanks to Heino Gaertner (heino@fm.ing.tu-bs.de)
+	- Irix 4.0.5     thanks to Jan L. Peterson (jlp@hamblin.math.byu.edu)
+	- SVR4 (Solaris 2.3)
+			 thanks to John P. Rouillard (rouilj@cs.umb.edu)
+	- NEC EWS4800/310PX UNIX_SV 4.2MP
+			thanks to Seiji Tokunaga (toku@ksp.nis.nec.co.jp)
+
+Please note: This software is distributed ``as-is''. 
+	     There is no warranty at all.
+
+
+INSTALLATION:
+
+Run ``./configure'' (with an optional --prefix=<prefix path>).
+Then run simply ``make''.
+
+To install run ``make sinstall'' - you have to run install as root.
+
+Before installing you may run a simple check with ``make check'':
+
+>    % make check
+>    echo '-size 120 localhost' | ./ntping -b
+>    {localhost 2} 
+>    echo '-size 60 -delay 30 -mask localhost' | ./ntping -b
+>    {localhost 255.0.0.0} 
+>    echo '-retries 2 -timeout 1 -ttl 1 localhost' | ./ntping -b
+>    {127.0.0.1 2} 
+>    echo '-size 100 -delay 10 -trace 1 localhost' | ./ntping -b
+>    {127.0.0.1 2} 
+>    echo '-tstamp localhost' | ./ntping -b
+>    {localhost -1} 
+
+The output may vary.
+
+If you are running in trouble with the configure script, you may
+cp Makefile.handmade to Makefile and edit it by hand.
+Then follow with ``make'' and ``make install''.
+
+
+NEWS:
+	(*) Jan 1997: ntping is no longer distributed with the
+	    scotty-package.
+
+	(*) Minor change to IP_HDRINCL: its no longer a fatal error.
+	    ntping tries to continue anyway.
+
+	(*) Mar 1995: Code cleanup done. Now the select() does the
+	    timeouts and delays; this allows much better timings when
+	    using delays. Static input/output buffers removed.
+	    Running ntping with hosts on the cmd-line, give nicer
+	    output (like ping or traceroute).
+
+	(*) broken -retries did not accept 0 - fixed. 
+
+	(*) AIX takes the IP_TTL option, but sends a ttl of 30; I guess 
+	    AIX is wrong. But the old build-our-own-packet code works.
+
+	(*) Added better support of DLPI interface (hp-ux/svr4) with
+	    IP_TTL option (no ip-raw socket neccessary).
+	    Added a hack to check about bad icmp tim-exceed /
+	    port-unreach packets with ports byte-swapped.
+
+	(*) September 1994: memory leak fixed.
+
+	(*) July 1994: use of bzero/bcopy by mem-routines replaced.
+	    This seems to help SVR4 and hopyfully won't hurt anyone
+	    else.  -lsocket and -lnsl added to the configure script by
+	    Juergen Schoenwaelder
+	    
+	(*) June 1994: HP-UX nukes sending RAW Pakets; special case
+	    cloned from traceroute; old hp-ux nonsense removed.
+	    a big thank you to iztoku@fer.uni-lj.si.
+
+	(*) May 1994: Kick me - ntping -b returned the old answer
+	    (sometimes garbled) for an empty input-line... ffff-fixed.
+
+	(*) Apr 1994: Fix for SGI Irix 4.0.5 added; junk in the ip
+	    packet to be sent for traces is not the real fun ;-)
+	    thanks to Jan L. Peterson (jlp@hamblin.math.byu.edu)
+
+	(*) Feb 1994: Linux 0.99.15 has fixed the icmp hdr offset bug.
+
+	(*) Jan 1994: fix for AIX added; thanks to Heino Gaertner
+	    <heino@fm.ing.tu-bs.de>
+
+	(*) Jan 1994: configure script added by
+	    <schoenw@ibr.cs.tu-bs.de> Juergen Schoenwaelder. 
+
+	(*) Nov 1993: fix for DEC Alpha added
+ 	    (submitted by <mosedale@genome.stanford.edu> Dan Mosedale)
+
+	(*) Oct 1993: fix for 386bsd added (submitted by
+	    <karl@sugar.NeoSoft.COM> Karl Lehenbauer)
+
+BUGS and TODO's:
+
+	(*) The code may need cleanups (interactive / bones / cmdline
+	    mode); better handling of ping/mask/tstamp/ttl jobs.
+
+	(*) The pkt-size seems to be buggy (too samll / too large)
+	    Sometimes size is the data-size, sometimes the
+	    complete paket size.
+
+	(*) The commandline interface should be more verbose and nicer
+	    formatted (eg. like ping).
+
+--
+(schoenfr@gaertner.de) Erik Schoenfelder

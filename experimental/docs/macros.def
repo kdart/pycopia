@@ -1,0 +1,34 @@
+.---------------------------------------------------------------------
+.-  macros.def    Common macro definitions
+.-
+.-  Written:  97/06/02  Pieter Hintjens <ph@imatix.com>
+.-  Revised:  97/12/16  Pieter Hintjens
+.---------------------------------------------------------------------
+
+.define LINEMAX	0
+
+.-  Macros for common HTML tags and constructions
+
+.macro TITLE  <TITLE>$*</TITLE>
+.macro H1     <H1>$*</H1>
+.macro H2     <H2>$*</H2>
+.macro H3     <H3>$*</H3>
+.macro H4     <H4>$*</H4>
+.macro H5     <H5>$*</H5>
+.macro H6     <H6>$*</H6>
+.macro HREF   <A HREF="$1">$+</A>
+
+.macro THEAD  <TABLE> -
+              <TR ALIGN=LEFT> -
+                  {<TH>$n</TH>} -
+              </TR>
+.macro TBODY  <TR ALIGN=LEFT>{<TD>$n</TD>}</TR>
+.macro TFOOT  </TABLE>
+
+.macro IMAGE  <IMG SRC="$1" WIDTH="&image_width("$1")" HEIGHT="&image_height("$1")" ALT="$+">
+.macro IMAGERIGHT  <IMG SRC="$1" WIDTH="&image_width("$1")" HEIGHT="&image_height("$1")" ALIGN=RIGHT ALT="$+">
+.macro IMAGELEFT  <IMG SRC="$1" WIDTH="&image_width("$1")" HEIGHT="&image_height("$1")" ALIGN=LEFT ALT="$+">
+
+.macro FIGURE <CENTER><IMG src="$1" ALT="$+"><P>Figure $(fignum): $+</P></CENTER>
+.macro FIGURERIGHT <IMG src="$1" ALT="$+" ALIGN=RIGHT><P>Figure $(fignum): $+</P>
+.macro FIGURELEFT <IMG src="$1" ALT="$+" ALIGN=LEFT><P>Figure $(fignum): $+</P>

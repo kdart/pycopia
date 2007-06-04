@@ -1,0 +1,81 @@
+#!/usr/bin/env python2.4
+"""
+dtd2py [-m mixinmodule] [-d <directory>] <DTDfile>...
+
+Converts the given DTD to a python form, and stores it in the site's dtds
+directory.
+
+The new dtds module will have the same base name as the DTD, but with
+dashes and dots converted to underscores.
+
+Options:
+    -m <modulename> -- specify a mixin module to load. If a class in this
+    module matches the DTD element name plus "Mixin" appended, then that class
+    will be inherited from in the generated element class.
+
+    -d <directory> -- specify the directory to output the new module to.
+
+"""
+
+import sys, os
+import getopt
+
+from pycopia.XML import DTD
+from pycopia.aid import Import
+from pycopia.dtds import USERDTDPATH, get_mod_file
+
+def compile_file(dtdfile, mixin, directory):
+    outfilename, doctype = get_mod_file(directory, dtdfile)
+    try:
+        outfile = open(outfilename, "w")
+        try:
+            dtdp = DTD.get_dtd_compiler(outfile, mixin, doctype)
+            dtdp.parse_resource(dtdfile)
+        finally:
+            outfile.close()
+    except:
+        os.unlink(outfilename)
+        print "COMPILE ERROR: while parsing:", dtdfile
+        import traceback
+        t, v, tb = sys.exc_info()
+        traceback.print_exception(t, v, tb)
+
+def compile_all(filelist, mixin, directory):
+    if len(filelist) == 1:
+        compile_file(filelist[0], mixin, directory)
+    else:
+        for dtdfile in filelist:
+            print "Compiling:", dtdfile
+            compile_file(dtdfile, mixin, directory)
+
+
+def main(argv):
+    mixin = None
+    directory = USERDTDPATH
+    try:
+        args, files = getopt.getopt(argv[1:], "m:d:")
+    except getopt.GetoptError, val:
+        print val
+        print __doc__
+        return
+    for opt, value in args:
+        if opt == "-m":
+            try:
+                mixin = Import(value)
+            except:
+                print "Warning: could not import mixin module"
+                mixin = None
+        elif opt == "-d":
+            directory = value
+
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
+
+    if files:
+        compile_all(files, mixin, directory)
+    else:
+        print __doc__
+
+
+main(sys.argv)
+

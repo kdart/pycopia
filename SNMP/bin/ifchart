@@ -1,0 +1,88 @@
+#!/usr/bin/python2.4
+# -*- coding: ascii -*-
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+# License: LGPL
+# Keith Dart <kdart@kdart.com>
+# $Id: ifchart,v 1.1 2005/07/25 21:25:16 kdart Exp $
+#
+
+import sys
+import gtk
+
+try:
+    import rtgraph
+except ImportError:
+    print >>sys.stderr, """The 'rtgraph' module is not installed. Obtain this from 
+    http://navi.cx/svn/misc/trunk/rtgraph/web/index.html
+    or run 'emerge dev-python/rtgraph' in Gentoo Linux."""
+    raise
+
+from pycopia.SNMP import SNMP
+from pycopia.mibs import IF_MIB
+
+class SNMPPortChannel(rtgraph.Channel):
+    rater = None
+    def getValue(self):
+        try:
+            self.rater.update(self._t)
+        except SNMPNoResponse:
+            return None
+        return self.rater.EWRA
+
+    def hasChanged(self, graph):
+        self._t = graph.lastUpdateTime
+
+
+def get_session(host, community):
+    sd = SNMP.sessionData(host)
+    sd.add_community(community, SNMP.RO)
+    return SNMP.new_session(sd)
+
+def get_channel(session, klass, port, color):
+    intf = klass(indexoid=[port])
+    intf.set_session(session)
+    rater = intf.get_ratecounter()
+    ch = SNMPPortChannel(color=color, name=klass.__name__)
+    ch.rater = rater
+    return ch
+
+
+
+def main(argv):
+    host = argv[1]
+    port = int(argv[2])
+    if len(argv) > 3:
+        community = argv[3]
+    else:
+        community = "public"
+    sess = get_session(host, community)
+
+    graph = rtgraph.HScrollLineGraph(
+        scrollRate = 2,
+        pollInterval = 1000,
+        size       = (384,128),
+        gridSize   = 32,
+        channels   = [get_channel(sess, IF_MIB.ifInUcastPkts, port, color=(1,0,0)), 
+                      get_channel(sess, IF_MIB.ifOutUcastPkts, port, color=(0,1,0))],
+        bgColor    = (0, 0, 0.3),
+        gridColor  = (0, 0, 0.5),
+        range      = (0, 3000),
+        )
+    graph.show()
+
+    frame = gtk.Frame()
+    frame.add(graph)
+    frame.set_shadow_type(gtk.SHADOW_OUT)
+    frame.show()
+
+    win = gtk.Window(gtk.WINDOW_TOPLEVEL)
+    win.set_title("%s port %s" % (host, port))
+    #win.set_decorated(gtk.FALSE)
+    #win.stick()
+    win.add(frame)
+    win.show()
+    win.connect("destroy", gtk.mainquit)
+
+    gtk.main()
+
+main(sys.argv)

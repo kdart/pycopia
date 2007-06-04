@@ -1,0 +1,59 @@
+<!-- xfdesktop-menu.dtd defines xfce4 desktop menu files. -->
+
+<!ENTITY % Boolean "(true|false)">
+
+<!ELEMENT xfdesktop-menu (app|separator|menu|title|include)?>
+
+<!ELEMENT menu (app|separator|menu|title|include)?>
+<!-- name="Name in menu" icon="iconfile" visible="true" -->
+<!ATTLIST menu
+name CDATA #REQUIRED
+icon CDATA #IMPLIED
+visible %Boolean; "true"
+>
+
+<!ELEMENT app EMPTY>
+<!-- name="Name" cmd="Command to run" term="false" icon="iconfile"  snotify="false" visible="true" -->
+<!ATTLIST app
+name CDATA #REQUIRED
+cmd CDATA #REQUIRED
+icon CDATA #IMPLIED
+term %Boolean; "false"
+snotify %Boolean; "false"
+visible %Boolean; "true"
+>
+
+<!ELEMENT separator EMPTY>
+<!-- visible="true" -->
+<!ATTLIST separator
+visible %Boolean; "true"
+>
+
+<!ELEMENT include EMPTY>
+<!-- type="file" src="menu2.xml" visible="true" -->
+<!-- type="system" style="simple" unique="true" -->
+<!ATTLIST include
+type (file|system) "file"
+src CDATA #IMPLIED
+style CDATA #IMPLIED
+unique %Boolean; "true"
+visible %Boolean; "true"
+>
+
+<!ELEMENT title EMPTY>
+<!-- title name="Name in menu" icon="iconfile" visible="true" -->
+<!ATTLIST title
+name CDATA #REQUIRED
+icon CDATA #IMPLIED
+visible %Boolean; "true"
+>
+
+<!ELEMENT builtin EMPTY>
+<!-- name="Quit" cmd="quit" icon="gnome-logout" -->
+<!ATTLIST builtin
+name CDATA #REQUIRED
+cmd CDATA #REQUIRED
+icon CDATA #IMPLIED
+>
+
+

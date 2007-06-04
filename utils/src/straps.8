@@ -1,0 +1,62 @@
+'\"
+'\" Copyright (c) 1994-1996 Technical University of Braunschweig.
+'\"
+'\" See the file "license.terms" for information on usage and redistribution
+'\" of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+'\" 
+.so man.macros
+.TH straps 8 "" Tnm "Tnm Tcl Extension"
+.BS
+'\" Note:  do not modify the .SH NAME line immediately below!
+.SH NAME
+straps \- A simple SNMP trap multiplexer.
+.SH SYNOPSIS
+.B straps
+[
+.I "port"
+]
+.BE
+
+.SH DESCRIPTION
+
+The \fBstraps\fR trap daemon listens on the snmp-trap port (usually
+port 162/udp) for incoming SNMP trap or inform messages and forwards
+them to all connected clients (like \fBscotty\fR). The optional
+\fIport\fR argument allows to use the straps daemon to forward
+messages received on a non standard SNMP trap port. However, port
+numbers below 1024 will be rejected.
+
+Clients connect to the \fBstraps\fR daemon by opening the AF_UNIX
+domain stream socket /tmp/.straps-\fIport\fR. Thus, the default
+AF_UNIX domain stream socket is named /tmp/.straps-162.
+
+Received messages are forwarded using the following format:
+
+.RS
+.TP 10
+4 byte
+IP address of the sender (network-byte-order).
+.TP
+2 byte
+Port number of the sender (network byte order).
+.TP
+4 byte
+Length of the trap message (host-byte-order).
+.TP
+n bytes
+The trap message itself.
+.RE
+
+The \fBstraps\fR daemon must be installed setuid root because normal
+operating systems require root permissions to open the standard SNMP
+trap port 162/udp. The \fBstraps\fR daemon rejects all \fIport\fR
+numbers below 1024 in order to protect the system security.
+
+.SH SEE ALSO
+scotty(1), tkined(1), Tnm(n)
+
+.SH AUTHORS
+Erik Schoenfelder <schoenfr@gaertner.de>
+.br
+Juergen Schoenwaelder <schoenw@cs.utwente.nl>
+.br

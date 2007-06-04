@@ -1,0 +1,23 @@
+#!/usr/bin/env python2.4
+
+"""pywhich <modname>
+Tell which Python module is imported.
+"""
+
+import sys
+
+def main(argv):
+    if len(argv) < 2:
+        print __doc__
+        return
+    for modname in argv[1:]:
+        try:
+            mod = __import__(modname)
+        except:
+            ex, val, tb = sys.exc_info()
+            print "%s (%s)" % (ex, val)
+            print "Could not import %r." % modname
+        else:
+            print "%15s : %s" % (modname, mod.__file__)
+
+main(sys.argv)

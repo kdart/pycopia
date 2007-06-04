@@ -1,0 +1,79 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+
+
+# User to run handler as. Main server must be run as root for this to have
+# any effect.
+USERNAME = "lighttpd"
+
+ADMINS = (
+    ('Your Name', 'yourname@yourdomain.biz'),
+)
+
+DATABASE_URL = ''
+DATABASE_ENGINE = 'postgresql'
+DATABASE_NAME = 'pycopia'
+DATABASE_USER = 'pycopia'
+DATABASE_PASSWORD = 'pycopia123'
+DATABASE_HOST = 'localhost'
+DATABASE_PORT = ''
+
+
+# Language code for this installation. All choices can be found here:
+# http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+LANGUAGE_CODE = 'en-us'
+
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = 'PYCOPkj3sdk4**#n=1s-xk@(b9%#39463flewrt*&(w23526^+'
+
+MIDDLEWARE_CLASSES = ()
+
+# Map pattern to handler functions. 
+LOCATIONMAP = (
+  (r"^/$", "nmsapps.base.views.main"),
+  (r"^/error/$", "nmsapps.base.views.error"),
+  (r"^/docs/$", "nmsapps.docs.views.main"),
+  (r"^/mibs/$", "nmsapps.mibs.views.main"),
+  (r"^/discover/$", "nmsapps.discover.views.main"),
+  (r"^/monitor/$", "nmsapps.monitor.views.main"),
+  (r"^/reports/$", "nmsapps.reports.views.main"),
+  (r'^/reports/(?P<report>\S+)/$', 'nmsapps.reports.views.reports'),
+  (r"^/selftest/$", "nmsapps.selftest.views.main"),
+  (r'^/selftest/testhandler/$', 'nmsapps.selftest.views.testhandler'),
+  (r'^/selftest/plot/$', 'graphs.testplot'),
+  (r'^/selftest/(?P<report>\S+)/$', 'nmsapps.selftest.views.reports'),
+    # aliases don't have a dot in the name.
+  (r'/media/css/(?P<name>\S+)', "css"),
+  (r'/media/js/(?P<name>\S+)', "js"),
+  (r'/media/images/(?P<name>\S+)', "images"),
+)
+
+DEFAULTNAV = (
+    # location                name in menu
+  ("nmsapps.base.views.main", "Main"),
+  ("nmsapps.docs.views.main", "Documentation"), 
+  ("nmsapps.mibs.views.main", "Mibs"), 
+  ("nmsapps.discover.views.main", "Discover"), 
+  ("nmsapps.monitor.views.main", "Monitor"), 
+  ("nmsapps.reports.views.main", "Reports"), 
+)
+
+
+ICONMAP = {
+# simplename     active         inactive (base state)
+#"xxx": ("icon_xxx_active.png", "icon_xxx_inactive.png"),
+  "default": (None, "icon_default_inactive.png"),
+  "edit": ("icon_edit_active.png", "icon_edit_inactive.png"),
+  "delete": ("icon_delete_active.png", "icon_delete_inactive.png"),
+  "activate": ("icon_activate_active.png", "icon_activate_inactive.png"),
+  "isactive": ("icon_isactive_active.png", "icon_isactive_inactive.png"),
+  "isinactive": ("icon_isinactive_active.png", "icon_isinactive_inactive.png"),
+  "unknown": ("icon_unknown_active.png", "icon_unknown_inactive.png"),
+  "plus": ("icon_plus_active.png", "icon_plus_inactive.png"),
+  "minus": ("icon_minus_active.png", "icon_minus_inactive.png"),
+  "alert": (None, "icon_alert_inactive.png"),
+}
+
+
+

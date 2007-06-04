@@ -1,0 +1,29 @@
+#!/usr/bin/python
+
+import sys
+from gtk import *
+from gnome.ui import *
+import pyglade
+
+widgetlist = pyglade.build._widgets.keys()
+widgetlist.sort()
+print widgetlist
+
+# create widget tree ...
+print "Reading tree..."
+wtree = pyglade.construct("gnomeined.glade")
+
+# if there is anything that needs to be added to the UI, we can access all
+# the widgets like this:
+print "Making Window..."
+try:
+	win = wtree.get_widget('Jordy')
+except: pass
+
+# we can connect to any of the signals named in the template:
+try:
+	wtree.connect('close_window', mainquit)
+except: pass
+
+print "entering mainloop..."
+mainloop()

@@ -1,0 +1,98 @@
+#!/usr/bin/python2.4 -tt
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+# -*- coding: ascii -*-
+# License: LGPL
+# Keith Dart <kdart@kdart.com>
+# $Id: pynms_install,v 1.1 2005/07/25 21:25:18 kdart Exp $
+
+"""
+Install and set up the pyNMS environment.
+
+"""
+
+
+import sys, os
+import compileall
+from errno import EEXIST
+
+def compile_modules():
+    libdir = os.path.join(os.environ["PYNMS_HOME"], "lib")
+    compileall.compile_dir(libdir)
+    if __debug__:
+        os.system("%s -OO %s" % (sys.executable, os.path.join(os.environ["PYNMS_HOME"], "sbin", "pynms_install")))
+
+def hardlink_files():
+    bindir = os.path.join(os.environ["PYNMS_HOME"], "bin")
+    os.chdir(bindir)
+    for fname in ["dos2mac",  "dos2unix",  "mac2dos",  "mac2unix",  "unix2mac"]:
+        try:
+            os.link("unix2dos", fname)
+        except OSError, why:
+            if why[0] == EEXIST:
+                pass
+            else:
+                raise
+    for fname in ["httpput",  "httppost"]:
+        try:
+            os.link("httpget", fname)
+        except OSError, why:
+            if why[0] == EEXIST:
+                pass
+            else:
+                raise
+
+def build_ISO():
+    import ISO
+    for modname in ("iso3166", "iso639a"):
+        FILE = os.path.join(ISO.__path__[0], "%s.py" % (modname,))
+        exec "ISO.build_%s(%r)" % (modname, FILE)
+    # to force compilation
+    import ISO.iso639a, ISO.iso3166
+
+def build_DTDs():
+    pass
+
+# XXX this requires root
+def install_system():
+    import glob, shutil
+    os.system("mkdir -p /etc/pynms")
+    for src in glob.glob(os.path.join(os.environ["PYNMS_HOME"], "etc", "*.example")):
+        shutil.copy(src, "/etc/pynms")
+
+def build_tools():
+    # install utilities
+    os.chdir(os.path.join(os.environ["PYNMS_HOME"], "src", "utils"))
+    os.system("sh configure")
+    os.system("make")
+    os.system("make install")
+    os.system("make sinstall")
+    # install new readline module
+
+def install_modules():
+    os.chdir(os.path.join(os.environ["PYNMS_HOME"], "src", "Modules"))
+    os.system("%s setup.py install" % (sys.executable,))
+    # remove original modules.
+    #for name in ("readline", "mmap", "fcntl"):
+    for name in ("mmap", "fcntl"):
+        try:
+            os.unlink("%s/lib/python%s/lib-dynload/%s.so" % (sys.prefix, 
+                         "%s.%s" % tuple(sys.version_info[:2]), name))
+        except OSError:
+            pass
+
+
+def main(argv):
+    compile_modules()
+    if __debug__: # non-optimized mode
+        hardlink_files()
+        build_ISO()
+        build_DTDs()
+        if os.getuid() == 0:
+            install_system()
+            build_tools()
+            install_modules()
+
+
+
+main(sys.argv)
+

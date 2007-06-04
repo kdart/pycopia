@@ -1,0 +1,28 @@
+# 1 
+smbaddress	"SMBAddress for this port."	None	SMBAddress
+# 2
+strt	"Starting utilization or % wire rate. Float between 0 and 100 (value must be nonzero). "	100	Float
+# 3 
+Step	"Test step rate. Float between 0 and 100 (a zero value is permissible). * "	0	Float
+# 4 
+Spd	"Portspeed."	"oc3"	("oc3", "oc12", "oc48", "oc192")
+# 4a 
+Sig	"Optional. Signaling protocol used for MPLS switching. Leaving it out effectively disables RSVT-TE signaling for the port."	None	"RSVPTE"
+# 4b 
+php	"Optional. Use this flag to enable penultimate hop behavior on this port."	None	"php"
+# 5 
+Burst	"Burst size. Any non-zero integer. "	1	Integer
+# 5a
+SetName	"Name of POS setting."	None	String
+# 5b
+F	"Fill pattern."	None	String
+# 6
+IPaddr	"Port IP address. Any valid IP address. "	"192.168.1.2"	IPAddress
+# 7
+gatewy	"Gateway. Any valid IP address."	"192.168.1.1"	IPAddress
+# 7a
+MPLS_Neighbor	"IP Optional. The IP address of the MPLS neighbor."	None	IPAddress
+# 8
+netmask	"Netmask. Any valid IP address. "	"255.255.255.0"	IPAddress
+# 9
+Name	"Port name (user-defined). Any valid string."	None	String

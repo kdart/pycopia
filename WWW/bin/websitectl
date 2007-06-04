@@ -1,0 +1,232 @@
+#!/usr/bin/python2.4 -OO
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+# 
+#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#
+#    This library is free software; you can redistribute it and/or
+#    modify it under the terms of the GNU Lesser General Public
+#    License as published by the Free Software Foundation; either
+#    version 2.1 of the License, or (at your option) any later version.
+#
+#    This library is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
+
+"""
+Master contoller of web site.
+This controller also handles the lighttpd process. So if you have it
+enabled in your site's init.d system you should disable it if they are
+configured to listen on the same port.
+
+"""
+
+import sys
+import os
+import getopt
+
+from pycopia.WWW import serverconfig
+from pycopia.aid import curry
+
+
+def start(config):
+    if config.DAEMON:
+        from pycopia import daemonize
+        from pycopia import logfile
+        lf = logfile.ManagedStdio(config.LOGFILENAME)
+        daemonize.daemonize(lf, pidfile=config.PIDFILE)
+    else:
+        lf = sys.stdout
+        fo = file(config.PIDFILE, "w")
+        fo.write("%s\n" % (os.getpid(),))
+        fo.close()
+    start_proc_manager(config, lf)
+
+def start_proc_manager(config, logfile):
+    import signal
+    from pycopia import proctools
+    from pycopia import scheduler
+    from pycopia import asyncio
+
+    def _quithandler(pm, sig, stack):
+        for proc in pm.getprocs():
+            proc.kill()
+            proc.wait()
+        if os.path.exists(config.PIDFILE):
+            os.unlink(config.PIDFILE)
+        raise KeyboardInterrupt
+
+    pm = proctools.get_procmanager()
+    signal.signal(signal.SIGINT, curry(_quithandler, pm))
+    signal.signal(signal.SIGTERM, curry(_quithandler, pm))
+    for name, serverlist in config.VHOSTS.items():
+        for servername in serverlist:
+            print "Starting %s for %s." % (servername, name)
+            p = pm.spawnpipe("%s -n" % (servername,), persistent=True, logfile=logfile)
+            asyncio.poller.register(p)
+            scheduler.sleep(1.0) # give it time to init...
+    if config.USEFRONTEND:
+        lighttpd = proctools.which("lighttpd")
+        ltconfig = "/etc/pynms/lighttpd/lighttpd.conf"
+        pm.spawnpipe("%s -D -f %s" % (lighttpd, ltconfig), persistent=True, logfile=logfile)
+    try:
+        while 1:
+        #    proctools.pause()
+            asyncio.poller.loop()
+            for proc in pm.getprocs():
+                if proc.readable():
+                    print proc.read(4096)
+    except KeyboardInterrupt:
+        asyncio.poller.unregister_all()
+
+
+def stop(config):
+    import signal
+    if os.path.exists(config.PIDFILE):
+        pid = int(open(config.PIDFILE).read().strip())
+        os.kill(pid, signal.SIGINT)
+
+
+def status(config):
+    from pycopia.OS import procfs
+    if os.path.exists(config.PIDFILE):
+        pid = int(open(config.PIDFILE).read().strip())
+        s = procfs.ProcStat(pid)
+        if s and s.command.find(config.SERVERNAME) >= 0:
+            print "Process manager running (pid %s)." % (pid,)
+            return 0
+    print "Process manager not running."
+    return 1
+
+def update(config):
+    import shutil
+    from pycopia import passwd
+    user = passwd.getpwnam(config.SITEOWNER)
+    for vhost in config.VHOSTS.keys():
+        base = os.path.join(config.SITEROOT, vhost)
+        if not os.path.isdir(base):
+            os.mkdir(base)
+            for subdir in ("htdocs", "media", "media/images", "media/css", "media/js"):
+                path = os.path.join(base, subdir)
+                os.makedirs(path)
+            shutil.copy(os.environ["PYNMS_HOME"]+"/www/htdocs/index.xhtml", 
+                                os.path.join(base, "htdocs"))
+            shutil.copy(os.environ["PYNMS_HOME"]+"/www/media/css/default.css", 
+                                os.path.join(base, "media/css"))
+            shutil.copy(os.environ["PYNMS_HOME"]+"/www/media/css/base.css", 
+                                os.path.join(base, "media/css"))
+            os.symlink(os.environ["PYNMS_HOME"]+"/www/media/js/pynms.js", 
+                                os.path.join(base, "media/js/base.js"))
+            os.symlink(os.environ["PYNMS_HOME"]+"/www/media/js/MochiKit.js", 
+                                os.path.join(base, "media/js/MochiKit.js"))
+            os.system("chown -R %s:%s %s " % (user.uid, user.gid, base))
+
+
+def robots(config):
+    from pycopia import passwd
+    user = passwd.getpwnam(config.SITEOWNER)
+    for vhost, scripts in config.VHOSTS.items():
+        rname = os.path.join(config.SITEROOT, vhost, "htdocs", "robots.txt")
+        fo = open(rname, "w")
+        fo.write(_get_robots_txt(scripts))
+        fo.close()
+        os.chown(rname, user.uid, user.gid)
+
+
+def check(config):
+    from pycopia import proctools
+    pm = proctools.get_procmanager()
+    lighttpd = proctools.which("lighttpd")
+    ltconfig = "/etc/pynms/lighttpd/lighttpd.conf"
+    proc = pm.spawnpipe("%s -p -f %s" % (lighttpd, ltconfig))
+    out = proc.read()
+    es = proc.wait()
+    if es:
+        print out
+    else:
+        print "Error: %s" % (es,)
+
+
+def _get_robots_txt(scripts):
+    s = ["User-agent: *"]
+    for name in scripts:
+        s.append("Disallow: /%s" % (name,))
+    s.append("")
+    return "\n".join(s)
+
+
+def main(argv):
+    _doc = """Main server controller.
+
+    %s [-?hnN] [-l <logfilename>] [-p <pidfilename>] [<command>]
+
+    Options:
+     -? or -h   Show this help.
+     -l  override log file name. 
+     -p  override pid file name. 
+     -n  do NOT become a daemon when starting.
+     -N  do NOT start the web server front end (lighttpd).
+
+    Where command is one of:
+        start  - start all web services and virtual hosts
+        stop   - stop a running server
+        status - status of server
+        update - create new vhost tree after editing website.conf
+        robots - update robots.txt files.
+    """
+    servername = os.path.basename(argv[0])
+    daemonize = True
+    frontend = True
+    logfilename = "/var/log/%s.log" % (servername,)
+    pidfilename = "/var/run/%s.pid" % (servername,)
+    try:
+        optlist, args = getopt.getopt(argv[1:], "?hnNl:p:")
+    except getopt.GetoptError:
+        print main._doc % (servername,)
+        return
+
+    for opt, optarg in optlist:
+        if opt in ("-?", "-h"):
+            print main._doc % (servername,)
+            return 2
+        elif opt == "-l":
+            logfilename = optarg
+        elif opt == "-n":
+            daemonize = False
+        elif opt == "-N":
+            frontend = False
+        elif opt == "-p":
+            pidfilename = optarg
+
+    config = serverconfig.get_site_config()
+
+    config.SERVERNAME = servername
+    config.LOGFILENAME = logfilename
+    config.PIDFILE = pidfilename
+    config.DAEMON = daemonize
+    config.USEFRONTEND = frontend
+    config.ARGV = args
+
+    if not args:
+        return status(config)
+    cmd = args[0]
+
+    if cmd.startswith("stat"):
+        return status(config)
+    elif cmd.startswith("star"):
+        return start(config)
+    elif cmd.startswith("stop"):
+        return stop(config)
+    elif cmd.startswith("upd"):
+        return update(config)
+    elif cmd.startswith("rob"):
+        return robots(config)
+    elif cmd.startswith("che"):
+        return check(config)
+    else:
+        print main._doc % (servername,)
+        return 2
+
+
+sys.exit(main(sys.argv))
+

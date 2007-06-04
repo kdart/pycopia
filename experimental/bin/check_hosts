@@ -1,0 +1,22 @@
+#!/usr/bin/env python2.4
+
+"""
+Prints a list of hosts that are reachable from the selected network. The
+network must have been previously scanned with pingsweep.
+
+"""
+
+import sys, nettools
+
+def IF(test, tv, fv=None):
+	if test:
+		return tv
+	else:
+		return fv
+
+if len(sys.argv) > 1:
+	reachables = nettools.check_hosts(sys.argv[1])
+	reachables.sort()
+	for host, reachable in reachables:
+		print "%-15s  %s" % (host, IF(reachable, "reachable", "NOT reachable"))
+

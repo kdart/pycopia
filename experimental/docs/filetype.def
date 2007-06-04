@@ -1,0 +1,51 @@
+.---------------------------------------------------------------------
+.-  filetype.def    Define file type names
+.-
+.-  Written:        96/04/03   Pieter Hintjens
+.-  Revised:        96/04/03   Pieter Hintjens
+.-
+.-  This file defines the macros that translate file extensions into
+.-  meaningful terms.  You will want to list all file extensions that
+.-  occur on your http site.  These macros are used to build directory
+.-  listings by the construct $($(DIR_EXT)) -- $(DIR_EXT) is the file
+.-  extension including the dot.  The file extension can itself contain
+.-  dots.  File extensions are always converted to lower-case.
+.---------------------------------------------------------------------
+
+.-  Textual file types
+.define .txt        Text file
+.define .htm        HTML document
+.define .html       HTML document
+
+.-  Archive file types
+.define .zip        ZIP archive
+.define .lzh        LHA archive
+.define .tgz        Gzip/tar archive
+.define .taz        Gzip/tar archive
+.define .tar.gz     Gzip/tar archive
+
+.-  Image file types
+.define .gif        GIF image
+.define .bmp        BMP image
+.define .jpg        JPEG image
+.define .jpeg       JPEG image
+
+.-  Multimedia file types
+.define .mpg        MPEG movie
+.define .mpeg       MPEG movie
+
+.-  Executable file types
+.define .com        MS-DOS Command
+.define .exe        Executable
+.define .dll        Windows DLL
+.define .sh         UNIX script
+
+.-  Miscellaneous file types
+.define .NONE       No extension
+.define .me         Readme file
+.define .sys        DOS Driver
+
+.- Applix types
+.define .ag         Applix Graphics
+.define .aw         Applix Words
+.define .as         Applix Spreadsheet

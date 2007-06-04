@@ -1,0 +1,349 @@
+<!-- DTD for LOGML 1.0.0 -->
+<!-- logml.dtd -->
+<!-- Date 06-25-2001 -->
+<!-- Authors: John Punin and Gerard Uffelman-->
+<!-- Computer Science Department -->
+<!-- Rensselaer Polytechnic Institute -->
+
+
+<!--ENTITY REFERENCES-->
+<!--================================================================-->
+
+<!-- Standard XML Namespace attribute -->
+<!ENTITY % nds 'xmlns'>
+
+<!--Boolean Type-->
+<!ENTITY % boolean.type "(0|1)">
+
+<!--Positive Number Type-->
+<!ENTITY % number.type "NMTOKEN">
+
+<!--Name Token Type-->
+<!ENTITY % nmtoken.type "NMTOKEN">
+
+<!--Identifier Type-->
+<!ENTITY % id.type "NMTOKEN">
+
+<!--String Type-->
+<!ENTITY % string.type "CDATA">
+
+<!--Date Type-->
+<!ENTITY % date.type "%string.type;">
+
+<!--URI Type-->
+<!ENTITY % uri.type "%string.type;">
+
+<!-- Global Attributes -->
+<!ENTITY % global-atts "id %number.type; #IMPLIED
+                        name %string.type; #IMPLIED
+			label %string.type; #IMPLIED">
+
+
+<!-- Global Required Attributes -->
+<!ENTITY % global-req-atts "id %number.type; #REQUIRED
+                        name %string.type; #IMPLIED
+			label %string.type; #IMPLIED">
+
+
+<!-- Standard XML Attributes -->
+<!ENTITY % xml-atts "%nds; %uri.type; #FIXED 'http://www.cs.rpi.edu/LOGML' 
+                        xml:lang NMTOKEN #IMPLIED
+                        xml:space (default | preserve) #IMPLIED">
+
+<!-- XGMML Attributes -->
+<!ENTITY %  xgmml-atts "weight	   %number.type;      #IMPLIED">
+
+<!-- General Access Log Attributes -->
+<!ENTITY %  log-acc-atts "access_count     %number.type;       #IMPLIED
+                          bytes            %number.type;       #IMPLIED
+		          html_pages       %number.type;       #IMPLIED">
+
+<!-- General Hit Log Attributes -->
+<!ENTITY %  log-hit-atts "hits	           %number.type;       #IMPLIED
+                          bytes            %number.type;       #IMPLIED
+		          html_pages       %number.type;       #IMPLIED">
+
+<!-- General Count Log Attributes -->
+<!ENTITY %  log-count-atts "total_count	     %number.type;       #IMPLIED
+                            bytes            %number.type;       #IMPLIED
+			    html_pages       %number.type;       #IMPLIED">
+
+
+<!-- Counter of Elements Attribute -->
+<!ENTITY %  count-att "count           %number.type;       #IMPLIED">
+
+<!--ROOT ELEMENT-->
+<!--================================================================-->
+
+<!ELEMENT logml (graph, hosts?, domains?, directories?, userAgents?, hostReferers?, referers?, keywords*, summary?, userSessions?)>
+<!ATTLIST logml
+          %global-atts;
+	  %xml-atts;
+          start_date     %date.type;          #REQUIRED
+	  end_date       %date.type;          #REQUIRED
+>
+
+<!--WEBSITE INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT graph (att*, (node, edge)*)>
+<!ATTLIST graph
+          %global-atts;
+	  directed      %boolean.type;	     #IMPLIED
+>
+
+<!ELEMENT node (att*)>
+<!ATTLIST node
+          %global-req-atts;
+	  %xgmml-atts;
+	  hits             %number.type;      #IMPLIED
+	  ehits		   %number.type;      #IMPLIED
+	  indp		   %boolean.type;     #IMPLIED
+>
+
+<!ENTITY % edge-atts "source %nmtoken.type; #REQUIRED
+		      target %nmtoken.type; #REQUIRED">
+
+<!ELEMENT edge (att*)>
+<!ATTLIST edge
+          %global-atts;
+	  %xgmml-atts;
+	  %edge-atts;
+	  hits            %number.type;	      #IMPLIED
+	  indp		  %boolean.type;      #IMPLIED
+>
+
+<!ELEMENT att (att*)>
+<!ATTLIST att
+          %global-atts;
+	  value	           %string.type;      #IMPLIED
+>
+
+
+<!--HOST INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT hosts (host+)>
+<!ATTLIST hosts
+          %count-att;
+>
+
+<!ELEMENT host EMPTY>
+<!ATTLIST host
+          %global-atts;
+	  ip		   %string.type;       #IMPLIED
+	  is_internal	   %boolean.type;      #IMPLIED 
+	  %log-acc-atts;
+>
+
+<!--DOMAIN INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT domains (domain+)>
+<!ATTLIST domains
+          %count-att;
+>
+
+<!ELEMENT domain EMPTY>
+<!ATTLIST domain
+          %global-atts;
+	  %log-acc-atts;
+>
+
+<!--DIRECTORY INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT directories (directory+)>
+<!ATTLIST directories
+          %count-att;
+>
+
+<!ELEMENT directory EMPTY>
+<!ATTLIST directory
+          %global-atts;
+	  total_count	     %number.type;       #IMPLIED
+	  %log-acc-atts;
+>
+
+
+<!--USER AGENT INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT userAgents (userAgent+)>
+<!ATTLIST userAgents 
+          %count-att;
+>
+
+<!ELEMENT userAgent EMPTY>
+<!ATTLIST userAgent
+          %global-atts;
+	  %log-acc-atts;
+	  is_spider	   %boolean.type;      #IMPLIED
+>            
+
+
+<!--REFERER INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT referers (referer+)>
+<!ATTLIST referers
+          %count-att;
+>
+
+<!ELEMENT referer EMPTY>
+<!ATTLIST referer
+          %global-atts;
+	  target	     %nmtoken.type;    #IMPLIED
+	  %log-acc-atts;
+	  is_internal	     %boolean.type;    #IMPLIED 
+>
+
+
+<!ELEMENT hostReferers (hostReferer+)>
+<!ATTLIST hostReferers
+          %count-att;
+>
+
+<!ELEMENT hostReferer EMPTY>
+<!ATTLIST hostReferer
+          %global-atts;
+	  %log-acc-atts;
+	  is_search_engine   %boolean.type;    #IMPLIED
+>
+
+
+<!--KEYWORD INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT keywords (keyword+)>
+<!ATTLIST keywords 
+	  search_engine_name	 %string.type;	   #IMPLIED
+	  search_count		 %number.type;	   #IMPLIED
+          %count-att;
+>
+
+<!ELEMENT keyword EMPTY>
+<!ATTLIST keyword 
+          %global-atts;
+	  total_count	     %number.type;       #IMPLIED
+>
+
+
+<!--GENERAL STATISTICS INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT summary ((att | httpCode | httpMethod | httpVersion)*, dateStat?)>
+<!ATTLIST summary
+          requests                      %number.type;     #IMPLIED
+	  sessions		        %number.type;     #IMPLIED
+	  bytes		                %number.type;     #IMPLIED
+	  html_pages	                %number.type;     #IMPLIED
+	  nhtml_pages		        %number.type;     #IMPLIED
+	  inline_objects	        %number.type;     #IMPLIED
+	  hyperlink_html	        %number.type;     #IMPLIED
+	  hyperlink_nhtml	        %number.type;     #IMPLIED
+	  html_entry_pages              %number.type;     #IMPLIED
+	  nhtml_entry_pages	        %number.type;     #IMPLIED
+	  unique_sites		        %number.type;     #IMPLIED
+	  unique_host_referers	        %number.type;     #IMPLIED
+	  unique_se_referers	        %number.type;     #IMPLIED
+	  unique_external_url_referers  %number.type;     #IMPLIED
+	  unique_internal_url_referers  %number.type;     #IMPLIED
+	  unique_user_agents	        %number.type;     #IMPLIED
+	  requests_hour		        %number.type;     #IMPLIED
+	  requests_day		        %number.type;     #IMPLIED
+	  kbytes_day		        %number.type;     #IMPLIED
+	  kbytes_hour		        %number.type;     #IMPLIED
+	  searches		        %number.type;     #IMPLIED
+	  unique_keywords	        %number.type;     #IMPLIED
+>
+
+<!ELEMENT httpCode EMPTY>
+<!ATTLIST httpCode 
+          code	           %number.type;       #REQUIRED
+          %global-atts;
+	  %log-count-atts;
+>
+
+<!ELEMENT httpMethod EMPTY>
+<!ATTLIST httpMethod
+          %global-atts;
+	  %log-count-atts;
+>
+
+<!ELEMENT httpVersion EMPTY>
+<!ATTLIST httpVersion
+          %global-atts;
+	  %log-count-atts;
+>
+
+
+<!ELEMENT dateStat (monthStat | dayStat | hourStat)+>
+
+<!ELEMENT monthStat EMPTY>
+<!ATTLIST monthStat 
+          month             %nmtoken.type;     #REQUIRED
+	  %log-hit-atts;
+>
+
+<!ELEMENT dayStat EMPTY>
+<!ATTLIST dayStat
+          day               %nmtoken.type;     #REQUIRED
+	  %log-hit-atts;
+>
+
+<!ELEMENT hourStat EMPTY>
+<!ATTLIST hourStat
+	  hour              %nmtoken.type;     #REQUIRED
+	  %log-hit-atts;
+>
+
+<!--USER SESSION INFORMATION-->
+<!--================================================================-->
+
+<!ELEMENT userSessions (userSession+)>
+<!ATTLIST userSessions
+          %count-att;
+	  max_edges	     %number.type;     #IMPLIED
+	  min_edges	     %number.type;     #IMPLIED
+>
+
+<!ELEMENT userSession (path)>
+<!ATTLIST userSession
+          %global-atts;
+	  ureferer	     %uri.type;        #IMPLIED
+	  entry_page	     %uri.type;	       #IMPLIED
+	  start_time	     %date.type;       #IMPLIED
+          access_count       %number.type;     #IMPLIED
+>
+
+<!ELEMENT path (uedge+)>
+<!ATTLIST path
+          %count-att;
+>
+
+<!ELEMENT uedge EMPTY>
+<!ATTLIST uedge
+          %edge-atts;
+	  utime           %date.type;         #IMPLIED
+>
+
+<!--================================================================-->
+<!--END LOGML DTD-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

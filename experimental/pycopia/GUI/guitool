@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+import GUImain
+
+UI = GUImain.MapWindow()
+UI.mainloop()
+

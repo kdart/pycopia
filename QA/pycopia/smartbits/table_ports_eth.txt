@@ -1,0 +1,36 @@
+#1 
+smbaddress	"SMBAddress object for this port."	None	SMBAddress
+#2 
+W	"Utilization or %wire rate. Float between 0 and 100 (value must be nonzero). "	100	Float
+#3 
+St	"Test step rate. Float between 0 and 100 (a zero value is permissible)."	0	Float
+#4 
+Sp	"Port speed."	10	Integer
+#5 
+D	"Duplex.  ('H' or 'F')"	"F"	("H", "F")
+#5a 
+AutoNg	"Auto negotiation between the port and DUT."	None	("A",None) 
+#5b 
+Sig	"Optional. Signaling protocol used for MPLS switching. This is an optional argument. Leaving it out effectively disables RSVT-TE signaling for the port. If you are sending labeled flows (LIP, LUDP), RSVP-TE signaling must be turned on for at least the transmit port."	None	("RSVPTE", None)
+#5c 
+php	"Optional. Use this flag to enable penultimate hop behavior on this port."	None	("php", None)
+#6 
+B	"Burst size."	1	Integer 
+#6a 
+F	"Fill pattern. Name of a fill pattern defined in an index statement. This is an optional argument. If it is not specified, the defaults are used."	None	String
+#7 
+A	"Address resolution (training) for DUT. L2S Layer 2 switch. L3S Layer 3 ARP."	"L3S"	("L3S", "L2S")
+#7a 
+MAC	"Optional argument. Port MAC address (a port on a module). This MAC address will not appear in any flows. For most purposes, it should not be specified, since there is a default: C.D.2.2.2.<port>."	None	MACAddress
+#8 
+IP	"Port IP address. Any valid IP address."	"192.168.1.2"	IPAddress
+#8a 
+Vid	"VLAN ID for default subnet on this port. This argument is optional. If it is not specified, the default subnet on the port will be untagged."	None	Integer
+#9 
+G	"Gateway. Any valid IP address. "	"192.168.1.1"	IPAddress
+#9a 
+MPLS	"Neighbor IP Optional. The IP address of the MPLS neighbor. If this argument is omitted, the gateway IP address specified on the port line is used."	None	String
+#10 
+N	"Netmask. Any valid IP address. "	"255.255.255.0"	IPAddress
+#11 
+Name	"Port name (user-defined). Any valid string."	None	String

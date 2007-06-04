@@ -1,0 +1,5 @@
+# python basic config
+
+# server IP of Pyro name server. The value None means use broadcast.
+nameserver = None
+
