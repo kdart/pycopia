@@ -34,9 +34,8 @@ PACKAGES = [
 "debugger",
 "process",
 "utils",
-"vim",
-"mibs",
 "SMI",
+"mibs",
 "SNMP",
 "storage",
 "QA",
@@ -44,6 +43,7 @@ PACKAGES = [
 "audio",
 "XML",
 "WWW",
+"vim",
 ]
 
 
