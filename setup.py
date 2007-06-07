@@ -20,6 +20,10 @@ Commands:
  sdist
  register
  publish
+ build
+ install
+
+NOTE: install requires sudo to be configured for you.
 
 """
 
@@ -47,22 +51,31 @@ PACKAGES = [
 ]
 
 
-def _do_commands(name, cmds):
+def _do_commands(name, cmds, root):
+    if root:
+        sudo = "sudo "
+    else:
+        sudo = ""
     os.chdir(name)
     try:
-        os.system("python setup.py %s" % (" ".join(cmds),))
+        os.system("%spython setup.py %s" % (sudo, " ".join(cmds)))
     finally:
         os.chdir("..")
 
-
 def do_sdist(name):
-    _do_commands(name, ["sdist"])
+    _do_commands(name, ["sdist"], False)
+
+def do_build(name):
+    _do_commands(name, ["build"], False)
 
 def do_register(name):
-    _do_commands(name, ["register"])
+    _do_commands(name, ["register"], False)
 
 def do_publish(name):
-    _do_commands(name, ["sdist", "upload"])
+    _do_commands(name, ["sdist", "upload"], False)
+
+def do_install(name):
+    _do_commands(name, ["install"], True)
 
 
 def main(argv):
