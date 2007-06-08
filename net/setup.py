@@ -9,12 +9,15 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-net"
-VERSION = "0.9"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-process>=0.9', 'pycopia-utils>=0.9'],
+    install_requires = ['pycopia-process>=0.9,==dev', 'pycopia-utils>=0.9,==dev'],
     scripts = glob("bin/*"), 
     test_suite = "test.NetTests",
 
@@ -28,7 +31,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia networks",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: System :: Networking",

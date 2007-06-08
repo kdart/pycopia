@@ -21,11 +21,15 @@ ez_setup.use_setuptools()
 from setuptools import setup, find_packages
 from glob import glob
 
-VERSION = "0.9"
+NAME = "pycopia-experimental"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 
 setup(
-    name = "pycopia", version = VERSION,
+    name = NAME, version = VERSION,
     #packages = find_packages(),
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
@@ -46,7 +50,7 @@ setup(
     license = "LGPL",
     keywords = "framework web CLI network SNMP SMI XML XHTML QA automation",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://pycopia.net/pub/pycopia-%s.tar.gz" % VERSION,
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
     classifiers = [
        "Operating System :: POSIX", 
        "Intended Audience :: Developers",

@@ -11,8 +11,10 @@ ez_setup.use_setuptools()
 from setuptools import setup, Extension 
 
 NAME = "pycopia-utils"
-VERSION = "0.9"
+VERSION = "1.0a1"
 
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 if sys.version_info[:2] < (2, 5):
 # The readline and mmap modules here are copies of the Python 2.5 modules.
@@ -35,7 +37,7 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
     ext_modules=extensions,
-    install_requires = ['pycopia-process>=0.9'],
+    install_requires = ['pycopia-process>=0.9,==dev'],
     test_suite = "test.UtilsTests",
 
     description = "Pycopia helper programs.",
@@ -50,7 +52,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@dartworks.biz",
     keywords = "pycopia framework ping",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: System :: Networking :: Monitoring",

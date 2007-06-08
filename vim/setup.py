@@ -11,7 +11,10 @@ from pycopia import proctools
 from glob import glob
 
 NAME = "pycopia-vim"
-VERSION = "0.9"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 # Get the VIM value from vim, which is were we need to put the .vim files.
 # There's got to be a better way..., but this screen-scraping program
@@ -58,7 +61,7 @@ setup (name=NAME, version=VERSION,
     packages = ["pycopia", "pycopia.vimlib"],
     test_suite = "test.VimTests",
     data_files = datafiles,
-    install_requires = ['pycopia-process>=0.9', 'pycopia-WWW>=0.9'],
+    install_requires = ['pycopia-process>=0.9,==dev', 'pycopia-WWW>=0.9,==dev'],
 
     description = "Extend Vim with Python helpers for Python IDE functionality.",
     long_description = """Extend Vim with Python helpers for Python IDE functionality.
@@ -70,7 +73,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia vim framework",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Intended Audience :: Developers"],

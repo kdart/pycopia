@@ -9,7 +9,10 @@ from glob import glob
 from setuptools import setup
 
 NAME = "pycopia-audio"
-VERSION = "0.9"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
@@ -17,7 +20,7 @@ setup (name=NAME, version=VERSION,
     scripts =glob("bin/*"), 
     data_files=[('/etc/pycopia', glob("etc/*.py") + glob("etc/*.example"))],
     # Also requires the mgetty/vgetty software installed on your system.
-    install_requires = ['pycopia-process>=0.9'],
+    install_requires = ['pycopia-process>=0.9,==dev'],
     test_suite = "test.AudioTests",
 
     description = "Audio and telephony modules for Python.",
@@ -33,7 +36,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia audio framework",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: Multimedia :: Sound/Audio :: Capture/Recording",

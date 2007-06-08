@@ -10,12 +10,15 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-WWW"
-VERSION = "0.9.2"
+VERSION = "1.0a1"
+
+DNAME = NAME.split("-", 1)[-1]
+ENAME = NAME.replace("-", "_")
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-XML>=0.9.1', 'simplejson>=0.5'],
+    install_requires = ['pycopia-XML>=0.9.1,==dev', 'simplejson>=0.5'],
     data_files = [
         ('/etc/pycopia', glob("etc/*.example")),
         ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
@@ -37,7 +40,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia WWW framework XHTML FCGI WSGI",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: CGI Tools/Libraries",

@@ -9,14 +9,17 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-QA"
-VERSION = "0.9"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
     # needs Pyro
-    #install_requires = ['pycopia-storage>=0.9', 'pycopia-CLI>=0.9', 'Pyro>=3.5'],
-    install_requires = ['pycopia-storage>=0.9', 'pycopia-CLI>=0.9'],
+    #install_requires = ['pycopia-storage>=0.9,==dev', 'pycopia-CLI>=0.9,==dev', 'Pyro>=3.5'],
+    install_requires = ['pycopia-storage>=0.9,==dev', 'pycopia-CLI>=0.9,==dev'],
     data_files = [
         ('/etc/pycopia', glob("etc/*.dist")),
     ],
@@ -33,7 +36,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@dartworks.biz",
     keywords = "pycopia QA framework",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: Software Development :: Quality Assurance",

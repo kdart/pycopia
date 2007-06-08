@@ -8,12 +8,15 @@ ez_setup.use_setuptools()
 from setuptools import setup
 
 NAME = "pycopia-CLI"
-VERSION = "0.9"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
-    install_requires = ['pycopia-aid>=0.9'],
+    install_requires = ['pycopia-aid>=0.9,==dev'],
     test_suite = "test.CLITests",
 
     description = "Pycopia framework for constructing POSIX/Cisco style command line interface tools.",
@@ -27,7 +30,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia CLI framework",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: System :: Networking :: Monitoring",

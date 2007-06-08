@@ -8,7 +8,10 @@ from setuptools import setup
 from glob import glob
 
 NAME = "pycopia-core"
-VERSION = "0.9.7"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
@@ -20,7 +23,7 @@ setup (name=NAME, version=VERSION,
     "pycopia.OS.Linux.proc",
     "pycopia.OS.Linux.proc.net",
     ],
-    install_requires = ['pycopia-aid>=0.9.4'],
+    install_requires = ['pycopia-aid>=0.9.4,==dev'],
     package_data = {
         '': ['*.txt', '*.doc'],
     },
@@ -40,7 +43,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia framework core Linux",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Intended Audience :: Developers"],

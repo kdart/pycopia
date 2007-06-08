@@ -10,13 +10,16 @@ from glob import glob
 from setuptools import setup
 
 NAME = "pycopia-process"
-VERSION = "0.9.4"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
     test_suite = "test.ProcessTests",
-    install_requires = ['pycopia-core>=0.9.4'],
+    install_requires = ['pycopia-core>=0.9.4,==dev'],
     data_files = [
         ('/etc/pycopia', glob("etc/*")),
         (os.path.join(sys.prefix, 'share', 'pycopia', 'docs'), 
@@ -34,7 +37,8 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia framework",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: System :: Operating System",

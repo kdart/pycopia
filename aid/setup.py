@@ -8,7 +8,10 @@ ez_setup.use_setuptools()
 from setuptools import setup
 
 NAME = "pycopia-aid"
-VERSION = "0.9.5"
+VERSION = "1.0a1"
+
+ENAME = NAME.replace("-", "_")
+DNAME = NAME.split("-", 1)[-1]
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
@@ -24,7 +27,8 @@ setup (name=NAME, version=VERSION,
     license = "LGPL",
     keywords = "pycopia framework Python extensions",
     url = "http://www.pycopia.net/",
-    download_url = "ftp://ftp.pycopia.net/pub/python/%s-%s.tar.gz" % (NAME, VERSION),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    #download_url = "ftp://ftp.pycopia.net/pub/python/%s-%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Programming Language :: Python",  
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Intended Audience :: Developers"],

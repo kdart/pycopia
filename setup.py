@@ -18,10 +18,10 @@ Master builder (custom script).
 
 Commands:
  sdist
- register
  publish
  build
  install
+ develop
 
 NOTE: install requires sudo to be configured for you.
 
@@ -68,11 +68,14 @@ def do_sdist(name):
 def do_build(name):
     _do_commands(name, ["build"], False)
 
-def do_register(name):
-    _do_commands(name, ["register"], False)
+#def do_register(name):
+#    _do_commands(name, ["register"], False)
+
+def do_develop(name):
+    _do_commands(name, ["develop -s $HOME/bin"], False)
 
 def do_publish(name):
-    _do_commands(name, ["sdist", "upload"], False)
+    _do_commands(name, ['egg_info -RDb ""', "sdist", "register", "upload"], False)
 
 def do_install(name):
     _do_commands(name, ["install"], True)
@@ -89,7 +92,7 @@ def main(argv):
     except KeyError:
         print __doc__
         return 2
-    for name in PACKAGES:
+    for name in (argv[2:] or PACKAGES):
         meth(name)
     return 0
 
