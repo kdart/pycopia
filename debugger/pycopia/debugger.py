@@ -663,30 +663,30 @@ class DebuggerCommands(CLI.BaseCommands):
     Execute the current line, stop at the first possible occasion
     (either in a function that is called or in the current function)."""
         self._dbg.set_step()
-        raise CommandExit
+        raise CLI.CommandExit
 
     def next(self, argv):
         """next
     Continue execution until the next line in the current function
     is reached or it returns."""
         self._dbg.set_next(self._dbg.curframe)
-        raise CommandExit
+        raise CLI.CommandExit
 
     def returns(self, argv):
         """returns
     Continue execution until the current function returns."""
         self._dbg.set_return(self._dbg.curframe)
-        raise CommandExit
+        raise CLI.CommandExit
 
     def cont(self, arg):
         """cont
     Continue execution, only stop when a breakpoint is encountered."""
         self._dbg.set_continue()
         if self._dbg.breaks:
-            raise CommandExit
+            raise CLI.CommandExit
         else:
             self._dbg._parser = None
-            raise CommandQuit
+            raise CLI.CommandQuit
 
     def jump(self, argv):
         """jump lineno

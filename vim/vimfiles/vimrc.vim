@@ -18,7 +18,9 @@ set history=500
 set statusline=%<%f%m%r%y%=%b\ 0x%B\ \ %l,%c%V\ %P
 set laststatus=2  " always a status line
 
-set dir=$VIM/vimfiles/tmp//
+" following improves performance when using NFS. You might want to change
+" it to someplace more private.
+set dir=/var/tmp//
 set hidden
 
 set incsearch
@@ -64,7 +66,7 @@ augroup cprog
 augroup END
 
 augroup pyprog
-  autocmd FileType python :so $VIM/vimfles/pydev.vim
+  autocmd FileType python :so $VIM/vimfiles/pydev.vim
 augroup END
 
 augroup newfile 
