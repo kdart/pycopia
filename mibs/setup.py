@@ -16,7 +16,7 @@ DNAME = NAME.split("-", 1)[-1]
 setup(name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.mibs"],
-    install_requires = ['pycopia-SMI>=0.9.4,==dev'],
+    install_requires = ['pycopia-SMI>=1.0a1,==dev'],
     test_suite = "test.MibsTests",
     zip_safe = True,
 

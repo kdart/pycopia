@@ -24,7 +24,7 @@ o Munge the word in various randomly selected ways.
 """
 
 import os, sys
-import whrandom, string
+import random, string
 
 WORDPLACES = ["/usr/dict/words", "/usr/share/dict/words"]
 
@@ -49,7 +49,7 @@ def getrandomwords(N=2):
     plainword = "" ; i = 0
     while i < N:
         while len(plainword) < 6 or len(plainword) > 15:
-            plainword = words[whrandom.randint(1,len(words))]
+            plainword = words[random.randint(1,len(words))]
         wordlist.append(plainword.strip())
         plainword = "" ; i += 1
     return tuple(wordlist)
@@ -91,7 +91,7 @@ def get_hashed_password():
 
 def get_double_word():
     word1, word2 = getrandomwords(2)
-    sep = "-=+#:"[whrandom.randint(0,4)]
+    sep = "-=+#:"[random.randint(0,4)]
     return "%s%s%s" % (word1, sep, word2)
 
 ## Main part

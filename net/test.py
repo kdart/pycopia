@@ -26,6 +26,8 @@ from pycopia import clientserver
 from pycopia import measure
 from pycopia import model
 
+from pycopia import ping
+from pycopia import slogsink
 from pycopia import dnsupdate
 from pycopia import ifconfig
 from pycopia import simpleserver
@@ -58,6 +60,10 @@ class NetTests(unittest.TestCase):
 #    def test_udpclient(self):
 #        srv = clientserver.UDPEchoClient("localhost")
 ##        srv.run()
+
+    def test_ping(self):
+        """Run a ping."""
+        self.assert_(bool(ping.reachable("localhost")))
 
     def test_runningaverage(self):
         rc = Counters.RunningAverage()

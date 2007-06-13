@@ -19,7 +19,7 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
     test_suite = "test.ProcessTests",
-    install_requires = ['pycopia-core>=0.9.4,==dev'],
+    install_requires = ['pycopia-core>=1.0a1,==dev'],
     data_files = [
         ('/etc/pycopia', glob("etc/*")),
         (os.path.join(sys.prefix, 'share', 'pycopia', 'docs'), 

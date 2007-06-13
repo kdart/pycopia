@@ -17,7 +17,7 @@ DNAME = NAME.split("-", 1)[-1]
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-core>=0.9,==dev', 'pycopia-CLI>=0.9,==dev', 'Durus>=3.5'],
+    install_requires = ['pycopia-core>=1.0a1,==dev', 'pycopia-CLI>=1.0a1,==dev', 'Durus>=3.5'],
     test_suite = "test.StorageTests",
     scripts = glob("bin/*"), 
     data_files = [

@@ -23,7 +23,7 @@ setup (name=NAME, version=VERSION,
     "pycopia.OS.Linux.proc",
     "pycopia.OS.Linux.proc.net",
     ],
-    install_requires = ['pycopia-aid>=0.9.4,==dev'],
+    install_requires = ['pycopia-utils>=1.0a1,==dev'],
     package_data = {
         '': ['*.txt', '*.doc'],
     },

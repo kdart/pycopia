@@ -23,11 +23,13 @@
 import unittest
 
 # just import a basic sample
-from pycopia.mibs import SNMPv2_SMI
+import pycopia.mibs
+import pycopia.SMI
+from pycopia.mibs import SNMPv2_SMI, SNMPv2_MIB
 
 class MibsTests(unittest.TestCase):
     def test_import(self):
-        print SNMPv2_MIB.OIDMAP['1.3.6.1.1']
+        self.assertEqual(pycopia.SMI.OIDMAP['1.3.6.1.1'].OID, [1,3,6,1,1])
 
 
 if __name__ == '__main__':

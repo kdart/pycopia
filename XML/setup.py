@@ -17,7 +17,7 @@ ENAME = NAME.replace("-", "_")
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.XML", "pycopia.dtds"],
-    install_requires = ['pycopia-core>=0.9.7,==dev'],
+    install_requires = ['pycopia-core>=1.0a1,==dev'],
     data_files=[('/etc/pycopia/dtd', glob("etc/dtd/*.dtd")+glob("etc/dtd/*.ent"))],
     scripts = glob("bin/*"), 
     test_suite = "test.XMLTests",

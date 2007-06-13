@@ -34,7 +34,7 @@ setup(
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
     scripts =glob("bin/*")+glob("sbin/*"), 
-    install_requires = ['docutils>=0.5', 'Durus>=3.5', 'itimer>=0.1'],
+    install_requires = ['docutils>=0.5'],
 
     data_files=[('/etc/pycopia', glob("etc/*.dist"))],
     package_data = {

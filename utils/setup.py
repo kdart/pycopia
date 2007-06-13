@@ -16,6 +16,8 @@ VERSION = "1.0a1"
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
 
+itimer = Extension('pycopia.itimer', ['pycopia.itimer.pyx'],)
+
 if sys.version_info[:2] < (2, 5):
 # The readline and mmap modules here are copies of the Python 2.5 modules.
 # They can also be used with previous versions of Python (as far as I can
@@ -28,16 +30,16 @@ if sys.version_info[:2] < (2, 5):
                    libraries=["readline", "ncurses"])
 
     mmap = Extension('mmap', ['mmapmodule.c'],)
-    extensions  = [readline, mmap]
+    extensions  = [readline, mmap, itimer]
 else:
-    extensions  = []
+    extensions  = [itimer]
 
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
     ext_modules=extensions,
-    install_requires = ['pycopia-process>=0.9,==dev'],
+    install_requires = ['pycopia-aid>=1.0a1,==dev'],
     test_suite = "test.UtilsTests",
 
     description = "Pycopia helper programs.",

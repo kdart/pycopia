@@ -18,7 +18,7 @@ ENAME = NAME.replace("-", "_")
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-XML>=0.9.1,==dev', 'simplejson>=0.5'],
+    install_requires = ['pycopia-XML>=1.0a1,==dev', 'simplejson>=0.5'],
     data_files = [
         ('/etc/pycopia', glob("etc/*.example")),
         ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),

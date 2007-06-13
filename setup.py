@@ -33,11 +33,11 @@ import os
 
 PACKAGES = [
 "aid",
+"utils",
 "core",
 "CLI",
 "debugger",
 "process",
-"utils",
 "SMI",
 "mibs",
 "SNMP",

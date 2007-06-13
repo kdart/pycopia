@@ -19,7 +19,7 @@ setup (name=NAME, version=VERSION,
     packages = find_packages(),
     # needs Pyro
     #install_requires = ['pycopia-storage>=0.9,==dev', 'pycopia-CLI>=0.9,==dev', 'Pyro>=3.5'],
-    install_requires = ['pycopia-storage>=0.9,==dev', 'pycopia-CLI>=0.9,==dev'],
+    install_requires = ['pycopia-storage>=1.0a1,==dev', 'pycopia-CLI>=1.0a1,==dev'],
     data_files = [
         ('/etc/pycopia', glob("etc/*.dist")),
     ],

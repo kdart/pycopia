@@ -26,15 +26,8 @@ using this module.  Instead, use get_scheduler().sleep(x) to sleep.
 import signal
 from errno import EINTR
 
-try:
-    import itimer
-except ImportError:
-    import sys
-    print >>sys.stderr, """scheduler: Try installing the py-itimer package for more precise timing."""
-    alarm = signal.alarm
-    del sys
-else:
-    alarm = itimer.alarm # allows subsecond precision using floats
+from pycopia import itimer
+alarm = itimer.alarm # allows subsecond precision using floats
 
 # enables custom readline module to process Python signal handlers when idle
 import readline

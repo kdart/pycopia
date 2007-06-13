@@ -23,7 +23,7 @@ without errors.
 """
 
 import sys
-import charbuffer
+from pycopia import charbuffer
 
 class error(Exception):
     pass

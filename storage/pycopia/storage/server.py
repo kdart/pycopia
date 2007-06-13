@@ -32,7 +32,7 @@ def start_durus(host, port, logfilename, dbfilename):
     direct_output(logfile)
     logger.setLevel(9)
     storage = FileStorage(dbfilename, repair=False, readonly=False)
-    log(20, 'Storage file=%s host=%s port=%s', storage.fp.name, host, port)
+    log(20, 'Storage file=%s host=%s port=%s', storage.get_filename(), host, port)
     StorageServer(storage, host=host, port=port).serve()
 
 

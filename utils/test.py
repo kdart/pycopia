@@ -21,27 +21,62 @@
 """
 
 import unittest
+import signal
+import time
 
 import readline
 import fcntl
 import mmap
+from pycopia import itimer
 
-from pycopia import slogsink
-from pycopia import ping
+s = time.time()
 
-from pycopia import charbuffer # from core package, uses mmap
+def catcher(n,f):
+    global s
+    print 'Alarmed in %.4f' % ( time.time() - s )
+    s = time.time()
 
 class UtilsTests(unittest.TestCase):
 
-    def test_ping(self):
-        """Run a ping."""
-        self.assert_(bool(ping.reachable("localhost")))
+    def test_itimer(self):
+        signal.signal(signal.SIGALRM, catcher)
+        print 'Setting alarm for 0.3 seconds with repeat every 0.5 seconds'
+        try:
+            itimer.setitimer(itimer.ITIMER_REAL, 0.3, 0.5)
+            initial, interval =  itimer.getitimer(itimer.ITIMER_REAL)
+            self.assertAlmostEqual(initial, 0.3, places=2)
+            self.assertAlmostEqual(interval, 0.5, places=2)
+            signal.pause()
+            signal.pause()
+            signal.pause()
+        finally:
+            itimer.setitimer(itimer.ITIMER_REAL, 0.0)
+            signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
-    def test_charbuffer(self):
-        """Charbuffer uses mmap module."""
-        b = charbuffer.Buffer()
-        b += "testing"
-        self.assertEqual(str(b), "testing")
+    def test_z_alarm(self):
+        global s
+        signal.signal(signal.SIGALRM, catcher)
+        print 'Setting alarm for 0.3 seconds'
+        start = s = time.time()
+        itimer.alarm(0.3)
+        signal.pause()
+        self.assertAlmostEqual(time.time()-start, 0.3, places=2)
+
+        print 'Setting alarm for 1.1 seconds'
+        start = s = time.time()
+        itimer.alarm(1.1)
+        signal.pause()
+        self.assertAlmostEqual(time.time()-start, 1.1, places=2)
+
+        print 'Setting alarm for 5.5 seconds'
+        start = s = time.time()
+        itimer.alarm(5.5)
+        signal.pause()
+        self.assertAlmostEqual(time.time()-start, 5.5, places=2)
+        itimer.alarm(0)
+        olddelay, oldinterval = itimer.getitimer(itimer.ITIMER_REAL)
+        self.assertEqual(olddelay, 0.0)
+        self.assertEqual(oldinterval, 0.0)
 
 
 if __name__ == '__main__':

@@ -22,7 +22,7 @@ setup (name=NAME, version=VERSION,
     py_modules = ["libsmi"], # stock SWIG wrapper
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.SMI"],       # custom Python wrapper - use this one.
-    install_requires = ['pycopia-aid>=0.9,==dev'],
+    install_requires = ['pycopia-aid>=1.0a1,==dev'],
     scripts = glob("bin/*"), 
     zip_safe = False,
     test_suite = "test.SMITests",

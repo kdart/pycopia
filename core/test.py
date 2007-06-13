@@ -78,8 +78,11 @@ import pycopia.OS
 
 class CoreTests(unittest.TestCase):
 
-    def setUp(self):
-        pass
+    def test_charbuffer(self):
+        """Charbuffer uses mmap module."""
+        b = charbuffer.Buffer()
+        b += "testing"
+        self.assertEqual(str(b), "testing")
 
     def test_ipv4(self):
         """basic test of ipv4 module."""

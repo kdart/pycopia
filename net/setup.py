@@ -17,7 +17,8 @@ DNAME = NAME.split("-", 1)[-1]
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-process>=0.9,==dev', 'pycopia-utils>=0.9,==dev'],
+    install_requires = ['pycopia-process>=1.0a1,==dev', 
+                        'pycopia-CLI>=1.0a1,==dev'],
     scripts = glob("bin/*"), 
     test_suite = "test.NetTests",
 

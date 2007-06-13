@@ -16,7 +16,7 @@ setup (name=NAME, version=VERSION,
 #    py_modules = ["XXX"],
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
-    install_requires = ['pycopia-aid>=0.9'],
+    install_requires = ['pycopia-aid>=1.0a1,==dev'],
     test_suite = "test.XXXTests",
 
     description = "",

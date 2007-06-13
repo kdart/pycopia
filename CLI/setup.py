@@ -16,7 +16,7 @@ DNAME = NAME.split("-", 1)[-1]
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
-    install_requires = ['pycopia-aid>=0.9,==dev'],
+    install_requires = ['pycopia-aid>=1.0a1,==dev'],
     test_suite = "test.CLITests",
 
     description = "Pycopia framework for constructing POSIX/Cisco style command line interface tools.",
