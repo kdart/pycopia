@@ -8,7 +8,7 @@ ez_setup.use_setuptools()
 from setuptools import setup
 
 NAME = "pycopia-debugger"
-VERSION = "1.0a1"
+VERSION = "1.0a2"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]

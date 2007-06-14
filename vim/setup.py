@@ -11,7 +11,7 @@ from pycopia import proctools
 from glob import glob
 
 NAME = "pycopia-vim"
-VERSION = "1.0a1"
+VERSION = "1.0a2"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]

@@ -10,7 +10,7 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-WWW"
-VERSION = "1.0a1"
+VERSION = "1.0a2"
 
 DNAME = NAME.split("-", 1)[-1]
 ENAME = NAME.replace("-", "_")

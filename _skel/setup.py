@@ -9,7 +9,7 @@ from setuptools import setup, Extension
 
 NAME = "pycopia-XXX"
 DNAME = NAME.split("-", 1)[-1]
-VERSION = "0.9"
+VERSION = "1.0"
 
 setup (name=NAME, version=VERSION,
 #    ext_modules = [_XXX],
