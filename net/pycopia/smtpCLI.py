@@ -115,7 +115,7 @@ class EmailClientCLI(CLI.BaseCommands):
         """quit
     Quits the SMTP session."""
         if self._client is None:
-            raise CommandQuit
+            raise CLI.CommandQuit
         try:
             self._print_msg(self._client.quit())
         except SMTP.SMTPServerDisconnected:
@@ -290,7 +290,7 @@ Provides an interactive session at a protocol level to an SMTP server.
     if sourcefile:
         try:
             parser.parse(sourcefile)
-        except CommandQuit:
+        except CLI.CommandQuit:
             pass
     else:
         parser.interact()

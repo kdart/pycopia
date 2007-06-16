@@ -155,7 +155,7 @@ class UserSlogDispatcher(socket.AsyncSocket):
             while 1:
                 msg, addr = self.recvfrom(4096, socket.MSG_DONTWAIT)
                 self.callback(parse_message(now(), IPv4(addr[0]), msg))
-        except SocketError, err:
+        except socket.SocketError, err:
             if err[0] == EAGAIN:
                 return
             else:
@@ -257,10 +257,6 @@ class SyslogCLI(CLI.BaseCommands):
 _CMDALIASES = {"log":["message"]}
 
 
-    
-# the daemonize and slogsink program source code is in the
-# $PYNMS_HOME/src/utils directory. This is a shim that runs as root and
-# forwards UDP syslog port to a UNIX socket.
 def start_slogsink(port=514):
     from pycopia import scheduler
     if port != 514:

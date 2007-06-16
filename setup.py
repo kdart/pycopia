@@ -77,6 +77,9 @@ def do_develop(name):
 def do_publish(name):
     _do_commands(name, ['egg_info -RDb ""', "sdist", "register", "upload"], False)
 
+def do_egg_info(name):
+    _do_commands(name, ['egg_info'], False)
+
 def do_install(name):
     _do_commands(name, ["install"], True)
 

@@ -166,7 +166,10 @@ def queryparse(query):
     parts = query.split("&")
     for part in parts:
         if part:
-            l, r = part.split("=", 1)
+            try:
+                l, r = part.split("=", 1)
+            except ValueError:
+                l, r = part, ""
             key = unquote_plus(l)
             val = unquote_plus(r)
             q[key] = val
@@ -367,9 +370,12 @@ def urlencode(query, doseq=0):
     else:
         for k, v in query:
             k = quote_plus(str(k))
-            if isinstance(v, (str, unicode)):
-                v = quote_plus(v)
-                l.append(k + '=' + v)
+            if isinstance(v, basestring):
+                if v:
+                    v = quote_plus(v)
+                    l.append("%s=%s" % (k, v))
+                else:
+                    l.append(k)
             else:
                 try:
                     # is this a sufficient test for sequence-ness?
@@ -377,11 +383,17 @@ def urlencode(query, doseq=0):
                 except TypeError:
                     # not a sequence
                     v = quote_plus(v)
-                    l.append(k + '=' + v)
+                    if v:
+                        l.append("%s=%s" % (k, v))
+                    else:
+                        l.append(k)
                 else:
                     # loop over the sequence
                     for elt in v:
-                        l.append(k + '=' + quote_plus(elt))
+                        if elt:
+                            l.append(k + '=' + quote_plus(elt))
+                        else:
+                            l.append(k)
     return '&'.join(l)
 
 
@@ -412,7 +424,7 @@ class UniversalResourceLocator(object):
         return bool(self._scheme) # valid url has scheme.
 
     def set(self, url, strict=True):
-        if type(url) is str:
+        if isinstance(url, basestring):
             self.clear(strict)
             try:
                 self._parse(url, strict)

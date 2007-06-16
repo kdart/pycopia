@@ -92,7 +92,7 @@ class ImapCLI(CLI.BaseCommands):
         """logout
     Quits the IMAP session."""
         if self._client is None:
-            raise CommandQuit
+            raise CLI.CommandQuit
         self._print_msg(self._client.logout())
         self._client = None
         self._setprompt(None)
@@ -339,7 +339,7 @@ Provides an interactive session at a protocol level to an IMAP server.
     if sourcefile:
         try:
             parser.parse(sourcefile)
-        except CommandQuit:
+        except CLI.CommandQuit:
             pass
     else:
         parser.interact()

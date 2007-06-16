@@ -332,7 +332,6 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
                         cb(mo)
                     return mo
                 i += 1
-        #raise TimeoutError, "timed out during expect"
 
     def expect_exact(self, patt, callback=None, timeout=None):
         return self.expect(patt, EXACT, callback, timeout)
@@ -354,7 +353,7 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
                 except EnvironmentError, val:
                     if val.errno == EINTR:
                         if self._timed_out == 1:
-                            raise TimeoutError, "expect: timed out during read."
+                            raise scheduler.TimeoutError, "expect: timed out during read."
                         else:
                             continue
                     else:
