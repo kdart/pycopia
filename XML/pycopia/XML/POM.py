@@ -992,7 +992,7 @@ class POMDocument(object):
     def encode(self, encoding=DEFAULT_ENCODING):
         if encoding != self.encoding:
             self.set_encoding(encoding)
-        return self.XMLHEADER + self.DOCTYPE + self.root.encode(enc) + "\n"
+        return self.XMLHEADER + self.DOCTYPE + self.root.encode(encoding) + "\n"
 
     def emit(self, fo, encoding=DEFAULT_ENCODING):
         if encoding != self.encoding:
