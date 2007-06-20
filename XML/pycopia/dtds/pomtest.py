@@ -5,16 +5,41 @@
 
 import pycopia.XML.POM
 
+attribIdval_234454883915322225 = pycopia.XML.POM.XMLAttribute(u'idval', 2, 11, None)
+
+
+attribName_1423564487243335089 = pycopia.XML.POM.XMLAttribute(u'name', 1, 12, None)
+
+
+attribId_1305668797275774409 = pycopia.XML.POM.XMLAttribute(u'id', 2, 11, None)
+
+
+attribMethod_4334465165459989921 = pycopia.XML.POM.XMLAttribute(u'method', 1, 14, u'POST')
+
+
+attribType_25226022599734441 = pycopia.XML.POM.XMLAttribute(u'type', pycopia.XML.POM.Enumeration((u'bullets', u'ordered', u'glossary')), 13, u'ordered')
+
+
+attribCdataimp_10069718494952169 = pycopia.XML.POM.XMLAttribute(u'cdataimp', 1, 12, None)
+
+
+
+
 #  representative set of elements to test POM module  
 
 
 class Toplevel(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'idval': attribIdval_234454883915322225, 
+         'cdataimp': attribCdataimp_10069718494952169, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('idval', 2, 11, None), 
-         pycopia.XML.POM.XMLAttribute('cdataimp', 1, 12, None), 
-         ])
 	_name = u'toplevel'
+
+
+
+_Root = Toplevel
+
 
 
 class Seclist(pycopia.XML.POM.ElementNode):
@@ -23,27 +48,27 @@ class Seclist(pycopia.XML.POM.ElementNode):
 
 
 class Termdef(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'id': attribId_1305668797275774409, 
+         'name': attribName_1423564487243335089, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 2, 11, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         ])
 	_name = u'termdef'
 
 
 class List(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'type': attribType_25226022599734441, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('type', pycopia.XML.POM.Enumeration(['bullets', 'ordered', 'glossary']), 13, u'ordered'), 
-         ])
 	_name = u'list'
 
 
 class Form(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'method': attribMethod_4334465165459989921, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('method', 1, 14, u'POST'), 
-         ])
 	_name = u'form'
 
 
@@ -52,4 +77,11 @@ class Formelement(pycopia.XML.POM.ElementNode):
 	_name = u'formelement'
 
 
-GENERAL_ENTITIES = {u'ename': u'ename value'}
+GENERAL_ENTITIES = {'ename': u'ename value'}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

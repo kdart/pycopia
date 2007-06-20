@@ -5,6 +5,14 @@
 
 import pycopia.XML.POM
 
+attribAction_3939340374857665600 = pycopia.XML.POM.XMLAttribute(u'action', pycopia.XML.POM.Enumeration((u'execute-low', u'execute-high', u'cache')), 13, u'execute-low')
+
+
+attribHref_35096121232009744 = pycopia.XML.POM.XMLAttribute(u'href', 1, 11, None)
+
+
+
+
 # 
 # Service Loading (SL) Document Type Definition.
 # 
@@ -33,16 +41,16 @@ import pycopia.XML.POM
 
 
 class Sl(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'action': attribAction_3939340374857665600, 
+         'href': attribHref_35096121232009744, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('href', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('action', pycopia.XML.POM.Enumeration(['execute-low', 'execute-high', 'cache']), 13, u'execute-low'), 
-         ])
 	_name = u'sl'
 
 
 
-Root = Sl
+_Root = Sl
 
 
 
@@ -53,3 +61,10 @@ Root = Sl
 
 
 GENERAL_ENTITIES = {}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

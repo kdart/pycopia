@@ -1,0 +1,16 @@
+#!/usr/bin/python2.4
+# -*- coding: ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+# License: LGPL
+# Keith Dart <keith@dartworks.biz>
+
+"""
+Run tests from a shell prompt.
+
+"""
+
+import sys
+from pycopia.QA import testrunner
+
+testrunner.main(sys.argv)
+

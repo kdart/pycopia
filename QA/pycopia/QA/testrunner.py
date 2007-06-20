@@ -32,6 +32,7 @@ testrunner.run_module(mytestmodule)
 
 import sys, os
 import shutil
+from errno import EEXIST
 
 from pycopia import getopt
 from pycopia import scheduler
@@ -44,10 +45,6 @@ class TestRunner(object):
     def __init__(self):
         cf = Storage.get_config()
         self._config = cf
-        TESTHOME = os.environ.get("TESTHOME", self._config.get("TESTHOME"))
-        if not TESTHOME:
-            raise ValueError, "I don't know where to find tests. Try setting TESTHOME"
-        sys.path.append(TESTHOME)
 
     def get_config(self):
         return self._config
@@ -222,14 +219,7 @@ class TestRunner(object):
 
     def get_test_list(self):
         import glob
-        TESTHOME = os.environ.get("TESTHOME", self._config.get("TESTHOME"))
-        if not TESTHOME:
-            raise ValueError, "I don't know where to find tests. Try setting TESTHOME"
-        modnames = []
-        os.path.walk(TESTHOME, _collect, modnames)
-        modnames = map(lambda n: n[len(TESTHOME)+1:].replace("/", "."), modnames)
-        return modnames
-
+        return [] # XXX
 
 
 def get_testrunner():

@@ -5,6 +5,38 @@
 
 import pycopia.XML.POM
 
+attribLength_1179879956032720849 = pycopia.XML.POM.XMLAttribute(u'length', 1, 11, None)
+
+
+attribPort_421820091656029089 = pycopia.XML.POM.XMLAttribute(u'port', 1, 12, None)
+
+
+attribRegisterprocedure_2110493455233555001 = pycopia.XML.POM.XMLAttribute(u'registerProcedure', 1, 12, None)
+
+
+attribIspermalink_312979127608890625 = pycopia.XML.POM.XMLAttribute(u'isPermaLink', pycopia.XML.POM.Enumeration((u'true', u'false')), 13, u'true')
+
+
+attribUrl_4063344339321802161 = pycopia.XML.POM.XMLAttribute(u'url', 1, 11, None)
+
+
+attribProtocol_1164123741548618244 = pycopia.XML.POM.XMLAttribute(u'protocol', 1, 12, None)
+
+
+attribPath_2436346508635681849 = pycopia.XML.POM.XMLAttribute(u'path', 1, 12, None)
+
+
+attribType_291473665566426121 = pycopia.XML.POM.XMLAttribute(u'type', 1, 11, None)
+
+
+attribVersion_869849613128885796 = pycopia.XML.POM.XMLAttribute(u'version', 1, 14, u'2.0')
+
+
+attribDomain_1465870397029897104 = pycopia.XML.POM.XMLAttribute(u'domain', 1, 12, None)
+
+
+
+
 #  RSS 2.0 DTD
 # 
 #      This version Copyright 2003 Silmaril Consultants
@@ -38,10 +70,10 @@ import pycopia.XML.POM
 
 
 class Rss(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'version': attribVersion_869849613128885796, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('version', 1, 14, u'2.0'), 
-         ])
 	_name = u'rss'
 
 
@@ -65,22 +97,22 @@ class Author(pycopia.XML.POM.ElementNode):
 
 
 class Category(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'domain': attribDomain_1465870397029897104, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('domain', 1, 12, None), 
-         ])
 	_name = u'category'
 
 
 class Cloud(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'path': attribPath_2436346508635681849, 
+         'domain': attribDomain_1465870397029897104, 
+         'protocol': attribProtocol_1164123741548618244, 
+         'port': attribPort_421820091656029089, 
+         'registerProcedure': attribRegisterprocedure_2110493455233555001, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('domain', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('port', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('path', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('registerProcedure', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('protocol', 1, 12, None), 
-         ])
 	_name = u'cloud'
 
 
@@ -105,12 +137,12 @@ class Docs(pycopia.XML.POM.ElementNode):
 
 
 class Enclosure(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'url': attribUrl_4063344339321802161, 
+         'length': attribLength_1179879956032720849, 
+         'type': attribType_291473665566426121, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('url', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('length', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('type', 1, 11, None), 
-         ])
 	_name = u'enclosure'
 
 
@@ -120,10 +152,10 @@ class Generator(pycopia.XML.POM.ElementNode):
 
 
 class Guid(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'isPermaLink': attribIspermalink_312979127608890625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('isPermaLink', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'true'), 
-         ])
 	_name = u'guid'
 
 
@@ -178,10 +210,10 @@ class Skiphours(pycopia.XML.POM.ElementNode):
 
 
 class Source(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'url': attribUrl_4063344339321802161, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('url', 1, 11, None), 
-         ])
 	_name = u'source'
 
 
@@ -216,3 +248,10 @@ class Width(pycopia.XML.POM.ElementNode):
 
 
 GENERAL_ENTITIES = {}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

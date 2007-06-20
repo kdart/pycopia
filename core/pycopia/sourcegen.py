@@ -22,6 +22,7 @@ similar to the "new" module.
 """
 
 import sys, os
+from pprint import pformat
 
 BANGLINE = "#!/usr/bin/python\n"
 
@@ -84,7 +85,7 @@ def genFunc(funcname, params, body=None, globals=None, doc=None, level=0):
 
 def genInstance(localname, instance, level=0):
     indent = "\t" * level
-    return "%s%s = %r\n" % (indent, localname, instance) # depends on proper repr
+    return "%s%s = %s\n" % (indent, localname, pformat(instance, indent=4, width=132))
 
 def genMethod(funcname, params, body=None, globals=None, doc=None):
     s = []
@@ -275,53 +276,83 @@ class SourceFile(object):
         s.extend(map(str, self.elements))
         return "\n".join(s)
 
+    def emit(self, fo):
+        fo.write(self.bangline)
+        fo.write("\n")
+        if self.docstring:
+            fo.write('"""\n%s\n"""\n\n' % (self.docstring))
+        for element in self.elements:
+            fo.write(str(element))
+            fo.write("\n")
+        fo.write("\n")
+
+    def get_current_index(self):
+        return len(self.elements)
+
     def add_doc(self, docstring):
         self.docstring = docstring
 
-    def add_comment(self, text):
-        self.elements.append(genComment(text))
+    def add_comment(self, text, index=None):
+        if index is None:
+            index = len(self.elements)
+        self.elements.insert(index, genComment(text))
 
-    def add_import(self, module, obj=None):
-        self.elements.append(genImport(module, obj))
+    def add_import(self, module, obj=None, index=None):
+        if index is None:
+            index = len(self.elements)
+        self.elements.insert(index, genImport(module, obj))
 
-    def add_blank(self):
-        self.elements.append("\n")
+    def add_blank(self, index=None):
+        if index is None:
+            index = len(self.elements)
+        self.elements.insert(index, "\n")
 
-    def add_function(self, funcname, params, attribs=None, doc=None):
+    def add_function(self, funcname, params, attribs=None, doc=None, index=None):
+        if index is None:
+            index = len(self.elements)
         fh = FunctionHolder(funcname, params, attribs, doc)
-        self.elements.append(fh)
+        self.elements.insert(index, fh)
         return fh
 
-    def add_class(self, klassname, parents, attributes=None, doc=None, methods=None):
+    def add_class(self, klassname, parents, attributes=None, doc=None, methods=None, index=None):
+        if index is None:
+            index = len(self.elements)
         ch = ClassHolder(klassname, parents, attributes, doc, methods)
-        self.elements.append(ch)
+        self.elements.insert(index, ch)
         return ch
 
-    def add_instance(self, name, instance, level=0):
+    def add_instance(self, name, instance, level=0, index=None):
+        if index is None:
+            index = len(self.elements)
         ih = InstanceHolder(name, instance, level)
-        self.elements.append(ih)
+        self.elements.insert(index, ih)
         return ih
 
-    def add_code(self, text, level=0):
+    def add_code(self, text, level=0, index=None):
+        if index is None:
+            index = len(self.elements)
         th = TextHolder(text, level)
-        self.elements.append(th)
+        self.elements.insert(index, th)
         return th
 
     def append(self, holder):
         self.elements.append(holder)
 
+    def insert(self, idx, holder):
+        self.elements.insert(idx, holder)
+
     def write(self, fo=None):
         fo = fo or self.fo
-        fo.write(str(self))
+        self.emit(fo)
 
     def writefile(self, filename=None):
         filename = filename or self.filename
         if filename:
             fo = open(filename, "w")
             self.write(fo)
+            fo.close()
         else:
             raise ValueError, "SourceFile: no filename given to write to!"
-
 
 
 if __name__ == "__main__":

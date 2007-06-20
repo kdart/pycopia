@@ -3,7 +3,6 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # License: LGPL
 # Keith Dart <keith@dartworks.biz>
-# $Id$
 
 """
 This module contains the test case and test suite classes used to control
@@ -12,7 +11,7 @@ It is the core part of automated testing.
 
 This module defines a Test class, which is the base class for all test
 case implementations. This class is not normally substantiated itself, but
-a subclass is defined that defines a 'test_method()' method. 
+a subclass is defined that defines a 'execute()' method. 
 
 To use the test case, instantiate your class and call it with test method
 parameters. You can define two hook methods in the subclass: 'initialize'
@@ -27,7 +26,7 @@ All test related errors are based on the 'TestError' exception. If a test
 cannot be completed for some reason you may raise a 'TestIncompleteError'
 exception.
 
-Your 'test_method()' should return the value of the 'passed()' or
+Your 'execute()' should return the value of the 'passed()' or
 'failed()' method, as appropriate. You may also use assertions. The
 standard Python 'assert' keyword may be used, or the assertion test
 methods may be used.
@@ -68,24 +67,24 @@ class TestSuiteAbort(RuntimeError):
     pass
 
 
-# One of the below values should be returned by test_method(). The usual
+# One of the below values should be returned by execute(). The usual
 # method is to return the value of the method with the same name. E.g.
 # 'return self.passed()'. The Test.passed() method adds a passed message
 # to the report, and returns the PASSED value for the suite to check.
 
-# test_method() passed, and the suite may continue.
+# execute() passed, and the suite may continue.
 PASSED = Enum(1, "PASSED")
 
-# test_method() failed, but the suite can continue. You may also raise a
+# execute() failed, but the suite can continue. You may also raise a
 # TestFailError exception.
 FAILED = Enum(0, "FAILED") 
 
-# test_method() could not complete, and the pass/fail criteria could not be
+# execute() could not complete, and the pass/fail criteria could not be
 # determined. but the suite may continue. You may also raise a TestIncompleteError
 # exception.
 INCOMPLETE = Enum(-1, "INCOMPLETE") 
 
-# test_method() could not complete, and the suite cannot continue. Raising
+# execute() could not complete, and the suite cannot continue. Raising
 # TestSuiteAbort is the same.
 ABORT = Enum(-2, "ABORT") 
 
@@ -136,13 +135,13 @@ class Test(object):
             return rv
         # test elapsed time does not include initializer time.
         teststarttime = timelib.now()
-        # run test_method
+        # run execute
         try:
-            rv = apply(self.test_method, args, kw)
+            rv = apply(self.execute, args, kw)
         except KeyboardInterrupt:
             if self._debug:
                 ex, val, tb = sys.exc_info()
-                debugger.post_mortem(ex, val, tb)
+                debugger.post_mortem(tb, ex, val)
             rv = self.incomplete("%s: aborted by user." % self.test_name)
             self._finalize(rv)
             raise
@@ -157,7 +156,7 @@ class Test(object):
         except:
             ex, val, tb = sys.exc_info()
             if self._debug:
-                debugger.post_mortem(ex, val, tb)
+                debugger.post_mortem(tb, ex, val)
                 tb = None
             rv = self.failed("%s: Exception occured! (%s: %s)" % (self.test_name, ex, val))
         endtime = timelib.now()
@@ -173,7 +172,7 @@ class Test(object):
             ex, val, tb = sys.exc_info()
             self.diagnostic("%s (%s)" % (ex, val))
             if self._debug:
-                debugger.post_mortem(ex, val, tb)
+                debugger.post_mortem(tb, ex, val)
             rv = self.abort("Test initialization failed!")
         return rv
 
@@ -188,7 +187,7 @@ class Test(object):
             ex, val, tb = sys.exc_info()
             self.diagnostic("%s (%s)" % (ex, val))
             if self._debug:
-                debugger.post_mortem(ex, val, tb)
+                debugger.post_mortem(tb, ex, val)
             rv = self.abort("Test finalize failed!")
         return rv
 
@@ -251,19 +250,19 @@ class Test(object):
         "Hook method when finalizing a test. Override if necessary."
         pass
 
-    def test_method(self, *args, **kw):
+    def execute(self, *args, **kw):
         """Overrided this method in a subclass to implement a specific test."""
-        return self.failed('you must define a method named "test_method" in your subclass.')
+        return self.incomplete('you must define a method named "execute" in your subclass.')
 
     # result reporting methods
     def passed(self, msg=NO_MESSAGE):
-        """Call this and return if the test_method() passed. If part of
+        """Call this and return if the execute() passed. If part of
         a suite, subsequent tests may continue."""
         self._report.passed(msg)
         return PASSED
 
     def failed(self, msg=NO_MESSAGE):
-        """Call this and return if the test_method() failed, but can continue
+        """Call this and return if the execute() failed, but can continue
         the next test."""
         self._report.failed(msg)
         return FAILED
@@ -491,7 +490,7 @@ called.
 
     def add_test(self, _testclass, *args, **kw):
         """add_test(Test, [args], [kwargs])
-Appends a test object in this suite. The test's test_method() will be called
+Appends a test object in this suite. The test's execute() will be called
 with the arguments supplied here. If the test case has a prerequisite defined
 it is checked for existence in the suite, and an exception is raised if it is
 not found."""
@@ -580,7 +579,7 @@ used by nested suites."""
             ex, val, tb = sys.exc_info()
             if self._debug:
                 ex, val, tb = sys.exc_info()
-                debugger.post_mortem(ex, val, tb)
+                debugger.post_mortem(tb, ex, val)
             self.info("Suite failed to initialize: %s (%s)" % (ex, val))
             raise TestSuiteAbort, val
         # run all the tests
@@ -619,9 +618,10 @@ used by nested suites."""
                 self.info("Suite aborted by test %s (%s)." % (entry.name(), err))
                 entry.result = INCOMPLETE
                 rv = ABORT
-            # this should only happen with incorrectly written test_method().
+            # this should only happen with incorrectly written execute().
             if rv is None:
-                self.report.diagnostic("warning: test returned None, assuming failed. Please fix the %s.test_method()" % (entry.name()))
+                self.report.diagnostic("warning: test returned None, assuming failed. "
+                                      "Please fix the %s.execute()" % (entry.name()))
                 rv = FAILED
             # keep return value in results
             # check for abort condition and abort if so
@@ -641,7 +641,7 @@ used by nested suites."""
             ex, val, tb = sys.exc_info()
             if self._debug:
                 print
-                debugger.post_mortem(ex, val, tb)
+                debugger.post_mortem(tb, ex, val)
             self.info("Suite failed to finalize: %s (%s)" % (ex, val))
             if self._nested:
                 raise TestSuiteAbort, "subordinate suite '%s' failed to finalize." % (self.test_name,)
@@ -684,18 +684,5 @@ suite is run. """
         """Override this if you need to do some clean-up after the suite is run."""
         pass
 
-
-# A test module may use "from qatest import *" and get these default
-# initialize/finalize functions. These are run as module-level initialize and
-# finalize by the testrunner module.
-
-def initialize(conf):
-    pass
-
-def finalize(conf):
-    pass
-
-if __name__ == "__main__":
-    os.system("qaunittest test_qatest")
 
 

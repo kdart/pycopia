@@ -70,25 +70,25 @@ class XMLTests(unittest.TestCase):
 
     def test_5POMvalidation(self):
         import pomtest # previous test just created this.
-        doc = POM.POMDocument(pomtest)
+        doc = POM.POMDocument(dtd=pomtest)
         doc.set_root(pomtest.Toplevel())
         self.assertRaises(POM.ValidationError, str, doc)
 
     def test_6POMemit(self):
         import pomtest
-        doc = POM.POMDocument(pomtest)
+        doc = POM.POMDocument(dtd=pomtest)
         doc.set_root(pomtest.Toplevel())
         doc.root.idval = "someid" # satisfy #REQUIRED attribute
         doc.emit(sys.stdout)
 
     def test_negdocencoding(self):
         import pomtest
-        doc = POM.POMDocument(pomtest)
+        doc = POM.POMDocument(dtd=pomtest)
         self.assertRaises(ValueError, doc.set_encoding, "xxx")
 
     def test_docencoding(self):
         import pomtest
-        doc = POM.POMDocument(pomtest)
+        doc = POM.POMDocument(dtd=pomtest)
         doc.set_encoding("iso-8859-1")
         self.assertEqual(doc.encoding, "iso-8859-1")
 

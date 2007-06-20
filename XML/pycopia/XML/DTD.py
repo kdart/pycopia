@@ -19,11 +19,12 @@ Deals with DTD files. Primarily, provides the DTD parser and Python
 import sys, os
 
 from pycopia import sourcegen
-from pycopia.textutils import identifier
+from pycopia.textutils import identifier, keyword_identifier
 
 import pycopia.XML.POM
-from pycopia.XML.POM import (ContentModel, XMLAttribute, AttributeList,
+from pycopia.XML.POM import (ContentModel, XMLAttribute, 
                              ElementNode, Notation, ValidationError,
+                             normalize_unicode,
                              ANY, PCDATA, EMPTY)
 
 ### DTD compiler components ###
@@ -36,14 +37,27 @@ def get_dtd_compiler(fo, mixinmodule=None, doctype=None):
     parser.set_dtd_consumer(dh)
     return parser
 
+def get_identifier(uname):
+    return identifier(normalize_unicode(uname))
+
+class AttributeMap(dict):
+    def __repr__(self):
+        s = ["{"]
+        for t in self.items():
+            s.append("%r: %s, " % t)
+        s.append("}")
+        return "\n         ".join(s)
+
 # this DTD parser consumer generates the Python source code from the DTD.
 class DTDConsumerForSourceGeneration(object):
     def __init__(self, generator, mixins=None, doctype=None):
         self.generator = generator
+        self._code_index = 0
         self.elements = {}
         self.parameter_entities = {}
         self.general_entities = {}
         self._forwardattributes = {}
+        self._allattributes = {}
         self.mixins = mixins # should be a module object
         self.doctype = doctype
 
@@ -53,11 +67,18 @@ class DTDConsumerForSourceGeneration(object):
         self.generator.add_import(pycopia.XML.POM)
         if self.mixins:
             self.generator.add_import(self.mixins)
+        self.generator.add_blank()
+        self._code_index = self.generator.get_current_index()
 
     def dtd_end(self):
         print "done parsing. Writing file."
-        self.generator.add_instance("GENERAL_ENTITIES", self.general_entities)
-        self.generator.write()
+        gen = self.generator
+        for name, value in self._allattributes.items():
+            gen.add_code("%s = %r" % (name, value), index=2)
+        gen.add_instance("GENERAL_ENTITIES", self.general_entities)
+        gen.add_comment("Cache for dynamic classes for this dtd.")
+        gen.add_instance("_CLASSCACHE", {})
+        gen.write()
 
     def new_element_type(self, elem_name, elem_cont):
         "Receives the declaration of an element type."
@@ -68,48 +89,52 @@ class DTDConsumerForSourceGeneration(object):
 
     def make_new_element(self, elem_name, contentmodel):
         parents = [ElementNode]
-        mixinname = "%sMixin" % ( elem_name )
-        if self.mixins and hasattr(self.mixins, mixinname):
-            parents.insert(0, getattr(self.mixins, mixinname))
+        if self.mixins:
+            mixinname = "%sMixin" % ( get_identifier(elem_name) )
+            if hasattr(self.mixins, mixinname):
+                parents.insert(0, getattr(self.mixins, mixinname))
         # class name is capitalized to avoid clashes with Python key words.
-        ch = self.generator.add_class(identifier(elem_name), tuple(parents))
+        ch = self.generator.add_class(get_identifier(elem_name), tuple(parents))
         ch.add_attribute("_name", elem_name)
         ch.add_attribute("CONTENTMODEL", _ContentModelGenerator(contentmodel))
         self.elements[elem_name] = ch
-        # add any previously seen attributes
+        # Add any previously seen attributes
         try:
             fwdlist = self._forwardattributes[elem_name]
         except KeyError:
             pass
         else:
-            ch.add_attribute("ATTLIST", fwdlist)
+            ch.add_attribute("ATTRIBUTES", fwdlist)
             del self._forwardattributes[elem_name]
-        # identify the root element with a generic name (Root).
+        # identify the root element with a generic name (_Root).
         if self.doctype and elem_name.lower() == self.doctype.name.lower():
-            self.generator.add_code("\nRoot = %s\n" % (identifier(elem_name),))
+            self.generator.add_code("\n_Root = %s\n" % (get_identifier(elem_name),))
 
     def new_attribute(self, elem, a_name, a_type, a_decl, a_def):
         "Receives the declaration of a new attribute."
         attr = XMLAttribute(a_name, a_type, a_decl, a_def)
+        ident = attr.get_identifier()
+        self._allattributes[ident] = attr
         try:
             element = self.elements[elem]
-            self._add_element_attlist(element, attr)
         except KeyError:
             # Got a forward attribute definition (defined before element)
             try:
                 fwdlist = self._forwardattributes[elem]
             except KeyError:
-                fwdlist = AttributeList()
+                fwdlist = AttributeMap()
                 self._forwardattributes[elem] = fwdlist
-            fwdlist.append(attr)
+            fwdlist[keyword_identifier(normalize_unicode(a_name))] = ident
+        else:
+            self._add_element_attlist(element, attr, ident)
 
-    def _add_element_attlist(self, element, xmlattribute):
+    def _add_element_attlist(self, element, xmlattribute, ident):
         try:
-            attlist = element.get_attribute("ATTLIST")
+            attlist = element.get_attribute("ATTRIBUTES")
         except KeyError:
-            element.add_attribute("ATTLIST", AttributeList())
-            attlist = element.get_attribute("ATTLIST")
-        attlist.append(xmlattribute)
+            element.add_attribute("ATTRIBUTES", AttributeMap())
+            attlist = element.get_attribute("ATTRIBUTES")
+        attlist[keyword_identifier(normalize_unicode(xmlattribute.name))] = ident
 
     def handle_comment(self, contents):
         "Receives the contents of a comment."
@@ -126,7 +151,7 @@ class DTDConsumerForSourceGeneration(object):
 
     def new_general_entity(self, name, val):
         "Receives internal general entity declarations."
-        self.general_entities[name] = val
+        self.general_entities[normalize_unicode(name)] = val
 
     def new_external_entity(self, ent_name, pub_id, sys_id, ndata):
         """Receives external general entity declarations. 'ndata' is the
@@ -138,7 +163,7 @@ class DTDConsumerForSourceGeneration(object):
     def new_notation(self,name, pubid, sysid):
         "Receives notation declarations."
         n = Notation(name, pubid, sysid)
-        self.generator.add_instance(identifier(name), n)
+        self.generator.add_instance(get_identifier(name), n)
 
     def handle_pi(self, target, data):
         "Receives the target and data of processing instructions."

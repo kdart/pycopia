@@ -54,7 +54,7 @@ class WWWTests(unittest.TestCase):
 
     def test_XHTML(self):
         """Construct an XHTML page. Verify visually."""
-        htd = XHTML.new_document(dtds.XHTML1_STRICT)
+        htd = XHTML.new_document(dtds.XHTML)
         htd.title = "This is the title."
         htd.add_header(1, 'Main document & "stuff"')
         htd.new_para("This is a test. This is text.")

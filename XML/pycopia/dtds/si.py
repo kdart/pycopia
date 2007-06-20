@@ -5,6 +5,26 @@
 
 import pycopia.XML.POM
 
+attribCreated_3186906745813812025 = pycopia.XML.POM.XMLAttribute(u'created', 1, 12, None)
+
+
+attribSi_expires_1744323112989519001 = pycopia.XML.POM.XMLAttribute(u'si-expires', 1, 12, None)
+
+
+attribSi_id_227873876613554161 = pycopia.XML.POM.XMLAttribute(u'si-id', 1, 12, None)
+
+
+attribClass_451108214986810000 = pycopia.XML.POM.XMLAttribute(u'class', 7, 11, None)
+
+
+attribHref_10590696292225 = pycopia.XML.POM.XMLAttribute(u'href', 1, 12, None)
+
+
+attribAction_894170243889120025 = pycopia.XML.POM.XMLAttribute(u'action', pycopia.XML.POM.Enumeration((u'signal-none', u'signal-low', u'signal-medium', u'signal-high', u'delete')), 13, u'signal-medium')
+
+
+
+
 # 
 # Service Indication (SI) Document Type Definition.
 # 
@@ -41,7 +61,7 @@ class Si(pycopia.XML.POM.ElementNode):
 
 
 
-Root = Si
+_Root = Si
 
 
 
@@ -49,14 +69,14 @@ Root = Si
 
 
 class Indication(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'action': attribAction_894170243889120025, 
+         'href': attribHref_10590696292225, 
+         'si_expires': attribSi_expires_1744323112989519001, 
+         'si_id': attribSi_id_227873876613554161, 
+         'created': attribCreated_3186906745813812025, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('href', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('si-id', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('created', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('si-expires', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('action', pycopia.XML.POM.Enumeration(['signal-none', 'signal-low', 'signal-medium', 'signal-high', 'delete']), 13, u'signal-medium'), 
-         ])
 	_name = u'indication'
 
 
@@ -69,10 +89,10 @@ class Info(pycopia.XML.POM.ElementNode):
 
 
 class Item(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'class_': attribClass_451108214986810000, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('class', 7, 11, None), 
-         ])
 	_name = u'item'
 
 
@@ -83,3 +103,10 @@ class Item(pycopia.XML.POM.ElementNode):
 
 
 GENERAL_ENTITIES = {}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

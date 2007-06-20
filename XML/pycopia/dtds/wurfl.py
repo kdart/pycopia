@@ -5,6 +5,38 @@
 
 import pycopia.XML.POM
 
+attribHome_page_228680789066463204 = pycopia.XML.POM.XMLAttribute(u'home_page', 1, 12, None)
+
+
+attribValue_15890819796852025 = pycopia.XML.POM.XMLAttribute(u'value', 7, 11, None)
+
+
+attribActual_device_root_944545155817036900 = pycopia.XML.POM.XMLAttribute(u'actual_device_root', 1, 12, None)
+
+
+attribHome_page_105690285034778929 = pycopia.XML.POM.XMLAttribute(u'home_page', 1, 11, None)
+
+
+attribName_303323689952890000 = pycopia.XML.POM.XMLAttribute(u'name', 7, 11, None)
+
+
+attribId_2197717004406010000 = pycopia.XML.POM.XMLAttribute(u'id', 7, 11, None)
+
+
+attribName_1246620389478747364 = pycopia.XML.POM.XMLAttribute(u'name', 1, 11, None)
+
+
+attribUser_agent_822211677339960996 = pycopia.XML.POM.XMLAttribute(u'user_agent', 1, 11, None)
+
+
+attribFall_back_56317973040874561 = pycopia.XML.POM.XMLAttribute(u'fall_back', 7, 11, None)
+
+
+attribEmail_287580418357562500 = pycopia.XML.POM.XMLAttribute(u'email', 1, 11, None)
+
+
+
+
 class Wurfl(pycopia.XML.POM.ElementNode):
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
 	_name = u'wurfl'
@@ -41,12 +73,12 @@ class Maintainers(pycopia.XML.POM.ElementNode):
 
 
 class Maintainer(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'home_page': attribHome_page_105690285034778929, 
+         'email': attribEmail_287580418357562500, 
+         'name': attribName_1246620389478747364, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('email', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('home_page', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 11, None), 
-         ])
 	_name = u'maintainer'
 
 
@@ -56,12 +88,12 @@ class Authors(pycopia.XML.POM.ElementNode):
 
 
 class Author(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'home_page': attribHome_page_228680789066463204, 
+         'name': attribName_1246620389478747364, 
+         'email': attribEmail_287580418357562500, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('name', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('email', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('home_page', 1, 12, None), 
-         ])
 	_name = u'author'
 
 
@@ -71,11 +103,11 @@ class Contributors(pycopia.XML.POM.ElementNode):
 
 
 class Contributor(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_1246620389478747364, 
+         'email': attribEmail_287580418357562500, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('name', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('email', 1, 11, None), 
-         ])
 	_name = u'contributor'
 
 
@@ -85,31 +117,38 @@ class Devices(pycopia.XML.POM.ElementNode):
 
 
 class Device(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'actual_device_root': attribActual_device_root_944545155817036900, 
+         'fall_back': attribFall_back_56317973040874561, 
+         'id': attribId_2197717004406010000, 
+         'user_agent': attribUser_agent_822211677339960996, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('fall_back', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('user_agent', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('actual_device_root', 1, 12, None), 
-         ])
 	_name = u'device'
 
 
 class Group(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'id': attribId_2197717004406010000, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 11, None), 
-         ])
 	_name = u'group'
 
 
 class Capability(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_303323689952890000, 
+         'value': attribValue_15890819796852025, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('name', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('value', 7, 11, None), 
-         ])
 	_name = u'capability'
 
 
 GENERAL_ENTITIES = {}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 """
 The dtds package is where compiled DTDs go.
@@ -14,6 +15,8 @@ __all__ = [ "contentxml", "google", "logml", "pomtest", "rss091", "rss2", "si", 
   ]
 
 import os
+from pycopia.aid import newclass, Import
+from pycopia.XML import ValidationError
 
 # TODO get from some config.
 USERDTDPATH = os.environ.get("USERDTDPATH", os.path.join("/", "var", "tmp", "dtds"))
@@ -24,6 +27,7 @@ __path__.append(USERDTDPATH)
 
 # Constants to be used as shortcut identifiers. Value os module name for
 # the docutment types compiled DTD.
+# Use one of these as a shortcut name to a document type.
 CONTENTXML = "pycopia.dtds.contentxml"
 GOOGLE = "pycopia.dtds.google"
 LOGML = "pycopia.dtds.logml"
@@ -72,6 +76,7 @@ class Doctype(object):
 # mapping here that must be maintained. This should be done before
 # compiling with dtd2py.
 DOCTYPES = {}
+DOCTYPES[POMTEST] = Doctype("toplevel", None, "pomtest.dtd")
 DOCTYPES[XHTML1_STRICT] = Doctype("HTML", "-//W3C//DTD XHTML 1.0 Strict//EN",
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd")
 DOCTYPES[XHTML1_TRANSITIONAL] = Doctype("HTML", "-//W3C//DTD XHTML 1.0 Transitional//EN",
@@ -103,36 +108,24 @@ DOCTYPES[SI] = Doctype("si", "-//WAPFORUM//DTD SI 1.0//EN",
 DOCTYPES[SL] = Doctype("sl", "-//WAPFORUM//DTD SL 1.0//EN",
                 "http://www.wapforum.org/DTD/sl.dtd")
 
-
-#DOCTYPES[CONTENTXML] = Doctype()
-#DOCTYPES[GOOGLE] = Doctype()
-#DOCTYPES[LOGML] = Doctype()
-#DOCTYPES[POMTEST] = Doctype()
-#DOCTYPES[RSS091] = Doctype()
-#DOCTYPES[RSS2] = Doctype()
-#DOCTYPES[WCSINVALIDATION] = Doctype()
-#DOCTYPES[WURFL] = Doctype()
-#DOCTYPES[XFDESKTOP_MENU] = Doctype()
-#DOCTYPES[XMLSCHEMA] = Doctype()
-
-
-NAMESPACES = {}
-NAMESPACES[XHTML] = "http://www.w3.org/1999/xhtml"
-NAMESPACES[XHTML1_STRICT] = NAMESPACES[XHTML]
-NAMESPACES[XHTML1_FRAMESET] = NAMESPACES[XHTML]
-NAMESPACES[XHTML1_TRANSITIONAL] = NAMESPACES[XHTML]
-NAMESPACES[XHTML11] = NAMESPACES[XHTML]
-NAMESPACES[WML] = NAMESPACES[XHTML]
-NAMESPACES[WML11] = NAMESPACES[XHTML]
-NAMESPACES[WML12] = NAMESPACES[XHTML]
-NAMESPACES[WML13] = NAMESPACES[XHTML]
-NAMESPACES[XHTML_MOBILE10] = NAMESPACES[XHTML]
-NAMESPACES[XHTML_BASIC10] = NAMESPACES[XHTML]
-NAMESPACES[XHTML_BASIC11] = NAMESPACES[XHTML]
-
-
 def get_doctype(keyname):
-  return DOCTYPES.get(keyname)
+    return DOCTYPES.get(keyname)
+
+def get_dtd_module(doctype_constant):
+    try:
+        mod = Import(doctype_constant)
+    except ImportError, err:
+        raise ValidationError, ("No compiled DTD found for %r." 
+                                   " Please run dtd2py. : %s" % (doctype_constant, err))
+    return mod
+
+def get_class(dtdmod, name, bases):
+    try:
+        cls = dtdmod._CLASSCACHE[name]
+    except KeyError:
+        cls = newclass(name, *bases)
+        dtdmod._CLASSCACHE[name] = cls
+    return cls
 
 def get_mod_file(directory, sourcefilename):
     """get_mod_file(sourcefilename)

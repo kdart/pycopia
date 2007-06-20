@@ -5,6 +5,50 @@
 
 import pycopia.XML.POM
 
+attribNuminv_762368709725798400 = pycopia.XML.POM.XMLAttribute(u'NUMINV', 1, 11, None)
+
+
+attribId_1353545877677048836 = pycopia.XML.POM.XMLAttribute(u'ID', 1, 11, None)
+
+
+attribMethod_627894436678797409 = pycopia.XML.POM.XMLAttribute(u'METHOD', 1, 12, None)
+
+
+attribHost_1201376012560416016 = pycopia.XML.POM.XMLAttribute(u'HOST', 1, 12, None)
+
+
+attribName_41976321684412644 = pycopia.XML.POM.XMLAttribute(u'NAME', 1, 11, None)
+
+
+attribStatus_3002794300863280225 = pycopia.XML.POM.XMLAttribute(u'STATUS', 1, 11, None)
+
+
+attribUri_290747525471488836 = pycopia.XML.POM.XMLAttribute(u'URI', 1, 11, None)
+
+
+attribVersion_1737231645363578896 = pycopia.XML.POM.XMLAttribute(u'VERSION', 1, 11, None)
+
+
+attribUriexp_3041169893097651225 = pycopia.XML.POM.XMLAttribute(u'URIEXP', 1, 12, None)
+
+
+attribBodyexp_3787984040095360000 = pycopia.XML.POM.XMLAttribute(u'BODYEXP', 1, 12, None)
+
+
+attribRemovalttl_1034675544925120576 = pycopia.XML.POM.XMLAttribute(u'REMOVALTTL', 1, 12, None)
+
+
+attribValue_1811967419986065664 = pycopia.XML.POM.XMLAttribute(u'VALUE', 1, 12, None)
+
+
+attribType_3841623343635462025 = pycopia.XML.POM.XMLAttribute(u'TYPE', 1, 11, None)
+
+
+attribUriprefix_2064277722911340304 = pycopia.XML.POM.XMLAttribute(u'URIPREFIX', 1, 11, None)
+
+
+
+
 #  WCSinvalidation.dtd is the DTD file that describes a valid
 # Webcache invalidation XML message for request and response.
 # 
@@ -14,10 +58,10 @@ import pycopia.XML.POM
 
 
 class Invalidation(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'VERSION': attribVersion_1737231645363578896, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('VERSION', 1, 11, None), 
-         ])
 	_name = u'INVALIDATION'
 
 
@@ -30,11 +74,11 @@ class System(pycopia.XML.POM.ElementNode):
 
 
 class Systeminfo(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'NAME': attribName_41976321684412644, 
+         'VALUE': attribValue_1811967419986065664, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('NAME', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('VALUE', 1, 12, None), 
-         ])
 	_name = u'SYSTEMINFO'
 
 
@@ -44,58 +88,58 @@ class Object(pycopia.XML.POM.ElementNode):
 
 
 class Basicselector(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'URI': attribUri_290747525471488836, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('URI', 1, 11, None), 
-         ])
 	_name = u'BASICSELECTOR'
 
 
 class Advancedselector(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'URIEXP': attribUriexp_3041169893097651225, 
+         'HOST': attribHost_1201376012560416016, 
+         'URIPREFIX': attribUriprefix_2064277722911340304, 
+         'METHOD': attribMethod_627894436678797409, 
+         'BODYEXP': attribBodyexp_3787984040095360000, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('URIPREFIX', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('HOST', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('URIEXP', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('METHOD', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('BODYEXP', 1, 12, None), 
-         ])
 	_name = u'ADVANCEDSELECTOR'
 
 
 class Cookie(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'NAME': attribName_41976321684412644, 
+         'VALUE': attribValue_1811967419986065664, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('NAME', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('VALUE', 1, 12, None), 
-         ])
 	_name = u'COOKIE'
 
 
 class Header(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'NAME': attribName_41976321684412644, 
+         'VALUE': attribValue_1811967419986065664, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('NAME', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('VALUE', 1, 12, None), 
-         ])
 	_name = u'HEADER'
 
 
 class Other(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'TYPE': attribType_3841623343635462025, 
+         'NAME': attribName_41976321684412644, 
+         'VALUE': attribValue_1811967419986065664, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('TYPE', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('NAME', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('VALUE', 1, 12, None), 
-         ])
 	_name = u'OTHER'
 
 
 class Action(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'REMOVALTTL': attribRemovalttl_1034675544925120576, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('REMOVALTTL', 1, 12, None), 
-         ])
 	_name = u'ACTION'
 
 
@@ -113,13 +157,20 @@ class Objectresult(pycopia.XML.POM.ElementNode):
 
 
 class Result(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'STATUS': attribStatus_3002794300863280225, 
+         'ID': attribId_1353545877677048836, 
+         'NUMINV': attribNuminv_762368709725798400, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('ID', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('STATUS', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('NUMINV', 1, 11, None), 
-         ])
 	_name = u'RESULT'
 
 
 GENERAL_ENTITIES = {}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

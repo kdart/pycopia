@@ -5,6 +5,185 @@
 
 import pycopia.XML.POM
 
+attribUnique_user_agents_962145505984825600 = pycopia.XML.POM.XMLAttribute(u'unique_user_agents', 7, 12, None)
+
+
+attribDirected_102157520356051801 = pycopia.XML.POM.XMLAttribute(u'directed', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+
+
+attribSource_12641013988165696 = pycopia.XML.POM.XMLAttribute(u'source', 7, 11, None)
+
+
+attribDay_1617103417574131344 = pycopia.XML.POM.XMLAttribute(u'day', 7, 11, None)
+
+
+attribKbytes_day_13780374770005281 = pycopia.XML.POM.XMLAttribute(u'kbytes_day', 7, 12, None)
+
+
+attribInline_objects_1913274850462156944 = pycopia.XML.POM.XMLAttribute(u'inline_objects', 7, 12, None)
+
+
+attribNhtml_pages_77703204346173025 = pycopia.XML.POM.XMLAttribute(u'nhtml_pages', 7, 12, None)
+
+
+attribSearches_3591259847399537296 = pycopia.XML.POM.XMLAttribute(u'searches', 7, 12, None)
+
+
+attribMax_edges_120142429621862400 = pycopia.XML.POM.XMLAttribute(u'max_edges', 7, 12, None)
+
+
+attribLabel_1763775457643958889 = pycopia.XML.POM.XMLAttribute(u'label', 1, 12, None)
+
+
+attribUnique_sites_2703820491168040000 = pycopia.XML.POM.XMLAttribute(u'unique_sites', 7, 12, None)
+
+
+attribId_2197717004406010000 = pycopia.XML.POM.XMLAttribute(u'id', 7, 11, None)
+
+
+attribHyperlink_nhtml_1744637703510159649 = pycopia.XML.POM.XMLAttribute(u'hyperlink_nhtml', 7, 12, None)
+
+
+attribNhtml_entry_pages_84340326245683600 = pycopia.XML.POM.XMLAttribute(u'nhtml_entry_pages', 7, 12, None)
+
+
+attribIs_spider_11021382836735076 = pycopia.XML.POM.XMLAttribute(u'is_spider', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+
+
+attribUnique_host_referers_2316178973845843681 = pycopia.XML.POM.XMLAttribute(u'unique_host_referers', 7, 12, None)
+
+
+attribEntry_page_146746641033358564 = pycopia.XML.POM.XMLAttribute(u'entry_page', 1, 12, None)
+
+
+attribXml_lang_2029235648979380625 = pycopia.XML.POM.XMLAttribute(u'xml:lang', 7, 12, None)
+
+
+attribHyperlink_html_821763882858372624 = pycopia.XML.POM.XMLAttribute(u'hyperlink_html', 7, 12, None)
+
+
+attribUtime_2602959081644437321 = pycopia.XML.POM.XMLAttribute(u'utime', 1, 12, None)
+
+
+attribUnique_se_referers_552373005848689 = pycopia.XML.POM.XMLAttribute(u'unique_se_referers', 7, 12, None)
+
+
+attribHits_4255455930859917316 = pycopia.XML.POM.XMLAttribute(u'hits', 7, 12, None)
+
+
+attribXmlns_765596079773108676 = pycopia.XML.POM.XMLAttribute(u'xmlns', 1, 14, u'http://www.cs.rpi.edu/LOGML')
+
+
+attribHtml_entry_pages_957466553447835601 = pycopia.XML.POM.XMLAttribute(u'html_entry_pages', 7, 12, None)
+
+
+attribSearch_count_905222652726154816 = pycopia.XML.POM.XMLAttribute(u'search_count', 7, 12, None)
+
+
+attribRequests_hour_2838434284560622500 = pycopia.XML.POM.XMLAttribute(u'requests_hour', 7, 12, None)
+
+
+attribSearch_engine_name_878728882074349201 = pycopia.XML.POM.XMLAttribute(u'search_engine_name', 1, 12, None)
+
+
+attribCode_761516448240213604 = pycopia.XML.POM.XMLAttribute(u'code', 7, 11, None)
+
+
+attribIs_search_engine_1085464416353769 = pycopia.XML.POM.XMLAttribute(u'is_search_engine', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+
+
+attribIndp_568034859833403876 = pycopia.XML.POM.XMLAttribute(u'indp', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+
+
+attribRequests_day_3367505903988218521 = pycopia.XML.POM.XMLAttribute(u'requests_day', 7, 12, None)
+
+
+attribSessions_3934721339115919209 = pycopia.XML.POM.XMLAttribute(u'sessions', 7, 12, None)
+
+
+attribUreferer_41903716971392676 = pycopia.XML.POM.XMLAttribute(u'ureferer', 1, 12, None)
+
+
+attribHour_4121460051367167721 = pycopia.XML.POM.XMLAttribute(u'hour', 7, 11, None)
+
+
+attribUnique_internal_url_referers_1640047041564249796 = pycopia.XML.POM.XMLAttribute(u'unique_internal_url_referers', 7, 12, None)
+
+
+attribWeight_2593941980357651364 = pycopia.XML.POM.XMLAttribute(u'weight', 7, 12, None)
+
+
+attribName_1423564487243335089 = pycopia.XML.POM.XMLAttribute(u'name', 1, 12, None)
+
+
+attribIp_1708523305872934489 = pycopia.XML.POM.XMLAttribute(u'ip', 1, 12, None)
+
+
+attribStart_time_12737478014110096 = pycopia.XML.POM.XMLAttribute(u'start_time', 1, 12, None)
+
+
+attribMin_edges_26492361238326564 = pycopia.XML.POM.XMLAttribute(u'min_edges', 7, 12, None)
+
+
+attribHtml_pages_3464228304359037504 = pycopia.XML.POM.XMLAttribute(u'html_pages', 7, 12, None)
+
+
+attribUnique_keywords_4275540978391373161 = pycopia.XML.POM.XMLAttribute(u'unique_keywords', 7, 12, None)
+
+
+attribUnique_external_url_referers_435765960924512656 = pycopia.XML.POM.XMLAttribute(u'unique_external_url_referers', 7, 12, None)
+
+
+attribTarget_662937813367444624 = pycopia.XML.POM.XMLAttribute(u'target', 7, 11, None)
+
+
+attribBytes_1180051357351649344 = pycopia.XML.POM.XMLAttribute(u'bytes', 7, 12, None)
+
+
+attribRequests_1852282429460788900 = pycopia.XML.POM.XMLAttribute(u'requests', 7, 12, None)
+
+
+attribAccess_count_21954491255844 = pycopia.XML.POM.XMLAttribute(u'access_count', 7, 12, None)
+
+
+attribValue_4156605816673722624 = pycopia.XML.POM.XMLAttribute(u'value', 1, 12, None)
+
+
+attribTarget_199657905920859681 = pycopia.XML.POM.XMLAttribute(u'target', 7, 12, None)
+
+
+attribMonth_1789626865905887044 = pycopia.XML.POM.XMLAttribute(u'month', 7, 11, None)
+
+
+attribEnd_date_268887526289108281 = pycopia.XML.POM.XMLAttribute(u'end_date', 1, 11, None)
+
+
+attribEhits_1742876526176640100 = pycopia.XML.POM.XMLAttribute(u'ehits', 7, 12, None)
+
+
+attribKbytes_hour_2119729736409455556 = pycopia.XML.POM.XMLAttribute(u'kbytes_hour', 7, 12, None)
+
+
+attribIs_internal_128356063005204736 = pycopia.XML.POM.XMLAttribute(u'is_internal', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+
+
+attribId_3798816270099800625 = pycopia.XML.POM.XMLAttribute(u'id', 7, 12, None)
+
+
+attribTotal_count_2656697091694191049 = pycopia.XML.POM.XMLAttribute(u'total_count', 7, 12, None)
+
+
+attribCount_13910844692731536 = pycopia.XML.POM.XMLAttribute(u'count', 7, 12, None)
+
+
+attribStart_date_3523617585021981316 = pycopia.XML.POM.XMLAttribute(u'start_date', 1, 11, None)
+
+
+attribXml_space_1831222745173704100 = pycopia.XML.POM.XMLAttribute(u'xml:space', pycopia.XML.POM.Enumeration((u'default', u'preserve')), 12, None)
+
+
+
+
 #  DTD for LOGML 1.0.0 
 
 
@@ -84,17 +263,17 @@ import pycopia.XML.POM
 
 
 class Logml(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_2029235648979380625, 
+         'xmlns': attribXmlns_765596079773108676, 
+         'name': attribName_1423564487243335089, 
+         'end_date': attribEnd_date_268887526289108281, 
+         'xml_space': attribXml_space_1831222745173704100, 
+         'label': attribLabel_1763775457643958889, 
+         'start_date': attribStart_date_3523617585021981316, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.cs.rpi.edu/LOGML'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['default', 'preserve']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('start_date', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('end_date', 1, 11, None), 
-         ])
 	_name = u'logml'
 
 
@@ -105,53 +284,53 @@ class Logml(pycopia.XML.POM.ElementNode):
 
 
 class Graph(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'directed': attribDirected_102157520356051801, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         'name': attribName_1423564487243335089, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('directed', pycopia.XML.POM.Enumeration(['0', '1']), 12, None), 
-         ])
 	_name = u'graph'
 
 
 class Node(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'hits': attribHits_4255455930859917316, 
+         'name': attribName_1423564487243335089, 
+         'weight': attribWeight_2593941980357651364, 
+         'label': attribLabel_1763775457643958889, 
+         'ehits': attribEhits_1742876526176640100, 
+         'id': attribId_2197717004406010000, 
+         'indp': attribIndp_568034859833403876, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('weight', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('hits', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('ehits', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('indp', pycopia.XML.POM.Enumeration(['0', '1']), 12, None), 
-         ])
 	_name = u'node'
 
 
 class Edge(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'hits': attribHits_4255455930859917316, 
+         'target': attribTarget_662937813367444624, 
+         'weight': attribWeight_2593941980357651364, 
+         'label': attribLabel_1763775457643958889, 
+         'source': attribSource_12641013988165696, 
+         'indp': attribIndp_568034859833403876, 
+         'id': attribId_3798816270099800625, 
+         'name': attribName_1423564487243335089, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('weight', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('source', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('target', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('hits', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('indp', pycopia.XML.POM.Enumeration(['0', '1']), 12, None), 
-         ])
 	_name = u'edge'
 
 
 class Att(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         'value': attribValue_4156605816673722624, 
+         'name': attribName_1423564487243335089, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('value', 1, 12, None), 
-         ])
 	_name = u'att'
 
 
@@ -162,25 +341,25 @@ class Att(pycopia.XML.POM.ElementNode):
 
 
 class Hosts(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         ])
 	_name = u'hosts'
 
 
 class Host(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_1423564487243335089, 
+         'access_count': attribAccess_count_21954491255844, 
+         'ip': attribIp_1708523305872934489, 
+         'is_internal': attribIs_internal_128356063005204736, 
+         'bytes': attribBytes_1180051357351649344, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('ip', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('is_internal', pycopia.XML.POM.Enumeration(['0', '1']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('access_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'host'
 
 
@@ -191,23 +370,23 @@ class Host(pycopia.XML.POM.ElementNode):
 
 
 class Domains(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         ])
 	_name = u'domains'
 
 
 class Domain(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_1423564487243335089, 
+         'access_count': attribAccess_count_21954491255844, 
+         'bytes': attribBytes_1180051357351649344, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('access_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'domain'
 
 
@@ -218,24 +397,24 @@ class Domain(pycopia.XML.POM.ElementNode):
 
 
 class Directories(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         ])
 	_name = u'directories'
 
 
 class Directory(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_1423564487243335089, 
+         'access_count': attribAccess_count_21954491255844, 
+         'total_count': attribTotal_count_2656697091694191049, 
+         'bytes': attribBytes_1180051357351649344, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('total_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('access_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'directory'
 
 
@@ -246,24 +425,24 @@ class Directory(pycopia.XML.POM.ElementNode):
 
 
 class Useragents(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         ])
 	_name = u'userAgents'
 
 
 class Useragent(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'is_spider': attribIs_spider_11021382836735076, 
+         'name': attribName_1423564487243335089, 
+         'access_count': attribAccess_count_21954491255844, 
+         'bytes': attribBytes_1180051357351649344, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('access_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('is_spider', pycopia.XML.POM.Enumeration(['0', '1']), 12, None), 
-         ])
 	_name = u'userAgent'
 
 
@@ -274,47 +453,47 @@ class Useragent(pycopia.XML.POM.ElementNode):
 
 
 class Referers(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         ])
 	_name = u'referers'
 
 
 class Referer(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'target': attribTarget_199657905920859681, 
+         'access_count': attribAccess_count_21954491255844, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'is_internal': attribIs_internal_128356063005204736, 
+         'bytes': attribBytes_1180051357351649344, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         'name': attribName_1423564487243335089, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('target', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('access_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('is_internal', pycopia.XML.POM.Enumeration(['0', '1']), 12, None), 
-         ])
 	_name = u'referer'
 
 
 class Hostreferers(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         ])
 	_name = u'hostReferers'
 
 
 class Hostreferer(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_1423564487243335089, 
+         'access_count': attribAccess_count_21954491255844, 
+         'bytes': attribBytes_1180051357351649344, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'label': attribLabel_1763775457643958889, 
+         'is_search_engine': attribIs_search_engine_1085464416353769, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('access_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('is_search_engine', pycopia.XML.POM.Enumeration(['0', '1']), 12, None), 
-         ])
 	_name = u'hostReferer'
 
 
@@ -325,23 +504,23 @@ class Hostreferer(pycopia.XML.POM.ElementNode):
 
 
 class Keywords(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         'search_engine_name': attribSearch_engine_name_878728882074349201, 
+         'search_count': attribSearch_count_905222652726154816, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('search_engine_name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('search_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         ])
 	_name = u'keywords'
 
 
 class Keyword(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'total_count': attribTotal_count_2656697091694191049, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         'name': attribName_1423564487243335089, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('total_count', 7, 12, None), 
-         ])
 	_name = u'keyword'
 
 
@@ -352,71 +531,71 @@ class Keyword(pycopia.XML.POM.ElementNode):
 
 
 class Summary(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'unique_se_referers': attribUnique_se_referers_552373005848689, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'kbytes_hour': attribKbytes_hour_2119729736409455556, 
+         'hyperlink_html': attribHyperlink_html_821763882858372624, 
+         'requests_day': attribRequests_day_3367505903988218521, 
+         'unique_keywords': attribUnique_keywords_4275540978391373161, 
+         'unique_external_url_referers': attribUnique_external_url_referers_435765960924512656, 
+         'requests_hour': attribRequests_hour_2838434284560622500, 
+         'nhtml_pages': attribNhtml_pages_77703204346173025, 
+         'unique_sites': attribUnique_sites_2703820491168040000, 
+         'sessions': attribSessions_3934721339115919209, 
+         'nhtml_entry_pages': attribNhtml_entry_pages_84340326245683600, 
+         'html_entry_pages': attribHtml_entry_pages_957466553447835601, 
+         'unique_user_agents': attribUnique_user_agents_962145505984825600, 
+         'kbytes_day': attribKbytes_day_13780374770005281, 
+         'searches': attribSearches_3591259847399537296, 
+         'hyperlink_nhtml': attribHyperlink_nhtml_1744637703510159649, 
+         'inline_objects': attribInline_objects_1913274850462156944, 
+         'bytes': attribBytes_1180051357351649344, 
+         'unique_internal_url_referers': attribUnique_internal_url_referers_1640047041564249796, 
+         'requests': attribRequests_1852282429460788900, 
+         'unique_host_referers': attribUnique_host_referers_2316178973845843681, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('requests', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('sessions', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('nhtml_pages', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('inline_objects', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('hyperlink_html', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('hyperlink_nhtml', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_entry_pages', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('nhtml_entry_pages', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('unique_sites', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('unique_host_referers', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('unique_se_referers', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('unique_external_url_referers', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('unique_internal_url_referers', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('unique_user_agents', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('requests_hour', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('requests_day', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('kbytes_day', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('kbytes_hour', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('searches', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('unique_keywords', 7, 12, None), 
-         ])
 	_name = u'summary'
 
 
 class Httpcode(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'code': attribCode_761516448240213604, 
+         'name': attribName_1423564487243335089, 
+         'total_count': attribTotal_count_2656697091694191049, 
+         'bytes': attribBytes_1180051357351649344, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('code', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('total_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'httpCode'
 
 
 class Httpmethod(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_1423564487243335089, 
+         'total_count': attribTotal_count_2656697091694191049, 
+         'bytes': attribBytes_1180051357351649344, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('total_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'httpMethod'
 
 
 class Httpversion(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_1423564487243335089, 
+         'total_count': attribTotal_count_2656697091694191049, 
+         'bytes': attribBytes_1180051357351649344, 
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'label': attribLabel_1763775457643958889, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('total_count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'httpVersion'
 
 
@@ -426,35 +605,35 @@ class Datestat(pycopia.XML.POM.ElementNode):
 
 
 class Monthstat(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'hits': attribHits_4255455930859917316, 
+         'bytes': attribBytes_1180051357351649344, 
+         'month': attribMonth_1789626865905887044, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('month', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('hits', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'monthStat'
 
 
 class Daystat(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'hits': attribHits_4255455930859917316, 
+         'bytes': attribBytes_1180051357351649344, 
+         'day': attribDay_1617103417574131344, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('day', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('hits', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'dayStat'
 
 
 class Hourstat(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'html_pages': attribHtml_pages_3464228304359037504, 
+         'hits': attribHits_4255455930859917316, 
+         'bytes': attribBytes_1180051357351649344, 
+         'hour': attribHour_4121460051367167721, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('hour', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('hits', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('bytes', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('html_pages', 7, 12, None), 
-         ])
 	_name = u'hourStat'
 
 
@@ -465,44 +644,44 @@ class Hourstat(pycopia.XML.POM.ElementNode):
 
 
 class Usersessions(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         'min_edges': attribMin_edges_26492361238326564, 
+         'max_edges': attribMax_edges_120142429621862400, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('max_edges', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('min_edges', 7, 12, None), 
-         ])
 	_name = u'userSessions'
 
 
 class Usersession(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'name': attribName_1423564487243335089, 
+         'access_count': attribAccess_count_21954491255844, 
+         'start_time': attribStart_time_12737478014110096, 
+         'ureferer': attribUreferer_41903716971392676, 
+         'label': attribLabel_1763775457643958889, 
+         'entry_page': attribEntry_page_146746641033358564, 
+         'id': attribId_3798816270099800625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('id', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('label', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('ureferer', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('entry_page', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('start_time', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('access_count', 7, 12, None), 
-         ])
 	_name = u'userSession'
 
 
 class Path(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'count': attribCount_13910844692731536, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('count', 7, 12, None), 
-         ])
 	_name = u'path'
 
 
 class Uedge(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'source': attribSource_12641013988165696, 
+         'target': attribTarget_662937813367444624, 
+         'utime': attribUtime_2602959081644437321, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('source', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('target', 7, 11, None), 
-         pycopia.XML.POM.XMLAttribute('utime', 1, 12, None), 
-         ])
 	_name = u'uedge'
 
 
@@ -513,3 +692,10 @@ class Uedge(pycopia.XML.POM.ElementNode):
 
 
 GENERAL_ENTITIES = {}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

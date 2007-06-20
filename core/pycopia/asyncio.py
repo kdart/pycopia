@@ -276,20 +276,6 @@ class DirectoryNotifier(object):
     def no_change(self):
         pass
 
-# precompute the O_ flag list, and stash it in the os module
-os.OLIST = filter(lambda n: n[0:2] == "O_", dir(os))
-def flag_string(fd):
-    """flag_string(fd)
-    where fd is an integer file descriptor of an open file. Returns the files open
-    flags as a vertical bar (|) delimited string.
-    """
-    flags = fcntl.fcntl(fd, fcntl.F_GETFL)
-    strlist = filter(None, map(lambda n: (flags & getattr(os, n)) and n, os.OLIST))
-    # hack to accomodate the fact that O_RDONLY is not really a flag...
-    if not (flags & os.ACCMODE):
-        strlist.insert(0, "O_RDONLY")
-    return "|".join(strlist)
-
 
 # a singleton instance of Poll. Usually, only this poller is used in a program
 # using this module.

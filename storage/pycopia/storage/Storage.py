@@ -358,7 +358,7 @@ class RootContainer(object):
             return self._cache._report
 
     def _build_report(self, name):
-        from pycopia import reports # XXX pycopia-QA dependency not listed
+        from pycopia import reports # XXX pycopia-QA circular dependency.
         if name is None:
             name = self.get("reportname", "default")
         params = self.reports.get(name, (None,))
@@ -428,9 +428,9 @@ class RootContainer(object):
 
     logfilename = property(get_logfilename, None, None, "The logfile object's path name.")
 
+    _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
 
     # perform shell-like variable expansion
-    _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
     def expand(self, value):
         if '$' not in value:
             return value
@@ -487,23 +487,14 @@ class DBFile(DB):
 
 
 # client constructor
-def get_client():
-    from pycopia import basicconfig
-    cf = basicconfig.get_config("storage.conf")
+def get_client(cf):
     host = cf.get("host", DEFAULT_HOST)
     port = cf.get("port", DEFAULT_PORT)
-    del cf
     return DBClient(host, port)
 
-def get_database(filename=None):
-    if not filename:
-        from pycopia import basicconfig
-        cf = basicconfig.get_config("storage.conf")
-        filename = cf.get("dbfile")
-        del cf
+def get_database(cf):
+    filename = cf.get("dbfile")
     return DBFile(os.path.expandvars(os.path.expanduser(filename)))
-
-
 
 def get_config(extrafiles=None, initdict=None, **kwargs):
     """get_config([extrafiles=], [initdict=], [**kwargs])
@@ -512,8 +503,11 @@ An extra dictionary may be merged in with the 'initdict' parameter.
 And finally, extra options may be added with keyword parameters when calling
 this.  """
     from pycopia import socket
+    from pycopia import basicconfig
     SOURCES = []
     SOURCES.append(os.path.join(os.environ["HOME"], ".pycopiarc"))
+
+    dbcf = basicconfig.get_config("storage.conf")
 
     if type(extrafiles) is str:
         extrafiles = [extrafiles]
@@ -521,10 +515,11 @@ this.  """
         FILES = SOURCES + extrafiles
     else:
         FILES = SOURCES
-    try:
-        db = get_client()
+    try: # try getting the server. If not available, try
+         # opening the data file directly.
+        db = get_client(dbcf)
     except socket.SocketError:
-        db = get_database()
+        db = get_database(dbcf)
     cache = AttrDict()
     cf = db.get_root(cache)
     # copy default flags to cache so the don't get altered
@@ -540,13 +535,13 @@ this.  """
     return cf
 
 # performs an initial set up of the persistent storage. This usually only
-# runs once, when first installing. 
+# runs once, when first installing. This is the default structure for a
+# new storage.
 def _initialize(db):
-    db["flags"] = PersistentAttrDict()
-    db["flags"].VERBOSE = 0 # levels of verbosity
-    db["flags"].DEBUG = 0 # levels of debugging
-    db["flags"].NONOTE = False # Don't ask for a note in the testrunner
-    db["flags"].NOINTERACTIVE = False # Run interactive tests also, by default
+    flags = db["flags"] = PersistentAttrDict()
+    flags.VERBOSE = 0 # levels of verbosity
+    flags.DEBUG = 0 # levels of debugging
+    flags.INTERACTIVE = False # Don't run interactive tests also, by default
     # collections of objects defined in the netobjects module.
     db["users"] = PersistentAttrDict()    # for User objects
     db["traps"] = PersistentAttrDict()    # for traps
@@ -554,12 +549,32 @@ def _initialize(db):
     db["networks"] = PersistentAttrDict() # For Network objects
     db["ipranges"] = PersistentAttrDict() # for IP range assignments
     db["testbeds"] = PersistentAttrDict() # for testbeds (collections of Devices)
+    # default report spec
     db["reports"] = PersistentAttrDict()  # For report constructors
     db["reports"].default = '("StandardReport", "-", "text/ansi")'
+    #
     db["default"] = PersistentAttrDict()  # for root default values
     db["default"].logbasename = "pycopia.log"
     db["default"].logfiledir = "/var/tmp"
     db["default"].reportbasename = "-"
+    # sub-package test configuration
+    unittests = db["unittests"] = PersistentAttrDict()  # For report constructors
+    unittests["aid"] = PersistentAttrDict()
+    unittests["utils"] = PersistentAttrDict() 
+    unittests["core"] = PersistentAttrDict()
+    unittests["CLI"] = PersistentAttrDict()
+    unittests["debugger"] = PersistentAttrDict()
+    unittests["process"] = PersistentAttrDict()
+    unittests["SMI"] = PersistentAttrDict()
+    unittests["mibs"] = PersistentAttrDict()
+    unittests["SNMP"] = PersistentAttrDict()
+    unittests["storage"] = PersistentAttrDict()
+    unittests["QA"] = PersistentAttrDict()
+    unittests["net"] = PersistentAttrDict()
+    unittests["audio"] = PersistentAttrDict()
+    unittests["XML"] = PersistentAttrDict()
+    unittests["WWW"] = PersistentAttrDict()
+    unittests["vim"] = PersistentAttrDict()
 
 
 

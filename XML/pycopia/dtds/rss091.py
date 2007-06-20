@@ -5,6 +5,11 @@
 
 import pycopia.XML.POM
 
+attribVersion_218229044018807056 = pycopia.XML.POM.XMLAttribute(u'version', 1, 11, None)
+
+
+
+
 # 
 # Rich Site Summary (RSS) 0.91 official DTD, proposed.
 # RSS is an XML vocabulary for describing
@@ -21,10 +26,10 @@ import pycopia.XML.POM
 
 
 class Rss(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'version': attribVersion_218229044018807056, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('version', 1, 11, None), 
-         ])
 	_name = u'rss'
 
 
@@ -466,4 +471,106 @@ class Skipdays(pycopia.XML.POM.ElementNode):
 # 
 
 
-GENERAL_ENTITIES = {u'aring': u'\xe5', u'yen': u'\xa5', u'ograve': u'\xf2', u'Ntilde': u'\xd1', u'nbsp': u'\xa0', u'Atilde': u'\xc3', u'aelig': u'\xe6', u'auml': u'\xe4', u'otilde': u'\xf5', u'Icirc': u'\xce', u'Eacute': u'\xc9', u'uacute': u'\xfa', u'ocirc': u'\xf4', u'cedil': u'\xb8', u'not': u'\xac', u'AElig': u'\xc6', u'oslash': u'\xf8', u'acute': u'\xb4', u'laquo': u'\xab', u'shy': u'\xad', u'Igrave': u'\xcc', u'Ograve': u'\xd2', u'Yacute': u'\xdd', u'Auml': u'\xc4', u'brvbar': u'\xa6', u'Otilde': u'\xd5', u'szlig': u'\xdf', u'agrave': u'\xe0', u'Ocirc': u'\xd4', u'frac14': u'\xbc', u'egrave': u'\xe8', u'iexcl': u'\xa1', u'frac12': u'\xbd', u'ordf': u'\xaa', u'Uuml': u'\xdc', u'ntilde': u'\xf1', u'atilde': u'\xe3', u'uml': u'\xa8', u'reg': u'\xae', u'Oslash': u'\xd8', u'THORN': u'\xde', u'yuml': u'\xff', u'aacute': u'\xe1', u'ecirc': u'\xea', u'Aring': u'\xc5', u'times': u'\xd7', u'Ugrave': u'\xd9', u'Agrave': u'\xc0', u'eth': u'\xf0', u'iuml': u'\xef', u'Egrave': u'\xc8', u'frac34': u'\xbe', u'divide': u'\xf7', u'Ouml': u'\xd6', u'igrave': u'\xec', u'ETH': u'\xd0', u'plusmn': u'\xb1', u'sup1': u'\xb9', u'sup2': u'\xb2', u'sup3': u'\xb3', u'Aacute': u'\xc1', u'cent': u'\xa2', u'euml': u'\xeb', u'iacute': u'\xed', u'para': u'\xb6', u'uuml': u'\xfc', u'icirc': u'\xee', u'copy': u'\xa9', u'Iuml': u'\xcf', u'Oacute': u'\xd3', u'ccedil': u'\xe7', u'Ucirc': u'\xdb', u'deg': u'\xb0', u'pound': u'\xa3', u'curren': u'\xa4', u'ucirc': u'\xfb', u'ugrave': u'\xf9', u'Acirc': u'\xc2', u'Euml': u'\xcb', u'Iacute': u'\xcd', u'Uacute': u'\xda', u'iquest': u'\xbf', u'yacute': u'\xfd', u'Ecirc': u'\xca', u'acirc': u'\xe2', u'macr': u'\xaf', u'Ccedil': u'\xc7', u'ordm': u'\xba', u'micro': u'\xb5', u'eacute': u'\xe9', u'middot': u'\xb7', u'thorn': u'\xfe', u'ouml': u'\xf6', u'raquo': u'\xbb', u'sect': u'\xa7', u'oacute': u'\xf3'}
+GENERAL_ENTITIES = {   'AElig': u'\xc6',
+    'Aacute': u'\xc1',
+    'Acirc': u'\xc2',
+    'Agrave': u'\xc0',
+    'Aring': u'\xc5',
+    'Atilde': u'\xc3',
+    'Auml': u'\xc4',
+    'Ccedil': u'\xc7',
+    'ETH': u'\xd0',
+    'Eacute': u'\xc9',
+    'Ecirc': u'\xca',
+    'Egrave': u'\xc8',
+    'Euml': u'\xcb',
+    'Iacute': u'\xcd',
+    'Icirc': u'\xce',
+    'Igrave': u'\xcc',
+    'Iuml': u'\xcf',
+    'Ntilde': u'\xd1',
+    'Oacute': u'\xd3',
+    'Ocirc': u'\xd4',
+    'Ograve': u'\xd2',
+    'Oslash': u'\xd8',
+    'Otilde': u'\xd5',
+    'Ouml': u'\xd6',
+    'THORN': u'\xde',
+    'Uacute': u'\xda',
+    'Ucirc': u'\xdb',
+    'Ugrave': u'\xd9',
+    'Uuml': u'\xdc',
+    'Yacute': u'\xdd',
+    'aacute': u'\xe1',
+    'acirc': u'\xe2',
+    'acute': u'\xb4',
+    'aelig': u'\xe6',
+    'agrave': u'\xe0',
+    'aring': u'\xe5',
+    'atilde': u'\xe3',
+    'auml': u'\xe4',
+    'brvbar': u'\xa6',
+    'ccedil': u'\xe7',
+    'cedil': u'\xb8',
+    'cent': u'\xa2',
+    'copy': u'\xa9',
+    'curren': u'\xa4',
+    'deg': u'\xb0',
+    'divide': u'\xf7',
+    'eacute': u'\xe9',
+    'ecirc': u'\xea',
+    'egrave': u'\xe8',
+    'eth': u'\xf0',
+    'euml': u'\xeb',
+    'frac12': u'\xbd',
+    'frac14': u'\xbc',
+    'frac34': u'\xbe',
+    'iacute': u'\xed',
+    'icirc': u'\xee',
+    'iexcl': u'\xa1',
+    'igrave': u'\xec',
+    'iquest': u'\xbf',
+    'iuml': u'\xef',
+    'laquo': u'\xab',
+    'macr': u'\xaf',
+    'micro': u'\xb5',
+    'middot': u'\xb7',
+    'nbsp': u'\xa0',
+    'not': u'\xac',
+    'ntilde': u'\xf1',
+    'oacute': u'\xf3',
+    'ocirc': u'\xf4',
+    'ograve': u'\xf2',
+    'ordf': u'\xaa',
+    'ordm': u'\xba',
+    'oslash': u'\xf8',
+    'otilde': u'\xf5',
+    'ouml': u'\xf6',
+    'para': u'\xb6',
+    'plusmn': u'\xb1',
+    'pound': u'\xa3',
+    'raquo': u'\xbb',
+    'reg': u'\xae',
+    'sect': u'\xa7',
+    'shy': u'\xad',
+    'sup1': u'\xb9',
+    'sup2': u'\xb2',
+    'sup3': u'\xb3',
+    'szlig': u'\xdf',
+    'thorn': u'\xfe',
+    'times': u'\xd7',
+    'uacute': u'\xfa',
+    'ucirc': u'\xfb',
+    'ugrave': u'\xf9',
+    'uml': u'\xa8',
+    'uuml': u'\xfc',
+    'yacute': u'\xfd',
+    'yen': u'\xa5',
+    'yuml': u'\xff'}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

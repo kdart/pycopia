@@ -5,6 +5,197 @@
 
 import pycopia.XML.POM
 
+attribArchive_2029791469104495009 = pycopia.XML.POM.XMLAttribute(u'archive', 1, 12, None)
+
+
+attribRowspan_824571289138210084 = pycopia.XML.POM.XMLAttribute(u'rowspan', 1, 13, u'1')
+
+
+attribCite_2366926375086749281 = pycopia.XML.POM.XMLAttribute(u'cite', 1, 12, None)
+
+
+attribTitle_4254840287891469241 = pycopia.XML.POM.XMLAttribute(u'title', 1, 12, None)
+
+
+attribAlt_1162895347347825025 = pycopia.XML.POM.XMLAttribute(u'alt', 1, 11, None)
+
+
+attribData_119997120992872036 = pycopia.XML.POM.XMLAttribute(u'data', 1, 12, None)
+
+
+attribName_1246620389478747364 = pycopia.XML.POM.XMLAttribute(u'name', 1, 11, None)
+
+
+attribDeclare_857178368687561284 = pycopia.XML.POM.XMLAttribute(u'declare', pycopia.XML.POM.Enumeration((u'declare',)), 12, None)
+
+
+attribType_3598646553109970404 = pycopia.XML.POM.XMLAttribute(u'type', 1, 12, None)
+
+
+attribAlign_1920212820748718721 = pycopia.XML.POM.XMLAttribute(u'align', pycopia.XML.POM.Enumeration((u'left', u'center', u'right')), 12, None)
+
+
+attribScheme_305738970983549041 = pycopia.XML.POM.XMLAttribute(u'scheme', 1, 12, None)
+
+
+attribClassid_1288014720321799044 = pycopia.XML.POM.XMLAttribute(u'classid', 1, 12, None)
+
+
+attribSize_1540036912549524169 = pycopia.XML.POM.XMLAttribute(u'size', 1, 12, None)
+
+
+attribSrc_3104320399512748900 = pycopia.XML.POM.XMLAttribute(u'src', 1, 11, None)
+
+
+attribMedia_1916838375387458329 = pycopia.XML.POM.XMLAttribute(u'media', 1, 12, None)
+
+
+attribHttp_equiv_1245057564071175625 = pycopia.XML.POM.XMLAttribute(u'http-equiv', 7, 12, None)
+
+
+attribMethod_1594070884251040000 = pycopia.XML.POM.XMLAttribute(u'method', pycopia.XML.POM.Enumeration((u'get', u'post')), 13, u'get')
+
+
+attribXmlns_xsi_197877992173683264 = pycopia.XML.POM.XMLAttribute(u'xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance')
+
+
+attribAccesskey_2737575848648385424 = pycopia.XML.POM.XMLAttribute(u'accesskey', 1, 12, None)
+
+
+attribValue_4156605816673722624 = pycopia.XML.POM.XMLAttribute(u'value', 1, 12, None)
+
+
+attribMaxlength_604742143183339225 = pycopia.XML.POM.XMLAttribute(u'maxlength', 1, 12, None)
+
+
+attribValuetype_3058020386316608164 = pycopia.XML.POM.XMLAttribute(u'valuetype', pycopia.XML.POM.Enumeration((u'data', u'ref', u'object')), 13, u'data')
+
+
+attribHreflang_29225588433214761 = pycopia.XML.POM.XMLAttribute(u'hreflang', 1, 12, None)
+
+
+attribAction_142350502103259025 = pycopia.XML.POM.XMLAttribute(u'action', 1, 11, None)
+
+
+attribXmlns_2523611023564185025 = pycopia.XML.POM.XMLAttribute(u'xmlns', 1, 14, u'http://www.w3.org/1999/xhtml')
+
+
+attribValign_2142455386295617129 = pycopia.XML.POM.XMLAttribute(u'valign', pycopia.XML.POM.Enumeration((u'top', u'middle', u'bottom')), 12, None)
+
+
+attribLongdesc_551606211785669089 = pycopia.XML.POM.XMLAttribute(u'longdesc', 1, 12, None)
+
+
+attribVersion_413241004091974081 = pycopia.XML.POM.XMLAttribute(u'version', 1, 14, u'-//W3C//DTD XHTML Basic 1.0//EN')
+
+
+attribId_121205855951786596 = pycopia.XML.POM.XMLAttribute(u'id', 2, 12, None)
+
+
+attribHeight_607192057250935849 = pycopia.XML.POM.XMLAttribute(u'height', 1, 12, None)
+
+
+attribContent_3546404873644026241 = pycopia.XML.POM.XMLAttribute(u'content', 1, 11, None)
+
+
+attribRel_3659796562539513529 = pycopia.XML.POM.XMLAttribute(u'rel', 8, 12, None)
+
+
+attribWidth_2698869476000729641 = pycopia.XML.POM.XMLAttribute(u'width', 1, 12, None)
+
+
+attribSelected_797750601755673316 = pycopia.XML.POM.XMLAttribute(u'selected', pycopia.XML.POM.Enumeration((u'selected',)), 12, None)
+
+
+attribSummary_293896294327076841 = pycopia.XML.POM.XMLAttribute(u'summary', 1, 12, None)
+
+
+attribClass_3214756266708739600 = pycopia.XML.POM.XMLAttribute(u'class', 8, 12, None)
+
+
+attribName_1423564487243335089 = pycopia.XML.POM.XMLAttribute(u'name', 1, 12, None)
+
+
+attribRows_873710474168435344 = pycopia.XML.POM.XMLAttribute(u'rows', 1, 11, None)
+
+
+attribScope_688360248864796225 = pycopia.XML.POM.XMLAttribute(u'scope', pycopia.XML.POM.Enumeration((u'row', u'col')), 12, None)
+
+
+attribHeaders_1895922246332405776 = pycopia.XML.POM.XMLAttribute(u'headers', 4, 12, None)
+
+
+attribCharset_2456238898048849 = pycopia.XML.POM.XMLAttribute(u'charset', 1, 12, None)
+
+
+attribCodetype_164813866435053081 = pycopia.XML.POM.XMLAttribute(u'codetype', 1, 12, None)
+
+
+attribXsi_schemalocation_8801704167490404 = pycopia.XML.POM.XMLAttribute(u'xsi:schemaLocation', 1, 12, None)
+
+
+attribHref_10590696292225 = pycopia.XML.POM.XMLAttribute(u'href', 1, 12, None)
+
+
+attribProfile_3085446061595951089 = pycopia.XML.POM.XMLAttribute(u'profile', 1, 13, u'')
+
+
+attribMultiple_1270567521988255296 = pycopia.XML.POM.XMLAttribute(u'multiple', pycopia.XML.POM.Enumeration((u'multiple',)), 12, None)
+
+
+attribColspan_13003694770657536 = pycopia.XML.POM.XMLAttribute(u'colspan', 1, 13, u'1')
+
+
+attribCodebase_1491350078472004 = pycopia.XML.POM.XMLAttribute(u'codebase', 1, 12, None)
+
+
+attribType_44301332405719489 = pycopia.XML.POM.XMLAttribute(u'type', pycopia.XML.POM.Enumeration((u'text', u'password', u'checkbox', u'radio', u'submit', u'reset', u'hidden')), 13, u'text')
+
+
+attribTabindex_1924349933320454025 = pycopia.XML.POM.XMLAttribute(u'tabindex', 1, 12, None)
+
+
+attribHref_35096121232009744 = pycopia.XML.POM.XMLAttribute(u'href', 1, 11, None)
+
+
+attribEnctype_436576891689519025 = pycopia.XML.POM.XMLAttribute(u'enctype', 1, 13, u'application/x-www-form-urlencoded')
+
+
+attribSrc_622124219914705225 = pycopia.XML.POM.XMLAttribute(u'src', 1, 12, None)
+
+
+attribXml_lang_1108072188818706241 = pycopia.XML.POM.XMLAttribute(u'xml:lang', 1, 12, None)
+
+
+attribName_3951386174947790881 = pycopia.XML.POM.XMLAttribute(u'name', 7, 12, None)
+
+
+attribXml_space_359981169846238864 = pycopia.XML.POM.XMLAttribute(u'xml:space', pycopia.XML.POM.Enumeration((u'preserve',)), 14, u'preserve')
+
+
+attribAbbr_2036693206661546449 = pycopia.XML.POM.XMLAttribute(u'abbr', 1, 12, None)
+
+
+attribFor_666919309859033284 = pycopia.XML.POM.XMLAttribute(u'for', 3, 12, None)
+
+
+attribChecked_1601429972271201856 = pycopia.XML.POM.XMLAttribute(u'checked', pycopia.XML.POM.Enumeration((u'checked',)), 12, None)
+
+
+attribCols_157052534391325764 = pycopia.XML.POM.XMLAttribute(u'cols', 1, 11, None)
+
+
+attribAxis_298091641253602249 = pycopia.XML.POM.XMLAttribute(u'axis', 1, 12, None)
+
+
+attribRev_684970124142549961 = pycopia.XML.POM.XMLAttribute(u'rev', 8, 12, None)
+
+
+attribStandby_275913609211742436 = pycopia.XML.POM.XMLAttribute(u'standby', 1, 12, None)
+
+
+
+
 #  XHTML Basic 1.0 DTD  ...................................................... 
 
 
@@ -1873,15 +2064,15 @@ Uris = pycopia.XML.POM.Notation(u'uris', u'-//W3C//NOTATION XHTML Datatype: URIs
 
 
 class Br(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         ])
 	_name = u'br'
 
 
@@ -1895,16 +2086,16 @@ class Br(pycopia.XML.POM.ElementNode):
 
 
 class Span(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'span'
 
 
@@ -1949,16 +2140,16 @@ class Span(pycopia.XML.POM.ElementNode):
 
 
 class Abbr(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'abbr'
 
 
@@ -1969,16 +2160,16 @@ class Abbr(pycopia.XML.POM.ElementNode):
 
 
 class Acronym(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'acronym'
 
 
@@ -1989,16 +2180,16 @@ class Acronym(pycopia.XML.POM.ElementNode):
 
 
 class Cite(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'cite'
 
 
@@ -2009,16 +2200,16 @@ class Cite(pycopia.XML.POM.ElementNode):
 
 
 class Code(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'code'
 
 
@@ -2029,16 +2220,16 @@ class Code(pycopia.XML.POM.ElementNode):
 
 
 class Dfn(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'dfn'
 
 
@@ -2049,16 +2240,16 @@ class Dfn(pycopia.XML.POM.ElementNode):
 
 
 class Em(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'em'
 
 
@@ -2069,16 +2260,16 @@ class Em(pycopia.XML.POM.ElementNode):
 
 
 class Kbd(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'kbd'
 
 
@@ -2089,17 +2280,17 @@ class Kbd(pycopia.XML.POM.ElementNode):
 
 
 class Q(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'cite': attribCite_2366926375086749281, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('cite', 1, 12, None), 
-         ])
 	_name = u'q'
 
 
@@ -2110,16 +2301,16 @@ class Q(pycopia.XML.POM.ElementNode):
 
 
 class Samp(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'samp'
 
 
@@ -2130,16 +2321,16 @@ class Samp(pycopia.XML.POM.ElementNode):
 
 
 class Strong(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'strong'
 
 
@@ -2150,16 +2341,16 @@ class Strong(pycopia.XML.POM.ElementNode):
 
 
 class Var(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'var'
 
 
@@ -2204,16 +2395,16 @@ class Var(pycopia.XML.POM.ElementNode):
 
 
 class Div(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'div'
 
 
@@ -2224,16 +2415,16 @@ class Div(pycopia.XML.POM.ElementNode):
 
 
 class P(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'p'
 
 
@@ -2278,16 +2469,16 @@ class P(pycopia.XML.POM.ElementNode):
 
 
 class Address(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'address'
 
 
@@ -2298,17 +2489,17 @@ class Address(pycopia.XML.POM.ElementNode):
 
 
 class Blockquote(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'cite': attribCite_2366926375086749281, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('cite', 1, 12, None), 
-         ])
 	_name = u'blockquote'
 
 
@@ -2319,16 +2510,16 @@ class Blockquote(pycopia.XML.POM.ElementNode):
 
 
 class Pre(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'pre'
 
 
@@ -2342,16 +2533,16 @@ class Pre(pycopia.XML.POM.ElementNode):
 
 
 class H1(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'h1'
 
 
@@ -2362,16 +2553,16 @@ class H1(pycopia.XML.POM.ElementNode):
 
 
 class H2(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'h2'
 
 
@@ -2382,16 +2573,16 @@ class H2(pycopia.XML.POM.ElementNode):
 
 
 class H3(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'h3'
 
 
@@ -2402,16 +2593,16 @@ class H3(pycopia.XML.POM.ElementNode):
 
 
 class H4(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'h4'
 
 
@@ -2422,16 +2613,16 @@ class H4(pycopia.XML.POM.ElementNode):
 
 
 class H5(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'h5'
 
 
@@ -2442,16 +2633,16 @@ class H5(pycopia.XML.POM.ElementNode):
 
 
 class H6(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'h6'
 
 
@@ -2504,24 +2695,24 @@ class H6(pycopia.XML.POM.ElementNode):
 
 
 class A(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'charset': attribCharset_2456238898048849, 
+         'rev': attribRev_684970124142549961, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'href': attribHref_10590696292225, 
+         'accesskey': attribAccesskey_2737575848648385424, 
+         'rel': attribRel_3659796562539513529, 
+         'hreflang': attribHreflang_29225588433214761, 
+         'type': attribType_3598646553109970404, 
+         'xml_space': attribXml_space_359981169846238864, 
+         'tabindex': attribTabindex_1924349933320454025, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('href', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('charset', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('type', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('hreflang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('rel', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('rev', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('accesskey', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('tabindex', 1, 12, None), 
-         ])
 	_name = u'a'
 
 
@@ -2569,16 +2760,16 @@ class A(pycopia.XML.POM.ElementNode):
 
 
 class Dl(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'dl'
 
 
@@ -2592,16 +2783,16 @@ class Dl(pycopia.XML.POM.ElementNode):
 
 
 class Dt(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'dt'
 
 
@@ -2615,16 +2806,16 @@ class Dt(pycopia.XML.POM.ElementNode):
 
 
 class Dd(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'dd'
 
 
@@ -2638,16 +2829,16 @@ class Dd(pycopia.XML.POM.ElementNode):
 
 
 class Ol(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'ol'
 
 
@@ -2661,16 +2852,16 @@ class Ol(pycopia.XML.POM.ElementNode):
 
 
 class Ul(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'ul'
 
 
@@ -2684,16 +2875,16 @@ class Ul(pycopia.XML.POM.ElementNode):
 
 
 class Li(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'li'
 
 
@@ -2750,21 +2941,21 @@ class Li(pycopia.XML.POM.ElementNode):
 
 
 class Img(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'src': attribSrc_3104320399512748900, 
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'width': attribWidth_2698869476000729641, 
+         'longdesc': attribLongdesc_551606211785669089, 
+         'alt': attribAlt_1162895347347825025, 
+         'height': attribHeight_607192057250935849, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('src', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('alt', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('longdesc', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('height', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('width', 1, 12, None), 
-         ])
 	_name = u'img'
 
 
@@ -2835,18 +3026,18 @@ class Img(pycopia.XML.POM.ElementNode):
 
 
 class Table(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'width': attribWidth_2698869476000729641, 
+         'summary': attribSummary_293896294327076841, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('summary', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('width', 1, 12, None), 
-         ])
 	_name = u'table'
 
 
@@ -2860,16 +3051,16 @@ class Table(pycopia.XML.POM.ElementNode):
 
 
 class Caption(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'caption'
 
 
@@ -2883,18 +3074,18 @@ class Caption(pycopia.XML.POM.ElementNode):
 
 
 class Tr(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'align': attribAlign_1920212820748718721, 
+         'class_': attribClass_3214756266708739600, 
+         'valign': attribValign_2142455386295617129, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('align', pycopia.XML.POM.Enumeration(['left', 'center', 'right']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('valign', pycopia.XML.POM.Enumeration(['top', 'middle', 'bottom']), 12, None), 
-         ])
 	_name = u'tr'
 
 
@@ -2913,24 +3104,24 @@ class Tr(pycopia.XML.POM.ElementNode):
 
 
 class Th(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'colspan': attribColspan_13003694770657536, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'headers': attribHeaders_1895922246332405776, 
+         'class_': attribClass_3214756266708739600, 
+         'rowspan': attribRowspan_824571289138210084, 
+         'abbr': attribAbbr_2036693206661546449, 
+         'align': attribAlign_1920212820748718721, 
+         'valign': attribValign_2142455386295617129, 
+         'scope': attribScope_688360248864796225, 
+         'xml_space': attribXml_space_359981169846238864, 
+         'axis': attribAxis_298091641253602249, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('abbr', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('axis', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('headers', 4, 12, None), 
-         pycopia.XML.POM.XMLAttribute('scope', pycopia.XML.POM.Enumeration(['row', 'col']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('rowspan', 1, 13, u'1'), 
-         pycopia.XML.POM.XMLAttribute('colspan', 1, 13, u'1'), 
-         pycopia.XML.POM.XMLAttribute('align', pycopia.XML.POM.Enumeration(['left', 'center', 'right']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('valign', pycopia.XML.POM.Enumeration(['top', 'middle', 'bottom']), 12, None), 
-         ])
 	_name = u'th'
 
 
@@ -2944,24 +3135,24 @@ class Th(pycopia.XML.POM.ElementNode):
 
 
 class Td(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'colspan': attribColspan_13003694770657536, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'headers': attribHeaders_1895922246332405776, 
+         'class_': attribClass_3214756266708739600, 
+         'rowspan': attribRowspan_824571289138210084, 
+         'abbr': attribAbbr_2036693206661546449, 
+         'align': attribAlign_1920212820748718721, 
+         'valign': attribValign_2142455386295617129, 
+         'scope': attribScope_688360248864796225, 
+         'xml_space': attribXml_space_359981169846238864, 
+         'axis': attribAxis_298091641253602249, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('abbr', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('axis', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('headers', 4, 12, None), 
-         pycopia.XML.POM.XMLAttribute('scope', pycopia.XML.POM.Enumeration(['row', 'col']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('rowspan', 1, 13, u'1'), 
-         pycopia.XML.POM.XMLAttribute('colspan', 1, 13, u'1'), 
-         pycopia.XML.POM.XMLAttribute('align', pycopia.XML.POM.Enumeration(['left', 'center', 'right']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('valign', pycopia.XML.POM.Enumeration(['top', 'middle', 'bottom']), 12, None), 
-         ])
 	_name = u'td'
 
 
@@ -3024,19 +3215,19 @@ class Td(pycopia.XML.POM.ElementNode):
 
 
 class Form(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'action': attribAction_142350502103259025, 
+         'method': attribMethod_1594070884251040000, 
+         'xml_space': attribXml_space_359981169846238864, 
+         'enctype': attribEnctype_436576891689519025, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('action', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('method', pycopia.XML.POM.Enumeration(['get', 'post']), 13, u'get'), 
-         pycopia.XML.POM.XMLAttribute('enctype', 1, 13, u'application/x-www-form-urlencoded'), 
-         ])
 	_name = u'form'
 
 
@@ -3054,18 +3245,18 @@ class Form(pycopia.XML.POM.ElementNode):
 
 
 class Label(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'for_': attribFor_666919309859033284, 
+         'accesskey': attribAccesskey_2737575848648385424, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('for', 3, 12, None), 
-         pycopia.XML.POM.XMLAttribute('accesskey', 1, 12, None), 
-         ])
 	_name = u'label'
 
 
@@ -3079,25 +3270,25 @@ class Label(pycopia.XML.POM.ElementNode):
 
 
 class Input(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'src': attribSrc_622124219914705225, 
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'checked': attribChecked_1601429972271201856, 
+         'name': attribName_1423564487243335089, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'value': attribValue_4156605816673722624, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'accesskey': attribAccesskey_2737575848648385424, 
+         'maxlength': attribMaxlength_604742143183339225, 
+         'tabindex': attribTabindex_1924349933320454025, 
+         'type': attribType_44301332405719489, 
+         'xml_space': attribXml_space_359981169846238864, 
+         'size': attribSize_1540036912549524169, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('type', pycopia.XML.POM.Enumeration(['text', 'password', 'checkbox', 'radio', 'submit', 'reset', 'hidden']), 13, u'text'), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('value', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('checked', pycopia.XML.POM.Enumeration(['checked']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('size', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('maxlength', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('src', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('tabindex', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('accesskey', 1, 12, None), 
-         ])
 	_name = u'input'
 
 
@@ -3119,20 +3310,20 @@ class Input(pycopia.XML.POM.ElementNode):
 
 
 class Select(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'multiple': attribMultiple_1270567521988255296, 
+         'name': attribName_1423564487243335089, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'tabindex': attribTabindex_1924349933320454025, 
+         'xml_space': attribXml_space_359981169846238864, 
+         'size': attribSize_1540036912549524169, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('size', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('multiple', pycopia.XML.POM.Enumeration(['multiple']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('tabindex', 1, 12, None), 
-         ])
 	_name = u'select'
 
 
@@ -3146,18 +3337,18 @@ class Select(pycopia.XML.POM.ElementNode):
 
 
 class Option(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'selected': attribSelected_797750601755673316, 
+         'value': attribValue_4156605816673722624, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('selected', pycopia.XML.POM.Enumeration(['selected']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('value', 1, 12, None), 
-         ])
 	_name = u'option'
 
 
@@ -3171,21 +3362,21 @@ class Option(pycopia.XML.POM.ElementNode):
 
 
 class Textarea(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'name': attribName_1423564487243335089, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'cols': attribCols_157052534391325764, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'rows': attribRows_873710474168435344, 
+         'accesskey': attribAccesskey_2737575848648385424, 
+         'xml_space': attribXml_space_359981169846238864, 
+         'tabindex': attribTabindex_1924349933320454025, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('rows', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('cols', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('tabindex', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('accesskey', 1, 12, None), 
-         ])
 	_name = u'textarea'
 
 
@@ -3246,23 +3437,23 @@ class Textarea(pycopia.XML.POM.ElementNode):
 
 
 class Link(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'media': attribMedia_1916838375387458329, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'charset': attribCharset_2456238898048849, 
+         'rev': attribRev_684970124142549961, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'href': attribHref_10590696292225, 
+         'rel': attribRel_3659796562539513529, 
+         'hreflang': attribHreflang_29225588433214761, 
+         'type': attribType_3598646553109970404, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('charset', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('href', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('hreflang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('type', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('rel', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('rev', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('media', 1, 12, None), 
-         ])
 	_name = u'link'
 
 
@@ -3313,16 +3504,16 @@ class Link(pycopia.XML.POM.ElementNode):
 
 
 class Meta(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'name': attribName_3951386174947790881, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'content': attribContent_3546404873644026241, 
+         'scheme': attribScheme_305738970983549041, 
+         'http_equiv': attribHttp_equiv_1245057564071175625, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('http-equiv', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 7, 12, None), 
-         pycopia.XML.POM.XMLAttribute('content', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('scheme', 1, 12, None), 
-         ])
 	_name = u'meta'
 
 
@@ -3377,12 +3568,12 @@ class Meta(pycopia.XML.POM.ElementNode):
 
 
 class Base(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'href': attribHref_35096121232009744, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('href', 1, 11, None), 
-         ])
 	_name = u'base'
 
 
@@ -3434,16 +3625,16 @@ class Base(pycopia.XML.POM.ElementNode):
 
 
 class Param(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xmlns': attribXmlns_2523611023564185025, 
+         'name': attribName_1246620389478747364, 
+         'valuetype': attribValuetype_3058020386316608164, 
+         'value': attribValue_4156605816673722624, 
+         'id': attribId_121205855951786596, 
+         'type': attribType_3598646553109970404, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('value', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('valuetype', pycopia.XML.POM.Enumeration(['data', 'ref', 'object']), 13, u'data'), 
-         pycopia.XML.POM.XMLAttribute('type', 1, 12, None), 
-         ])
 	_name = u'param'
 
 
@@ -3498,28 +3689,28 @@ class Param(pycopia.XML.POM.ElementNode):
 
 
 class Object(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'classid': attribClassid_1288014720321799044, 
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'name': attribName_1423564487243335089, 
+         'title': attribTitle_4254840287891469241, 
+         'archive': attribArchive_2029791469104495009, 
+         'type': attribType_3598646553109970404, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'standby': attribStandby_275913609211742436, 
+         'id': attribId_121205855951786596, 
+         'codebase': attribCodebase_1491350078472004, 
+         'class_': attribClass_3214756266708739600, 
+         'width': attribWidth_2698869476000729641, 
+         'codetype': attribCodetype_164813866435053081, 
+         'declare': attribDeclare_857178368687561284, 
+         'height': attribHeight_607192057250935849, 
+         'data': attribData_119997120992872036, 
+         'xml_space': attribXml_space_359981169846238864, 
+         'tabindex': attribTabindex_1924349933320454025, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('declare', pycopia.XML.POM.Enumeration(['declare']), 12, None), 
-         pycopia.XML.POM.XMLAttribute('classid', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('codebase', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('data', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('type', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('codetype', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('archive', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('standby', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('height', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('width', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('name', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('tabindex', 1, 12, None), 
-         ])
 	_name = u'object'
 
 
@@ -3579,12 +3770,12 @@ class Object(pycopia.XML.POM.ElementNode):
 
 
 class Title(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'title'
 
 
@@ -3598,13 +3789,13 @@ class Title(pycopia.XML.POM.ElementNode):
 
 
 class Head(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'profile': attribProfile_3085446061595951089, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('profile', 1, 13, u''), 
-         ])
 	_name = u'head'
 
 
@@ -3622,16 +3813,16 @@ class Head(pycopia.XML.POM.ElementNode):
 
 
 class Body(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'title': attribTitle_4254840287891469241, 
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'id': attribId_121205855951786596, 
+         'class_': attribClass_3214756266708739600, 
+         'xml_space': attribXml_space_359981169846238864, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('id', 2, 12, None), 
-         pycopia.XML.POM.XMLAttribute('class', 8, 12, None), 
-         pycopia.XML.POM.XMLAttribute('title', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('xml:space', pycopia.XML.POM.Enumeration(['preserve']), 14, u'preserve'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'body'
 
 
@@ -3645,19 +3836,19 @@ class Body(pycopia.XML.POM.ElementNode):
 
 
 class Html(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'xmlns_xsi': attribXmlns_xsi_197877992173683264, 
+         'xmlns': attribXmlns_2523611023564185025, 
+         'xml_lang': attribXml_lang_1108072188818706241, 
+         'xsi_schemaLocation': attribXsi_schemalocation_8801704167490404, 
+         'version': attribVersion_413241004091974081, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('xmlns', 1, 14, u'http://www.w3.org/1999/xhtml'), 
-         pycopia.XML.POM.XMLAttribute('xmlns:xsi', 1, 14, u'http://www.w3.org/2001/XMLSchema-instance'), 
-         pycopia.XML.POM.XMLAttribute('xsi:schemaLocation', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('version', 1, 14, u'-//W3C//DTD XHTML Basic 1.0//EN'), 
-         pycopia.XML.POM.XMLAttribute('xml:lang', 1, 12, None), 
-         ])
 	_name = u'html'
 
 
 
-Root = Html
+_Root = Html
 
 
 
@@ -3689,4 +3880,263 @@ Root = Html
 #  end of XHTML Basic 1.0 DTD  ........................................... 
 
 
-GENERAL_ENTITIES = {u'zwnj': u'\u200c', u'aring': u'\xe5', u'gt': u'>', u'yen': u'\xa5', u'ograve': u'\xf2', u'Chi': u'\u03a7', u'delta': u'\u03b4', u'rang': u'\u232a', u'sup': u'\u2283', u'trade': u'\u2122', u'Ntilde': u'\xd1', u'xi': u'\u03be', u'upsih': u'\u03d2', u'nbsp': u'\xa0', u'Atilde': u'\xc3', u'radic': u'\u221a', u'otimes': u'\u2297', u'aelig': u'\xe6', u'oelig': u'\u0153', u'equiv': u'\u2261', u'ni': u'\u220b', u'infin': u'\u221e', u'Psi': u'\u03a8', u'auml': u'\xe4', u'cup': u'\u222a', u'Epsilon': u'\u0395', u'otilde': u'\xf5', u'lt': u'&#60;', u'Icirc': u'\xce', u'Eacute': u'\xc9', u'Lambda': u'\u039b', u'sbquo': u'\u201a', u'Prime': u'\u2033', u'prime': u'\u2032', u'psi': u'\u03c8', u'Kappa': u'\u039a', u'rsaquo': u'\u203a', u'Tau': u'\u03a4', u'uacute': u'\xfa', u'ocirc': u'\xf4', u'lrm': u'\u200e', u'zwj': u'\u200d', u'cedil': u'\xb8', u'Alpha': u'\u0391', u'not': u'\xac', u'amp': u'&#38;', u'AElig': u'\xc6', u'oslash': u'\xf8', u'acute': u'\xb4', u'lceil': u'\u2308', u'alefsym': u'\u2135', u'laquo': u'\xab', u'shy': u'\xad', u'loz': u'\u25ca', u'ge': u'\u2265', u'Igrave': u'\xcc', u'nu': u'\u03bd', u'Ograve': u'\xd2', u'lsaquo': u'\u2039', u'sube': u'\u2286', u'euro': u'\u20ac', u'rarr': u'\u2192', u'sdot': u'\u22c5', u'rdquo': u'\u201d', u'Yacute': u'\xdd', u'lfloor': u'\u230a', u'lArr': u'\u21d0', u'Auml': u'\xc4', u'Dagger': u'\u2021', u'brvbar': u'\xa6', u'Otilde': u'\xd5', u'szlig': u'\xdf', u'clubs': u'\u2663', u'diams': u'\u2666', u'agrave': u'\xe0', u'Ocirc': u'\xd4', u'Iota': u'\u0399', u'Theta': u'\u0398', u'Pi': u'\u03a0', u'zeta': u'\u03b6', u'Scaron': u'\u0160', u'frac14': u'\xbc', u'egrave': u'\xe8', u'sub': u'\u2282', u'iexcl': u'\xa1', u'frac12': u'\xbd', u'ordf': u'\xaa', u'sum': u'\u2211', u'prop': u'\u221d', u'Uuml': u'\xdc', u'ntilde': u'\xf1', u'apos': u"'", u'atilde': u'\xe3', u'asymp': u'\u2248', u'uml': u'\xa8', u'prod': u'\u220f', u'nsub': u'\u2284', u'reg': u'\xae', u'rArr': u'\u21d2', u'Oslash': u'\xd8', u'emsp': u'\u2003', u'THORN': u'\xde', u'yuml': u'\xff', u'aacute': u'\xe1', u'Mu': u'\u039c', u'hArr': u'\u21d4', u'le': u'\u2264', u'thinsp': u'\u2009', u'dArr': u'\u21d3', u'ecirc': u'\xea', u'bdquo': u'\u201e', u'Sigma': u'\u03a3', u'Aring': u'\xc5', u'tilde': u'\u02dc', u'nabla': u'\u2207', u'mdash': u'\u2014', u'uarr': u'\u2191', u'times': u'\xd7', u'Ugrave': u'\xd9', u'Eta': u'\u0397', u'Agrave': u'\xc0', u'chi': u'\u03c7', u'real': u'\u211c', u'circ': u'\u02c6', u'eth': u'\xf0', u'rceil': u'\u2309', u'iuml': u'\xef', u'gamma': u'\u03b3', u'lambda': u'\u03bb', u'harr': u'\u2194', u'Egrave': u'\xc8', u'frac34': u'\xbe', u'dagger': u'\u2020', u'divide': u'\xf7', u'Ouml': u'\xd6', u'image': u'\u2111', u'ndash': u'\u2013', u'hellip': u'\u2026', u'igrave': u'\xec', u'Yuml': u'\u0178', u'ang': u'\u2220', u'alpha': u'\u03b1', u'frasl': u'\u2044', u'ETH': u'\xd0', u'lowast': u'\u2217', u'Nu': u'\u039d', u'plusmn': u'\xb1', u'bull': u'\u2022', u'sup1': u'\xb9', u'sup2': u'\xb2', u'sup3': u'\xb3', u'Aacute': u'\xc1', u'cent': u'\xa2', u'oline': u'\u203e', u'Beta': u'\u0392', u'perp': u'\u22a5', u'Delta': u'\u0394', u'there4': u'\u2234', u'pi': u'\u03c0', u'iota': u'\u03b9', u'empty': u'\u2205', u'euml': u'\xeb', u'notin': u'\u2209', u'iacute': u'\xed', u'para': u'\xb6', u'epsilon': u'\u03b5', u'weierp': u'\u2118', u'OElig': u'\u0152', u'uuml': u'\xfc', u'larr': u'\u2190', u'icirc': u'\xee', u'Upsilon': u'\u03a5', u'omicron': u'\u03bf', u'upsilon': u'\u03c5', u'copy': u'\xa9', u'Iuml': u'\xcf', u'Oacute': u'\xd3', u'Xi': u'\u039e', u'kappa': u'\u03ba', u'ccedil': u'\xe7', u'Ucirc': u'\xdb', u'cap': u'\u2229', u'mu': u'\u03bc', u'scaron': u'\u0161', u'lsquo': u'\u2018', u'isin': u'\u2208', u'Zeta': u'\u0396', u'minus': u'\u2212', u'deg': u'\xb0', u'and': u'\u2227', u'tau': u'\u03c4', u'pound': u'\xa3', u'curren': u'\xa4', u'int': u'\u222b', u'ucirc': u'\xfb', u'rfloor': u'\u230b', u'ensp': u'\u2002', u'crarr': u'\u21b5', u'ugrave': u'\xf9', u'exist': u'\u2203', u'cong': u'\u2245', u'theta': u'\u03b8', u'oplus': u'\u2295', u'permil': u'\u2030', u'Acirc': u'\xc2', u'piv': u'\u03d6', u'Euml': u'\xcb', u'Phi': u'\u03a6', u'Iacute': u'\xcd', u'quot': u'"', u'Uacute': u'\xda', u'Omicron': u'\u039f', u'ne': u'\u2260', u'iquest': u'\xbf', u'eta': u'\u03b7', u'rsquo': u'\u2019', u'yacute': u'\xfd', u'Rho': u'\u03a1', u'darr': u'\u2193', u'Ecirc': u'\xca', u'Omega': u'\u03a9', u'acirc': u'\xe2', u'sim': u'\u223c', u'phi': u'\u03c6', u'sigmaf': u'\u03c2', u'macr': u'\xaf', u'thetasym': u'\u03d1', u'Ccedil': u'\xc7', u'ordm': u'\xba', u'uArr': u'\u21d1', u'forall': u'\u2200', u'beta': u'\u03b2', u'fnof': u'\u0192', u'rho': u'\u03c1', u'micro': u'\xb5', u'eacute': u'\xe9', u'omega': u'\u03c9', u'middot': u'\xb7', u'Gamma': u'\u0393', u'rlm': u'\u200f', u'lang': u'\u2329', u'spades': u'\u2660', u'supe': u'\u2287', u'thorn': u'\xfe', u'ouml': u'\xf6', u'or': u'\u2228', u'raquo': u'\xbb', u'part': u'\u2202', u'sect': u'\xa7', u'ldquo': u'\u201c', u'hearts': u'\u2665', u'sigma': u'\u03c3', u'oacute': u'\xf3'}
+GENERAL_ENTITIES = {   'AElig': u'\xc6',
+    'Aacute': u'\xc1',
+    'Acirc': u'\xc2',
+    'Agrave': u'\xc0',
+    'Alpha': u'\u0391',
+    'Aring': u'\xc5',
+    'Atilde': u'\xc3',
+    'Auml': u'\xc4',
+    'Beta': u'\u0392',
+    'Ccedil': u'\xc7',
+    'Chi': u'\u03a7',
+    'Dagger': u'\u2021',
+    'Delta': u'\u0394',
+    'ETH': u'\xd0',
+    'Eacute': u'\xc9',
+    'Ecirc': u'\xca',
+    'Egrave': u'\xc8',
+    'Epsilon': u'\u0395',
+    'Eta': u'\u0397',
+    'Euml': u'\xcb',
+    'Gamma': u'\u0393',
+    'Iacute': u'\xcd',
+    'Icirc': u'\xce',
+    'Igrave': u'\xcc',
+    'Iota': u'\u0399',
+    'Iuml': u'\xcf',
+    'Kappa': u'\u039a',
+    'Lambda': u'\u039b',
+    'Mu': u'\u039c',
+    'Ntilde': u'\xd1',
+    'Nu': u'\u039d',
+    'OElig': u'\u0152',
+    'Oacute': u'\xd3',
+    'Ocirc': u'\xd4',
+    'Ograve': u'\xd2',
+    'Omega': u'\u03a9',
+    'Omicron': u'\u039f',
+    'Oslash': u'\xd8',
+    'Otilde': u'\xd5',
+    'Ouml': u'\xd6',
+    'Phi': u'\u03a6',
+    'Pi': u'\u03a0',
+    'Prime': u'\u2033',
+    'Psi': u'\u03a8',
+    'Rho': u'\u03a1',
+    'Scaron': u'\u0160',
+    'Sigma': u'\u03a3',
+    'THORN': u'\xde',
+    'Tau': u'\u03a4',
+    'Theta': u'\u0398',
+    'Uacute': u'\xda',
+    'Ucirc': u'\xdb',
+    'Ugrave': u'\xd9',
+    'Upsilon': u'\u03a5',
+    'Uuml': u'\xdc',
+    'Xi': u'\u039e',
+    'Yacute': u'\xdd',
+    'Yuml': u'\u0178',
+    'Zeta': u'\u0396',
+    'aacute': u'\xe1',
+    'acirc': u'\xe2',
+    'acute': u'\xb4',
+    'aelig': u'\xe6',
+    'agrave': u'\xe0',
+    'alefsym': u'\u2135',
+    'alpha': u'\u03b1',
+    'amp': u'&#38;',
+    'and': u'\u2227',
+    'ang': u'\u2220',
+    'apos': u"'",
+    'aring': u'\xe5',
+    'asymp': u'\u2248',
+    'atilde': u'\xe3',
+    'auml': u'\xe4',
+    'bdquo': u'\u201e',
+    'beta': u'\u03b2',
+    'brvbar': u'\xa6',
+    'bull': u'\u2022',
+    'cap': u'\u2229',
+    'ccedil': u'\xe7',
+    'cedil': u'\xb8',
+    'cent': u'\xa2',
+    'chi': u'\u03c7',
+    'circ': u'\u02c6',
+    'clubs': u'\u2663',
+    'cong': u'\u2245',
+    'copy': u'\xa9',
+    'crarr': u'\u21b5',
+    'cup': u'\u222a',
+    'curren': u'\xa4',
+    'dArr': u'\u21d3',
+    'dagger': u'\u2020',
+    'darr': u'\u2193',
+    'deg': u'\xb0',
+    'delta': u'\u03b4',
+    'diams': u'\u2666',
+    'divide': u'\xf7',
+    'eacute': u'\xe9',
+    'ecirc': u'\xea',
+    'egrave': u'\xe8',
+    'empty': u'\u2205',
+    'emsp': u'\u2003',
+    'ensp': u'\u2002',
+    'epsilon': u'\u03b5',
+    'equiv': u'\u2261',
+    'eta': u'\u03b7',
+    'eth': u'\xf0',
+    'euml': u'\xeb',
+    'euro': u'\u20ac',
+    'exist': u'\u2203',
+    'fnof': u'\u0192',
+    'forall': u'\u2200',
+    'frac12': u'\xbd',
+    'frac14': u'\xbc',
+    'frac34': u'\xbe',
+    'frasl': u'\u2044',
+    'gamma': u'\u03b3',
+    'ge': u'\u2265',
+    'gt': u'>',
+    'hArr': u'\u21d4',
+    'harr': u'\u2194',
+    'hearts': u'\u2665',
+    'hellip': u'\u2026',
+    'iacute': u'\xed',
+    'icirc': u'\xee',
+    'iexcl': u'\xa1',
+    'igrave': u'\xec',
+    'image': u'\u2111',
+    'infin': u'\u221e',
+    'int': u'\u222b',
+    'iota': u'\u03b9',
+    'iquest': u'\xbf',
+    'isin': u'\u2208',
+    'iuml': u'\xef',
+    'kappa': u'\u03ba',
+    'lArr': u'\u21d0',
+    'lambda': u'\u03bb',
+    'lang': u'\u2329',
+    'laquo': u'\xab',
+    'larr': u'\u2190',
+    'lceil': u'\u2308',
+    'ldquo': u'\u201c',
+    'le': u'\u2264',
+    'lfloor': u'\u230a',
+    'lowast': u'\u2217',
+    'loz': u'\u25ca',
+    'lrm': u'\u200e',
+    'lsaquo': u'\u2039',
+    'lsquo': u'\u2018',
+    'lt': u'&#60;',
+    'macr': u'\xaf',
+    'mdash': u'\u2014',
+    'micro': u'\xb5',
+    'middot': u'\xb7',
+    'minus': u'\u2212',
+    'mu': u'\u03bc',
+    'nabla': u'\u2207',
+    'nbsp': u'\xa0',
+    'ndash': u'\u2013',
+    'ne': u'\u2260',
+    'ni': u'\u220b',
+    'not': u'\xac',
+    'notin': u'\u2209',
+    'nsub': u'\u2284',
+    'ntilde': u'\xf1',
+    'nu': u'\u03bd',
+    'oacute': u'\xf3',
+    'ocirc': u'\xf4',
+    'oelig': u'\u0153',
+    'ograve': u'\xf2',
+    'oline': u'\u203e',
+    'omega': u'\u03c9',
+    'omicron': u'\u03bf',
+    'oplus': u'\u2295',
+    'or': u'\u2228',
+    'ordf': u'\xaa',
+    'ordm': u'\xba',
+    'oslash': u'\xf8',
+    'otilde': u'\xf5',
+    'otimes': u'\u2297',
+    'ouml': u'\xf6',
+    'para': u'\xb6',
+    'part': u'\u2202',
+    'permil': u'\u2030',
+    'perp': u'\u22a5',
+    'phi': u'\u03c6',
+    'pi': u'\u03c0',
+    'piv': u'\u03d6',
+    'plusmn': u'\xb1',
+    'pound': u'\xa3',
+    'prime': u'\u2032',
+    'prod': u'\u220f',
+    'prop': u'\u221d',
+    'psi': u'\u03c8',
+    'quot': u'"',
+    'rArr': u'\u21d2',
+    'radic': u'\u221a',
+    'rang': u'\u232a',
+    'raquo': u'\xbb',
+    'rarr': u'\u2192',
+    'rceil': u'\u2309',
+    'rdquo': u'\u201d',
+    'real': u'\u211c',
+    'reg': u'\xae',
+    'rfloor': u'\u230b',
+    'rho': u'\u03c1',
+    'rlm': u'\u200f',
+    'rsaquo': u'\u203a',
+    'rsquo': u'\u2019',
+    'sbquo': u'\u201a',
+    'scaron': u'\u0161',
+    'sdot': u'\u22c5',
+    'sect': u'\xa7',
+    'shy': u'\xad',
+    'sigma': u'\u03c3',
+    'sigmaf': u'\u03c2',
+    'sim': u'\u223c',
+    'spades': u'\u2660',
+    'sub': u'\u2282',
+    'sube': u'\u2286',
+    'sum': u'\u2211',
+    'sup': u'\u2283',
+    'sup1': u'\xb9',
+    'sup2': u'\xb2',
+    'sup3': u'\xb3',
+    'supe': u'\u2287',
+    'szlig': u'\xdf',
+    'tau': u'\u03c4',
+    'there4': u'\u2234',
+    'theta': u'\u03b8',
+    'thetasym': u'\u03d1',
+    'thinsp': u'\u2009',
+    'thorn': u'\xfe',
+    'tilde': u'\u02dc',
+    'times': u'\xd7',
+    'trade': u'\u2122',
+    'uArr': u'\u21d1',
+    'uacute': u'\xfa',
+    'uarr': u'\u2191',
+    'ucirc': u'\xfb',
+    'ugrave': u'\xf9',
+    'uml': u'\xa8',
+    'upsih': u'\u03d2',
+    'upsilon': u'\u03c5',
+    'uuml': u'\xfc',
+    'weierp': u'\u2118',
+    'xi': u'\u03be',
+    'yacute': u'\xfd',
+    'yen': u'\xa5',
+    'yuml': u'\xff',
+    'zeta': u'\u03b6',
+    'zwj': u'\u200d',
+    'zwnj': u'\u200c'}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

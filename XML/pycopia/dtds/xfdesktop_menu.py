@@ -5,6 +5,38 @@
 
 import pycopia.XML.POM
 
+attribUnique_3882054017216351376 = pycopia.XML.POM.XMLAttribute(u'unique', pycopia.XML.POM.Enumeration((u'true', u'false')), 13, u'true')
+
+
+attribTerm_2943920413903779025 = pycopia.XML.POM.XMLAttribute(u'term', pycopia.XML.POM.Enumeration((u'true', u'false')), 13, u'false')
+
+
+attribCmd_2961778865341874704 = pycopia.XML.POM.XMLAttribute(u'cmd', 1, 11, None)
+
+
+attribStyle_68292116612380816 = pycopia.XML.POM.XMLAttribute(u'style', 1, 12, None)
+
+
+attribSrc_622124219914705225 = pycopia.XML.POM.XMLAttribute(u'src', 1, 12, None)
+
+
+attribIcon_898652848543866441 = pycopia.XML.POM.XMLAttribute(u'icon', 1, 12, None)
+
+
+attribName_1246620389478747364 = pycopia.XML.POM.XMLAttribute(u'name', 1, 11, None)
+
+
+attribVisible_686906346921881956 = pycopia.XML.POM.XMLAttribute(u'visible', pycopia.XML.POM.Enumeration((u'true', u'false')), 13, u'true')
+
+
+attribType_4574891062544652004 = pycopia.XML.POM.XMLAttribute(u'type', pycopia.XML.POM.Enumeration((u'file', u'system')), 13, u'file')
+
+
+attribSnotify_3151943522720133376 = pycopia.XML.POM.XMLAttribute(u'snotify', pycopia.XML.POM.Enumeration((u'true', u'false')), 13, u'false')
+
+
+
+
 #  xfdesktop-menu.dtd defines xfce4 desktop menu files. 
 
 
@@ -14,12 +46,12 @@ class Xfdesktop_menu(pycopia.XML.POM.ElementNode):
 
 
 class Menu(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'visible': attribVisible_686906346921881956, 
+         'name': attribName_1246620389478747364, 
+         'icon': attribIcon_898652848543866441, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('name', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('icon', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('visible', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'true'), 
-         ])
 	_name = u'menu'
 
 
@@ -27,15 +59,15 @@ class Menu(pycopia.XML.POM.ElementNode):
 
 
 class App(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'term': attribTerm_2943920413903779025, 
+         'name': attribName_1246620389478747364, 
+         'cmd': attribCmd_2961778865341874704, 
+         'visible': attribVisible_686906346921881956, 
+         'snotify': attribSnotify_3151943522720133376, 
+         'icon': attribIcon_898652848543866441, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('name', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('cmd', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('icon', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('term', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'false'), 
-         pycopia.XML.POM.XMLAttribute('snotify', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'false'), 
-         pycopia.XML.POM.XMLAttribute('visible', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'true'), 
-         ])
 	_name = u'app'
 
 
@@ -43,10 +75,10 @@ class App(pycopia.XML.POM.ElementNode):
 
 
 class Separator(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'visible': attribVisible_686906346921881956, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('visible', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'true'), 
-         ])
 	_name = u'separator'
 
 
@@ -54,14 +86,14 @@ class Separator(pycopia.XML.POM.ElementNode):
 
 
 class Include(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'src': attribSrc_622124219914705225, 
+         'style': attribStyle_68292116612380816, 
+         'unique': attribUnique_3882054017216351376, 
+         'type': attribType_4574891062544652004, 
+         'visible': attribVisible_686906346921881956, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('type', pycopia.XML.POM.Enumeration(['file', 'system']), 13, u'file'), 
-         pycopia.XML.POM.XMLAttribute('src', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('style', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('unique', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'true'), 
-         pycopia.XML.POM.XMLAttribute('visible', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'true'), 
-         ])
 	_name = u'include'
 
 
@@ -72,12 +104,12 @@ class Include(pycopia.XML.POM.ElementNode):
 
 
 class Title(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'visible': attribVisible_686906346921881956, 
+         'name': attribName_1246620389478747364, 
+         'icon': attribIcon_898652848543866441, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('name', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('icon', 1, 12, None), 
-         pycopia.XML.POM.XMLAttribute('visible', pycopia.XML.POM.Enumeration(['true', 'false']), 13, u'true'), 
-         ])
 	_name = u'title'
 
 
@@ -85,12 +117,12 @@ class Title(pycopia.XML.POM.ElementNode):
 
 
 class Builtin(pycopia.XML.POM.ElementNode):
+	ATTRIBUTES = {
+         'cmd': attribCmd_2961778865341874704, 
+         'name': attribName_1246620389478747364, 
+         'icon': attribIcon_898652848543866441, 
+         }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
-	ATTLIST = pycopia.XML.POM.AttributeList([
-         pycopia.XML.POM.XMLAttribute('name', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('cmd', 1, 11, None), 
-         pycopia.XML.POM.XMLAttribute('icon', 1, 12, None), 
-         ])
 	_name = u'builtin'
 
 
@@ -98,3 +130,10 @@ class Builtin(pycopia.XML.POM.ElementNode):
 
 
 GENERAL_ENTITIES = {}
+
+# Cache for dynamic classes for this dtd.
+
+
+_CLASSCACHE = {}
+
+

@@ -37,11 +37,12 @@ from htmlentitydefs import name2codepoint
 
 from pycopia.urlparse import quote_plus
 from pycopia.textutils import identifier
-from pycopia.aid import partial, newclass, Enums, Import
+from pycopia.aid import partial, newclass, Enums
 
 from pycopia import dtds
 from pycopia.XML import POM, XMLVisitorContinue, ValidationError
 
+get_class = dtds.get_class
 
 NBSP = POM.ASIS("&nbsp;")
 TRUE = True
@@ -57,18 +58,6 @@ INLINE_PHRASE = [ "em", "strong", "dfn", "code", "samp", "kbd",
 INLINE_FORM = ["input", "select", "textarea", "label", "button"]
 INLINE = ["a"] + INLINE_SPECIAL + INLINE_FONTSTYLE + INLINE_PHRASE + INLINE_FORM 
 
-
-# new (dynamic) classes are cached here.
-_CLASSCACHE = {}
-
-def get_dtd_module(doctype_constant):
-    try:
-        mod = Import(doctype_constant)
-    except ImportError, err:
-        raise ValidationError, ("No compiled DTD found for %r." 
-                                   " Please run dtd2py. : %s" % (doctype_constant, err))
-    _CLASSCACHE[mod] = {}
-    return mod
 
 # make strings into Text objects, otherwise verify Element object.
 def check_object(obj):
@@ -177,14 +166,6 @@ class FlowMixin(object):
         except AttributeError:
             raise ValidationError, "No element: %s" % (name,)
 
-    def _get_class(self, name, bases):
-        try:
-            cls = _CLASSCACHE[self.dtd][name]
-        except KeyError:
-            cls = newclass(name, *bases)
-            _CLASSCACHE[self.dtd][name] = cls
-        return cls
-
     def make_node(self, name, attribs, *content):
         if name in ("Text", "ASIS", "Fragments"):
             elemclass = getattr(POM, name)
@@ -273,7 +254,7 @@ class FlowMixin(object):
 
     def get_object(self, _params=None, **kwargs):
         check_flag(kwargs, "declare")
-        Object = self._get_class("Object", (ObjectMixin, self.dtd.Object))
+        Object = get_class(self.dtd, "Object", (ObjectMixin, self.dtd.Object))
         obj = Object(**kwargs)
         obj._init(self.dtd)
         if _params:
@@ -313,8 +294,8 @@ def _NULLRenderer(nodemaker, obj):
 class ContainerMixin(FlowMixin):
 
     def get_section(self, _name, **kwargs):
-        Section = self._get_class("Section%s" % _name, (ContainerMixin, self.dtd.Div))
-        kwargs["class"] = _name
+        Section = get_class(self.dtd, "Section%s" % _name, (ContainerMixin, self.dtd.Div))
+        kwargs["class_"] = _name
         sect = Section(**kwargs)
         sect._init(self.dtd)
         return sect
@@ -332,8 +313,8 @@ class ContainerMixin(FlowMixin):
         return sect
 
     def get_inline(self, _name, **kwargs):
-        Inline = self._get_class("Inline%s" % _name, (InlineMixin, self.dtd.Span))
-        kwargs["class"] = str(_name)
+        Inline = get_class(self.dtd, "Inline%s" % _name, (InlineMixin, self.dtd.Span))
+        kwargs["class_"] = str(_name)
         sect = Inline(**kwargs)
         sect._init(self.dtd)
         return sect
@@ -359,7 +340,7 @@ class ContainerMixin(FlowMixin):
         return br
 
     def get_para(self, **attribs):
-        Para = self._get_class("Para", (InlineMixin, FormMixin, self.dtd.P))
+        Para = get_class(self.dtd, "Para", (InlineMixin, FormMixin, self.dtd.P))
         p = Para(**attribs)
         p._init(self.dtd)
         return p
@@ -395,13 +376,13 @@ class ContainerMixin(FlowMixin):
         return hr
 
     def get_unordered_list(self, **attribs):
-        Unordered = self._get_class("Unordered", (ListMixin, self.dtd.Ul))
+        Unordered = get_class(self.dtd, "Unordered", (ListMixin, self.dtd.Ul))
         ul = Unordered(**attribs)
         ul._init(self.dtd)
         return ul
 
     def get_ordered_list(self, **attribs):
-        Ordered = self._get_class("Ordered", (ListMixin, self.dtd.Ol))
+        Ordered = get_class(self.dtd, "Ordered", (ListMixin, self.dtd.Ol))
         ol = Ordered(**attribs)
         ol._init(self.dtd)
         return ol
@@ -423,7 +404,7 @@ class ContainerMixin(FlowMixin):
         return ol
 
     def get_definition_list(self, **attribs):
-        DL = self._get_class("DefinitionList", (DefinitionListMixin, self.dtd.Dl))
+        DL = get_class(self.dtd, "DefinitionList", (DefinitionListMixin, self.dtd.Dl))
         dl = DL(**attribs)
         dl._init(self.dtd)
         return dl
@@ -452,7 +433,7 @@ class ContainerMixin(FlowMixin):
         self.append(comment)
 
     def get_table(self, **kwargs):
-        XHTMLTable = self._get_class("XHTMLTable", (TableMixin, self.dtd.Table))
+        XHTMLTable = get_class(self.dtd, "XHTMLTable", (TableMixin, self.dtd.Table))
         t= XHTMLTable(**kwargs)
         t._init(self.dtd)
         return t
@@ -483,7 +464,7 @@ class ContainerMixin(FlowMixin):
         if tbl_id: # if table has id, then cells get an id. 
             for y, obj in enumerate(rowiter):
                 row = tbl.new_row()
-                setattr(row, "class", cycler.next())
+                setattr(row, "class_", cycler.next())
                 col = row.add_column(id="%s_%s_%s" % (tbl_id, y, 0))
                 col.append(check_object(renderer(NM, obj)))
                 for x, callback in enumerate(coliter):
@@ -492,7 +473,7 @@ class ContainerMixin(FlowMixin):
         else:
             for obj in rowiter:
                 row = tbl.new_row()
-                setattr(row, "class", cycler.next())
+                setattr(row, "class_", cycler.next())
                 col = row.add_column()
                 col.append(check_object(renderer(NM, obj)))
                 for callback in coliter:
@@ -501,7 +482,7 @@ class ContainerMixin(FlowMixin):
         return tbl
 
     def get_form(self, **kwargs):
-        XHTMLForm = self._get_class("XHTMLForm", (FormMixin, self.dtd.Form))
+        XHTMLForm = get_class(self.dtd, "XHTMLForm", (FormMixin, self.dtd.Form))
         f = XHTMLForm(**kwargs)
         f._init(self.dtd)
         method = kwargs.get("method")
@@ -523,7 +504,7 @@ class ContainerMixin(FlowMixin):
         return f
 
     def get_preformat(self, **kwargs):
-        Preform = self._get_class("Preform", (InlineMixin, self.dtd.Pre))
+        Preform = get_class(self.dtd, "Preform", (InlineMixin, self.dtd.Pre))
         pre = Preform(**kwargs)
         pre._init(self.dtd)
         return pre
@@ -548,47 +529,25 @@ def get_container(dtd, name, kwargs):
         return base(**kwargs)
     if issubclass(base, ContainerMixin):
         return base(**kwargs)
-    try:
-        cls = _CLASSCACHE[dtd][name]
-    except KeyError:
-        cls = newclass(name, ContainerMixin, base)
-        _CLASSCACHE[dtd][name] = cls
+    cls = get_class(dtd, name, (ContainerMixin, base))
     obj = cls(**kwargs)
     obj._init(dtd)
-    obj.set_namespace(None)
     return obj
 
 def get_inlinecontainer(dtd, name, kwargs):
     name = identifier(name)
-    try:
-        cls = _CLASSCACHE[dtd][name]
-    except KeyError:
-        base = getattr(dtd, name)
-        cls = newclass(name, InlineMixin, base)
-        _CLASSCACHE[dtd][name] = cls
+    base = getattr(dtd, name)
+    cls = get_class(dtd, name, (InlineMixin, base))
     obj = cls(**kwargs)
     obj._init(dtd)
-    obj.set_namespace(None)
     return obj
 
 class XHTMLDocument(POM.POMDocument, ContainerMixin):
-    """XHTMLDocument(doctype)
-    doctype must be one of the keys in the DOCTYPES dictionary.
+    """XHTMLDocument is a complete XHTML document.
     """
     MIMETYPE="application/xhtml+xml"
-    def __init__(self, doctype=None, lang="en", encoding=POM.DEFAULT_ENCODING):
-        super(XHTMLDocument, self).__init__(encoding=encoding)
-        self.lang = lang
-        self._COUNTERS = {}
-        if doctype: # implies new document 
-            self.set_doctype(doctype)
-            self.root = self.dtd.Html()
-#            self.xmlnamespace = NAMESPACES[doctype]
-#            self.root.xmlns = self.xmlnamespace
-            self.root.set_namespace(None) # XHTML tags have no namespace tags
-            self.root.append(get_container(self.dtd, "Head", {}))
-            self.root.append(get_container(self.dtd, "Body", {}))
 
+    # default body shortcuts are properties.
     head = property(lambda self: self.get_path("/html/head"))
     body = property(lambda self: self.get_path("/html/body"))
 
@@ -655,20 +614,6 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
     javascriptlink = property(_get_javascript, 
                     lambda self, v: self.add_javascript2head(url=v))
 
-    def set_root(self, rootnode):
-        self.dirty = 0
-        self.root = rootnode
-#        self.xmlnamespace = self.root.xmlns
-        self.root.set_namespace(None)
-
-    def set_doctype(self, doctype):
-        self.DOCTYPE = str(dtds.DOCTYPES[doctype])
-        self.dtd = get_dtd_module(doctype)
-        self.set_dtd(self.dtd)
-
-    def get_parser(self):
-        return get_parser(self)
-
     # general add methods
     def append(self, obj, **kwargs):
         if type(obj) is str:
@@ -685,8 +630,8 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
 class InlineMixin(FlowMixin):
 
     def get_inline(self, _name, **kwargs):
-        Inline = self._get_class("Inline%s" % (_name,), (InlineMixin, self.dtd.Span))
-        kwargs["class"] = str(_name)
+        Inline = get_class(self.dtd, "Inline%s" % (_name,), (InlineMixin, self.dtd.Span))
+        kwargs["class_"] = str(_name)
         span = Inline(**kwargs)
         span._init(self.dtd)
         return span
@@ -702,7 +647,7 @@ class InlineMixin(FlowMixin):
             ilmc = getattr(self.dtd, _name)
         except AttributeError:
             raise ValidationError, "%s: not valid for this DTD." % (_name,)
-        Inline = self._get_class("Inline%s" % (_name,), (InlineMixin, ilmc))
+        Inline = get_class(self.dtd, "Inline%s" % (_name,), (InlineMixin, ilmc))
         il = Inline(**attribs)
         il._init(self.dtd)
         if _obj:
@@ -781,8 +726,9 @@ class InlineMixin(FlowMixin):
 class ListMixin(ContainerMixin):
     def add_item(self, obj, **attribs):
         obj = create_POM(obj, self.dtd)
-        Item = self._get_class("Item", (InlineMixin, self.dtd.Li))
+        Item = get_class(self.dtd, "Item", (InlineMixin, self.dtd.Li))
         li = Item(**attribs)
+        li._init(self.dtd)
         li.append(obj)
         self.append(li)
         return li
@@ -862,30 +808,36 @@ class TableMixin(ContainerMixin):
 
     def __str__(self):
         self._verify_attributes()
+        encoding = self.encoding
+        ns = self._get_ns(encoding)
+        name = self._name.encode(encoding)
         s = []
-        s.append("<%s%s%s>" % (self._get_ns(), self._name, self._attr_str()))
+        s.append("<%s%s%s>" % (ns, name, self._attr_str(encoding)))
         if self._t_caption:
             s.append(str(self._t_caption))
         if self._headings:
             s.append(str(self._headings))
         for row in self._t_rows:
             s.append(str(row))
-        s.append(("</%s%s>" % (self._get_ns(), self._name)))
+        s.append(("</%s%s>" % (ns, name)))
         return "\n".join(s)
 
-    def emit(self, fo):
+    def emit(self, fo, encoding=None):
+        encoding = encoding or self.encoding
         self._verify_attributes()
-        fo.write("<%s%s%s>" % (self._get_ns(), self._name, self._attr_str()))
+        ns = self._get_ns(encoding)
+        name = self._name.encode(encoding)
+        fo.write("<%s%s%s>" % (ns, name, self._attr_str(encoding)))
         if self._t_caption:
-            self._t_caption.emit(fo)
+            self._t_caption.emit(fo, encoding)
         if self._headings:
-            self._headings.emit(fo)
+            self._headings.emit(fo, encoding)
         for row in self._t_rows:
-            row.emit(fo)
-        fo.write("</%s%s>" % (self._get_ns(), self._name))
+            row.emit(fo, encoding)
+        fo.write("</%s%s>" % (ns, name))
 
     def get_row(self, **kwargs):
-        Row = self._get_class("Row", (RowMixin, self.dtd.Tr))
+        Row = get_class(self.dtd, "Row", (RowMixin, self.dtd.Tr))
         row = Row(**kwargs)
         row._init(self.dtd)
         return row
@@ -914,7 +866,7 @@ class TableMixin(ContainerMixin):
 
 class RowMixin(ContainerMixin):
     def get_column(self, **kwargs):
-        TD = self._get_class("Column", (ContainerMixin, self.dtd.Td))
+        TD = get_class(self.dtd, "Column", (ContainerMixin, self.dtd.Td))
         col = TD(**kwargs)
         col._init(self.dtd)
         return col
@@ -992,8 +944,9 @@ class FormMixin(ContainerMixin):
     def get_textarea(self, name, text=None, rows=4, cols=60, **kwargs):
         check_flag(kwargs, "readonly")
         check_flag(kwargs, "disabled")
-        textclass = self._get_class("TextWidget", (TextareaMixin, self.dtd.Textarea))
+        textclass = get_class(self.dtd, "TextWidget", (TextareaMixin, self.dtd.Textarea))
         ta = textclass(name=name, rows=rows, cols=cols, **kwargs)
+        ta._init(self.dtd)
         if text:
             ta.append(check_object(text))
         return ta
@@ -1007,8 +960,9 @@ class FormMixin(ContainerMixin):
         check_flag(kwargs, "readonly")
         check_flag(kwargs, "checked")
         check_flag(kwargs, "disabled")
-        inputclass = self._get_class("InputWidget", (InputMixin, self.dtd.Input))
+        inputclass = get_class(self.dtd, "InputWidget", (InputMixin, self.dtd.Input))
         inp = inputclass(**kwargs)
+        inp._init(self.dtd)
         return inp
 
     def add_input(self, **kwargs):
@@ -1017,8 +971,9 @@ class FormMixin(ContainerMixin):
         return inp
 
     def get_fieldset(self, legend=None, **kwargs):
-        FieldSet = self._get_class("FieldSet", (FormMixin, self.dtd.Fieldset))
+        FieldSet = get_class(self.dtd, "FieldSet", (FormMixin, self.dtd.Fieldset))
         fs = FieldSet(**kwargs)
+        fs._init(self.dtd)
         if legend:
             lg = self.dtd.Legend()
             lg.append(check_object(legend))
@@ -1186,7 +1141,7 @@ class FormMixin(ContainerMixin):
 
     def yes_no(self, prompt, default=True):
         fs = self.add_fieldset(prompt)
-        fs.set_attribute("class", "yes_no")
+        fs.set_attribute("class_", "yes_no")
         for i, item in enumerate(["Yes", "No"]):
             inp = self.dtd.Input(type="radio", name="yes_no", value=i)
             if i == 0 and default:
@@ -1272,7 +1227,7 @@ class FlowCreator(FormMixin, InlineMixin, DefinitionListMixin):
 
 # HTML POM parser. This parser populates the POM with XHTML objects, so this
 # HTML parser essentially translates HTML to XHTML, hopefully with good
-# results.
+# results. Note that you can't regenerate the original HTML.
 class _HTMLParser(HTMLParser.HTMLParser):
     def __init__(self, doc=None):
         self.reset()
@@ -1316,8 +1271,6 @@ class _HTMLParser(HTMLParser.HTMLParser):
         if obj.CONTENTMODEL.is_empty():
             self.stack[-1].append(obj)
             return
-        if not self.stack:
-            obj.set_namespace(None)
         self.stack.append(obj)
 
     def getContentHandler(self):
@@ -1376,175 +1329,42 @@ class _HTMLParser(HTMLParser.HTMLParser):
             version, encoding = mo.groups()
             assert version == "1.0"
             self._encoding = encoding
-            #self.doc.set_encoding(encoding)
-        else:
-            print >>sys.stderr, "!!! Unhandled pi: %r" % (data,)
-
-### sax2 XHTML to POM parser
-
-class XHTMLContentHandler(object):
-    def __init__(self, doc=None):
-        self._locator = None
-        self.stack = []
-        self.msg = None
-        self.doc = doc
-        self.encoding = POM.DEFAULT_ENCODING
-        self.modules = []
-
-    def _get_dtd_class(self, name):
-        klass = None
-        for mod in self.doc.dtds:
-            try:
-                klass = getattr(mod, identifier(name))
-            except AttributeError:
-                continue
-            if klass:
-                return klass
-        raise AttributeError
-
-    def setDocumentLocator(self, locator):
-        self._locator = locator
-
-    def startDocument(self):
-        self.stack = []
-
-    def endDocument(self):
-        if self.stack: # stack should be empty now
-            raise ValidationError, "unbalanced document!"
-        self.doc.set_root(self.msg)
-        self.msg = None
-
-    def startElement(self, name, atts):
-        "Handle an event for the beginning of an element."
-        try:
-            klass = self._get_dtd_class(name)
-        except AttributeError:
-            raise ValidationError, "Undefined element tag: "+name
-        attr = {} # atts is a instance with unicode keys.. must convert to str..
-        def fixatts(t):
-            attr[str(t[0])] = POM.unescape(str(t[1]))
-        map(fixatts, atts.items())
-        obj = apply (klass, (), attr)
-        self.stack.append(obj)
-
-    def endElement(self, name):
-        "Handle an event for the end of an element."
-        obj = self.stack.pop()
-        if self.stack:
-            self.stack[-1].append(obj)
-        else:
-            self.msg = obj
-
-    def characters(self, text):
-        if self.stack and text:
-            self.stack[-1].append(POM.Text(text))
-
-    def processingInstruction(self, target, data):
-        'xml version="1.0" encoding="ISO-8859-1"?'
-        mo = re.match('xml version="([0123456789.]+)" encoding="([A-Z0-9-]+)"', data, re.IGNORECASE)
-        if mo:
-            version, encoding = mo.groups()
-            assert version in ("1.0", "1.1")
-            self.encoding = encoding
             self.doc.set_encoding(encoding)
         else:
             print >>sys.stderr, "!!! Unhandled pi: %r" % (data,)
 
-    def startPrefixMapping(self, prefix, uri):
-        print >>sys.stderr, "unhandled startPrefixMapping:", prefix, uri
-
-    def endPrefixMapping(self, prefix):
-        print >>sys.stderr, "unhandled endPrefixMapping:", prefix
-
-    def skippedEntity(self, name):
-        if self.stack:
-            self.stack[-1].add_text(str(unichr(name2codepoint[name])))
-
-    def ignorableWhitespace(self, whitespace):
-        print >>sys.stderr, "unhandled ignorableWhitespace:", whitespace
-
-    def startElementNS(self, cooked_name, name, attributesns):
-        print >>sys.stderr, "unhandled startElementNS:", cooked_name, name, attributesns
-
-    def endElementNS(self, name, rawname):
-        print >>sys.stderr, "unhandled endElementNS:", name, rawname
-
-    # DTDHandler interface
-    def notationDecl(self, name, publicId, systemId):
-        """Handle a notation declaration event."""
-        print >>sys.stderr, "unhandled notationDecl:", name, publicId, systemId
-
-    def unparsedEntityDecl(self, name, publicId, systemId, ndata):
-        """Handle an unparsed entity declaration event."""
-        print >>sys.stderr, "unhandled unparsedEntityDecl:", \
-                    name, publicId, systemId, ndata
-
-    # entity resolver interface
-    def resolveEntity(self, publicId, systemId):
-        for modname, doctype in dtds.DOCTYPES.items():
-            if doctype.public == publicId:
-                if self.doc is None:
-                    self.doc = new_document(doctype=modname, encoding=self.encoding)
-                else:
-                    self.doc.set_doctype(modname)
-                break
-        else:
-            raise ValidationError, "unknown DOCTYPE: %r" % (publicId,)
-        # Have to fake a file-like object for the XML parser to not
-        # actually get an external entity.
-        return FakeFile(systemId)
-
-class FakeFile(object):
-    def __init__(self, name):
-        self.name = name
-    def read(self, amt=None):
-        return ""
-
-class XHTMLErrorHandler(object):
-    def error(self, exception):
-        "Handle a recoverable error."
-        raise exception
-
-    def fatalError(self, exception):
-        "Handle a non-recoverable error."
-        raise exception
-
-    def warning(self, exception):
-        "Handle a warning."
-        print exception
 
 
-def get_parser(doc=None, validate=0):
-    from xml.sax.xmlreader import InputSource
-    import xml.sax.sax2exts
-    import xml.sax.handler
-    import new
-    #import xml.sax.handler
-    handler = XHTMLContentHandler(doc)
-    errorhandler = XHTMLErrorHandler()
-    # create parser 
-    parser = xml.sax.sax2exts.XMLParserFactory.make_parser() 
-    parser.setFeature(xml.sax.handler.feature_namespaces, 0) 
-    parser.setFeature(xml.sax.handler.feature_validation, validate) 
-    parser.setFeature(xml.sax.handler.feature_external_ges, 1) 
-    parser.setFeature(xml.sax.handler.feature_external_pes, 0) 
-    # set handlers 
-    parser.setContentHandler(handler) 
-    parser.setDTDHandler(handler) 
-    parser.setEntityResolver(handler) 
-    parser.setErrorHandler(errorhandler) 
-    # since the xml API provides some generic parser I can't just
-    # subclass I have to "patch" the object in-place with this trick.
-    # This is to a) make the API compatible with the HTMLParser, and b)
-    # allow specifing the encoding in the request.
-    parser.parse_orig = parser.parse
-    def parse(self, url, data=None, encoding=POM.DEFAULT_ENCODING, 
-                                    useragent=None, accept=None):
-        from pycopia.WWW import urllibplus
-        fo = urllibplus.urlopen(url, data, encoding, useragent=useragent, accept=accept)
-        return self.parse_orig(fo)
-    parser.parse = new.instancemethod(parse, parser, parser.__class__)
-    return parser
+#def get_parser(doc=None, validate=0, logfile=None):
+#    from xml.sax.xmlreader import InputSource
+#    import xml.sax.sax2exts
+#    import xml.sax.handler
+#    import new
+#    handler = POM.ContentHandler(doc, doc_factory=new_document)
+#    errorhandler = POM.ErrorHandler(logfile)
+#    # create parser 
+#    parser = xml.sax.sax2exts.XMLParserFactory.make_parser() 
+#    parser.setFeature(xml.sax.handler.feature_namespaces, 0) 
+#    parser.setFeature(xml.sax.handler.feature_validation, validate) 
+#    parser.setFeature(xml.sax.handler.feature_external_ges, 1) 
+#    parser.setFeature(xml.sax.handler.feature_external_pes, 0) 
+#    # set handlers 
+#    parser.setContentHandler(handler) 
+#    parser.setDTDHandler(handler) 
+#    parser.setEntityResolver(handler) 
+#    parser.setErrorHandler(errorhandler) 
+#    # since the xml API provides some generic parser I can't just
+#    # subclass I have to "patch" the object in-place with this trick.
+#    # This is to a) make the API compatible with the HTMLParser, and b)
+#    # allow specifing the encoding in the request.
+#    parser.parse_orig = parser.parse
+#    def parse(self, url, data=None, encoding=POM.DEFAULT_ENCODING, 
+#                                    useragent=None, accept=None):
+#        from pycopia.WWW import urllibplus
+#        fo = urllibplus.urlopen(url, data, encoding, useragent=useragent, accept=accept)
+#        return self.parse_orig(fo)
+#    parser.parse = new.instancemethod(parse, parser, parser.__class__)
+#    return parser
 
 # This is here as a convenience, but could introduce non-conformance
 # errors into the document.
@@ -1569,13 +1389,13 @@ def check_flag(kwargs, name):
 
 def add2class(node, name):
     """Maintains space-separated class names."""
-    attr = node._get_attribute("class")
+    attr = node._get_attribute("class_")
     if attr is None:
-        node.set_attribute("class", name)
+        node.set_attribute("class_", name)
     else:
         attr += " "
         attr += name
-        node.set_attribute("class", attr)
+        node.set_attribute("class_", attr)
 
 def get_url(params, base=None):
     """Return a URL properly encoded for inclusion as an href. Provide a
@@ -1593,7 +1413,6 @@ class URL(dict):
     def __str__(self):
         return get_url(self, self._base)
 
-
 ### WML support... should be factored out.
 
 class WMLDocument(POM.POMDocument, ContainerMixin):
@@ -1601,30 +1420,8 @@ class WMLDocument(POM.POMDocument, ContainerMixin):
     """
     MIMETYPE="text/vnd.wap.wml"
 
-    def __init__(self, doctype=None, lang="en", encoding=POM.DEFAULT_ENCODING):
-        super(WMLDocument, self).__init__(encoding=encoding)
-        self.lang = lang
-        self._COUNTERS = {}
-        if doctype: # implies new document 
-            self.set_doctype(doctype)
-            self.root = self.dtd.Wml()
-#            self.xmlnamespace = NAMESPACES[doctype]
-#            self.root.xmlns = self.xmlnamespace
-            self.root.set_namespace(None) # WML tags have no namespace tags
-
     def get_parser(self):
         return get_parser(self)
-
-    def set_root(self, rootnode):
-        self.dirty = 0
-        self.root = rootnode
-#        self.xmlnamespace = self.root.xmlns
-        self.root.set_namespace(None)
-
-    def set_doctype(self, doctype):
-        self.DOCTYPE = str(dtds.DOCTYPES[doctype])
-        self.dtd = get_dtd_module(doctype)
-        self.set_dtd(self.dtd)
 
     def append(self, obj, **kwargs):
         if type(obj) is str:
@@ -1641,35 +1438,6 @@ class GenericDocument(POM.POMDocument, FlowMixin):
     """
     MIMETYPE="text/xml"
 
-    def __init__(self, doctype=None, lang="en", encoding=POM.DEFAULT_ENCODING):
-        super(GenericDocument, self).__init__(encoding=encoding)
-        self.lang = lang
-        self._COUNTERS = {}
-        if doctype: # implies new document 
-            self.set_doctype(doctype)
-            self.root = self.dtd.Root()
-
-    def get_parser(self):
-        return get_parser(self)
-
-    def set_root(self, rootnode):
-        self.dirty = 0
-        self.root = rootnode
-
-    def set_doctype(self, doctype):
-        self.DOCTYPE = str(dtds.DOCTYPES[doctype])
-        self.dtd = get_dtd_module(doctype)
-        self.set_dtd(self.dtd)
-
-    def append(self, obj, **kwargs):
-        if type(obj) is str:
-            obj = get_container(self.dtd, obj, **kwargs)
-        self.body.append(obj)
-
-    def insert(self, ind, obj, **kwargs):
-        if type(obj) is str:
-            obj = get_container(self.dtd, obj, **kwargs)
-        self.body.insert(ind, obj)
 
 # danger: hard-coded config. ;-) 
 # This maps a doctype, generically determined by the root element name,
@@ -1683,7 +1451,6 @@ _DOCMAP = {
     "application/xhtml+xml": XHTMLDocument,
     "text/vnd.wap.wml": WMLDocument,
 }
-
 
 def get_document_class(doctype=None, mimetype=None):
     if doctype:
@@ -1700,22 +1467,41 @@ def get_document_class(doctype=None, mimetype=None):
 
 # Document constructors. Use one of these to get your XHTML document.
 
-def new_document(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING):
-    docclass = get_document_class(doctype=doctype)
-    doc = docclass(doctype)
-    doc.set_encoding(encoding)
+# Primary document factory for new XHTML class of documents.
+def new_document(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING, lang=None):
+    doc = xhtml_factory(doctype, encoding, lang)
+    root = doc.dtd._Root()
+    doc.set_root(root)
+    head = get_container(doc.dtd, "Head", {})
+    body = get_container(doc.dtd, "Body", {})
+    root.append(head)
+    root.append(body)
+    # Set convenient direct accessors to main HTML document parts.
+    root.head = head
+    root.body = body
     return doc
 
+# TODO WML factory
+
+# Document factory for new sparse documents. Used by parser.
+def xhtml_factory(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING, lang=None):
+    docclass = get_document_class(doctype=doctype)
+    doc = docclass(doctype=doctype, lang=lang, encoding=encoding)
+    return doc
 
 def get_document(url, data=None, encoding=POM.DEFAULT_ENCODING, 
-        mimetype="application/xhtml+xml", useragent=None, validate=0):
+        mimetype="application/xhtml+xml", useragent=None, validate=0, logfile=None):
+    """Fetchs a document from the given source, including remote hosts."""
     if "text/html" in mimetype: # need loose SGML parser.
         p = _HTMLParser()
     else: # assume some kind of XML
-        p = get_parser(validate=validate)
+        p = get_parser(validate=validate, logfile=logfile)
     p.parse(url, data, encoding, useragent=useragent, accept=mimetype)
     handler = p.getContentHandler()
     return handler.doc
 
+def get_parser(document=None, namespaces=0, validate=0, logfile=None):
+    return POM.get_parser(document, namespaces=namespaces, validate=validate, 
+        external_ges=1, logfile=logfile, doc_factory=xhtml_factory)
 
 

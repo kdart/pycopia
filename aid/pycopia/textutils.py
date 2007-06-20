@@ -37,6 +37,7 @@ CRLF   = "\r\n"
 punctuation = """!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"""
 printable = digits + letters + punctuation + whitespace
 
+
 def cut_string(s, maxlen=800):
     """Cuts a long string, returning the head and tail combined, with the
 middle missing. """
@@ -76,10 +77,22 @@ for c in alphanumeric:
 _IDENTTABLE = "".join(tbl)
 del tbl, c
 
+# build keyword map
+import keyword
+_KEYWORDS = {}
+for kw in keyword.kwlist:
+    _KEYWORDS[kw] = kw + "_"
+del kw, keyword
+
 def identifier(tag):
     """Return a valid Python identifier given an arbitrary string."""
     tag = str(tag)
     return tag.translate(_IDENTTABLE).capitalize()
+
+def keyword_identifier(name):
+    """Return a valid Python keyword identifier given an arbitrary string."""
+    ident = name.translate(_IDENTTABLE)
+    return _KEYWORDS.get(ident, ident)
 
 # creating a new translation table all the time is annoying. This makes a
 # default one automatically.

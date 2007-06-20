@@ -172,10 +172,18 @@ Wraps a file-like object with safe read methods, and allows logged reads."""
         self._fo = fo
         self.linesep = linesep or os.linesep
         self._logfile = logfile
-        self.mode = fo.mode
         self.closed = 0
         self.softspace = 0
         self._restart = restart
+        try:
+            self.mode = fo.mode
+        except AttributeError: # some file-like objects don't have this attribute.
+            try:
+                fd = fo.fileno()
+            except AttributeError:
+                self.mode = "r" # sheesh, wing it
+            else:
+                self.mode = mode_string(fd)
 
     # delegate other methods, note that they are not protected from EINTR...
     def __getattr__(self, name):
@@ -483,4 +491,38 @@ def mode2flags(mode):
         flags = flags | os.O_RDWR
     return flags
 
+
+# precompute the O_ flag list, and stash it in the os module
+os.OLIST = filter(lambda n: n.startswith("O_"), dir(os))
+def flag_string(fd):
+    """flag_string(fd)
+    where fd is an integer file descriptor of an open file. Returns the files open
+    flags as a vertical bar (|) delimited string.
+    """
+    flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    strlist = filter(None, map(lambda n: (flags & getattr(os, n)) and n, os.OLIST))
+    # hack to accomodate the fact that O_RDONLY is not really a flag...
+    if not (flags & os.ACCMODE):
+        strlist.insert(0, "O_RDONLY")
+    return "|".join(strlist)
+
+
+# XXX still need to verify this or add more.
+_MODEMAP = {
+    os.O_RDONLY: "r",
+    os.O_RDWR: "r+",
+    os.O_WRONLY | os.O_TRUNC: "w",
+    os.O_RDWR | os.O_CREAT: "w+",
+    os.O_APPEND | os.O_WRONLY: "a",
+    os.O_APPEND | os.O_RDWR | os.O_CREAT: "a+",
+}
+
+def mode_string(fd):
+    """Get a suitalbe mode string for an fd."""
+    flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    mode = _MODEMAP.get(flags)
+    if mode is None:
+        return flag_string(fd)
+    else:
+        return mode
 
