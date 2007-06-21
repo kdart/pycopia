@@ -231,7 +231,7 @@ class ASIS(object):
 
 class NameSpace(object):
     def __init__(self, name, uri):
-        self.uri = str(uri)
+        self.uri = uri
         if ":" in name:
             [xmlns, name] = name.split(":", 1)
             self.name = "%s:" % name
@@ -834,7 +834,7 @@ class BeautifulWriter(object):
             return self._fo.write(data)
         mo = self._tagre.search(data)
         if mo:
-            if str(mo.group(1)) in self._inline:
+            if mo.group(1) in self._inline:
                 return self._fo.write(data)
             else:
                 self._fo.write("\n"+"  "*self._level)
@@ -1206,7 +1206,7 @@ class ContentHandler(object):
 
     def skippedEntity(self, name):
         if self.stack:
-            self.stack[-1].add_text(str(unichr(name2codepoint[name])))
+            self.stack[-1].add_text(unichr(name2codepoint[name]))
 
     def ignorableWhitespace(self, whitespace):
         self._errormethod("unhandled ignorableWhitespace: %r" % (whitespace,))
@@ -1376,14 +1376,14 @@ DEFAULT = 13    # default value for enumerated types (added by parser)
 FIXED = 14      # always the same, fixed, value.
 
 _ATTRTYPEMAP = {
-    "CDATA": AT_CDATA,
-    "ID": AT_ID,
-    "IDREF": AT_IDREF,
-    "IDREFS": AT_IDREFS,
-    "ENTITY": AT_ENTITY,
-    "ENTITIES": AT_ENTITIES,
-    "NMTOKEN": AT_NMTOKEN,
-    "NMTOKENS": AT_NMTOKENS
+    u"CDATA": AT_CDATA,
+    u"ID": AT_ID,
+    u"IDREF": AT_IDREF,
+    u"IDREFS": AT_IDREFS,
+    u"ENTITY": AT_ENTITY,
+    u"ENTITIES": AT_ENTITIES,
+    u"NMTOKEN": AT_NMTOKEN,
+    u"NMTOKENS": AT_NMTOKENS
 }
 
 _ATTRCLASSMAP = {
@@ -1416,7 +1416,7 @@ class XMLAttribute(object):
         if a_type_type is int: # from the generated file
             self.a_type = _ATTRCLASSMAP.get(a_type, a_type)
         elif a_type_type is unicode: # from the parser
-            self.a_type = _ATTRTYPEMAP.get(str(a_type), a_type)
+            self.a_type = _ATTRTYPEMAP.get(a_type, a_type)
         elif issubclass(a_type_type, list):
             self.a_type = Enumeration(a_type)
             self._is_enumeration = True

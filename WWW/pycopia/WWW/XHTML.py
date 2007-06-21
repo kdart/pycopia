@@ -1440,16 +1440,17 @@ class GenericDocument(POM.POMDocument, FlowMixin):
 
 
 # danger: hard-coded config. ;-) 
-# This maps a doctype, generically determined by the root element name,
-# to a specific document class. It simultaneously contains the mimtype to
-# document class mapping.
+# This maps a doctype, generically determined by the root element name, to
+# a specific document class and default doctype. It simultaneously
+# contains the mimtype to document class mapping.
 # TODO doctype registry.
 _DOCMAP = {
-    "html": XHTMLDocument,
-    "wml": WMLDocument,
-    "wta-wml": WMLDocument,
-    "application/xhtml+xml": XHTMLDocument,
-    "text/vnd.wap.wml": WMLDocument,
+    "html": (XHTMLDocument, dtds.XHTML),
+    "wml": (WMLDocument, dtds.WML20),
+    "wta-wml": (WMLDocument, dtds.WTA_WML12),
+    "application/xhtml+xml": (XHTMLDocument, dtds.XHTML),
+    "text/vnd.wap.wml": (WMLDocument, dtds.WML20),
+    "text/html": (XHTMLDocument, dtds.XHTML),
 }
 
 def get_document_class(doctype=None, mimetype=None):
@@ -1469,7 +1470,7 @@ def get_document_class(doctype=None, mimetype=None):
 
 # Primary document factory for new XHTML class of documents.
 def new_document(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING, lang=None):
-    doc = xhtml_factory(doctype, encoding, lang)
+    doc = xhtml_factory(doctype=doctype, encoding=encoding, lang=lang)
     root = doc.dtd._Root()
     doc.set_root(root)
     head = get_container(doc.dtd, "Head", {})
@@ -1484,8 +1485,10 @@ def new_document(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING, lang=None)
 # TODO WML factory
 
 # Document factory for new sparse documents. Used by parser.
-def xhtml_factory(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING, lang=None):
-    docclass = get_document_class(doctype=doctype)
+def xhtml_factory(doctype=None, mimetype=None, encoding=POM.DEFAULT_ENCODING, lang=None):
+    docclass, defdt = get_document_class(doctype=doctype, mimetype=mimetype)
+    if doctype is None:
+        doctype = defdt
     doc = docclass(doctype=doctype, lang=lang, encoding=encoding)
     return doc
 
