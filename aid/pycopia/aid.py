@@ -27,6 +27,8 @@ builtins. ;-)
 import sys
 from math import ceil
 
+from pycopia.socket import SocketError
+
 # Works like None, but is callable and iterable.
 class NULLType(type):
     def __new__(cls, name, bases, dct):

@@ -21,6 +21,7 @@ Basic async server using the asyncio and socket modules.
 """
 
 import sys
+from errno import EINTR
 
 from pycopia import socket, asyncio
 
@@ -146,7 +147,7 @@ class SocketWorker(object):
         while 1:
             try:
                 sent = self._sock.send(self._buf[:4096], self._sendflags)
-            except SocketError, why:
+            except socket.SocketError, why:
                 if why[0] == EINTR:
                     continue
                 else:
