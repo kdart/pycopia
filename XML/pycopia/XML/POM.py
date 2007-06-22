@@ -35,12 +35,6 @@ from pycopia.textutils import identifier, keyword_identifier
 from pycopia import dtds
 from pycopia.XML import XMLVisitorContinue, ValidationError
 
-try:
-    sys.setdefaultencoding
-except AttributeError:
-    pass
-else:
-    sys.setdefaultencoding("UTF-8")
 
 DEFAULT_ENCODING = sys.getdefaultencoding()
 
@@ -57,6 +51,8 @@ def verify_encoding(newcodec):
         codecs.lookup(newcodec)
     except LookupError, err:
         raise ValueError, err.args[0]
+
+set_default_encoding("utf-8")
 
 #########################################################
 # XML generating classes
@@ -82,7 +78,7 @@ class Text(object):
     def __add__(self, other):
         return self.__class__(self.data + other.data)
     def emit(self, fo, encoding=None):
-        fo.write( escape(self.data.encode(encoding or self.encoding)) )
+        fo.write( escape(self.data).encode(encoding or self.encoding) )
     def encode(self, encoding):
         return escape(self.data.encode(encoding))
     def __str__(self):

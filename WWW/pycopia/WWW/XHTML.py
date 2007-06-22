@@ -1334,38 +1334,6 @@ class _HTMLParser(HTMLParser.HTMLParser):
             print >>sys.stderr, "!!! Unhandled pi: %r" % (data,)
 
 
-
-#def get_parser(doc=None, validate=0, logfile=None):
-#    from xml.sax.xmlreader import InputSource
-#    import xml.sax.sax2exts
-#    import xml.sax.handler
-#    import new
-#    handler = POM.ContentHandler(doc, doc_factory=new_document)
-#    errorhandler = POM.ErrorHandler(logfile)
-#    # create parser 
-#    parser = xml.sax.sax2exts.XMLParserFactory.make_parser() 
-#    parser.setFeature(xml.sax.handler.feature_namespaces, 0) 
-#    parser.setFeature(xml.sax.handler.feature_validation, validate) 
-#    parser.setFeature(xml.sax.handler.feature_external_ges, 1) 
-#    parser.setFeature(xml.sax.handler.feature_external_pes, 0) 
-#    # set handlers 
-#    parser.setContentHandler(handler) 
-#    parser.setDTDHandler(handler) 
-#    parser.setEntityResolver(handler) 
-#    parser.setErrorHandler(errorhandler) 
-#    # since the xml API provides some generic parser I can't just
-#    # subclass I have to "patch" the object in-place with this trick.
-#    # This is to a) make the API compatible with the HTMLParser, and b)
-#    # allow specifing the encoding in the request.
-#    parser.parse_orig = parser.parse
-#    def parse(self, url, data=None, encoding=POM.DEFAULT_ENCODING, 
-#                                    useragent=None, accept=None):
-#        from pycopia.WWW import urllibplus
-#        fo = urllibplus.urlopen(url, data, encoding, useragent=useragent, accept=accept)
-#        return self.parse_orig(fo)
-#    parser.parse = new.instancemethod(parse, parser, parser.__class__)
-#    return parser
-
 # This is here as a convenience, but could introduce non-conformance
 # errors into the document.
 def parseRST(rsttext):
@@ -1471,6 +1439,9 @@ def get_document_class(doctype=None, mimetype=None):
 # Primary document factory for new XHTML class of documents.
 def new_document(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING, lang=None):
     doc = xhtml_factory(doctype=doctype, encoding=encoding, lang=lang)
+    return initialize_document(doc)
+
+def initialize_document(doc):
     root = doc.dtd._Root()
     doc.set_root(root)
     head = get_container(doc.dtd, "Head", {})
