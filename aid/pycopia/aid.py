@@ -26,8 +26,10 @@ builtins. ;-)
 
 import sys
 from math import ceil
+from errno import EINTR
 
-from pycopia.socket import SocketError
+# have to import this way to avoid a circular import
+from _socket import error as SocketError
 
 # Works like None, but is callable and iterable.
 class NULLType(type):
@@ -368,7 +370,7 @@ def debugmethod(meth):
             return meth(*iargs, **ikwargs)
         except:
             ex, val, tb = sys.exc_info()
-            import debugger
+            from pycopia import debugger
             debugger.post_mortem(tb, ex, val)
     return _lambda
 
@@ -379,12 +381,12 @@ def systemcall(meth):
             try:
                 rv = meth(*args, **kwargs)
             except EnvironmentError, why:
-                if why.args and why.args[0] == errno.EINTR:
+                if why.args and why.args[0] == EINTR:
                     continue
                 else:
                     raise
             except SocketError, why:
-                if why.args and why.args[0] == errno.EINTR:
+                if why.args and why.args[0] == EINTR:
                     continue
                 else:
                     raise
