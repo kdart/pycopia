@@ -31,18 +31,18 @@ MIDDLEWARE_CLASSES = ()
 
 # Map pattern to handler functions. 
 LOCATIONMAP = (
-  (r"^/$", "nmsapps.base.views.main"),
-  (r"^/error/$", "nmsapps.base.views.error"),
-  (r"^/docs/$", "nmsapps.docs.views.main"),
-  (r"^/mibs/$", "nmsapps.mibs.views.main"),
-  (r"^/discover/$", "nmsapps.discover.views.main"),
-  (r"^/monitor/$", "nmsapps.monitor.views.main"),
-  (r"^/reports/$", "nmsapps.reports.views.main"),
-  (r'^/reports/(?P<report>\S+)/$', 'nmsapps.reports.views.reports'),
-  (r"^/selftest/$", "nmsapps.selftest.views.main"),
-  (r'^/selftest/testhandler/$', 'nmsapps.selftest.views.testhandler'),
-  (r'^/selftest/plot/$', 'graphs.testplot'),
-  (r'^/selftest/(?P<report>\S+)/$', 'nmsapps.selftest.views.reports'),
+  (r"^/$", "pycopia.nmsapps.base.views.main"),
+  (r"^/error/$", "pycopia.nmsapps.base.views.error"),
+  (r"^/docs/$", "pycopia.nmsapps.docs.views.main"),
+  (r"^/mibs/$", "pycopia.nmsapps.mibs.views.main"),
+  (r"^/discover/$", "pycopia.nmsapps.discover.views.main"),
+  (r"^/monitor/$", "pycopia.nmsapps.monitor.views.main"),
+  (r"^/reports/$", "pycopia.nmsapps.reports.views.main"),
+  (r'^/reports/(?P<report>\S+)/$', 'pycopia.nmsapps.reports.views.reports'),
+  (r"^/selftest/$", "pycopia.nmsapps.selftest.views.main"),
+  (r'^/selftest/testhandler/$', 'pycopia.nmsapps.selftest.views.testhandler'),
+  (r'^/selftest/(?P<report>\S+)/$', 'pycopia.nmsapps.selftest.views.reports'),
+#  (r'^/selftest/plot/$', 'graphs.testplot'),
     # aliases don't have a dot in the name.
   (r'/media/css/(?P<name>\S+)', "css"),
   (r'/media/js/(?P<name>\S+)', "js"),
@@ -51,12 +51,12 @@ LOCATIONMAP = (
 
 DEFAULTNAV = (
     # location                name in menu
-  ("nmsapps.base.views.main", "Main"),
-  ("nmsapps.docs.views.main", "Documentation"), 
-  ("nmsapps.mibs.views.main", "Mibs"), 
-  ("nmsapps.discover.views.main", "Discover"), 
-  ("nmsapps.monitor.views.main", "Monitor"), 
-  ("nmsapps.reports.views.main", "Reports"), 
+  ("pycopia.nmsapps.base.views.main", "Main"),
+  ("pycopia.nmsapps.docs.views.main", "Documentation"), 
+  ("pycopia.nmsapps.mibs.views.main", "Mibs"), 
+  ("pycopia.nmsapps.discover.views.main", "Discover"), 
+  ("pycopia.nmsapps.monitor.views.main", "Monitor"), 
+  ("pycopia.nmsapps.reports.views.main", "Reports"), 
 )
 
 

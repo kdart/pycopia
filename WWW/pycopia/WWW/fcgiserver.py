@@ -67,8 +67,9 @@ def get_server(config):
     app = framework.WebApplication(config)
 
     if config.DEBUG:
-        from paste.evalexception.middleware import EvalException
-        app = EvalException(app)
+        pass
+        #from paste.evalexception.middleware import EvalException
+        #app = EvalException(app)
 
     return FCGIServer(app, 
             procmanager=pm,

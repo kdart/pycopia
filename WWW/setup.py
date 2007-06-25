@@ -20,7 +20,7 @@ setup (name=NAME, version=VERSION,
     packages = find_packages(),
     install_requires = ['pycopia-XML>=1.0a1,==dev', 'simplejson>=0.5'],
     data_files = [
-        ('/etc/pycopia', glob("etc/*.example")),
+        ('/etc/pycopia', glob("etc/*.example")+glob("etc/*.dist")),
         ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
         (os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html'), 
              glob("doc/html/*.html")),

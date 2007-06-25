@@ -69,14 +69,16 @@ class AutoMessageMixin(object):
         if To:
             self.To(To)
 
-    def send(self, smtp, mail_options=[], rcpt_options=[]):
+    def send(self, smtp, mail_options=None, rcpt_options=None):
         """send off this message using the supplied SMTP sender object."""
+        mopts = mail_options or []
+        rcptopts = rcpt_options or []
         if not self.mail_from or not self.rcpt_to:
             raise RuntimeError, "AutoMessage: cannot send. no From or recipients."
         self["Date"] = formatdate()
         if self.has_key("Bcc"):
             del self["Bcc"]
-        return smtp.sendmail(self.mail_from, self.rcpt_to, self.as_string(0), mail_options, rcpt_options)
+        return smtp.sendmail(self.mail_from, self.rcpt_to, self.as_string(0), mopts, rcptopts)
 
     def Subject(self, subj):
         self["Subject"] = str(subj)
@@ -217,7 +219,6 @@ def mail(obj, To=None, From=None, subject=None, cc=None, bcc=None):
 
     """
     global CONFIG
-    from pycopia.inet import SMTP
     if isinstance(obj, (AutoMessage, MultipartMessage)):
         outer = obj
     else:
@@ -236,19 +237,44 @@ def mail(obj, To=None, From=None, subject=None, cc=None, bcc=None):
     if bcc:
         outer.Bcc(bcc)
 
-    smtp = SMTP.SMTP(CONFIG.get("mailhost"), bindto=CONFIG.get("bindto"))
-    errs = outer.send(smtp)
-    smtp.quit()
-    if errs:
-        print >>sys.stderr, "Error while sending mail!"
-        print >>sys.stderr, errs
+    mailhost = CONFIG.get("mailhost", "localhost")
+
+    if mailhost == "localhost":
+        smtp = LocalSender()
+        status = outer.send(smtp)
+        if not status:
+            print >>sys.stderr, status
+    else:
+        from pycopia.inet import SMTP
+        smtp = SMTP.SMTP(mailhost, bindto=CONFIG.get("bindto"))
+        errs = outer.send(smtp)
+        smtp.quit()
+        if errs:
+            print >>sys.stderr, "Error while sending mail!"
+            print >>sys.stderr, errs
 
 def get_config():
     from pycopia import basicconfig
     return basicconfig.get_config("ezmail.conf")
 
+class LocalSender(object):
+    def sendmail(self, From, rcpt_to, msg, mopts=None, rcptopts=None):
+        from pycopia import proctools
+        cmd = "/usr/sbin/sendmail -i"
+        if From:
+            cmd += " -f %s" % From
+        for rcpt in rcpt_to:
+            cmd += " %s" % rcpt
+        proc = proctools.spawnpipe(cmd)
+        proc.write(msg)
+        proc.close()
+        proc.wait()
+        return proc.exitstatus
+
+
 # global configuration
 CONFIG = get_config()
+
 
 if __name__ == "__main__":
     mail(["This is a test.\n", "Another part"], None, subject="Testing ezmail")

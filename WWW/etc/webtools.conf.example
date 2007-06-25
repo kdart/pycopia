@@ -17,15 +17,15 @@ LANGUAGE_CODE = 'en-us'
 
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'pyNMSkj3sd%$***ni1U-Toosl9yo8&p63fOewrt*&(w2358@^+'
+SECRET_KEY = 'webtoolssd%$***ni1U-Toosl9yo8&p63fOewrt*&(w2358@^+'
 
 MIDDLEWARE_CLASSES = ()
 
 # Map pattern to handler functions. 
 LOCATIONMAP = (
-  (r"^/?$", "webtools.base.views.main"),
-  (r"^/headers$", "webtools.base.views.headers"),
-  (r"^/headers/mail$", "webtools.base.views.emailrequest"),
+  (r"^/?$", "pycopia.webtools.core.views.main"),
+  (r"^/headers$", "pycopia.webtools.core.views.headers"),
+  (r"^/headers/mail$", "pycopia.webtools.core.views.emailrequest"),
     # aliases don't have a dot in the name.
   (r'/media/css/(?P<name>\S+)', "css"),
   (r'/media/js/(?P<name>\S+)', "js"),
@@ -34,8 +34,8 @@ LOCATIONMAP = (
 
 DEFAULTNAV = [
     # location                name in menu
-  ("webtools.base.views.main", "Main"),
-  ("webtools.base.views.headers", "Headers"),
+  ("pycopia.webtools.core.views.main", "Main"),
+  ("pycopia.webtools.core.views.headers", "Headers"),
 ]
 
 

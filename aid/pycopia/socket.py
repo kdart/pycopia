@@ -607,7 +607,9 @@ def connect_inet(host, port, socktype, sobject=SafeSocket):
             continue
         else:
             return s
-    raise SocketError, "could not connect, no connections found."
+    ex, val, tb = sys.exc_info()
+    #raise GetAddressInfoError, "could not connect, no connections found."
+    raise ex, val, tb
 
 def connect_tcp(host, port, sobject=SafeSocket):
     return connect_inet(host, port, SOCK_STREAM, sobject)

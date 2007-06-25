@@ -80,9 +80,9 @@ class Text(object):
     def emit(self, fo, encoding=None):
         fo.write( escape(self.data).encode(encoding or self.encoding) )
     def encode(self, encoding):
-        return escape(self.data.encode(encoding))
+        return escape(self.data).encode(encoding)
     def __str__(self):
-        return escape(self.data.encode(self.encoding))
+        return self.encode(self.encoding)
     def __unicode__(self):
         return escape(self.data)
     def __repr__(self):
@@ -383,6 +383,10 @@ class ElementNode(object):
     def set_namespace(self, ns):
         self._namespace = ns
 
+    def set_encoding(self, encoding):
+        POM.verify_encoding(encoding)
+        self.encoding = encoding
+
     def index(self, obj):
         objid = id(obj)
         i = 0
@@ -555,7 +559,7 @@ class ElementNode(object):
         return "%s.%s(%s)" % (cl.__module__, cl.__name__, ", ".join(attrs))
 
     def __str__(self):
-        return self.encode(DEFAULT_ENCODING)
+        return self.encode(self.encoding or DEFAULT_ENCODING)
 
     def encode(self, encoding):
         self._verify_attributes()

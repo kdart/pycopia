@@ -35,6 +35,18 @@ from pycopia.aid import NULL
 class ExitNow(Exception):
     pass
 
+# fix up the os module to include more Linux/BSD constants.
+os.ACCMODE = 03
+# flag for ASYNC I/O support. Note cygwin/win32 does not support it.
+O_ASYNC = os.O_ASYNC = {
+    "linux1":020000, # ?
+    "linux2":020000, 
+    "freebsd4":0x0040, 
+    "freebsd5":0x0040,  # ?
+    "darwin":0x0040,
+    "sunos5":0, # not supported
+    }.get(sys.platform, 0)
+
 
 class Poll(object):
     """
@@ -210,7 +222,7 @@ def set_asyncio(obj):
     else:
         raise ValueError, "set_asyncio: needs integer file descriptor, or object with fileno() method."
     flags = fcntl.fcntl(fd, fcntl.F_GETFL)
-    flags |= os.O_ASYNC
+    flags |= O_ASYNC
     fcntl.fcntl(fd, fcntl.F_SETFL, flags)
     fcntl.fcntl(fd, fcntl.F_SETOWN, os.getpid())
 

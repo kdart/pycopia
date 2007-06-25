@@ -4,7 +4,7 @@
 from pycopia.nmsapps import core, _
 
 
-TITLE = _("Python Network Management System and Toolkit")
+TITLE = _("Network Management System")
 
 def main(request):
   resp = core.ResponseDocument(request, title=TITLE,

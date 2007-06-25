@@ -23,30 +23,23 @@ the default bahavior is kept.
 
 import sys
 
-if __debug__:
-    if sys.platform == "win32":
-        def debugger_hook(exc, value, tb):
-            if hasattr(sys, 'ps1') or not hasattr(sys.stderr, "isatty") or \
-                not sys.stderr.isatty() or exc in (SyntaxError, IndentationError, KeyboardInterrupt):
-                sys.__excepthook__(exc, value, tb)
-            else:
-                import pdb
-                pdb.post_mortem(tb)
-    else:
-        def debugger_hook(exc, value, tb):
-            if hasattr(sys, 'ps1') or not hasattr(sys.stderr, "isatty") or \
-                not sys.stderr.isatty() or exc in (SyntaxError, IndentationError, KeyboardInterrupt):
-                # we are in interactive mode or we don't have a tty-like
-                # device, or it was a SyntaxError, so we call the default hook
-                sys.__excepthook__(exc, value, tb)
-            else:  # we are NOT in interactive mode, print the exception...
-                from pycopia import debugger
-                # ...then start the debugger in post-mortem mode.
-                debugger.post_mortem(tb, exc, value)
+if sys.platform == "win32":
+    def debugger_hook(exc, value, tb):
+        if (not hasattr(sys.stderr, "isatty") or
+            not sys.stderr.isatty() or exc in (SyntaxError, IndentationError, KeyboardInterrupt)):
+            sys.__excepthook__(exc, value, tb)
+        else:
+            import pdb
+            pdb.post_mortem(tb)
+else:
+    def debugger_hook(exc, value, tb):
+        if (not hasattr(sys.stderr, "isatty") or 
+            not sys.stderr.isatty() or exc in (SyntaxError, IndentationError, KeyboardInterrupt)):
+            # We don't have a tty-like device, or it was a SyntaxError, so
+            # call the default hook.
+            sys.__excepthook__(exc, value, tb)
+        else:
+            from pycopia import debugger
+            debugger.post_mortem(tb, exc, value)
 
-    sys.excepthook = debugger_hook
-
-else: # -O mode is "production mode"
-    import warnings
-    warnings.filterwarnings("ignore")
-
+sys.excepthook = debugger_hook

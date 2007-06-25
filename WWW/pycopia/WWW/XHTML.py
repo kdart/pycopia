@@ -807,20 +807,22 @@ class TableMixin(ContainerMixin):
             del self._t_rows[row-1]
 
     def __str__(self):
+        return self.encode(self.encoding or POM.DEFAULT_ENCODING)
+
+    def encode(self, encoding):
         self._verify_attributes()
-        encoding = self.encoding
         ns = self._get_ns(encoding)
         name = self._name.encode(encoding)
         s = []
         s.append("<%s%s%s>" % (ns, name, self._attr_str(encoding)))
         if self._t_caption:
-            s.append(str(self._t_caption))
+            s.append(self._t_caption.encode(encoding))
         if self._headings:
-            s.append(str(self._headings))
+            s.append(self._headings.encode(encoding))
         for row in self._t_rows:
-            s.append(str(row))
+            s.append(row.encode(encoding))
         s.append(("</%s%s>" % (ns, name)))
-        return "\n".join(s)
+        return "".join(s)
 
     def emit(self, fo, encoding=None):
         encoding = encoding or self.encoding

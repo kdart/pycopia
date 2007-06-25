@@ -1,0 +1,60 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+
+# Same as webtools, but use shorter paths to make it easier to enter into
+# mobile devices.
+
+# User to run handler as. Main server must be run as root for this to have
+# any effect.
+USERNAME = "lighttpd"
+
+ADMINS = [
+    ('keith@dartworks.biz', 'Keith Dart'),
+]
+
+DATABASE_URL = ''
+DATABASE_ENGINE = 'postgresql'      # 'postgresql', 'mysql', 'sqlite3' or 'ado_mssql'.
+DATABASE_NAME = 'webtools'             # Or path to database file if using sqlite3.
+DATABASE_USER = 'webtools'             # Not used with sqlite3.
+DATABASE_PASSWORD = 'XXXXXX'      # Not used with sqlite3.
+DATABASE_HOST = 'localhost'         # Set to empty string for localhost. Not used with sqlite3.
+DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+
+
+# Language code for this installation. All choices can be found here:
+# http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+LANGUAGE_CODE = 'en-us'
+
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = 'wtNMSkj3sd%$***ni1U-Toosl2in8&p63fOewrt*&(w2358@^+'
+
+MIDDLEWARE_CLASSES = ()
+
+# Map pattern to handler functions. 
+LOCATIONMAP = (
+  (r"^/?$", "pycopia.webtools.base.views.headers"),
+  (r"^/h$", "pycopia.webtools.base.views.headers"),
+  (r"^/h/m$", "pycopia.webtools.base.views.emailrequest"),
+  (r"^/h/mail/?$", "pycopia.webtools.base.views.emailrequest"),
+  (r"^/headers/?$", "pycopia.webtools.base.views.headers"),
+  (r"^/headers/mail/?$", "pycopia.webtools.base.views.emailrequest"),
+    # aliases don't have a dot in the name.
+  (r'/media/css/(?P<name>\S+)', "css"),
+  (r'/media/js/(?P<name>\S+)', "js"),
+  (r'/media/images/(?P<name>\S+)', "images"),
+)
+
+DEFAULTNAV = [
+    # location                name in menu
+  ("pycopia.webtools.base.views.main", "Main"),
+  ("pycopia.webtools.base.views.headers", "Headers"),
+]
+
+
+ICONMAP = {
+# simplename     active         inactive (base state)
+#"xxx": ("icon_xxx_active.png", "icon_xxx_inactive.png"),
+  "default": (None, "icon_default_inactive.png"),
+}
+

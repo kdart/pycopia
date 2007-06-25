@@ -20,7 +20,7 @@
 
 from pycopia.WWW import XHTML, framework
 
-JSKIT = "MochiKit.js"
+JSKIT = "mochikit/MochiKit.js"
 UILIB = "nms.js"
 DEFAULTSTYLE = "default.css"
 

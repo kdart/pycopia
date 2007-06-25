@@ -43,7 +43,7 @@ Example usage:
 
   #!/usr/bin/env python
   from myapplication import app # Assume app is your WSGI application object
-  from fcgi import FCGIServer
+  from pycopia.inet.fcgi import FCGIServer
   FCGIServer(app).run()
 
 See the documentation for FCGIServer/Server for more information.
@@ -766,7 +766,7 @@ class Connection(object):
 # method in some way.
 class ProcessManager(object):
     def __init__(self):
-        import proctools
+        from pycopia import proctools
         self._procmanager = proctools.get_procmanager()
 
     def __call__(self, func):

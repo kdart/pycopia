@@ -20,10 +20,13 @@ Web tools.
 
 from pycopia.WWW import framework
 from pycopia.WWW import XHTML
-from pycopia.aid import curry
+from pycopia.aid import partial
 
 from pycopia import ezmail
 
+
+EMAILBODY = """Here is the header information you requested.
+"""
 
 def doc_constructor(request, **kwargs):
     doc = XHTML.new_document()
@@ -47,9 +50,9 @@ def doc_constructor(request, **kwargs):
 def renderval(d, NM, key):
     return repr(d[key])
 
-def get_header_table(doc, environ):
+def get_header_table(section, environ):
     d = dict([(k[5:].replace("_", "-").capitalize(), v) for k, v in environ.items() if k.startswith("HTTP")])
-    tbl = doc.new_table(d.keys(), [curry(renderval, d)], ("HTTP Headers",))
+    tbl = section.new_table(d.keys(), [partial(renderval, d)], ("HTTP Headers",))
     tbl.width = "100%"
 
 
@@ -68,18 +71,31 @@ def headers(request):
     return resp.finalize()
 
 
+
 def emailrequest(request):
     """Send HTTP request headers to provided email address."""
     resp = framework.ResponseDocument(request, doc_constructor, title="Web Responder")
     recipients = request.GET.getlist("recipient")+request.GET.getlist("rcpt") or resp.config.ADMINS
+    # some basic validation. Mailer shuould validate the rest.
+    recipients = filter(lambda name: "@" in name, recipients)
+    recipients = filter(lambda name: "." in name, recipients)
 
-    rpt = XHTML.new_document(encoding="us-ascii")
-    get_header_table(rpt, request.META)
+    if recipients:
+        rpt = XHTML.new_document()
+        get_header_table(rpt.body, request.META)
 
-    msg = ezmail.AutoMessage(str(rpt), mimetype=rpt.MIMETYPE, charset=rpt.encoding)
-    ezmail.mail(msg, To=recipients, subject="Webtool received request from %s." % (request.META.get("REMOTE_ADDR", "<unknown>"),))
+        body = ezmail.AutoMessage(EMAILBODY)
+        body["Content-Disposition"] = 'inline'
+        msg = ezmail.AutoMessage(str(rpt), mimetype=rpt.MIMETYPE, charset=rpt.encoding)
+        msg["Content-Disposition"] = 'attachment; filename=headers.html'
+        ezmail.mail([body, msg], To=recipients, 
+                  subject="Webtool header request from %s." % (request.META.get("REMOTE_ADDR", "<unknown>"),))
 
     get_header_table(resp.doc.content, request.META)
-    resp.doc.content.new_para("Header data emailed to %s." % (recipients,))
+
+    if recipients:
+        resp.doc.content.new_para("Header data emailed to %s." % (", ".join(recipients),))
+    else:
+        resp.doc.content.new_para("No valid email recipients.")
     return resp.finalize()
 
