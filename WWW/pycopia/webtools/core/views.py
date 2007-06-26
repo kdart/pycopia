@@ -68,6 +68,9 @@ def main(request):
 def headers(request):
     resp = framework.ResponseDocument(request, doc_constructor, title="Request Headers")
     get_header_table(resp.doc, request.META)
+    frm = resp.doc.add_form(method="get", action=request.get_url(emailrequest))
+    frm.add_textinput("rcpt", "Email")
+    frm.add_input(type="submit", value="Send")
     return resp.finalize()
 
 
