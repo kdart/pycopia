@@ -28,7 +28,9 @@ from cStringIO import StringIO
 from pycopia import environ
 from pycopia import cliutils
 from pycopia import tty
+
 from pycopia.fsm import FSM, ANY
+from pycopia.aid import IF
 
 # set the PROMPT ignore depending on whether or not readline module is
 # available.
@@ -229,7 +231,7 @@ class UserInterface(object):
                 if last is not None: # don't NL if last value is None (works like trailing comma).
                     wr(str(last))
                     wr("\n")
-            except PageQuitError:
+            except tty.PageQuitError:
                 return
         else:
             wr("\n")
@@ -265,7 +267,7 @@ class UserInterface(object):
                     else:
                         ps += cs
                 self.print_obj("%s%s" % (ps, clist[-1]))
-            except PageQuitError:
+            except tty.PageQuitError:
                 pass
 
     def error(self, text):

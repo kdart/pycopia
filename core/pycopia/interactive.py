@@ -56,7 +56,7 @@ Alternatively, you can just 'import interactive' at the original Python prompt.
 import sys, os, types
 from pprint import pprint
 from pycopia.cliutils import *
-from pycopia.aid import add2builtin
+from pycopia.aid import add2builtin, IF
 
 
 try:

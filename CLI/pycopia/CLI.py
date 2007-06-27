@@ -47,7 +47,7 @@ from pycopia import getopt
 from pycopia.IO import ConsoleIO
 from pycopia.UI import DefaultTheme, UserInterface, method_repr, safe_repr
 from pycopia.fsm import FSM, ANY
-from pycopia.aid import IF, Print
+from pycopia.aid import IF, Print, removedups
 
 # global timer for timing methods
 from pycopia import scheduler
