@@ -52,7 +52,7 @@ def renderval(d, NM, key):
 
 def get_header_table(section, environ):
     d = dict([(k[5:].replace("_", "-").capitalize(), v) for k, v in environ.items() if k.startswith("HTTP")])
-    tbl = section.new_table(d.keys(), [partial(renderval, d)], ("HTTP Headers",))
+    tbl = section.new_table(d.keys(), [partial(renderval, d)], ("HTTP Header", "Value"))
     tbl.width = "100%"
 
 
@@ -66,9 +66,12 @@ def main(request):
 
 
 def headers(request):
-    resp = framework.ResponseDocument(request, doc_constructor, title="Request Headers")
-    get_header_table(resp.doc, request.META)
-    frm = resp.doc.add_form(method="get", action=request.get_url(emailrequest))
+    resp = framework.ResponseDocument(request, doc_constructor, 
+             title="Request Headers",
+             stylesheet=request.get_url("css", name="headers.css"))
+    resp.doc.nav.append(resp.anchor2(main, "Web Tools"))
+    get_header_table(resp.doc.content, request.META)
+    frm = resp.doc.content.add_form(method="get", action=request.get_url(emailrequest))
     frm.add_textinput("rcpt", "Email")
     frm.add_input(type="submit", value="Send")
     return resp.finalize()
