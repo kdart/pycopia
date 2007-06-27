@@ -48,6 +48,9 @@ NBSP = POM.ASIS("&nbsp;")
 TRUE = True
 FALSE = False
 
+MIME_XHTML = "application/xhtml+xml"
+MIME_WAP = "text/vnd.wap.wml"
+MIME_HTML = "text/html"
 
 # tags defined to be inline - use for BeautifulWriter and other type checks
 INLINE_SPECIAL = ["span", "bdo", "object", "img", "map"]
@@ -1418,9 +1421,9 @@ _DOCMAP = {
     "html": (XHTMLDocument, dtds.XHTML),
     "wml": (WMLDocument, dtds.WML20),
     "wta-wml": (WMLDocument, dtds.WTA_WML12),
-    "application/xhtml+xml": (XHTMLDocument, dtds.XHTML),
-    "text/vnd.wap.wml": (WMLDocument, dtds.WML20),
-    "text/html": (XHTMLDocument, dtds.XHTML),
+    MIME_XHTML: (XHTMLDocument, dtds.XHTML),
+    MIME_WAP: (WMLDocument, dtds.WML20),
+    MIME_HTML: (XHTMLDocument, dtds.XHTML),
 }
 
 def get_document_class(doctype=None, mimetype=None):
@@ -1465,19 +1468,23 @@ def xhtml_factory(doctype=None, mimetype=None, encoding=POM.DEFAULT_ENCODING, la
     doc = docclass(doctype=doctype, lang=lang, encoding=encoding)
     return doc
 
-def get_document(url, data=None, encoding=POM.DEFAULT_ENCODING, 
-        mimetype="application/xhtml+xml", useragent=None, validate=0, logfile=None):
+def get_document(url, data=None, encoding=POM.DEFAULT_ENCODING,
+        mimetype=MIME_XHTML, useragent=None, validate=0,
+        logfile=None):
     """Fetchs a document from the given source, including remote hosts."""
-    if "text/html" in mimetype: # need loose SGML parser.
-        p = _HTMLParser()
-    else: # assume some kind of XML
-        p = get_parser(validate=validate, logfile=logfile)
+    p = get_parser(validate=validate, mimetype=mimetype, logfile=logfile)
     p.parse(url, data, encoding, useragent=useragent, accept=mimetype)
     handler = p.getContentHandler()
     return handler.doc
 
-def get_parser(document=None, namespaces=0, validate=0, logfile=None):
-    return POM.get_parser(document, namespaces=namespaces, validate=validate, 
-        external_ges=1, logfile=logfile, doc_factory=xhtml_factory)
+def get_parser(document=None, namespaces=0, validate=0, mimetype=None, 
+        logfile=None):
+    if mimetype == MIME_HTML:
+        if not document:
+            document = new_document(dtds.XHTML1_TRANSITIONAL, POM.DEFAULT_ENCODING)
+        return _HTMLParser(document)
+    else: # assume some kind of XML
+        return POM.get_parser(document, namespaces=namespaces, validate=validate, 
+            external_ges=1, logfile=logfile, doc_factory=xhtml_factory)
 
 

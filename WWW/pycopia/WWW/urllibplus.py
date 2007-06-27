@@ -30,6 +30,10 @@ DEFAULT_ACCEPT = "application/xhtml+xml,text/html;q=0.9"
 DEFAULT_ENCODING = "utf-8"
 DEFAULT_USERAGENT = "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.13) Gecko/20060418"
 
+
+class PlusErrorHandler(urllib2.HTTPDefaultErrorHandler):
+    pass
+
 def urlopen(url, data=None, encoding=None, useragent=None, accept=None):
     """Get a URL with a particular character encoding.
 
@@ -71,22 +75,8 @@ def get_page(url, data=None, encoding=DEFAULT_ENCODING, useragent=DEFAULT_USERAG
         raw = fo.read()
     finally:
         fo.close()
-    return unicode(raw, encoding)
+    return raw
 
-def get_POM(url, data=None, encoding="utf-8", useragent=None):
-    """Get a Python Object Model document from a URL.
-    """
-    from pycopia.WWW import  XHTML
-    text = get_page(url, data, encoding, useragent)
-    doc = XHTML.XHTMLDocument()
-    p = doc.get_parser("text/html") # XXX
-    p.feed(text)
-    return doc
-
-
-if __name__ == "__main__":
-    import sys
-    p = get_POM(sys.argv[1])
 
 
 
