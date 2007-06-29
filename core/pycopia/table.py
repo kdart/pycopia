@@ -35,9 +35,10 @@ Objects for representing tabular data.
 class GenericTable(object):
     """GenericTable([initializer], [default=None])
 A two-dimensional table of objects."""
-    def __init__(self, obj=None, default=None, title=None):
+    def __init__(self, obj=None, default=None, title=None, width=80):
         self.default = default # default value is value for "empty" cells
         self.title = title
+        self.width = width
         if obj is None:
             self._newtable((0,0))
         elif isinstance(obj, self.__class__):
@@ -171,14 +172,15 @@ A two-dimensional table of objects."""
     def __str__(self):
         if self.x == 0 and self.y == 0:
             return "<empty table>"
-        s = ["            " + " | ".join(map(lambda lv: "%10.10s" % lv, self.headings))]
-        s.append("            "+"-"*(13*len(self.headings)+1))
-        r = 0
-        for row in self.data:
-            s.append("%10.10s: " % self.rownames[r] + " | ".join(map(lambda lv: "%10.10s" % lv, row)))
-            r += 1
+        s = [" "*20 + "  " +  " | ".join(map(lambda lv: "%25.25s" % lv, self.headings))]
+
+        s.append("-" * self.width)
+
+        for r, row in enumerate(self.data):
+            s.append("%20.20s: " % self.rownames[r] + " | ".join(map(lambda lv: "%25.25s" % lv, row)))
+
         if self.title:
-            s.insert(0, self.title.center(78))
+            s.insert(0, self.title.center(self.width))
         return "\n".join(s)
 
     def __iter__(self):

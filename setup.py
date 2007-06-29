@@ -22,6 +22,7 @@ Commands:
  build
  install
  develop
+ list
 
 NOTE: install requires sudo to be configured for you.
 
@@ -56,17 +57,24 @@ def _do_commands(name, cmds, root):
         sudo = "sudo "
     else:
         sudo = ""
+    cmd = "%spython setup.py %s" % (sudo, " ".join(cmds))
+    print "======================", cmd, "============================"
     os.chdir(name)
     try:
-        os.system("%spython setup.py %s" % (sudo, " ".join(cmds)))
+        os.system(cmd)
     finally:
         os.chdir("..")
+        print "====================== END ============================"
+        print
 
 def do_sdist(name):
     _do_commands(name, ["sdist"], False)
 
 def do_build(name):
     _do_commands(name, ["build"], False)
+
+def do_list(name):
+    print name,
 
 #def do_register(name):
 #    _do_commands(name, ["register"], False)
@@ -97,6 +105,7 @@ def main(argv):
         return 2
     for name in (argv[2:] or PACKAGES):
         meth(name)
+    print
     return 0
 
 sys.exit(main(sys.argv))

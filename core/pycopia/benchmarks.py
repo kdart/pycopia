@@ -23,16 +23,17 @@ of algorithms and functions.
 
 
 import itertools
-import table
-from timelib import clock
+
+from pycopia import table
+from pycopia.timelib import now
 
 
 # simple timing loop
 def time_it(count, callit, *args, **kwargs):
-    start = clock()
+    start = now()
     for i in range(count):
         callit(*args, **kwargs)
-    end = clock()
+    end = now()
     return (end - start)/count
 
 
@@ -107,11 +108,11 @@ benchmarks, and to characterize baseline performance."""
             iterator = itertools.cycle(argiterator)
         else:
             iterator = itertools.repeat(args)
-        start = clock()
+        start = now()
         for i in xrange(self._iter):
             args = iterator.next()
             rv = meth(*args, **kwargs)
-        end = clock()
+        end = now()
         res.runtime = ((end - start)/self._iter) - self._overhead
         res.overhead = self._overhead
         res.returnvalue = rv
@@ -153,7 +154,7 @@ class RatioReport(table.GenericTable):
 # a table with columns of function (names) and rows of trail-run times (loops).
 class CompareResults(table.GenericTable):
     def get_ratios(self):
-        rrep = RatioReport(self.headings, title=self.title)
+        rrep = RatioReport(self.headings, title=self.title, width=self.width)
         for rowname in self.headings:
             newrow = []
             for col in self.headings:
@@ -183,10 +184,10 @@ class BenchCompare(object):
             self._methlist.append( meth )
 
 
-    def __call__(self, args=(), kwargs={}, argiterator=None):
+    def __call__(self, args=(), kwargs={}, argiterator=None, tablewidth=130):
         headings = map(lambda o: o.func_name, self._methlist)
         names = map(lambda o: _form_name(o, args, kwargs), self._methlist)
-        rep = CompareResults(headings, title=" vs. ".join(names))
+        rep = CompareResults(headings, title=" vs. ".join(names), width=tablewidth)
         for loop in xrange(self.loops):
             newrow = []
             for meth in self._methlist:
