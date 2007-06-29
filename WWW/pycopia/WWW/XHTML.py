@@ -1300,12 +1300,12 @@ class _HTMLParser(HTMLParser.HTMLParser):
             pass
 
     def handle_charref(self, val):
-           data = str(unichr(int(val)))
+           data = unichr(int(val))
            self.stack[-1].add_text(data)
 
     def handle_entityref(self, name):
         if self.stack:
-            self.stack[-1].add_text(str(unichr(name2codepoint[name])))
+            self.stack[-1].add_text(unichr(name2codepoint[name]))
 
     def handle_comment(self, data):
         cmt = POM.Comment(data)
@@ -1406,6 +1406,7 @@ class WMLDocument(POM.POMDocument, ContainerMixin):
             obj = get_container(self.dtd, obj, **kwargs)
         self.body.insert(ind, obj)
 
+
 class GenericDocument(POM.POMDocument, FlowMixin):
     """Generic markup document to be used as a default.
     """
@@ -1430,11 +1431,11 @@ def get_document_class(doctype=None, mimetype=None):
     if doctype:
         dtobject = dtds.get_doctype(doctype)
         if dtobject:
-            return _DOCMAP.get(dtobject.name.lower(), GenericDocument)
+            return _DOCMAP.get(dtobject.name.lower(), (GenericDocument, doctype))
         else:
-            return GenericDocument # no doctype defined
+            return (GenericDocument, None) # no doctype defined
     elif mimetype:
-        return _DOCMAP.get(mimetype, GenericDocument)
+        return _DOCMAP.get(mimetype, (GenericDocument, dtds.XHTML1_TRANSITIONAL))
     else:
         raise ValueError("You must supply a doctype or a mimetime")
 
@@ -1487,4 +1488,10 @@ def get_parser(document=None, namespaces=0, validate=0, mimetype=None,
         return POM.get_parser(document, namespaces=namespaces, validate=validate, 
             external_ges=1, logfile=logfile, doc_factory=xhtml_factory)
 
+
+def parseString(string):
+    p = get_parser()
+    p.feed(string)
+    p.close() 
+    return p.getContentHandler().doc
 

@@ -241,32 +241,31 @@ class NameSpace(object):
 
 # runtime attribute object
 class POMAttribute(object):
-    __slots__ = ["name", "value", "namespace", "default_namespace"]
-    def __init__(self, name, value, namespace=u"", default_namespace=u"",
+    __slots__ = ["name", "value", "namespace"]
+    def __init__(self, name, value, namespace=u"",
                             encoding=DEFAULT_ENCODING):
         self.name = POMString(name, encoding)
         self.value = POMString(value, encoding)
         self.namespace = namespace
-        self.default_namespace = default_namespace
+
+    def __hash__(self):
+        return hash((self.name, self.value, self.namespace))
 
     def __str__(self):
         return self.encode(DEFAULT_ENCODING)
 
     def encode(self, encoding=DEFAULT_ENCODING):
         name = self.name.encode(encoding)
-        value = self.value.encode(encoding)
-        return '%s="%s"' % (name, self._normalize(value))
+        value = escape(self.value).encode(encoding)
+        return '%s="%s"' % (name, value)
 # TODO namespace support
 
     def __repr__(self):
-        return "%s(%r, %r, %r, %r)" % (self.__class__.__name__, self.name, self.value, 
-                  self.namespace, self.default_namespace)
+        return "%s(%r, %r, %r)" % (self.__class__.__name__, self.name, self.value, 
+                  self.namespace)
 
     def __nonzero__(self):
         return bool(self.name)
-
-    def _normalize(self, value):
-        return escape(value) # XXX need to do any more here?
 
 
 class ProcessingInstruction(object):
@@ -280,62 +279,62 @@ class ProcessingInstruction(object):
 # below.
 
 class ElementNode(object):
-    ATTRIBUTES = None
+    ATTRIBUTES = {}
     CONTENTMODEL = None
     _name = None
     def __init__(self, **attribs):
-        self._attribs = {}
-        self._default_namespace = ""
-        self.encoding = DEFAULT_ENCODING
+        self.__dict__["_attribs"] = attr = {}
+        self.__dict__["_parent"] = None
+        self.__dict__["_children"] = []
+        self.__dict__["_namespace"] = u""
+        self.__dict__["encoding"] = DEFAULT_ENCODING
+        ATT = self.__class__.ATTRIBUTES
         for key, value in attribs.items():
-            valid, xmlattr = self._validate_attribute(key, value)
-            if valid:
-                self._attribs[key] = POMAttribute(xmlattr.name, value)
-            else:
-                raise ValidationError, \
-                    "Invalid attribute name (%s) for this element (%s)." % (
-                                            key, self._name)
-        self._children = []
-        self._parent = None
-
-    # check if attribute name is defined for this element
-    def _validate_attribute_name(self, name):
-        if self.ATTRIBUTES:
-            return bool(self.ATTRIBUTES.get(name))
-        return False
-
-    def _validate_attribute(self, name, value):
-        if self.ATTRIBUTES:
-            xmlattr = self.ATTRIBUTES.get(name)
+            xmlattr = ATT.get(key)
             if xmlattr:
-                return xmlattr.verify(value), xmlattr
-        return False, None
+                attr[key] = POMAttribute(xmlattr.name, value)
 
-    def _verify_attributes(self):
-        if not self.ATTRIBUTES:
-            return None
-        attribs = self._attribs
-        for key, attr in self.ATTRIBUTES.items():
-            aval = attribs.get(key, None)
-            if aval is None:
-                if attr.a_decl == REQUIRED:
-                    raise ValidationError, \
-                        "required attribute not present: %s" % (attr.name,)
-            else:
-                attr.verify(aval.value)
-
-    def _get_attribute(self, name):
+    def get_attribute(self, name):
         if not self.ATTRIBUTES:
             return None
         try:
-            return self._attribs[name].value
+            return self.__dict__["_attribs"][name].value
         except KeyError:
             # might be implied, fixed, or enum...
-            xmlattr = self.ATTRIBUTES.get(name)
+            xmlattr = self.__class__.ATTRIBUTES.get(name)
             if xmlattr:
                 if xmlattr.a_decl in (FIXED, IMPLIED, DEFAULT):
                     return xmlattr.default or u""
         return None
+
+    def set_attribute(self, name, val, ns=u""):
+        """set_attribute(name, value) This exists to set attributes that
+        have names with characters that make it an illegal Python
+        identifier.  """
+        xmlattr = self.__class__.ATTRIBUTES.get(name)
+        if xmlattr:
+            self._attribs[name] = POMAttribute(xmlattr.name, val, ns)
+            return True
+        return False
+
+    def __getattr__(self, name):
+        defval = self.get_attribute(name)
+        if defval is not None:
+            return defval
+        raise AttributeError, "Element %r has no attribute %r." % (self._name, name)
+
+    def __setattr__(self, name, value):
+        if not self.set_attribute(name, value, self.__dict__["_namespace"]):
+            self.__dict__[name] = value
+
+    def __delattr__(self, name):
+        try:
+            del self._attribs[name]
+        except KeyError:
+            try:
+                del self.__dict__[key]
+            except KeyError:
+                raise AttributeError("%r has no attribute %r " % (self.__class__, name))
 
     def get_attribute_names(self):
         """return list of names that may be used as keyword names when
@@ -380,8 +379,8 @@ class ElementNode(object):
             n._parent = None
         self._children = None
 
-    def set_namespace(self, ns):
-        self._namespace = ns
+    def set_namespace(self, ns, encoding=DEFAULT_ENCODING):
+        self._namespace = POMString(ns, encoding)
 
     def set_encoding(self, encoding):
         POM.verify_encoding(encoding)
@@ -476,55 +475,6 @@ class ElementNode(object):
     def has_children(self):
         return len(self._children)
 
-    def set_attribute(self, name, val, ns=""):
-        """set_attribute(name, value) This exists to set attributes that
-        have names with characters that make it an illegal Python
-        identifier.  """
-        if ns: # Don't validate attribute if different namespace. XXX needs work
-            self._attribs[name] = POMAttribute(name, val, ns, self._default_namespace)
-            return
-        valid, xmlattr = self._validate_attribute(keyword_identifier(name), val)
-        if valid:
-            self._attribs[name] = POMAttribute(xmlattr.name, val, ns,
-                                  self._default_namespace)
-
-    def get_attribute(self, name):
-        """get_attribute(name) Use this method to get attributes that have
-        names with characters that make it an illegal Python identifier.
-        """
-        return self._get_attribute(name)
-
-    def __getattr__(self, name):
-        defval = self._get_attribute(name)
-        if defval is not None:
-            return defval
-        raise AttributeError, "Element %r has no attribute %r." % (self._name, name)
-
-    def __setattr__(self, name, value):
-        valid, xmlattr = self._validate_attribute(name, value)
-        if valid:
-            self._attribs[name] = POMAttribute(xmlattr.name, value, 
-                        self._default_namespace, self._default_namespace)
-        else:
-            self.__dict__[name] = value
-
-#    def _acquire(self, name):
-#        if self._parent:
-#            try:
-#                return self._parent.__dict__[name]
-#            except KeyError:
-#                pass
-#            return self._parent._acquire(name)
-#        else:
-#            try:
-#                return self._acquired[name]
-#            except KeyError:
-#                pass
-#        raise AttributeError
-
-    def __delattr__(self, name):
-        del self._attribs[name]
-
     def _find_index(self, index):
         if type(index) is str:
             for i in xrange(len(self._children)):
@@ -560,6 +510,19 @@ class ElementNode(object):
 
     def __str__(self):
         return self.encode(self.encoding or DEFAULT_ENCODING)
+
+    def _verify_attributes(self):
+        if not self.__class__.ATTRIBUTES:
+            return None
+        attribs = self._attribs
+        for key, xmlattr in self.ATTRIBUTES.items():
+            aval = attribs.get(key, None)
+            if aval is None:
+                if xmlattr.a_decl == REQUIRED:
+                    raise ValidationError(
+                        "required attribute not present: %s" % (xmlattr.name,))
+            else:
+                xmlattr.verify(aval.value)
 
     def encode(self, encoding):
         self._verify_attributes()
@@ -606,6 +569,11 @@ class ElementNode(object):
             map(lambda o: o.emit(fo, enc), self._children)
             fo.write("</%s%s>" % (ns, name))
 
+    def validate(self, encoding=DEFAULT_ENCODING):
+        ff = FakeFile(None)
+        # Will raise a ValidationError if not valid.
+        self.emit(ff, encoding)
+
     def walk(self, visitor):
         try:
             visitor(self)
@@ -644,7 +612,7 @@ class ElementNode(object):
                 if name != self._name:
                     return False
                 mp = match.split("=")
-                attr = self._get_attribute(mp[0][1:])
+                attr = self.get_attribute(mp[0][1:])
                 if attr is None:
                     return False
                 if len(mp) > 1:
@@ -782,15 +750,10 @@ class Fragments(ElementNode):
         return False
 
 
-class POMString(unicode):
-    def __new__(cls, arg, encoding=DEFAULT_ENCODING, errors='strict'):
-        if isinstance(arg, unicode):
-            return unicode.__new__(cls, arg)
-        else:
-            return unicode.__new__(cls, str(arg), encoding, errors)
-
-    def normalize(self):
-        return normalize_unicode(self)
+def POMString(arg, encoding):
+    if isinstance(arg, unicode):
+        return arg
+    return unicode(str(arg), encoding)
 
 
 class Notation(object):
@@ -1002,6 +965,9 @@ class POMDocument(object):
         self.root.emit(fo, encoding)
         fo.write("\n")
 
+    def validate(self, encoding=DEFAULT_ENCODING):
+        self.root.validate(encoding)
+
     def get_iterator(self, writer=None):
         """Return an iterable of the document content.  """
         it = WSGIAdapter(self.MIMETYPE, writer)
@@ -1133,6 +1099,7 @@ class ContentHandler(object):
         self._doc_factory = doc_factory
         self.encoding = DEFAULT_ENCODING # default to regenerate as
         self.modules = []
+        self._classcache = {}
         if logfile:
             self._errormethod = logfile.write
         else:
@@ -1140,12 +1107,18 @@ class ContentHandler(object):
 
     def _get_class(self, name):
         klass = None
+        name = identifier(name)
+        try:
+            return self._classcache[name]
+        except KeyError:
+            pass
         for mod in self.doc.dtds:
             try:
-                klass = getattr(mod, identifier(name))
+                klass = getattr(mod, name)
             except AttributeError:
                 continue
             if klass:
+                self._classcache[name] = klass
                 return klass
         raise AttributeError
 
@@ -1167,7 +1140,7 @@ class ContentHandler(object):
             klass = self._get_class(name)
         except AttributeError:
             raise ValidationError, "Undefined element tag: " + name
-        attr = {} # atts is a instance with unicode keys.. must convert to str..
+        attr = {}
         for name, value in atts.items():
             attr[keyword_identifier(normalize_unicode(name))] = unescape(value)
         obj = klass(**attr)
@@ -1176,9 +1149,13 @@ class ContentHandler(object):
     def endElement(self, name):
         "Handle an event for the end of an element."
         obj = self.stack.pop()
-        if self.stack:
+#        if self.stack:
+#            self.stack[-1].append(obj)
+#        else:
+#            self.msg = obj
+        try:
             self.stack[-1].append(obj)
-        else:
+        except IndexError:
             self.msg = obj
 
     def characters(self, text):
@@ -1251,6 +1228,9 @@ class FakeFile(object):
         self.name = name
     def read(self, amt=None):
         return ""
+    def write(self, data):
+        return len(data)
+
 
 class ErrorHandler(object):
     def __init__(self, logfile=None):
@@ -1436,6 +1416,9 @@ class XMLAttribute(object):
     def __hash__(self):
         return hash((self.name, self.a_type, self.a_decl, self.default))
 
+    def __nonzero__(self):
+        return True
+
     # Generate a unique identifier for internal use in dtd module.
     # TODO verify the enumerations are unique enough.
     def get_identifier(self):
@@ -1484,7 +1467,7 @@ def _construct_node(name, modules):
     if "[" not in name:
         nc = _find_element(name, modules)
         if nc is None:
-            raise ValidationError, "no such element name in modules"
+            raise ValidationError, "no such element name %r in modules" % (name,)
         return nc() # node
     else:
         xpath_re = re.compile(r'(\w*)(\[.*])')

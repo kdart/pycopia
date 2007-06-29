@@ -20,7 +20,11 @@ XML
 XML related modules.
 """
 
-class ValidationError(ValueError):
+
+class XMLError(AssertionError):
+    pass
+
+class ValidationError(XMLError):
     """ValidationError
     This exception is raised when an attempt is made to construct an XML POM
     tree that would be invalid.
