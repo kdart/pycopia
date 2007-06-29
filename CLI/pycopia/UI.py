@@ -34,14 +34,14 @@ from pycopia.aid import IF
 
 # set the PROMPT ignore depending on whether or not readline module is
 # available.
-try:
-    import readline
-    PROMPT_START_IGNORE = '\001'
-    PROMPT_END_IGNORE = '\002'
-except ImportError:
-    readline = None
-    PROMPT_START_IGNORE = ''
-    PROMPT_END_IGNORE = ''
+#try:
+#    import readline
+#    PROMPT_START_IGNORE = '\001'
+#    PROMPT_END_IGNORE = '\002'
+#except ImportError:
+#    readline = None
+#    PROMPT_START_IGNORE = ''
+#    PROMPT_END_IGNORE = ''
 
 from types import MethodType
 
@@ -450,7 +450,8 @@ class UserInterface(object):
                 if callable(arg):
                     arg = str(arg(c))
                 else:
-                    arg = PROMPT_START_IGNORE + arg + PROMPT_END_IGNORE 
+                    pass
+                    #arg = PROMPT_START_IGNORE + arg + PROMPT_END_IGNORE 
         fsm.arg += arg
 
     def _username(self, c):
