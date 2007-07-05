@@ -5,13 +5,13 @@
 
 import pycopia.XML.POM
 
-attribIdval_234454883915322225 = pycopia.XML.POM.XMLAttribute(u'idval', 2, 11, None)
+attribName_1485147577566348721 = pycopia.XML.POM.XMLAttribute(u'name', 1, 12, None)
 
 
-attribName_1423564487243335089 = pycopia.XML.POM.XMLAttribute(u'name', 1, 12, None)
+attribCdataimp_4401878107967355625 = pycopia.XML.POM.XMLAttribute(u'cdataimp', 1, 12, None)
 
 
-attribId_1305668797275774409 = pycopia.XML.POM.XMLAttribute(u'id', 2, 11, None)
+attribIdval_2261477458681828209 = pycopia.XML.POM.XMLAttribute(u'idval', 2, 11, None)
 
 
 attribMethod_4334465165459989921 = pycopia.XML.POM.XMLAttribute(u'method', 1, 14, u'POST')
@@ -20,7 +20,7 @@ attribMethod_4334465165459989921 = pycopia.XML.POM.XMLAttribute(u'method', 1, 14
 attribType_25226022599734441 = pycopia.XML.POM.XMLAttribute(u'type', pycopia.XML.POM.Enumeration((u'bullets', u'ordered', u'glossary')), 13, u'ordered')
 
 
-attribCdataimp_10069718494952169 = pycopia.XML.POM.XMLAttribute(u'cdataimp', 1, 12, None)
+attribId_4454725712327073225 = pycopia.XML.POM.XMLAttribute(u'id', 2, 11, None)
 
 
 
@@ -30,10 +30,14 @@ attribCdataimp_10069718494952169 = pycopia.XML.POM.XMLAttribute(u'cdataimp', 1, 
 
 class Toplevel(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'idval': attribIdval_234454883915322225, 
-         'cdataimp': attribCdataimp_10069718494952169, 
+         u'idval': attribIdval_2261477458681828209, 
+         u'cdataimp': attribCdataimp_4401878107967355625, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'idval': attribIdval_2261477458681828209, 
+         'cdataimp': attribCdataimp_4401878107967355625, 
+         }
 	_name = u'toplevel'
 
 
@@ -49,26 +53,36 @@ class Seclist(pycopia.XML.POM.ElementNode):
 
 class Termdef(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'id': attribId_1305668797275774409, 
-         'name': attribName_1423564487243335089, 
+         u'id': attribId_4454725712327073225, 
+         u'name': attribName_1485147577566348721, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'id': attribId_4454725712327073225, 
+         'name': attribName_1485147577566348721, 
+         }
 	_name = u'termdef'
 
 
 class List(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'type': attribType_25226022599734441, 
+         u'type': attribType_25226022599734441, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'type': attribType_25226022599734441, 
+         }
 	_name = u'list'
 
 
 class Form(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'method': attribMethod_4334465165459989921, 
+         u'method': attribMethod_4334465165459989921, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'method': attribMethod_4334465165459989921, 
+         }
 	_name = u'form'
 
 

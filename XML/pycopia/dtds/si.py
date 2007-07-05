@@ -5,19 +5,19 @@
 
 import pycopia.XML.POM
 
-attribCreated_3186906745813812025 = pycopia.XML.POM.XMLAttribute(u'created', 1, 12, None)
+attribSi_expires_2496959613638388889 = pycopia.XML.POM.XMLAttribute(u'si-expires', 1, 12, None)
 
 
-attribSi_expires_1744323112989519001 = pycopia.XML.POM.XMLAttribute(u'si-expires', 1, 12, None)
+attribCreated_4009362612254311225 = pycopia.XML.POM.XMLAttribute(u'created', 1, 12, None)
 
 
-attribSi_id_227873876613554161 = pycopia.XML.POM.XMLAttribute(u'si-id', 1, 12, None)
+attribClass_2331018730345177744 = pycopia.XML.POM.XMLAttribute(u'class', 7, 11, None)
 
 
-attribClass_451108214986810000 = pycopia.XML.POM.XMLAttribute(u'class', 7, 11, None)
+attribHref_2430637454403731329 = pycopia.XML.POM.XMLAttribute(u'href', 1, 12, None)
 
 
-attribHref_10590696292225 = pycopia.XML.POM.XMLAttribute(u'href', 1, 12, None)
+attribSi_id_809765079235731441 = pycopia.XML.POM.XMLAttribute(u'si-id', 1, 12, None)
 
 
 attribAction_894170243889120025 = pycopia.XML.POM.XMLAttribute(u'action', pycopia.XML.POM.Enumeration((u'signal-none', u'signal-low', u'signal-medium', u'signal-high', u'delete')), 13, u'signal-medium')
@@ -70,13 +70,20 @@ _Root = Si
 
 class Indication(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'action': attribAction_894170243889120025, 
-         'href': attribHref_10590696292225, 
-         'si_expires': attribSi_expires_1744323112989519001, 
-         'si_id': attribSi_id_227873876613554161, 
-         'created': attribCreated_3186906745813812025, 
+         u'action': attribAction_894170243889120025, 
+         u'si-expires': attribSi_expires_2496959613638388889, 
+         u'href': attribHref_2430637454403731329, 
+         u'created': attribCreated_4009362612254311225, 
+         u'si-id': attribSi_id_809765079235731441, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'action': attribAction_894170243889120025, 
+         'href': attribHref_2430637454403731329, 
+         'si_expires': attribSi_expires_2496959613638388889, 
+         'si_id': attribSi_id_809765079235731441, 
+         'created': attribCreated_4009362612254311225, 
+         }
 	_name = u'indication'
 
 
@@ -90,9 +97,12 @@ class Info(pycopia.XML.POM.ElementNode):
 
 class Item(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'class_': attribClass_451108214986810000, 
+         u'class': attribClass_2331018730345177744, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'class_': attribClass_2331018730345177744, 
+         }
 	_name = u'item'
 
 

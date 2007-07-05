@@ -5,46 +5,49 @@
 
 import pycopia.XML.POM
 
-attribVisible_host_3987856111145358400 = pycopia.XML.POM.XMLAttribute(u'visible_host', 1, 11, None)
+attribDate_837821029072060881 = pycopia.XML.POM.XMLAttribute(u'date', 1, 11, None)
 
 
-attribEsc_url_2186690894810510449 = pycopia.XML.POM.XMLAttribute(u'esc_url', 1, 11, None)
+attribVisible_url_1248271722030899344 = pycopia.XML.POM.XMLAttribute(u'visible_url', 1, 11, None)
 
 
-attribVisible_url_24059867801854096 = pycopia.XML.POM.XMLAttribute(u'visible_url', 1, 11, None)
+attribFeedback_url_211887419975662249 = pycopia.XML.POM.XMLAttribute(u'feedback_url', 1, 12, None)
 
 
-attribDate_1380095062412427729 = pycopia.XML.POM.XMLAttribute(u'date', 1, 11, None)
+attribUrl_527219945134558641 = pycopia.XML.POM.XMLAttribute(u'url', 1, 11, None)
 
 
-attribN_160808686459853056 = pycopia.XML.POM.XMLAttribute(u'n', 1, 11, None)
+attribVisible_host_2499097219355022400 = pycopia.XML.POM.XMLAttribute(u'visible_host', 1, 11, None)
 
 
-attribUrl_4063344339321802161 = pycopia.XML.POM.XMLAttribute(u'url', 1, 11, None)
+attribCluster_size_3541495718679481369 = pycopia.XML.POM.XMLAttribute(u'cluster_size', 1, 11, None)
 
 
-attribCluster_size_2073395026825595929 = pycopia.XML.POM.XMLAttribute(u'cluster_size', 1, 11, None)
+attribSource_86696549516357284 = pycopia.XML.POM.XMLAttribute(u'source', 1, 11, None)
 
 
-attribVer_18072778635451225 = pycopia.XML.POM.XMLAttribute(u'VER', 1, 11, None)
+attribVer_564243035711265625 = pycopia.XML.POM.XMLAttribute(u'VER', 1, 11, None)
 
 
-attribType_291473665566426121 = pycopia.XML.POM.XMLAttribute(u'type', 1, 11, None)
+attribEsc_url_679840682432181361 = pycopia.XML.POM.XMLAttribute(u'esc_url', 1, 11, None)
 
 
-attribSource_161179171000102564 = pycopia.XML.POM.XMLAttribute(u'source', 1, 11, None)
+attribN_2024686072726329600 = pycopia.XML.POM.XMLAttribute(u'n', 1, 11, None)
 
 
-attribFeedback_url_840739610829568681 = pycopia.XML.POM.XMLAttribute(u'feedback_url', 1, 12, None)
+attribType_1977399331530900489 = pycopia.XML.POM.XMLAttribute(u'type', 1, 11, None)
 
 
 
 
 class Gsp(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'VER': attribVer_18072778635451225, 
+         u'VER': attribVer_564243035711265625, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'VER': attribVer_564243035711265625, 
+         }
 	_name = u'GSP'
 
 
@@ -55,13 +58,20 @@ class Ads(pycopia.XML.POM.ElementNode):
 
 class Ad(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'url': attribUrl_4063344339321802161, 
-         'feedback_url': attribFeedback_url_840739610829568681, 
-         'visible_url': attribVisible_url_24059867801854096, 
-         'type': attribType_291473665566426121, 
-         'n': attribN_160808686459853056, 
+         u'url': attribUrl_527219945134558641, 
+         u'feedback_url': attribFeedback_url_211887419975662249, 
+         u'visible_url': attribVisible_url_1248271722030899344, 
+         u'type': attribType_1977399331530900489, 
+         u'n': attribN_2024686072726329600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'url': attribUrl_527219945134558641, 
+         'feedback_url': attribFeedback_url_211887419975662249, 
+         'visible_url': attribVisible_url_1248271722030899344, 
+         'type': attribType_1977399331530900489, 
+         'n': attribN_2024686072726329600, 
+         }
 	_name = u'AD'
 
 
@@ -152,10 +162,14 @@ class Radlinks(pycopia.XML.POM.ElementNode):
 
 class Radlink(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'url': attribUrl_4063344339321802161, 
-         'n': attribN_160808686459853056, 
+         u'url': attribUrl_527219945134558641, 
+         u'n': attribN_2024686072726329600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'url': attribUrl_527219945134558641, 
+         'n': attribN_2024686072726329600, 
+         }
 	_name = u'RADLINK'
 
 
@@ -176,13 +190,20 @@ class Pages(pycopia.XML.POM.ElementNode):
 
 class Page(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'url': attribUrl_4063344339321802161, 
-         'visible_host': attribVisible_host_3987856111145358400, 
-         'visible_url': attribVisible_url_24059867801854096, 
-         'type': attribType_291473665566426121, 
-         'n': attribN_160808686459853056, 
+         u'url': attribUrl_527219945134558641, 
+         u'visible_host': attribVisible_host_2499097219355022400, 
+         u'visible_url': attribVisible_url_1248271722030899344, 
+         u'type': attribType_1977399331530900489, 
+         u'n': attribN_2024686072726329600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'url': attribUrl_527219945134558641, 
+         'visible_host': attribVisible_host_2499097219355022400, 
+         'visible_url': attribVisible_url_1248271722030899344, 
+         'type': attribType_1977399331530900489, 
+         'n': attribN_2024686072726329600, 
+         }
 	_name = u'PAGE'
 
 
@@ -193,17 +214,28 @@ class News(pycopia.XML.POM.ElementNode):
 
 class Article(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'esc_url': attribEsc_url_2186690894810510449, 
-         'url': attribUrl_4063344339321802161, 
-         'n': attribN_160808686459853056, 
-         'source': attribSource_161179171000102564, 
-         'cluster_size': attribCluster_size_2073395026825595929, 
-         'visible_host': attribVisible_host_3987856111145358400, 
-         'date': attribDate_1380095062412427729, 
-         'visible_url': attribVisible_url_24059867801854096, 
-         'type': attribType_291473665566426121, 
+         u'esc_url': attribEsc_url_679840682432181361, 
+         u'url': attribUrl_527219945134558641, 
+         u'n': attribN_2024686072726329600, 
+         u'source': attribSource_86696549516357284, 
+         u'cluster_size': attribCluster_size_3541495718679481369, 
+         u'visible_host': attribVisible_host_2499097219355022400, 
+         u'date': attribDate_837821029072060881, 
+         u'visible_url': attribVisible_url_1248271722030899344, 
+         u'type': attribType_1977399331530900489, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'esc_url': attribEsc_url_679840682432181361, 
+         'url': attribUrl_527219945134558641, 
+         'n': attribN_2024686072726329600, 
+         'source': attribSource_86696549516357284, 
+         'cluster_size': attribCluster_size_3541495718679481369, 
+         'visible_host': attribVisible_host_2499097219355022400, 
+         'date': attribDate_837821029072060881, 
+         'visible_url': attribVisible_url_1248271722030899344, 
+         'type': attribType_1977399331530900489, 
+         }
 	_name = u'ARTICLE'
 
 

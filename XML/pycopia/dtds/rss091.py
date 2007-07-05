@@ -5,7 +5,7 @@
 
 import pycopia.XML.POM
 
-attribVersion_218229044018807056 = pycopia.XML.POM.XMLAttribute(u'version', 1, 11, None)
+attribVersion_261757124092690704 = pycopia.XML.POM.XMLAttribute(u'version', 1, 11, None)
 
 
 
@@ -27,10 +27,18 @@ attribVersion_218229044018807056 = pycopia.XML.POM.XMLAttribute(u'version', 1, 1
 
 class Rss(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'version': attribVersion_218229044018807056, 
+         u'version': attribVersion_261757124092690704, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'version': attribVersion_261757124092690704, 
+         }
 	_name = u'rss'
+
+
+
+_Root = Rss
+
 
 
 #  must be "0.91"> 

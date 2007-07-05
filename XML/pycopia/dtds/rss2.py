@@ -5,34 +5,34 @@
 
 import pycopia.XML.POM
 
-attribLength_1179879956032720849 = pycopia.XML.POM.XMLAttribute(u'length', 1, 11, None)
-
-
-attribPort_421820091656029089 = pycopia.XML.POM.XMLAttribute(u'port', 1, 12, None)
-
-
-attribRegisterprocedure_2110493455233555001 = pycopia.XML.POM.XMLAttribute(u'registerProcedure', 1, 12, None)
-
-
 attribIspermalink_312979127608890625 = pycopia.XML.POM.XMLAttribute(u'isPermaLink', pycopia.XML.POM.Enumeration((u'true', u'false')), 13, u'true')
 
 
-attribUrl_4063344339321802161 = pycopia.XML.POM.XMLAttribute(u'url', 1, 11, None)
+attribPort_116265298844058529 = pycopia.XML.POM.XMLAttribute(u'port', 1, 12, None)
 
 
-attribProtocol_1164123741548618244 = pycopia.XML.POM.XMLAttribute(u'protocol', 1, 12, None)
+attribPath_1403968622733128761 = pycopia.XML.POM.XMLAttribute(u'path', 1, 12, None)
 
 
-attribPath_2436346508635681849 = pycopia.XML.POM.XMLAttribute(u'path', 1, 12, None)
-
-
-attribType_291473665566426121 = pycopia.XML.POM.XMLAttribute(u'type', 1, 11, None)
+attribProtocol_402492753557463556 = pycopia.XML.POM.XMLAttribute(u'protocol', 1, 12, None)
 
 
 attribVersion_869849613128885796 = pycopia.XML.POM.XMLAttribute(u'version', 1, 14, u'2.0')
 
 
-attribDomain_1465870397029897104 = pycopia.XML.POM.XMLAttribute(u'domain', 1, 12, None)
+attribDomain_2892948211515610000 = pycopia.XML.POM.XMLAttribute(u'domain', 1, 12, None)
+
+
+attribRegisterprocedure_159508720897514041 = pycopia.XML.POM.XMLAttribute(u'registerProcedure', 1, 12, None)
+
+
+attribLength_3509839988040323025 = pycopia.XML.POM.XMLAttribute(u'length', 1, 11, None)
+
+
+attribUrl_527219945134558641 = pycopia.XML.POM.XMLAttribute(u'url', 1, 11, None)
+
+
+attribType_1977399331530900489 = pycopia.XML.POM.XMLAttribute(u'type', 1, 11, None)
 
 
 
@@ -71,10 +71,18 @@ attribDomain_1465870397029897104 = pycopia.XML.POM.XMLAttribute(u'domain', 1, 12
 
 class Rss(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'version': attribVersion_869849613128885796, 
+         u'version': attribVersion_869849613128885796, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'version': attribVersion_869849613128885796, 
+         }
 	_name = u'rss'
+
+
+
+_Root = Rss
+
 
 
 #  A channel can apparently either have one or more items, 
@@ -98,21 +106,31 @@ class Author(pycopia.XML.POM.ElementNode):
 
 class Category(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'domain': attribDomain_1465870397029897104, 
+         u'domain': attribDomain_2892948211515610000, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'domain': attribDomain_2892948211515610000, 
+         }
 	_name = u'category'
 
 
 class Cloud(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'path': attribPath_2436346508635681849, 
-         'domain': attribDomain_1465870397029897104, 
-         'protocol': attribProtocol_1164123741548618244, 
-         'port': attribPort_421820091656029089, 
-         'registerProcedure': attribRegisterprocedure_2110493455233555001, 
+         u'path': attribPath_1403968622733128761, 
+         u'domain': attribDomain_2892948211515610000, 
+         u'protocol': attribProtocol_402492753557463556, 
+         u'port': attribPort_116265298844058529, 
+         u'registerProcedure': attribRegisterprocedure_159508720897514041, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'path': attribPath_1403968622733128761, 
+         'domain': attribDomain_2892948211515610000, 
+         'protocol': attribProtocol_402492753557463556, 
+         'port': attribPort_116265298844058529, 
+         'registerProcedure': attribRegisterprocedure_159508720897514041, 
+         }
 	_name = u'cloud'
 
 
@@ -138,11 +156,16 @@ class Docs(pycopia.XML.POM.ElementNode):
 
 class Enclosure(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'url': attribUrl_4063344339321802161, 
-         'length': attribLength_1179879956032720849, 
-         'type': attribType_291473665566426121, 
+         u'url': attribUrl_527219945134558641, 
+         u'length': attribLength_3509839988040323025, 
+         u'type': attribType_1977399331530900489, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'url': attribUrl_527219945134558641, 
+         'length': attribLength_3509839988040323025, 
+         'type': attribType_1977399331530900489, 
+         }
 	_name = u'enclosure'
 
 
@@ -153,9 +176,12 @@ class Generator(pycopia.XML.POM.ElementNode):
 
 class Guid(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'isPermaLink': attribIspermalink_312979127608890625, 
+         u'isPermaLink': attribIspermalink_312979127608890625, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'isPermaLink': attribIspermalink_312979127608890625, 
+         }
 	_name = u'guid'
 
 
@@ -211,9 +237,12 @@ class Skiphours(pycopia.XML.POM.ElementNode):
 
 class Source(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'url': attribUrl_4063344339321802161, 
+         u'url': attribUrl_527219945134558641, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'url': attribUrl_527219945134558641, 
+         }
 	_name = u'source'
 
 

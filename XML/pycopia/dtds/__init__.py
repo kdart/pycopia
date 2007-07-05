@@ -32,6 +32,8 @@ CONTENTXML = "pycopia.dtds.contentxml"
 GOOGLE = "pycopia.dtds.google"
 LOGML = "pycopia.dtds.logml"
 POMTEST = "pycopia.dtds.pomtest"
+WURFL = "pycopia.dtds.wurfl"
+XFDESKTOP_MENU = "pycopia.dtds.xfdesktop_menu"
 RSS091 = "pycopia.dtds.rss091"
 RSS2 = "pycopia.dtds.rss2"
 SI = "pycopia.dtds.si"
@@ -42,8 +44,6 @@ WML12 = "pycopia.dtds.wml12"
 WML13 = "pycopia.dtds.wml13"
 WML20 = "pycopia.dtds.wml20"
 WTA_WML12 = "pycopia.dtds.wta_wml12"
-WURFL = "pycopia.dtds.wurfl"
-XFDESKTOP_MENU = "pycopia.dtds.xfdesktop_menu"
 XHTML11 = "pycopia.dtds.xhtml11"
 XHTML1_FRAMESET = "pycopia.dtds.xhtml1_frameset"
 XHTML1_STRICT = "pycopia.dtds.xhtml1_strict"
@@ -89,24 +89,32 @@ DOCTYPES[XHTML11] = Doctype("html", "-//W3C//DTD XHTML 1.1//EN",
 DOCTYPES[WML11] = Doctype("wml", "-//WAPFORUM//DTD WML 1.1//EN",
           "http://www.wapforum.org/DTD/wml_1.1.xml")
 DOCTYPES[WML12] = Doctype("wml", "-//WAPFORUM//DTD WML 1.2//EN",
-    "http://www.wapforum.org/DTD/wml12.dtd")
+             "http://www.wapforum.org/DTD/wml12.dtd")
 DOCTYPES[WML13] = Doctype("wml", "-//WAPFORUM//DTD WML 1.3//EN",
-    "http://www.wapforum.org/DTD/wml13.dtd")
+             "http://www.wapforum.org/DTD/wml13.dtd")
 DOCTYPES[WML20] = Doctype("html", "-//WAPFORUM//DTD WML 2.0//EN",
-    "http://www.wapforum.org/dtd/wml20.dtd")
+             "http://www.wapforum.org/dtd/wml20.dtd")
 DOCTYPES[XHTML_MOBILE10] = Doctype("html", "-//WAPFORUM//DTD XHTML Mobile 1.0//EN",
-    "http://www.wapforum.org/DTD/xhtml-mobile10.dtd")
+             "http://www.wapforum.org/DTD/xhtml-mobile10.dtd")
 DOCTYPES[XHTML_BASIC10] = Doctype("html", "-//W3C//DTD XHTML Basic 1.0//EN",
              "http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd")
 DOCTYPES[XHTML_BASIC11] = Doctype("html", "-//W3C//DTD XHTML Basic 1.1//EN",
              "http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd")
 DOCTYPES[WTA_WML12] = Doctype("wta-wml", "-//WAPFORUM//DTD WTA-WML 1.2//EN",
-    "http://www.wapforum.org/DTD/wta-wml12.dtd")
+             "http://www.wapforum.org/DTD/wta-wml12.dtd")
 
 DOCTYPES[SI] = Doctype("si", "-//WAPFORUM//DTD SI 1.0//EN",
-                "http://www.wapforum.org/DTD/si.dtd")
+             "http://www.wapforum.org/DTD/si.dtd")
 DOCTYPES[SL] = Doctype("sl", "-//WAPFORUM//DTD SL 1.0//EN",
-                "http://www.wapforum.org/DTD/sl.dtd")
+             "http://www.wapforum.org/DTD/sl.dtd")
+# Others
+DOCTYPES[GOOGLE] = Doctype("GSP", None, "google.dtd")
+DOCTYPES[RSS2] = Doctype("rss", None, "rss2.dtd")
+DOCTYPES[RSS091] = Doctype("rss", None, "rss091.dtd")
+DOCTYPES[WURFL] = Doctype("wurfl", None, "wurfl.dtd")
+DOCTYPES[XMLSCHEMA] = Doctype("xs:schema", "-//W3C//DTD XMLSCHEMA 200102//EN",
+             "http://www.w3.org/2001/XMLSchema.dtd")
+
 
 def get_doctype(keyname):
     return DOCTYPES.get(keyname)

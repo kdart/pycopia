@@ -100,11 +100,12 @@ class DTDConsumerForSourceGeneration(object):
         self.elements[elem_name] = ch
         # Add any previously seen attributes
         try:
-            fwdlist = self._forwardattributes[elem_name]
+            fwdattribs, fwdkwattribs = self._forwardattributes[elem_name]
         except KeyError:
             pass
         else:
-            ch.add_attribute("ATTRIBUTES", fwdlist)
+            ch.add_attribute("ATTRIBUTES", fwdattribs)
+            ch.add_attribute("KWATTRIBUTES", fwdkwattribs)
             del self._forwardattributes[elem_name]
         # identify the root element with a generic name (_Root).
         if self.doctype and elem_name.lower() == self.doctype.name.lower():
@@ -120,21 +121,29 @@ class DTDConsumerForSourceGeneration(object):
         except KeyError:
             # Got a forward attribute definition (defined before element)
             try:
-                fwdlist = self._forwardattributes[elem]
+                fwdattribs, fwdkwattribs = self._forwardattributes[elem]
             except KeyError:
-                fwdlist = AttributeMap()
-                self._forwardattributes[elem] = fwdlist
-            fwdlist[keyword_identifier(normalize_unicode(a_name))] = ident
+                fwdattribs = AttributeMap()
+                fwdkwattribs = AttributeMap()
+                self._forwardattributes[elem] = (fwdattribs, fwdkwattribs)
+            fwdattribs[a_name] = ident
+            keywordname = keyword_identifier(normalize_unicode(a_name))
+            fwdkwattribs[keywordname] = ident
         else:
             self._add_element_attlist(element, attr, ident)
 
     def _add_element_attlist(self, element, xmlattribute, ident):
         try:
-            attlist = element.get_attribute("ATTRIBUTES")
+            attrmap = element.get_attribute("ATTRIBUTES")
+            kwattrmap = element.get_attribute("KWATTRIBUTES")
         except KeyError:
             element.add_attribute("ATTRIBUTES", AttributeMap())
-            attlist = element.get_attribute("ATTRIBUTES")
-        attlist[keyword_identifier(normalize_unicode(xmlattribute.name))] = ident
+            element.add_attribute("KWATTRIBUTES", AttributeMap())
+            attrmap = element.get_attribute("ATTRIBUTES")
+            kwattrmap = element.get_attribute("KWATTRIBUTES")
+        attrmap[xmlattribute.name] = ident
+        keywordname = keyword_identifier(normalize_unicode(xmlattribute.name))
+        kwattrmap[keywordname] = ident
 
     def handle_comment(self, contents):
         "Receives the contents of a comment."

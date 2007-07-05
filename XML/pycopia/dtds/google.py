@@ -5,116 +5,124 @@
 
 import pycopia.XML.POM
 
-attribVer_18072778635451225 = pycopia.XML.POM.XMLAttribute(u'VER', 1, 11, None)
+attribN_1304866719271601641 = pycopia.XML.POM.XMLAttribute(u'n', 1, 12, None)
+
+
+attribN_4095895239692176041 = pycopia.XML.POM.XMLAttribute(u'N', 1, 12, None)
+
+
+attribVisible_url_1248271722030899344 = pycopia.XML.POM.XMLAttribute(u'visible_url', 1, 11, None)
+
+
+attribFgcolor_2682975237200580100 = pycopia.XML.POM.XMLAttribute(u'fgcolor', 1, 11, None)
 
 
 attribTag_4807433608964281 = pycopia.XML.POM.XMLAttribute(u'TAG', 1, 13, u'related:')
 
 
+attribUrl_527219945134558641 = pycopia.XML.POM.XMLAttribute(u'url', 1, 11, None)
+
+
+attribBgcolor_911213090796331684 = pycopia.XML.POM.XMLAttribute(u'bgcolor', 1, 11, None)
+
+
 attribL_514968469437137296 = pycopia.XML.POM.XMLAttribute(u'L', 1, 13, u'1')
-
-
-attribU_4346679868820594361 = pycopia.XML.POM.XMLAttribute(u'U', 1, 11, None)
-
-
-attribN_3556458597055695529 = pycopia.XML.POM.XMLAttribute(u'N', 1, 12, None)
-
-
-attribValue_18672084769430569 = pycopia.XML.POM.XMLAttribute(u'value', 1, 11, None)
-
-
-attribN_1332154039022930176 = pycopia.XML.POM.XMLAttribute(u'N', 1, 11, None)
-
-
-attribFgcolor_1730844454325521924 = pycopia.XML.POM.XMLAttribute(u'fgcolor', 1, 11, None)
-
-
-attribV_2249095075005995584 = pycopia.XML.POM.XMLAttribute(u'V', 1, 11, None)
-
-
-attribSn_1420310751305768100 = pycopia.XML.POM.XMLAttribute(u'SN', 1, 11, None)
-
-
-attribMime_430583703186490441 = pycopia.XML.POM.XMLAttribute(u'MIME', 1, 13, u'text/html')
-
-
-attribTag_2177253955547847225 = pycopia.XML.POM.XMLAttribute(u'TAG', 1, 13, u'link:')
-
-
-attribUrl_4063344339321802161 = pycopia.XML.POM.XMLAttribute(u'url', 1, 11, None)
-
-
-attribName_41976321684412644 = pycopia.XML.POM.XMLAttribute(u'NAME', 1, 11, None)
-
-
-attribEn_4086367240052250000 = pycopia.XML.POM.XMLAttribute(u'EN', 1, 11, None)
-
-
-attribOriginal_value_299950742588208100 = pycopia.XML.POM.XMLAttribute(u'original_value', 1, 11, None)
-
-
-attribEnc_1407847503510140004 = pycopia.XML.POM.XMLAttribute(u'ENC', 1, 13, u'')
-
-
-attribFiltered_75788619905128900 = pycopia.XML.POM.XMLAttribute(u'FILTERED', 1, 11, None)
-
-
-attribType_291473665566426121 = pycopia.XML.POM.XMLAttribute(u'type', 1, 11, None)
-
-
-attribN_163364587025925609 = pycopia.XML.POM.XMLAttribute(u'n', 1, 12, None)
-
-
-attribValue_29829782096130025 = pycopia.XML.POM.XMLAttribute(u'VALUE', 1, 11, None)
-
-
-attribEncoding_2134937557265072704 = pycopia.XML.POM.XMLAttribute(u'encoding', 1, 11, None)
-
-
-attribN1_2290310921770646329 = pycopia.XML.POM.XMLAttribute(u'N1', 1, 12, None)
-
-
-attribSz_697843989222124900 = pycopia.XML.POM.XMLAttribute(u'SZ', 1, 11, None)
-
-
-attribRpos_1531329548235442081 = pycopia.XML.POM.XMLAttribute(u'RPOS', 1, 11, None)
-
-
-attribName_1246620389478747364 = pycopia.XML.POM.XMLAttribute(u'name', 1, 11, None)
-
-
-attribCtc_url_1628073390800683264 = pycopia.XML.POM.XMLAttribute(u'ctc_url', 1, 13, u'')
-
-
-attribTag_25308272671347600 = pycopia.XML.POM.XMLAttribute(u'TAG', 1, 13, u'cache:')
-
-
-attribVisible_url_24059867801854096 = pycopia.XML.POM.XMLAttribute(u'visible_url', 1, 11, None)
 
 
 attribSe_2342063394331741609 = pycopia.XML.POM.XMLAttribute(u'SE', 1, 13, u'ISO-8859-1')
 
 
-attribQ_690064884079476481 = pycopia.XML.POM.XMLAttribute(u'q', 1, 11, None)
+attribVer_564243035711265625 = pycopia.XML.POM.XMLAttribute(u'VER', 1, 11, None)
 
 
-attribBgcolor_3011312533748277924 = pycopia.XML.POM.XMLAttribute(u'bgcolor', 1, 11, None)
+attribEn_3408712189162198416 = pycopia.XML.POM.XMLAttribute(u'EN', 1, 11, None)
+
+
+attribEncoding_4404753610880238144 = pycopia.XML.POM.XMLAttribute(u'encoding', 1, 11, None)
+
+
+attribN_3426581457697261824 = pycopia.XML.POM.XMLAttribute(u'N', 1, 11, None)
+
+
+attribName_4287999358535244004 = pycopia.XML.POM.XMLAttribute(u'NAME', 1, 11, None)
+
+
+attribTag_2177253955547847225 = pycopia.XML.POM.XMLAttribute(u'TAG', 1, 13, u'link:')
+
+
+attribName_3839651748354608356 = pycopia.XML.POM.XMLAttribute(u'name', 1, 11, None)
+
+
+attribQ_302809276911025921 = pycopia.XML.POM.XMLAttribute(u'q', 1, 11, None)
+
+
+attribValue_94788037157002281 = pycopia.XML.POM.XMLAttribute(u'value', 1, 11, None)
+
+
+attribV_431277155044170304 = pycopia.XML.POM.XMLAttribute(u'V', 1, 11, None)
+
+
+attribMime_430583703186490441 = pycopia.XML.POM.XMLAttribute(u'MIME', 1, 13, u'text/html')
+
+
+attribOriginal_value_2586052951233999844 = pycopia.XML.POM.XMLAttribute(u'original_value', 1, 11, None)
+
+
+attribN1_209166773258746681 = pycopia.XML.POM.XMLAttribute(u'N1', 1, 12, None)
+
+
+attribCtc_url_1628073390800683264 = pycopia.XML.POM.XMLAttribute(u'ctc_url', 1, 13, u'')
+
+
+attribOdel_2778230957370838225 = pycopia.XML.POM.XMLAttribute(u'ODEL', 1, 11, None)
+
+
+attribSz_1917534406987443556 = pycopia.XML.POM.XMLAttribute(u'SZ', 1, 11, None)
+
+
+attribTag_25308272671347600 = pycopia.XML.POM.XMLAttribute(u'TAG', 1, 13, u'cache:')
+
+
+attribEnc_1407847503510140004 = pycopia.XML.POM.XMLAttribute(u'ENC', 1, 13, u'')
+
+
+attribSn_136224704229416100 = pycopia.XML.POM.XMLAttribute(u'SN', 1, 11, None)
+
+
+attribFiltered_460884040604100 = pycopia.XML.POM.XMLAttribute(u'FILTERED', 1, 11, None)
+
+
+attribValue_64774315446792169 = pycopia.XML.POM.XMLAttribute(u'VALUE', 1, 11, None)
 
 
 attribCid_1664288556900978724 = pycopia.XML.POM.XMLAttribute(u'CID', 1, 13, u'')
 
 
-attribOdel_1937669498403900625 = pycopia.XML.POM.XMLAttribute(u'ODEL', 1, 11, None)
+attribRpos_212176399394949025 = pycopia.XML.POM.XMLAttribute(u'RPOS', 1, 11, None)
+
+
+attribU_3329968306123005625 = pycopia.XML.POM.XMLAttribute(u'U', 1, 11, None)
+
+
+attribType_1977399331530900489 = pycopia.XML.POM.XMLAttribute(u'type', 1, 11, None)
 
 
 
 
 class Gsp(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'VER': attribVer_18072778635451225, 
+         u'VER': attribVer_564243035711265625, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'VER': attribVer_564243035711265625, 
+         }
 	_name = u'GSP'
+
+
+
+_Root = Gsp
+
 
 
 class Error(pycopia.XML.POM.ElementNode):
@@ -159,10 +167,14 @@ class Cache_legend_found(pycopia.XML.POM.ElementNode):
 
 class Cache_legend_text(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'bgcolor': attribBgcolor_3011312533748277924, 
-         'fgcolor': attribFgcolor_1730844454325521924, 
+         u'bgcolor': attribBgcolor_911213090796331684, 
+         u'fgcolor': attribFgcolor_2682975237200580100, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'bgcolor': attribBgcolor_911213090796331684, 
+         'fgcolor': attribFgcolor_2682975237200580100, 
+         }
 	_name = u'CACHE_LEGEND_TEXT'
 
 
@@ -193,35 +205,49 @@ class Cache_html(pycopia.XML.POM.ElementNode):
 
 class Blob(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'encoding': attribEncoding_2134937557265072704, 
+         u'encoding': attribEncoding_4404753610880238144, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'encoding': attribEncoding_4404753610880238144, 
+         }
 	_name = u'BLOB'
 
 
 class Param(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1246620389478747364, 
-         'value': attribValue_18672084769430569, 
-         'original_value': attribOriginal_value_299950742588208100, 
+         u'name': attribName_3839651748354608356, 
+         u'value': attribValue_94788037157002281, 
+         u'original_value': attribOriginal_value_2586052951233999844, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'name': attribName_3839651748354608356, 
+         'value': attribValue_94788037157002281, 
+         'original_value': attribOriginal_value_2586052951233999844, 
+         }
 	_name = u'PARAM'
 
 
 class Cb(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1246620389478747364, 
+         u'name': attribName_3839651748354608356, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'name': attribName_3839651748354608356, 
+         }
 	_name = u'CB'
 
 
 class Cs(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1246620389478747364, 
+         u'name': attribName_3839651748354608356, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'name': attribName_3839651748354608356, 
+         }
 	_name = u'CS'
 
 
@@ -272,9 +298,12 @@ class Spelling(pycopia.XML.POM.ElementNode):
 
 class Suggestion(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'q': attribQ_690064884079476481, 
+         u'q': attribQ_302809276911025921, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'q': attribQ_302809276911025921, 
+         }
 	_name = u'Suggestion'
 
 
@@ -310,9 +339,12 @@ class Synonyms(pycopia.XML.POM.ElementNode):
 
 class Onesynonym(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'q': attribQ_690064884079476481, 
+         u'q': attribQ_302809276911025921, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'q': attribQ_302809276911025921, 
+         }
 	_name = u'OneSynonym'
 
 
@@ -358,10 +390,14 @@ class Definitions(pycopia.XML.POM.ElementNode):
 
 class Definition(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'MIME': attribMime_430583703186490441, 
-         'N': attribN_1332154039022930176, 
+         u'MIME': attribMime_430583703186490441, 
+         u'N': attribN_3426581457697261824, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'MIME': attribMime_430583703186490441, 
+         'N': attribN_3426581457697261824, 
+         }
 	_name = u'DEFINITION'
 
 
@@ -382,19 +418,27 @@ class Definition_language(pycopia.XML.POM.ElementNode):
 
 class Definition_extension(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'MIME': attribMime_430583703186490441, 
-         'N': attribN_1332154039022930176, 
+         u'MIME': attribMime_430583703186490441, 
+         u'N': attribN_3426581457697261824, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'MIME': attribMime_430583703186490441, 
+         'N': attribN_3426581457697261824, 
+         }
 	_name = u'DEFINITION_EXTENSION'
 
 
 class Definition_other_language(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'MIME': attribMime_430583703186490441, 
-         'N': attribN_1332154039022930176, 
+         u'MIME': attribMime_430583703186490441, 
+         u'N': attribN_3426581457697261824, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'MIME': attribMime_430583703186490441, 
+         'N': attribN_3426581457697261824, 
+         }
 	_name = u'DEFINITION_OTHER_LANGUAGE'
 
 
@@ -545,13 +589,20 @@ class Ads(pycopia.XML.POM.ElementNode):
 
 class Ad(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'url': attribUrl_4063344339321802161, 
-         'ctc_url': attribCtc_url_1628073390800683264, 
-         'visible_url': attribVisible_url_24059867801854096, 
-         'type': attribType_291473665566426121, 
-         'n': attribN_163364587025925609, 
+         u'url': attribUrl_527219945134558641, 
+         u'ctc_url': attribCtc_url_1628073390800683264, 
+         u'visible_url': attribVisible_url_1248271722030899344, 
+         u'type': attribType_1977399331530900489, 
+         u'n': attribN_1304866719271601641, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'url': attribUrl_527219945134558641, 
+         'ctc_url': attribCtc_url_1628073390800683264, 
+         'visible_url': attribVisible_url_1248271722030899344, 
+         'type': attribType_1977399331530900489, 
+         'n': attribN_1304866719271601641, 
+         }
 	_name = u'AD'
 
 
@@ -597,11 +648,16 @@ class Commercial(pycopia.XML.POM.ElementNode):
 
 class Res(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'FILTERED': attribFiltered_75788619905128900, 
-         'EN': attribEn_4086367240052250000, 
-         'SN': attribSn_1420310751305768100, 
+         u'FILTERED': attribFiltered_460884040604100, 
+         u'EN': attribEn_3408712189162198416, 
+         u'SN': attribSn_136224704229416100, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'FILTERED': attribFiltered_460884040604100, 
+         'EN': attribEn_3408712189162198416, 
+         'SN': attribSn_136224704229416100, 
+         }
 	_name = u'RES'
 
 
@@ -637,12 +693,18 @@ class Nu(pycopia.XML.POM.ElementNode):
 
 class R(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'N1': attribN1_2290310921770646329, 
-         'MIME': attribMime_430583703186490441, 
-         'L': attribL_514968469437137296, 
-         'N': attribN_3556458597055695529, 
+         u'N1': attribN1_209166773258746681, 
+         u'MIME': attribMime_430583703186490441, 
+         u'L': attribL_514968469437137296, 
+         u'N': attribN_4095895239692176041, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'N1': attribN1_209166773258746681, 
+         'MIME': attribMime_430583703186490441, 
+         'L': attribL_514968469437137296, 
+         'N': attribN_4095895239692176041, 
+         }
 	_name = u'R'
 
 
@@ -748,10 +810,14 @@ class Xp(pycopia.XML.POM.ElementNode):
 
 class Fs(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'NAME': attribName_41976321684412644, 
-         'VALUE': attribValue_29829782096130025, 
+         u'NAME': attribName_4287999358535244004, 
+         u'VALUE': attribValue_64774315446792169, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'NAME': attribName_4287999358535244004, 
+         'VALUE': attribValue_64774315446792169, 
+         }
 	_name = u'FS'
 
 
@@ -797,9 +863,12 @@ class Di(pycopia.XML.POM.ElementNode):
 
 class Cat(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'SE': attribSe_2342063394331741609, 
+         u'SE': attribSe_2342063394331741609, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'SE': attribSe_2342063394331741609, 
+         }
 	_name = u'CAT'
 
 
@@ -825,28 +894,40 @@ class Ds(pycopia.XML.POM.ElementNode):
 
 class L(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'TAG': attribTag_2177253955547847225, 
+         u'TAG': attribTag_2177253955547847225, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'TAG': attribTag_2177253955547847225, 
+         }
 	_name = u'L'
 
 
 class C(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'SZ': attribSz_697843989222124900, 
+         u'SZ': attribSz_1917534406987443556, 
+         u'TAG': attribTag_25308272671347600, 
+         u'ENC': attribEnc_1407847503510140004, 
+         u'CID': attribCid_1664288556900978724, 
+         }
+	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'SZ': attribSz_1917534406987443556, 
          'TAG': attribTag_25308272671347600, 
          'ENC': attribEnc_1407847503510140004, 
          'CID': attribCid_1664288556900978724, 
          }
-	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
 	_name = u'C'
 
 
 class Rt(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'TAG': attribTag_4807433608964281, 
+         u'TAG': attribTag_4807433608964281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'TAG': attribTag_4807433608964281, 
+         }
 	_name = u'RT'
 
 
@@ -857,27 +938,38 @@ class Pers_cats(pycopia.XML.POM.ElementNode):
 
 class Hn(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'U': attribU_4346679868820594361, 
+         u'U': attribU_3329968306123005625, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'U': attribU_3329968306123005625, 
+         }
 	_name = u'HN'
 
 
 class Mt(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'V': attribV_2249095075005995584, 
-         'N': attribN_1332154039022930176, 
+         u'V': attribV_431277155044170304, 
+         u'N': attribN_3426581457697261824, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'V': attribV_431277155044170304, 
+         'N': attribN_3426581457697261824, 
+         }
 	_name = u'MT'
 
 
 class Revs(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'RPOS': attribRpos_1531329548235442081, 
-         'ODEL': attribOdel_1937669498403900625, 
+         u'RPOS': attribRpos_212176399394949025, 
+         u'ODEL': attribOdel_2778230957370838225, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'RPOS': attribRpos_212176399394949025, 
+         'ODEL': attribOdel_2778230957370838225, 
+         }
 	_name = u'REVS'
 
 
@@ -888,9 +980,12 @@ class Fq(pycopia.XML.POM.ElementNode):
 
 class Rev(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'N': attribN_3556458597055695529, 
+         u'N': attribN_4095895239692176041, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'N': attribN_4095895239692176041, 
+         }
 	_name = u'REV'
 
 
@@ -901,10 +996,14 @@ class Car(pycopia.XML.POM.ElementNode):
 
 class Md(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'V': attribV_2249095075005995584, 
-         'N': attribN_1332154039022930176, 
+         u'V': attribV_431277155044170304, 
+         u'N': attribN_3426581457697261824, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'V': attribV_431277155044170304, 
+         'N': attribN_3426581457697261824, 
+         }
 	_name = u'MD'
 
 

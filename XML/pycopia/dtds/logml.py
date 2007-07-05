@@ -5,181 +5,181 @@
 
 import pycopia.XML.POM
 
-attribUnique_user_agents_962145505984825600 = pycopia.XML.POM.XMLAttribute(u'unique_user_agents', 7, 12, None)
+attribTarget_2606114967532412449 = pycopia.XML.POM.XMLAttribute(u'target', 7, 12, None)
 
 
-attribDirected_102157520356051801 = pycopia.XML.POM.XMLAttribute(u'directed', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+attribWeight_2869438123883260836 = pycopia.XML.POM.XMLAttribute(u'weight', 7, 12, None)
 
 
-attribSource_12641013988165696 = pycopia.XML.POM.XMLAttribute(u'source', 7, 11, None)
+attribDirected_395502404441852761 = pycopia.XML.POM.XMLAttribute(u'directed', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
 
 
-attribDay_1617103417574131344 = pycopia.XML.POM.XMLAttribute(u'day', 7, 11, None)
+attribIndp_249851775976876516 = pycopia.XML.POM.XMLAttribute(u'indp', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
 
 
-attribKbytes_day_13780374770005281 = pycopia.XML.POM.XMLAttribute(u'kbytes_day', 7, 12, None)
+attribIs_spider_1174524340807486564 = pycopia.XML.POM.XMLAttribute(u'is_spider', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
 
 
-attribInline_objects_1913274850462156944 = pycopia.XML.POM.XMLAttribute(u'inline_objects', 7, 12, None)
+attribHour_160462018652489449 = pycopia.XML.POM.XMLAttribute(u'hour', 7, 11, None)
 
 
-attribNhtml_pages_77703204346173025 = pycopia.XML.POM.XMLAttribute(u'nhtml_pages', 7, 12, None)
+attribUnique_user_agents_520477589746403584 = pycopia.XML.POM.XMLAttribute(u'unique_user_agents', 7, 12, None)
 
 
-attribSearches_3591259847399537296 = pycopia.XML.POM.XMLAttribute(u'searches', 7, 12, None)
+attribEntry_page_11461909977296100 = pycopia.XML.POM.XMLAttribute(u'entry_page', 1, 12, None)
 
 
-attribMax_edges_120142429621862400 = pycopia.XML.POM.XMLAttribute(u'max_edges', 7, 12, None)
+attribId_831959764007104656 = pycopia.XML.POM.XMLAttribute(u'id', 7, 11, None)
 
 
-attribLabel_1763775457643958889 = pycopia.XML.POM.XMLAttribute(u'label', 1, 12, None)
+attribHyperlink_nhtml_3279659045982581025 = pycopia.XML.POM.XMLAttribute(u'hyperlink_nhtml', 7, 12, None)
 
 
-attribUnique_sites_2703820491168040000 = pycopia.XML.POM.XMLAttribute(u'unique_sites', 7, 12, None)
+attribUnique_external_url_referers_2287810300723600 = pycopia.XML.POM.XMLAttribute(u'unique_external_url_referers', 7, 12, None)
 
 
-attribId_2197717004406010000 = pycopia.XML.POM.XMLAttribute(u'id', 7, 11, None)
+attribHyperlink_html_21566798696406544 = pycopia.XML.POM.XMLAttribute(u'hyperlink_html', 7, 12, None)
 
 
-attribHyperlink_nhtml_1744637703510159649 = pycopia.XML.POM.XMLAttribute(u'hyperlink_nhtml', 7, 12, None)
+attribHtml_pages_1601689840754268736 = pycopia.XML.POM.XMLAttribute(u'html_pages', 7, 12, None)
 
 
-attribNhtml_entry_pages_84340326245683600 = pycopia.XML.POM.XMLAttribute(u'nhtml_entry_pages', 7, 12, None)
+attribRequests_day_2877955159636597401 = pycopia.XML.POM.XMLAttribute(u'requests_day', 7, 12, None)
 
 
-attribIs_spider_11021382836735076 = pycopia.XML.POM.XMLAttribute(u'is_spider', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+attribUtime_104777876201303881 = pycopia.XML.POM.XMLAttribute(u'utime', 1, 12, None)
 
 
-attribUnique_host_referers_2316178973845843681 = pycopia.XML.POM.XMLAttribute(u'unique_host_referers', 7, 12, None)
+attribXml_space_576194800467364 = pycopia.XML.POM.XMLAttribute(u'xml:space', pycopia.XML.POM.Enumeration((u'default', u'preserve')), 12, None)
 
 
-attribEntry_page_146746641033358564 = pycopia.XML.POM.XMLAttribute(u'entry_page', 1, 12, None)
+attribSearches_3137871153401068176 = pycopia.XML.POM.XMLAttribute(u'searches', 7, 12, None)
 
 
-attribXml_lang_2029235648979380625 = pycopia.XML.POM.XMLAttribute(u'xml:lang', 7, 12, None)
+attribBytes_1364263450653204544 = pycopia.XML.POM.XMLAttribute(u'bytes', 7, 12, None)
 
 
-attribHyperlink_html_821763882858372624 = pycopia.XML.POM.XMLAttribute(u'hyperlink_html', 7, 12, None)
+attribStart_time_9806078169614736 = pycopia.XML.POM.XMLAttribute(u'start_time', 1, 12, None)
 
 
-attribUtime_2602959081644437321 = pycopia.XML.POM.XMLAttribute(u'utime', 1, 12, None)
+attribUnique_internal_url_referers_1867869365611630276 = pycopia.XML.POM.XMLAttribute(u'unique_internal_url_referers', 7, 12, None)
 
 
-attribUnique_se_referers_552373005848689 = pycopia.XML.POM.XMLAttribute(u'unique_se_referers', 7, 12, None)
-
-
-attribHits_4255455930859917316 = pycopia.XML.POM.XMLAttribute(u'hits', 7, 12, None)
+attribXml_lang_1645670971257252241 = pycopia.XML.POM.XMLAttribute(u'xml:lang', 7, 12, None)
 
 
 attribXmlns_765596079773108676 = pycopia.XML.POM.XMLAttribute(u'xmlns', 1, 14, u'http://www.cs.rpi.edu/LOGML')
 
 
-attribHtml_entry_pages_957466553447835601 = pycopia.XML.POM.XMLAttribute(u'html_entry_pages', 7, 12, None)
+attribMin_edges_2557569006196337956 = pycopia.XML.POM.XMLAttribute(u'min_edges', 7, 12, None)
 
 
-attribSearch_count_905222652726154816 = pycopia.XML.POM.XMLAttribute(u'search_count', 7, 12, None)
+attribMonth_168288785814546244 = pycopia.XML.POM.XMLAttribute(u'month', 7, 11, None)
 
 
-attribRequests_hour_2838434284560622500 = pycopia.XML.POM.XMLAttribute(u'requests_hour', 7, 12, None)
+attribStart_date_155527660617962116 = pycopia.XML.POM.XMLAttribute(u'start_date', 1, 11, None)
 
 
-attribSearch_engine_name_878728882074349201 = pycopia.XML.POM.XMLAttribute(u'search_engine_name', 1, 12, None)
+attribUnique_keywords_1198118237749515625 = pycopia.XML.POM.XMLAttribute(u'unique_keywords', 7, 12, None)
 
 
-attribCode_761516448240213604 = pycopia.XML.POM.XMLAttribute(u'code', 7, 11, None)
+attribNhtml_entry_pages_1342605888534368656 = pycopia.XML.POM.XMLAttribute(u'nhtml_entry_pages', 7, 12, None)
 
 
-attribIs_search_engine_1085464416353769 = pycopia.XML.POM.XMLAttribute(u'is_search_engine', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+attribIp_76641959720322649 = pycopia.XML.POM.XMLAttribute(u'ip', 1, 12, None)
 
 
-attribIndp_568034859833403876 = pycopia.XML.POM.XMLAttribute(u'indp', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+attribUnique_host_referers_3866816610810310369 = pycopia.XML.POM.XMLAttribute(u'unique_host_referers', 7, 12, None)
 
 
-attribRequests_day_3367505903988218521 = pycopia.XML.POM.XMLAttribute(u'requests_day', 7, 12, None)
+attribValue_227024667205755136 = pycopia.XML.POM.XMLAttribute(u'value', 1, 12, None)
 
 
-attribSessions_3934721339115919209 = pycopia.XML.POM.XMLAttribute(u'sessions', 7, 12, None)
+attribHtml_entry_pages_35726083902875601 = pycopia.XML.POM.XMLAttribute(u'html_entry_pages', 7, 12, None)
 
 
-attribUreferer_41903716971392676 = pycopia.XML.POM.XMLAttribute(u'ureferer', 1, 12, None)
+attribCount_509238004691539600 = pycopia.XML.POM.XMLAttribute(u'count', 7, 12, None)
 
 
-attribHour_4121460051367167721 = pycopia.XML.POM.XMLAttribute(u'hour', 7, 11, None)
+attribInline_objects_265139652827105424 = pycopia.XML.POM.XMLAttribute(u'inline_objects', 7, 12, None)
 
 
-attribUnique_internal_url_referers_1640047041564249796 = pycopia.XML.POM.XMLAttribute(u'unique_internal_url_referers', 7, 12, None)
+attribTarget_133968751743456400 = pycopia.XML.POM.XMLAttribute(u'target', 7, 11, None)
 
 
-attribWeight_2593941980357651364 = pycopia.XML.POM.XMLAttribute(u'weight', 7, 12, None)
+attribRequests_2423472486643381924 = pycopia.XML.POM.XMLAttribute(u'requests', 7, 12, None)
 
 
-attribName_1423564487243335089 = pycopia.XML.POM.XMLAttribute(u'name', 1, 12, None)
+attribRequests_hour_37165557299094436 = pycopia.XML.POM.XMLAttribute(u'requests_hour', 7, 12, None)
 
 
-attribIp_1708523305872934489 = pycopia.XML.POM.XMLAttribute(u'ip', 1, 12, None)
+attribEnd_date_231553275429629241 = pycopia.XML.POM.XMLAttribute(u'end_date', 1, 11, None)
 
 
-attribStart_time_12737478014110096 = pycopia.XML.POM.XMLAttribute(u'start_time', 1, 12, None)
+attribMax_edges_2155079244130041856 = pycopia.XML.POM.XMLAttribute(u'max_edges', 7, 12, None)
 
 
-attribMin_edges_26492361238326564 = pycopia.XML.POM.XMLAttribute(u'min_edges', 7, 12, None)
+attribUnique_se_referers_2785470123691200625 = pycopia.XML.POM.XMLAttribute(u'unique_se_referers', 7, 12, None)
 
 
-attribHtml_pages_3464228304359037504 = pycopia.XML.POM.XMLAttribute(u'html_pages', 7, 12, None)
+attribUnique_sites_2551268820599718976 = pycopia.XML.POM.XMLAttribute(u'unique_sites', 7, 12, None)
 
 
-attribUnique_keywords_4275540978391373161 = pycopia.XML.POM.XMLAttribute(u'unique_keywords', 7, 12, None)
+attribKbytes_day_189799871727793441 = pycopia.XML.POM.XMLAttribute(u'kbytes_day', 7, 12, None)
 
 
-attribUnique_external_url_referers_435765960924512656 = pycopia.XML.POM.XMLAttribute(u'unique_external_url_referers', 7, 12, None)
+attribKbytes_hour_1839489845105531844 = pycopia.XML.POM.XMLAttribute(u'kbytes_hour', 7, 12, None)
 
 
-attribTarget_662937813367444624 = pycopia.XML.POM.XMLAttribute(u'target', 7, 11, None)
+attribIs_internal_128797805846028544 = pycopia.XML.POM.XMLAttribute(u'is_internal', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
 
 
-attribBytes_1180051357351649344 = pycopia.XML.POM.XMLAttribute(u'bytes', 7, 12, None)
+attribNhtml_pages_2031471746302367329 = pycopia.XML.POM.XMLAttribute(u'nhtml_pages', 7, 12, None)
 
 
-attribRequests_1852282429460788900 = pycopia.XML.POM.XMLAttribute(u'requests', 7, 12, None)
+attribSource_154333177898043456 = pycopia.XML.POM.XMLAttribute(u'source', 7, 11, None)
 
 
-attribAccess_count_21954491255844 = pycopia.XML.POM.XMLAttribute(u'access_count', 7, 12, None)
+attribName_1485147577566348721 = pycopia.XML.POM.XMLAttribute(u'name', 1, 12, None)
 
 
-attribValue_4156605816673722624 = pycopia.XML.POM.XMLAttribute(u'value', 1, 12, None)
+attribUreferer_971096987816341156 = pycopia.XML.POM.XMLAttribute(u'ureferer', 1, 12, None)
 
 
-attribTarget_199657905920859681 = pycopia.XML.POM.XMLAttribute(u'target', 7, 12, None)
+attribEhits_316955801165405284 = pycopia.XML.POM.XMLAttribute(u'ehits', 7, 12, None)
 
 
-attribMonth_1789626865905887044 = pycopia.XML.POM.XMLAttribute(u'month', 7, 11, None)
+attribId_31104179015885361 = pycopia.XML.POM.XMLAttribute(u'id', 7, 12, None)
 
 
-attribEnd_date_268887526289108281 = pycopia.XML.POM.XMLAttribute(u'end_date', 1, 11, None)
+attribHits_1698092039031263236 = pycopia.XML.POM.XMLAttribute(u'hits', 7, 12, None)
 
 
-attribEhits_1742876526176640100 = pycopia.XML.POM.XMLAttribute(u'ehits', 7, 12, None)
+attribTotal_count_17042729390318025 = pycopia.XML.POM.XMLAttribute(u'total_count', 7, 12, None)
 
 
-attribKbytes_hour_2119729736409455556 = pycopia.XML.POM.XMLAttribute(u'kbytes_hour', 7, 12, None)
+attribLabel_507096964801122921 = pycopia.XML.POM.XMLAttribute(u'label', 1, 12, None)
 
 
-attribIs_internal_128356063005204736 = pycopia.XML.POM.XMLAttribute(u'is_internal', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
+attribSessions_81520584856573801 = pycopia.XML.POM.XMLAttribute(u'sessions', 7, 12, None)
 
 
-attribId_3798816270099800625 = pycopia.XML.POM.XMLAttribute(u'id', 7, 12, None)
+attribIs_search_engine_449643100093988329 = pycopia.XML.POM.XMLAttribute(u'is_search_engine', pycopia.XML.POM.Enumeration((u'0', u'1')), 12, None)
 
 
-attribTotal_count_2656697091694191049 = pycopia.XML.POM.XMLAttribute(u'total_count', 7, 12, None)
+attribSearch_engine_name_3169777068594900625 = pycopia.XML.POM.XMLAttribute(u'search_engine_name', 1, 12, None)
 
 
-attribCount_13910844692731536 = pycopia.XML.POM.XMLAttribute(u'count', 7, 12, None)
+attribDay_353089626537756304 = pycopia.XML.POM.XMLAttribute(u'day', 7, 11, None)
 
 
-attribStart_date_3523617585021981316 = pycopia.XML.POM.XMLAttribute(u'start_date', 1, 11, None)
+attribSearch_count_643942655050061376 = pycopia.XML.POM.XMLAttribute(u'search_count', 7, 12, None)
 
 
-attribXml_space_1831222745173704100 = pycopia.XML.POM.XMLAttribute(u'xml:space', pycopia.XML.POM.Enumeration((u'default', u'preserve')), 12, None)
+attribCode_1540593302576832100 = pycopia.XML.POM.XMLAttribute(u'code', 7, 11, None)
+
+
+attribAccess_count_449601970573511716 = pycopia.XML.POM.XMLAttribute(u'access_count', 7, 12, None)
 
 
 
@@ -264,16 +264,26 @@ attribXml_space_1831222745173704100 = pycopia.XML.POM.XMLAttribute(u'xml:space',
 
 class Logml(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'xml_lang': attribXml_lang_2029235648979380625, 
-         'xmlns': attribXmlns_765596079773108676, 
-         'name': attribName_1423564487243335089, 
-         'end_date': attribEnd_date_268887526289108281, 
-         'xml_space': attribXml_space_1831222745173704100, 
-         'label': attribLabel_1763775457643958889, 
-         'start_date': attribStart_date_3523617585021981316, 
-         'id': attribId_3798816270099800625, 
+         u'xmlns': attribXmlns_765596079773108676, 
+         u'name': attribName_1485147577566348721, 
+         u'end_date': attribEnd_date_231553275429629241, 
+         u'xml:space': attribXml_space_576194800467364, 
+         u'label': attribLabel_507096964801122921, 
+         u'xml:lang': attribXml_lang_1645670971257252241, 
+         u'start_date': attribStart_date_155527660617962116, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'xml_lang': attribXml_lang_1645670971257252241, 
+         'xmlns': attribXmlns_765596079773108676, 
+         'name': attribName_1485147577566348721, 
+         'end_date': attribEnd_date_231553275429629241, 
+         'xml_space': attribXml_space_576194800467364, 
+         'label': attribLabel_507096964801122921, 
+         'start_date': attribStart_date_155527660617962116, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'logml'
 
 
@@ -285,52 +295,83 @@ class Logml(pycopia.XML.POM.ElementNode):
 
 class Graph(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'directed': attribDirected_102157520356051801, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
-         'name': attribName_1423564487243335089, 
+         u'directed': attribDirected_395502404441852761, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
+         u'name': attribName_1485147577566348721, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'directed': attribDirected_395502404441852761, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         'name': attribName_1485147577566348721, 
+         }
 	_name = u'graph'
 
 
 class Node(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'hits': attribHits_4255455930859917316, 
-         'name': attribName_1423564487243335089, 
-         'weight': attribWeight_2593941980357651364, 
-         'label': attribLabel_1763775457643958889, 
-         'ehits': attribEhits_1742876526176640100, 
-         'id': attribId_2197717004406010000, 
-         'indp': attribIndp_568034859833403876, 
+         u'hits': attribHits_1698092039031263236, 
+         u'name': attribName_1485147577566348721, 
+         u'weight': attribWeight_2869438123883260836, 
+         u'label': attribLabel_507096964801122921, 
+         u'ehits': attribEhits_316955801165405284, 
+         u'id': attribId_831959764007104656, 
+         u'indp': attribIndp_249851775976876516, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'hits': attribHits_1698092039031263236, 
+         'name': attribName_1485147577566348721, 
+         'weight': attribWeight_2869438123883260836, 
+         'label': attribLabel_507096964801122921, 
+         'ehits': attribEhits_316955801165405284, 
+         'id': attribId_831959764007104656, 
+         'indp': attribIndp_249851775976876516, 
+         }
 	_name = u'node'
 
 
 class Edge(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'hits': attribHits_4255455930859917316, 
-         'target': attribTarget_662937813367444624, 
-         'weight': attribWeight_2593941980357651364, 
-         'label': attribLabel_1763775457643958889, 
-         'source': attribSource_12641013988165696, 
-         'indp': attribIndp_568034859833403876, 
-         'id': attribId_3798816270099800625, 
-         'name': attribName_1423564487243335089, 
+         u'hits': attribHits_1698092039031263236, 
+         u'target': attribTarget_133968751743456400, 
+         u'weight': attribWeight_2869438123883260836, 
+         u'label': attribLabel_507096964801122921, 
+         u'source': attribSource_154333177898043456, 
+         u'indp': attribIndp_249851775976876516, 
+         u'id': attribId_31104179015885361, 
+         u'name': attribName_1485147577566348721, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'hits': attribHits_1698092039031263236, 
+         'target': attribTarget_133968751743456400, 
+         'weight': attribWeight_2869438123883260836, 
+         'label': attribLabel_507096964801122921, 
+         'source': attribSource_154333177898043456, 
+         'indp': attribIndp_249851775976876516, 
+         'id': attribId_31104179015885361, 
+         'name': attribName_1485147577566348721, 
+         }
 	_name = u'edge'
 
 
 class Att(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
-         'value': attribValue_4156605816673722624, 
-         'name': attribName_1423564487243335089, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
+         u'value': attribValue_227024667205755136, 
+         u'name': attribName_1485147577566348721, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         'value': attribValue_227024667205755136, 
+         'name': attribName_1485147577566348721, 
+         }
 	_name = u'att'
 
 
@@ -342,24 +383,37 @@ class Att(pycopia.XML.POM.ElementNode):
 
 class Hosts(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
+         u'count': attribCount_509238004691539600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         }
 	_name = u'hosts'
 
 
 class Host(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1423564487243335089, 
-         'access_count': attribAccess_count_21954491255844, 
-         'ip': attribIp_1708523305872934489, 
-         'is_internal': attribIs_internal_128356063005204736, 
-         'bytes': attribBytes_1180051357351649344, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
+         u'name': attribName_1485147577566348721, 
+         u'access_count': attribAccess_count_449601970573511716, 
+         u'ip': attribIp_76641959720322649, 
+         u'is_internal': attribIs_internal_128797805846028544, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'name': attribName_1485147577566348721, 
+         'access_count': attribAccess_count_449601970573511716, 
+         'ip': attribIp_76641959720322649, 
+         'is_internal': attribIs_internal_128797805846028544, 
+         'bytes': attribBytes_1364263450653204544, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'host'
 
 
@@ -371,22 +425,33 @@ class Host(pycopia.XML.POM.ElementNode):
 
 class Domains(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
+         u'count': attribCount_509238004691539600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         }
 	_name = u'domains'
 
 
 class Domain(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1423564487243335089, 
-         'access_count': attribAccess_count_21954491255844, 
-         'bytes': attribBytes_1180051357351649344, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
+         u'name': attribName_1485147577566348721, 
+         u'access_count': attribAccess_count_449601970573511716, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'name': attribName_1485147577566348721, 
+         'access_count': attribAccess_count_449601970573511716, 
+         'bytes': attribBytes_1364263450653204544, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'domain'
 
 
@@ -398,23 +463,35 @@ class Domain(pycopia.XML.POM.ElementNode):
 
 class Directories(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
+         u'count': attribCount_509238004691539600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         }
 	_name = u'directories'
 
 
 class Directory(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1423564487243335089, 
-         'access_count': attribAccess_count_21954491255844, 
-         'total_count': attribTotal_count_2656697091694191049, 
-         'bytes': attribBytes_1180051357351649344, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
+         u'name': attribName_1485147577566348721, 
+         u'access_count': attribAccess_count_449601970573511716, 
+         u'total_count': attribTotal_count_17042729390318025, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'name': attribName_1485147577566348721, 
+         'access_count': attribAccess_count_449601970573511716, 
+         'total_count': attribTotal_count_17042729390318025, 
+         'bytes': attribBytes_1364263450653204544, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'directory'
 
 
@@ -426,23 +503,35 @@ class Directory(pycopia.XML.POM.ElementNode):
 
 class Useragents(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
+         u'count': attribCount_509238004691539600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         }
 	_name = u'userAgents'
 
 
 class Useragent(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'is_spider': attribIs_spider_11021382836735076, 
-         'name': attribName_1423564487243335089, 
-         'access_count': attribAccess_count_21954491255844, 
-         'bytes': attribBytes_1180051357351649344, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
+         u'is_spider': attribIs_spider_1174524340807486564, 
+         u'name': attribName_1485147577566348721, 
+         u'access_count': attribAccess_count_449601970573511716, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'is_spider': attribIs_spider_1174524340807486564, 
+         'name': attribName_1485147577566348721, 
+         'access_count': attribAccess_count_449601970573511716, 
+         'bytes': attribBytes_1364263450653204544, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'userAgent'
 
 
@@ -454,46 +543,71 @@ class Useragent(pycopia.XML.POM.ElementNode):
 
 class Referers(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
+         u'count': attribCount_509238004691539600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         }
 	_name = u'referers'
 
 
 class Referer(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'target': attribTarget_199657905920859681, 
-         'access_count': attribAccess_count_21954491255844, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'is_internal': attribIs_internal_128356063005204736, 
-         'bytes': attribBytes_1180051357351649344, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
-         'name': attribName_1423564487243335089, 
+         u'target': attribTarget_2606114967532412449, 
+         u'access_count': attribAccess_count_449601970573511716, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'is_internal': attribIs_internal_128797805846028544, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
+         u'name': attribName_1485147577566348721, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'target': attribTarget_2606114967532412449, 
+         'access_count': attribAccess_count_449601970573511716, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'is_internal': attribIs_internal_128797805846028544, 
+         'bytes': attribBytes_1364263450653204544, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         'name': attribName_1485147577566348721, 
+         }
 	_name = u'referer'
 
 
 class Hostreferers(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
+         u'count': attribCount_509238004691539600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         }
 	_name = u'hostReferers'
 
 
 class Hostreferer(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1423564487243335089, 
-         'access_count': attribAccess_count_21954491255844, 
-         'bytes': attribBytes_1180051357351649344, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'label': attribLabel_1763775457643958889, 
-         'is_search_engine': attribIs_search_engine_1085464416353769, 
-         'id': attribId_3798816270099800625, 
+         u'name': attribName_1485147577566348721, 
+         u'access_count': attribAccess_count_449601970573511716, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'label': attribLabel_507096964801122921, 
+         u'is_search_engine': attribIs_search_engine_449643100093988329, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'name': attribName_1485147577566348721, 
+         'access_count': attribAccess_count_449601970573511716, 
+         'bytes': attribBytes_1364263450653204544, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'label': attribLabel_507096964801122921, 
+         'is_search_engine': attribIs_search_engine_449643100093988329, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'hostReferer'
 
 
@@ -505,22 +619,33 @@ class Hostreferer(pycopia.XML.POM.ElementNode):
 
 class Keywords(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
-         'search_engine_name': attribSearch_engine_name_878728882074349201, 
-         'search_count': attribSearch_count_905222652726154816, 
+         u'count': attribCount_509238004691539600, 
+         u'search_engine_name': attribSearch_engine_name_3169777068594900625, 
+         u'search_count': attribSearch_count_643942655050061376, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         'search_engine_name': attribSearch_engine_name_3169777068594900625, 
+         'search_count': attribSearch_count_643942655050061376, 
+         }
 	_name = u'keywords'
 
 
 class Keyword(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'total_count': attribTotal_count_2656697091694191049, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
-         'name': attribName_1423564487243335089, 
+         u'total_count': attribTotal_count_17042729390318025, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
+         u'name': attribName_1485147577566348721, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'total_count': attribTotal_count_17042729390318025, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         'name': attribName_1485147577566348721, 
+         }
 	_name = u'keyword'
 
 
@@ -532,70 +657,119 @@ class Keyword(pycopia.XML.POM.ElementNode):
 
 class Summary(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'unique_se_referers': attribUnique_se_referers_552373005848689, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'kbytes_hour': attribKbytes_hour_2119729736409455556, 
-         'hyperlink_html': attribHyperlink_html_821763882858372624, 
-         'requests_day': attribRequests_day_3367505903988218521, 
-         'unique_keywords': attribUnique_keywords_4275540978391373161, 
-         'unique_external_url_referers': attribUnique_external_url_referers_435765960924512656, 
-         'requests_hour': attribRequests_hour_2838434284560622500, 
-         'nhtml_pages': attribNhtml_pages_77703204346173025, 
-         'unique_sites': attribUnique_sites_2703820491168040000, 
-         'sessions': attribSessions_3934721339115919209, 
-         'nhtml_entry_pages': attribNhtml_entry_pages_84340326245683600, 
-         'html_entry_pages': attribHtml_entry_pages_957466553447835601, 
-         'unique_user_agents': attribUnique_user_agents_962145505984825600, 
-         'kbytes_day': attribKbytes_day_13780374770005281, 
-         'searches': attribSearches_3591259847399537296, 
-         'hyperlink_nhtml': attribHyperlink_nhtml_1744637703510159649, 
-         'inline_objects': attribInline_objects_1913274850462156944, 
-         'bytes': attribBytes_1180051357351649344, 
-         'unique_internal_url_referers': attribUnique_internal_url_referers_1640047041564249796, 
-         'requests': attribRequests_1852282429460788900, 
-         'unique_host_referers': attribUnique_host_referers_2316178973845843681, 
+         u'unique_se_referers': attribUnique_se_referers_2785470123691200625, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'kbytes_hour': attribKbytes_hour_1839489845105531844, 
+         u'hyperlink_html': attribHyperlink_html_21566798696406544, 
+         u'requests_day': attribRequests_day_2877955159636597401, 
+         u'unique_keywords': attribUnique_keywords_1198118237749515625, 
+         u'unique_external_url_referers': attribUnique_external_url_referers_2287810300723600, 
+         u'requests_hour': attribRequests_hour_37165557299094436, 
+         u'nhtml_pages': attribNhtml_pages_2031471746302367329, 
+         u'unique_sites': attribUnique_sites_2551268820599718976, 
+         u'sessions': attribSessions_81520584856573801, 
+         u'nhtml_entry_pages': attribNhtml_entry_pages_1342605888534368656, 
+         u'html_entry_pages': attribHtml_entry_pages_35726083902875601, 
+         u'unique_user_agents': attribUnique_user_agents_520477589746403584, 
+         u'kbytes_day': attribKbytes_day_189799871727793441, 
+         u'searches': attribSearches_3137871153401068176, 
+         u'hyperlink_nhtml': attribHyperlink_nhtml_3279659045982581025, 
+         u'inline_objects': attribInline_objects_265139652827105424, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'unique_internal_url_referers': attribUnique_internal_url_referers_1867869365611630276, 
+         u'requests': attribRequests_2423472486643381924, 
+         u'unique_host_referers': attribUnique_host_referers_3866816610810310369, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'unique_se_referers': attribUnique_se_referers_2785470123691200625, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'kbytes_hour': attribKbytes_hour_1839489845105531844, 
+         'hyperlink_html': attribHyperlink_html_21566798696406544, 
+         'requests_day': attribRequests_day_2877955159636597401, 
+         'unique_keywords': attribUnique_keywords_1198118237749515625, 
+         'unique_external_url_referers': attribUnique_external_url_referers_2287810300723600, 
+         'requests_hour': attribRequests_hour_37165557299094436, 
+         'nhtml_pages': attribNhtml_pages_2031471746302367329, 
+         'unique_sites': attribUnique_sites_2551268820599718976, 
+         'sessions': attribSessions_81520584856573801, 
+         'nhtml_entry_pages': attribNhtml_entry_pages_1342605888534368656, 
+         'html_entry_pages': attribHtml_entry_pages_35726083902875601, 
+         'unique_user_agents': attribUnique_user_agents_520477589746403584, 
+         'kbytes_day': attribKbytes_day_189799871727793441, 
+         'searches': attribSearches_3137871153401068176, 
+         'hyperlink_nhtml': attribHyperlink_nhtml_3279659045982581025, 
+         'inline_objects': attribInline_objects_265139652827105424, 
+         'bytes': attribBytes_1364263450653204544, 
+         'unique_internal_url_referers': attribUnique_internal_url_referers_1867869365611630276, 
+         'requests': attribRequests_2423472486643381924, 
+         'unique_host_referers': attribUnique_host_referers_3866816610810310369, 
+         }
 	_name = u'summary'
 
 
 class Httpcode(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'code': attribCode_761516448240213604, 
-         'name': attribName_1423564487243335089, 
-         'total_count': attribTotal_count_2656697091694191049, 
-         'bytes': attribBytes_1180051357351649344, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
+         u'code': attribCode_1540593302576832100, 
+         u'name': attribName_1485147577566348721, 
+         u'total_count': attribTotal_count_17042729390318025, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'code': attribCode_1540593302576832100, 
+         'name': attribName_1485147577566348721, 
+         'total_count': attribTotal_count_17042729390318025, 
+         'bytes': attribBytes_1364263450653204544, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'httpCode'
 
 
 class Httpmethod(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1423564487243335089, 
-         'total_count': attribTotal_count_2656697091694191049, 
-         'bytes': attribBytes_1180051357351649344, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
+         u'name': attribName_1485147577566348721, 
+         u'total_count': attribTotal_count_17042729390318025, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'name': attribName_1485147577566348721, 
+         'total_count': attribTotal_count_17042729390318025, 
+         'bytes': attribBytes_1364263450653204544, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'httpMethod'
 
 
 class Httpversion(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1423564487243335089, 
-         'total_count': attribTotal_count_2656697091694191049, 
-         'bytes': attribBytes_1180051357351649344, 
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'label': attribLabel_1763775457643958889, 
-         'id': attribId_3798816270099800625, 
+         u'name': attribName_1485147577566348721, 
+         u'total_count': attribTotal_count_17042729390318025, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'label': attribLabel_507096964801122921, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'name': attribName_1485147577566348721, 
+         'total_count': attribTotal_count_17042729390318025, 
+         'bytes': attribBytes_1364263450653204544, 
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'label': attribLabel_507096964801122921, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'httpVersion'
 
 
@@ -606,34 +780,52 @@ class Datestat(pycopia.XML.POM.ElementNode):
 
 class Monthstat(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'hits': attribHits_4255455930859917316, 
-         'bytes': attribBytes_1180051357351649344, 
-         'month': attribMonth_1789626865905887044, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'hits': attribHits_1698092039031263236, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'month': attribMonth_168288785814546244, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'hits': attribHits_1698092039031263236, 
+         'bytes': attribBytes_1364263450653204544, 
+         'month': attribMonth_168288785814546244, 
+         }
 	_name = u'monthStat'
 
 
 class Daystat(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'hits': attribHits_4255455930859917316, 
-         'bytes': attribBytes_1180051357351649344, 
-         'day': attribDay_1617103417574131344, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'hits': attribHits_1698092039031263236, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'day': attribDay_353089626537756304, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'hits': attribHits_1698092039031263236, 
+         'bytes': attribBytes_1364263450653204544, 
+         'day': attribDay_353089626537756304, 
+         }
 	_name = u'dayStat'
 
 
 class Hourstat(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'html_pages': attribHtml_pages_3464228304359037504, 
-         'hits': attribHits_4255455930859917316, 
-         'bytes': attribBytes_1180051357351649344, 
-         'hour': attribHour_4121460051367167721, 
+         u'html_pages': attribHtml_pages_1601689840754268736, 
+         u'hits': attribHits_1698092039031263236, 
+         u'bytes': attribBytes_1364263450653204544, 
+         u'hour': attribHour_160462018652489449, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'html_pages': attribHtml_pages_1601689840754268736, 
+         'hits': attribHits_1698092039031263236, 
+         'bytes': attribBytes_1364263450653204544, 
+         'hour': attribHour_160462018652489449, 
+         }
 	_name = u'hourStat'
 
 
@@ -645,43 +837,65 @@ class Hourstat(pycopia.XML.POM.ElementNode):
 
 class Usersessions(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
-         'min_edges': attribMin_edges_26492361238326564, 
-         'max_edges': attribMax_edges_120142429621862400, 
+         u'count': attribCount_509238004691539600, 
+         u'min_edges': attribMin_edges_2557569006196337956, 
+         u'max_edges': attribMax_edges_2155079244130041856, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         'min_edges': attribMin_edges_2557569006196337956, 
+         'max_edges': attribMax_edges_2155079244130041856, 
+         }
 	_name = u'userSessions'
 
 
 class Usersession(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_1423564487243335089, 
-         'access_count': attribAccess_count_21954491255844, 
-         'start_time': attribStart_time_12737478014110096, 
-         'ureferer': attribUreferer_41903716971392676, 
-         'label': attribLabel_1763775457643958889, 
-         'entry_page': attribEntry_page_146746641033358564, 
-         'id': attribId_3798816270099800625, 
+         u'name': attribName_1485147577566348721, 
+         u'access_count': attribAccess_count_449601970573511716, 
+         u'start_time': attribStart_time_9806078169614736, 
+         u'ureferer': attribUreferer_971096987816341156, 
+         u'label': attribLabel_507096964801122921, 
+         u'entry_page': attribEntry_page_11461909977296100, 
+         u'id': attribId_31104179015885361, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'name': attribName_1485147577566348721, 
+         'access_count': attribAccess_count_449601970573511716, 
+         'start_time': attribStart_time_9806078169614736, 
+         'ureferer': attribUreferer_971096987816341156, 
+         'label': attribLabel_507096964801122921, 
+         'entry_page': attribEntry_page_11461909977296100, 
+         'id': attribId_31104179015885361, 
+         }
 	_name = u'userSession'
 
 
 class Path(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'count': attribCount_13910844692731536, 
+         u'count': attribCount_509238004691539600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'count': attribCount_509238004691539600, 
+         }
 	_name = u'path'
 
 
 class Uedge(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'source': attribSource_12641013988165696, 
-         'target': attribTarget_662937813367444624, 
-         'utime': attribUtime_2602959081644437321, 
+         u'source': attribSource_154333177898043456, 
+         u'target': attribTarget_133968751743456400, 
+         u'utime': attribUtime_104777876201303881, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'source': attribSource_154333177898043456, 
+         'target': attribTarget_133968751743456400, 
+         'utime': attribUtime_104777876201303881, 
+         }
 	_name = u'uedge'
 
 

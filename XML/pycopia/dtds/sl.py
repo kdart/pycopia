@@ -8,7 +8,7 @@ import pycopia.XML.POM
 attribAction_3939340374857665600 = pycopia.XML.POM.XMLAttribute(u'action', pycopia.XML.POM.Enumeration((u'execute-low', u'execute-high', u'cache')), 13, u'execute-low')
 
 
-attribHref_35096121232009744 = pycopia.XML.POM.XMLAttribute(u'href', 1, 11, None)
+attribHref_1415841210624387600 = pycopia.XML.POM.XMLAttribute(u'href', 1, 11, None)
 
 
 
@@ -42,10 +42,14 @@ attribHref_35096121232009744 = pycopia.XML.POM.XMLAttribute(u'href', 1, 11, None
 
 class Sl(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'action': attribAction_3939340374857665600, 
-         'href': attribHref_35096121232009744, 
+         u'action': attribAction_3939340374857665600, 
+         u'href': attribHref_1415841210624387600, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(None)
+	KWATTRIBUTES = {
+         'action': attribAction_3939340374857665600, 
+         'href': attribHref_1415841210624387600, 
+         }
 	_name = u'sl'
 
 

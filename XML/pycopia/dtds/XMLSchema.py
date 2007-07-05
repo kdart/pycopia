@@ -5,67 +5,79 @@
 
 import pycopia.XML.POM
 
+attribName_1939937075622105121 = pycopia.XML.POM.XMLAttribute(u'name', 7, 12, None)
+
+
 attribBlockdefault_2388562210315765201 = pycopia.XML.POM.XMLAttribute(u'blockDefault', 1, 13, u'')
 
 
-attribBase_48033626411394001 = pycopia.XML.POM.XMLAttribute(u'base', 7, 12, None)
+attribBase_4067928618489278244 = pycopia.XML.POM.XMLAttribute(u'base', 7, 11, None)
 
 
-attribMinoccurs_271680201052381081 = pycopia.XML.POM.XMLAttribute(u'minOccurs', 7, 13, u'1')
+attribMaxoccurs_2635762036467084196 = pycopia.XML.POM.XMLAttribute(u'maxOccurs', 1, 12, None)
 
 
-attribValue_18672084769430569 = pycopia.XML.POM.XMLAttribute(u'value', 1, 11, None)
+attribMinoccurs_3448318498702679044 = pycopia.XML.POM.XMLAttribute(u'minOccurs', pycopia.XML.POM.Enumeration((u'1',)), 12, None)
 
 
-attribMinoccurs_122740967384164900 = pycopia.XML.POM.XMLAttribute(u'minOccurs', 7, 12, None)
+attribRef_1513066398975169600 = pycopia.XML.POM.XMLAttribute(u'ref', 7, 12, None)
 
 
-attribSource_3543840153906090025 = pycopia.XML.POM.XMLAttribute(u'source', 1, 12, None)
+attribUse_837291069793426609 = pycopia.XML.POM.XMLAttribute(u'use', pycopia.XML.POM.Enumeration((u'prohibited', u'optional', u'required')), 12, None)
+
+
+attribXmlns_92858189217657889 = pycopia.XML.POM.XMLAttribute(u'xmlns', 1, 12, None)
+
+
+attribSource_3875251958556381225 = pycopia.XML.POM.XMLAttribute(u'source', 1, 12, None)
+
+
+attribForm_110819381296493401 = pycopia.XML.POM.XMLAttribute(u'form', pycopia.XML.POM.Enumeration((u'qualified', u'unqualified')), 12, None)
+
+
+attribTargetnamespace_98563049709415729 = pycopia.XML.POM.XMLAttribute(u'targetNamespace', 1, 12, None)
 
 
 attribProcesscontents_2594902936561138564 = pycopia.XML.POM.XMLAttribute(u'processContents', pycopia.XML.POM.Enumeration((u'skip', u'lax', u'strict')), 13, u'strict')
 
 
-attribType_1469512337522113600 = pycopia.XML.POM.XMLAttribute(u'type', 7, 12, None)
+attribMaxoccurs_1005860178358304481 = pycopia.XML.POM.XMLAttribute(u'maxOccurs', 1, 13, u'1')
 
 
-attribXmlns_2093790244028003361 = pycopia.XML.POM.XMLAttribute(u'xmlns', 1, 12, None)
+attribFinal_4042113406485616225 = pycopia.XML.POM.XMLAttribute(u'final', 1, 12, None)
 
 
-attribSchemalocation_142242159460702401 = pycopia.XML.POM.XMLAttribute(u'schemaLocation', 1, 11, None)
+attribFixed_999547109289113841 = pycopia.XML.POM.XMLAttribute(u'fixed', 1, 12, None)
 
 
-attribBlock_218279069298343936 = pycopia.XML.POM.XMLAttribute(u'block', 1, 12, None)
+attribXpath_569229373432813921 = pycopia.XML.POM.XMLAttribute(u'xpath', 1, 11, None)
 
 
-attribFixed_89551180751567089 = pycopia.XML.POM.XMLAttribute(u'fixed', 1, 12, None)
+attribType_1221480214019521600 = pycopia.XML.POM.XMLAttribute(u'type', 7, 12, None)
+
+
+attribAbstract_1927589966619520644 = pycopia.XML.POM.XMLAttribute(u'abstract', pycopia.XML.POM.Enumeration((u'true', u'false')), 12, None)
 
 
 attribXmlns_xs_558026015295709321 = pycopia.XML.POM.XMLAttribute(u'xmlns:xs', 1, 14, u'http://www.w3.org/2001/XMLSchema')
 
 
-attribMinoccurs_1069741866053360644 = pycopia.XML.POM.XMLAttribute(u'minOccurs', pycopia.XML.POM.Enumeration((u'1',)), 12, None)
+attribBase_4088963046051587025 = pycopia.XML.POM.XMLAttribute(u'base', 7, 12, None)
 
 
-attribMaxoccurs_1005860178358304481 = pycopia.XML.POM.XMLAttribute(u'maxOccurs', 1, 13, u'1')
+attribMinoccurs_3515802384737479204 = pycopia.XML.POM.XMLAttribute(u'minOccurs', 7, 12, None)
 
 
-attribName_303323689952890000 = pycopia.XML.POM.XMLAttribute(u'name', 7, 11, None)
+attribXml_lang_3812812596121276225 = pycopia.XML.POM.XMLAttribute(u'xml:lang', 1, 12, None)
 
 
-attribSubstitutiongroup_61645110013254889 = pycopia.XML.POM.XMLAttribute(u'substitutionGroup', 7, 12, None)
+attribValue_94788037157002281 = pycopia.XML.POM.XMLAttribute(u'value', 1, 11, None)
 
 
-attribVersion_796990994287477441 = pycopia.XML.POM.XMLAttribute(u'version', 1, 12, None)
+attribMembertypes_1859748649442684289 = pycopia.XML.POM.XMLAttribute(u'memberTypes', 8, 12, None)
 
 
-attribNillable_2661748353041983209 = pycopia.XML.POM.XMLAttribute(u'nillable', pycopia.XML.POM.Enumeration((u'true', u'false')), 12, None)
-
-
-attribPublic_3737720894171978884 = pycopia.XML.POM.XMLAttribute(u'public', 1, 11, None)
-
-
-attribId_121205855951786596 = pycopia.XML.POM.XMLAttribute(u'id', 2, 12, None)
+attribSchemalocation_386465377926252816 = pycopia.XML.POM.XMLAttribute(u'schemaLocation', 1, 12, None)
 
 
 attribNamespace_809216084559556996 = pycopia.XML.POM.XMLAttribute(u'namespace', 1, 13, u'##any')
@@ -74,76 +86,64 @@ attribNamespace_809216084559556996 = pycopia.XML.POM.XMLAttribute(u'namespace', 
 attribFinaldefault_3880612109539224900 = pycopia.XML.POM.XMLAttribute(u'finalDefault', 1, 13, u'')
 
 
-attribDefault_3956494662362844900 = pycopia.XML.POM.XMLAttribute(u'default', 1, 12, None)
+attribFixed_3889665877119146569 = pycopia.XML.POM.XMLAttribute(u'fixed', pycopia.XML.POM.Enumeration((u'true', u'false')), 12, None)
 
 
-attribXpath_1637985964080798049 = pycopia.XML.POM.XMLAttribute(u'xpath', 1, 11, None)
+attribNillable_617688626061846249 = pycopia.XML.POM.XMLAttribute(u'nillable', pycopia.XML.POM.Enumeration((u'true', u'false')), 12, None)
 
 
-attribMaxoccurs_4487678595656788900 = pycopia.XML.POM.XMLAttribute(u'maxOccurs', 1, 12, None)
+attribVersion_440306481527947969 = pycopia.XML.POM.XMLAttribute(u'version', 1, 12, None)
 
 
-attribNamespace_4318307271518053284 = pycopia.XML.POM.XMLAttribute(u'namespace', 1, 12, None)
+attribNamespace_1943882797323936676 = pycopia.XML.POM.XMLAttribute(u'namespace', 1, 12, None)
 
 
-attribSystem_556045631547116929 = pycopia.XML.POM.XMLAttribute(u'system', 1, 12, None)
+attribItemtype_746377092415504225 = pycopia.XML.POM.XMLAttribute(u'itemType', 7, 12, None)
 
 
-attribRefer_71349915707402500 = pycopia.XML.POM.XMLAttribute(u'refer', 7, 11, None)
-
-
-attribName_3951386174947790881 = pycopia.XML.POM.XMLAttribute(u'name', 7, 12, None)
-
-
-attribMembertypes_3659974999597968769 = pycopia.XML.POM.XMLAttribute(u'memberTypes', 8, 12, None)
-
-
-attribAttributeformdefault_141148993966564081 = pycopia.XML.POM.XMLAttribute(u'attributeFormDefault', pycopia.XML.POM.Enumeration((u'qualified', u'unqualified')), 13, u'unqualified')
-
-
-attribRef_4288112745189774400 = pycopia.XML.POM.XMLAttribute(u'ref', 7, 12, None)
-
-
-attribUse_18216708433288369 = pycopia.XML.POM.XMLAttribute(u'use', pycopia.XML.POM.Enumeration((u'prohibited', u'optional', u'required')), 12, None)
-
-
-attribTargetnamespace_2860084296067640625 = pycopia.XML.POM.XMLAttribute(u'targetNamespace', 1, 12, None)
-
-
-attribSchemalocation_891186576461596944 = pycopia.XML.POM.XMLAttribute(u'schemaLocation', 1, 12, None)
-
-
-attribXml_lang_1108072188818706241 = pycopia.XML.POM.XMLAttribute(u'xml:lang', 1, 12, None)
-
-
-attribFixed_3954921823337175625 = pycopia.XML.POM.XMLAttribute(u'fixed', pycopia.XML.POM.Enumeration((u'true', u'false')), 12, None)
-
-
-attribItemtype_3634105045556428641 = pycopia.XML.POM.XMLAttribute(u'itemType', 7, 12, None)
-
-
-attribBase_3424859667182219044 = pycopia.XML.POM.XMLAttribute(u'base', 7, 11, None)
-
-
-attribMixed_1444315125457797376 = pycopia.XML.POM.XMLAttribute(u'mixed', pycopia.XML.POM.Enumeration((u'true', u'false')), 12, None)
-
-
-attribMaxoccurs_155409837311655936 = pycopia.XML.POM.XMLAttribute(u'maxOccurs', pycopia.XML.POM.Enumeration((u'1',)), 12, None)
-
-
-attribFinal_200879899131090529 = pycopia.XML.POM.XMLAttribute(u'final', 1, 12, None)
+attribPublic_2963329996656581764 = pycopia.XML.POM.XMLAttribute(u'public', 1, 11, None)
 
 
 attribElementformdefault_1699274912443886449 = pycopia.XML.POM.XMLAttribute(u'elementFormDefault', pycopia.XML.POM.Enumeration((u'qualified', u'unqualified')), 13, u'unqualified')
 
 
-attribAbstract_4258482856034709124 = pycopia.XML.POM.XMLAttribute(u'abstract', pycopia.XML.POM.Enumeration((u'true', u'false')), 12, None)
+attribAttributeformdefault_141148993966564081 = pycopia.XML.POM.XMLAttribute(u'attributeFormDefault', pycopia.XML.POM.Enumeration((u'qualified', u'unqualified')), 13, u'unqualified')
+
+
+attribSystem_2295138509464817025 = pycopia.XML.POM.XMLAttribute(u'system', 1, 12, None)
+
+
+attribId_4002951160133423716 = pycopia.XML.POM.XMLAttribute(u'id', 2, 12, None)
+
+
+attribDefault_2927111106656685796 = pycopia.XML.POM.XMLAttribute(u'default', 1, 12, None)
+
+
+attribMinoccurs_271680201052381081 = pycopia.XML.POM.XMLAttribute(u'minOccurs', 7, 13, u'1')
+
+
+attribSubstitutiongroup_1565265269893373161 = pycopia.XML.POM.XMLAttribute(u'substitutionGroup', 7, 12, None)
+
+
+attribMixed_3290927172172038400 = pycopia.XML.POM.XMLAttribute(u'mixed', pycopia.XML.POM.Enumeration((u'true', u'false')), 12, None)
+
+
+attribRefer_2031594030079600900 = pycopia.XML.POM.XMLAttribute(u'refer', 7, 11, None)
+
+
+attribSchemalocation_2066361535366895809 = pycopia.XML.POM.XMLAttribute(u'schemaLocation', 1, 11, None)
+
+
+attribBlock_1173253193515024384 = pycopia.XML.POM.XMLAttribute(u'block', 1, 12, None)
+
+
+attribName_3478465917411609744 = pycopia.XML.POM.XMLAttribute(u'name', 7, 11, None)
 
 
 attribMixed_823651025861041 = pycopia.XML.POM.XMLAttribute(u'mixed', pycopia.XML.POM.Enumeration((u'true', u'false')), 13, u'false')
 
 
-attribForm_409928776348808025 = pycopia.XML.POM.XMLAttribute(u'form', pycopia.XML.POM.Enumeration((u'qualified', u'unqualified')), 12, None)
+attribMaxoccurs_513492537333252096 = pycopia.XML.POM.XMLAttribute(u'maxOccurs', pycopia.XML.POM.Enumeration((u'1',)), 12, None)
 
 
 
@@ -272,11 +272,16 @@ attribForm_409928776348808025 = pycopia.XML.POM.XMLAttribute(u'form', pycopia.XM
 
 class Xs_simpletype(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'id': attribId_121205855951786596, 
-         'name': attribName_3951386174947790881, 
-         'final': attribFinal_200879899131090529, 
+         u'id': attribId_4002951160133423716, 
+         u'name': attribName_1939937075622105121, 
+         u'final': attribFinal_4042113406485616225, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'id': attribId_4002951160133423716, 
+         'name': attribName_1939937075622105121, 
+         'final': attribFinal_4042113406485616225, 
+         }
 	_name = u'xs:simpleType'
 
 
@@ -285,10 +290,14 @@ class Xs_simpletype(pycopia.XML.POM.ElementNode):
 
 class Xs_restriction(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'base': attribBase_48033626411394001, 
-         'id': attribId_121205855951786596, 
+         u'base': attribBase_4088963046051587025, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'base': attribBase_4088963046051587025, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:restriction'
 
 
@@ -305,10 +314,14 @@ class Xs_restriction(pycopia.XML.POM.ElementNode):
 
 class Xs_list(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'itemType': attribItemtype_3634105045556428641, 
-         'id': attribId_121205855951786596, 
+         u'itemType': attribItemtype_746377092415504225, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'itemType': attribItemtype_746377092415504225, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:list'
 
 
@@ -320,10 +333,14 @@ class Xs_list(pycopia.XML.POM.ElementNode):
 
 class Xs_union(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'memberTypes': attribMembertypes_3659974999597968769, 
-         'id': attribId_121205855951786596, 
+         u'memberTypes': attribMembertypes_1859748649442684289, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'memberTypes': attribMembertypes_1859748649442684289, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:union'
 
 
@@ -335,91 +352,136 @@ class Xs_union(pycopia.XML.POM.ElementNode):
 
 class Xs_maxexclusive(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:maxExclusive'
 
 
 class Xs_minexclusive(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:minExclusive'
 
 
 class Xs_maxinclusive(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:maxInclusive'
 
 
 class Xs_mininclusive(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:minInclusive'
 
 
 class Xs_totaldigits(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:totalDigits'
 
 
 class Xs_fractiondigits(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:fractionDigits'
 
 
 class Xs_length(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:length'
 
 
 class Xs_minlength(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:minLength'
 
 
 class Xs_maxlength(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:maxLength'
 
 
@@ -428,20 +490,29 @@ class Xs_maxlength(pycopia.XML.POM.ElementNode):
 
 class Xs_enumeration(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:enumeration'
 
 
 class Xs_whitespace(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'fixed': attribFixed_3954921823337175625, 
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'fixed': attribFixed_3889665877119146569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'fixed': attribFixed_3889665877119146569, 
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:whiteSpace'
 
 
@@ -450,10 +521,14 @@ class Xs_whitespace(pycopia.XML.POM.ElementNode):
 
 class Xs_pattern(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'id': attribId_121205855951786596, 
-         'value': attribValue_18672084769430569, 
+         u'id': attribId_4002951160133423716, 
+         u'value': attribValue_94788037157002281, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'id': attribId_4002951160133423716, 
+         'value': attribValue_94788037157002281, 
+         }
 	_name = u'xs:pattern'
 
 
@@ -463,19 +538,36 @@ class Xs_pattern(pycopia.XML.POM.ElementNode):
 
 class Xs_schema(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'xml_lang': attribXml_lang_1108072188818706241, 
-         'xmlns': attribXmlns_2093790244028003361, 
+         u'targetNamespace': attribTargetnamespace_98563049709415729, 
+         u'elementFormDefault': attribElementformdefault_1699274912443886449, 
+         u'finalDefault': attribFinaldefault_3880612109539224900, 
+         u'xml:lang': attribXml_lang_3812812596121276225, 
+         u'xmlns': attribXmlns_92858189217657889, 
+         u'attributeFormDefault': attribAttributeformdefault_141148993966564081, 
+         u'version': attribVersion_440306481527947969, 
+         u'blockDefault': attribBlockdefault_2388562210315765201, 
+         u'xmlns:xs': attribXmlns_xs_558026015295709321, 
+         u'id': attribId_4002951160133423716, 
+         }
+	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'xml_lang': attribXml_lang_3812812596121276225, 
+         'xmlns': attribXmlns_92858189217657889, 
          'xmlns_xs': attribXmlns_xs_558026015295709321, 
          'finalDefault': attribFinaldefault_3880612109539224900, 
          'attributeFormDefault': attribAttributeformdefault_141148993966564081, 
-         'version': attribVersion_796990994287477441, 
+         'version': attribVersion_440306481527947969, 
          'elementFormDefault': attribElementformdefault_1699274912443886449, 
          'blockDefault': attribBlockdefault_2388562210315765201, 
-         'targetNamespace': attribTargetnamespace_2860084296067640625, 
-         'id': attribId_121205855951786596, 
+         'targetNamespace': attribTargetnamespace_98563049709415729, 
+         'id': attribId_4002951160133423716, 
          }
-	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
 	_name = u'xs:schema'
+
+
+
+_Root = Xs_schema
+
 
 
 #  Note the xmlns declaration is NOT in the Schema for Schemas,
@@ -501,14 +593,22 @@ class Xs_schema(pycopia.XML.POM.ElementNode):
 
 class Xs_complextype(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_3951386174947790881, 
-         'abstract': attribAbstract_4258482856034709124, 
-         'id': attribId_121205855951786596, 
-         'mixed': attribMixed_823651025861041, 
-         'final': attribFinal_200879899131090529, 
-         'block': attribBlock_218279069298343936, 
+         u'name': attribName_1939937075622105121, 
+         u'abstract': attribAbstract_1927589966619520644, 
+         u'id': attribId_4002951160133423716, 
+         u'mixed': attribMixed_823651025861041, 
+         u'final': attribFinal_4042113406485616225, 
+         u'block': attribBlock_1173253193515024384, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'name': attribName_1939937075622105121, 
+         'abstract': attribAbstract_1927589966619520644, 
+         'id': attribId_4002951160133423716, 
+         'mixed': attribMixed_823651025861041, 
+         'final': attribFinal_4042113406485616225, 
+         'block': attribBlock_1173253193515024384, 
+         }
 	_name = u'xs:complexType'
 
 
@@ -525,10 +625,14 @@ class Xs_complextype(pycopia.XML.POM.ElementNode):
 
 class Xs_complexcontent(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'mixed': attribMixed_1444315125457797376, 
-         'id': attribId_121205855951786596, 
+         u'mixed': attribMixed_3290927172172038400, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'mixed': attribMixed_3290927172172038400, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:complexContent'
 
 
@@ -538,9 +642,12 @@ class Xs_complexcontent(pycopia.XML.POM.ElementNode):
 
 class Xs_simplecontent(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'id': attribId_121205855951786596, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:simpleContent'
 
 
@@ -550,10 +657,14 @@ class Xs_simplecontent(pycopia.XML.POM.ElementNode):
 
 class Xs_extension(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'base': attribBase_3424859667182219044, 
-         'id': attribId_121205855951786596, 
+         u'base': attribBase_4067928618489278244, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'base': attribBase_4067928618489278244, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:extension'
 
 
@@ -564,22 +675,38 @@ class Xs_extension(pycopia.XML.POM.ElementNode):
 
 class Xs_element(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_3951386174947790881, 
-         'minOccurs': attribMinoccurs_122740967384164900, 
-         'default': attribDefault_3956494662362844900, 
-         'ref': attribRef_4288112745189774400, 
-         'abstract': attribAbstract_4258482856034709124, 
-         'nillable': attribNillable_2661748353041983209, 
-         'final': attribFinal_200879899131090529, 
-         'form': attribForm_409928776348808025, 
-         'maxOccurs': attribMaxoccurs_4487678595656788900, 
-         'substitutionGroup': attribSubstitutiongroup_61645110013254889, 
-         'fixed': attribFixed_89551180751567089, 
-         'type': attribType_1469512337522113600, 
-         'id': attribId_121205855951786596, 
-         'block': attribBlock_218279069298343936, 
+         u'name': attribName_1939937075622105121, 
+         u'minOccurs': attribMinoccurs_3515802384737479204, 
+         u'default': attribDefault_2927111106656685796, 
+         u'ref': attribRef_1513066398975169600, 
+         u'abstract': attribAbstract_1927589966619520644, 
+         u'nillable': attribNillable_617688626061846249, 
+         u'final': attribFinal_4042113406485616225, 
+         u'form': attribForm_110819381296493401, 
+         u'maxOccurs': attribMaxoccurs_2635762036467084196, 
+         u'substitutionGroup': attribSubstitutiongroup_1565265269893373161, 
+         u'fixed': attribFixed_999547109289113841, 
+         u'type': attribType_1221480214019521600, 
+         u'id': attribId_4002951160133423716, 
+         u'block': attribBlock_1173253193515024384, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'name': attribName_1939937075622105121, 
+         'minOccurs': attribMinoccurs_3515802384737479204, 
+         'default': attribDefault_2927111106656685796, 
+         'ref': attribRef_1513066398975169600, 
+         'abstract': attribAbstract_1927589966619520644, 
+         'nillable': attribNillable_617688626061846249, 
+         'final': attribFinal_4042113406485616225, 
+         'form': attribForm_110819381296493401, 
+         'maxOccurs': attribMaxoccurs_2635762036467084196, 
+         'substitutionGroup': attribSubstitutiongroup_1565265269893373161, 
+         'fixed': attribFixed_999547109289113841, 
+         'type': attribType_1221480214019521600, 
+         'id': attribId_4002951160133423716, 
+         'block': attribBlock_1173253193515024384, 
+         }
 	_name = u'xs:element'
 
 
@@ -602,43 +729,65 @@ class Xs_element(pycopia.XML.POM.ElementNode):
 
 class Xs_group(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'maxOccurs': attribMaxoccurs_4487678595656788900, 
-         'ref': attribRef_4288112745189774400, 
-         'name': attribName_3951386174947790881, 
-         'minOccurs': attribMinoccurs_122740967384164900, 
-         'id': attribId_121205855951786596, 
+         u'maxOccurs': attribMaxoccurs_2635762036467084196, 
+         u'ref': attribRef_1513066398975169600, 
+         u'name': attribName_1939937075622105121, 
+         u'minOccurs': attribMinoccurs_3515802384737479204, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'maxOccurs': attribMaxoccurs_2635762036467084196, 
+         'ref': attribRef_1513066398975169600, 
+         'name': attribName_1939937075622105121, 
+         'minOccurs': attribMinoccurs_3515802384737479204, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:group'
 
 
 class Xs_all(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'maxOccurs': attribMaxoccurs_155409837311655936, 
-         'id': attribId_121205855951786596, 
-         'minOccurs': attribMinoccurs_1069741866053360644, 
+         u'maxOccurs': attribMaxoccurs_513492537333252096, 
+         u'id': attribId_4002951160133423716, 
+         u'minOccurs': attribMinoccurs_3448318498702679044, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'maxOccurs': attribMaxoccurs_513492537333252096, 
+         'id': attribId_4002951160133423716, 
+         'minOccurs': attribMinoccurs_3448318498702679044, 
+         }
 	_name = u'xs:all'
 
 
 class Xs_choice(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'maxOccurs': attribMaxoccurs_4487678595656788900, 
-         'id': attribId_121205855951786596, 
-         'minOccurs': attribMinoccurs_122740967384164900, 
+         u'maxOccurs': attribMaxoccurs_2635762036467084196, 
+         u'id': attribId_4002951160133423716, 
+         u'minOccurs': attribMinoccurs_3515802384737479204, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'maxOccurs': attribMaxoccurs_2635762036467084196, 
+         'id': attribId_4002951160133423716, 
+         'minOccurs': attribMinoccurs_3515802384737479204, 
+         }
 	_name = u'xs:choice'
 
 
 class Xs_sequence(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'maxOccurs': attribMaxoccurs_4487678595656788900, 
-         'id': attribId_121205855951786596, 
-         'minOccurs': attribMinoccurs_122740967384164900, 
+         u'maxOccurs': attribMaxoccurs_2635762036467084196, 
+         u'id': attribId_4002951160133423716, 
+         u'minOccurs': attribMinoccurs_3515802384737479204, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'maxOccurs': attribMaxoccurs_2635762036467084196, 
+         'id': attribId_4002951160133423716, 
+         'minOccurs': attribMinoccurs_3515802384737479204, 
+         }
 	_name = u'xs:sequence'
 
 
@@ -659,13 +808,20 @@ class Xs_sequence(pycopia.XML.POM.ElementNode):
 
 class Xs_any(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
+         u'maxOccurs': attribMaxoccurs_1005860178358304481, 
+         u'namespace': attribNamespace_809216084559556996, 
+         u'minOccurs': attribMinoccurs_271680201052381081, 
+         u'processContents': attribProcesscontents_2594902936561138564, 
+         u'id': attribId_4002951160133423716, 
+         }
+	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
          'maxOccurs': attribMaxoccurs_1005860178358304481, 
          'namespace': attribNamespace_809216084559556996, 
          'minOccurs': attribMinoccurs_271680201052381081, 
          'processContents': attribProcesscontents_2594902936561138564, 
-         'id': attribId_121205855951786596, 
+         'id': attribId_4002951160133423716, 
          }
-	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
 	_name = u'xs:any'
 
 
@@ -686,11 +842,16 @@ class Xs_any(pycopia.XML.POM.ElementNode):
 
 class Xs_anyattribute(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'namespace': attribNamespace_809216084559556996, 
-         'id': attribId_121205855951786596, 
-         'processContents': attribProcesscontents_2594902936561138564, 
+         u'namespace': attribNamespace_809216084559556996, 
+         u'id': attribId_4002951160133423716, 
+         u'processContents': attribProcesscontents_2594902936561138564, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'namespace': attribNamespace_809216084559556996, 
+         'id': attribId_4002951160133423716, 
+         'processContents': attribProcesscontents_2594902936561138564, 
+         }
 	_name = u'xs:anyAttribute'
 
 
@@ -705,16 +866,26 @@ class Xs_anyattribute(pycopia.XML.POM.ElementNode):
 
 class Xs_attribute(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'use': attribUse_18216708433288369, 
-         'name': attribName_3951386174947790881, 
-         'form': attribForm_409928776348808025, 
-         'default': attribDefault_3956494662362844900, 
-         'ref': attribRef_4288112745189774400, 
-         'fixed': attribFixed_89551180751567089, 
-         'type': attribType_1469512337522113600, 
-         'id': attribId_121205855951786596, 
+         u'use': attribUse_837291069793426609, 
+         u'name': attribName_1939937075622105121, 
+         u'form': attribForm_110819381296493401, 
+         u'default': attribDefault_2927111106656685796, 
+         u'ref': attribRef_1513066398975169600, 
+         u'fixed': attribFixed_999547109289113841, 
+         u'type': attribType_1221480214019521600, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'use': attribUse_837291069793426609, 
+         'name': attribName_1939937075622105121, 
+         'form': attribForm_110819381296493401, 
+         'default': attribDefault_2927111106656685796, 
+         'ref': attribRef_1513066398975169600, 
+         'fixed': attribFixed_999547109289113841, 
+         'type': attribType_1221480214019521600, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:attribute'
 
 
@@ -737,11 +908,16 @@ class Xs_attribute(pycopia.XML.POM.ElementNode):
 
 class Xs_attributegroup(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'ref': attribRef_4288112745189774400, 
-         'name': attribName_3951386174947790881, 
-         'id': attribId_121205855951786596, 
+         u'ref': attribRef_1513066398975169600, 
+         u'name': attribName_1939937075622105121, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'ref': attribRef_1513066398975169600, 
+         'name': attribName_1939937075622105121, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:attributeGroup'
 
 
@@ -753,47 +929,68 @@ class Xs_attributegroup(pycopia.XML.POM.ElementNode):
 
 class Xs_unique(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_303323689952890000, 
-         'id': attribId_121205855951786596, 
+         u'name': attribName_3478465917411609744, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'name': attribName_3478465917411609744, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:unique'
 
 
 class Xs_key(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'name': attribName_303323689952890000, 
-         'id': attribId_121205855951786596, 
+         u'name': attribName_3478465917411609744, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'name': attribName_3478465917411609744, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:key'
 
 
 class Xs_keyref(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'id': attribId_121205855951786596, 
-         'name': attribName_303323689952890000, 
-         'refer': attribRefer_71349915707402500, 
+         u'id': attribId_4002951160133423716, 
+         u'name': attribName_3478465917411609744, 
+         u'refer': attribRefer_2031594030079600900, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'id': attribId_4002951160133423716, 
+         'name': attribName_3478465917411609744, 
+         'refer': attribRefer_2031594030079600900, 
+         }
 	_name = u'xs:keyref'
 
 
 class Xs_selector(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'xpath': attribXpath_1637985964080798049, 
-         'id': attribId_121205855951786596, 
+         u'xpath': attribXpath_569229373432813921, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'xpath': attribXpath_569229373432813921, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:selector'
 
 
 class Xs_field(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'xpath': attribXpath_1637985964080798049, 
-         'id': attribId_121205855951786596, 
+         u'xpath': attribXpath_569229373432813921, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'xpath': attribXpath_569229373432813921, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:field'
 
 
@@ -802,40 +999,59 @@ class Xs_field(pycopia.XML.POM.ElementNode):
 
 class Xs_include(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'schemaLocation': attribSchemalocation_142242159460702401, 
-         'id': attribId_121205855951786596, 
+         u'schemaLocation': attribSchemalocation_2066361535366895809, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'schemaLocation': attribSchemalocation_2066361535366895809, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:include'
 
 
 class Xs_import(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'schemaLocation': attribSchemalocation_891186576461596944, 
-         'namespace': attribNamespace_4318307271518053284, 
-         'id': attribId_121205855951786596, 
+         u'schemaLocation': attribSchemalocation_386465377926252816, 
+         u'namespace': attribNamespace_1943882797323936676, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'schemaLocation': attribSchemalocation_386465377926252816, 
+         'namespace': attribNamespace_1943882797323936676, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:import'
 
 
 class Xs_redefine(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'schemaLocation': attribSchemalocation_142242159460702401, 
-         'id': attribId_121205855951786596, 
+         u'schemaLocation': attribSchemalocation_2066361535366895809, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'schemaLocation': attribSchemalocation_2066361535366895809, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:redefine'
 
 
 class Xs_notation(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'system': attribSystem_556045631547116929, 
-         'public': attribPublic_3737720894171978884, 
-         'name': attribName_303323689952890000, 
-         'id': attribId_121205855951786596, 
+         u'system': attribSystem_2295138509464817025, 
+         u'public': attribPublic_2963329996656581764, 
+         u'name': attribName_3478465917411609744, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel((True,))
+	KWATTRIBUTES = {
+         'system': attribSystem_2295138509464817025, 
+         'public': attribPublic_2963329996656581764, 
+         'name': attribName_3478465917411609744, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:notation'
 
 
@@ -857,10 +1073,14 @@ class Xs_annotation(pycopia.XML.POM.ElementNode):
 
 class Xs_appinfo(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'source': attribSource_3543840153906090025, 
-         'id': attribId_121205855951786596, 
+         u'source': attribSource_3875251958556381225, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(True)
+	KWATTRIBUTES = {
+         'source': attribSource_3875251958556381225, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:appinfo'
 
 
@@ -869,11 +1089,16 @@ class Xs_appinfo(pycopia.XML.POM.ElementNode):
 
 class Xs_documentation(pycopia.XML.POM.ElementNode):
 	ATTRIBUTES = {
-         'source': attribSource_3543840153906090025, 
-         'xml_lang': attribXml_lang_1108072188818706241, 
-         'id': attribId_121205855951786596, 
+         u'source': attribSource_3875251958556381225, 
+         u'xml:lang': attribXml_lang_3812812596121276225, 
+         u'id': attribId_4002951160133423716, 
          }
 	CONTENTMODEL = pycopia.XML.POM.ContentModel(True)
+	KWATTRIBUTES = {
+         'source': attribSource_3875251958556381225, 
+         'xml_lang': attribXml_lang_3812812596121276225, 
+         'id': attribId_4002951160133423716, 
+         }
 	_name = u'xs:documentation'
 
 

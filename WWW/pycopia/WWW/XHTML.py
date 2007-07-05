@@ -37,7 +37,7 @@ from htmlentitydefs import name2codepoint
 
 from pycopia.urlparse import quote_plus
 from pycopia.textutils import identifier
-from pycopia.aid import partial, newclass, Enums
+from pycopia.aid import partial, newclass, Enums, Enum
 
 from pycopia import dtds
 from pycopia.XML import POM, XMLVisitorContinue, ValidationError
@@ -1042,31 +1042,39 @@ class FormMixin(ContainerMixin):
         return sl
 
     def _add_options(self, sl, enums, base=0):
-        if type(enums) is Enums and enums:
+        et =  type(enums)
+        if et is Enums and enums:
             for i, name in enums.choices:
                 opt = self.dtd.Option(value=base+i)
                 opt.append(POM.Text(name))
                 sl.append(opt)
             return base+i+1
-        if type(enums) is dict and enums:
+        if et is dict and enums:
             for i, (key, val) in enumerate(enums.items()):
                 opt = self.dtd.Optgroup(label=key)
                 base = self._add_options(opt, val, base)
                 sl.append(opt)
             return i
-        if type(enums) is list and enums:
+        if et is tuple and enums:
+            name, value = enums
+            opt = self.dtd.Option(value=value)
+            opt.append(POM.Text(name))
+            return base
+        if et is list and enums:
             for i, item in enumerate(enums):
                 it = type(item)
                 if it is tuple: # add "selected" item by adding (value, flag)
-                    val = item[0]
-                    opt = self.dtd.Option(value=val)
-                    opt.append(POM.Text(val))
-                    if item[1]:
-                        opt.selected = "selected"
+                    opt = self.dtd.Option(value=item[1])
+                    opt.append(POM.Text(item[0]))
+                    if len(item) > 2:
+                        opt.selected = bool(item[2])
                 elif it is dict: # make option groups by passing dictionaries
                     for key, val in item.items():
                         opt = self.dtd.Optgroup(label=key)
                         base = self._add_options(opt, val, i)
+                elif it is Enum: # a named number
+                    opt = self.dtd.Option(value=int(item))
+                    opt.append(POM.Text(item))
                 elif it is list: # for nested lists
                     base = self._add_options(sl, item, i)
                 else:

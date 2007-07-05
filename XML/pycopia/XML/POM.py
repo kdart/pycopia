@@ -54,6 +54,20 @@ def verify_encoding(newcodec):
 
 set_default_encoding("utf-8")
 
+
+class ContentModel(object):
+    """Represents and validates a content model.  """
+    def __init__(self, rawmodel=None):
+        self.model = rawmodel # TODO need actual content model...
+
+    def __repr__(self):
+        cl = self.__class__
+        return "%s.%s(%r)" % (cl.__module__, cl.__name__, self.model)
+
+    def is_empty(self):
+        return not self.model
+
+
 #########################################################
 # XML generating classes
 # These classes are used to generate XML documents, similar to DOM. But, this
@@ -65,14 +79,14 @@ class Text(object):
         self._parent = None
         self.set_text(data, encoding)
     def set_text(self, data, encoding=DEFAULT_ENCODING):
-        self.data = unescape(POMString(data, encoding))
+        self.data = unescape(to_unicode(data, encoding))
         self.encoding = encoding
     def get_text(self):
         return self.data
     def insert(self, data, encoding=None):
-        self.data = unescape(POMString(data, encoding or self.encoding)) + self.data
+        self.data = unescape(to_unicode(data, encoding or self.encoding)) + self.data
     def add_text(self,data, encoding=None):
-        self.data += unescape(POMString(data, encoding or self.encoding))
+        self.data += unescape(to_unicode(data, encoding or self.encoding))
     append = add_text
     __iadd__ = add_text
     def __add__(self, other):
@@ -141,7 +155,7 @@ class Comment(Text):
         self._parent = None
         self.set_text(data, encoding)
     def set_text(self, data, encoding=DEFAULT_ENCODING):
-        self.data = POMString(data, encoding)
+        self.data = to_unicode(data, encoding)
         self.encoding = encoding
     def __str__(self):
         return self.encode(self.encoding)
@@ -154,9 +168,9 @@ class Comment(Text):
     def get_text(self):
         return self.data
     def insert(self, data, encoding=None):
-        self.data = POMString(data, encoding or self.encoding) + self.data
+        self.data = to_unicode(data, encoding or self.encoding) + self.data
     def add_text(self, data, encoding=None):
-        self.data += POMString(data, encoding or self.encoding)
+        self.data += to_unicode(data, encoding or self.encoding)
     append = add_text
     def _fix(self, data):
         data = escape(data)
@@ -172,14 +186,14 @@ class ASIS(object):
         self._parent = None
         self.set_text(data, encoding)
     def set_text(self, data, encoding=DEFAULT_ENCODING):
-        self.data = POMString(data, encoding)
+        self.data = to_unicode(data, encoding)
         self.encoding = encoding
     def get_text(self):
         return self.data
     def insert(self, data, encoding=None):
         raise NotImplementedError, "Cannot insert into ASIS"
     def add_text(self,data, encoding=None):
-        self.data += POMString(data, encoding or self.encoding)
+        self.data += to_unicode(data, encoding or self.encoding)
     append = add_text
     __iadd__ = add_text
     def __str__(self):
@@ -244,8 +258,8 @@ class POMAttribute(object):
     __slots__ = ["name", "value", "namespace"]
     def __init__(self, name, value, namespace=u"",
                             encoding=DEFAULT_ENCODING):
-        self.name = POMString(name, encoding)
-        self.value = POMString(value, encoding)
+        self.name = to_unicode(name, encoding)
+        self.value = to_unicode(value, encoding)
         self.namespace = namespace
 
     def __hash__(self):
@@ -280,42 +294,65 @@ class ProcessingInstruction(object):
 
 class ElementNode(object):
     ATTRIBUTES = {}
+    KWATTRIBUTES = {}
     CONTENTMODEL = None
     _name = None
     def __init__(self, **attribs):
         self.__dict__["_attribs"] = attr = {}
+        self.__dict__["_badattribs"] = badattrs = {}
         self.__dict__["_parent"] = None
         self.__dict__["_children"] = []
         self.__dict__["_namespace"] = u""
-        self.__dict__["encoding"] = DEFAULT_ENCODING
-        ATT = self.__class__.ATTRIBUTES
+        self.__dict__["_encoding"] = DEFAULT_ENCODING
+        ATT = self.__class__.KWATTRIBUTES
         for key, value in attribs.items():
             xmlattr = ATT.get(key)
+            if type(value) is tuple:
+                atns, value = value
+            else:
+                atns = u""
             if xmlattr:
-                attr[key] = POMAttribute(xmlattr.name, value)
+                attr[xmlattr.name] = POMAttribute(xmlattr.name, value, atns)
+            else:
+                # for delayed attribute validation.
+                # XXX could be foriegn namespace attribute
+                badattrs[key] = POMAttribute(key, value, atns)
 
     def get_attribute(self, name):
-        if not self.ATTRIBUTES:
-            return None
         try:
-            return self.__dict__["_attribs"][name].value
+            xmlattr = self.__class__.ATTRIBUTES[name]
+        except KeyError:
+            try:
+                xmlattr = self.__class__.KWATTRIBUTES[name]
+            except KeyError:
+                return None
+        try:
+            return self.__dict__["_attribs"][xmlattr.name].value
         except KeyError:
             # might be implied, fixed, or enum...
-            xmlattr = self.__class__.ATTRIBUTES.get(name)
-            if xmlattr:
-                if xmlattr.a_decl in (FIXED, IMPLIED, DEFAULT):
-                    return xmlattr.default or u""
+            if xmlattr.a_decl in (FIXED, IMPLIED, DEFAULT):
+                return xmlattr.default or u""
         return None
+    getAttribute = get_attribute # JS compatibility
 
     def set_attribute(self, name, val, ns=u""):
-        """set_attribute(name, value) This exists to set attributes that
-        have names with characters that make it an illegal Python
-        identifier.  """
-        xmlattr = self.__class__.ATTRIBUTES.get(name)
-        if xmlattr:
-            self._attribs[name] = POMAttribute(xmlattr.name, val, ns)
+        """set_attribute(name, value)
+        Set the element node attribute "name" to "value". 
+        The name can be the shorthand identifier, or the real name.
+        """
+        if u":" in name:
+            self._attribs[name] = POMAttribute(name, val)
             return True
-        return False
+        try:
+            xmlattr = self.__class__.ATTRIBUTES[name]
+        except KeyError:
+            try:
+                xmlattr = self.__class__.KWATTRIBUTES[name]
+            except KeyError:
+                return False
+        self._attribs[xmlattr.name] = POMAttribute(xmlattr.name, val, ns)
+        return True
+    setAttribute = set_attribute # JS compatibility
 
     def __getattr__(self, name):
         defval = self.get_attribute(name)
@@ -327,20 +364,36 @@ class ElementNode(object):
         if not self.set_attribute(name, value, self.__dict__["_namespace"]):
             self.__dict__[name] = value
 
+    def del_attribute(self, name):
+        self.__delattr__(name)
+    removeAttribute = del_attribute # JS compatibility
+
     def __delattr__(self, name):
         try:
-            del self._attribs[name]
+            xmlattr = self.__class__.ATTRIBUTES[name]
         except KeyError:
             try:
-                del self.__dict__[key]
+                xmlattr = self.__class__.KWATTRIBUTES[name]
             except KeyError:
-                raise AttributeError("%r has no attribute %r " % (self.__class__, name))
+                try:
+                    del self.__dict__[key]
+                except KeyError:
+                    raise AttributeError("%r has no attribute %r " % (self.__class__, name))
+        try:
+            del self._attribs[xmlattr.name]
+        except KeyError:
+            pass
 
-    def get_attribute_names(self):
+    def get_keyword_attributes(self):
         """return list of names that may be used as keyword names when
         instantiating this element.
         """
-        return self.ATTRIBUTES.keys()
+        return self.__class__.KWATTRIBUTES.keys()
+
+    def get_attributes(self):
+        """return list of DTD defined attribute names.
+        """
+        return self.__class__.ATTRIBUTES.keys()
 
     def get_parent(self):
         return self._parent
@@ -379,12 +432,9 @@ class ElementNode(object):
             n._parent = None
         self._children = None
 
-    def set_namespace(self, ns, encoding=DEFAULT_ENCODING):
-        self._namespace = POMString(ns, encoding)
-
     def set_encoding(self, encoding):
         POM.verify_encoding(encoding)
-        self.encoding = encoding
+        self._encoding = encoding
 
     def index(self, obj):
         objid = id(obj)
@@ -462,9 +512,9 @@ class ElementNode(object):
     def __nonzero__(self):
         return True
 
-    def hasAttributes(self):
+    def has_attributes(self):
         return bool(self._attribs)
-    has_attributes = hasAttributes
+    hasAttributes = has_attributes
 
     def has_attribute(self, name):
         return name in self._attribs
@@ -504,25 +554,29 @@ class ElementNode(object):
         del self._children[index]
 
     def __repr__(self):
-        attrs = map(lambda t: '%s=%r' % t, self._attribs.items())
+        attrs = [('%s=%r' % (keyword_identifier(normalize_unicode(t[0])), t[1]))
+            for t in self._attribs.items()]
         cl = self.__class__
         return "%s.%s(%s)" % (cl.__module__, cl.__name__, ", ".join(attrs))
 
     def __str__(self):
-        return self.encode(self.encoding or DEFAULT_ENCODING)
+        return self.encode(self._encoding)
 
     def _verify_attributes(self):
-        if not self.__class__.ATTRIBUTES:
-            return None
+        if self._badattribs:
+            cl = self.__class__
+            raise ValidationError(
+                "Attribute(s) %r not valid for %s.%s." %
+                (",".join(self._badattribs.keys()), cl.__module__, cl.__name__))
         attribs = self._attribs
-        for key, xmlattr in self.ATTRIBUTES.items():
+        for key, dtdattr in self.__class__.ATTRIBUTES.items():
             aval = attribs.get(key, None)
             if aval is None:
-                if xmlattr.a_decl == REQUIRED:
+                if dtdattr.a_decl == REQUIRED:
                     raise ValidationError(
-                        "required attribute not present: %s" % (xmlattr.name,))
+                        "Required attribute not present: %s" % (dtdattr.name,))
             else:
-                xmlattr.verify(aval.value)
+                dtdattr.verify(aval.value)
 
     def encode(self, encoding):
         self._verify_attributes()
@@ -531,8 +585,17 @@ class ElementNode(object):
         else:
             return self._non_empty_str(encoding)
 
+    def set_namespace(self, ns, encoding=DEFAULT_ENCODING):
+        self._namespace = to_unicode(ns, encoding)
+
+    def del_namespace(self):
+        self._namespace = u""
+
+    namespace = property(lambda s: s._namespace, set_namespace,
+                del_namespace)
+
     def _get_ns(self, encoding):
-        return "" # TODO namespace support
+        return self._namespace.encode(encoding)
 
     def _non_empty_str(self, encoding):
         ns = self._get_ns(encoding)
@@ -551,14 +614,8 @@ class ElementNode(object):
         attrs.insert(0, "") # for space before first attribute
         return " ".join(attrs)
 
-    def get_iterator(self, writer=None, encoding=None):
-        """Return an iterable of the content."""
-        it = WSGIAdapter(writer=writer)
-        self.emit(it, encoding)
-        return it
-
     def emit(self, fo, encoding=None):
-        enc = encoding or self.encoding
+        enc = encoding or self._encoding
         self._verify_attributes()
         if not self.CONTENTMODEL or self.CONTENTMODEL.is_empty():
             fo.write(self._empty_str(enc))
@@ -572,7 +629,11 @@ class ElementNode(object):
     def validate(self, encoding=DEFAULT_ENCODING):
         ff = FakeFile(None)
         # Will raise a ValidationError if not valid.
-        self.emit(ff, encoding)
+        # Don't need full backtrace for this type of error.
+        try:
+            self.emit(ff, encoding)
+        except ValidationError, err:
+            raise ValidationError, err 
 
     def walk(self, visitor):
         try:
@@ -583,10 +644,13 @@ class ElementNode(object):
             node.walk(visitor)
 
     # methods for node path manipulation
+
+    _xpath_re = re.compile(r'(\w+)\[(.*)]')
+
     def pathname(self):
         """pathname() returns the ElementNode as a string in xpath format."""
         if self._attribs:
-            s = map(lambda i: "@%s='%s'" % (i[0],i[1]), self._attribs.items())
+            s = map(lambda it: "@%s='%s'" % it, self._attribs.items())
             return "%s[%s]" % (self.__class__.__name__, " and ".join(s))
         else:
             return self.__class__.__name__
@@ -605,8 +669,7 @@ class ElementNode(object):
         if "[" not in pathelement:
             return pathelement == self._name
         else:
-            xpath_re = re.compile(r'(\w+)\[(.*)]') # XXX still needs work
-            mo = xpath_re.match(pathelement)
+            mo = self._xpath_re.match(pathelement)
             if mo:
                 name, match = mo.groups()
                 if name != self._name:
@@ -620,7 +683,7 @@ class ElementNode(object):
                 else:
                     return True
             else:
-                raise ValueError, "Invalid path element"
+                raise ValueError, "Path element %r not found." % (pathelement,)
 
     def find_elements(self, pathelement):
         rv = []
@@ -688,6 +751,41 @@ class ElementNode(object):
         return self.getall(ElementNode, sys.maxint)
 
 
+# Used to hold unknown nodes (not found it dtd module). Usually from some
+# foriegn namespace.
+class UnknownNode(ElementNode):
+    ATTRIBUTES = {}
+    KWATTRIBUTES = {}
+    CONTENTMODEL = ContentModel((True,))
+    _name = None
+    def __init__(self, **attribs):
+        self.__dict__["_attribs"] = attr = {}
+        self.__dict__["_badattribs"] = badattrs = {}
+        self.__dict__["_parent"] = None
+        self.__dict__["_children"] = []
+        self.__dict__["_namespace"] = u""
+        self.__dict__["_encoding"] = DEFAULT_ENCODING
+        ATT = self.__class__.KWATTRIBUTES
+        for key, value in attribs.items():
+            xmlattr = ATT.get(key)
+            if type(value) is tuple:
+                atns, value = value
+            else:
+                atns = u""
+            if xmlattr:
+                attr[xmlattr.name] = POMAttribute(xmlattr.name, value, atns)
+            else:
+                # for delayed attribute validation.
+                # XXX could be foriegn namespace attribute
+                badattrs[key] = POMAttribute(key, value, atns)
+
+    def _verify_attributes(self):
+        return True # XXX cannot verify foriegn attributes at this time.
+
+    def _get_ns(self, encoding):
+        return u"".encode(encoding)
+
+
 class NodeIterator(object):
     def __init__(self, node, elclass):
         self.node = node
@@ -718,25 +816,12 @@ def find_nodes(node, elclass):
     return
 
 
-class ContentModel(object):
-    """Represents and validates a content model.  """
-    def __init__(self, rawmodel=None):
-        self.model = rawmodel # TODO need actual content model...
-
-    def __repr__(self):
-        cl = self.__class__
-        return "%s.%s(%r)" % (cl.__module__, cl.__name__, self.model)
-
-    def is_empty(self):
-        return not self.model
-
-
 class Fragments(ElementNode):
     """Fragments is a special holder class to hold 'loose' markup fragments.
     That is, bits of markup that don't have a common container (e.g. not in
     root element).  It is invisible."""
     def __str__(self):
-        return self.encode(self.encoding)
+        return self.encode(self._encoding)
 
     def encode(self, encoding):
         s = []
@@ -750,7 +835,7 @@ class Fragments(ElementNode):
         return False
 
 
-def POMString(arg, encoding):
+def to_unicode(arg, encoding):
     if isinstance(arg, unicode):
         return arg
     return unicode(str(arg), encoding)
@@ -804,79 +889,6 @@ class BeautifulWriter(object):
                 self._level += 1
                 return self._fo.write(data)
         return self._fo.write(data)
-
-
-class WSGIAdapter(object):
-    """Adapt the emit() method of a document to the WSGI spec. It is an
-    iterable object that you can return to the WSGI caller. This is also
-    the file-like for the document's (or node's) emit() method.
-    First, pass this to a document or node's emit() method. Then, return
-    it to the WSGI caller.
-    Alternatively, use the WSGI write function by passing it to the
-    constructor.
-
-    Use it like this:
-
-    def SampleApp(environ, start_response): # use write callabled
-      doc = <POMDocument from somewhere>
-      response = "200 OK"
-      headers = [("Content-Type", doc.MIMETYPE)]
-      writer = start_response(response, headers)
-      it = WSGIAdapter(writer=writer)
-      doc.emit(it)
-      return it
-
-    def SampleApp2(environ, start_response): # use iterator
-      doc = <POMDocument from somewhere>
-      it = WSGIAdapter(doc.MIMETYPE)
-      start_response(it.response, it.headers)
-      doc.emit(it)
-      return it
-
-    """
-    def __init__(self, mimetype=None, writer=None):
-        if writer:
-            self.write = writer # override write method
-        self._chunks = []
-        self.length = 0
-        self._response = "200 OK"
-        self._mimetype = mimetype
-
-    def __iter__(self):
-        return iter(self._chunks)
-
-    def __len__(self):
-        return self.length
-
-    def close(self):
-        self._chunks = []
-
-    #  emit() calls this
-    def write(self, data):
-        try:
-            self.length += len(data)
-            self._chunks.append(data)
-        finally:
-            self._response = "500 Writer error"
-
-    def get_headers(self):
-        if self.length:
-            rv = [("Content-Length", str(self.length))]
-        else:
-            rv = []
-        if self._mimetype:
-            rv.append(("Content-Type", self._mimetype))
-        return rv
-
-    def get_response(self):
-        return self._response
-
-    def set_mimetype(self, mimetype):
-        self._mimetype = mimetype
-
-    headers = property(get_headers, None, None, "WSGI style header list")
-    response = property(get_response)
-    mimetype = property(lambda s: s._mimetype, set_mimetype)
 
 
 # base class for whole POM documents, including Header.
@@ -968,11 +980,6 @@ class POMDocument(object):
     def validate(self, encoding=DEFAULT_ENCODING):
         self.root.validate(encoding)
 
-    def get_iterator(self, writer=None):
-        """Return an iterable of the document content.  """
-        it = WSGIAdapter(self.MIMETYPE, writer)
-        self.emit(it)
-        return it
 
     def walk(self, visitor):
         self.root.walk(visitor)
@@ -1086,6 +1093,10 @@ def new_document(doctype, encoding=DEFAULT_ENCODING):
     doc.set_encoding(encoding)
     return doc
 
+def write_error(msg):
+    sys.stderr.write(msg)
+    sys.stderr.write("\n")
+
 XML_HEADER_RE = re.compile(r'xml version="([0123456789.]+)" encoding="([A-Z0-9-]+)"', re.IGNORECASE)
 
 #### new sax2 parser ###
@@ -1099,11 +1110,12 @@ class ContentHandler(object):
         self._doc_factory = doc_factory
         self.encoding = DEFAULT_ENCODING # default to regenerate as
         self.modules = []
+        self._prefixes = {}
         self._classcache = {}
         if logfile:
             self._errormethod = logfile.write
         else:
-            self._errormethod = sys.stderr.write
+            self._errormethod = write_error
 
     def _get_class(self, name):
         klass = None
@@ -1131,8 +1143,15 @@ class ContentHandler(object):
     def endDocument(self):
         if self.stack: # stack should be empty now
             raise ValidationError, "unbalanced document!"
-        self.doc.set_root(self.msg)
+        if self.doc is None:
+            self.doc = self._doc_factory(encoding=self.encoding)
+        root = self.msg
         self.msg = None
+        # Parser strips out namespaces, have to add them back in.
+        if self._prefixes:
+            for uri, prefix in self._prefixes.items():
+                root.set_attribute(u"xmlns:%s" % prefix, uri)
+        self.doc.set_root(root)
 
     def startElement(self, name, atts):
         "Handle an event for the beginning of an element."
@@ -1149,10 +1168,6 @@ class ContentHandler(object):
     def endElement(self, name):
         "Handle an event for the end of an element."
         obj = self.stack.pop()
-#        if self.stack:
-#            self.stack[-1].append(obj)
-#        else:
-#            self.msg = obj
         try:
             self.stack[-1].append(obj)
         except IndexError:
@@ -1176,10 +1191,10 @@ class ContentHandler(object):
             self._errormethod("!!! Unhandled pi: %r" % (data,))
 
     def startPrefixMapping(self, prefix, uri):
-        self._errormethod("unhandled startPrefixMapping: %s %s" % (prefix, uri))
+        self._prefixes[uri] = prefix
 
     def endPrefixMapping(self, prefix):
-        self._errormethod("unhandled endPrefixMapping: %s" % (prefix,))
+        pass
 
     def skippedEntity(self, name):
         if self.stack:
@@ -1188,13 +1203,40 @@ class ContentHandler(object):
     def ignorableWhitespace(self, whitespace):
         self._errormethod("unhandled ignorableWhitespace: %r" % (whitespace,))
 
-    # TODO handle namespaces
-    def startElementNS(self, cooked_name, name, attributesns):
-        self._errormethod("unhandled startElementNS: %r %r %r" % ( 
-                               cooked_name, name, attributesns))
+    # Namespace interface
+    def startElementNS(self, cooked_name, name, atts):
+        ns, basename = cooked_name
+        if ns:
+            attr = {}
+            obj = UnknownNode()
+            obj._name = name
+            obj.set_namespace(self._prefixes[ns])
+            for cooked_attname, value in atts.items():
+                atns, atname = cooked_attname
+                attr[atname] = POMAttribute(atname, unescape(value), atns)
+            obj._attribs = attr
+        else:
+            try:
+                klass = self._get_class(basename)
+            except AttributeError:
+                raise ValidationError, "Undefined element tag: " + name
+            attributes = {}
+            for cooked_attname, value in atts.items():
+                atns, atname = cooked_attname
+                kwname = keyword_identifier(normalize_unicode(atname))
+                if atns:
+                    attributes[kwname] = (self._prefixes[atns], unescape(value))
+                else:
+                    attributes[kwname] =  unescape(value)
+            obj = klass(**attributes)
+        self.stack.append(obj)
 
     def endElementNS(self, name, rawname):
-        self._errormethod("unhandled endElementNS: %r %r" % (name, rawname))
+        obj = self.stack.pop()
+        try:
+            self.stack[-1].append(obj)
+        except IndexError:
+            self.msg = obj
 
     # DTDHandler interface
     def notationDecl(self, name, publicId, systemId):
@@ -1439,6 +1481,10 @@ class XMLAttribute(object):
                         self.name, value, self.default))
         return True
 
+
+class UnknownXMLAttribute(object):
+    def verify(self, value):
+        raise ValidationError("Can't validate unknown attribute: %r" % (self.name,))
 
 
 #########################################################
