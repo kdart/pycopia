@@ -189,10 +189,8 @@ class FlowMixin(object):
         for cont in content:
             if isinstance(cont, (POM.ElementNode, POM.Text, POM.ASIS)):
                 elem.append(cont)
-            elif type(cont) in (str, unicode):
-                elem.add_text(cont)
             else:
-                elem.add_text(str(cont))
+                elem.add_text(cont)
         return elem
 
     def get_nodemaker(self):
@@ -273,6 +271,19 @@ class FlowMixin(object):
         obj = self.get_object(_params, **kwargs)
         self.append(obj)
         return obj
+
+    # Some MochiKit integration.
+    def connect(self, signame, dest, func=None):
+        """http://mochikit.com/doc/html/MochiKit/Signal.html#fn-connect"""
+        self.add_javascript('connect("%s", "%s", %s);' % (self.id, signame, dest))
+
+    def disconnect(self, *signals):
+        if signals:
+            self.add_javascript('disconnectAll("%s", %s);' % (
+                 self.id, 
+                 ", ".join(map(repr, signals))))
+        else:
+            self.add_javascript('disconnectAll("%s");' % (self.id, ))
 
 
 class ObjectMixin(FlowMixin):

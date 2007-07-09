@@ -86,6 +86,13 @@ DOCTYPES[XHTML1_FRAMESET] = Doctype("HTML", "-//W3C//DTD XHTML 1.0 Frameset//EN"
 DOCTYPES[XHTML11] = Doctype("html", "-//W3C//DTD XHTML 1.1//EN",
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd")
 # mobile variants
+DOCTYPES[XHTML_MOBILE10] = Doctype("html", "-//WAPFORUM//DTD XHTML Mobile 1.0//EN",
+             "http://www.wapforum.org/DTD/xhtml-mobile10.dtd")
+DOCTYPES[XHTML_BASIC10] = Doctype("html", "-//W3C//DTD XHTML Basic 1.0//EN",
+             "http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd")
+DOCTYPES[XHTML_BASIC11] = Doctype("html", "-//W3C//DTD XHTML Basic 1.1//EN",
+             "http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd")
+# wml
 DOCTYPES[WML11] = Doctype("wml", "-//WAPFORUM//DTD WML 1.1//EN",
           "http://www.wapforum.org/DTD/wml_1.1.xml")
 DOCTYPES[WML12] = Doctype("wml", "-//WAPFORUM//DTD WML 1.2//EN",
@@ -94,15 +101,8 @@ DOCTYPES[WML13] = Doctype("wml", "-//WAPFORUM//DTD WML 1.3//EN",
              "http://www.wapforum.org/DTD/wml13.dtd")
 DOCTYPES[WML20] = Doctype("html", "-//WAPFORUM//DTD WML 2.0//EN",
              "http://www.wapforum.org/dtd/wml20.dtd")
-DOCTYPES[XHTML_MOBILE10] = Doctype("html", "-//WAPFORUM//DTD XHTML Mobile 1.0//EN",
-             "http://www.wapforum.org/DTD/xhtml-mobile10.dtd")
-DOCTYPES[XHTML_BASIC10] = Doctype("html", "-//W3C//DTD XHTML Basic 1.0//EN",
-             "http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd")
-DOCTYPES[XHTML_BASIC11] = Doctype("html", "-//W3C//DTD XHTML Basic 1.1//EN",
-             "http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd")
 DOCTYPES[WTA_WML12] = Doctype("wta-wml", "-//WAPFORUM//DTD WTA-WML 1.2//EN",
              "http://www.wapforum.org/DTD/wta-wml12.dtd")
-
 DOCTYPES[SI] = Doctype("si", "-//WAPFORUM//DTD SI 1.0//EN",
              "http://www.wapforum.org/DTD/si.dtd")
 DOCTYPES[SL] = Doctype("sl", "-//WAPFORUM//DTD SL 1.0//EN",
