@@ -561,6 +561,17 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
     """
     MIMETYPE="application/xhtml+xml"
 
+    def initialize(self):
+        root = self.dtd._Root()
+        self.set_root(root)
+        head = get_container(self.dtd, "Head", {})
+        body = get_container(self.dtd, "Body", {})
+        root.append(head)
+        root.append(body)
+        # Set convenient direct accessors to main HTML document parts.
+        root.head = head
+        root.body = body
+
     # default body shortcuts are properties.
     head = property(lambda self: self.get_path("/html/head"))
     body = property(lambda self: self.get_path("/html/body"))
@@ -1405,26 +1416,70 @@ class URL(dict):
     def __str__(self):
         return get_url(self, self._base)
 
+
 ### WML support... should be factored out.
 
-class WMLDocument(POM.POMDocument, ContainerMixin):
+class WMLMixin(FlowMixin):
+    def get_section(self, _name, **kwargs):
+        Section = get_class(self.dtd, "WmlSection%s" % _name, (WMLMixin, self.dtd.Card))
+        kwargs["class_"] = _name
+        sect = Section(**kwargs)
+        sect._init(self.dtd)
+        return sect
+
+    def add_section(self, _name, **kwargs):
+        sect = self.get_section(_name, **kwargs)
+        self.append(sect)
+        return sect
+
+    def new_section(self, _name, _data, **kwargs):
+        sect = self.get_section(_name, **kwargs)
+        _data = create_POM(_data, self.dtd) # XXX
+        sect.append(_data)
+        self.append(sect)
+        return sect
+
+    def get_anchor(self, **attribs):
+        return self.dtd.Go(**attribs)
+
+    def add_anchor(self, **attribs):
+        a = self.dtd.Go(**attribs)
+        self.append(a)
+        return a
+
+    def new_anchor(self, obj, **attribs):
+        a = self.dtd.Go(**attribs)
+        a.append(check_object(obj))
+        self.append(a)
+        return a
+
+
+class WMLDocument(POM.POMDocument, WMLMixin):
     """WMLDocument(doctype)
     """
     MIMETYPE="text/vnd.wap.wml"
+
+    def initialize(self):
+        root = self.dtd._Root()
+        self.set_root(root)
+
+    head = property(lambda self: self.get_path("/wml/head"))
+    template = property(lambda self: self.get_path("/wml/template"))
+    card = property(lambda self: self.get_path("/wml/card"))
 
     def get_parser(self):
         return get_parser(self)
 
     def append(self, obj, **kwargs):
-        if type(obj) is str:
-            obj = get_container(self.dtd, obj, **kwargs)
-        self.body.append(obj)
+        obj = check_object(obj)
+        self.root.append(obj)
 
     def insert(self, ind, obj, **kwargs):
-        if type(obj) is str:
-            obj = get_container(self.dtd, obj, **kwargs)
-        self.body.insert(ind, obj)
+        obj = check_object(obj)
+        self.root.insert(ind, obj)
 
+
+####
 
 class GenericDocument(POM.POMDocument, FlowMixin):
     """Generic markup document to be used as a default.
@@ -1464,21 +1519,9 @@ def get_document_class(doctype=None, mimetype=None):
 # Primary document factory for new XHTML class of documents.
 def new_document(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING, lang=None):
     doc = xhtml_factory(doctype=doctype, encoding=encoding, lang=lang)
-    return initialize_document(doc)
-
-def initialize_document(doc):
-    root = doc.dtd._Root()
-    doc.set_root(root)
-    head = get_container(doc.dtd, "Head", {})
-    body = get_container(doc.dtd, "Body", {})
-    root.append(head)
-    root.append(body)
-    # Set convenient direct accessors to main HTML document parts.
-    root.head = head
-    root.body = body
+    doc.initialize()
     return doc
 
-# TODO WML factory
 
 # Document factory for new sparse documents. Used by parser.
 def xhtml_factory(doctype=None, mimetype=None, encoding=POM.DEFAULT_ENCODING, lang=None):

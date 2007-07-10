@@ -919,6 +919,10 @@ class POMDocument(object):
         self.set_encoding(encoding)
         self.set_language(lang)
 
+    def initialize(self):
+        """New document initializer."""
+        pass
+
     def set_encoding(self, encoding):
         verify_encoding(encoding)
         self.XMLHEADER = '<?xml version="1.0" encoding="%s"?>\n' % (encoding,)
