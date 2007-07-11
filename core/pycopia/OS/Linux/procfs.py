@@ -127,6 +127,7 @@ class ProcStat(object):
             try:
                 self.stats = tuple(map(self._toint, open(self._FF % (self.pid)).read().split()))
                 self.cmdline = self.get_cmdline()
+                self.uid, self.gid = self._get_uid()
                 self.ttyname = self._get_ttyname_linux()
             except IOError: # no such process
                 self.pid = None
@@ -193,6 +194,20 @@ class ProcStat(object):
                 return name[5:] # chop /dev
         else:
             return "?"
+
+    def _get_uid(self):
+        try:
+            statuslines = open("/proc/%d/status" % (self.pid,)).readlines()
+        except IOError, err:
+            return 0, 0
+        uid = 0
+        gid = 0
+        for line in statuslines:
+            if line.startswith("Uid"):
+                uid = int(line[5:].split()[0])
+            elif line.startswith("Gid"):
+                gid = int(line[5:].split()[0])
+        return uid, gid
 
     def get_stat(self, name):
         if not self.stats:
