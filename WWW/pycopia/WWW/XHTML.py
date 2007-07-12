@@ -1392,13 +1392,13 @@ def check_flag(kwargs, name):
 
 def add2class(node, name):
     """Maintains space-separated class names."""
-    attr = node._get_attribute("class_")
+    attr = node.get_attribute("class")
     if attr is None:
-        node.set_attribute("class_", name)
+        node.set_attribute("class", name)
     else:
         attr += " "
         attr += name
-        node.set_attribute("class_", attr)
+        node.set_attribute("class", attr)
 
 def get_url(params, base=None):
     """Return a URL properly encoded for inclusion as an href. Provide a
