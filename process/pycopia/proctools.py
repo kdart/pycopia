@@ -548,8 +548,8 @@ class ProcessPty(Process):
 
     def interrupt(self):
         if self._intr is None:
-            import termtools
-            self._intr = termtools.get_intr_char(self._fd)
+            from pycopia import tty
+            self._intr = tty.get_intr_char(self._fd)
         self._write(self._intr)
 
     def close(self):
@@ -1114,7 +1114,9 @@ def run_as(pwent, umask=022):
   except OSError:
     os.chdir("/") 
   # drop privs to user.
+  #os.setgroups([pwent.gid]) # TODO get group list
   os.setgid(pwent.gid)
+  os.setegid(pwent.gid)
   os.setuid(pwent.uid)
   os.environ["HOME"] = home
   os.environ["USER"] = pwent.name

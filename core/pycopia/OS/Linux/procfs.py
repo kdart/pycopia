@@ -90,10 +90,10 @@ class ProcStat(object):
         self.pid = None
         self.ttyname = None
         self.read(pid)
-    
+
     def __getstate__(self):
         return (self.pid, self.stats, self.cmdline, self.ttyname)
-    
+
     def __setstate__(self, t):
         self.pid, self.stats, self.cmdline, self.ttyname = t
 
@@ -160,11 +160,18 @@ class ProcStat(object):
             s = ["%15s: %s" % ("cmdline", self.cmdline)]
             names = self._STATINDEX.keys()
             names.sort()
-            #for name, i in self._STATINDEX.items():
             for name in names:
                 i = self._STATINDEX[name]
                 s.append("%15s: %s" % (name, self.stats[i]))
             return "\n".join(s)
+
+    def __iter__(self):
+        if self.stats is None:
+            return
+        yield ("cmdline", self.cmdline)
+        for name in self._STATINDEX.keys():
+            i = self._STATINDEX[name]
+            yield (name, self.stats[i])
 
     def get_attributes(self):
         return self._STATINDEX.keys()
