@@ -1105,7 +1105,7 @@ object connected to the master end of the child pty.  """
 
 def run_as(pwent, umask=022):
   """Drop privileges to given user's password entry, and set up
-  environment.
+  environment. Assumes the parent process has root privileges.
   """
   os.umask(umask)
   home = pwent.home
@@ -1113,13 +1113,15 @@ def run_as(pwent, umask=022):
     os.chdir(home) 
   except OSError:
     os.chdir("/") 
-  # drop privs to user.
-  #os.setgroups([pwent.gid]) # TODO get group list
+  # drop privs to user
+  os.setgroups(pwent.groups)
   os.setgid(pwent.gid)
   os.setegid(pwent.gid)
   os.setuid(pwent.uid)
+  os.seteuid(pwent.uid)
   os.environ["HOME"] = home
   os.environ["USER"] = pwent.name
+  os.environ["LOGNAME"] = pwent.name
   os.environ["SHELL"] = pwent.shell
   os.environ["PATH"] = "/bin:/usr/bin:/usr/local/bin"
 

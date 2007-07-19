@@ -22,6 +22,8 @@ better than the pwd_passwd structure, and is pickle-able as well.
 """
 
 import pwd
+import grp
+import os
 
 class PWEntry(object):
     def __init__(self, _ut):
@@ -29,14 +31,18 @@ class PWEntry(object):
         self.passwd = _ut[1]
         self.uid = _ut[2]
         self.gid = _ut[3]
+        self.group = _ut[3] # alias
         self.gecos = _ut[4]
-        self.fullname = self.gecos  # alias
+        self.fullname = _ut[4]  # alias
         self.home = _ut[5]
         self.shell = _ut[6]
-        self._INDEX = {0:self.name, 1:self.passwd, 2:self.uid, 3:self.gid, 4:self.gecos, 5:self.home, 6:self.shell}
+        self._INDEX = {0:self.name, 1:self.passwd, 2:self.uid, 3:self.gid, 
+                       4:self.gecos, 5:self.home, 6:self.shell}
+        self._groups = None
 
     def __repr__(self):
-        return "%s:%s:%s:%s:%s:%s:%s" % (self.name, self.passwd, self.uid, self.gid, self.gecos, self.home, self.shell)
+        return "%s:%s:%s:%s:%s:%s:%s" % (self.name, self.passwd, 
+                     self.uid, self.gid, self.gecos, self.home, self.shell)
 
     def __str__(self):
         return self.name
@@ -46,8 +52,23 @@ class PWEntry(object):
 
     # pwd compatibility - sequence interface
     def __getitem__(self, idx):
-        return self._INDEX[int(idx)]
+        return self._INDEX[idx]
 
+    groupname = property(lambda self: grp.getgrgid(self.gid)[0], 
+               doc="Primary group name.")
+
+    def _get_groups(self):
+        grplist = []
+        if self._groups is None:
+            # Is there a better/faster way than this?
+            name = self.name
+            for gent in grp.getgrall():
+                if name in gent.gr_mem:
+                    grplist.append(gent.gr_gid)
+            self._groups = grplist
+        return self._groups
+
+    groups = property(_get_groups)
 
 def getpwuid(uid):
     return PWEntry(pwd.getpwuid(uid))
@@ -62,6 +83,5 @@ def getpwall():
     return rv
 
 def getpwself():
-    import os
     return PWEntry(pwd.getpwuid(os.getuid()))
 
