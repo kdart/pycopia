@@ -77,11 +77,11 @@ class Doctype(object):
 # compiling with dtd2py.
 DOCTYPES = {}
 DOCTYPES[POMTEST] = Doctype("toplevel", None, "pomtest.dtd")
-DOCTYPES[XHTML1_STRICT] = Doctype("HTML", "-//W3C//DTD XHTML 1.0 Strict//EN",
+DOCTYPES[XHTML1_STRICT] = Doctype("html", "-//W3C//DTD XHTML 1.0 Strict//EN",
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd")
-DOCTYPES[XHTML1_TRANSITIONAL] = Doctype("HTML", "-//W3C//DTD XHTML 1.0 Transitional//EN",
+DOCTYPES[XHTML1_TRANSITIONAL] = Doctype("html", "-//W3C//DTD XHTML 1.0 Transitional//EN",
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd")
-DOCTYPES[XHTML1_FRAMESET] = Doctype("HTML", "-//W3C//DTD XHTML 1.0 Frameset//EN",
+DOCTYPES[XHTML1_FRAMESET] = Doctype("html", "-//W3C//DTD XHTML 1.0 Frameset//EN",
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd")
 DOCTYPES[XHTML11] = Doctype("html", "-//W3C//DTD XHTML 1.1//EN",
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd")

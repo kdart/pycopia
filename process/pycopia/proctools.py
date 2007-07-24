@@ -32,6 +32,7 @@ from pycopia import scheduler
 
 from pycopia.aid import Enum
 
+
 # Exec flags
 IPIPE = Enum(1, "IPIPE")
 OPIPE = Enum(2, "OPIPE")
@@ -42,6 +43,10 @@ class ProcessError(Exception):
 class NotFoundError(ValueError):
     """Raised when the `which` function cannot find the given command."""
     pass
+
+class AuthenticationError(Exception):
+    pass
+
 
 class Process(object):
     """Abstract base class for Processes. Handles all process handling, and
@@ -60,6 +65,7 @@ class Process(object):
         self.exitstatus = None
         self._async = bool(async) # use asyncio, or not
         self._flags = int(flags)
+        self._authtoken = None
 
 #   def __del__(self):
 #       if not self.deadchild:
@@ -1104,26 +1110,60 @@ object connected to the master end of the child pty.  """
 
 
 def run_as(pwent, umask=022):
-  """Drop privileges to given user's password entry, and set up
-  environment. Assumes the parent process has root privileges.
-  """
-  os.umask(umask)
-  home = pwent.home
-  try:
-    os.chdir(home) 
-  except OSError:
-    os.chdir("/") 
-  # drop privs to user
-  os.setgroups(pwent.groups)
-  os.setgid(pwent.gid)
-  os.setegid(pwent.gid)
-  os.setuid(pwent.uid)
-  os.seteuid(pwent.uid)
-  os.environ["HOME"] = home
-  os.environ["USER"] = pwent.name
-  os.environ["LOGNAME"] = pwent.name
-  os.environ["SHELL"] = pwent.shell
-  os.environ["PATH"] = "/bin:/usr/bin:/usr/local/bin"
+    """Drop privileges to given user's password entry, and set up
+    environment. Assumes the parent process has root privileges.
+    """
+    os.umask(umask)
+    home = pwent.home
+    try:
+      os.chdir(home) 
+    except OSError:
+      os.chdir("/") 
+    # drop privs to user
+    os.setgroups(pwent.groups)
+    os.setgid(pwent.gid)
+    os.setegid(pwent.gid)
+    os.setuid(pwent.uid)
+    os.seteuid(pwent.uid)
+    os.environ["HOME"] = home
+    os.environ["USER"] = pwent.name
+    os.environ["LOGNAME"] = pwent.name
+    os.environ["SHELL"] = pwent.shell
+    os.environ["PATH"] = "/bin:/usr/bin:/usr/local/bin"
+    return None
+
+
+def run_as_with_PAM(pwent, umask):
+    """NOTE: this is currently experimental and untested."""
+    import PAM
+    auth = PAM.pam()
+    auth.start("su", pwent.name)
+    os.setgroups(pwent.groups)
+    os.setgid(pwent.gid)
+    os.setegid(pwent.gid)
+    os.setuid(pwent.uid)
+    os.seteuid(pwent.uid)
+    try:
+        #auth.authenticate(PAM.PAM_SILENT)
+        auth.setcred(PAM.PAM_ESTABLISH_CRED|PAM.PAM_SILENT)
+        auth.acct_mgmt()
+        auth.open_session(PAM.PAM_SILENT)
+    # XXX 
+    except PAM.error, resp:
+        raise AuthenticationError, resp
+    os.environ["HOME"] = home
+    os.environ["USER"] = pwent.name
+    os.environ["LOGNAME"] = pwent.name
+    os.environ["SHELL"] = pwent.shell
+    os.environ["PATH"] = "/bin:/usr/bin:/usr/local/bin"
+    home = pwent.home
+    try:
+      os.chdir(home) 
+    except OSError:
+      os.chdir("/") 
+
+    return auth
+
 
 def waitproc(proc, option=0):
     pm = get_procmanager()

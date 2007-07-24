@@ -37,6 +37,7 @@ import sre as re
 import sre_parse
 from pprint import pformat
 import itertools
+import traceback
 
 from pycopia import urlparse
 from pycopia.inet import httputils
@@ -384,20 +385,6 @@ ONLY_POST = HttpResponseNotAllowed(["POST"])
 ONLY_GET_AND_POST = HttpResponseNotAllowed(["GET", "POST"])
 
 
-class JSONResponse(HttpResponse):
-    """Used for asynchronous interfaces needing JSON data returned."""
-    def __init__(self, obj):
-        json = simplejson.dumps(obj)
-        HttpResponse.__init__(self, json, "application/json")
-
-
-def JSONQuery(request):
-    """Convert query term where values are JSON encoded strings."""
-    rv = {}
-    for key, value in itertools.chain(request.GET.items(), request.POST.items()):
-        rv[key] = simplejson.loads(value)
-    return rv
-
 
 class URLMap(object):
     """From regexp to url, and back again. Patterns must use named groups.
@@ -478,10 +465,8 @@ class URLResolver(object):
         self._patterns = []
         if urlbase:
             self._urlbase = urlbase
-            self._urlbaselen = len(urlbase)
         else:
             self._urlbase = ""
-            self._urlbaselen = 0
         if mapconfig:
             for pattern, methname in mapconfig:
                 self.register(pattern, methname)
@@ -553,7 +538,7 @@ class URLResolver(object):
         try:
             urlmap = self._reverse[method]
         except KeyError:
-            raise InvalidPath("Method not registered")
+            raise InvalidPath("Method %r not registered." % (method,))
         return self._urlbase + urlmap.get_url(**kwargs)
 
     def get_alias(self, name, **kwargs):
@@ -583,6 +568,7 @@ class WebApplication(object):
                       STATUSCODES.get(response.status_code, 'UNKNOWN STATUS CODE'))
         start_response(status, response.get_response_headers())
         return response
+
 
 
 # You can subclass this and set and instance to be called by URL mapping.
@@ -642,6 +628,75 @@ class RequestHandler(object):
 
     def trace(self, request, **kwargs):
         raise NotImplementedError
+
+# for JSON servers.
+
+class JSONResponse(HttpResponse):
+    """Used for asynchronous interfaces needing JSON data returned."""
+    def __init__(self, obj):
+        json = simplejson.dumps(obj)
+        HttpResponse.__init__(self, json, "application/json")
+
+
+def JSONQuery(request):
+    """Convert query term where values are JSON encoded strings."""
+    rv = {}
+    for key, value in itertools.chain(request.GET.items(), request.POST.items()):
+        rv[key] = simplejson.loads(value)
+    return rv
+
+
+def JSON404():
+    json = simplejson.dumps(None)
+    return HttpResponseNotFound(json, mimetype="application/json")
+
+
+def JSONServerError(ex, val, tblist):
+    json = simplejson.dumps((str(ex), str(val), tblist))
+    return HttpResponseServerError(json, mimetype="application/json")
+
+
+class JSONRequestHandler(RequestHandler):
+    """Sub-dispatcher for JSON requests. catches all exceptions and
+    returns exception on error as JSON serialized objects (since async
+    requests are not viewable on the client side).
+
+    Supply a list of functions to handle. The names of which match the
+    "function" field in the URL mapping.
+
+    Your handler functions will get keyword arguments mapped from the
+    request query or form. You return any Python primitive objects which
+    get sent back to the client.
+    """
+    def __init__(self, flist, **kwargs):
+      self._mapping = mapping = {}
+      for func in flist:
+          mapping[func.func_name] = func
+      super(JSONRequestHandler, self).__init__(None, **kwargs)
+
+    def get(self, request, function):
+        try:
+            handler = self._mapping[function]
+        except KeyError:
+            request.environ["wsgi.errors"].write("No JSON handler for %r.\n" % function)
+            return JSON404()
+        kwargs = JSONQuery(request)
+        try:
+            return JSONResponse(handler(request, **kwargs))
+        except:
+            ex, val, tb = sys.exc_info()
+            tblist = traceback.extract_tb(tb)
+            del tb
+            request.environ["wsgi.errors"].write("JSON handler error: %s: %s\n" % (ex, val))
+            return JSONServerError(ex, val, tblist)
+
+    post = get # since JSONQuery also converts POST part.
+
+    def get_response(self, request, **kwargs):
+        return None # should not be used for JSON handlers.
+
+    def get_url(self, function):
+        return "../%s" % function.func_name # XXX assumes name is end of path.
 
 
 def default_doc_constructor(request, **kwargs):
@@ -705,6 +760,7 @@ class ResponseDocument(object):
 
     def anchor2(self, path, text, **kwargs):
         return self.NM("A", {"href": self.get_url(path, **kwargs)}, text)
+
 
 
 def get_method(name):
