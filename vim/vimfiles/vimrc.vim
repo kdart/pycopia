@@ -65,8 +65,12 @@ augroup cprog
   autocmd FileType c,cpp  set formatoptions=croql cindent comments=sr:/*,mb:*,el:*/,://
 augroup END
 
-augroup pyprog
+augroup pycopia
   autocmd FileType python :so $VIM/vimfiles/pydev.vim
+  autocmd FileType html	:so $VIM/vimfiles/html.vim
+  autocmd FileType dtd	:so $VIM/vimfiles/xml_dtd.vim
+  autocmd FileType xml	:so $VIM/vimfiles/xml.vim
+  autocmd FileType javascript  :so $VIM/vimfiles/jsdev.vim
 augroup END
 
 augroup newfile 
@@ -76,14 +80,6 @@ augroup newfile
   autocmd BufNewFile            *.py    0r      $VIM/vimfiles/py_template.py
 augroup END
 
-augroup html
- autocmd FileType html	:so $VIM/vimfiles/html.vim
-augroup END
-
-augroup xml
- autocmd FileType dtd	:so $VIM/vimfiles/xml_dtd.vim
- autocmd FileType xml	:so $VIM/vimfiles/xml.vim
-augroup END
 
 " augroup text
 "  autocmd BufRead /tmp/pico* :set tw=72 comments=rb:> noai
@@ -124,5 +120,20 @@ augroup END
 if v:progname == "mvim"
 	set cursorcolumn
 	gui
+endif
+
+
+" Enable menus in screen vim, and switch buffers with control arrow.
+if v:progname == "svim"
+	source $VIMRUNTIME/menu.vim
+	set wildmenu
+	set cpo-=<
+	set wcm=<C-Z>
+	map <F4> :emenu <C-Z>
+	set hidden
+        nmap <Esc>[5D :bp<CR>                                                                                                       
+        nmap <Esc>[5C :bn<CR>                                                                                                       
+        nmap <Esc>[3^ :bd<CR>                                                                                                       
+        nmap ZZ :bd<CR>                                                                                                             
 endif
 
