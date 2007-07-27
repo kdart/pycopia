@@ -63,11 +63,6 @@ SERVICES_REVERSE = dict((v,k) for k,v in SERVICES.items())
 MAX_CACHE_SIZE = 20
 _parse_cache = {}
 
-def clear_cache():
-    """Clear the parse cache."""
-    global _parse_cache
-    _parse_cache = {}
-
 # End of urlparse module copy.
 
 # from rfc2396 appendix B:
@@ -99,11 +94,12 @@ def uriparse(uri, strict=False):
     """
     key = uri, strict
     try:
-        return _parse_cache[key]
+        scheme, authority, path, q, fragment = _parse_cache[key]
+        return (scheme, authority, path, q.copy(), fragment)
     except KeyError:
         pass
     if len(_parse_cache) >= MAX_CACHE_SIZE:
-        clear_cache()
+        _parse_cache.clear()
     if strict:
         mo = URI_RE_STRICT.search(uri)
         if mo:
@@ -121,8 +117,8 @@ def uriparse(uri, strict=False):
     else:
         q = URLQuery()
     t = (scheme, authority, path, q, fragment)
-    _parse_cache[key] = t
-    return t
+    _parse_cache[key] = (scheme, authority, path, q.copy(), fragment)
+    return (scheme, authority, path, q, fragment)
 
 urlparse = uriparse
 
