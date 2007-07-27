@@ -421,6 +421,9 @@ class UniversalResourceLocator(object):
 
     def set(self, url, strict=True):
         if isinstance(url, basestring):
+            if isinstance(url, unicode):
+                # URL's are defined to be in the ASCII character set.
+                url = quote(url, ";/?:@&=+$,")
             self.clear(strict)
             try:
                 self._parse(url, strict)
@@ -626,7 +629,10 @@ class UniversalResourceLocator(object):
 
 if __name__ == "__main__":
     URL = "http://name:pass@www.host.com:8080/cgi?qr=arg1&qr=arg2&arg3=val3"
+    uURL = u"http://name:pass@www.host.com:8080/cgi?qr=arg1&qr=arg2&arg3=val3"
     url = UniversalResourceLocator(URL)
+    uurl = UniversalResourceLocator(uURL)
+    assert str(url) == str(uurl)
     print url.scheme
     print url.user
     print url.password
