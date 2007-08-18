@@ -645,6 +645,7 @@ class ElementNode(object):
 
     # methods for node path manipulation
 
+    _xpath_index_re = re.compile(r'(\w+)\[(\d+)]')
     _xpath_re = re.compile(r'(\w+)\[(.*)]')
 
     def pathname(self):
@@ -669,7 +670,7 @@ class ElementNode(object):
         if "[" not in pathelement:
             return pathelement == self._name
         else:
-            mo = self._xpath_re.match(pathelement)
+            mo = ElementNode._xpath_re.match(pathelement)
             if mo:
                 name, match = mo.groups()
                 if name != self._name:
@@ -692,7 +693,11 @@ class ElementNode(object):
                 rv.append(child)
         return rv
 
+
     def get_element(self, pathelement):
+        mo = ElementNode._xpath_index_re.match(pathelement)
+        if mo:
+            return self._children[int(mo.group(2))-1]
         for child in self._children:
             if child.matchpath(pathelement):
                 return child
