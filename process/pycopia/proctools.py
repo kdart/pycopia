@@ -67,10 +67,10 @@ class Process(object):
         self._flags = int(flags)
         self._authtoken = None
 
-#   def __del__(self):
+    def __del__(self):
 #       if not self.deadchild:
 #           self.killwait()
-#       self.close()
+        self.close()
 
     def __repr__(self):
         return "%s(%r, %r)" % (self.__class__.__name__, self.cmdline, self._log)

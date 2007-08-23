@@ -22,7 +22,7 @@ Use the powermate to control the volume at any time.
 
 from pycopia.OS import powermate
 import _pyosd
-import alsa
+import alsaaudio
 
 from time import time
 
@@ -69,8 +69,8 @@ class VolumeControl(object):
         kn.open()
         kn.register_motion(self.change_volume)
         kn.register_button(self.handle_button)
-        am = self._mixer = alsa.mixer("default")
-        self._volume = int(am.getVolume("Master")[0])
+        am = self._mixer = alsaaudio.Mixer(alsaaudio.mixers()[0]) # XXX
+        self._volume = am.getvolume()[0]
 
     def osd(self, val):
         self._osd.display(val)
@@ -79,15 +79,15 @@ class VolumeControl(object):
     def handle_button(self, tm, flag):
         if flag:
             vol = self._volume
-            self._mixer.setVolumeAbs("Master", vol, vol)
+            self._mixer.setvolume(vol, alsaaudio.MIXER_CHANNEL_ALL)
 
     def change_volume(self, tm, delta):
         self._volume = constrain(self._volume+int(delta), 1, 99)
         if (time() - tm) < 1.0:
             #vol = self._volume
             self.osd(self._volume)
-            #self._mixer.setVolumeAbs("Master", vol, vol)
-            #self._volume = int(self._mixer.getVolume("Master")[0])
+            #self._mixer.setvolume(vol, alsaaudio.MIXER_CHANNEL_ALL)
+            #self._volume = int(self._mixer.getvolume()[0])
 
     def poll(self):
         try:

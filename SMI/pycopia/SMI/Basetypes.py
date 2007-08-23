@@ -75,7 +75,8 @@ class OID(list):
         return "%s.%s(%s)" % (cl.__module__, cl.__name__, super(OID, self).__repr__())
     
     def __cmp__(self, other):
-        # Until python 2.1...
+        if not other:
+            return -1
         # self can only be greater than other if prefixes match.
         cv = cmp(len(self), len(other))
         if cv < 0: # then self is shorter than other, defined as less
