@@ -1065,42 +1065,43 @@ class FormMixin(ContainerMixin):
         self._add_options(sl, enums)
         return sl
 
-    def _add_options(self, sl, enums, base=0):
+    def _add_options(self, sl, enums):
         et =  type(enums)
         if et is Enums and enums:
             for i, name in enums.choices:
-                opt = self.dtd.Option(value=base+i)
+                opt = self.dtd.Option(value=i)
                 opt.append(POM.Text(name))
                 sl.append(opt)
-            return base+i+1
+            return 
         if et is dict and enums:
             for i, (key, val) in enumerate(enums.items()):
                 opt = self.dtd.Optgroup(label=key)
-                base = self._add_options(opt, val, base)
+                self._add_options(opt, val)
                 sl.append(opt)
             return i
         if et is tuple and enums:
             name, value = enums
             opt = self.dtd.Option(value=value)
             opt.append(POM.Text(name))
-            return base
+            return
         if et is list and enums:
             for i, item in enumerate(enums):
                 it = type(item)
                 if it is tuple: # add "selected" item by adding (value, flag)
                     opt = self.dtd.Option(value=item[1])
                     opt.append(POM.Text(item[0]))
-                    if len(item) > 2:
-                        opt.selected = bool(item[2])
+                    if len(item) > 2 and item[2]:
+                        opt.selected = "selected"
                 elif it is dict: # make option groups by passing dictionaries
                     for key, val in item.items():
-                        opt = self.dtd.Optgroup(label=key)
-                        base = self._add_options(opt, val, i)
+                        optgrp = self.dtd.Optgroup(label=key)
+                        sl.append(optgrp)
+                        self._add_options(optgrp, val)
                 elif it is Enum: # a named number
                     opt = self.dtd.Option(value=int(item))
                     opt.append(POM.Text(item))
                 elif it is list: # for nested lists
-                    base = self._add_options(sl, item, i)
+                    self._add_options(sl, item)
                 else:
                     opt = self.dtd.Option(value=item)
                     opt.append(POM.Text(item))
@@ -1110,7 +1111,7 @@ class FormMixin(ContainerMixin):
             opt = self.dtd.Option(value=enums)
             opt.append(POM.Text(enums))
             sl.append(opt)
-            return base+1
+            return
 
     def add_select(self, enums, **kwargs):
         sl = self.get_select(enums, **kwargs)
