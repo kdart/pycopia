@@ -72,6 +72,11 @@ class Process(object):
 #           self.killwait()
         self.close()
 
+    # Override in subclass -- close your file descriptors connected to
+    # subprocess.
+    def close(self):
+        pass
+
     def __repr__(self):
         return "%s(%r, %r)" % (self.__class__.__name__, self.cmdline, self._log)
 
