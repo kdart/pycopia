@@ -33,8 +33,7 @@ from pycopia.aid import IF
 from pycopia.textutils import identifier, keyword_identifier
 
 from pycopia import dtds
-from pycopia.XML import XMLVisitorContinue, ValidationError
-
+from pycopia.XML import XMLVisitorContinue, ValidationError, XMLPathError
 
 DEFAULT_ENCODING = sys.getdefaultencoding()
 
@@ -536,9 +535,10 @@ class ElementNode(object):
 
     def __getitem__(self, index):
         if type(index) is str:
-            el =  self.get_element(index)
-            if el is None:
-                raise IndexError, "no item matches"
+            try:
+                el =  self.get_element(index)
+            except XMLPathError, err:
+                raise KeyError, err
             else:
                 return el
         else:
@@ -697,11 +697,21 @@ class ElementNode(object):
     def get_element(self, pathelement):
         mo = ElementNode._xpath_index_re.match(pathelement)
         if mo:
-            return self._children[int(mo.group(2))-1]
-        for child in self._children:
-            if child.matchpath(pathelement):
-                return child
-        return None
+            elname = mo.group(1)
+            elidx = int(mo.group(2)) - 1
+            idx = 0
+            for el in self._children:
+                if isinstance(el, ElementNode) and el._name == elname:
+                    if elidx == idx:
+                        return el
+                    else:
+                        idx += 1
+            raise XMLPathError, "%s not indexed in %r." % (elname, self)
+        else:
+            for child in self._children:
+                if child.matchpath(pathelement):
+                    return child
+        raise XMLPathError, "%s not found in %r." % (pathelement, self)
 
     def elements(self, elclass):
         """Return iterator that iterates over list of elements matching elclass"""
@@ -1040,8 +1050,6 @@ class POMDocument(object):
             while elements:
                 pathelement = elements.pop(0)
                 node = node.get_element(pathelement)
-                if node is None:
-                    raise IndexError, "path element not found"
             return node
         else:
             raise IndexError, "first path element not found"
