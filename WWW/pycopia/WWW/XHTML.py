@@ -1270,6 +1270,7 @@ class _HTMLParser(HTMLParser.HTMLParser):
     def __init__(self, doc=None):
         self.reset()
         self.topelement = None
+        self._encoding = POM.DEFAULT_ENCODING
         self.doc = doc
         self.stack = []
         self.comments = []
@@ -1350,13 +1351,13 @@ class _HTMLParser(HTMLParser.HTMLParser):
     def handle_decl(self, decl):
         if decl.startswith("DOCTYPE"):
             if decl.find("Strict") > 1:
-                self.doc = new_document(dtds.XHTML1_STRICT, self.encoding)
+                self.doc = new_document(dtds.XHTML1_STRICT, self._encoding)
             elif decl.find("Frameset") > 1:
-                self.doc = new_document(dtds.XHTML1_FRAMESET, self.encoding)
+                self.doc = new_document(dtds.XHTML1_FRAMESET, self._encoding)
             elif decl.find("Transitional") > 1:
-                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, self.encoding)
+                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, self._encoding)
             else:
-                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, self.encoding)
+                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, self._encoding)
         else:
             print >>sys.stderr, "!!! Unhandled decl: %r" % (decl,)
 
