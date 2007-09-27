@@ -29,7 +29,7 @@ EMAILBODY = """Here is the header information you requested.
 """
 
 def doc_constructor(request, **kwargs):
-    doc = XHTML.new_document()
+    doc = framework.get_acceptable_document(request)
     for name, val in kwargs.items():
         setattr(doc, name, val)
     container = doc.add_section("container")

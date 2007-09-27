@@ -1351,13 +1351,13 @@ class _HTMLParser(HTMLParser.HTMLParser):
     def handle_decl(self, decl):
         if decl.startswith("DOCTYPE"):
             if decl.find("Strict") > 1:
-                self.doc = new_document(dtds.XHTML1_STRICT, self._encoding)
+                self.doc = new_document(dtds.XHTML1_STRICT, encoding=self._encoding)
             elif decl.find("Frameset") > 1:
-                self.doc = new_document(dtds.XHTML1_FRAMESET, self._encoding)
+                self.doc = new_document(dtds.XHTML1_FRAMESET, encoding=self._encoding)
             elif decl.find("Transitional") > 1:
-                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, self._encoding)
+                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, encoding=self._encoding)
             else:
-                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, self._encoding)
+                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, encoding=self._encoding)
         else:
             print >>sys.stderr, "!!! Unhandled decl: %r" % (decl,)
 
@@ -1422,10 +1422,11 @@ class URL(dict):
 
 
 ### WML support... should be factored out.
+#### Very rough for now... not sure how to map XHTML to WML functionality.
 
-class WMLMixin(FlowMixin):
+class WML13Mixin(ContainerMixin):
     def get_section(self, _name, **kwargs):
-        Section = get_class(self.dtd, "WmlSection%s" % _name, (WMLMixin, self.dtd.Card))
+        Section = get_class(self.dtd, "WmlSection%s" % _name, (WML13Mixin, self.dtd.Card))
         kwargs["class_"] = _name
         sect = Section(**kwargs)
         sect._init(self.dtd)
@@ -1457,9 +1458,75 @@ class WMLMixin(FlowMixin):
         self.append(a)
         return a
 
+    def get_header(self, level, text, **kwargs):
+        hobj = get_inlinecontainer(self.dtd, "Big", kwargs)
+        hobj.append(POM.Text(text))
+        return hobj
 
-class WMLDocument(POM.POMDocument, WMLMixin):
-    """WMLDocument(doctype)
+    def add_header(self, level, text, **kwargs):
+        hobj = self.get_header(level, text, **kwargs)
+        self.append(hobj)
+        return hobj
+
+    def get_table(self, **kwargs):
+        WMLTable = get_class(self.dtd, "WMLTable", (WML13TableMixin, self.dtd.Table))
+        t= WMLTable(**kwargs)
+        t._init(self.dtd)
+        return t
+
+    def get_form(self, **kwargs):
+        WMLForm = get_class(self.dtd, "WMLForm", (CardMixin, self.dtd.Card))
+        f = WMLForm(**kwargs)
+        f._init(self.dtd)
+        return f
+
+
+class CardMixin(FormMixin):
+    def get_label(self, text, _for=None):
+        return POM.Text(text)
+
+
+class WML13TableMixin(TableMixin):
+
+    def _init(self, dtd):
+        super(WML13TableMixin, self)._init(dtd)
+        self.columns = 0 # XXX
+
+    def caption(self, content, **kwargs):
+        # enforce the rule that there is only one caption, and it is first
+        # element in the table.
+        cap = self.dtd.Tr(**kwargs)
+        td = self.dtd.Td()
+        td.append(check_object(content))
+        cap.append(td)
+        self._t_caption = cap
+
+    def get_headings(self):
+        return self._headings # a row (tr) object.
+
+    def set_heading(self, col, val, **kwargs):
+        val = check_object(val)
+        if not self._headings:
+            self._headings = self.dtd.Tr()
+        # auto-fill intermediate cells, if necessary.
+        for inter in range(col - len(self._headings)):
+            self._headings.append(self.dtd.Td(**kwargs))
+        th = self._headings[col-1]
+        th.append(val)
+        self.columns = str(len(self._headings)) # mandatory attribute
+        return th
+
+    def new_headings(self, *args, **kwargs):
+        self._headings = self.dtd.Tr()
+        for hv in args:
+            th = self.dtd.Td(**kwargs)
+            self._headings.append(th)
+            th.append(check_object(hv))
+        return self._headings
+
+
+class WML13Document(POM.POMDocument, WML13Mixin):
+    """WML13Document(doctype)
     """
     MIMETYPE="text/vnd.wap.wml"
 
@@ -1498,10 +1565,10 @@ class GenericDocument(POM.POMDocument, FlowMixin):
 # TODO doctype registry.
 _DOCMAP = {
     "html": (XHTMLDocument, dtds.XHTML),
-    "wml": (WMLDocument, dtds.WML20),
-    "wta-wml": (WMLDocument, dtds.WTA_WML12),
+    "wml": (WML13Document, dtds.WML13),
+    "wta-wml": (WML13Document, dtds.WTA_WML12),
     MIME_XHTML: (XHTMLDocument, dtds.XHTML),
-    MIME_WAP: (WMLDocument, dtds.WML20),
+    MIME_WAP: (WML13Document, dtds.WML13),
     MIME_HTML: (XHTMLDocument, dtds.XHTML),
 }
 
@@ -1521,8 +1588,8 @@ def get_document_class(doctype=None, mimetype=None):
 # Document constructors. Use one of these to get your XHTML document.
 
 # Primary document factory for new XHTML class of documents.
-def new_document(doctype=dtds.XHTML11, encoding=POM.DEFAULT_ENCODING, lang=None):
-    doc = xhtml_factory(doctype=doctype, encoding=encoding, lang=lang)
+def new_document(doctype=dtds.XHTML11, mimetype=None, encoding=POM.DEFAULT_ENCODING, lang=None):
+    doc = xhtml_factory(doctype=doctype, mimetype=mimetype, encoding=encoding, lang=lang)
     doc.initialize()
     return doc
 
@@ -1544,11 +1611,11 @@ def get_document(url, data=None, encoding=POM.DEFAULT_ENCODING,
     handler = p.getContentHandler()
     return handler.doc
 
-def get_parser(document=None, namespaces=0, validate=0, mimetype=None, 
+def get_parser(document=None, namespaces=0, validate=0, mimetype=None,
         logfile=None):
     if mimetype == MIME_HTML:
         if not document:
-            document = new_document(dtds.XHTML1_TRANSITIONAL, POM.DEFAULT_ENCODING)
+            document = new_document(dtds.XHTML1_TRANSITIONAL, encoding=POM.DEFAULT_ENCODING)
         return _HTMLParser(document)
     else: # assume some kind of XML
         return POM.get_parser(document, namespaces=namespaces, validate=validate, 

@@ -28,6 +28,7 @@ However, it currently lags far behind the XHTML document API.
 import sys
 
 from pycopia.XML import POM
+from pycopia.aid import partial
 
 Text = POM.Text
 
@@ -37,6 +38,11 @@ Text = POM.Text
 # indicates any content
 ANYCONTENT = POM.ContentModel((True,)) # can contain other nodes
 
+attribClass = POM.XMLAttribute('class', 8, 12, None)
+attribHref = POM.XMLAttribute('href', 1, 12, None)
+attribLevel = POM.XMLAttribute('level', 1, 12, None)
+
+
 def check_object(obj):
     if type(obj) in (str, unicode):
         return POM.Text(obj)
@@ -45,6 +51,7 @@ def check_object(obj):
     raise POM.ValidationError, "bad initializer object"
 
 class InlineMixin(object):
+
     def _init(self, dtd):
         self.dtd = dtd
 
@@ -52,17 +59,42 @@ class InlineMixin(object):
         fo.write(self.__str__())
 
 class ContainerMixin(object):
+
     def _init(self, dtd):
         self.dtd = dtd
 
+    def make_node(self, name, attribs, *content):
+        if name in ("Text", "ASIS", "Fragments"):
+            elemclass = getattr(POM, name)
+        else:
+            elemclass = Plaintext
+
+        if attribs:
+            elem = elemclass(**attribs)
+        else:
+            elem = elemclass()
+
+        for cont in content:
+            if isinstance(cont, (POM.ElementNode, POM.Text, POM.ASIS)):
+                elem.append(cont)
+            else:
+                elem.add_text(cont)
+        return elem
+
+    def get_nodemaker(self):
+        def _make_node(container, name, attribs, *contents):
+            return container.make_node(name, attribs, *contents)
+        return partial(_make_node, self)
+    nodemaker = property(get_nodemaker)
+
     def get_section(self, _name, **kwargs):
-        kwargs["class"] = str(_name)
+        #kwargs["class"] = _name
         sect = Section(**kwargs)
         sect._init(self.dtd)
         return sect
 
-    def add_section(self, **kwargs):
-        sect = self.get_section(**kwargs)
+    def add_section(self, _name, **kwargs):
+        sect = self.get_section(_name, **kwargs)
         self.append(sect)
         return sect
 
@@ -96,14 +128,25 @@ class ContainerMixin(object):
         self.append(hobj)
         return hobj
 
-    def get_unordered_list(self, **attribs):
-        raise NotImplementedError
+    def get_unordered_list(self, items, **attribs):
+        rv = []
+        for item in items:
+            self.append(Plaintext("* %s\n" % item))
+        return rv
 
-    def add_unordered_list(self, items):
-        raise NotImplementedError
-    
+    def add_unordered_list(self, items, **attribs):
+        for item in items:
+            self.append(Plaintext("* %s\n" % item))
+
+    def get_ordered_list(self, items):
+        rv = []
+        for i, item in enumerate(items):
+            rv.append(Plaintext("%d. %s\n" % (i, item)))
+        return rv
+
     def add_ordered_list(self, items):
-        raise NotImplementedError
+        for i, item in enumerate(items):
+            self.append(Plaintext("%d. %s\n" % (i, item)))
 
     def add_anchor(self, **attribs):
         raise NotImplementedError
@@ -117,7 +160,7 @@ class ContainerMixin(object):
     def add_table(self, **kwargs):
         raise NotImplementedError
 
-    def emit(self, fo):
+    def emit(self, fo, encoding="ascii"):
         if not self.CONTENTMODEL or self.CONTENTMODEL.is_empty():
             fo.write(self.__str__())
         else:
@@ -127,8 +170,13 @@ class ContainerMixin(object):
 # root element
 class Plaintext(ContainerMixin, POM.ElementNode):
     _name = "text"
-    ATTLIST = POM.AttributeList([POM.XMLAttribute('class', 1, 12, None)])
     CONTENTMODEL = ANYCONTENT
+    ATTRIBUTES = {
+         'class': attribClass, 
+         }
+    KWATTRIBUTES = {
+         'class_': attribClass, 
+         }
 
     def __str__(self):
         s = map(str, self._children)
@@ -155,16 +203,26 @@ class Br(ContainerMixin, POM.ElementNode):
 
 class A(ContainerMixin, POM.ElementNode):
     _name = "a"
-    ATTLIST = POM.AttributeList([POM.XMLAttribute('href', 1, 12, None)])
     CONTENTMODEL = ANYCONTENT
+    ATTRIBUTES = {
+         'href': attribHref, 
+         }
+    KWATTRIBUTES = {
+         'href': attribHref, 
+         }
     def __str__(self):
         t = self.get_text()
         return "%s [%s] " % (t, self.href)
 
 class Heading(ContainerMixin, POM.ElementNode):
     _name = "heading"
-    ATTLIST = POM.AttributeList([POM.XMLAttribute('level', 1, 12, None)])
     CONTENTMODEL = ANYCONTENT
+    ATTRIBUTES = {
+         'level': attribLevel, 
+         }
+    KWATTRIBUTES = {
+         'level': attribLevel, 
+         }
     def __str__(self):
         t = self.get_text()
         try:
@@ -199,9 +257,11 @@ class TextDocument(POM.POMDocument, ContainerMixin):
     XMLHEADER = ""
     DOCTYPE = ""
     MIMETYPE = "text/plain"
-    def __init__(self, encoding=POM.DEFAULT_ENCODING):
+    def __init__(self, encoding="ascii"):
         dtd = sys.modules[__name__] # the psuedo-dtd module is this module
-        super(TextDocument, self).__init__(dtd, encoding)
+        super(TextDocument, self).__init__(dtd=dtd, encoding=encoding)
+
+    def initialize(self):
         self.set_root(Plaintext())
 
     def __iadd__(self, text):
@@ -228,8 +288,16 @@ class TextDocument(POM.POMDocument, ContainerMixin):
 
     title = property(_get_title, add_title)
 
+    # general add methods
+    def append(self, obj, **kwargs):
+        self.root.append(obj)
+
+    def insert(self, ind, obj, **kwargs):
+        self.root.insert(ind, obj)
 
 
 def new_document(encoding=POM.DEFAULT_ENCODING):
-    return TextDocument(encoding)
+    doc = TextDocument(encoding)
+    doc.initialize()
+    return doc
 

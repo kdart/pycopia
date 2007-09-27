@@ -152,28 +152,29 @@ class MediaRange(object):
     """MediaRange is an element in an Accept list. Here, a None values means
     ANY. These are essential MIME types."""
 
-    def __init__(self, type=None, subtype=None, q=1.0, **kwargs):
-        self.type = IF(type is None, "*", str(type))
-        self.subtype = IF(subtype is None, "*", str(subtype))
+    def __init__(self, type="*", subtype="*", q=1.0, **kwargs):
+        self.type = type
+        self.subtype = subtype
         assert q >=0 and q <= 1.0
         self.q = q
-        self.extension = kwargs
+        self.extensions = kwargs
 
     def __repr__(self):
         return "%s(type=%r, subtype=%r, q=%r, **%r)" % (self.__class__.__name__, 
-            self.type, self.subtype, self.q, self.extension)
+            self.type, self.subtype, self.q, self.extensions)
 
     def __str__(self):
-        if self.extension:
+        if self.extensions:
             exts = []
-            for extname, extval in self.extension.items():
+            for extname, extval in self.extensions.items():
                 exts.append("%s=%s" % (extname, httpquote(extval)))
             extstr = ";%s" % (";".join(exts))
         else:
             extstr = ""
-        return IF(self.q != 1.0, 
-                    "%s/%s;q=%1.1f%s" % (self.type, self.subtype, self.q, extstr),
-                    "%s/%s%s" % (self.type, self.subtype, extstr))
+        if self.q != 1.0: 
+            "%s/%s;q=%1.1f%s" % (self.type, self.subtype, self.q, extstr)
+        else:
+            "%s/%s%s" % (self.type, self.subtype, extstr)
 
     def parse(self, text):
         if ";" in text:
@@ -182,12 +183,41 @@ class MediaRange(object):
             if q == "q":
                 self.q = float(v)
             else:
-                self.extension[q] = v
+                self.extensions[q] = v
         self.type, self.subtype = text.split("/", 1)
 
+    def __cmp__(self, other):
+        qcmp = cmp(self.q, other.q)
+        if qcmp == 0:
+            tcmp = cmp(self.type, other.type)
+            if tcmp == 0:
+                tcmp = cmp(self.subtype, other.subtype)
+                if tcmp == 0:
+                    return cmp(self.extensions, other.extensions)
+                else:
+                    return tcmp
+            else:
+                return tcmp
+        else:
+            return qcmp
+
+    def match(self, type, subtype):
+        if self.type == "*":
+            return True
+        if type == self.type:
+            if subtype == "*":
+                return True
+            else:
+                return subtype == self.subtype
+        else:
+            return False
+
+
+# Value object for Accept header.
 class Media(list):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, ",".join(map(repr, self)))
+
 
 ### base class for all header objects
 
@@ -315,6 +345,16 @@ class ContentType(HTTPHeader):
                               ))
         return value
 
+    def initialize(self, **kwargs):
+        self.parameters = kwargs
+
+    def __str__(self):
+        if self.parameters:
+            return "%s: %s; %s" % (self._name, self.value, 
+                "; ".join(['%s="%s"' % t for t in self.parameters.iteritems()]))
+        else:
+            return "%s: %s" % (self._name, self.value)
+
 class ETag(HTTPHeader):
     HEADER="ETag"
 
@@ -341,6 +381,8 @@ class Accept(HTTPHeader):
             m = MediaRange()
             m.parse(part)
             rv.append(m)
+        rv.sort()
+        rv.reverse()
         return rv
 
     def __str__(self):
@@ -349,8 +391,17 @@ class Accept(HTTPHeader):
     def __iter__(self):
         return iter(self.value)
 
-    def add_mediarange(self, type, subtype=None, q=1.0):
+    def add_mediarange(self, type, subtype="*", q=1.0):
         self.data.append(MediaRange(type, subtype, q))
+
+    # Supply a list of mimetypes that are supported.
+    def select(self, mimetypes):
+        media = [t.split("/", 1) for t in mimetypes]
+        for accepted in self.value: # Media ordered in decreasing preference
+            for maintype, subtype in media:
+                if accepted.match(maintype, subtype):
+                    return "%s/%s" % (maintype, subtype)
+        return None
 
 
 class AcceptCharset(HTTPHeader):
@@ -1099,4 +1150,7 @@ if __name__ == "__main__":
     print "----------"
     auth = Authorization(username="myname", password="mypassword")
     print auth
+    a = Accept('Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5')
+    print a.value
+
 

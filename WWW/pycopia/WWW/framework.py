@@ -43,6 +43,8 @@ from pycopia import urlparse
 from pycopia.inet import httputils
 from pycopia.dictlib import ObjectCache
 
+from pycopia.WWW import XHTML
+from pycopia.XML import Plaintext
 import email, email.Message
 
 # external dependency
@@ -58,11 +60,14 @@ class InvalidPath(Error):
   handlers.
   """
 
-
 class HTTPError(Error):
     pass
 
 ELEMENTCACHE = ObjectCache()
+
+# supported mime types.
+SUPPORTED = [ "application/xhtml+xml", "text/vnd.wap.wml", "text/plain" ]
+
 
 # The following, until end marker:
 
@@ -108,18 +113,17 @@ class HttpResponse(object):
     "A basic HTTP response, with content and dictionary-accessed headers"
     status_code = 200
     def __init__(self, content='', mimetype=None):
+        self.headers = httputils.Headers()
+        self.cookies = httputils.CookieJar()
         self._charset = sys.getdefaultencoding() # XXX
-        if not mimetype:
-            mimetype = "text/plain; charset=%s" % (self._charset,)
+        if mimetype:
+            self.headers.add_header(httputils.ContentType(mimetype, charset=self._charset))
         if hasattr(content, '__iter__'):
             self._container = content
             self._is_string = False
         else:
             self._container = [content]
             self._is_string = True
-        self.headers = httputils.Headers()
-        self.headers.add_header(httputils.ContentType(mimetype))
-        self.cookies = httputils.CookieJar()
 
     def __str__(self):
         "Full HTTP message, including headers"
@@ -370,11 +374,22 @@ class HTTPRequest(object):
             buf.close()
             return self._raw_post_data
 
+    def _get_headers(self):
+        try:
+            return self._headers
+        except AttributeError:
+            self._headers = hdrs = httputils.Headers()
+            for k, v in self.environ.iteritems():
+                if k.startswith("HTTP"):
+                    hdrs.append(httputils.make_header(k[5:].replace("_", "-"), v))
+            return self._headers
+
     GET = property(_get_get)
     POST = property(_get_post)
     COOKIES = property(_get_cookies)
     FILES = property(_get_files)
     raw_post_data = property(_get_raw_post_data)
+    headers = property(_get_headers)
 
 
 ### End (modified) code from Django. ###
@@ -699,9 +714,20 @@ class JSONRequestHandler(RequestHandler):
         return "../%s" % function.func_name # XXX assumes name is end of path.
 
 
+
+def get_acceptable_document(request):
+    accept = request.headers["accept"]
+    preferred = accept.select(SUPPORTED)
+    if preferred:
+        if preferred == "text/plain":
+            return Plaintext.new_document()
+        else:
+            return XHTML.new_document(doctype=None, mimetype=preferred)
+    else:
+        raise HTTPError((415, "Unsupported Media Type"))
+
 def default_doc_constructor(request, **kwargs):
-    from pycopia.WWW import XHTML
-    doc = XHTML.new_document()
+    doc = get_acceptable_document(request)
     for name, val in kwargs.items():
         setattr(doc, name, val)
     container = doc.add_section("container")
@@ -745,7 +771,7 @@ class ResponseDocument(object):
         self.config = None
         self._doc = None
         resp = HttpResponse()
-        resp.add_header(httputils.ContentType(doc.MIMETYPE))
+        resp.add_header(httputils.ContentType(doc.MIMETYPE, charset=doc.encoding))
         resp.add_header(httputils.CacheControl("no-cache"))
         doc.emit(resp)
         return resp
