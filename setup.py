@@ -57,14 +57,14 @@ def _do_commands(name, cmds, root):
         sudo = "sudo "
     else:
         sudo = ""
-    cmd = "%spython setup.py %s" % (sudo, " ".join(cmds))
-    print "======================", cmd, "============================"
+    cmd = "%s%s setup.py %s" % (sudo, sys.executable, " ".join(cmds))
+    print "========", name, "==", cmd
     os.chdir(name)
     try:
         os.system(cmd)
     finally:
         os.chdir("..")
-        print "====================== END ============================"
+        print "====================== END", name
         print
 
 def do_sdist(name):

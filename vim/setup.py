@@ -10,6 +10,7 @@ from setuptools import setup
 from pycopia import proctools
 from glob import glob
 
+
 NAME = "pycopia-vim"
 VERSION = "1.0a2"
 
@@ -61,6 +62,7 @@ setup (name=NAME, version=VERSION,
     packages = ["pycopia", "pycopia.vimlib"],
     test_suite = "test.VimTests",
     data_files = datafiles,
+    scripts = glob("bin/*"), 
     install_requires = ['pycopia-process>=1.0a1,==dev', 'pycopia-WWW>=1.0a1,==dev'],
 
     description = "Extend Vim with Python helpers for Python IDE functionality.",
