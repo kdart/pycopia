@@ -21,7 +21,7 @@ The FSM is fairly simple. It is useful for small parsing tasks.
 
 """
 
-import sre as re
+import re
 
 from pycopia.aid import Enum, Enums
 

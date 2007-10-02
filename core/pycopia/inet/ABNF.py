@@ -20,7 +20,7 @@ Constants and constructs from rfc2234, Augmented BNF definition.
 Refer to ftp://ftp.ietf.org/rfc/rfc2234.txt for more details.
 
 """
-import sre
+import re
 
 
 def crange(start, fin):
@@ -91,15 +91,15 @@ VCHAR  = CharRange(0x21, 0x7E)
 WSP    = SP+HTAB
 
 def _re_factory(charset):
-    return sre.compile("[%s]+" %(charset,))
+    return re.compile("[%s]+" %(charset,))
 
-LWSP   = sre.compile(r'[%s]+|(%s[%s]+)+' % (WSP, CRLF, WSP))
+LWSP   = re.compile(r'[%s]+|(%s[%s]+)+' % (WSP, CRLF, WSP))
 
 def normalize(s):
     """Convert all linear white space to a single space."""
     return LWSP.sub(" ", s)
 
-FOLDED   = sre.compile(r'%s([%s]+)' % (CRLF, WSP))
+FOLDED   = re.compile(r'%s([%s]+)' % (CRLF, WSP))
 def unfold(s):
     """Unfold a folded string, keeping line breaks and other white space."""
     return FOLDED.sub(r"\1", s)

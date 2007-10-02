@@ -9,7 +9,7 @@ Module used to extract Pycopia-QA test plan documentation from the set of
 automated test plans found in the test module location.
 """
 
-import sys, os, sre, shutil
+import sys, os, re, shutil
 import locale
 try:
     locale.setlocale(locale.LC_ALL, '')
@@ -34,7 +34,7 @@ def fix_path():
 
 def build_testplans(argv):
     from pycopia.WWW import XHTML
-    py_matcher = sre.compile(r"(^[a-zA-Z]+)\.py$", sre.M)
+    py_matcher = re.compile(r"(^[a-zA-Z]+)\.py$", re.M)
     HOME = fix_path()
     STYLESHEET = "/stylesheets/qa_tp.css"
     hl = len(HOME)+1

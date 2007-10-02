@@ -33,7 +33,7 @@ A lightweight, but flexible, web application framework.
 
 
 import sys, os
-import sre as re
+import re
 import sre_parse
 from pprint import pformat
 import itertools

@@ -10,7 +10,7 @@ Parts copied from the standard urlparse module.
 """
 
 import sys
-import sre as re
+import re
 
 # A classification of schemes ('' means apply by default)
 uses_relative = ['ftp', 'http', 'gopher', 'nntp', 'imap',

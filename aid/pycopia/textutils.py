@@ -22,7 +22,7 @@ General text functions. You may import this instead of the stock
 """
 
 import sys
-import sre as re
+import re
 import binascii
 
 from pycopia.aid import removedups

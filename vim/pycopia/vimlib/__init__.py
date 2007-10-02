@@ -24,7 +24,7 @@ except ImportError:
 
 import sys, os
 import string
-import sre
+import re
 import parser, symbol, token
 import tokenize
 import cStringIO as StringIO
@@ -47,10 +47,10 @@ EXECTEMP = "/var/tmp/python_vim_temp_%s.py" % (os.getpid())
 def_template = """def XXX():
     pass
 """
-re_def = sre.compile(r"^[ \t]*def ")
-re_class = sre.compile(r"^[ \t]*class ")
-re_klass_export = sre.compile(r"^class ([a-zA-Z][a-zA-Z0-9_]*)")
-re_def_export = sre.compile(r"^def ([a-zA-Z][a-zA-Z0-9_]*)")
+re_def = re.compile(r"^[ \t]*def ")
+re_class = re.compile(r"^[ \t]*class ")
+re_klass_export = re.compile(r"^class ([a-zA-Z][a-zA-Z0-9_]*)")
+re_def_export = re.compile(r"^def ([a-zA-Z][a-zA-Z0-9_]*)")
 
 def normal(str):
     command("normal "+str)
@@ -118,7 +118,7 @@ def spc_to_tab(vrange=None):
         command("s/%s/  /g" % spcs)
     else:
         for linenum in range(len(vrange)):
-            vrange[linenum] = sre.sub(spcs, "\t", vrange[linenum])
+            vrange[linenum] = re.sub(spcs, "\t", vrange[linenum])
 
 def reverse_search(reobject):
     startline, startcol = current.window.cursor

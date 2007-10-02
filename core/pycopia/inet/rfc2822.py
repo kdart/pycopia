@@ -21,6 +21,8 @@ Objects for constructing, parsing, and editing rfc 2822 compliant messages
 
 """
 
+import re
+
 from pycopia.inet.ABNF import *
 from pycopia.fsm import FSM, ANY
 from pycopia.aid import IF, Enums
@@ -33,7 +35,7 @@ ATEXT = ALPHA+DIGIT+EXTRA
 
 HEADBREAK = CRLF+CRLF
 
-FOLDED   = sre.compile(r'%s([%s]+)' % (CRLF, WSP))
+FOLDED   = re.compile(r'%s([%s]+)' % (CRLF, WSP))
 
 
 class RFC2822Error(Exception):

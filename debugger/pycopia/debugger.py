@@ -25,7 +25,7 @@ import sys, os
 import linecache
 import bdb
 from repr import Repr
-import sre
+import re
 
 from pycopia import IO
 from pycopia import UI
@@ -42,7 +42,7 @@ _saferepr = _repr.repr
 DebuggerQuit = bdb.BdbQuit
 
 def find_function(funcname, filename):
-    cre = sre.compile(r'def\s+%s\s*[(]' % funcname)
+    cre = re.compile(r'def\s+%s\s*[(]' % funcname)
     try:
         fp = open(filename)
     except IOError:
@@ -877,7 +877,7 @@ class DebuggerCommands(CLI.BaseCommands):
     def search(self, argv):
         """search <pattern>
     Search the source file for the regular expression pattern."""
-        patt = sre.compile(" ".join(argv[1:]))
+        patt = re.compile(" ".join(argv[1:]))
         filename = self._dbg.curframe.f_code.co_filename
         if self._dbg.lineno is None:
             start = 0
