@@ -23,8 +23,11 @@
 import sys
 import unittest
 import webbrowser
+import simplejson
+from cStringIO import StringIO
 
 from pycopia.aid import Enums, NULL
+from pycopia import urlparse
 from pycopia.XML import POM
 from pycopia import dtds
 
@@ -36,6 +39,7 @@ from pycopia.WWW import rst
 from pycopia.WWW import serverconfig
 from pycopia.WWW import urllibplus
 from pycopia.WWW import useragents
+from pycopia.WWW import json
 
 
 XHTMLFILENAME = "/tmp/testXHTML.html"
@@ -43,6 +47,9 @@ XHTMLFILENAME = "/tmp/testXHTML.html"
 MOBILEAGENT1 = "Nokia6680/1.0 ((4.04.07) SymbianOS/8.0 Series60/2.6 Profile/MIDP-2.0 Configuration/CLDC-1.1)"
 MOBILEAGENT2 = 'MOT-V3/0E.41.C3R MIB/2.2.1 Profile/MIDP-2.0 Configuration/CLDC-1.0 UP.Link/6.3.1.17.06.3.1.17.0'
 WML = "text/wml, text/vnd.wap.wml"
+
+def _JsonTest(arg1):
+    return arg1
 
 class WWWTests(unittest.TestCase):
 
@@ -215,7 +222,8 @@ class WWWTests(unittest.TestCase):
         mimetype=WML,
         useragent=MOBILEAGENT2)
         print "WML doctype:", doc.DOCTYPE
-        self.assert_(type(doc) is XHTML.WMLDocument)
+        self.assert_(type(doc) is XHTML.XHTMLDocument)
+        self.assert_(str(doc.DOCTYPE).find("Mobile") > 0)
         # write it out for inspection
         # Note that the document was parsed, and regenerated.
         fo = open("/tmp/test_WWW_wml.html", "w")
@@ -236,6 +244,37 @@ Some Text.
     """
         print renderer.render(text)
 
+    def test_JSONcodec(self):
+        data = [{"data": "test"}, 1]
+        enc = json.GetJSONEncoder()
+        dec = json.GetJSONDecoder()
+        self.assertEqual( dec.decode(enc.encode(data)), data)
+
+
+    def test_JSONhandler(self):
+        disp = json.JSONDispatcher([_JsonTest])
+        env = GetMockEnviron(disp)
+        req = framework.HTTPRequest(env)
+        response = disp(req, "_JsonTest")
+        self.assert_(isinstance(response, framework.HttpResponse))
+        self.assertEqual(response.headers["Content-Type"].value, "application/json")
+        content = simplejson.loads(response.content)
+        self.assertEqual(content, 1)
+
+
+def GetMockEnviron(handler):
+    environ = {}
+    environ['REQUEST_METHOD'] = "POST"
+    environ['PATH_INFO'] = "/proxy/_JsonTest"
+    m = framework.URLMap(r'^/proxy/(?P<methodname>\w+)/$', handler)
+    environ["framework.get_url"] = m.get_url
+    q = 'data=%5B%22_JsonTest%22%2C+1%5D' # as PythonProxy would send a call from proxy._JsonTest(1)
+    inp = StringIO(q)
+    environ["CONTENT_TYPE"] = "application/x-www-form-urlencoded"
+    environ["CONTENT_LENGTH"] = len(q)
+    environ["wsgi.input"] = inp
+    environ["wsgi.errors"] = sys.stderr
+    return environ
 
 
 if __name__ == '__main__':

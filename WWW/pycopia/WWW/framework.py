@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#
+#    Copyright (C) 1999-2007  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -27,10 +27,12 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-A lightweight, but flexible, web application framework.
+A lightweight and flexible web application framework.
+This framework is intended for highly dynamic content. There are no
+templates, but a pure Python markup generator. It is expected that little
+markup will be generated, however. Most of the application would be
+written in Javascript.
 """
-
-
 
 import sys, os
 import re
@@ -38,6 +40,7 @@ import sre_parse
 from pprint import pformat
 import itertools
 import traceback
+from cStringIO import StringIO
 
 from pycopia import urlparse
 from pycopia.inet import httputils
@@ -128,7 +131,7 @@ class HttpResponse(object):
     def __str__(self):
         "Full HTTP message, including headers"
         return '\n'.join(['%s: %s' % (key, value)
-            for key, value in self.headers.items()]) \
+            for key, value in self.headers.asWSGI()]) \
             + '\n\n' + self.content
 
     def __setitem__(self, header, value):
@@ -272,6 +275,9 @@ class HTTPRequest(object):
         self.method = environ['REQUEST_METHOD'].upper()
         self.path = environ['PATH_INFO']
         self.get_url = environ["framework.get_url"]
+
+    def log_error(self, message):
+        self.environ["wsgi.errors"].write(message)
 
     def __repr__(self):
         # Since this is called as part of error handling, we need to be very
@@ -530,8 +536,7 @@ class URLResolver(object):
             if method:
                 response = method(request, **kwargs)
                 if response is None:
-                    request.environ['wsgi.errors'].write(
-                             "Handler %r returned none.\n" % (method,))
+                    request.log_error("Handler %r returned none.\n" % (method,))
                     raise HTTPError((500, "handler returned None"))
                 return response
         else:
@@ -618,7 +623,7 @@ class RequestHandler(object):
             return HttpResponseNotAllowed(self._implemented)
 
     def _invalid(self, request, **kwargs):
-        request.environ['wsgi.errors'].write("%r: invalid method: %r\n" % (self, request.method))
+        request.log_error("%r: invalid method: %r\n" % (self, request.method))
         return HttpResponseNotAllowed(self._implemented)
 
     # Override one or more of these in your handler subclass. Invalid
@@ -693,7 +698,7 @@ class JSONRequestHandler(RequestHandler):
         try:
             handler = self._mapping[function]
         except KeyError:
-            request.environ["wsgi.errors"].write("No JSON handler for %r.\n" % function)
+            request.log_error("No JSON handler for %r.\n" % function)
             return JSON404()
         kwargs = JSONQuery(request)
         try:
@@ -702,7 +707,7 @@ class JSONRequestHandler(RequestHandler):
             ex, val, tb = sys.exc_info()
             tblist = traceback.extract_tb(tb)
             del tb
-            request.environ["wsgi.errors"].write("JSON handler error: %s: %s\n" % (ex, val))
+            request.log_error("JSON handler error: %s: %s\n" % (ex, val))
             return JSONServerError(ex, val, tblist)
 
     post = get # since JSONQuery also converts POST part.
