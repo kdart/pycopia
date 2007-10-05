@@ -43,6 +43,7 @@ from pycopia import debugger
 from pycopia import scheduler
 from pycopia import timelib
 from pycopia import cliutils
+from pycopia import UserFile
 
 
 __all__ = ['TestError', 'TestIncompleteError', 'TestFailError',
@@ -301,6 +302,14 @@ class Test(object):
     def get_datapoints(self):
         "Accessor method to return copy of datapoints list."
         return self.datapoints[:]
+
+    @classmethod
+    def open_file(cls, fname):
+        """Open file in same directory as test case class."""
+        path = os.path.join(
+              os.path.dirname(sys.modules[cls.__module__].__file__),
+              fname)
+        return UserFile.UserFile(path)
 
     # assertion methods make it convenient to check conditions.
     def assert_passed(self, arg, msg=None):
