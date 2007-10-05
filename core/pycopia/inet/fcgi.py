@@ -119,6 +119,8 @@ FCGI_UnknownTypeBody = '!B7x'
 FCGI_EndRequestBody_LEN = struct.calcsize(FCGI_EndRequestBody)
 FCGI_UnknownTypeBody_LEN = struct.calcsize(FCGI_UnknownTypeBody)
 
+WSGI_VERSION = (1,0)
+
 if __debug__:
     import time
 
@@ -774,8 +776,11 @@ class ProcessManager(object):
 
 
 def DefaultErrorHandler(ex, val, tb, stream):
-    stream.write('Content-Type: text/html\r\n\r\n' +
-                     cgitb.html((ex, val, tb)))
+    stream.write('Status: 500 fcgi error\r\n')
+    stream.write('Content-Type: text/html\r\n')
+    stream.write('\r\n')
+    stream.write(cgitb.html((ex, val, tb)))
+    stream.flush()
 
 
 class FCGIServer(object):
@@ -960,7 +965,7 @@ class FCGIServer(object):
         environ = req.params
         environ.update(self.environ)
 
-        environ['wsgi.version'] = (1,0)
+        environ['wsgi.version'] = WSGI_VERSION
         environ['wsgi.input'] = req.stdin
         if self._bindAddress is None:
             stderr = req.stderr
@@ -989,7 +994,7 @@ class FCGIServer(object):
             if not headers_sent:
                 status, responseHeaders = headers_sent[:] = headers_set
                 found = False
-                for header,value in responseHeaders:
+                for header, value in responseHeaders:
                     if header.lower() == 'content-length':
                         found = True
                         break
@@ -1006,9 +1011,9 @@ class FCGIServer(object):
                 for header in responseHeaders:
                     req.stdout.write('%s: %s\r\n' % header)
                 req.stdout.write('\r\n')
+                req.stdout.flush()
 
             req.stdout.write(data)
-            req.stdout.flush()
 
         def start_response(status, response_headers, exc_info=None):
             if exc_info:
@@ -1034,16 +1039,16 @@ class FCGIServer(object):
             return write
 
         try:
-            result = self.application(environ, start_response)
+            iterable = self.application(environ, start_response)
             try:
-                for data in result:
+                for data in iterable:
                     if data:
                         write(data)
                 if not headers_sent:
                     write('') # in case body was empty
             finally:
-                if hasattr(result, 'close'):
-                    result.close()
+                if hasattr(iterable, 'close'):
+                    iterable.close()
         except socket.error, e:
             if e[0] != errno.EPIPE:
                 raise # Don't let EPIPE propagate beyond server

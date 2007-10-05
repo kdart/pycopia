@@ -37,25 +37,29 @@ class WSGIAdapter(object):
       response = "200 OK"
       headers = [("Content-Type", doc.MIMETYPE)]
       writer = start_response(response, headers)
-      it = WSGIAdapter(writer=writer)
-      doc.emit(it)
-      return it
+      adapter = WSGIAdapter(writer=writer)
+      doc.emit(adapter)
+      return adapter
 
     def SampleApp2(environ, start_response): # use iterator
       doc = <POMDocument from somewhere>
-      it = WSGIAdapter(doc.MIMETYPE)
-      start_response(it.response, it.headers)
-      doc.emit(it)
-      return it
+      adapter = WSGIAdapter(doc)
+      start_response(adapter.response, adapter.headers)
+      doc.emit(adapter)
+      return adapter
 
     """
-    def __init__(self, mimetype=None, writer=None):
+    def __init__(self, doc=None, writer=None):
         if writer:
             self.write = writer # override write method
         self._chunks = []
         self.length = 0
-        self._response = "200 OK"
-        self._mimetype = mimetype
+        if doc:
+            self.mimetype = doc.MIMETYPE
+            self.charset = doc.encoding
+        else:
+            self.mimetype = None
+            self.charset = None
 
     def __iter__(self):
         return iter(self._chunks)
@@ -65,33 +69,23 @@ class WSGIAdapter(object):
 
     def close(self):
         self._chunks = []
+        self.length = 0
 
     #  emit() calls this
     def write(self, data):
-        try:
-            self.length += len(data)
-            self._chunks.append(data)
-        finally:
-            self._response = "500 Writer error"
+        self.length += len(data)
+        self._chunks.append(data)
 
     def get_headers(self):
         if self.length:
             rv = [("Content-Length", str(self.length))]
         else:
             rv = []
-        if self._mimetype:
-            rv.append(("Content-Type", self._mimetype))
+        if self.mimetype:
+            rv.append(("Content-Type", "%s; charset=%s" % (self.mimetype, self.charset)))
         return rv
 
-    def get_response(self):
-        return self._response
-
-    def set_mimetype(self, mimetype):
-        self._mimetype = mimetype
-
     headers = property(get_headers, None, None, "WSGI style header list")
-    response = property(get_response)
-    mimetype = property(lambda s: s._mimetype, set_mimetype)
 
 
 def get_iterator(doc, writer=None, encoding=None):

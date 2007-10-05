@@ -40,18 +40,20 @@ import sre_parse
 from pprint import pformat
 import itertools
 import traceback
+import cgitb
 from cStringIO import StringIO
+
+import email, email.Message
+# external dependency
+import simplejson
 
 from pycopia import urlparse
 from pycopia.inet import httputils
 from pycopia.dictlib import ObjectCache
-
 from pycopia.WWW import XHTML
 from pycopia.XML import Plaintext
-import email, email.Message
+from pycopia.WWW.middleware import POMadapter
 
-# external dependency
-import simplejson
 
 STATUSCODES = httputils.STATUSCODES
 
@@ -127,6 +129,9 @@ class HttpResponse(object):
         else:
             self._container = [content]
             self._is_string = True
+
+    def get_status(self):
+        return STATUSCODES.get(self.status_code, 'UNKNOWN STATUS CODE')
 
     def __str__(self):
         "Full HTTP message, including headers"
@@ -537,10 +542,10 @@ class URLResolver(object):
                 response = method(request, **kwargs)
                 if response is None:
                     request.log_error("Handler %r returned none.\n" % (method,))
-                    raise HTTPError((500, "handler returned None"))
+                    raise HTTPError(500, "handler returned None")
                 return response
         else:
-            raise HTTPError((404, path))
+            raise HTTPError(404, path)
 
     def get_url(self, method, **kwargs):
         """Reverse mapping. How do I call method with the given args from
@@ -583,12 +588,20 @@ class WebApplication(object):
         environ['framework.get_alias'] = self._resolver.get_alias
         environ['framework.config'] = self._config
         request = HTTPRequest(environ)
-        response = self._resolver.dispatch(request)
-        status = '%s %s' % (response.status_code, 
-                      STATUSCODES.get(response.status_code, 'UNKNOWN STATUS CODE'))
-        start_response(status, response.get_response_headers())
-        return response
-
+        try:
+            response = self._resolver.dispatch(request)
+        except HTTPError, err:
+            code = err.args[0]
+            status = '%s %s' % (code, STATUSCODES.get(code, 'UNKNOWN STATUS CODE'))
+            start_response(status, [("Content-Type", "text/plain")])
+            return [str(err)]
+        except:
+            excinfo = sys.exc_info()
+            start_response("500 Internal Server Error", [("Content-Type", "text/html")], excinfo)
+            return [cgitb.html(excinfo)]
+        else:
+            start_response(response.get_status(), response.get_response_headers())
+            return response
 
 
 # You can subclass this and set and instance to be called by URL mapping.
@@ -729,7 +742,7 @@ def get_acceptable_document(request):
         else:
             return XHTML.new_document(doctype=None, mimetype=preferred)
     else:
-        raise HTTPError((415, "Unsupported Media Type"))
+        raise HTTPError(415, "Unsupported Media Type")
 
 def default_doc_constructor(request, **kwargs):
     doc = get_acceptable_document(request)
@@ -755,11 +768,12 @@ class ResponseDocument(object):
     accessing configuration.
     """
     def __init__(self, _request, _constructor=default_doc_constructor, **kwargs):
+        self._doc = doc = _constructor(_request, **kwargs)
+        self.NM = self._doc.nodemaker # nodemaker shortcut
+        # shortcuts
         self.get_url = _request.environ["framework.get_url"]
         self.get_alias = _request.environ["framework.get_alias"]
         self.config = _request.environ["framework.config"]
-        self._doc = doc = _constructor(_request, **kwargs)
-        self.NM = self._doc.nodemaker # nodemaker shortcut
 
     doc = property(lambda s: s._doc)
 
@@ -775,11 +789,13 @@ class ResponseDocument(object):
         self.get_url = None
         self.config = None
         self._doc = None
-        resp = HttpResponse()
-        resp.add_header(httputils.ContentType(doc.MIMETYPE, charset=doc.encoding))
-        resp.add_header(httputils.CacheControl("no-cache"))
-        doc.emit(resp)
-        return resp
+        adapter = POMadapter.WSGIAdapter(doc)
+        doc.emit(adapter)
+        response = HttpResponse(adapter)
+        for headertuple in adapter.headers:
+            response.add_header(*headertuple)
+        response.add_header(httputils.CacheControl("no-cache"))
+        return response
 
     def get_icon(self, name):
         try:

@@ -45,15 +45,6 @@ class ProcessManager(object):
         self._procmanager.submethod(func, pwent=self._pwent)
 
 
-# TODO nicer error display
-def ErrorHandler(ex, val, tb, stream):
-    if ex is framework.HTTPError:
-        stream.write("Content-Type: text/plain\r\n\r\nError: %s: %s" % val.args[0])
-    else:
-        stream.write('Content-Type: text/html\r\n\r\n' +
-                                         cgitb.html((ex, val, tb)))
-
-
 # Factory function creats a server instance with our interface
 # handlers.
 def get_server(config):
@@ -71,11 +62,10 @@ def get_server(config):
         #from paste.evalexception.middleware import EvalException
         #app = EvalException(app)
 
-    return FCGIServer(app, 
+    return FCGIServer(app,
             procmanager=pm,
-            errorhandler=ErrorHandler,
             bindAddress=config.SOCKETPATH,
-            umask=config.get("SOCKET_UMASK", 0), 
+            umask=config.get("SOCKET_UMASK", 0),
             debug=config.DEBUG)
 
 
