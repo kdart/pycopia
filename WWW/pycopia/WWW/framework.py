@@ -282,7 +282,9 @@ class HTTPRequest(object):
         self.get_url = environ["framework.get_url"]
 
     def log_error(self, message):
-        self.environ["wsgi.errors"].write(message)
+        fo = self.environ["wsgi.errors"]
+        fo.write(message)
+        fo.flush()
 
     def __repr__(self):
         # Since this is called as part of error handling, we need to be very

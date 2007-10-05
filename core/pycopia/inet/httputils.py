@@ -172,9 +172,9 @@ class MediaRange(object):
         else:
             extstr = ""
         if self.q != 1.0: 
-            "%s/%s;q=%1.1f%s" % (self.type, self.subtype, self.q, extstr)
+            return "%s/%s;q=%1.1f%s" % (self.type, self.subtype, self.q, extstr)
         else:
-            "%s/%s%s" % (self.type, self.subtype, extstr)
+            return "%s/%s%s" % (self.type, self.subtype, extstr)
 
     def parse(self, text):
         if ";" in text:
@@ -379,7 +379,7 @@ class Accept(HTTPHeader):
         rv = Media()
         for part in data.split(","):
             m = MediaRange()
-            m.parse(part)
+            m.parse(part.strip())
             rv.append(m)
         rv.sort()
         rv.reverse()
@@ -394,11 +394,13 @@ class Accept(HTTPHeader):
     def add_mediarange(self, type, subtype="*", q=1.0):
         self.data.append(MediaRange(type, subtype, q))
 
-    # Supply a list of mimetypes that are supported.
-    def select(self, mimetypes):
-        media = [t.split("/", 1) for t in mimetypes]
-        for accepted in self.value: # Media ordered in decreasing preference
-            for maintype, subtype in media:
+    # Select from accepted mime types one we support. 
+    # This isn't currently right, but it's what we support (XHTML)
+    # (server is given choice preference)
+    def select(self, supported):
+        for mymedia in supported: 
+            for accepted in self.value: # Media ordered in decreasing preference
+                maintype, subtype = mymedia.split("/", 1)
                 if accepted.match(maintype, subtype):
                     return "%s/%s" % (maintype, subtype)
         return None
