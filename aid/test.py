@@ -81,5 +81,38 @@ class AidTests(unittest.TestCase):
                 break
         fd.close()
 
+    def test_timelib(self):
+        mt = timelib.localtime_mutable()
+        print mt
+        mt.add_seconds(3600)
+        print mt
+        print timelib.strftime("%Y-%m-%d", timelib.weekof(timelib.time()))
+
+        t = timelib.now()
+        for d in range(1, 60):
+            week = timelib.weekof(t+(d*60*60*24))
+            print timelib.MutableTime(week)
+
+        print "Local time:"
+        print timelib.localtimestamp()
+
+        p = timelib.TimespecParser()
+        for spec, secs in [
+            ("0s", 0.0),
+            ("3m", 180.0),
+            ("3.0m", 180.0),
+            ("3minute+2secs", 182.0),
+            ("2h 3minute+2.2secs", 7382.2),
+            ("-3m", -180.0),
+            ("-3.0m", -180.0),
+            ("1h3m", 3780.0),
+            ("1h-3m", 3420.0),
+            ("1d 3m", 86580.0)]:
+            p.parse(spec)
+            self.assert_(p.seconds == secs)
+
+        self.assertRaises(ValueError, p.parse, "12m -m")
+
+
 if __name__ == '__main__':
     unittest.main()

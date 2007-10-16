@@ -495,6 +495,25 @@ class ContainerMixin(FlowMixin):
                     col.append(check_object(callback(NM, obj)))
         return tbl
 
+    def new_table_from_GenericTable(self, table, renderer=_NULLRenderer, **kwargs):
+        """Construct an XHTML table from a pycopia.table.GenericTable object.
+        """
+        tbl = self.add_table(**kwargs)
+        NM = self.get_nodemaker()
+        cycler = itertools.cycle(["row1", "row2"]) # For alternating row styles.
+        # headings
+        if table.headings:
+            tbl.new_headings(*table.headings)
+        if table.title:
+            tbl.caption(table.title)
+        for table_row in table:
+            row = tbl.new_row()
+            setattr(row, "class_", cycler.next())
+            for cell in table_row:
+                col = row.add_column()
+                col.append(check_object(renderer(NM, cell)))
+        return tbl
+
     def get_form(self, **kwargs):
         XHTMLForm = get_class(self.dtd, "XHTMLForm", (FormMixin, self.dtd.Form))
         f = XHTMLForm(**kwargs)

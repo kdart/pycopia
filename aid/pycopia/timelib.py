@@ -27,6 +27,9 @@ This module also provides some time related functions.
 from time import *
 now = time
 
+from pycopia.fsm import FSM, ANY
+from pycopia import textutils
+
 # Python time tuple:
 # Index   Attribute   Values 
 # 0 tm_year (for example, 1993)
@@ -238,19 +241,49 @@ rfc822 compliant date value."""
         return strftime(fmt, localtime())
 
 
-if __name__ == "__main__":
-    mt = localtime_mutable()
-    print mt
-    mt.add_seconds(3600)
-    print mt
-    print strftime("%Y-%m-%d", weekof(time()))
+class TimespecParser(object):
+    """Loose time span parser. 
+    Convert strings such as "1day 3min" to seconds.
+    The attribute "seconds" holds the updated value.
+    """
+    def __init__(self):
+        self._seconds = 0.0
+        f = FSM(0)
+        f.arg = ""
+        f.add_default_transition(self._error, 0)
+        f.add_transition_list(textutils.digits + "+-", 0, self._newdigit, 1)
+        f.add_transition_list(textutils.digits, 1, self._addtext, 1)
+        f.add_transition(".", 1, self._addtext, 2)
+        f.add_transition_list(textutils.digits, 2, self._addtext, 2)
+        f.add_transition_list("dhms", 1, self._multiplier, 3)
+        f.add_transition_list("dhms", 2, self._multiplier, 3)
+        f.add_transition_list(textutils.letters, 3, None, 3)
+        f.add_transition_list(textutils.whitespace, 3, None, 3)
+        f.add_transition_list(textutils.digits + "+-", 3, self._newdigit, 1)
+        self._fsm = f
 
-    t = now()
-    for d in range(1, 60):
-        week = weekof(t+(d*60*60*24))
-        print MutableTime(week)
-    
-    print "Local time:"
-    print localtimestamp()
+    seconds = property(lambda s: s._seconds)
+
+    def _error(self, input_symbol, fsm):
+        fsm.reset()
+        raise ValueError('TimeParser error: %s\n%r' % (input_symbol, fsm.stack))
+
+    def _addtext(self, c, fsm):
+        fsm.arg += c
+
+    def _newdigit(self, c, fsm):
+        fsm.arg = c
+
+    def _multiplier(self, c, fsm):
+        m = {"d": 86400.0, "h": 3600.0, "m": 60.0, "s": 1.0}[c]
+        v = float(fsm.arg)
+        fsm.arg = ""
+        self._seconds += (v*m)
+
+    def parse(self, string):
+        self._fsm.reset()
+        self._seconds = 0.0
+        self._fsm.process_string(string)
+        return self._seconds
 
 
