@@ -1219,7 +1219,6 @@ class Shell(object):
 def _reset_readline():
     if readline:
         readline.parse_and_bind("tab: complete")
-        readline.parse_and_bind("?: possible-completions")
         readline.parse_and_bind("set horizontal-scroll-mode on")
         readline.parse_and_bind("set page-completions on")
         readline.set_history_length(500)

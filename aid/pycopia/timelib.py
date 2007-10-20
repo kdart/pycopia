@@ -244,7 +244,7 @@ rfc822 compliant date value."""
 class TimespecParser(object):
     """Loose time span parser. 
     Convert strings such as "1day 3min" to seconds.
-    The attribute "seconds" holds the updated value.
+    The attribute "seconds" holds the updated value, after parsing.
     """
     def __init__(self):
         self._seconds = 0.0
@@ -285,5 +285,11 @@ class TimespecParser(object):
         self._seconds = 0.0
         self._fsm.process_string(string)
         return self._seconds
+
+
+def parse_timespan(string):
+  p = TimespecParser()
+  p.parse(string)
+  return p.seconds
 
 
