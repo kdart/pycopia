@@ -17,6 +17,7 @@
 #    Lesser General Public License for more details.
 
 from pycopia import reports
+from pycopia import timelib
 
 RESET = "\x1b[0m"
 RED = "\x1b[31m"
