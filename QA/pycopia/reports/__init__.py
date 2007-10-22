@@ -53,6 +53,7 @@ _FORMATTERS = {
     "text/ascii": ("StandardFormatter", "asc"), # plain text
     "text/html": ("pycopia.reports.Html.XHTMLFormatter", "html"), # HTML 
     "text/ansi": ("pycopia.reports.ANSI.ANSIFormatter", "ansi"), # text with ANSI-term color escapes
+    "text/ansi; charset=utf8": ("pycopia.reports.utf8ANSI.UTF8Formatter", "ansi"),
 }
 
 # register another formatter object that adheres to the NullFormatter
