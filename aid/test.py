@@ -113,6 +113,20 @@ class AidTests(unittest.TestCase):
 
         self.assertRaises(ValueError, p.parse, "12m -m")
 
+    def test_tty_SerialPort(self):
+        # just call some setup methods. This really needs some serial
+        # loopback to fully test.
+        sp = tty.SerialPort("/dev/ttyS0")
+        sp.set_serial("9600 8N1")
+        sp.stty("-parenb", "-parodd", "cs8", "hupcl", "-cstopb", "cread",
+            "clocal", "-crtscts", "ignbrk", "-brkint", "ignpar", "-parmrk",
+            "-inpck", "-istrip", "-inlcr", "-igncr", "-icrnl", "-ixon",
+            "-ixoff", "-iuclc", "-ixany", "-imaxbel", "-opost", "-olcuc",
+            "-ocrnl", "onlcr", "-onocr", "-onlret", "-ofill", "-ofdel", "nl0",
+            "cr0", "tab0", "bs0", "vt0", "ff0", "-isig", "-icanon", "-iexten",
+            "-echo", "echoe", "echok", "-echonl", "-noflsh", "-xcase",
+            "-tostop", "-echoprt", "echoctl", "echoke")
+
 
 if __name__ == '__main__':
     unittest.main()

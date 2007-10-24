@@ -22,11 +22,15 @@ module,  as this module subsumes that functionality.
 """
 
 import sys, os
-from termios import *
-from errno import EINTR
+import stat
 import signal
 import fcntl
 import struct
+from termios import *
+from errno import EINTR
+
+from pycopia.aid import systemcall
+
 
 class PageQuitError(Exception):
     pass
@@ -186,6 +190,26 @@ def setraw(fd, when=TCSAFLUSH):
     mode[LFLAG] |= (ECHOCTL)
     mode[CC][VMIN] = 1
     mode[CC][VTIME] = 0
+    tcsetattr(fd, when, mode)
+    return old
+
+def set_8N1(fd, when=TCSAFLUSH):
+    mode = tcgetattr(fd)
+    old = mode[:]
+    mode[IFLAG] &= ~(INPCK | ISTRIP)
+    mode[IFLAG] |= (IGNPAR)
+    mode[CFLAG] &= ~(PARENB | CSTOPB)
+    mode[CFLAG] |= CS8
+    tcsetattr(fd, when, mode)
+    return old
+
+def set_7E1(fd, when=TCSAFLUSH):
+    mode = tcgetattr(fd)
+    old = mode[:]
+    mode[IFLAG] &= ~(IGNPAR | ISTRIP)
+    mode[IFLAG] |= (INPCK)
+    mode[CFLAG] &= ~(CSTOPB | PARODD)
+    mode[CFLAG] |= (CS7 | PARENB)
     tcsetattr(fd, when, mode)
     return old
 
@@ -527,4 +551,76 @@ def save_state(fd):
     savestate = tcgetattr(fd)
     _TTYSTATES[fd] = savestate
 
+
+
+class SerialPort(object):
+    def __init__(self, fname, setup="9600 8N1"):
+        st = os.stat(fname).st_mode
+        if not stat.S_ISCHR(stat.S_IFMT(st)):
+            raise ValueError, "%s is not a character device." % fname
+        fd = os.open(fname, os.O_RDWR)
+        tcflush(fd, TCIOFLUSH)
+        setraw(fd)
+        fo = os.fdopen(fd, "w+", 0)
+        self._fo = fo
+        self.name = fname
+        self.closed = False
+        self.set_serial(setup)
+
+    def fileno(self):
+        return self._fo.fileno()
+
+    def sendbreak(self, duration=0):
+        tcsendbreak(self._fo.fileno(), duration)
+
+    def set_baud(self, baud):
+        set_baud(self._fo.fileno(), baud)
+
+    def set_serial(self, spec):
+        """Quick and easy way to setup the serial port.
+        Supply a string such as "9600 8N1".
+        """
+        fd = self._fo.fileno()
+        baud, mode = spec.split() 
+        set_baud(fd, baud)
+        if mode == "8N1":
+            return set_8N1(fd)
+        elif mode == "7E1":
+            return set_7E1(fd)
+        else:
+            raise ValueError, "set_serial: bad serial string."
+
+    def get_inqueue(self):
+        v = fcntl.ioctl(self._fo.fileno(), TIOCINQ, '\x00\x00\x00\x00')
+        return struct.unpack("i", v)[0]
+
+    def __str__(self):
+        if not self.closed:
+            fl = flag_string(self._fo.fileno())
+            return "%s:\n%s" % (self.name, fl)
+        else:
+            return "SerialPort %r is closed." % self.name
+
+    def stty(self, *args):
+        return stty(self._fo.fileno(), *args)
+
+    @systemcall
+    def read(self, amt=4096):
+        amt = min(amt, self.get_inqueue())
+        return self._fo.read(amt)
+
+    @systemcall
+    def write(self, data):
+        return self._fo.write(data)
+
+    @systemcall
+    def readline(self, hint=-1):
+        return self._fo.readline(hint)
+
+    @systemcall
+    def close(self):
+        fo = self._fo
+        self._fo = None
+        self.closed = True
+        return fo.close()
 
