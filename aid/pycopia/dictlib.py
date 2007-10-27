@@ -74,8 +74,8 @@ class AttrDictWrapper(object):
 class AttrDict(dict):
     """A dictionary with attribute-style access. It maps attribute access to
     the real dictionary.  """
-    def __init__(self, init={}):
-        dict.__init__(self, init)
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
 
     def __getstate__(self):
         return self.__dict__.items()
@@ -144,7 +144,7 @@ class AttrDictDefault(dict):
 
 
 class ObjectCache(dict):
-    """A dict that caches objects. Simple adds a method, get_object, that
+    """A dict that caches objects. Adds a method, get_object, that
     works like get() but takes a constructor callable that is called if
     the object is not found here.  
     """
