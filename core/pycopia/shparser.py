@@ -110,18 +110,14 @@ Feed the parser, callback gets an argv list for each completed suite."""
         f.add_transition(ANY, 8, self._endvar, 3)
         f.add_transition("}", 10, self._endvarbrace, 3)
         f.add_transition(ANY, 10, self._vartext, 10)
-        # single quotes quote all
+        # quotes allow embedding word breaks and such.
+        # Single quotes can quote double quotes, and vice versa.
         f.add_transition("'", 0, None, 2)
         f.add_transition("'", 2, self._singlequote, 0)
         f.add_transition(ANY, 2, self._addtext, 2)
-        # double quotes allow embedding word breaks and such
         f.add_transition('"', 0, None, 3)
         f.add_transition('"', 3, self._doublequote, 0)
         f.add_transition(ANY, 3, self._addtext, 3)
-        # single-quotes withing double quotes
-        f.add_transition("'", 3, None, 5)
-        f.add_transition("'", 5, self._singlequote, 3)
-        f.add_transition(ANY, 5, self._addtext, 5)
         self._fsm = f
 
     def _startvar(self, c, fsm):

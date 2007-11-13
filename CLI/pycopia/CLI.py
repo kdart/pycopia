@@ -213,11 +213,12 @@ argument must match a name of a method.
             else:
                 self.except_hook(ex, val, tb)
         else:
-            try:
-                self._environ["?"] = int(rv)
-            except (ValueError, TypeError, AttributeError):
-                self._environ["?"] = -1
-            self._environ["_"] = rv
+            if rv is not None:
+                try:
+                    self._environ["?"] = int(rv)
+                except (ValueError, TypeError, AttributeError):
+                    self._environ["?"] = 0
+                self._environ["_"] = rv
             return rv
 
     def _expand_aliases(self, argv):
