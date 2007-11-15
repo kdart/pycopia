@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: us-ascii -*-
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -25,6 +25,12 @@ from pycopia.fsm import FSM
 from pycopia import ascii
 
 from pycopia import scheduler
+
+# meta modifiers for tables
+SHIFT = 0x200
+ALT = 0x400
+META = 0x800
+COMPOSE = 0x1000
 
 # from <linux/input.h>
 # * Event types
@@ -583,49 +589,53 @@ for c in ascii.digits:
     _DIGITS[c] = val
 del c
 
-_SHIFTED = 0x200
-
-_PUNC = {
- '!': _SHIFTED | KEY_1,
- '"': _SHIFTED | KEY_APOSTROPHE,
- '#': _SHIFTED | KEY_3,
- '$': _SHIFTED | KEY_4,
- '%': _SHIFTED | KEY_5,
- '&': _SHIFTED | KEY_7,
+# ascii codes that result from modifiers
+# TODO add more ISO-8859-1 symbols
+_KEYMAP = { # This reflects a en_US keyboard mapping.
  "'": KEY_APOSTROPHE,
- '(': _SHIFTED | KEY_9,
- ')': _SHIFTED | KEY_0,
- '*': _SHIFTED | KEY_8,
- '+': _SHIFTED | KEY_EQUAL,
  ',': KEY_COMMA,
  '-': KEY_MINUS,
  '.': KEY_DOT,
  '/': KEY_SLASH,
- ':': _SHIFTED | KEY_SEMICOLON,
  ';': KEY_SEMICOLON,
- '<': _SHIFTED | KEY_COMMA,
  '=': KEY_EQUAL,
- '>': _SHIFTED | KEY_DOT,
- '?': _SHIFTED | KEY_SLASH,
- '@': _SHIFTED | KEY_2,
  '[': KEY_LEFTBRACE,
- '\\': KEY_BACKSLASH,
  ']': KEY_RIGHTBRACE,
- '^': _SHIFTED | KEY_6,
- '_': _SHIFTED | KEY_MINUS,
+# '\\': KEY_BACKSLASH, # handled specially, since it is an escape
  '`': KEY_GRAVE,
- '{': _SHIFTED | KEY_LEFTBRACE,
- '|': _SHIFTED | KEY_BACKSLASH,
- '}': _SHIFTED | KEY_RIGHTBRACE,
- '~': _SHIFTED | KEY_GRAVE,
+ '!': SHIFT | KEY_1,
+ '"': SHIFT | KEY_APOSTROPHE,
+ '#': SHIFT | KEY_3,
+ '$': SHIFT | KEY_4,
+ '%': SHIFT | KEY_5,
+ '&': SHIFT | KEY_7,
+ '(': SHIFT | KEY_9,
+ ')': SHIFT | KEY_0,
+ '*': SHIFT | KEY_8,
+ '+': SHIFT | KEY_EQUAL,
+ ':': SHIFT | KEY_SEMICOLON,
+ '<': SHIFT | KEY_COMMA,
+ '>': SHIFT | KEY_DOT,
+ '?': SHIFT | KEY_SLASH,
+ '@': SHIFT | KEY_2,
+ '^': SHIFT | KEY_6,
+ '_': SHIFT | KEY_MINUS,
+ '{': SHIFT | KEY_LEFTBRACE,
+ '|': SHIFT | KEY_BACKSLASH,
+ '}': SHIFT | KEY_RIGHTBRACE,
+ '~': SHIFT | KEY_GRAVE,
+ '¥': SHIFT | ALT | KEY_5,
+ '£': SHIFT | ALT | KEY_3,
 }
+
 
 class KeyEventGenerator(object):
     """ASCII in, events out."""
 
-    def __init__(self, device):
-        self._device = device # EventDevice handler.
-        self._init()
+    def __init__(self, device, keymap=_KEYMAP):
+        self._device = device # EventDevice handler (only uses write() method).
+        self._symbolmapping = keymap
+        self._init(keymap)
         self.reset()
 
     def reset(self):
@@ -634,19 +644,21 @@ class KeyEventGenerator(object):
         self._shift = 0 # %S
         self._alt = 0 # %A
         self._meta = 0 # %M
+        self._compose = 0 # %O
 
     def __call__(self, text):
         for c in text:
             self._fsm.process(c)
 
-    def _init(self):
+    def _init(self, keymap):
+        keysyms = "".join(keymap.keys())
         f = FSM(0)
         f.add_default_transition(self._error, 0)
         # key code names are in angle brackets
         f.add_transition_list(ascii.lowercase, 0, self._lower, 0)
         f.add_transition_list(ascii.uppercase, 0, self._upper, 0)
         f.add_transition_list(ascii.digits, 0, self._digit, 0)
-        f.add_transition_list(ascii.punctuation, 0, self._punctuation, 0)
+        f.add_transition_list(keysyms, 0, self._symbols, 0)
         f.add_transition_list(ascii.control, 0, self._control, 0)
         f.add_transition(" ", 0, self._space, 0)
         # Any key name may use the "<NAME>" syntax (without the "KEY_")
@@ -655,16 +667,19 @@ class KeyEventGenerator(object):
         f.add_transition('>', 2, self._keycode, 0)
         # slashes escape any special character.
         f.add_transition("\\", 0, None, 1)
-        f.add_transition_list(ascii.punctuation, 1, self._punctuation, 0)
+        f.add_transition("\\", 1, self._backslash, 0)
+        f.add_transition_list("tnrbe", 1, self._specials, 0)
+        f.add_transition_list(keysyms, 1, self._symbols, 0)
         # percent signals meta transitions.
         f.add_transition("%", 0, None, 3)
-        f.add_transition("%", 3, self._punctuation, 0)
-        f.add_transition_list("CcSsAaMm", 3, self._handlespecial, 0)
+        f.add_transition("%", 3, self._symbols, 0)
+        f.add_transition_list("CcSsAaMmOo", 3, self._stickies, 0)
         self._fsm = f
 
     def _error(self, input_symbol, fsm):
+        msg = 'Error: symbol: %s, state: %s' % (input_symbol, fsm.current_state)
         fsm.reset()
-        raise ValueError('Error: symbol: %s stack: %r' % (input_symbol, fsm.stack))
+        raise ValueError(msg)
 
     def _startkeycode(self, c, fsm):
         fsm.keyname = ""
@@ -698,19 +713,49 @@ class KeyEventGenerator(object):
         self._presskey(val)
         scheduler.sleep(0.1)
 
-    def _punctuation(self, c, fsm):
+    def _backslash(self, c, fsm):
+        self._presskey(KEY_BACKSLASH)
+        scheduler.sleep(0.1)
+
+    def _symbols(self, c, fsm):
         d = self._device
-        val = _PUNC[c]
-        if val & _SHIFTED:
-            val &= ~_SHIFTED
-            shifted = 1
-        else:
-            shifted = 0
+        val = self._symbolmapping[c]
+        code = val & 0x1ff
+        shifted = val & SHIFT
+        alt = val & ALT
+        meta = val & META
+        compose = val & COMPOSE
+
+        if compose:
+            d.write(EV_KEY, KEY_COMPOSE, 1)
         if shifted:
             d.write(EV_KEY, KEY_LEFTSHIFT, 1)
-        self._presskey(val)
+        if alt:
+            d.write(EV_KEY, KEY_LEFTALT, 1)
+        if meta:
+            d.write(EV_KEY, KEY_LEFTMETA, 1)
+        self._presskey(code)
+        if meta:
+            d.write(EV_KEY, KEY_LEFTMETA, 0)
+        if alt:
+            d.write(EV_KEY, KEY_LEFTALT, 0)
         if shifted:
             d.write(EV_KEY, KEY_LEFTSHIFT, 0)
+        if compose:
+            d.write(EV_KEY, KEY_COMPOSE, 0)
+        scheduler.sleep(0.1)
+
+    def _specials(self, c, fsm):
+        if c == "t":
+            self._device.write(EV_KEY, KEY_TAB, 0)
+        elif c == "n":
+            self._device.write(EV_KEY, KEY_ENTER, 0)
+        elif c == "r":
+            self._device.write(EV_KEY, KEY_KPENTER, 0)
+        elif c == "b":
+            self._device.write(EV_KEY, KEY_BACKSPACE, 0)
+        elif c == "e":
+            self._device.write(EV_KEY, KEY_ESC, 0)
         scheduler.sleep(0.1)
 
     def _control(self, c, fsm):
@@ -724,8 +769,8 @@ class KeyEventGenerator(object):
         self._presskey(KEY_SPACE)
         scheduler.sleep(0.1)
 
-    # "sticky" modifiers. Explicitly turned on and off.
-    def _handlespecial(self, c, fsm):
+    # "sticky" modifiers. Explicitly turned on and off using a % prefix.
+    def _stickies(self, c, fsm):
         if c == "S" and not self._shift:
             self._shift = 1
             self._device.write(EV_KEY, KEY_LEFTSHIFT, 1)
@@ -753,6 +798,14 @@ class KeyEventGenerator(object):
         elif c == "m" and self._meta:
             self._meta = 0
             self._device.write(EV_KEY, KEY_LEFTMETA, 0)
+
+        elif c == "O" and not self._compose:
+            self._compose = 1
+            self._device.write(EV_KEY, KEY_COMPOSE, 1)
+        elif c == "o" and self._compose:
+            self._compose = 0
+            self._device.write(EV_KEY, KEY_COMPOSE, 0)
+
         scheduler.sleep(0.1)
 
 
