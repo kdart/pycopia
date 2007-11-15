@@ -635,10 +635,9 @@ class KeyEventGenerator(object):
         self._alt = 0 # %A
         self._meta = 0 # %M
 
-    def send(self, text):
+    def __call__(self, text):
         for c in text:
             self._fsm.process(c)
-            scheduler.sleep(0.1) # needed to prevent event loss.
 
     def _init(self):
         f = FSM(0)
@@ -673,27 +672,31 @@ class KeyEventGenerator(object):
     def _keyname(self, c, fsm):
         fsm.keyname += c
 
-    def _keycode(self, c, fsm):
-        val = _VALUEMAP[fsm.keyname]
+    def _presskey(self, val):
         self._device.write(EV_KEY, val, 1)
         self._device.write(EV_KEY, val, 0)
 
+    def _keycode(self, c, fsm):
+        val = _VALUEMAP[fsm.keyname]
+        self._presskey(val)
+        scheduler.sleep(0.1)
+
     def _lower(self, c, fsm):
         val = _LETTERS[c]
-        self._device.write(EV_KEY, val, 1)
-        self._device.write(EV_KEY, val, 0)
+        self._presskey(val)
+        scheduler.sleep(0.1)
 
     def _upper(self, c, fsm):
         val = _LETTERS[c.lower()]
         self._device.write(EV_KEY, KEY_LEFTSHIFT, 1)
-        self._device.write(EV_KEY, val, 1)
-        self._device.write(EV_KEY, val, 0)
+        self._presskey(val)
         self._device.write(EV_KEY, KEY_LEFTSHIFT, 0)
+        scheduler.sleep(0.1)
 
     def _digit(self, c, fsm):
         val = _DIGITS[c]
-        self._device.write(EV_KEY, val, 1)
-        self._device.write(EV_KEY, val, 0)
+        self._presskey(val)
+        scheduler.sleep(0.1)
 
     def _punctuation(self, c, fsm):
         d = self._device
@@ -705,21 +708,21 @@ class KeyEventGenerator(object):
             shifted = 0
         if shifted:
             d.write(EV_KEY, KEY_LEFTSHIFT, 1)
-        d.write(EV_KEY, val, 1)
-        d.write(EV_KEY, val, 0)
+        self._presskey(val)
         if shifted:
             d.write(EV_KEY, KEY_LEFTSHIFT, 0)
+        scheduler.sleep(0.1)
 
     def _control(self, c, fsm):
         val = _LETTERS[chr(ord(c) | 0x60)]
         self._device.write(EV_KEY, KEY_LEFTCTRL, 1)
-        self._device.write(EV_KEY, val, 1)
-        self._device.write(EV_KEY, val, 0)
+        self._presskey(val)
         self._device.write(EV_KEY, KEY_LEFTCTRL, 0)
+        scheduler.sleep(0.1)
 
     def _space(self, c, fsm):
-        self._device.write(EV_KEY, KEY_SPACE, 1)
-        self._device.write(EV_KEY, KEY_SPACE, 0)
+        self._presskey(KEY_SPACE)
+        scheduler.sleep(0.1)
 
     # "sticky" modifiers. Explicitly turned on and off.
     def _handlespecial(self, c, fsm):
@@ -750,6 +753,7 @@ class KeyEventGenerator(object):
         elif c == "m" and self._meta:
             self._meta = 0
             self._device.write(EV_KEY, KEY_LEFTMETA, 0)
+        scheduler.sleep(0.1)
 
 
 
@@ -766,19 +770,19 @@ if __name__ == "__main__":
     fo = Input.EventDevice("/dev/input/event1")
     g = KeyEventGenerator(fo)
     scheduler.sleep(2)
-    g.send('sent = """')
-    g.send(ascii.lowercase)
-    g.send("\n")
-    g.send(ascii.uppercase)
-    g.send("\n")
-    g.send(ascii.digits)
-    g.send("\n")
+    g('sent = """')
+    g(ascii.lowercase)
+    g("\n")
+    g(ascii.uppercase)
+    g("\n")
+    g(ascii.digits)
+    g("\n")
     # You have to slash escape the "<" and \ itself.
-    g.send( r"""!"#$&'()*+,-./:;\<=>?@[\\]^_`{|}~""" )
-    g.send("\n")
-    g.send("ab\%c<TAB>%Sdef%s%Ci%cghi%%" )
-    g.send("\n")
-    g.send('"""\n')
+    g( r"""!"#$&'()*+,-./:;\<=>?@[\\]^_`{|}~""" )
+    g("\n")
+    g("ab\%c<TAB>%Sdef%s%Ci%cghi%%" )
+    g("\n")
+    g('"""\n')
     fo.close()
     expected = (ascii.lowercase + "\n" + ascii.uppercase + "\n" + ascii.digits + "\n" +
         r"""!"#$&'()*+,-./:;<=>?@[\]^_`{|}~""" + "\n" + "ab%c\tDEF\tghi%\n" )
