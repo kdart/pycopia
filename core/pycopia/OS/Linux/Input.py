@@ -62,115 +62,6 @@ def EVIOCGBIT(ev,len):
 def EVIOCGABS(abs):
     return _IOR(69, 0x40 + abs, INT5)       # get abs value/limits */
 
-# Event types
-
-EV_RST =        0x00
-EV_KEY =        0x01
-EV_REL =        0x02
-EV_ABS =        0x03
-EV_MSC =        0x04
-EV_LED =        0x11
-EV_SND =        0x12
-EV_REP =        0x14
-EV_FF =         0x15
-EV_MAX =        0x1f
-
-# Absolute axes codes
-
-ABS_X           = 0x00
-ABS_Y           = 0x01
-ABS_Z           = 0x02
-ABS_RX          = 0x03
-ABS_RY          = 0x04
-ABS_RZ          = 0x05
-ABS_THROTTLE    = 0x06
-ABS_RUDDER      = 0x07
-ABS_WHEEL       = 0x08
-ABS_GAS         = 0x09
-ABS_BRAKE       = 0x0a
-ABS_HAT0X       = 0x10
-ABS_HAT0Y       = 0x11
-ABS_HAT1X       = 0x12
-ABS_HAT1Y       = 0x13
-ABS_HAT2X       = 0x14
-ABS_HAT2Y       = 0x15
-ABS_HAT3X       = 0x16
-ABS_HAT3Y       = 0x17
-ABS_PRESSURE    = 0x18
-ABS_DISTANCE    = 0x19
-ABS_TILT_X      = 0x1a
-ABS_TILT_Y      = 0x1b
-ABS_MISC        = 0x1c
-ABS_MAX         = 0x1f
-
-# Relative axes codes
-
-REL_X =         0x00
-REL_Y =         0x01
-REL_Z =         0x02
-REL_HWHEEL =    0x06
-REL_DIAL =  0x07
-REL_WHEEL =     0x08
-REL_MISC =  0x09
-REL_MAX =       0x0f
-
-# Misc events
-
-MSC_SERIAL      = 0x00
-MSC_PULSELED    = 0x01
-MSC_MAX     = 0x07
-
-# * LEDs
-
-LED_NUML    = 0x00
-LED_CAPSL   = 0x01
-LED_SCROLLL = 0x02
-LED_COMPOSE = 0x03
-LED_KANA    = 0x04
-LED_SLEEP   = 0x05
-LED_SUSPEND = 0x06
-LED_MUTE    = 0x07
-LED_MISC    = 0x08
-LED_MAX = 0x0f
-
-# * Autorepeat values
-
-REP_DELAY   = 0x00
-REP_PERIOD  = 0x01
-REP_MAX = 0x01
-
-# * Sounds
-
-SND_CLICK   = 0x00
-SND_BELL    = 0x01
-SND_MAX = 0x07
-
-# Keys
-BTN_MISC    = 0x100
-BTN_0   = 0x100
-BTN_1   = 0x101
-BTN_2   = 0x102
-BTN_3   = 0x103
-BTN_4   = 0x104
-BTN_5   = 0x105
-BTN_6   = 0x106
-BTN_7   = 0x107
-BTN_8   = 0x108
-BTN_9   = 0x109
-BTN_MOUSE   = 0x110
-BTN_LEFT    = 0x110
-BTN_RIGHT   = 0x111
-BTN_MIDDLE  = 0x112
-BTN_SIDE    = 0x113
-BTN_EXTRA   = 0x114
-BTN_FORWARD = 0x115
-BTN_BACK    = 0x116
-
-KEY_MAX = 0x1ff
-
-
-# XXX missing KEY name constants
-
 #struct input_event {
 #        struct timeval time; = {long seconds, long microseconds}
 #        unsigned short type;
@@ -180,6 +71,7 @@ KEY_MAX = 0x1ff
 
 EVFMT = "llHHi"
 EVsize = struct.calcsize(EVFMT)
+
 class Event(object):
     """This structure is the collection of data for the general event
     interface. You can create one to write to an event device. If you read from
@@ -198,26 +90,28 @@ class Event(object):
     def encode(self):
         tv_sec, tv_usec = divmod(self.time, 1.0)
         return struct.pack(EVFMT, long(tv_sec), long(tv_usec*1000000.0), self.evtype, self.code, self.value)
-    
+
     def decode(self, ev):
         tv_sec, tv_usec, self.evtype, self.code, self.value = struct.unpack(EVFMT, ev)
         self.time = float(tv_sec) + float(tv_usec)/1000000.0
-    
+
     def set(self, evtype, code, value):
         self.time = time.time()
         self.evtype = int(evtype)
         self.code = int(code)
         self.value = int(value)
-        
+
 
 # base class for event devices. Subclass this for your specific device.
 class EventDevice(object):
     DEVNAME = None # must match name string of device 
-    def __init__(self):
+    def __init__(self, fname=None):
         self._fd = None
         self.name = ""
         self._eventq = Queue()
         self.idbus = self.idvendor = self.idproduct = self.idversion = None
+        if fname:
+            self._open(fname)
 
     def __str__(self):
         if self.idbus is None:
@@ -237,7 +131,7 @@ class EventDevice(object):
                     ev = Event()
                     ev.decode(raw[i*EVsize:(i+1)*EVsize])
                     self._eventq.push(ev)
-    
+
     def open(self, start=0):
         assert self.DEVNAME is not None
         for d in range(start, 16):
@@ -255,7 +149,7 @@ class EventDevice(object):
         self._fd = os.open(filename, os.O_RDWR)
         name = fcntl.ioctl(self._fd, EVIOCGNAME, chr(0) * 256)
         self.name = name.replace(chr(0), '')
-    
+
     def fileno(self):
         return self._fd
 
@@ -277,15 +171,15 @@ class EventDevice(object):
     def get_driverversion(self):
         ver = fcntl.ioctl(self._fd, EVIOCGVERSION, '\x00\x00\x00\x00')
         return struct.unpack(INT, ver)[0]
-    
+
     def get_deviceid(self):
         ver = fcntl.ioctl(self._fd, EVIOCGID, '\x00\x00\x00\x00\x00\x00\x00\x00')
         self.idbus, self.idvendor, self.idproduct, self.idversion = struct.unpack(SHORT4, ver)
         return self.idbus, self.idvendor, self.idproduct, self.idversion
-    
+
     def readable(self):
         return bool(self._fd)
-    
+
     def writable(self):
         return False
 
@@ -305,9 +199,4 @@ class EventDevice(object):
         pass
 
 
-def _test(argv):
-    pass # XXX
-
-if __name__ == "__main__":
-    _test(sys.argv)
 

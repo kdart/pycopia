@@ -26,17 +26,7 @@ import re
 import binascii
 
 from pycopia.aid import removedups
-
-lowercase = 'abcdefghijklmnopqrstuvwxyz'
-uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-digits = '0123456789'
-letters = lowercase + uppercase
-alphanumeric = lowercase + uppercase + digits
-whitespace = ' \t\n\r\v\f'
-CRLF   = "\r\n"
-punctuation = """!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"""
-printable = digits + letters + punctuation + whitespace
-
+from pycopia.ascii import *
 
 def cut_string(s, maxlen=800):
     """Cuts a long string, returning the head and tail combined, with the
