@@ -26,6 +26,8 @@ import time
 
 from pycopia import socket
 
+randomizer = random.SystemRandom()
+
 class GUID(object):
     '''
      A globally unique identifier that combines ip, time, and random bits.  Since the 
@@ -38,14 +40,13 @@ class GUID(object):
      two databases together, combining data, or generating keys in distributed
      systems.
     '''
-    rand = random.Random()
     ip = ''
     try:
         ip = socket.get_myaddress()
     except (socket.gaierror): # if we don't have an ip, default to someting in the 10.x.x.x private range
         ip = '10'
         for i in range(3):
-            ip += '.' + str(rand.randrange(1, 254))
+            ip += '.' + str(randomizer.randrange(1, 254))
     # leave space for ip v6 (65K in each sub)
     hexip = ''.join(["%04x" % long(i) for i in ip.split('.')])
     lastguid = ""
@@ -60,7 +61,7 @@ class GUID(object):
                 now = long(time.time() * 1000)
                 self.guid = ("%016x" % now) + self.__class__.hexip
                 # random part
-                self.guid += ("%03x" % (self.__class__.rand.randrange(0, 4095)))
+                self.guid += ("%03x" % (randomizer.randrange(0, 4095)))
             self.__class__.lastguid = self.guid
       
         elif type(guid) == type(self): # if a GUID object, copy its value

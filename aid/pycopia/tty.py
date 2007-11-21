@@ -606,7 +606,6 @@ class SerialPort(object):
 
     @systemcall
     def read(self, amt=4096):
-        amt = min(amt, self.get_inqueue())
         return self._fo.read(amt)
 
     @systemcall
