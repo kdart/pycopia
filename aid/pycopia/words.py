@@ -22,6 +22,7 @@ fetch words from the system word list, using regular expressions.
 
 import re
 
+from pycopia import UserFile
 
 WORDFILES = ["/usr/share/dict/words", "/usr/dict/words"]
 
@@ -29,7 +30,7 @@ WORDFILES = ["/usr/share/dict/words", "/usr/dict/words"]
 def get_wordfile():
     for fn in WORDFILES:
         try:
-            wordfile = open(fn, "r")
+            wordfile = UserFile.open(fn, "r")
         except IOError:
             pass
         else:
@@ -37,14 +38,30 @@ def get_wordfile():
     raise ValueError, "cannot find file of words."
 
 
+def get_random_word():
+    """Return a randomly selected word from dict file."""
+    from pycopia import sysrandom
+    fo = get_wordfile()
+    try:
+        point = sysrandom.randrange(fo.size)
+        fo.seek(point)
+        c = fo.read(1)
+        while c != '\n' and fo.tell() > 0:
+            fo.seek(-2, 1)
+            c = fo.read(1)
+        word = fo.readline().strip()
+    finally:
+        fo.close()
+    return word
+
+
 def get_word_list(patt, wordfile=None):
-    wl = []
+    """Yield words matching pattern (like grep)."""
     if not wordfile:
         wordfile = get_wordfile()
     wre = re.compile(patt)
     for line in wordfile:
         test = line.strip()
-        if wre.search(test):
-            wl.append(test)
-    return wl
+        if wre.match(test):
+            yield test
 
