@@ -102,6 +102,37 @@ class Event(object):
         self.value = int(value)
 
 
+class EventFile(object):
+    """Read from a file containing raw recorded events."""
+    def __init__(self, fname, mode="r"):
+        self._fo = open(fname, mode)
+        self._eventq = Queue()
+
+    def read(self, amt=None): # amt not used, provided for compatibility.
+        """Read a single Event object from stream."""
+        if not self._eventq:
+            if not self._fill():
+                return None
+        return self._eventq.pop()
+
+    def readall(self):
+        ev = self.read()
+        while ev:
+            yield ev
+            ev = self.read()
+
+    def _fill(self):
+        raw = self._fo.read(EVsize * 32)
+        if raw:
+            for i in xrange(len(raw)/EVsize):
+                ev = Event()
+                ev.decode(raw[i*EVsize:(i+1)*EVsize])
+                self._eventq.push(ev)
+            return True
+        else:
+            return False
+
+
 # base class for event devices. Subclass this for your specific device.
 class EventDevice(object):
     DEVNAME = None # must match name string of device 
@@ -163,6 +194,12 @@ class EventDevice(object):
         if not self._eventq:
             self._fill()
         return self._eventq.pop()
+
+    def readall(self):
+        ev = self.read()
+        while ev:
+            yield ev
+            ev = self.read()
 
     def write(self, evtype, code, value):
         ev = Event(0.0, evtype, code, value)

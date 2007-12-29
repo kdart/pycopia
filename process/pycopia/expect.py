@@ -434,6 +434,7 @@ through a filter function.  """
         self.cmd_interp = cmd_interp
         if self.cmd_interp:
             self.cmd_interp.set_session(self)
+            from pycopia.CLI import CommandQuit
         print msg or "\nEntering interactive mode."
         print "Type ^%s to stop interacting." % (chr(ord(escape) | 0x40))
         # save tty state and set to raw mode
@@ -472,7 +473,7 @@ through a filter function.  """
                         try:
                             self.cmd_interp.interact()
                             tty.setraw(stdin_fd)
-                        except InteractiveQuit:
+                        except CommandQuit:
                             break
                         except:
                             extype, exvalue, tb = sys.exc_info()

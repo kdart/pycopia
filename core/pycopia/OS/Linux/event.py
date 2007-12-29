@@ -628,7 +628,6 @@ _KEYMAP = { # This reflects a en_US keyboard mapping.
  '£': SHIFT | ALT | KEY_3,
 }
 
-
 class KeyEventGenerator(object):
     """ASCII in, events out."""
 

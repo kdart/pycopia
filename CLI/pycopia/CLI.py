@@ -31,7 +31,6 @@ __all__ = ['CLIException', 'CommandQuit', 'CommandExit', 'NewCommand',
 
 import sys, os
 from cStringIO import StringIO
-import traceback
 
 try:
     import readline # readline is very, very important to us...
@@ -1067,11 +1066,11 @@ class FileCLI(GenericCLI):
                     continue
             if fo_fd in rfd:
                 try:
-                    text = self._obj.read(1)
+                    text = self._obj.read(4096)
                 except (OSError, EOFError), err:
                     tty.tcsetattr(stdin_fd, tty.TCSAFLUSH, ttystate)
-                    self._print( '*** EOF ***' )
-                    self._print( err)
+                    self._print('*** EOF ***')
+                    self._print(err)
                     break
                 if text:
                     io.write(text)
@@ -1080,7 +1079,7 @@ class FileCLI(GenericCLI):
                     break
             if stdin_fd in rfd:
                 char = io.read(1)
-                if char == escape: 
+                if char == escape:
                     break
                 else:
                     try:
