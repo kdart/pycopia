@@ -21,12 +21,11 @@ A Globally Unique Identifier object. Mostly stolen from ASPN snippet.
 """
 
 
-import random
-import time
 
 from pycopia import socket
+from pycopia import timelib
+from pycopia import sysrandom
 
-randomizer = random.SystemRandom()
 
 class GUID(object):
     '''
@@ -46,7 +45,7 @@ class GUID(object):
     except (socket.gaierror): # if we don't have an ip, default to someting in the 10.x.x.x private range
         ip = '10'
         for i in range(3):
-            ip += '.' + str(randomizer.randrange(1, 254))
+            ip += '.' + str(sysrandom.randrange(1, 254))
     # leave space for ip v6 (65K in each sub)
     hexip = ''.join(["%04x" % long(i) for i in ip.split('.')])
     lastguid = ""
@@ -58,10 +57,10 @@ class GUID(object):
             self.guid = self.__class__.lastguid
             while self.guid == self.__class__.lastguid:
                 # time part
-                now = long(time.time() * 1000)
+                now = long(timelib.now() * 1000)
                 self.guid = ("%016x" % now) + self.__class__.hexip
                 # random part
-                self.guid += ("%03x" % (randomizer.randrange(0, 4095)))
+                self.guid += ("%03x" % (sysrandom.randrange(0, 4095)))
             self.__class__.lastguid = self.guid
       
         elif type(guid) == type(self): # if a GUID object, copy its value

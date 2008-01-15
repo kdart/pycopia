@@ -16,26 +16,44 @@
 #    Lesser General Public License for more details.
 
 """
-A helper module that wraps the standard email package to make simple things simple. ;-)
+A helper module that wraps the standard email package to make simple
+things simple. ;-)
 
 """
 
 import sys, os
-import time
 from email import *
 
 from pycopia.emailplus import *
 
+from pycopia import socket
+from pycopia import timelib
+
+
+class MailError(Exception):
+    pass
+
+
+_HOSTNAME = None
+
+def _get_hostname():
+    global _HOSTNAME
+    if _HOSTNAME is None:
+        _HOSTNAME = socket.gethostname()
+    return _HOSTNAME
+
+
 def formatdate(timeval=None):
     if timeval is None:
-        timeval = time.time()
-    timeval = time.gmtime(timeval)
+        timeval = timelib.now()
+    timeval = timelib.gmtime(timeval)
     return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (
             ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][timeval[6]],
             timeval[2],
             ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][timeval[1]-1],
                                 timeval[0], timeval[3], timeval[4], timeval[5])
+
 
 
 class SimpleMessage(Message.Message):
@@ -75,9 +93,14 @@ class AutoMessageMixin(object):
         rcptopts = rcpt_options or []
         if not self.mail_from or not self.rcpt_to:
             raise RuntimeError, "AutoMessage: cannot send. no From or recipients."
-        self["Date"] = formatdate()
         if self.has_key("Bcc"):
             del self["Bcc"]
+        now = timelib.now()
+        self["Date"] = formatdate(now)
+        self["Message-ID"] = "<%s.%x@%s>" % (
+            timelib.localtimestamp(now, fmt="%Y%m%d%H%M%S"), 
+            id(self) % 0x7fffffff,
+            _get_hostname())
         return smtp.sendmail(self.mail_from, self.rcpt_to, self.as_string(0), mopts, rcptopts)
 
     def Subject(self, subj):
@@ -177,8 +200,7 @@ Returns address string referring to user running this (yourself)."""
     if domain:
         return "%s@%s" % (name, domain), longname
     else:
-        from pycopia import socket
-        return "%s@%s" % (name, socket.gethostname()), longname
+        return "%s@%s" % (name, _get_hostname()), longname
 
 def getuser():
     """getuser()
@@ -211,7 +233,8 @@ def _do_attach(multipart, obj):
         multipart.attach(msg)
 
 
-def mail(obj, To=None, From=None, subject=None, cc=None, bcc=None):
+def ezmail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
+        extra_headers=None):
     """A generic mailer that sends a multipart-mixed message with attachments.
     The 'obj' parameter may be a MIME* message, or another type of object that
     will be converted to text. If it is a list, each element of the list will
@@ -237,25 +260,42 @@ def mail(obj, To=None, From=None, subject=None, cc=None, bcc=None):
     if bcc:
         outer.Bcc(bcc)
 
+    if extra_headers: # a dictionary of header names (keys), and values.
+        for name, value in extra_headers.items():
+            outer[name] = value
+
     mailhost = CONFIG.get("mailhost", "localhost")
 
     if mailhost == "localhost":
         smtp = LocalSender()
         status = outer.send(smtp)
         if not status:
-            print >>sys.stderr, status
+            raise MailError(str(status))
     else:
         from pycopia.inet import SMTP
         smtp = SMTP.SMTP(mailhost, bindto=CONFIG.get("bindto"))
         errs = outer.send(smtp)
         smtp.quit()
         if errs:
-            print >>sys.stderr, "Error while sending mail!"
-            print >>sys.stderr, errs
+            raise MailError(str(status))
+
+    return outer["Message-ID"]
+
+
+def mail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
+        extra_headers=None):
+    try:
+        return ezmail(obj, To, From, subject, cc, bcc, extra_headers)
+    except MailError, err:
+        print >>sys.stderr, "Error while sending mail!"
+        print >>sys.stderr, err
+        return None
+
 
 def get_config():
     from pycopia import basicconfig
     return basicconfig.get_config("ezmail.conf")
+
 
 class LocalSender(object):
     def sendmail(self, From, rcpt_to, msg, mopts=None, rcptopts=None):
@@ -277,5 +317,5 @@ CONFIG = get_config()
 
 
 if __name__ == "__main__":
-    mail(["This is a test.\n", "Another part"], None, subject="Testing ezmail")
+    print mail(["This is a test.\n", "Another part"], None, subject="Testing ezmail")
 
