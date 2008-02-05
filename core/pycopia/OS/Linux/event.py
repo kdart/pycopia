@@ -40,10 +40,13 @@ EV_KEY = 0x01
 EV_REL = 0x02
 EV_ABS = 0x03
 EV_MSC = 0x04
+EV_SW = 0x05
 EV_LED = 0x11
 EV_SND = 0x12
 EV_REP = 0x14
+EV_FF = 0x15
 EV_PWR = 0x16
+EV_FF_STATUS = 0x17
 EV_MAX = 0x1f
 
 # * Synchronization events.
@@ -567,6 +570,15 @@ BUS_AMIGA = 0x16
 BUS_ADB = 0x17
 BUS_I2C = 0x18
 BUS_HOST = 0x19
+BUS_GSC = 0x1A
+
+
+
+# Values describing the status of an effect
+
+FF_STATUS_STOPPED = 0x00
+FF_STATUS_PLAYING = 0x01
+FF_STATUS_MAX = 0x01
 
 
 
@@ -628,8 +640,38 @@ _KEYMAP = { # This reflects a en_US keyboard mapping.
  '£': SHIFT | ALT | KEY_3,
 }
 
+class RelativeMotionGenerator(object):
+    def __init__(self, device):
+        self._device = device # EventDevice handler (only uses write() method).
+
+    def MoveUp(self, ticks=1):
+        self._device.write(EV_REL, REL_Y, -ticks)
+        self._device.write(EV_SYN, 0, 0)
+
+    def MoveDown(self, ticks=1):
+        self._device.write(EV_REL, REL_Y, ticks)
+        self._device.write(EV_SYN, 0, 0)
+
+    def MoveLeft(self, ticks=1):
+        self._device.write(EV_REL, REL_X, -ticks)
+        self._device.write(EV_SYN, 0, 0)
+
+    def MoveRight(self, ticks=1):
+        self._device.write(EV_REL, REL_X, ticks)
+        self._device.write(EV_SYN, 0, 0)
+
+
+class AbsoluteMotionGenerator(object):
+    def __init__(self, device):
+        self._device = device # EventDevice handler
+
+    def MoveTo(self, x, y):
+        self._device.write(EV_ABS, ABS_X, x)
+        self._device.write(EV_ABS, ABS_Y, y)
+
+
 class KeyEventGenerator(object):
-    """ASCII in, events out."""
+    """ASCII in, events out. Call an instance with a string."""
 
     def __init__(self, device, keymap=_KEYMAP):
         self._device = device # EventDevice handler (only uses write() method).

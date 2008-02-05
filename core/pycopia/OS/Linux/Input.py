@@ -45,7 +45,6 @@ EVIOCGKEYCODE   = _IOR(69, 0x04, INT2)          # get keycode */
 EVIOCSKEYCODE   = _IOW(69, 0x04, INT2)          # set keycode */
 EVIOCGKEY       = _IOR(69, 0x05, INT2)          # get key value */
 EVIOCGNAME      = _IOC(_IOC_READ, 69, 0x06, 255)# get device name */
-EVIOCGBUS       = _IOR(69, 0x07, SHORT4)        # get bus address */
 EVIOCRMFF       = _IOW(69, 0x81, INT)           # Erase a force effect */
 EVIOCSGAIN      = _IOW(69, 0x82, USHORT)        # Set overall gain */
 EVIOCSAUTOCENTER= _IOW(69, 0x83, USHORT)        # Enable or disable auto-centering */
@@ -56,11 +55,17 @@ EVIOCGEFFECTS   = _IOR(69, 0x84, INT)           # Report number of effects playa
 #EVIOCSFF       = _IOC(_IOC_WRITE, 69, 0x80, sizeof(struct ff_effect))  # send a force effect to a force feedback device */
 
 # these take parameters.
-def EVIOCGBIT(ev,len):
+def EVIOCGBIT(ev, len):
     return _IOC(_IOC_READ, 69, 0x20 + ev, len)  # get event bits */
 
 def EVIOCGABS(abs):
     return _IOR(69, 0x40 + abs, INT5)       # get abs value/limits */
+
+def EVIOCGSW(len):
+    return _IOC(_IOC_READ, 69, 0x1b, len)   # get all switch states */
+
+def EVIOCGLED(len):
+    return _IOC(_IOC_READ, 69, 0x19, len)   #  get all LEDs */
 
 #struct input_event {
 #        struct timeval time; = {long seconds, long microseconds}
