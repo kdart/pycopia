@@ -374,6 +374,10 @@ class Accept(HTTPHeader):
             v = filter(lambda o: isinstance(o, MediaRange), media)
             if v:
                 self.value = v
+            else:
+                self.value = [MediaRange()]
+        else:
+            self.value = [MediaRange()]
 
     def parse_value(self, data):
         rv = Media()
