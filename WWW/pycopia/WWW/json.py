@@ -1,15 +1,11 @@
 #!/usr/bin/python2.4
 # -*- coding: us-ascii -*-
 # vim:ts=2:sw=2:softtabstop=0:tw=74:smarttab:expandtab
-#
-# Copyright Google Inc. All Rights Reserved.
 
-"""Data access module for Droid WebUI.
-
-Provides JSON mini-framework.
 """
-
-__author__ = 'dart@google.com (Keith Dart)'
+Provides transparent RPC between Javascript and Python, using JSON
+encoding.
+"""
 
 import sys
 import time
@@ -198,7 +194,7 @@ def GetJSONDecoder():
   global _DECODER
   if _DECODER is None:
     decoder = JSONObjectDecoder()
-    decoder.register("date", _DtDecoder)
+    decoder.register("date", _DtDecoder) # pre-register date objects
     _DECODER =  simplejson.JSONDecoder(object_hook=decoder)
   return _DECODER
 

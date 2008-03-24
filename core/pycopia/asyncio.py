@@ -29,7 +29,6 @@ POLLPRI = select.POLLPRI
 
 from errno import EINTR, EBADF
 
-from pycopia.asyncinterface import HandlerMethods, get_default_handler
 from pycopia.aid import NULL
 
 class ExitNow(Exception):
@@ -50,68 +49,23 @@ O_ASYNC = os.O_ASYNC = {
 
 class Poll(object):
     """
-Poll()
-An object wrapper for the poll() system call. Use the register() method to add
-instances of the Dispatcher class or subclass. Call the poll() method to start
-polling, with a timeout. Default is no timeout.
-
     """
     def __init__(self):
         self.smap = {}
         self.pollster = select.poll()
 
     def __str__(self):
-        return "Poll is polling descriptors: %r" % (self.smap.keys())
-    
-    def _getflags(self, hobj):
-        flags = 0
-        if hobj.readable():
-            flags = POLLIN
-        if hobj.writable():
-            flags = flags | POLLOUT
-        if hobj.priority():
-            flags = flags | POLLPRI
-        return flags
-
-    def _reregister(self):
-        for fd, hobj in self.smap.items():
-            flags = self._getflags(hobj)
-            if flags:
-                self.pollster.register(fd, flags)
-            else:
-                try:
-                    self.pollster.unregister(fd)
-                except KeyError:
-                    pass
+        return "Polling descriptors: %r" % (self.smap.keys())
 
     def register(self, obj):
-        try:
-            handlers = obj.get_handlers() # might not have this...
-            if handlers:
-                for hobj in handlers:
-                    self.register_handler(hobj)
-                return
-        except AttributeError:
-            pass
-        if hasattr(obj, "fileno"):
-            hobj = get_default_handler(obj)
-            if hobj:
-                self.register_handler(hobj)
-                return
-        raise ValueError, "Poll.register: must be a file-like object or object with get_handlers() method."
-
-    def register_handler(self, hobj):
-        set_asyncio(hobj.fd)
-        self.smap[hobj.fd] = hobj
+        flags = self._getflags(obj)
+        if flags:
+            fd = obj.fileno()
+            self.smap[fd] = obj
+            self.pollster.register(fd, flags)
 
     def unregister(self, obj):
-        if hasattr(obj, "get_handlers"):
-            for hobj in obj.get_handlers():
-                self.unregister_fd(hobj.fd)
-        elif hasattr(obj, "fileno"):
-            self.unregister_fd(obj.fileno())
-    
-    def unregister_fd(self, fd):
+        fd = obj.fileno()
         try:
             del self.smap[fd]
         except KeyError:
@@ -120,20 +74,20 @@ polling, with a timeout. Default is no timeout.
             self.pollster.unregister(fd)
         except KeyError:
             pass
-    
+
     def poll(self, timeout=-1):
         timeout = int(timeout*1000) # the poll method time unit is milliseconds
         while 1:
             try:
                 rl = self.pollster.poll(timeout)
             except select.error, why:
-                if why[0] == EBADF:
-                    self._reregister() # remove objects that might have went away
+                if why[0] == EINTR:
                     continue
-                elif why[0] == EINTR:
+                elif why[0] == EBADF:
+                    self._removebad() # remove objects that might have went away
                     continue
                 else:
-                    raise 
+                    raise
             else:
                 break
         for fd, flags in rl:
@@ -145,24 +99,20 @@ polling, with a timeout. Default is no timeout.
                 if (flags  & POLLERR) or (flags & POLLNVAL):
                     self.unregister_fd(fd)
                     hobj.hangup_handler()
-                    raise ExitNow, "Error while polling: %s" % (fd,)
-                if (flags  & POLLHUP):
+                    continue
+                if (flags & POLLHUP):
                     self.unregister_fd(fd)
                     hobj.hangup_handler()
                     continue
-                if (flags  & POLLIN):
+                if (flags & POLLIN):
                     hobj.read_handler()
                 if (flags & POLLOUT):
                     hobj.write_handler()
                 if (flags & POLLPRI):
                     hobj.pri_handler()
-            except ExitNow, val:
-                pass
-                #raise ExitNow, val
             except:
                 ex, val, tb = sys.exc_info()
                 hobj.error_handler(ex, val, tb)
-        self._reregister()
 
     # note that if you use this, unregister the default SIGIO handler
     def loop(self, timeout=10, callback=NULL):
@@ -171,9 +121,61 @@ polling, with a timeout. Default is no timeout.
             callback()
 
     def unregister_all(self):
-        for x in self.smap.keys():
-            self.unregister_fd(x)
+        for obj in self.smap.values():
+            self.unregister(obj)
+
     clear = unregister_all
+
+    def _getflags(self, hobj):
+        flags = 0
+        if hobj.readable():
+            flags = POLLIN
+        if hobj.writable():
+            flags |= POLLOUT
+        if hobj.priority():
+            flags |= POLLPRI
+        return flags
+
+    def _removebad(self):
+        for fd, hobj in self.smap.items():
+            try:
+                os.fstat(fd)
+            except OSError:
+                del self.smap[fd]
+                try:
+                    self.pollster.unregister(fd)
+                except KeyError:
+                    pass
+
+
+
+# Mixin for objects that only want to define a few methods for a class
+# that the Poll object needs.
+class PollerInterface(object):
+
+    def readable(self):
+        return False
+
+    def writable(self):
+        return False
+
+    def priority(self):
+        return False
+
+    def read_handler(self):
+        pass
+
+    def write_handler(self):
+        pass
+
+    def pri_handler(self):
+        pass
+
+    def hangup_handler(self):
+        pass
+
+    def error_handler(self, ex, val, tb):
+        print >>sys.stderr, "Poller error: %s (%s)" % (ex, val)
 
 
 # Default setup is to poll our files when we get a SIGIO. This is done since
@@ -289,12 +291,7 @@ class DirectoryNotifier(object):
         pass
 
 
-# a singleton instance of Poll. Usually, only this poller is used in a program
-# using this module.
-try:
-    poller
-except NameError:
-    poller = Poll()
+poller = Poll()
 
 def get_poller():
     global poller

@@ -42,7 +42,18 @@ For more information, see /usr/src/linux/Documentation/rtc.txt
 
 import os, fcntl, struct
 
+
+RTC_IS_OPEN = 0x01    # means /dev/rtc is in use
+RTC_TIMER_ON = 0x02   # missed irq timer active
+
+# status bits
+RTC_IRQF = 0x80 # any of the following 3 is active
+RTC_PF = 0x40
+RTC_AF = 0x20
+RTC_UF = 0x10
+
 _UL = struct.pack("L", 0L)
+_UL_len = len(_UL)
 
 class rtc_time(object):
     FMT = "9i"
@@ -132,9 +143,8 @@ class rtc_wkalrm(object):
 class RTC(object):
     """RTC() represent the Real Time Clock device on a PC. Some methods require
 root privileges. """
-    def __init__(self, callback=None):
+    def __init__(self):
         self.rtc_fd = os.open("/dev/rtc", os.O_RDONLY)
-        self.callback = callback
 
     def fileno(self):
         return self.rtc_fd
@@ -143,7 +153,7 @@ root privileges. """
         self.close()
 
     def close(self):
-        if self.rtc_fd:
+        if self.rtc_fd is not None:
             os.close(self.rtc_fd)
             self.rtc_fd = None
 
@@ -180,9 +190,9 @@ will reset it to the value read from the device."""
     def read(self, amt=None): 
         """read() returns a 2-tuple. (number of interrupts since last read,
 interrupt status). May block."""
-        raw = struct.unpack("L", os.read(self.rtc_fd, len(_UL)))[0]
-        status = int(raw & 0xff)
-        count = int(raw >> 8)
+        raw = struct.unpack("L", os.read(self.rtc_fd, _UL_len))[0]
+        status = raw & 0xf0
+        count = raw >> 8
         return count, status
 
     def alarm_interrupt_on(self):
@@ -250,20 +260,6 @@ only fills in the year, month, day, hour, minute, and second fields.
     def wake_read(self):
         _wake_time = rtc_wkalrm(None)
         return rtc_wkalrm(fcntl.ioctl(self.rtc_fd, RTC_WKALM_RD, repr(_wake_time)))
-
-    # asyncio interfaces
-    def readable(self):
-        return 1
-
-    def writable(self):
-        return 0
-
-    def handle_read_event(self):
-        count, status = self.read()
-        if self.callback:
-            while count > 0: # deals with "stacked up" events
-                self.callback()
-                count -= 1
 
 
 class StopWatch(object):
