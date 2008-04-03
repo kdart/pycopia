@@ -145,6 +145,8 @@ class RTC(object):
 root privileges. """
     def __init__(self):
         self.rtc_fd = os.open("/dev/rtc", os.O_RDONLY)
+        flags = fcntl.fcntl(self.rtc_fd, fcntl.F_GETFD)
+        fcntl.fcntl(self.rtc_fd, fcntl.F_SETFD, flags | fcntl.FD_CLOEXEC)
 
     def fileno(self):
         return self.rtc_fd

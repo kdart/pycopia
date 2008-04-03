@@ -118,7 +118,8 @@ class AttrDictDefault(dict):
             self.__dict__[key] = val
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, dict.__repr__(self))
+        return "%s(%s, %r)" % (self.__class__.__name__, dict.__repr__(self), 
+            self.__dict__["_default"])
 
     def __setitem__(self, key, value):
         return super(AttrDictDefault, self).__setitem__(key, value)
