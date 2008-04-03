@@ -137,7 +137,7 @@ class AttrDictDefault(dict):
     __setattr__ = __setitem__
 
     def copy(self):
-        return AttrDictDefault(self, self.__dict__["_default"])
+        return self.__class__(self, self.__dict__["_default"])
 
     def get(self, default=None):
         df = default or self.__dict__["_default"]
