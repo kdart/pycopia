@@ -131,11 +131,11 @@ Spawns a copy of this process. Note that the log file is not inherited."""
     def basename(self):
         return os.path.basename(self.cmdline.split()[0])
 
-    def kill(self, sig=SIGTERM):
+    def kill(self, sig=SIGINT):
         if not self.deadchild:
             os.kill(self.childpid, sig)
 
-    def killwait(self, sig=SIGTERM):
+    def killwait(self, sig=SIGINT):
         if not self.deadchild:
             os.kill(self.childpid, sig)
         return self.wait()
