@@ -217,7 +217,8 @@ class MergeDict(object):
 class SortedDict(dict):
     "A dictionary that keeps its keys in the order in which they're inserted."
     def __init__(self, data=None):
-        if data is None: data = {}
+        if data is None: 
+            data = {}
         dict.__init__(self, data)
         self.keyOrder = data.keys()
 
@@ -255,6 +256,17 @@ class SortedDict(dict):
     def value_for_index(self, index):
         "Returns the value of the item at the given zero-based index."
         return self[self.keyOrder[index]]
+
+    def pop(self, key, *args):
+        try:
+            item = dict.__getitem__(self, key)
+            self.__delitem__(key)
+        except KeyError:
+            if args:
+                item = args[0]
+            else:
+                raise
+        return item
 
 
 class MultiValueDict(dict):
