@@ -552,20 +552,30 @@ def save_state(fd):
     _TTYSTATES[fd] = savestate
 
 
+_MODEMAP = {
+    "r": 0, # O_RDONLY
+    "w": os.O_WRONLY,
+    "w+": os.O_RDWR,
+    "r+": os.O_RDWR,
+}
+
 
 class SerialPort(object):
-    def __init__(self, fname, setup="9600 8N1"):
+    def __init__(self, fname, mode="w+", setup="9600 8N1"):
         st = os.stat(fname).st_mode
         if not stat.S_ISCHR(stat.S_IFMT(st)):
             raise ValueError, "%s is not a character device." % fname
-        fd = os.open(fname, os.O_RDWR)
+        fd = os.open(fname, _MODEMAP[mode])
         tcflush(fd, TCIOFLUSH)
         setraw(fd)
-        fo = os.fdopen(fd, "w+", 0)
+        fo = os.fdopen(fd, mode, 0)
         self._fo = fo
         self.name = fname
         self.closed = False
         self.set_serial(setup)
+
+    def __del__(self):
+        self.close()
 
     def fileno(self):
         return self._fo.fileno()
@@ -618,8 +628,9 @@ class SerialPort(object):
 
     @systemcall
     def close(self):
-        fo = self._fo
-        self._fo = None
-        self.closed = True
-        return fo.close()
+        if self._fo is not None:
+            fo = self._fo
+            self._fo = None
+            self.closed = True
+            return fo.close()
 
