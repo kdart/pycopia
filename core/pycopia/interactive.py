@@ -36,8 +36,11 @@ PYHISTFILE     - name of the history file (defaults to $HOME/.pythonhist)
 Some external program invocations should be defined. These may contain a
 '%s' that will be expanded to a file name or url.
 
+XTERM          - How to invoke xterm, e.g. "urxvtc -title Python -name Python -e %s"
 EDITOR         - editor to use in the currrent terminal, 
+VIEWER         - What terminal text viewer (e.g. "/usr/bin/view")
 XEDITOR        - text editor for use in the X Windows System.
+XVIEWER        - What X text viewer (e.g. "/usr/bin/mousepad")
 BROWSER        - HTML browser for X GUI.
 CBROWSER       - HTML browser for character terminals.
 

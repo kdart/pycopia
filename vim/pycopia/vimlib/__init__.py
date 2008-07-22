@@ -179,7 +179,7 @@ def htmlhex(text):
     return "".join(map(lambda c: "%%%x" % (ord(c),), text))
 
 def get_visual_selection():
-    b = vim.current.buffer
+    b = current.buffer
     start_row, start_col = b.mark("<")
     end_row, end_col = b.mark(">")
     if start_row == end_row:
@@ -265,19 +265,6 @@ def keyword_split():
         command("split %s" % (filename,))
     else:
         print >>sys.stderr, "Could not find source to %s." % modname
-
-def get_visual_selection():
-    b = current.buffer
-    start_row, start_col = b.mark("<")
-    end_row, end_col = b.mark(">")
-    if start_row == end_row:
-        return b[start_row-1][start_col:end_col+1]
-    else:
-        s = [ b[start_row-1][start_col:] ]
-        for l in b[start_row:end_row-2]:
-            s.append(l)
-        s.append(b[end_row-1][:end_col+1])
-        return "\n".join(s)
 
 def visual_edit():
     text = get_visual_selection()
