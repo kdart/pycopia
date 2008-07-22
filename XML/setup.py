@@ -9,7 +9,7 @@ from glob import glob
 from setuptools import setup
 
 NAME = "pycopia-XML"
-VERSION = "1.0a2"
+VERSION = "1.0a3"
 
 DNAME = NAME.split("-", 1)[-1]
 ENAME = NAME.replace("-", "_")

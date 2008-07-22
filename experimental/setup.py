@@ -22,7 +22,7 @@ from setuptools import setup, find_packages
 from glob import glob
 
 NAME = "pycopia-experimental"
-VERSION = "1.0a2"
+VERSION = "1.0a3"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]

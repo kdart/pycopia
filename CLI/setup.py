@@ -8,7 +8,7 @@ ez_setup.use_setuptools()
 from setuptools import setup
 
 NAME = "pycopia-CLI"
-VERSION = "1.0a2"
+VERSION = "1.0a3"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
