@@ -20,11 +20,8 @@ Report object that creats XHTML format reports.
 
 """
 
-import sys
-
 from pycopia import reports
 from pycopia import timelib
-from pycopia.WWW import XHTML
 
 def escape(s):
     s = s.replace("&", "&amp;") # Must be first
@@ -32,72 +29,6 @@ def escape(s):
     s = s.replace(">", "&gt;")
     s = s.replace('"', "&quot;")
     return s
-
-class HTMLFormatter(reports.NullFormatter):
-    MIMETYPE = "text/html"
-    _MSGTYPESUB = {
-        "PASSED":'<font color="green">PASSED</font>',
-        "FAILED":'<font color="red">FAILED</font>',
-        "EXPECTED_FAIL":'<font color="#dd0000">EXPECTED FAIL</font>',
-        "INCOMPLETE":'<font color="yellow">INCOMPLETE</font>',
-        "ABORTED":'<font color="yellow">ABORTED</font>',
-        "INFO":"INFO",
-        "DIAGNOSTIC":'<font color="brown">DIAGNOSTIC</font>',
-    }
-
-    def title(self, title):
-        s = ["<br><h1>"]
-        s.append(escape(title))
-        s.append("</h1>\n")
-        return "".join(s)
-
-    def heading(self, text, level=1):
-        s = []
-        s.append("\n<h%s>" % (level,))
-        s.append(escape(text))
-        s.append("</h%s>\n" % (level,))
-        return "".join(s)
-
-    def paragraph(self, text):
-        return "<p>%s</p>\n" % (escape(text),)
-
-    def message(self, msgtype, msg, level=1):
-        if msgtype.find("TIME") >= 0:
-            msg = timelib.localtimestamp(msg)
-        msg = str(msg)
-        msgtype = self._MSGTYPESUB.get(msgtype, msgtype)
-        if msg.find("\n") > 0:
-            return "%s: <pre>%s</pre><br>\n" % (msgtype, escape(msg))
-        else:
-            return '<font face="courier" size="-1">%s: %s</font><br>\n' % (msgtype, escape(msg))
-
-    def text(self, text):
-        return "<pre>\n%s\n</pre>\n" % (text,)
-
-    def url(self, text, url):
-        return '<a href="%s">%s</a>\n' % (url, text)
-
-    def summaryline(self, text):
-        sum = "<pre>\n%s\n</pre>\n" % (text,)
-        return sum.replace("PASSED", self._MSGTYPESUB["PASSED"])
-
-    def section(self):
-        return "<hr>\n"
-
-    def page(self):
-        return "<br><hr><br>\n"
-
-    def initialize(self):
-        return """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Final//EN">
-<html>
-  <head>
-    <title>Test Results</title>
-  </head>
-<body>
-"""
-    def finalize(self):
-        return "\n</body>\n</html>\n"
-
 
 
 class XHTMLFormatter(reports.NullFormatter):
@@ -122,8 +53,7 @@ class XHTMLFormatter(reports.NullFormatter):
     <title>Test Results</title>
    <style type="text/css">
 body {background: white; color: black;
-    margin: .25in; border: 0; padding: 0;
-    font:13px/1.45 sans-serif; 
+    border: 0; padding: 0;
 }
 a:link {
     background-color: transparent;
@@ -139,12 +69,17 @@ a:hover {
     text-decoration:underline;
 }
 img {
-    border:0;
+    border: 10px;
+    padding: 0.25in;
 }
 
 pre {
     padding: 0;
-    margin: 0;
+    margin-left: 0.5in;
+}
+
+pre.analysis {
+   color: #225500;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -171,12 +106,18 @@ h2 {
 }
 h3, h4, h5 {
     font-size: 1.0em;
+    margin-left: 0.75in;
 }
 p {
    margin: 0;
    padding: 0;
    margin-left: .5in;
    font-family: monospace;
+}
+
+p.note {
+  color: #ff0000;
+  padding: 5pt;
 }
 
 span.passed {
@@ -198,9 +139,11 @@ span.aborted {
     color: yellow;
 }
 span.diagnostic {
+    color: #F85AF8;
 }
 
 span.info {
+    color: gray;
 }
 
    </style>
@@ -243,6 +186,9 @@ span.info {
     def text(self, text):
         return "<pre>%s</pre>\n" % (text,)
 
+    def analysis(self, text):
+        return '<h3>Analysis</h3>\n<pre class="analysis">%s</pre>\n' % (text,)
+
     def url(self, text, url):
         return '<p>%s: <a href="%s">%s</a></p>\n' % (text, url, url)
 
@@ -263,6 +209,7 @@ if __name__ == "__main__":
     report.initialize()
     report.info("Some self test info.")
     report.passed("yippee!")
+    report.add_analysis("Analyze this!")
     report.finalize()
 
 # End of file

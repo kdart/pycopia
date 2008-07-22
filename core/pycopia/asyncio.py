@@ -153,6 +153,9 @@ class Poll(object):
 # that the Poll object needs.
 class PollerInterface(object):
 
+    def fileno(self):
+        return -1
+
     def readable(self):
         return False
 

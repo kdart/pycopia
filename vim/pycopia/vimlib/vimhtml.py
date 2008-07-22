@@ -3,7 +3,11 @@
 
 # Functions to make editing [X]HTML files in vim more productive.
 
-import vim
+try:
+    import vim
+except ImportError:
+    from pycopia.vimlib import vimtest as vim
+
 import sys, os, re
 
 from pycopia.WWW import XHTML
@@ -24,7 +28,7 @@ def vimstring(obj):
     return unicode(str(obj), vim.eval("&fileencoding") or vim.eval("&encoding"))
 
 def htmlify():
-    vim.current.line = escape(vim.current.line)
+    vim.current.line = escape(vim.current.line).encode("ascii")
 
 def text_to_table():
     table = DTD.Table()

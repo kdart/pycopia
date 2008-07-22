@@ -204,9 +204,9 @@ def weekof(secs=None):
     secs = ((secs // 604800)*604800)-172800
     return localtime(secs)
 
-def seconds(minutes=0, hours=0, days=0, weeks=0):
+def seconds(seconds=0, minutes=0, hours=0, days=0, weeks=0):
     """Returns a value in seconds given some minutes, hours, days, or weeks."""
-    return minutes*60 + hours*3600 + days*86400 + weeks*604800
+    return seconds + minutes*60 + hours*3600 + days*86400 + weeks*604800
 
 def HMS(secs):
     """Return tuple of hours, minutes, and seconds given value in seconds."""
@@ -237,4 +237,9 @@ rfc822 compliant date value."""
     else:
         return strftime(fmt, localtime())
 
+def strptime_localtimestamp(ts, fmt="%a, %d %b %Y %H:%M:%S %Z"):
+    """Return seconds given a local timestamp string (inverse of
+    localtimestamp function).
+    """
+    return mktime(strptime(ts, fmt))
 

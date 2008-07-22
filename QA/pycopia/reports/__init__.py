@@ -98,6 +98,8 @@ class NullFormatter(object):
         return self.message("DIAGNOSTIC", msg, level)
     def text(self, text):
         return text
+    def analysis(self, text):
+        return text
     def url(self, text, url):
         return ""
     def page(self):
@@ -133,6 +135,7 @@ class NullReport(object):
     def add_message(self, msgtype, msg, level=1): pass
     def add_summary(self, entries): pass
     def add_text(self, text): pass
+    def add_analysis(self, text): pass
     def add_data(self, data, datatype, note=None): pass
     def add_url(self, text, url): pass
     def passed(self, msg=NO_MESSAGE, level=1): pass
@@ -173,6 +176,8 @@ class DebugReport(NullReport):
         print "add_summary"
     def add_text(self, text):
         print "add_text"
+    def add_analysis(self, text):
+        print "add_analysis"
     def add_data(self, data, datatype, note=None):
         print "add_data type: %s note: %s" % (datatype, note)
     def add_url(self, text, url):
@@ -261,6 +266,9 @@ the filename specified is "-" then use stdout.  """
     def add_text(self, text):
         self.write(self._formatter.text(text))
 
+    def add_analysis(self, text):
+        self.write(self._formatter.analysis(text))
+
     def add_data(self, data, datatype, note=None):
         self.write(self._formatter.text(
                         "  DATA type: %s note: %s\n" % (datatype, note)))
@@ -304,6 +312,9 @@ class StandardFormatter(NullFormatter):
 
     def text(self, text):
         return text
+
+    def analysis(self, text):
+        return "ANALYSIS:\n" + text
 
     def url(self, text, url):
         return "%s: <%s>\n" % (text, url)
@@ -426,6 +437,9 @@ class StackedReport(object):
 
     def add_text(self, text):
         map(lambda rpt: rpt.add_text(text), self._reports)
+
+    def add_analysis(self, text):
+        map(lambda rpt: rpt.add_analysis(text), self._reports)
 
     def add_data(self, data, datatype, note=None):
         map(lambda rpt: rpt.add_data(data, datatype, note), self._reports)
