@@ -16,7 +16,8 @@ VERSION = "1.0a2"
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
 
-itimer = Extension('pycopia.itimer', ['pycopia.itimer.pyx'],)
+itimer = Extension('pycopia.itimer', ['pycopia.itimer.pyx'],
+                   libraries=["rt"])
 
 if sys.version_info[:2] < (2, 5):
 # The readline and mmap modules here are copies of the Python 2.5 modules.

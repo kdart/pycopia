@@ -78,6 +78,25 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(olddelay, 0.0)
         self.assertEqual(oldinterval, 0.0)
 
+    def test_nanosleep(self):
+        signal.signal(signal.SIGALRM, catcher)
+        start = s = time.time()
+        try:
+            itimer.alarm(2.0)
+            itimer.nanosleep(10.0)
+        finally:
+            signal.signal(signal.SIGALRM, signal.SIG_DFL)
+        self.assertAlmostEqual(time.time()-start, 10.0, places=2)
+
+    def test_absolutesleep(self):
+        signal.signal(signal.SIGALRM, catcher)
+        start = s = time.time()
+        try:
+            itimer.alarm(2.0)
+            itimer.absolutesleep(10.0)
+        finally:
+            signal.signal(signal.SIGALRM, signal.SIG_DFL)
+        self.assertAlmostEqual(time.time()-start, 10.0, places=2)
 
 if __name__ == '__main__':
     unittest.main()
