@@ -199,9 +199,25 @@ argument must match a name of a method.
             rv = meth(argv) # call the method
         except (NewCommand, CommandQuit, CommandExit, KeyboardInterrupt):
             raise # pass these through to parser
-        except (CLISyntaxError, IndexError): # tried to get non-existent argv value
-            self._print("Parsing error.")
+        except CLISyntaxError:
+            self._print("Syntax error.")
             self._print(meth.__doc__)
+        except IndexError: # may have tried to get non-existent argv value.
+            ex, val, tb = sys.exc_info()
+            lev = 0
+            t = tb
+            while t.tb_next is not None:
+                t = t.tb_next
+                lev += 1
+            if lev == 1: # Happened inside the command method.
+                self._print("Argument error.")
+                self._print(meth.__doc__)
+            else:        # IndexError from something called by command method.
+                if _DEBUG:
+                    from pycopia import debugger
+                    debugger.post_mortem(tb, ex, val)
+                else:
+                    self.except_hook(ex, val, tb)
         except getopt.GetoptError, err:
             self._print("option %r: %s" % (err.opt, err.msg))
         except:
