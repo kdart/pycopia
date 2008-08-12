@@ -217,13 +217,7 @@ interval. If the repeat flag is given the job is rescheduled indefinitely."""
 Pause the current thread of execution for <secs> seconds. Use this
 instead of time.sleep() since it works with the scheduler, and allows
 other events to run.  """
-        itimer.absolutesleep(secs)
-#        self._sleepflag = 0
-#        self.add(delay, 0, self._sleep_cb)
-#        while 1:
-#            signal.pause()
-#            if self._sleepflag:
-#                return
+        itimer.absolutesleep(delay)
 
     def _timeout_cb(self):
         raise TimeoutError, "timer expired"

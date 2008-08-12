@@ -19,6 +19,7 @@
 
 
 """
+import os
 
 import unittest
 
@@ -36,7 +37,6 @@ from pycopia import daemonize
 from pycopia import environ
 from pycopia import ezmail
 from pycopia import fsm
-from pycopia import gtktools
 from pycopia import guid
 from pycopia import interactive
 from pycopia import ipv4
@@ -55,6 +55,9 @@ from pycopia import shparser
 from pycopia import table
 from pycopia import texttools
 from pycopia import passwd
+
+if os.environ.get("DISPLAY"):
+    from pycopia import gtktools
 
 from pycopia.inet import ABNF
 from pycopia.inet import CGI
