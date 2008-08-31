@@ -39,6 +39,8 @@ del readline
 
 __all__ = ["get_scheduler"]
 
+# Save a function call by making a simple reference.
+sleep = itimer.absolutesleep
 
 def insort(a, x, lo=0, hi=None):
     if hi is None:
@@ -277,8 +279,6 @@ def del_scheduler():
     scheduler.stop()
     del scheduler
 
-def sleep(secs):
-    itimer.absolutesleep(secs)
 
 def timeout(*args, **kwargs):
     return get_scheduler().timeout(*args, **kwargs)
