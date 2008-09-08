@@ -34,13 +34,15 @@ In Gentoo Linux, place a line with "evdev" in the
 """
 
 from pycopia.OS.Linux import Input
+from pycopia.OS.Linux import event
+from pycopia.aid import NULL
 
 
 class PowerMate(Input.EventDevice):
     DEVNAME = 'Griffin PowerMate'
-    EVENT_DISPATCH = {(Input.EV_MSC, Input.MSC_PULSELED):None, 
-        (Input.EV_REL, Input.REL_DIAL):None, 
-        (Input.EV_KEY, Input.BTN_0):None}
+    EVENT_DISPATCH = {(event.EV_MSC, event.MSC_PULSELED):None, 
+        (event.EV_REL, event.REL_DIAL):None, 
+        (event.EV_KEY, event.BTN_0):None}
 
     def set_LED(self, brightness, pulse_speed=0, pulse_table=0, 
                 pulse_asleep=0, pulse_awake=1):
@@ -52,33 +54,32 @@ class PowerMate(Input.EventDevice):
         value = (int(brightness*255.0) & 0xff) | \
             ((int(pulse_speed*510.0) & 0x1ff) << 8) | \
             ((pulse_table % 3) << 17) | \
-            ((not not pulse_asleep) << 19) | \
-            ((not not pulse_awake) << 20)
-        self.write(Input.EV_MSC, Input.MSC_PULSELED, value)
+            ((pulse_asleep & 1) << 19) | \
+            ((pulse_awake & 1) << 20)
+        self.write(event.EV_MSC, event.MSC_PULSELED, value)
         ev = self.read() # read change notice back and return it.
-        assert ev.evtype == Input.EV_MSC
+        assert ev.evtype == event.EV_MSC
         return ev
 
     def register_motion(self, cb=None):
         """Register a callback to be called when the knob is turned. The
         callback receives two parameters, the timestamp of the event and
         a delta value."""
-        self.EVENT_DISPATCH[(Input.EV_REL, Input.REL_DIAL)] = cb
+        self.EVENT_DISPATCH[(event.EV_REL, event.REL_DIAL)] = cb
 
     def register_button(self, cb=None):
         """Register a callback to be called when the knob is pressed.
         The callback receives two paramaters, the even timestamp and a
         value of 1 for a press, and 0 for a release."""
-        self.EVENT_DISPATCH[(Input.EV_KEY, Input.BTN_0)] = cb
+        self.EVENT_DISPATCH[(event.EV_KEY, event.BTN_0)] = cb
 
     def poll(self):
         """Blocking poller. Use this for simple apps. For more complex apps
         using asyncio then register this object with the asyncio poller."""
         while 1:
             ev = self.read()
-            cb = self.EVENT_DISPATCH.get((ev.evtype, ev.code))
-            if cb:
-                cb(ev.time, ev.value)
+            cb = self.EVENT_DISPATCH.get((ev.evtype, ev.code), NULL)
+            cb(ev.time, ev.value)
 
     handle_read_event = poll
 

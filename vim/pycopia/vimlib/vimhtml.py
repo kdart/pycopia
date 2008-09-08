@@ -48,11 +48,13 @@ def text_to_table():
         else:
             if linecount >= 1:
                 tr = body.add(DTD.Tr)
+                rc = DTD.Td
             else:
                 tr = head.add(DTD.Tr)
+                rc = DTD.Th
             for item in columns:
-                td = tr.add(DTD.Td)
-                td.add_text(item)
+                cell = tr.add(rc)
+                cell.add_text(item)
             linecount += 1
     vim.current.range[:] = xml_format(table).split("\n")
 

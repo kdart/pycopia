@@ -24,11 +24,12 @@
 
 DEBUG = 1
 
+import sys
 import socket
 import re
 import struct
-import whrandom
-import sys
+
+from pycopia import sysrandom
 
 
 TOC_SERV_AUTH = ("login.oscar.aol.com", 5159 )
