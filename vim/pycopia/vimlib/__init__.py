@@ -2,7 +2,6 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # License: LGPL
 # Keith Dart <kdart@kdart.com>
-# $Id$
 
 """
 This module is intended for use with the Vim editor. It provides
@@ -11,16 +10,16 @@ designed specifically for editing other python source files.
 
 1. Adds more advanced functionality and commands to Vim
 2. Enables more convenient Python program development (makes Vim a Python IDE)
-3. Adds features for other specialized editing tasks, such as HTML.
 
 """
 
 try:
-    from vim import *
+    import vim
 except ImportError:
     # for running outside of vim
-    from pycopia.vimlib.vimtest import *
-    
+    import pycopia.vimlib.vimtest as vim
+
+# buffers command current error eval windows
 
 import sys, os
 import string
@@ -35,11 +34,6 @@ from pycopia import textutils
 pyterm = interactive.pyterm
 xterm = interactive.xterm
 
-# hm, the vim module defines eval, which is the same name as the builtin
-# function.
-import __builtin__
-py_eval = __builtin__.eval
-del __builtin__
 
 XTERM = os.environ.get("XTERM", "rxvt -e")
 EXECTEMP = "/var/tmp/python_vim_temp_%s.py" % (os.getpid())
@@ -53,10 +47,10 @@ re_klass_export = re.compile(r"^class ([a-zA-Z][a-zA-Z0-9_]*)")
 re_def_export = re.compile(r"^def ([a-zA-Z][a-zA-Z0-9_]*)")
 
 def normal(str):
-    command("normal "+str)
+    vim.command("normal "+str)
 
 def test_count():
-    print int(eval("v:count"))
+    print int(vim.eval("v:count"))
 
 def str_range(vrange):
     return string.join(vrange, "\n") + "\n"
@@ -71,7 +65,7 @@ def exec_vimrange_in_term(vrange):
     interactive.run_config(XTERM, "python -i %s" % (EXECTEMP))
 
 def insert_def():
-    current.range.append(string.split(def_template, "\n"))
+    vim.current.range.append(string.split(def_template, "\n"))
 
 def insert_viminfo():
     """Insert a vim line with tabbing related settings reflecting current settings."""
@@ -79,14 +73,16 @@ def insert_viminfo():
     # v-i-m tagline.
     vi = ["# %s" % ("".join(['v','i','m']),)] 
     for var in ('ts', 'sw', 'softtabstop'):
-        vi.append("%s=%s" % (var, eval("&%s" % (var,))))
+        vi.append("%s=%s" % (var, vim.eval("&%s" % (var,))))
     for var in ('smarttab', 'expandtab'):
-        if int(eval("&%s" % var)):
+        if int(vim.eval("&%s" % var)):
             vi.append(var)
-    current.range.append(":".join(vi))
+    if vim.eval("&ft") != "python":
+        vi.append("ft=python")
+    vim.current.range.append(":".join(vi))
 
 def insert__all__():
-    path, name = os.path.split(current.buffer.name)
+    path, name = os.path.split(vim.current.buffer.name)
     if name == "__init__.py":
         insert__all__pkg(path)
     else:
@@ -95,53 +91,53 @@ def insert__all__():
 def insert__all__mod():
     klasses = []
     funcs = []
-    for line in current.buffer:
+    for line in vim.current.buffer:
         mo = re_klass_export.search(line)
         if mo:
             klasses.append(mo.group(1))
         mo = re_def_export.search(line)
         if mo:
             funcs.append(mo.group(1))
-    current.range.append("__all__ = [%s]" % (", ".join(map(repr, klasses+funcs))))
+    vim.current.range.append("__all__ = [%s]" % (", ".join(map(repr, klasses+funcs))))
 
 def insert__all__pkg(path):
     files = textutils.grep ("^[A-Za-z]+\\.py$", os.listdir(path))
     res = []
     for name, ext in map(os.path.splitext, files):
         res.append(name)
-    current.range.append("__all__ = [%s]" % (", ".join(map(repr, res))))
+    vim.current.range.append("__all__ = [%s]" % (", ".join(map(repr, res))))
 
 
 def spc_to_tab(vrange=None):
-    spcs = " " * int(eval("&ts"))
+    spcs = " " * int(vim.eval("&ts"))
     if vrange is None:
-        command("s/%s/  /g" % spcs)
+        vim.command("s/%s/  /g" % spcs)
     else:
         for linenum in range(len(vrange)):
             vrange[linenum] = re.sub(spcs, "\t", vrange[linenum])
 
 def reverse_search(reobject):
-    startline, startcol = current.window.cursor
+    startline, startcol = vim.current.window.cursor
     for linenum in xrange(startline-2, 0, -1):
-        if reobject.match(current.buffer[linenum]):
+        if reobject.match(vim.current.buffer[linenum]):
             return linenum
 
 def forward_search(reobject):
-    startline, startcol = current.window.cursor
-    for linenum in xrange(startline, len(current.buffer)):
-        if reobject.match(current.buffer[linenum]):
+    startline, startcol = vim.current.window.cursor
+    for linenum in xrange(startline, len(vim.current.buffer)):
+        if reobject.match(vim.current.buffer[linenum]):
             return linenum
 
 def forward_move(reobject):
     foundline = forward_search(reobject)
     if foundline:
-        current.window.cursor = foundline+1, 0
+        vim.current.window.cursor = foundline+1, 0
         normal("z.")
 
 def reverse_move(reobject):
     foundline = reverse_search(reobject)
     if foundline:
-        current.window.cursor = foundline+1, 0
+        vim.current.window.cursor = foundline+1, 0
         normal("z.")
 
 
@@ -159,7 +155,7 @@ def previous_class():
 
 def balloonhelp():
     try:
-        result = py_eval(eval("v:beval_text")).__doc__
+        result = eval(vim.eval("v:beval_text")).__doc__
         if result is None:
             return "No doc."
         result = result.replace("\0", " ")
@@ -171,41 +167,28 @@ def balloonhelp():
 
 # XXX is this hack really necessary?
 def return2vim(val):
-    command('let g:python_rv = "%s"' % (val,))
+    vim.command('let g:python_rv = "%s"' % (val,))
 
 # utility functions
 
 def htmlhex(text):
     return "".join(map(lambda c: "%%%x" % (ord(c),), text))
 
-def get_visual_selection():
-    b = current.buffer
-    start_row, start_col = b.mark("<")
-    end_row, end_col = b.mark(">")
-    if start_row == end_row:
-        return b[start_row-1][start_col:end_col+1]
-    else:
-        s = [ b[start_row-1][start_col:] ]
-        for l in b[start_row:end_row-2]:
-            s.append(l)
-        s.append(b[end_row-1][:end_col+1])
-        return "\n".join(s)
-
 def htmlhex_visual_selection():
-    b = current.buffer
+    b = vim.current.buffer
     start_row, start_col = b.mark("<")
     end_row, end_col = b.mark(">")
     if start_row == end_row:
         l = b[start_row-1]
-        c = str(htmlhex(l[start_col:end_col+1]))
+        c = htmlhex(l[start_col:end_col+1])
         b[start_row-1] = l[:start_col]+c+l[end_col+1:]
     else:
-        b[start_row-1:end_row] = str(htmlhex("\n".join(b[start_row-1:end_row]))).split("\n") # XXX partial lines
+        b[start_row-1:end_row] = htmlhex("\n".join(b[start_row-1:end_row])).split("\n") # XXX partial lines
 
 def get_indent_level(line=None):
     if line is None:
-        line = current.line
-    altpyts = int(eval("&ts"))
+        line = vim.current.line
+    altpyts = int(vim.eval("&ts"))
     pyts = 8
     col = altcol = 0
     for i in xrange(len(line)):
@@ -235,11 +218,11 @@ def classifyws(s, tabwidth):
 def select_block(top_re):
     matchline = reverse_search(top_re)
     if matchline:
-        current.window.cursor = matchline+1, 0
+        vim.current.window.cursor = matchline+1, 0
 #       normal("z\r")
-        ind, realind = get_indent_level(current.line)
-        for i in xrange(1,len(current.buffer) - matchline):
-            if get_indent_level(current.buffer[matchline+i])[1] <= realind:
+        ind, realind = get_indent_level(vim.current.line)
+        for i in xrange(1,len(vim.current.buffer) - matchline):
+            if get_indent_level(vim.current.buffer[matchline+i])[1] <= realind:
                 break
         normal("V%dj" % i)
 
@@ -250,19 +233,19 @@ def select_def():
     select_block(re_def)
 
 def keyword_help():
-    interactive.showdoc(eval('expand("<cword>")'))
+    interactive.showdoc(vim.eval('expand("<cword>")'))
 
 def keyword_edit():
-    interactive.edit(eval('expand("<cword>")'))
+    interactive.edit(vim.eval('expand("<cword>")'))
 
 def keyword_view():
-    interactive.view(eval('expand("<cword>")'))
+    interactive.view(vim.eval('expand("<cword>")'))
 
 def keyword_split():
-    modname = eval('expand("<cword>")')
+    modname = vim.eval('expand("<cword>")')
     filename = interactive.find_source_file(modname)
     if filename is not None:
-        command("split %s" % (filename,))
+        vim.command("split %s" % (filename,))
     else:
         print >>sys.stderr, "Could not find source to %s." % modname
 
@@ -280,19 +263,32 @@ def visual_view():
     else:
         interactive.view(text)
 
+def get_visual_selection():
+    b = vim.current.buffer
+    start_row, start_col = b.mark("<")
+    end_row, end_col = b.mark(">")
+    if start_row == end_row:
+        return b[start_row-1][start_col:end_col+1]
+    else:
+        s = [ b[start_row-1][start_col:] ]
+        for l in b[start_row:end_row-2]:
+            s.append(l)
+        s.append(b[end_row-1][:end_col+1])
+        return "\n".join(s)
+
 
 #### The following is experimental and is not fully functional.
 ### code analysis....
 
 def syntax_check():
-    src = "\n".join(current.buffer)+"\n"
+    src = "\n".join(vim.current.buffer)+"\n"
     fo = StringIO.StringIO(src)
     if check(fo):
         ast = get_ast(src)
 
 def get_ast(src=None):
     if src is None:
-        src = "\n".join(current.buffer)+"\n"
+        src = "\n".join(vim.current.buffer)+"\n"
     try:
         ast = parser.suite(src)
     except parser.ParserError, err:
@@ -310,7 +306,7 @@ def eval_simple(t, d=None):
     # put a valid top-level wrapper around the simple statement fragment.
     ast = parser.sequence2ast( (257, (264, (265, t, (4, '') )), (0, '')) )
     co = ast.compile()
-    py_eval(co, d, d)
+    eval(co, d, d)
     del d["__builtins__"] # somehow this gets in here.
     return d
 
@@ -322,7 +318,7 @@ def eval_seq(t, d=None):
         d = {}
     ast = parser.sequence2ast( (257, t, (0, '')) )
     co = ast.compile()
-    py_eval(co, d, d)
+    eval(co, d, d)
     del d["__builtins__"]
     return d
 
@@ -387,7 +383,7 @@ def check(fo):
         badline = nag.get_lineno()
         line = nag.get_line()
         print "*** Questionable tabbing on line %d ***" % (badline)
-        current.window.cursor = (badline, 0)
+        vim.current.window.cursor = (badline, 0)
         normal("z.")
         #print nag.get_msg()
         return 0

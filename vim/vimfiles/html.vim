@@ -1,26 +1,32 @@
 " will use Python to implement some editing functions
+" vim:ts=4:sw=4:softtabstop=0:smarttab
 
-:python from pycopia.vimlib.vimhtml import *
+:python from pycopia import vimlib
+:python from pycopia.vimlib import vimhtml
 
 :set mps+=<:>
 
-vmap	;ta	:py text_to_table()<CR>
-map	;ht	:py htmlify()<CR>
-map	;ti	:%!tidy<CR>
-"
+vmap	;ta	:py vimhtml.text_to_table()<CR>
+nmap	;ht	:py vimhtml.htmlify()<CR>
+vmap	;ht	:py vimhtml.htmlify()<CR>
+vmap	;un :py vimhtml.unhtmlify()<CR>
+nmap	;ti	:%!tidy -i -asxhtml -utf8<CR>
+vmap	;ti	:`<,`>!tidy -i -xml -utf8<CR>
+vmap	;hx :py vimlib.htmlhex_visual_selection()<CR>
+
 " SECTION 1: Setup menus and associated mapped keyboard shortcuts
-"
+
 "" Menu HTML Tags
-"
+
 """ Comment:
 "	normal		new comment on previous line
 "	visual		wrap visual selection in comment
 "	insert		insert comment at cursor position
-nmenu HTML\ Tags.Comment\ \ \ \ \ ;cm  :py commentline()<CR>
-vmenu HTML\ Tags.Comment\ \ \ \ \ ;cm  :py comment_visual_selection()<CR>
+nmenu HTML\ Tags.Comment\ \ \ \ \ ;cm  :py vimhtml.commentline()<CR>
+vmenu HTML\ Tags.Comment\ \ \ \ \ ;cm  :py vimhtml.comment_visual_selection()<CR>
 imenu HTML\ Tags.Comment\ \ \ \ \ ;cm  <!--   --><Esc>5ha
-nmap	;cm	:py commentline()<CR>
-vmap	;cm	:py comment_visual_selection()<CR>
+nmap	;cm	:py vimhtml.commentline()<CR>
+vmap	;cm	:py vimhtml.comment_visual_selection()<CR>
 imap	;cm	<!--   --><Esc>5ha
 "
 " P (paragraph)
@@ -51,9 +57,9 @@ imap	;ah	<a href="URL">tag</a><Esc>5bcw
 nmenu HTML\ Tags.Image\ \ \ \ \ \ \ ;im O<IMG src="URL" alt="IMAGE"><Esc>6bcw
 vmenu HTML\ Tags.Image\ \ \ \ \ \ \ ;im <Esc>`>a" alt="IMAGE"><Esc>`<i<IMG src="><Esc>l
 imenu HTML\ Tags.Image\ \ \ \ \ \ \ ;im <IMG src="URL" alt="IMAGE"><Esc>6bcw
-nmap	;im	O<img src="URL" alt="IMAGE"><Esc>6bcw
-vmap	;im	<Esc>`>a" alt="IMAGE"><Esc>`<i<img src="<Esc>l
-imap	;im	<img src="URL" alt="IMAGE"><Esc>6bcw
+nmap	;im	O<img src="URL" alt="IMAGE" /><Esc>6bcw
+vmap	;im	<Esc>`>a" alt="IMAGE" /><Esc>`<i<img src="<Esc>l
+imap	;im	<img src="URL" alt="IMAGE" /><Esc>6bcw
 "
 """ Break:
 "	normal		creates break on previous line
@@ -62,9 +68,9 @@ imap	;im	<img src="URL" alt="IMAGE"><Esc>6bcw
 nmenu HTML\ Tags.Break\ \ \ \ \ \ \ ;br	O<br><Esc>
 vmenu HTML\ Tags.Break\ \ \ \ \ \ \ ;br	<Esc>`<i<br><Esc>
 imenu HTML\ Tags.Break\ \ \ \ \ \ \ ;br	<br>
-nmap	;br	O<br><Esc>
-vmap	;br	<Esc>`<i<br><Esc>
-imap	;br	<br>
+nmap	;br	O<br /><Esc>
+vmap	;br	<Esc>`<i<br /><Esc>
+imap	;br	<br />
 "
 """ Horizontal Rule:
 "	normal		creates rule on previous line
@@ -73,9 +79,9 @@ imap	;br	<br>
 nmenu HTML\ Tags.Rule\ \ \ \ \ \ \ \ ;hr	O<hr><Esc>
 vmenu HTML\ Tags.Rule\ \ \ \ \ \ \ \ ;hr	<Esc>`<i<hr><CR><Esc>
 imenu HTML\ Tags.Rule\ \ \ \ \ \ \ \ ;hr	<hr><CR>
-nmap	;hr	O<hr><CR><Esc>
-vmap	;hr	<Esc>`<i<hr><CR><Esc>
-imap	;hr	<hr><CR>
+nmap	;hr	O<hr /><CR><Esc>
+vmap	;hr	<Esc>`<i<hr /><CR><Esc>
+imap	;hr	<hr /><CR>
 "
 """ Headings Sub-Menu
 "	normal		creates selected heading on previous line
@@ -283,9 +289,9 @@ imap	;sp	<sup>TEXT</sup><Esc>3bcw
 nmenu HTML\ Tags.Formats.Typerwriter\ ;tt	O<TT>TEXT</TT><Esc>3bcw
 vmenu HTML\ Tags.Formats.Typerwriter\ ;tt	<Esc>`>a</TT><Esc>`<i<TT><Esc>l
 imenu HTML\ Tags.Formats.Typerwriter\ ;tt	<TT>TEXT</TT><Esc>3bcw
-nmap	;tt	O<TT>TEXT</TT><Esc>3bcw
-vmap	;tt	<Esc>`>a</TT><Esc>`<i<TT><Esc>l
-imap	;tt	<TT>TEXT</TT><Esc>3bcw
+nmap	;tt	O<tt>TEXT</tt><Esc>3bcw
+vmap	;tt	<Esc>`>a</tt><Esc>`<i<tt><Esc>l
+imap	;tt	<tt>TEXT</tt><Esc>3bcw
 "
 " Underline heading
 nmenu HTML\ Tags.Formats.Underline\ \ \ ;uu	O<U>TEXT</U><Esc>3bcw
@@ -307,11 +313,7 @@ imap	;vv	<var>TEXT</var><Esc>3bcw
 "	normal		creates selected item on previous line
 "	visual		creates selected item around visual selection
 "	insert		creates selected item at cursor position
-"
-"	for multi-line visual selections with ;ul, ;ol, etc. inserts
-"	<li> at beginning of selection and at beginning of each line
-"	in selection and puts whole thing in list (<ul></ul>, e.g)
-"
+
 """" list Item -
 nmap	;li	O<li>ITEM</li><Esc>3bcw
 vmap	;li	<Esc>`<i<li><Esc>`>a</li><Esc>
@@ -319,12 +321,12 @@ imap	;li	<li>ITEM</li><Esc>3bcw
 "
 """" Unordered List
 nmap	;ul	O<ul><CR>  <li>ITEM</li><CR><BS><BS></ul><Esc>6bcw
-vmap	;ul	:py unordered_list()<CR>
+vmap	;ul	:py vimhtml.unordered_list()<CR>
 imap	;ul	<CR><ul><CR>  <li>ITEM</li><CR><BS><BS></ul><Esc>6bcw
 "
 """" Ordered List
 nmap	;ol	O<ol><CR>  <li>ITEM</li><CR><BS><BS></ol><Esc>6bcw
-vmap	;ol	:py ordered_list()<CR>
+vmap	;ol	:py vimhtml.ordered_list()<CR>
 imap	;ol	<CR><ol><CR>  <li>ITEM</li><CR><BS><BS></ol><Esc>6bcw
 "
 
@@ -344,38 +346,22 @@ imap	;mu	<CR><mu><CR>  <li>LIST ITEM<CR><BS><BS></mu><Esc>4b2cw
 nmenu HTML\ Tags.List.Definition\ \ \ \ \ \ ;dt	O<dt>TERM<CR><dd>DEFINITION<Esc>5bcw
 vmenu HTML\ Tags.List.Definition\ \ \ \ \ \ ;dt	<Esc>`>a<CR><dd>DEFINITION <Esc>`<i<dt><Esc>5wcw
 imenu HTML\ Tags.List.Definition\ \ \ \ \ \ ;dt	<dt>TERM<CR><dd>DEFINITION<Esc>5bcw
-nmap	;dt	O<DT>TERM</DT><CR><DD>DEFINITION</DD><Esc>5bcw
-vmap	;dt	<Esc>`>a<CR><DD>DEFINITION</DD> <Esc>`<i<DT><Esc>5wcw
-imap	;dt	<DT>TERM</DT><CR><DD>DEFINITION</DD><Esc>5bcw
+nmap	;dt	O<dt>TERM</dt><CR><dd>DEFINITION</dd><Esc>5bcw
+vmap	;dt	<Esc>`>a<CR><dd>DEFINITION</dd> <Esc>`<i<DT><Esc>5wcw
+imap	;dt	<dt>TERM</dt><CR><dd>DEFINITION</dd><Esc>5bcw
 "
 """" Definition list
-" TODO - set this up so that multi-line visual seleciton get turned into multiple
-"	 entries (like ul, ol, etc.)
 nmenu HTML\ Tags.List.Definition\ List\ ;dl	O<dl><CR>  <li>LIST ITEM<CR><BS><BS></dl><Esc>4b2cw
 vmenu HTML\ Tags.List.Definition\ List\ ;dl	<Esc>`>a<CR>    <dd>DEFINITION<CR><BS><BS><BS><BS></dl><Esc>`<i<dl><CR>    <dt><Esc>l
 imenu HTML\ Tags.List.Definition\ List\ ;dl	<CR><dl><CR>  <li>LIST ITEM<CR><BS><BS></dl><Esc>4b2cw
-nmap	;dl	O<DL><CR>  <li>LIST ITEM<CR><BS><BS></DL><Esc>4b2cw
+nmap	;dl	O<dl><CR>  <li>LIST ITEM<CR><BS><BS></dl><Esc>4b2cw
 "vmap	;dl	<Esc>`>a<CR></dl><Esc>`<i<dl><CR>  <li><Esc>l
-vmap	;dl	<Esc>`>o</DL><Esc>`<O<DL><Esc>:'<,'>s/^/   <dt>/<CR>:'<,'>s/$/<\/DT>  <DD>DD<\/DD>/<CR>
-imap	;dl	<CR><dl><CR>  <DT>LIST ITEM<\DT><CR><BS><BS></DL><Esc>4b2cw
-"
-" TODO - tables submenu, forms submenu
-"
-"
-"
+vmap	;dl	<Esc>`>o</dl><Esc>`<O<dl><Esc>:'<,'>s/^/   <dt>/<CR>:'<,'>s/$/<\/dt>  <dd>DD<\/dd>/<CR>
+imap	;dl	<CR><dl><CR>  <dt>LIST ITEM<\dt><CR><BS><BS></dl><Esc>4b2cw
+
+
 " SECTION 2: macros unassociated with menus
-"	In this section - I placed some of the Macros from Doug's file that 
-"	I didn't think would be used often enought to justify a menu listing.
-"	Actually, I could probably reduce the number in the menus as well.
-"	Generally, if an HTML tag is used once in a document (like <html>) then
-"	it shouldn't be in a menu.  If you use a template (like the one I
-"	call below), then most of those things would be there anyways.  I put
-"	a lot of 3.0 tags in this section because they might not be generally
-"	supported yet.
-"	
-"	Haven't set up visual or normal modes for these - still working on the
-"	visual v. visual lines problem - prob fixed in VIM5.0g - still TODO
-"
+
 " ABBREV (3.0)
 map!	;ab	<abbrev></abbrev><Esc>bhhi
 " ACRONYM (3.0)
@@ -395,7 +381,7 @@ map!	;ca <caption></caption><Esc>bhhi
 " CREDIT (3.0)
 map!	;cr <credit></credit><Esc>bhhi
 " DD (definition for definition list)
-map!	;dd <DD></DD><Esc>bhhi
+map!	;dd <dd></dd><Esc>bhhi
 " DEL (deleted text) (3.0)
 map!	;de <del></del><Esc>bhhi
 " DIV (document division) (3.0)
@@ -408,8 +394,6 @@ map!	;fn <fn></fn><Esc>bhhi
 map!	;fo <font size=></font><Esc>bhhhi
 " HEAD
 map!	;he <head><CR></head><Esc>O
-" HTML (3.0)
-map!	;ht <html><CR></html><Esc>O
 " INS (inserted text) (3.0)
 map!	;in <ins></ins><Esc>bhhi
 " LANG (language context) (3.0)
@@ -440,13 +424,5 @@ map!	;cp 	&copy;
 map!	;" 	&quot;
 map!	;< 	&lt;
 map!	;> 	&gt;
-"
-"
-" SECTION 3: htmlpp macros
-" Added to support source files that are used with the HTML preprocessor
-" (htmlpp)
-" 
-nmap	;ha a$(*DEF)<Esc>bcw
-vmap	;ha <Esc>`>a")<Esc>`<i$(*DEF="<Esc>bbcw
-imap	;ha $(*DEF)<Esc>bcw
+
 

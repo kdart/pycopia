@@ -3,63 +3,67 @@
 
 # Functions to make editing [X]HTML files in vim more productive.
 
+# The following allows testing this module outside of a vim editor.
+# The vimtest module is a mock of the internal vim module.
 try:
     import vim
 except ImportError:
     from pycopia.vimlib import vimtest as vim
 
-import sys, os, re
-
-from pycopia.WWW import XHTML
 from pycopia.dtds import xhtml1_strict as DTD
 
 from cStringIO import StringIO
 from pycopia.XML.POM import escape, unescape, Comment, BeautifulWriter
 
 
-
 def xml_format(obj):
     s = StringIO()
     w = BeautifulWriter(s)
-    obj.emit(w)
+    obj.emit(w, get_encoding())
     return s.getvalue()
 
-def vimstring(obj):
-    return unicode(str(obj), vim.eval("&fileencoding") or vim.eval("&encoding"))
+def get_encoding():
+    # return current documents character encoding.
+    return vim.eval("&fileencoding") or vim.eval("&encoding")
 
 def htmlify():
-    vim.current.line = escape(vim.current.line).encode("ascii")
+    vim.current.range[:] = escape("\n".join(vim.current.range)).encode(get_encoding()).split("\n")
+
+def unhtmlify():
+    vim.current.range[:] = unescape("\n".join(vim.current.range)).encode(get_encoding()).split("\n")
 
 def text_to_table():
     table = DTD.Table()
+    head = table.add(DTD.Thead)
+    body = table.add(DTD.Tbody)
+    linecount = 0
     for line in vim.current.range:
-        tr = table.add(DTD.Tr)
-        for item in line.split("\t"):
-            td = tr.add(DTD.Td)
-            td.add_text(item)
-    vim.current.range[:] = str(table).split("\n")
-
-def get_visual_selection():
-    b = vim.current.buffer
-    start_row, start_col = b.mark("<")
-    end_row, end_col = b.mark(">")
-    if start_row == end_row:
-        return b[start_row-1][start_col:end_col+1]
-    else:
-        s = [ b[start_row-1][start_col:] ]
-        for l in b[start_row:end_row-2]:
-            s.append(l)
-        s.append(b[end_row-1][:end_col+1])
-        return "\n".join(s)
+        columns = line.split("\t")
+        if len(columns) == 0:
+            continue
+        elif len(columns) == 1:
+            cap = DTD.Caption()
+            cap.add_text(columns[0])
+            table.insert(0, cap)
+        else:
+            if linecount >= 1:
+                tr = body.add(DTD.Tr)
+            else:
+                tr = head.add(DTD.Tr)
+            for item in columns:
+                td = tr.add(DTD.Td)
+                td.add_text(item)
+            linecount += 1
+    vim.current.range[:] = xml_format(table).split("\n")
 
 def _append(obj):
-    vim.current.range.append(str(obj))
+    vim.current.range.append(unicode(obj, get_encoding()))
 
 def _replace(obj):
-    vim.current.range[:] = str(obj).split("\n")
+    vim.current.range[:] = unicode(obj, get_encoding()).split("\n")
 
 def _replace_line(obj):
-    vim.current.line = str(obj)
+    vim.current.line = unicode(obj, get_encoding())
 
 def commentline():
     vim.current.line = str(Comment(vim.current.line))
@@ -73,19 +77,16 @@ def comment_visual_selection():
         c = str(Comment(l[start_col:end_col+1]))
         b[start_row-1] = l[:start_col]+c+l[end_col+1:]
     else:
-        b[start_row-1:end_row] = str(Comment("\n".join(b[start_row-1:end_row]))).split("\n") # XXX partial lines
-
-def block_visual_selection(objname):
-    obj = getattr(DTD, objname)
-    b = vim.current.buffer
-    start_row, start_col = b.mark("<")
-    end_row, end_col = b.mark(">")
-    if start_row == end_row:
-        l = b[start_row-1]
-        c = str(obj(l[start_col:end_col+1]))
-        b[start_row-1] = l[:start_col]+c+l[end_col+1:]
-    else:
-        b[start_row-1:end_row] = str(obj("\n".join(b[start_row-1:end_row]))).split("\n") # XXX partial lines
+        # collect source text
+        lines = b[start_row:end_row-1]
+        lines.insert(0, b[start_row-1][start_col:])
+        lines.append(b[end_row-1][:end_col+1])
+        # comment and escape source text.
+        newlines = xml_format(Comment("\n".join(lines))).split("\n")
+        # replace source with new text.
+        b[start_row-1] = b[start_row-1][:start_col] + newlines[0]
+        b[start_row:end_row-1] = newlines[1:-1]
+        b[end_row-1] = newlines[-1] + b[end_row-1][end_col+1:]
 
 
 def _list(lobj):
