@@ -48,7 +48,7 @@ endfunction
 :python from pycopia.vimlib import *
 " put VIMSERVER in environment for child python processes to use.
 if has("gui_gtk") && has("gui_running")
-	:py os.environ["VIMSERVER"] = eval("v:servername")
+	:py os.environ["VIMSERVER"] = vim.eval("v:servername")
 endif
 
 function! PyClean ()
@@ -72,27 +72,27 @@ nmenu Python.Syntax.Use\ Google :call GoogleSpaces()<CR>
 nmenu Python.Syntax.No\ Tabs\ (:retab) :%retab<CR>
 nmenu Python.Syntax.Clean\ (;cl) :call PyClean()<CR>
 nmenu Python.Syntax.Tabify\ (:retab!) :%retab!<CR>
-nmenu Python.Run.Run\ (be) :update<CR>:python execfile(current.buffer.name, {}, {})<CR>
-nmenu Python.Run.In\ term\ (ru) :update<CR>:python pyterm(current.buffer.name, 0)<CR>
-nmenu Python.Run.In\ term\ (interactive)(ri) :update<CR>:python pyterm(current.buffer.name, 1)<CR>
+nmenu Python.Run.Run\ (be) :update<CR>:python execfile(vim.current.buffer.name, {}, {})<CR>
+nmenu Python.Run.In\ term\ (ru) :update<CR>:python pyterm(vim.current.buffer.name, 0)<CR>
+nmenu Python.Run.In\ term\ (interactive)(ri) :update<CR>:python pyterm(vim.current.buffer.name, 1)<CR>
 nmenu Python.Run.Interactive\ shell\ (py) :python pyterm()<CR>
 nmenu Python.Test.Run\ pyunit :make<CR>
-nmenu Python.Evaluate\ Line\ (ev) :python print py_eval(current.line)<CR>
-vmenu Python.Range.Exec\ (ex) :python exec_vimrange(current.range)<CR>
-vmenu Python.Range.Exec\ in\ term\ (et) :python exec_vimrange_in_term(current.range)<CR>
+nmenu Python.Evaluate\ Line\ (ev) :python print eval(vim.current.line)<CR>
+vmenu Python.Range.Exec\ (ex) :python exec_vimrange(vim.current.range)<CR>
+vmenu Python.Range.Exec\ in\ term\ (et) :python exec_vimrange_in_term(vim.current.range)<CR>
 
 " execution/evaluation
 nmap ;py :python pyterm()<CR>
 nmap ;sy :python syntax_check()<CR>
-nmap ;be :update<CR>:python execfile(current.buffer.name, {}, {})<CR>
-nmap ;ru :update<CR>:python pyterm(current.buffer.name, 0)<CR>
-nmap ;ri :update<CR>:python pyterm(current.buffer.name, 1)<CR>
-nmap ;ev :python print py_eval(current.line)<CR>
-nmap ;ex :python exec current.line<CR>
+nmap ;be :update<CR>:python execfile(vim.current.buffer.name, {}, {})<CR>
+nmap ;ru :update<CR>:python pyterm(vim.current.buffer.name, 0)<CR>
+nmap ;ri :update<CR>:python pyterm(vim.current.buffer.name, 1)<CR>
+nmap ;ev :python print eval(vim.current.line)<CR>
+nmap ;ex :python exec vim.current.line<CR>
 
-vmap ;ex :python exec_vimrange(current.range)<CR>
-vmap ;et :python exec_vimrange_in_term(current.range)<CR>
-nmap ;el :python current.line = str(py_eval(current.line))<CR>
+vmap ;ex :python exec_vimrange(vim.current.range)<CR>
+vmap ;et :python exec_vimrange_in_term(vim.current.range)<CR>
+nmap ;el :python vim.current.line = str(eval(vim.current.line))<CR>
 
 " convenient editing macros
 nmap ;id :python insert_def()<CR>
