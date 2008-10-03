@@ -298,9 +298,9 @@ ProcManager uses this."""
             if not data:
                 return
             self._rawq.append(data)
-        except (IOError, EOFError):
-            ex, val, tb = sys.exc_info()
-            print >>sys.stderr, "*** Error:", ex, val
+        except (IOError, EOFError), err:
+            if self._log is not None:
+                self._log.write("Read error: (%s)\n" % (err,))
 
     def _readerr_fill(self):
         try:
@@ -308,28 +308,36 @@ ProcManager uses this."""
             if not c:
                 return
             self._errbuf += c
-        except (IOError, EOFError):
-            ex, val, tb = sys.exc_info()
-            print >>sys.stderr, "*** Error:", ex, val
+        except (IOError, EOFError), err:
+            if self._log is not None:
+                self._log.write("Read error (error stream): (%s)\n" % (err,))
 
 # interfaces for asyncio poller/manager.
     def readable(self):
-        return bool(self._rawq)
+        return True
 
     def writable(self):
-        return len(self._writebuf)
+        return True
 
     def priority(self):
-        return 0
+        return False
 
-    def handle_hangup_event(self):
+    def read_handler(self):
+        self._read_fill()
+
+    def write_handler(self):
+        self._write_buf()
+
+    def pri_handler(self):
         pass
-        #self._read_fill()
 
-    def handle_error(self, ex, val, tb):
-        if self._log:
-            self._log.write("error event: %s (%s)\n" % (ex, val))
+    def hangup_handler(self):
+        if self._log is not None:
+            self._log.write("Hangup: %s.\n" % self.cmdline)
 
+    def error_handler(self, ex, val, tb):
+        if self._log is not None:
+            self._log.write("Error event: %s (%s)\n" % (ex, val))
 
 
 class ProcessPipe(Process):
@@ -465,21 +473,6 @@ class ProcessPipe(Process):
             return ""
         return self._read_fd(self._stderr, amt)
 
-    # poller interface method
-    def err_readable(self):
-        return self._stderr # true
-
-    def get_handlers(self):
-        outh = asyncio.HandlerMethods(self._p_stdout, 
-                 readable=self.readable, read_handler=self._read_fill)
-        inh =  asyncio.HandlerMethods(self._p_stdin, 
-                 writable=self.writable, write_handler=self._write_buf)
-        if self._stderr is None:
-            return outh, inh
-        else:
-            return (outh, inh, asyncio.HandlerMethods(self._stderr, 
-                 readable=self.err_readable, read_handler=self._readerr_fill))
-
 
 
 class ProcessPty(Process):
@@ -599,14 +592,6 @@ class ProcessPty(Process):
         if self._log:
             self._log.write(next)
         return next
-    
-
-    def get_handlers(self):
-        return (
-            asyncio.HandlerMethods(self._fd, 
-                 readable=self.readable, read_handler=self._read_fill,
-                 writable=self.writable, write_handler=self._write_buf,
-                 hangup_handler=self.handle_hangup_event),)
 
 
 # A process connected by a named pipe
