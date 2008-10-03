@@ -31,8 +31,8 @@ import sys
 import os
 
 from pycopia.WWW import serverconfig
-from pycopia.aid import partial
 
+LTCONFIG = "/etc/pycopia/lighttpd/lighttpd.conf"
 
 def start(config):
     if config.DAEMON:
@@ -47,35 +47,24 @@ def start(config):
         fo.close()
     start_proc_manager(config, lf)
 
+
 def start_proc_manager(config, logfile):
-    #import signal
     from pycopia import proctools
     from pycopia import scheduler
     from pycopia import asyncio
 
     asyncio.start_sigio()
-
-    def _quithandler(pm, sig, stack):
-        for proc in pm.getprocs():
-            proc.kill()
-            proc.wait()
-        if os.path.exists(config.PIDFILE):
-            os.unlink(config.PIDFILE)
-        raise KeyboardInterrupt
-
     pm = proctools.get_procmanager()
-#    signal.signal(signal.SIGINT, partial(_quithandler, pm))
-#    signal.signal(signal.SIGTERM, partial(_quithandler, pm))
+
     for name, serverlist in config.VHOSTS.items():
         for servername in serverlist:
             print "Starting %s for %s." % (servername, name)
-            p = pm.spawnpipe("%s -n" % (servername,), persistent=True, logfile=logfile)
+            p = pm.spawnpipe("%s/fcgi_server -n %s" % (config.LIBEXEC, servername), persistent=True, logfile=logfile)
             asyncio.poller.register(p)
             scheduler.sleep(1.0) # give it time to init...
     if config.USEFRONTEND:
         lighttpd = proctools.which("lighttpd")
-        ltconfig = "/etc/pycopia/lighttpd/lighttpd.conf"
-        pm.spawnpipe("%s -D -f %s" % (lighttpd, ltconfig), persistent=True, logfile=logfile)
+        pm.spawnpipe("%s -D -f %s" % (lighttpd, LTCONFIG), persistent=True, logfile=logfile)
     try:
         while 1:
             asyncio.poller.loop()
@@ -126,8 +115,7 @@ def check(config):
     from pycopia import proctools
     pm = proctools.get_procmanager()
     lighttpd = proctools.which("lighttpd")
-    ltconfig = "/etc/pycopia/lighttpd/lighttpd.conf"
-    proc = pm.spawnpipe("%s -p -f %s" % (lighttpd, ltconfig))
+    proc = pm.spawnpipe("%s -p -f %s" % (lighttpd, LTCONFIG))
     out = proc.read()
     es = proc.wait()
     if es:
@@ -158,10 +146,11 @@ Options:
  -N  do NOT start the web server front end (lighttpd).
 
 Where command is one of:
-    start  - start all web services and virtual hosts
-    stop   - stop a running server
-    status - status of server
-    robots - update robots.txt files.
+    start   - start all web services and virtual hosts
+    stop    - stop a running server
+    status  - status of server
+    robots  - update robots.txt files.
+    check   - Emit the generated lighttpd config, so you can check it.
 """
 
 def main(argv):

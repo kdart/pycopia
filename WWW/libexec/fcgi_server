@@ -1,0 +1,12 @@
+#!/usr/bin/python2 -OO
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+
+# All of the servers configuration, unix socket name, log file, and config
+# file name are all determined by the name given as first non-option
+# argument to this server.
+
+import sys
+from pycopia.WWW import fcgiserver
+
+sys.exit(fcgiserver.run_server(sys.argv))
+

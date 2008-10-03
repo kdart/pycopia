@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 
 """
 A simple HTTP server. also handles CGI scripts. Used for unit testing.

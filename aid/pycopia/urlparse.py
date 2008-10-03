@@ -57,6 +57,9 @@ SERVICES = {
   "ftps": 990,
   "imaps": 993,
   "svn": 3690,
+  "postgres": 5432,
+  "mysql": 3306,
+  "sqlite": 0,
 }
 SERVICES_REVERSE = dict((v,k) for k,v in SERVICES.items())
 

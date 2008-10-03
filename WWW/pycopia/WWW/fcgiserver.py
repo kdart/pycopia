@@ -90,20 +90,25 @@ def kill_server(config):
 
 
 def run_server(argv):
-    servername = os.path.basename(argv[0])
     username = None
     do_daemon = True
     debug = False
     killserver = False
+    try:
+        optlist, args = getopt.getopt(argv[1:], "dnh?kl:f:p:s:")
+    except getopt.GetoptError:
+        print run_server._doc % (argv[0],)
+        return
+
+    if len(args) > 0:
+        servername = args[0]
+    else:
+        servername = os.path.basename(argv[0])
+
     logfilename = "/var/log/%s.log" % (servername,)
     cffilename = "/etc/pycopia/%s.conf" % (servername,)
     pidfile="/var/run/%s.pid" % (servername,)
     socketpath = '/tmp/%s.sock' % (servername,)
-    try:
-        optlist, args = getopt.getopt(argv[1:], "dnh?kl:f:p:s:")
-    except getopt.GetoptError:
-        print run_server._doc % (servername,)
-        return
 
     for opt, optarg in optlist:
         if opt == "-n":
@@ -123,26 +128,32 @@ def run_server(argv):
         elif opt == "-s":
             socketpath = optarg
         elif opt in ("-h", "-?"):
-            print run_server._doc % (servername,)
+            print run_server._doc % (argv[0],)
             return 2
 
-    config = basicconfig.get_config(cffilename, 
+    try:
+        config = basicconfig.get_config(cffilename, 
                     CONFIGFILE=cffilename,
                     PIDFILE=pidfile,
                     SOCKETPATH=socketpath,
                     LOGFILENAME=logfilename, 
                     DEBUG=debug, 
                     SERVERNAME=servername)
+    except:
+        ex, val, tb = sys.exc_info()
+        print >>sys.stderr, "Could not get server config: %s (%s)" % (ex, val)
+        return 1
+
     if username:
         config.USERNAME = username
 
     if killserver:
         kill_server(config)
-        return
+        return 0
 
     if check4server(config):
         print >>sys.stderr, "Server %r already running on socket %r." % (servername, socketpath)
-        return
+        return 1
 
     if do_daemon and not debug:
         from pycopia import daemonize
@@ -156,15 +167,19 @@ def run_server(argv):
         del fo
 
     server = get_server(config)
-    server.run()
+    return int(server.run())
 
 
+# Add it this way since server is run in optimized mode.
 run_server._doc = """Run the Pycopia FCGI web server.
 
     %s [-ndk?] [-l <logfile>] [-f <configfile>] [-p <pidfile>] 
-                 [-s <socketpath>]
+                 [-s <socketpath>] [<servername>]
 
-    where:
+    <servername> determines the configuration, socket, log names, etc. to
+    use and defines the FCGI server.
+
+    Options:
          -n = Do NOT become a deamon.
          -d = Enable debugging. Also does not become a deamon.
          -k = Kill a running server.

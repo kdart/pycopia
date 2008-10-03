@@ -11,6 +11,9 @@ SITEUSER = "lighttpd"
 # user that owns the website files:
 SITEOWNER = "you"
 
+# where fcgi servers and other support scripts are stored.
+LIBEXEC = "/usr/libexec/pycopia"
+
 # VHOSTS format is a dictionary where key names are the site (virtual host)
 # names, and values are lists of servers to start.
 

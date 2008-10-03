@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 
@@ -20,7 +20,7 @@ setup (name=NAME, version=VERSION,
     packages = find_packages(),
     install_requires = ['pycopia-XML>=1.0a1,==dev', 'simplejson>=0.7'],
     data_files = [
-        ('/etc/pycopia', glob("etc/*.example")+glob("etc/*.dist")),
+        ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
         ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
         (os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html'), 
              glob("doc/html/*.html")),
@@ -28,6 +28,7 @@ setup (name=NAME, version=VERSION,
              glob("doc/html/cgi-bin/*.py")),
         (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'js'), 
              glob("media/js/*.js")),
+        (os.path.join(sys.prefix, 'libexec', 'pycopia'), glob("libexec/*")),
     ],
     scripts = glob("bin/*"), 
     test_suite = "test.WWWTests",
