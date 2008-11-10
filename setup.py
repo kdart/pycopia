@@ -51,6 +51,7 @@ PACKAGES = [
 "vim",
 ]
 
+SQUASHDIR = "/var/tmp/python"
 
 def _do_commands(name, cmds, root):
     if root:
@@ -90,6 +91,34 @@ def do_egg_info(name):
 
 def do_install(name):
     _do_commands(name, ["install"], True)
+
+# "squash" selected sub packages to a single package. Also removes
+# setuptools dependency when tarballed.
+def do_squash(name):
+    if not os.path.isdir(SQUASHDIR):
+        os.mkdir(SQUASHDIR)
+    #_do_commands(name, ["build"], False)
+    os.chdir(name)
+    uname = os.uname()
+    bin_dir = "build/lib.%s-%s-%s" % (uname[0].lower(), uname[4], sys.version[:3])
+    # e.g: build/lib.linux-x86_64-2.5/pycopia
+    print "======== SQUASH", name, "to", SQUASHDIR
+    try:
+        os.system("%s setup.py build" % (sys.executable,))
+        for pydir in ("build/lib", bin_dir):
+            if os.path.isdir(pydir):
+                cmd = "rsync -azvu %s/ %s" % (pydir, SQUASHDIR)
+                os.system(cmd)
+    finally:
+        os.chdir("..")
+    _null_init(SQUASHDIR)
+    print "====================== END", name
+    print
+
+def _null_init(directory):
+    open(os.path.join(directory, "pycopia", "__init__.py"), "w").close()
+
+
 
 
 def main(argv):
