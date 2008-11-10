@@ -28,8 +28,6 @@ import sys
 from math import ceil
 from errno import EINTR
 
-# have to import this way to avoid a circular import
-from _socket import error as SocketError
 
 # Works like None, but is callable and iterable.
 class NULLType(type):
@@ -376,6 +374,8 @@ def debugmethod(meth):
 
 # decorator to make system call methods safe from EINTR
 def systemcall(meth):
+    # have to import this way to avoid a circular import
+    from _socket import error as SocketError
     def systemcallmeth(*args, **kwargs):
         while 1:
             try:

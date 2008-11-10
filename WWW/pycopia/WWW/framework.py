@@ -131,7 +131,7 @@ class HttpResponse(object):
             self._is_string = True
 
     def get_status(self):
-        return STATUSCODES.get(self.status_code, 'UNKNOWN STATUS CODE')
+        return "%s %s" % (self.status_code, STATUSCODES.get(self.status_code, 'UNKNOWN STATUS CODE'))
 
     def __str__(self):
         "Full HTTP message, including headers"
@@ -582,8 +582,7 @@ class WebApplication(object):
     """
     def __init__(self, config):
         self._config = config
-        self._resolver = URLResolver(config.LOCATIONMAP, "/%s" % (config.SERVERNAME,))
-        #self._cookiejar = httputils.CookieJar()
+        self._resolver = URLResolver(config.LOCATIONMAP, config.get("BASEPATH"))
 
     def __call__(self, environ, start_response):
         environ['framework.get_url'] = self._resolver.get_url

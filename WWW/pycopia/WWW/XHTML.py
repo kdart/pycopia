@@ -32,7 +32,7 @@ import sys
 import re
 import itertools
 import HTMLParser
-import Image  # from PIL package
+from PIL import Image  # from PIL package
 from htmlentitydefs import name2codepoint
 
 from pycopia.urlparse import quote_plus
