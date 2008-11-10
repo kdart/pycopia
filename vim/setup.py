@@ -7,7 +7,6 @@ import ez_setup
 ez_setup.use_setuptools()
 
 from setuptools import setup
-from pycopia import proctools
 from glob import glob
 
 
@@ -21,6 +20,7 @@ DNAME = NAME.split("-", 1)[-1]
 # There's got to be a better way..., but this screen-scraping program
 # works, and also demonstrates the Pycopia proctools module ;-).
 def get_vimvar():
+    from pycopia import proctools
     proc = proctools.spawnpty("vim")
     proc.write(":echo $VIM\r")
     proc.write(":exit\r")
@@ -55,7 +55,10 @@ def get_vimfiles():
             (vimsyntax, glob("vimfiles/syntax/*")),
            ]
 
-datafiles = get_vimfiles()
+try:
+    datafiles = get_vimfiles()
+except (ImportError, AttributeError):
+    datafiles = []
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],

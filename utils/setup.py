@@ -16,7 +16,10 @@ VERSION = "1.0a2"
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
 
-itimer = Extension('pycopia.itimer', ['pycopia.itimer.pyx'],
+if sys.platform == "darwin":
+    itimer = Extension('pycopia.itimer', ['pycopia.itimer.pyx'])
+else:
+    itimer = Extension('pycopia.itimer', ['pycopia.itimer.pyx'],
                    libraries=["rt"])
 
 if sys.version_info[:2] < (2, 5):
