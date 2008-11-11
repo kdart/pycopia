@@ -9,7 +9,7 @@ from glob import glob
 from setuptools import setup
 
 NAME = "pycopia-XML"
-VERSION = "1.0a3"
+VERSION = "1.0a4"
 
 DNAME = NAME.split("-", 1)[-1]
 ENAME = NAME.replace("-", "_")
@@ -25,8 +25,9 @@ setup (name=NAME, version=VERSION,
     description = "Work with XML in a Pythonic way.",
     long_description = """Work with XML in a Pythonic way.
     Provides Python(ic) Object Model, or POM, for creating, inspecting, or
-    modifying basic XML documents. Partially validates documents. This framework
-    requires a DTD for the XML. Never "print" XML tags again.""",
+    modifying basic XML documents. Provides XML factory objects. Partially
+    validates documents when emitted. This framework requires a DTD for
+    the XML. Never "print" XML tags again.""",
     license = "LGPL",
     author = "Keith Dart",
     author_email = "keith@kdart.com",

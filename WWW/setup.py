@@ -10,7 +10,7 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-WWW"
-VERSION = "1.0a3"
+VERSION = "1.0a4"
 
 DNAME = NAME.split("-", 1)[-1]
 ENAME = NAME.replace("-", "_")
@@ -36,8 +36,14 @@ setup (name=NAME, version=VERSION,
     description = "Pycopia WWW tools and web application framework.",
     long_description = """Pycopia WWW tools and web application framework.
     Provides FCGI servers, XHTML page generator with functional style
-    interfaces, and lightweight web application framework. Designed to
-    work closely with the lighttd front-end server.""",
+    interfaces, XHTML generator objects, and lightweight web application
+    framework. Some support for WML as well. Designed to work closely with
+    the lighttd front-end server via the FCGI interface. You may run any
+    number of FCGI handlers, each in its own process with its own user ID
+    and associated permissions. Generally, supports a design comprised of
+    a set of JSON handlers with the expectation that the web application
+    will be mostly provided by Javascript on the client side.  The
+    framework also works with Google's web application engine.""",
     license = "LGPL",
     author = "Keith Dart",
     author_email = "keith@kdart.com",

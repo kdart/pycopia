@@ -8,7 +8,7 @@ from setuptools import setup
 from glob import glob
 
 NAME = "pycopia-core"
-VERSION = "1.0a3"
+VERSION = "1.0a4"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
