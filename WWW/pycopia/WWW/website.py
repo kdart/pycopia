@@ -125,7 +125,7 @@ def check(config):
     from pycopia import proctools
     pm = proctools.get_procmanager()
     lighttpd = proctools.which("lighttpd")
-    proc = pm.spawnpipe("%s -p -f %s" % (lighttpd, LTCONFIG), merged=True)
+    proc = pm.spawnpipe("%s -p -f %s" % (lighttpd, LTCONFIG))
     out = proc.read()
     es = proc.wait()
     if es:
