@@ -65,7 +65,9 @@ class Poll(object):
             self.pollster.register(fd, flags)
 
     def unregister(self, obj):
-        fd = obj.fileno()
+        self.unregister_fd(obj.fileno())
+
+    def unregister_fd(self, fd):
         try:
             del self.smap[fd]
         except KeyError:

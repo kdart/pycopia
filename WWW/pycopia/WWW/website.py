@@ -4,7 +4,7 @@
 # 
 # $Id$
 #
-#    Copyright (C) 1999-2004  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2008  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,16 @@ front-end.
 
 This controller also handles the lighttpd process itself. So if you have
 it enabled in your site's init.d system you should disable it if they are
-configured to listen on the same port.
+configured to listen on the same port. The lighttpd server is run under
+the pycopia process manager and will be automatically restarted if it
+abnormally exits.
+
+The pycopia web framework provides its own configuration file. Changes
+made to any installed lighttpd configuration won't be used.
+
+The lighttpd build was configured like this:
+
+./configure --prefix=/usr --with-fam --with-openssl --with-attr --with-pcre --with-zlib --disable-ipv6
 
 """
 
@@ -55,11 +64,12 @@ def start_proc_manager(config, logfile):
 
     asyncio.start_sigio()
     pm = proctools.get_procmanager()
+    libexec = config.get("LIBEXEC", "/usr/libexec/pycopia")
 
     for name, serverlist in config.VHOSTS.items():
         for servername in serverlist:
             print "Starting %s for %s." % (servername, name)
-            p = pm.spawnpipe("%s/fcgi_server -n %s" % (config.LIBEXEC, servername), persistent=True, logfile=logfile)
+            p = pm.spawnpipe("%s/fcgi_server -n %s" % (libexec, servername), persistent=True, logfile=logfile)
             asyncio.poller.register(p)
             scheduler.sleep(1.0) # give it time to init...
     if config.USEFRONTEND:
@@ -115,7 +125,7 @@ def check(config):
     from pycopia import proctools
     pm = proctools.get_procmanager()
     lighttpd = proctools.which("lighttpd")
-    proc = pm.spawnpipe("%s -p -f %s" % (lighttpd, LTCONFIG))
+    proc = pm.spawnpipe("%s -p -f %s" % (lighttpd, LTCONFIG), merged=True)
     out = proc.read()
     es = proc.wait()
     if es:
