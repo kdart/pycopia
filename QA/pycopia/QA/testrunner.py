@@ -1,245 +1,320 @@
-#!/usr/bin/python
+#!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# License: LGPL
-# Keith Dart <keith@dartworks.biz>
+
+# Copyright The Android Open Source Project
+
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at 
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Modified by Keith Dart to conform to Pycopia style.
+# Previously modified from pycopia modules by Keith Dart for Android.
+
+
+"""Top level test runner.
+
+This module provides the primary test runner for the automation framework.
 
 """
-Top level test runner.  This module is the primary test runner for the
-automation framework. It instantiates the configuration object and the test
-suites, then initializes and runs them. 
+__author__ = 'keith@dartworks.biz (Keith Dart)'
+__original_author__ = 'dart@google.com (Keith Dart)'
+__original_original_author__ = 'keith@kdart.com (Keith Dart)'
 
-From the command line (using the 'runtest' program):
-
-runtest <testmodulename>...
-
-Options:
-    -h   - print help
-    -d   - debug mode
-    -v   - be more verbose
-    -f <filename>  - Use <filename> to load additional configuration.
-
-or, in a script,
-
----------
-#!/usr/bin/python
-from pycopia import testrunner
-import mytestmodule
-
-testrunner.run_module(mytestmodule)
----------
-
-"""
-
-import sys, os
+import sys
+import os
 import shutil
 from errno import EEXIST
 
-from pycopia import getopt
-from pycopia import scheduler
 from pycopia import timelib
-from pycopia.storage import Storage 
+from pycopia.QA import core
+from pycopia.QA import constants
+from pycopia import reports 
 
-__testrunner = None
+# for object type checking
+ModuleType = type(sys)
+ObjectType = object
+TypeType = type
+
+
+class Error(Exception):
+    """Testrunner errors."""
+    pass
+
+class TestRunnerError(Error):
+    """Raised for a runtime error of the test runner."""
+
 
 class TestRunner(object):
-    def __init__(self):
-        cf = Storage.get_config()
-        self._config = cf
+    """Runs test objects.
 
-    def get_config(self):
-        return self._config
+    Handled running objects, generating the report, and other overhead of
+    running tests and cleaning up afterwards.
+    """
+    def __init__(self, config):
+        self.config = config
+        self.config.options_override = {}
+        self.config.arguments = []
 
-    def __call__(self, argv):
-        cf = self._config
-        optlist, extraopts, args = getopt.getopt(argv[1:], "hdvc:f:n:N")
-        for opt, optarg in optlist:
-            if opt == "-h":
-                print __doc__
-                sys.exit(2)
-            if opt == "-d":
-                cf.flags.DEBUG += 1
-            if opt == "-v":
-                cf.flags.VERBOSE += 1
-            if opt == "-c" or opt == "-f":
-                cf.mergefile(optarg)
-            if opt == "-n":
-                cf.NOTE = optarg
-            if opt == "-N":
-                cf.flags.NONOTE = True
-        cf.update(extraopts)
-        cf.argv = args # test args
-        cf.arguments = [os.path.basename(argv[0])] + argv[1:] # original command line
-
-        self.initialize()
-        if cf.argv:
-            self.run_modules(cf.argv)
+    def set_options(self, opts):
+        if isinstance(opts, dict):
+            self.config.options_override = opts
         else:
-            from pycopia import cliutils
-            testlist = self.get_test_list()
-            try:
-                test = cliutils.choose(testlist)
-            except:
-                return None
+            raise ValueError, "Options must be dictionary type."
+
+    def run_object(self, obj):
+        """Run a test object (object with run() function or method).
+
+        Arguments: 
+            obj: 
+                A Python test object.    This object must have a `run()` function
+                or method that takes a configuration object as it's single
+                parameter. It should also have a `test_name` attribute.
+
+        Messages:
+            May send any of the following messages to the report object:
+                RUNNERARGUMENTS: 
+                    command-line arguments given to test runner.
+                logfile: 
+                    name of the log file from the configuration.
+                COMMENT:
+                    User supplied comment given when test object was invoked.
+                RUNNERSTART:
+                    Timestamp when test runner started.
+                RUNNEREND:
+                    Timestamp when test runner ends.
+                add_url:
+                    Location where any generated data files, logs, and reports can
+                    be found.
+
+        """
+        cf = self.config
+        basename = "_".join(obj.test_name.split("."))
+        cf.reportfilename = basename
+        cf.logbasename = "%s.log" % (basename,)
+        # resultsdir is where you would place any resulting data files. This
+        # is also where any report object or log files are placed.
+        cf.resultsdir = os.path.join(
+            os.path.expandvars(cf.get("resultsdirbase", "/var/tmp")),
+            "%s-%s-%s" % (cf.reportfilename, cf.username, timelib.strftime("%Y%m%d%H%M", 
+            timelib.localtime(cf.runnerstarttime))))
+        self._create_results_dir()
+        self._set_report_url()
+        cf.report.logfile(cf.logfilename)
+        # run the test object!
+        return obj.run(cf) 
+
+    def run_objects(self, objects):
+        """Invoke the `run` method on a list of mixed runnable objects.
+
+        Arguments:
+            objects:
+                A list of runnable object instances.
+
+        May raise TestRunnerError if an object is not runnable by this test
+        runner.
+        """
+        for obj in objects:
+            objecttype = type(obj)
+            if objecttype is ModuleType and hasattr(obj, "run"):
+                self.run_module(obj)
+            elif objecttype is TypeType and issubclass(obj, core.Test):
+                    self.run_test(obj)
+            elif isinstance(obj, core.TestSuite):
+                    self.run_suite(obj)
             else:
-                self.run_module(test)
-        self.finalize()
+                raise TestRunnerError("%r is not a runnable object." % (obj,))
 
     def run_module(self, mod):
-        """run_module(module)
-    Runs the module. The parameter should be a module object, but if it is a
-    string then a module object with that name will be imported. 
-    """
-        cf = self._config
-        if type(mod) is str:
-            mod = self.get_module(mod)
-        if not mod:
-            raise ValueError, "Unable to locate test module"
-        try:
-            cf.module_ID = mod._ID
-        except AttributeError:
-            cf.module_ID = "<unknown>"
-        cf.reportbasename = mod.__name__.replace(".", "_")
-        cf.logbasename = "%s.log" % (cf.reportbasename,)
-        # merge any test-module specific config files.
-        testconf = os.path.join(os.path.dirname(mod.__file__) , "%s.conf" % (mod.__name__.split(".")[-1],))
+        """Run a test module.
+
+        Prepares the configuration with module configuration, sends report
+        messages appropriate for modules, and reports pass or fail.
+
+        Arguments:
+            mod:
+                A module object with a run() function that takes a configuration
+                object as it's single parameter.
+
+        Returns:
+            The return value of the module's Run() function, or FAILED if the
+            module raised an exception.
+        """
+        cf = self.config
+        # merge any test-module specific config files. The config file name is
+        # the same as the module name, with ".conf" appended. Located in the
+        # same directory as the module itself.
+        testconf = os.path.join(os.path.dirname(mod.__file__), 
+                    "%s.conf" % (mod.__name__.split(".")[-1],))
         cf.mergefile(testconf)
-        # resultsdir is where you would place any resulting data files.
-        starttime = timelib.now()
-        cf.resultsdir = os.path.join(
-                os.path.expandvars(cf.get("resultsdirbase", "/var/tmp")),
-                "%s-%s" % (cf.reportbasename, timelib.strftime("%Y%m%d%H%M", timelib.localtime(starttime)))
-        )
-        # make results dir, don't worry if it already exists
+        cf.evalupdate(cf.options_override)
+        # make the module look like a test.
+        mod.test_name = mod.__name__
         try:
-            os.mkdir(cf.resultsdir)
-        except OSError, errno:
-            if errno[0] == EEXIST:
+            ID = mod.__version__[1:-1]
+        except AttributeError: # should be there, but don't worry if its not.
+            ID = "undefined"
+        cf.report.add_message("MODULEVERSION", ID)
+        cf.report.add_message("MODULESTARTTIME", timelib.now())
+        try:
+            rv = self.run_object(mod)
+        except KeyboardInterrupt:
+            cf.report.add_message("MODULEENDTIME", timelib.now())
+            cf.report.incomplete("Module aborted by user.")
+            raise
+        except:
+            ex, val, tb = sys.exc_info()
+            if cf.flags.DEBUG:
+                from pycopia import debugger
+                debugger.post_mortem(tb, ex, val)
+            rv = constants.FAILED
+            cf.report.add_message("MODULEENDTIME", timelib.now())
+            cf.report.failed("Module exception: %s (%s)" % (ex, val))
+        else:
+            cf.report.add_message("MODULEENDTIME", timelib.now())
+            if rv is None:
+                # If module run() function returns None we take that to mean that
+                # it runs a TestSuite itself. Report nothing.
+                pass
+            # But if the module returns something else we take that to mean that
+            # it is reporting some true/false value to report as pass/fail.
+            elif rv:
+                return cf.report.passed("Return evaluates True.")
+            else:
+                return cf.report.failed("Return evaluates False.")
+            return rv
+
+    def run_suite(self, suite):
+        """Run a TestSuite object.
+
+        Given a pre-populated TestSuite object, run it after initializing
+        configuration and report objects.
+
+        Arguments:
+            suite:
+                An instance of a core.TestSuite class or subclass. This should
+                already have Test objects added to it.
+
+        Returns:
+            The return value of the suite. Should be PASSED or FAILED.
+
+        """
+        assert isinstance(suite, core.TestSuite), "Must supply TestSuite object."
+        return self.run_object(suite)
+
+    def run_test(self, testclass, *args, **kwargs):
+        """Run a test class with arguments.
+
+        Runs a single test class with the provided arguments.
+
+        Arguments:
+            testclass:
+                A class that is a subclass of core.Test. Any extra arguments given
+                are passed to the `execute()` method when it is invoked.
+
+        Returns:
+            The return value of the Test instance. Should be PASSED, FAILED, 
+            INCOMPLETE, or ABORT.
+        """
+        cf = self.config
+        testinstance = testclass(cf)
+        entry = core.TestEntry(testinstance, args, kwargs)
+        try:
+            return self.run_object(entry)
+        except core.TestSuiteAbort, err:
+            cf.report.info("%r aborted (%s)." % (entry.test_name, err))
+            entry.result = constants.INCOMPLETE
+            return constants.ABORT
+
+    def _create_results_dir(self):
+        """Make results dir, don't worry if it already exists."""
+        try:
+            os.mkdir(self.config.resultsdir)
+        except OSError, error:
+            if error[0] == EEXIST:
                 pass
             else:
-                raise
-        # firstly, run the module-level initialize function.
-        if hasattr(mod, "initialize") and callable(mod.initialize):
-            if cf.flags.DEBUG:
-                try:
-                    mod.initialize(cf)
-                except:
-                    ex, val, tb = sys.exc_info()
-                    from pycopia import debugger
-                    debugger.post_mortem(ex, val, tb)
-            else:
-                mod.initialize(cf)
+                raise # raise original execption since we don't know what else it
+                            # could be. This will be an OSError, which is not specific
+                            # to the domain of this module.
 
-        rpt = cf.get_report()
-        cf.reportfilenames = rpt.filenames # Report file's names. save for future use.
-        rpt.initialize()
-        rpt.logfile(cf.logfilename)
-        rpt.add_title("Test Results for module %r." % (mod.__name__, ))
-        rpt.add_message("ARGUMENTS", " ".join(cf.arguments))
-        note = self.get_note()
-        if note:
-            rpt.add_message("NOTE", note)
-            self._config.comment = note
-        else:
-            self._config.comment = "<none>"
-        self._reporturl(rpt)
-        rpt.add_message("MODULESTART", timelib.strftime("%a, %d %b %Y %H:%M:%S %Z", timelib.localtime(starttime)))
-        mod.run(cf) # run the test!
-        rpt.add_message("MODULEEND", timelib.localtimestamp())
-        rpt.finalize()
-        # force close of report and logfile between modules
-        cf.logfile.flush()
-        del cf.report ; del cf.logfile 
-        for fname in cf.reportfilenames:
-            if not fname.startswith("<"):
-                shutil.move(fname, cf.resultsdir)
+    def _set_report_url(self):
+        """Construct a URL for finding the report and test produced data.
 
-        # lastly, run the module-level finalize function.
-        if hasattr(mod, "finalize") and callable(mod.finalize):
-            if cf.flags.DEBUG:
-                try:
-                    mod.finalize(cf)
-                except:
-                    ex, val, tb = sys.exc_info()
-                    from pycopia import debugger
-                    debugger.post_mortem(ex, val, tb)
-            else:
-                mod.finalize(cf)
-
-    def _reporturl(self, rpt):
-        cf = self._config
+        If the configuration has a `baseurl` and `documentroot` defined then
+        the results location is available by web server and a URL is sent to
+        the report. If not, the a directory location is sent to the report.
+        """
+        cf = self.config
         baseurl = cf.get("baseurl")
         documentroot = cf.get("documentroot")
         resultsdir = cf.resultsdir
         if baseurl and documentroot:
-            rpt.add_url("RESULTSDIR", baseurl+resultsdir[len(documentroot):])
+            cf.report.add_url("Results location.", baseurl + resultsdir[len(documentroot):])
         else:
-            rpt.add_message("RESULTSDIR", resultsdir)
-
-    def run_modules(self, modlist):
-        """run_modules(modlist)
-    Runs the run_module() function on the supplied list of modules (or module
-    names).  """
-        for mod in modlist:
-            self.run_module(mod)
-            # give things time to "settle" from previous suite. Some spawned
-            # processes may delay exiting and hold open TCP ports, etc.
-            scheduler.sleep(2) 
-
-    def get_module(self, name):
-        if sys.modules.has_key(name):
-            return sys.modules[name]
-        try:
-            mod = __import__(name)
-            components = name.split('.')
-            for comp in components[1:]:
-                mod = getattr(mod, comp)
-        except ImportError:
-            print >>sys.stderr, "*** Could not find test module %s." % (name)
-            return None
-        else:
-            return mod
-
-    def get_note(self):
-        note = self._config.get("NOTE")
-        if note:
-            return note
-        elif not self._config.flags.get("NONOTE"):
-            from pycopia import cliutils
-            return cliutils.get_text("> ", "Enter a small note to describe the test conditions. End with single '.'.")
-        else:
-            return None
-
-    # overrideable interace follows
+            cf.report.add_url("Results location.", "file://" + resultsdir)
 
     def initialize(self):
-        pass
+        """Perform any initialization needed by the test runner.
+
+        Initializes report. Sends runner and header messages to the report.
+        """
+        cf = self.config
+        cf.username = os.environ["USER"]
+        os.chdir(cf.logfiledir) # Make sure runner CWD is a writable place.
+        cf.runnerstarttime = starttime = timelib.now()
+        try:
+            rpt = cf.report
+        except reports.ReportFindError, err:
+            cf.UI.error("No report with the name %r. Use of of the following." % (cf.reportname,))
+            cf.UI.print_list(err.args[0])
+            raise TestRunnerError, "No such report name: %r" % (cf.reportname,)
+        # Report file's names. save for future use.
+        cf.reportfilenames = rpt.filenames 
+        rpt.initialize(cf)
+        rpt.add_title("Test Results for %r." % " ".join(cf.get("argv", [])))
+        arguments = cf.get("arguments")
+        # Report command line arguments, if any.
+        if arguments:
+            rpt.add_message("RUNNERARGUMENTS", " ".join(arguments))
+        # Report comment, if any.
+        comment = cf.get("comment")
+        if comment:
+            rpt.add_message("COMMENT", comment)
+        rpt.add_message("RUNNERSTARTTIME", starttime, 0)
 
     def finalize(self):
-        pass
-
-    def get_test_list(self):
-        import glob
-        return [] # XXX
-
-
-def get_testrunner():
-    global __testrunner
-    if not __testrunner:
-        __testrunner = TestRunner()
-    return __testrunner
-
-def delete_testrunner():
-    global __testrunner
-    __testrunner = None
-
-
-# callback for testdir walker
-def _collect(flist, dirname, names):
-    for name in names:
-        if name.endswith(".py") and not name.startswith("_") and (name.find("CVS") == -1):
-            flist.append(os.path.join(dirname, name[:-3]))
-
-def main(argv):
-    tr = get_testrunner()
-    tr(argv)
+        """Perform any finalization needed by the test runner.
+        Sends runner end messages to report. Finalizes report.
+        """
+        cf = self.config
+        rpt = cf.report
+        rpt.add_message("RUNNERENDTIME", timelib.now(), 0)
+        rpt.finalize()
+        # force close of report and logfile between objects. these are
+        # `property` objects and deleting them makes them close and clears the
+        # cache.
+        del rpt
+        del cf.report
+        del cf.logfile 
+        del cf.UI 
+        if cf.has_key("resultsdir"):
+            for fname in cf.reportfilenames:
+                if not fname.startswith("<"): # a real file, not builtin stdio
+                    if os.path.isfile(fname):
+                        shutil.move(fname, cf.resultsdir)
+            for suffix in ("", ".1", ".2", ".3", ".4", ".5"): # log may have rotated
+                fname = cf.logfilename + suffix
+                if os.path.isfile(fname) and os.path.getsize(fname) > 0:
+                    shutil.move(fname, cf.resultsdir)
+            # If resultsdir ends up empty, remove it.
+            if not os.listdir(cf.resultsdir): # TODO(dart), stat this instead
+                os.rmdir(cf.resultsdir)
 

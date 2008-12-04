@@ -9,7 +9,7 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-storage"
-VERSION = "1.0a3"
+VERSION = "1.0a4"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
@@ -17,7 +17,10 @@ DNAME = NAME.split("-", 1)[-1]
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-core>=1.0a1,==dev', 'pycopia-CLI>=1.0a1,==dev', 'Durus>=3.5'],
+    install_requires = ['pycopia-core>=1.0a1,==dev', 
+            'pycopia-CLI>=1.0a1,==dev', 
+            'Durus>=3.5',
+            'psycopg2>=2.0'],
     test_suite = "test.StorageTests",
     scripts = glob("bin/*"), 
     data_files = [

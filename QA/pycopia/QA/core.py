@@ -1,144 +1,198 @@
-#!/usr/bin/python
-# -*- coding: ascii -*-
+#!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# License: LGPL
-# Keith Dart <keith@dartworks.biz>
 
-"""
-This module contains the test case and test suite classes used to control
-the running of tests and provides a basic framework for automated testing.
-It is the core part of automated testing.
+# LICENSE: LGPL
 
-This module defines a Test class, which is the base class for all test
-case implementations. This class is not normally substantiated itself, but
-a subclass is defined that defines a 'execute()' method. 
+# Copied from Pycopia test automation framework, and modified for Google Gtest.
+# Copied from Gtest, and modified for Droid test automation framework.
+# Copied from Droid back into Pycopia test automation framework.
 
-To use the test case, instantiate your class and call it with test method
-parameters. You can define two hook methods in the subclass: 'initialize'
-and 'finalize'.  These are run at the beginning and end of the test,
-respectively.
 
-You may also need to define dependencies. Your class definition may
-contain a PREREQUISITE class-variable that is used for this. This should
-be set, if required, so dependency tracking works.
+"""Provides base classes for test cases and suites.
 
-All test related errors are based on the 'TestError' exception. If a test
-cannot be completed for some reason you may raise a 'TestIncompleteError'
-exception.
+This module defines a Test class, which is the base class for all test case
+implementations. This class is not substantiated itself, but a subclass is
+defined that overrides the `execute` method. 
 
-Your 'execute()' should return the value of the 'passed()' or
-'failed()' method, as appropriate. You may also use assertions. The
-standard Python 'assert' keyword may be used, or the assertion test
-methods may be used.
+Your `execute` should return the value that the `passed` or
+`failed` methods return, as appropriate. 
+
+All test related errors are based on the `TestError` exception. You may
+also use the built-in `assert` statement. There are also various assertion
+methods you may use. If a test cannot be completed for some reason you may
+also raise a 'TestIncompleteError' exception.
 
 Usually, a set of test cases is collected in a TestSuite object, and run
 sequentially by calling the suite instance. 
 
 """
 
-import sys, os
+__author__ = 'keith@kdart.com (Keith Dart)'
 
-from pycopia.aid import Enum, IF
-from pycopia import debugger
+
+import sys
+import os
+
+from pycopia import aid
+from pycopia import combinatorics
 from pycopia import scheduler
 from pycopia import timelib
-from pycopia import cliutils
+from pycopia import debugger
 from pycopia import UserFile
+from pycopia import dictlib
+from pycopia import module
+from pycopia import methods
+from pycopia.QA import constants
 
-
-__all__ = ['TestError', 'TestIncompleteError', 'TestFailError',
-'TestSuiteAbort', 'Test', 'PreReq', 'TestSuite', 'repr_test',
-]
 
 # exception classes that may be raised by test methods.
 class TestError(AssertionError):
-    """TestError() Base class of testing errors."""
-    pass
+    """TestError() Base class of testing errors. 
+
+    This is based on AssertionError so the same assertion catcher can be
+    used for catching assertions and these kind of exceptions.
+    """
+Error = TestError # alias for google conformance.
 
 class TestIncompleteError(TestError):
     """Test case disposition could not be determined."""
-    pass
 
 class TestFailError(TestError):
     """Test case failed to meet the pass criteria."""
-    pass
 
-class TestSuiteAbort(RuntimeError):
+class TestSuiteAbort(Exception):
     """Entire test suite must be aborted."""
-    pass
 
 
-# One of the below values should be returned by execute(). The usual
-# method is to return the value of the method with the same name. E.g.
-# 'return self.passed()'. The Test.passed() method adds a passed message
-# to the report, and returns the PASSED value for the suite to check.
-
-# execute() passed, and the suite may continue.
-PASSED = Enum(1, "PASSED")
-
-# execute() failed, but the suite can continue. You may also raise a
-# TestFailError exception.
-FAILED = Enum(0, "FAILED") 
-
-# execute() could not complete, and the pass/fail criteria could not be
-# determined. but the suite may continue. You may also raise a TestIncompleteError
-# exception.
-INCOMPLETE = Enum(-1, "INCOMPLETE") 
-
-# execute() could not complete, and the suite cannot continue. Raising
-# TestSuiteAbort is the same.
-ABORT = Enum(-2, "ABORT") 
+class TestPrerequisiteError(Exception):
+    """Error in prerequisite calculation."""
 
 
-# default report message
-NO_MESSAGE = "no message"
+class TestResult(object):
+    def __init__(self, value):
+        self._value = value
+
+    def __str__(self):
+        return "Result: %s" % self._value
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, self._value)
+
+    def __nonzero__(self):
+        return self._value == constants.PASSED
+
+    def is_passed(self):
+        return self._value == constants.PASSED
+
+    def is_failed(self):
+        return self._value == constants.FAILED
+
+    def is_incomplete(self):
+        return self._value == constants.INCOMPLETE
 
 
-# Cheat a little here for better user input
-BRIGHTWHITE = "\x1b[37;01m"
-NORMAL = "\x1b[0m"
+class TestOptions(object):
+    """A descriptor that forces OPTIONS to be class attributes that are not
+    overridable by instances.
+    """
+    def __init__(self, initdict):
+        # Default option value is empty iterable (evaluates false).
+        self.OPTIONS = dictlib.AttrDictDefault(initdict, default=())
+
+    def __get__(self, instance, owner):
+        return self.OPTIONS
+
+    # This is here to make instances not able to override options, but does
+    # nothing else. Attempts to set testinstance.OPTIONS are simply ignored.
+    def __set__(self, instance, value):
+        pass
 
 
+def insert_options(klass, **kwargs):
+    if type(klass) is type and issubclass(klass, Test):
+        if not klass.__dict__.has_key("OPTIONS"):
+            klass.OPTIONS = TestOptions(kwargs)
+    else:
+        raise ValueError("Need Test class.")
 
-######################################################
-# abstract base class of all tests
+
 class Test(object):
-    """Base class for all test cases. The test should be as atomic as possible.
-    Multiple instances of these may be run in a TestSuite object.  Be sure to
-    set the PREREQUISITES class-variable in the subclass if the test has a
-    prerequisite test."""
-    # prerequisite tests are static, defined in the class definition.
-    # They are defined by the PreReq class. The PreReq class takes a name of a
-    # test case (which is the name of the Test subclass) and any arguments that
-    # the test requires. A unique test case is defined by the Test class and
-    # its specific arguments. The PREREQUISITES class attribute is a list of
-    # PreReq objects.
-    # e.g. PREREQUISITES = [PreReq("MyPrereqTest", 1)]
+    """Base class for all test cases.
+
+    Subclass this to define a new test. The test should be as atomic as
+    possible. A Test may be combined with other tests and may have
+    dependencies (defined by the database).
+
+    May send any of the following messages to the report object:
+        TESTARGUMENTS : string representation of supplied arguments.
+        STARTTIME         : timestamp indicating when test was started.
+        ENDTIME             : timestamp indicating when test ended.
+        add_heading     : Section heading.
+        passed                : When test passed.
+        failed                : When test failed.
+        incomplete        : When test was not able to complete.
+        diagnostic        : Add useful diagnostic information when a test fails.
+        abort                 : Abort suite, provides the reason.
+        info                    : Informational and progress messages.
+    """
+    # class level attributes that may be overridden in subclasses, or reset by test
+    # runner from external information (database).
+
+    OPTIONS = TestOptions({})
     PREREQUISITES = []
-    INTERACTIVE = False # define to True if your test is interactive (takes user input).
 
     def __init__(self, config):
-        self.test_name = self.__class__.__name__
+        cl = self.__class__
+        self.test_name = "%s.%s" % (cl.__module__, cl.__name__)
         self.config = config 
         self._report = config.report 
         self._debug = config.flags.DEBUG 
         self._verbose = config.flags.VERBOSE 
-        self.datapoints = [] # optionally used to collect data during test run
+        self.__datapoints = []
+        self._merge_config()
 
-    def __call__(self, *args, **kw):
-        # this heading displays the test name just as a PREREQUISITES entry needs.
-        self._report.add_heading(repr_test(self.test_name, args, kw), 2)
-        self.starttime = timelib.now()
-        self.info("STARTTIME: %s" % (timelib.strftime("%a, %d %b %Y %H:%M:%S %Z", timelib.localtime(self.starttime)),))
-        rv = None # in case of exception
-        rv = self._initialize(rv)
-        if rv is not None: # an exception happened
-            return rv
+    def _merge_config(self):
+        """Merge Test specific config file."""
+        cl = self.__class__
+        cf = self.config
+        mod = sys.modules[cl.__module__]
+        testcnf = os.path.join(os.path.dirname(mod.__file__), 
+                    "%s.conf" % (cl.__name__,))
+        if cf.mergefile(testcnf):
+            cf.evalupdate(cf.options_override)
+
+    @classmethod
+    def set_test_options(cls):
+        insert_options(cls)
+        opts = cls.OPTIONS
+        pl = []
+        for prereq in cls.PREREQUISITES:
+            if type(prereq) is str:
+                pl.append(PreReq(prereq))
+            elif type(prereq) is tuple:
+                pl.append(PreReq(*prereq))
+            else:
+                raise ValueError("Bad prerequisite value.")
+        opts.prerequisites = pl
+        opts.bugid = None
+
+    def __call__(self, *args, **kwargs):
+        """Invoke the test.
+
+        The test is "kicked-off" by calling this. Any arguments are passed to
+        the test implementation (`execute` method).
+        """
+        self._report.add_heading(self.test_name, 2)
+        if args or kwargs:
+            self._report.add_message("TESTARGUMENTS", repr_args(args, kwargs), 2)
+        self.starttime = timelib.now() # saved starttime in case initializer
+                                                                     # needs to create the log file.
+        self._initialize()
         # test elapsed time does not include initializer time.
         teststarttime = timelib.now()
-        # run execute
+        # run the execute() method and check for exceptions.
         try:
-            rv = apply(self.execute, args, kw)
+            rv = self.execute(*args, **kwargs)
         except KeyboardInterrupt:
             if self._debug:
                 ex, val, tb = sys.exc_info()
@@ -149,24 +203,40 @@ class Test(object):
         except TestFailError, errval:
             rv = self.failed("Caught Fail exception: %s" % (errval,))
         except TestIncompleteError, errval:
-            rv = self.incomplete("Caught Incomplete exception: %s" % (errval,))
+            rv = self.incomplete("Caught incomplete exception: %s" % (errval,))
+        # Test asserts and validation errors are based on this.
         except AssertionError, errval:
             rv = self.failed("failed assertion: %s" % (errval,))
         except TestSuiteAbort:
             raise # pass this one up to suite
+        except debugger.DebuggerQuit: # set_trace "leaks" BdbQuit
+            rv = self.incomplete("%s: Debugger exit." % (self.test_name, ))
         except:
             ex, val, tb = sys.exc_info()
             if self._debug:
                 debugger.post_mortem(tb, ex, val)
                 tb = None
-            rv = self.failed("%s: Exception occured! (%s: %s)" % (self.test_name, ex, val))
+            rv = self.incomplete("%s: Exception occured! (%s: %s)" % \
+                    (self.test_name, ex, val))
         endtime = timelib.now()
+
+        self._report.add_message("STARTTIME", teststarttime, 2)
+        self._report.add_message("ENDTIME", endtime, 2)
         minutes, seconds = divmod(endtime - teststarttime, 60.0)
         hours, minutes = divmod(minutes, 60.0)
         self.info("Time elapsed: %02.0f:%02.0f:%02.2f" % (hours, minutes, seconds))
         return self._finalize(rv)
 
-    def _initialize(self, rv):
+    def _initialize(self):
+        """initialize phase handler.
+
+        Run user-defined `initialize()` and catch exceptions. If an exception
+        occurs in the `initialize()` method (which establishes the
+        pre-conditions for a test) then alter the return value to abort()
+        which will abort the suite. Invokes the debugger if the debug flag is
+        set. If debug flag is not set then emit a diagnostic message to the
+        report.
+        """
         try:
             self.initialize()
         except:
@@ -174,413 +244,926 @@ class Test(object):
             self.diagnostic("%s (%s)" % (ex, val))
             if self._debug:
                 debugger.post_mortem(tb, ex, val)
-            rv = self.abort("Test initialization failed!")
-        return rv
+            self.abort("Test initialization failed!")
 
-    # run user's finalize() and catch exceptions. If an exception occurs
-    # in the finalize() method (which is supposed to clean up from the
-    # test and leave the DUT in the same condition as when it was entered)
-    # then alter the return value to abort(). 
     def _finalize(self, rv):
+        """
+        Run user-defined `finalize()` and catch exceptions. If an exception
+        occurs in the finalize() method (which is supposed to clean up from
+        the test and leave the UUT in the same condition as when it was
+        entered) then alter the return value to abort() which will abort the
+        suite. Invokes the debugger if the debug flag is set.
+        """
         try:
-            self.finalize()
+            self.finalize(rv)
         except:
             ex, val, tb = sys.exc_info()
             self.diagnostic("%s (%s)" % (ex, val))
             if self._debug:
                 debugger.post_mortem(tb, ex, val)
-            rv = self.abort("Test finalize failed!")
+            self.abort("Test finalize failed!")
+        if self.__datapoints and rv.is_passed():
+            self.save_data(self.__datapoints,
+                note="datapoints: %d" % (len(self.__datapoints),))
         return rv
 
-    def logfilename(self, ext="log"):
-        """Return a standardized log file name with a timestamp that should be
-        unique enough to not clash with other tests, and also able to correlate
-        it later to the test report via the time stamp."""
-        return "%s-%s.%s" % (self.test_name, timelib.strftime("%Y%m%d%H%M%S", timelib.localtime(self.starttime)), ext)
+    # utility methods - methods that are common to nearly all tests.
 
-    # Tests expose the scheduler interface also
-    def sleep(self, secs):
-        """Sleep method simply sleeps for specified number of seconds."""
-        return scheduler.sleep(secs)
+    def get_start_timestamp(self):
+        return timelib.strftime("%m%d%H%M%S", timelib.localtime(self.starttime))
+
+    def get_filename(self, basename=None, ext="log"):
+        """Create a log file name.
+
+        Return a standardized log file name with a timestamp that should be
+        unique enough to not clash with other tests, and also able to correlate
+        it later to the test report via the time stamp. The path points to the
+        resultsdir location.
+        """
+        filename = "%s-%s.%s" % (basename or self.test_name.replace(".", "_"),
+                self.get_start_timestamp(), ext)
+        return os.path.join(self.config.resultsdir, filename)
+
+    def get_file(self, basename=None, ext="log", mode="a+"):
+        """Return a file object for a log file in the results location."""
+        fname = self.get_filename(basename, ext)
+        return UserFile.UserFile(fname, mode)
+
+    def sleep(self, Nsecs):
+        """Sleep for N seconds.
+
+        Sleep method simply sleeps for specified number of seconds.
+        """
+        return scheduler.sleep(Nsecs)
 
     def schedule(self, delay, cb):
-        """Schedule a callback to run 'delay' seconds in the future."""
+        """Callback scheduler.
+
+        Schedule a function to run 'delay' seconds in the future.
+        """
         return scheduler.add(delay, callback=cb)
 
     def timed(self, function, args=(), kwargs={}, timeout=30):
-        """Call a method with a failsafe timeout value."""
+        """Run a function with a failsafe timer.
+
+        Call the provided function with a failsafe timeout value. The function
+        will be interrupted if it takes longer than `timeout` seconds.
+        """
         sched = scheduler.get_scheduler()
         return sched.timeout(function, args, kwargs, timeout)
 
     def timedio(self, function, args=(), kwargs={}, timeout=30):
-        """Call a method with a failsafe timeout value."""
+        """Run a function that may block on I/O with a failsafe timer.
+
+        Call the provided function with a failsafe timeout value. The function
+        will be interrupted if it takes longer than `timeout` seconds. The
+        method should be one that blocks on I/O.
+        """
         sched = scheduler.get_scheduler()
         return sched.iotimeout(function, args, kwargs, timeout)
 
     def run_subtest(self, _testclass, *args, **kwargs):
-        """Runs a test test class with the given arguments. """
+        """Invoke another Test class in the same environment as this one.
+
+        Runs another Test subclass with the given arguments passed to the
+        `execute()`.
+        """
+        orig = self.config.report
+        if not self._verbose: # don't let the subtest write to the report.
+            # if verbose mode then use original report (bug 708716)
+            from pycopia import reports
+            nr = reports.get_report(("NullReport",))
+            self.config.report = nr
         inst = _testclass(self.config)
-        return apply(inst, args, kwargs)
+        try:
+            return apply(inst, args, kwargs)
+        finally:
+            self.config.report = orig
+
+    def run_command(self, cmdline, env=None, timeout=None, logfile=None):
+        """Run an external command. 
+
+        This method will block until the command returns. An optional timeout
+        may be supplied to prevent hanging forever.
+
+        Arguments:
+            A string that is the command line to be run. 
+            A (optional) dictionary containing the environment variables.
+            An (optional) timeout value that will forcibly return if the call
+                takes longer than the timeout value.
+
+        Returns:
+         A tuple of ExitStatus object and stdout/stderr (string) of the program.
+        """
+        from pycopia import proctools
+        p = proctools.spawnpipe(cmdline, logfile=logfile, env=env)
+        try:
+            if timeout:
+                sched = scheduler.get_scheduler()
+                text = sched.iotimeout(p.read, timeout=timeout)
+            else:
+                text = p.read()
+        finally:
+            p.wait()
+            p.close()
+        return p.exitstatus, text
 
     def debug(self):
-        """Enter the debugger... at will."""
-        debugger.set_trace(2)
+        """Enter The Debugger (starring Bruce Li). 
 
+        Forceably enter the dubugger. Win the prize, escape with your life. 
+        Useful when developing tests.
+        """
+        debugger.set_trace(start=2)
+
+    # runtime flag control
     def set_debug(self, onoff=1):
-        """Turn on or off the DEBUG flag."""
+        """Turn on or off the DEBUG flag.
+
+        Set the debug flag from a test method. Useful for setting debug flag
+        only around questionable code blocks during test development.
+
+        Args:
+            onoff: flag (boolean) to set the debug state on or off.
+        """
         ov = self._debug
         self._debug = self.config.flags.DEBUG = onoff
         return ov
 
-    def set_verbose(self, onoff=1):
-        """Turn on or off the VERBOSE flag."""
+    def set_verbose(self, level=1):
+        """Turn on or off the VERBOSE flag.
+
+        Make reports more, or less, verbose at run time.
+        """
         ov = self._verbose
-        self._verbose = self.config.flags.VERBOSE = onoff
+        self._verbose = self.config.flags.VERBOSE = level
         return ov
 
-    def prerequisites(self):
-        "Get the list of prerequisites, which could be empty."
-        return getattr(self, "PREREQUISITES", [])
+    # for checking verbosity in tests.
+    verbose = property(lambda s: s._verbose, set_verbose)
 
-    # the overrideable methods
+    def _get_prerequisites(self):
+        """Get the list of prerequisites.
+
+        Returns current list of prerequisite tests, which could be empty.
+        """
+        return self.OPTIONS.prerequisites
+
+    prerequisites = property(_get_prerequisites)
+
+    ### the overrideable methods follow ###
     def initialize(self):
-        "Hook method to initialize a test. Override if necessary."
+        """Hook method to initialize a test. 
+
+        Override if necessary. Establishes the pre-conditions of the test.
+        """
         pass
 
-    def finalize(self):
-        "Hook method when finalizing a test. Override if necessary."
+    def finalize(self, result):
+        """Hook method when finalizing a test. 
+
+        Override if necessary. Used to clean up any state in UUT.
+        """
         pass
 
     def execute(self, *args, **kw):
-        """Overrided this method in a subclass to implement a specific test."""
-        return self.incomplete('you must define a method named "execute" in your subclass.')
+        """The primary test method.
+
+        Overrided this method in a subclass to implement a specific test. All
+        primary test logic and control should go here.
+        """
+        return self.incomplete(
+                'you must define a method named "execute" in your subclass.')
 
     # result reporting methods
-    def passed(self, msg=NO_MESSAGE):
-        """Call this and return if the execute() passed. If part of
-        a suite, subsequent tests may continue."""
-        self._report.passed(msg)
-        return PASSED
+    def passed(self, msg=constants.NO_MESSAGE):
+        """Call this and return if the execute() passed.
 
-    def failed(self, msg=NO_MESSAGE):
-        """Call this and return if the execute() failed, but can continue
-        the next test."""
-        self._report.failed(msg)
-        return FAILED
+        If your execute determined that the test passed, call this. 
+        In a execute, the pattern is: `return self.passed('message').
+        """
+        self._report.passed(msg, 2)
+        return TestResult(constants.PASSED)
 
-    def incomplete(self, msg=NO_MESSAGE):
-        """Test could not complete."""
-        self._report.incomplete(msg)
-        return INCOMPLETE
+    def failed(self, msg=constants.NO_MESSAGE):
+        """Call this and return if the execute() failed.
 
-    def abort(self, msg=NO_MESSAGE):
-        """Some drastic error occurred, or some condition is not met, and the suite cannot continue."""
-        self._report.abort(msg)
+        Call this if your test logic determines a failure. Only call this if
+        your test implementation in the execute is positively sure that it
+        does not meet the criteria. Other kinds of errors should return
+        `incomplete()`. 
+        In the execute method, the pattern is: `return self.failed('message').
+        """
+        if self.OPTIONS.bugid:
+            self._report.diagnostic(
+                            "This failure was expected. see bug: %s." % (self.OPTIONS.bugid,), 2)
+            self._report.expectedfail(msg, 2)
+            return TestResult(constants.EXPECTED_FAIL)
+        else:
+            self._report.failed(msg, 2)
+            return TestResult(constants.FAILED)
+
+    def incomplete(self, msg=constants.NO_MESSAGE):
+        """Test could not complete.
+
+        Call this and return if your test implementation determines that the
+        test cannot be completed for whatever reason.
+        In a execute, the pattern is: `return self.incomplete('message').
+        """
+        self._report.incomplete(msg, 2)
+        return TestResult(constants.INCOMPLETE)
+
+    def abort(self, msg=constants.NO_MESSAGE):
+        """Abort the test suite.
+
+        Some drastic error occurred, or some condition is not met, and the
+        suite cannot continue. Raises the TestSuiteAbort exception.
+        """
+        self._report.abort(msg, 2)
         raise TestSuiteAbort
 
-    def info(self, msg):
-        """Call this to record non-critical information in the report object."""
-        self._report.info(msg)
+    def info(self, msg, level=0):
+        """Informational messages for the report.
 
-    def verboseinfo(self, msg):
-        """Call this to record really non-critical information in the report
-        object that is only emitted when the VERBOSE flag is enabled in the
-        configuration."""
-        if self._verbose:
-            self._report.info(msg)
+        Record non-critical information in the report object. This message is
+        not effected by the VERBOSE flag.
+        """
+        if level <= self._verbose:
+            self._report.info(msg, 2)
 
     def diagnostic(self, msg):
-        """Call this one or more times if a failed condition is detected, and
-        you want to record in the report some pertinent diagnostic information.
-        Then return with a FAIL message."""
-        self._report.diagnostic(msg)
+        """Emit diagnostic message to report.
 
-    def datapoint(self, val):
-        """Adds data to the list of collected data.  A time stamp is added."""
-        self.datapoints.extend((timelib.now(), val))
-    
-    def get_datapoints(self):
-        "Accessor method to return copy of datapoints list."
-        return self.datapoints[:]
+        Call this one or more times if a failed condition is detected, and you
+        want to record in the report some pertinent diagnostic information.
+        The diagnostic information is typically some ephemeral state of the
+        UUT you want to record.
+        """
+        self._report.diagnostic(msg, 2)
 
-    @classmethod
-    def open_file(cls, fname):
-        """Open file in same directory as test case class."""
-        path = os.path.join(
-              os.path.dirname(sys.modules[cls.__module__].__file__),
-              fname)
-        return UserFile.UserFile(path)
+    # assertion methods make it convenient to check conditions. These names
+    # match those in the standard `unittest` module for the benefit of those
+    # people using that module.
+    def assertPassed(self, arg, msg=None):
+        """Assert a sub-test run by the `run_subtest()` method passed.
 
-    # assertion methods make it convenient to check conditions.
-    def assert_passed(self, arg, msg=None):
-        if arg != PASSED:
+        Used when invoking test objects as a unit.
+        """
+        if arg != constants.PASSED:
             raise TestFailError, msg or "Did not pass test."
 
-    def assert_failed(self, arg, msg=None):
-        if arg != FAILED:
+    def assertFailed(self, arg, msg=None):
+        """Assert a sub-test run by the `run_subtest()` method failed.
+
+        Useful for "negative" tests.
+        """
+        if arg not in (constants.FAILED, constants.EXPECTED_FAIL):
             raise TestFailError, msg or "Did not pass test."
 
-    def assert_equal(self, arg1, arg2, msg=None):
+    def assertEqual(self, arg1, arg2, msg=None):
+        """Asserts that the arguments are equal,
+
+        Raises TestFailError if arguments are not equal. An optional message
+        may be included that overrides the default message.
+        """
         if arg1 != arg2:
             raise TestFailError, msg or "%s != %s" % (arg1, arg2)
 
-    def assert_not_equal(self, arg1, arg2, msg=None):
+    def assertNotEqual(self, arg1, arg2, msg=None):
+        """Asserts that the arguments are not equal,
+
+        Raises TestFailError if arguments are equal. An optional message
+        may be included that overrides the default message.
+        """
         if arg1 == arg2:
             raise TestFailError, msg or "%s == %s" % (arg1, arg2)
-    assert_notequal = assert_not_equal # alias
 
-    def assert_true(self, arg, msg=None):
+    def assertGreaterThan(self, arg1, arg2, msg=None):
+        """Asserts that the first argument is greater than the second
+        argument.
+        """
+        if not (arg1 > arg2):
+            raise TestFailError, msg or "%s <= %s" % (arg1, arg2)
+
+    def assertGreaterThanOrEqual(self, arg1, arg2, msg=None):
+        """Asserts that the first argument is greater or equal to the second
+        argument.
+        """
+        if not (arg1 >= arg2):
+            raise TestFailError, msg or "%s < %s" % (arg1, arg2)
+
+    def assertLessThan(self, arg1, arg2, msg=None):
+        """Asserts that the first argument is less than the second
+        argument.
+        """
+        if not (arg1 < arg2):
+            raise TestFailError, msg or "%s >= %s" % (arg1, arg2)
+
+    def assertLessThanOrEqual(self, arg1, arg2, msg=None):
+        """Asserts that the first argument is less than or equal to the second
+        argument.
+        """
+        if not (arg1 <= arg2):
+            raise TestFailError, msg or "%s > %s" % (arg1, arg2)
+
+    def assertTrue(self, arg, msg=None):
+        """Asserts that the argument evaluates to True by Python.
+
+        Raises TestFailError if argument is not True according to Python truth
+        testing rules.
+        """
         if not arg:
             raise TestFailError, msg or "%s not true." % (arg,)
 
-    def assert_false(self, arg, msg=None):
+    def assertFalse(self, arg, msg=None):
+        """Asserts that the argument evaluates to False by Python.
+
+        Raises TestFailError if argument is not False according to Python truth
+        testing rules.
+        """
         if arg:
             raise TestFailError, msg or "%s not false." % (arg,)
 
-    def assert_approximately_equal(self, arg1, arg2, fudge=None, msg=None):
+    def assertApproximatelyEqual(self, arg1, arg2, fudge=None, msg=None):
+        """Asserts that the numeric arguments are approximately equal.
+
+        Raises TestFailError if the second argument is outside a tolerance
+        range (defined by the "fudge factor").    The default is 5% of the first
+        argument.
+        """
         if fudge is None:
-            fudge = arg1*0.05 # default 5% of arg1
+            fudge = arg1*0.05
         if abs(arg1-arg2) > fudge:
-            raise TestFailError, msg or "%s and %s not within %s units of each other." % (arg1, arg2, fudge)
+            raise TestFailError, \
+                msg or "%s and %s not within %s units of each other." % \
+                        (arg1, arg2, fudge)
+
+    def assertRaises(self, exception, method, args=None, kwargs=None, msg=None):
+        """Assert that a method and the given args will raise the given
+        exception.
+
+        Args:
+            exception: The exception class the method should raise.
+            method:    the method to call with the given arguments.
+            args: a tuple of positional arguments.
+            kwargs: a dictionary of keyword arguments
+            msg: optional message string to be used if assertion fails.
+        """
+        args = args or ()
+        kwargs = kwargs or {}
+        try:
+            rv = method(*args, **kwargs)
+        except exception:
+            return
+        # it might raise another exception, which is marked INCOMPLETE
+        raise TestFailError, msg or "%r did not raise %r." % (method, exception)
 
     # some logical aliases
-    fail_if_equal = assert_not_equal
-    fail_if_not_equal = assert_equal
-    assert_not_true = assert_false
-    assert_not_false = assert_true
+    failIfEqual = assertNotEqual
+    failIfNotEqual = assertEqual
+    assertNotTrue = assertFalse
+    assertNotFalse = assertTrue
+    failUnlessRaises = assertRaises
 
-    # user input methods. May only be used for tests flagged as INTERACTIVE.
-    def user_input(self, prompt=None):
-        if self.INTERACTIVE:
-            return raw_input(BRIGHTWHITE+prompt+NORMAL)
-        else:
-            raise TestIncompleteError, "user input in non-interactive test."
+    # data storage
+    def save_text(self, text, filename=None):
+        """Save some text into a file in the results location.
 
-    def choose(self, somelist, defidx=0):
-        if self.INTERACTIVE:
-            return cliutils.choose(somelist, defidx)
-        else:
-            raise TestIncompleteError, "user input in non-interactive test."
-    
-    def get_text(self, msg=None):
-        if self.INTERACTIVE:
-            return cliutils.get_text("> ", msg)
-        else:
-            raise TestIncompleteError, "user input in non-interactive test."
+        This may be called multiple times and the file will be appended to.
 
-    def get_value(self, prompt, default=None):
-        if self.INTERACTIVE:
-            return cliutils.get_input(prompt, default)
-        else:
-            raise TestIncompleteError, "user input in non-interactive test."
+        Arguments:
+            text: A blob of text as a string.
+            filename: the base name of the file to write. Default is test name
+                plus timestamp.
+        """
+        if filename is None:
+            filename = self.get_filename("saved", "txt")
+        fo = UserFile.UserFile(filename, "a")
+        try:
+            fo.write(str(text))
+        finally:
+            fo.close()
 
-    def yes_no(self, prompt, default=True):
-        if self.INTERACTIVE:
-            yesno = cliutils.get_input(prompt, IF(default, "Y", "N"))
-            return yesno.upper().startswith("Y")
-        else:
-            raise TestIncompleteError, "user input in non-interactive test."
+    @classmethod
+    def open_data_file(cls, fname):
+        """Open a data file located in the same directory as the test case
+        implmentation.
 
+        Return the file object (actually a UserFile object). Make sure you
+        close it.
+        """
+        fullname = os.path.join(
+                    os.path.dirname(sys.modules[cls.__module__].__file__), fname)
+        return UserFile.UserFile(fullname)
 
+    def save_data(self, obj, note=None):
+        """Send an add_data message to the report. The object is serialized (pickled).
+
+        Arguments:
+            obj: any python object.
+                documentation. Only used for the `packed` datatype.
+            note: A text note describing the data for future users (optional).
+        """
+        import cPickle as pickle
+        data = pickle.dumps(obj)
+        self._report.add_data(data, note)
+
+    def add_datapoint(self, value):
+        """Add a datapoint to the list of saved data.
+        """
+        self.__datapoints.append(value)
 
 # --------------------
 
-
 class PreReq(object):
-    """A holder for test prerequiste."""
-    def __init__(self, name, *args, **kwargs):
-        self.name = name
-        self.args = args
-        self.kwargs = kwargs
+    """A holder for test prerequisite.
+
+    Used to hold the definition of a prerequisite test. A prerequisite is a
+    Test implementation class plus any arguments it may be called with.
+    No arguments means ANY arguments.
+    """
+    def __init__(self, implementation, args=None, kwargs=None):
+        self.implementation = implementation
+        self.args = args or ()
+        self.kwargs = kwargs or {}
 
     def __repr__(self):
-        return "%s(%r, %r, %r)" % (self.__class__.__name__, self.name, self.args, self.kwargs)
+        return "%s(%r, args=%r, kwargs=%r)" % \
+                (self.__class__.__name__, self.implementation, 
+                        self.args, self.kwargs)
 
     def __str__(self):
-        return repr_test(self.name, self.args, self.kwargs)
+        return repr_test(self.implementation, self.args, self.kwargs)
 
 
-# holds an instance of a Test class and the parameters it will be called with.
-# This actually calls the test, and stores the result value for later summary.
-# It also supports pre-requisite matching.
-class _TestEntry(object):
-    def __init__(self, inst, args=None, kwargs=None):
+class TestEntry(object):
+    """Helper class used to run a Test with arguments and store the result.
+
+    Holds an instance of a Test class and the parameters it will be called
+    with.    This actually calls the test, and stores the result value for
+    later summary.    It also supports pre-requisite checking.
+    """
+    def __init__(self, inst, args=None, kwargs=None, autoadded=False):
         self.inst = inst
         self.args = args or ()
         self.kwargs = kwargs or {}
-        self.result = None
+        self._result = constants.INCOMPLETE
+        self.autoadded = autoadded # True if automatically added as a prerequisite.
 
-    def __call__(self):
+    def run(self, config=None):
+        """Invoke the test with its arguments. The config argument is passed
+        when run directly from a TestRunner, but not from a TestSuite. It is
+        ignored here.
+        """
         try:
-            self.result = apply(self.inst, self.args, self.kwargs)
+            self._result = self.inst(*self.args, **self.kwargs)
         except KeyboardInterrupt:
-            self.result = ABORT
+            self._result = constants.ABORT
             raise
-        return self.result
+        return self._result
 
     def __eq__(self, other):
         return self.inst == other.inst
 
-    def matches(self, name, args, kwargs):
-        return (name, args, kwargs) == (self.inst.test_name, self.args, self.kwargs)
+    def _setResult(self, val):
+        self._result = val
+
+    result = property(lambda s: s._result, _setResult, 
+                doc="The test rusult enumeration.")
+
+    def match_test(self, name, args, kwargs):
+        """Test signature matcher.
+
+        Determine if a test name and set of arguments matches this test.
+        """
+        return (name, args, kwargs) == \
+                    (self.inst.test_name, self.args, self.kwargs)
 
     def match_prerequisite(self, prereq):
-        "Does this test match the specified prerequisite?"
-        return (self.inst.test_name, self.args, self.kwargs) == (prereq.name, prereq.args, prereq.kwargs)
+        """Does this test match the specified prerequisite?
 
-    def get_result(self):
-        return self.result
+        Returns True if this test matches the supplied PreReq object.
+        """
+        return (self.inst.test_name, self.args, self.kwargs) == \
+                    (prereq.implementation, prereq.args, prereq.kwargs)
 
-    def prerequisites(self):
-        return self.inst.prerequisites()
+    def _get_prerequisites(self):
+        return self.inst.prerequisites
+
+    prerequisites = property(_get_prerequisites)
+
+    def get_signature(self):
+        """Return a unique identifier for this test entry."""
+        try:
+            return self._signature
+        except AttributeError:
+            arg_sig = repr((self.args, self.kwargs))
+            self._signature = (id(self.inst.__class__), arg_sig)
+            return self._signature
+
+    signature = property(get_signature, doc="unique signature string of test.")
 
     def abort(self):
-        self.result = self.inst.abort("Abort forced by suite runner.")
-        return self.result
+        """Abort the test suite.
 
-    def was_aborted(self):
-        return self.result == ABORT
+        Causes this this test, and the suite, to be aborted.
+        """
+        self._result = self.inst.abort("Abort forced by suite runner.")
+        return self._result
 
-    def name(self):
-        return self.inst.test_name
-
-    def get_values(self):
-        return self.inst.test_name, self.args, self.kwargs, self.result
+    test_name = property(lambda s: s.inst.test_name)
 
     def __repr__(self):
         return repr_test(self.inst.test_name, self.args, self.kwargs)
 
-class _SuiteEntry(_TestEntry):
-    def get_result(self):
-        # self.result is a list in this case
-        self.results = self.inst.results()
-        for res in self.results:
-               if res != PASSED:
-                   return res
-        return PASSED
+    def __str__(self):
+        return "%s: %s" % (self.__repr__(), self._result)
+
+
+class SuiteEntry(TestEntry):
+    """Entry object that wraps other Suite objects. 
+
+    Used when sub-suites are run as test cases.
+    """
+    def _get_result(self):
+        self._results = self.inst.results
+        for res in self._results:
+            if res != constants.PASSED:
+                self._result = res
+                return res
+        self._result = constants.PASSED
+        return constants.PASSED
+
+    def _setResult(self, val):
+        self._result = val
+    result = property(lambda s: s._get_result(),
+                                        _setResult, None,
+        """The test rusult enumeration PASSED if all tests in suite passed.""")
+
+    results = property(lambda s: s._results, None, None,
+        """The actual list of test results.""")
+
+
+def PruneEnd(n, l):
+    return l[:n]
+
+class TestEntrySeries(TestEntry):
+    """
+    Provides an efficient means to add many test case instances without
+    having to actually instantiate a TestEntry at suite build time.
+    """
+    def __init__(self, testinstance, N, chooser, filter, args, kwargs):
+        self.inst = testinstance
+        self.args = args or ()
+        self.kwargs = kwargs or {}
+        self._sig = methods.MethodSignature(testinstance.execute)
+        self.result = constants.INCOMPLETE # Aggregate of test results
+        chooser = chooser or PruneEnd
+        arglist = []
+        if args:
+            arglist.extend(args)
+        if kwargs:
+            for name, default in self._sig.kwarguments:
+                try:
+                    val = kwargs[name]
+                except KeyError:
+                    pass
+                else:
+                    arglist.append(val)
+        self._counter = combinatorics.ListCounter(
+                                                                combinatorics.prune(N, arglist, chooser))
+        if filter:
+            assert callable(filter)
+            self._filter = filter
+        else:
+            self._filter = lambda *args, **kwargs: True
+
+    test_name = property(lambda s: s.inst.test_name)
+
+    def run(self, config=None):
+        resultset = {constants.PASSED:0, constants.FAILED:0, constants.INCOMPLETE:0}
+        for argset in self._counter:
+            kwargs = self._sig.get_keyword_arguments(argset)
+            # kwargs also contains non-keyword args, but python maps them to
+            # positional args anyway.
+            if self._filter(**kwargs):
+                entry = TestEntry(self.inst, (), kwargs)
+                entryresult = entry.run()
+                resultset[entryresult] += 1
+        if resultset[constants.FAILED] > 0:
+            self.result = constants.FAILED
+        elif resultset[constants.INCOMPLETE] > 0:
+            self.result = constants.INCOMPLETE
+        elif resultset[constants.PASSED] > 0: # must have all passed, anyway.
+            self.result = constants.PASSED
+        return self.result
+
 
 def repr_test(name, args, kwargs):
-    args_s = IF(args, 
-        IF(kwargs, "%s, ", "%s") % ", ".join(map(repr, args)),
-        "")
+    """Produce repr form of test case signature.
+
+    Returns a Test instantiation plus arguments as text (repr).
+    """
+    return "%s()(%s)" % (name, repr_args(args, kwargs))
+
+def repr_args(args, kwargs):
+    """Stringify a set of arguments.
+
+    Arguments:
+        args: tuple of arguments as a function would see it.
+        kwargs: dictionary of keyword arguments as a function would see it.
+    Returns:
+        String as you would write it in a script.
+    """
+    args_s = aid.IF(args, 
+                        aid.IF(kwargs, "%s, ", "%s") % ", ".join(map(repr, args)), 
+                        "")
     kws = ", ".join(map(lambda it: "%s=%r" % (it[0], it[1]), kwargs.items()))
-    return "%s()(%s%s)" % (name, args_s, kws)
+    return "%s%s" % (args_s, kws)
+
+
+def parse_args(arguments):
+    """Take a string of arguments and keyword arguments and convert back to
+    objects.
+    """
+    # Try a possibly icky method of constructing a temporary function string
+    # and exec it (leverage Python parser and argument handling).
+    ANY = None # To allow "ANY" keyword in prereq spec.
+    def _ArgGetter(*args, **kwargs):
+        return args, kwargs
+    funcstr = "args, kwargs = _ArgGetter(%s)\n" % arguments
+    exec funcstr in locals()
+    return args, kwargs # set by exec call
 
 
 class TestSuite(object):
-    """TestSuite(config)
-A TestSuite contains a set of test cases (subclasses of Test class objects)
-that are run sequentially, in the order added. It monitors abort status of each
-test, and aborts the suite if required. 
+    """A Test holder and runner.
 
-To run it, create a TestSuite object (or a subclass with some methods
-overridden), add tests with the 'add_test()' method, and then call the
-instance. The 'initialize()' method will be run with the arguments given when
-called.
+    A TestSuite contains a set of test cases (subclasses of Test class) that
+    are run sequentially, in the order added. It monitors abort status of
+    each test, and aborts the suite if required. 
 
+    To run it, create a TestSuite object (or a subclass with some methods
+    overridden), add tests with the `add_test()` method, and then call the
+    instance. The 'initialize()' method will be run with the arguments given
+    when called.
     """
     def __init__(self, cf, nested=0):
         self.config = cf
         self.report = cf.report
         self._debug = cf.flags.DEBUG
-        self._verbose = cf.flags.VERBOSE
         self._tests = []
+        self._testset = set()
+        self._multitestset = set()
         self._nested = nested
         self.suite_name = self.__class__.__name__
         cl = self.__class__
         self.test_name = "%s.%s" % (cl.__module__, cl.__name__)
+        self.result = None
+        self._merge_config()
 
-    
+    def _merge_config(self):
+        # Merge any test-suite specific config files. Config file name is the
+        # name of the suite class plus ".conf", located in the same directory
+        # as the module it's in.
+        cl = self.__class__
+        mod = sys.modules[cl.__module__]
+        # merge module config
+        modconf = os.path.join(os.path.dirname(mod.__file__), 
+                    "%s.conf" % (mod.__name__.split(".")[-1],))
+        if self.config.mergefile(modconf):
+            self.config.evalupdate(self.config.options_override)
+        # merge suite config
+        suiteconf = os.path.join(os.path.dirname(mod.__file__), 
+                    "%s.conf" % (cl.__name__,))
+        if self.config.mergefile(suiteconf):
+            self.config.evalupdate(self.config.options_override)
+
     def __iter__(self):
         return iter(self._tests)
 
-    def set_config(self, cf):
-        self.config = cf
+    def _get_results(self):
+        return map(lambda t: t.result, self._tests)
+    results = property(_get_results)
 
-    def add_test(self, _testclass, *args, **kw):
-        """add_test(Test, [args], [kwargs])
-Appends a test object in this suite. The test's execute() will be called
-with the arguments supplied here. If the test case has a prerequisite defined
-it is checked for existence in the suite, and an exception is raised if it is
-not found."""
-        if _testclass.INTERACTIVE and self.config.flags.NOINTERACTIVE:
-            print >>sys.stderr, "%s is an interactive test and NOINTERACTIVE is set. Skipping." % (_testclass.__name__,)
-            return
+    def _add_with_prereq(self, entry):
+        """Add a TestEntry instance to the list of tests.
+
+        Also adds any prerequisites, if not already present, recursively.
+        """
+        for prereq in entry.inst.OPTIONS.prerequisites:
+            pretestclass = module.get_object(prereq.implementation)
+            preentry = TestEntry(pretestclass(self.config), prereq.args, prereq.kwargs, True)
+            presig, argsig = preentry.get_signature()
+            if presig not in self._multitestset:
+                self._add_with_prereq(preentry)
+        testcaseid = entry.get_signature()
+        if testcaseid not in self._testset:
+            self._testset.add(testcaseid)
+            self._tests.append(entry)
+
+    def add_test(self, _testclass, *args, **kwargs):
+        """Add a Test subclass and its arguments to the suite.
+
+    Appends a test object in this suite. The test's `execute()` will be
+    called (at the appropriate time) with the arguments supplied here. If
+    the test case has a prerequisite defined it is checked for existence in
+    the suite, and an exception is raised if it is not found.
+    """
+        if isinstance(_testclass, str):
+            _testclass = module.get_class(_testclass)
+        _testclass.set_test_options()
         testinstance = _testclass(self.config)
-        entry = _TestEntry(testinstance, args, kw)
-        self._verify_new(entry)
-        self._tests.append(entry)
+        entry = TestEntry(testinstance, args, kwargs, False)
+        self._add_with_prereq(entry)
 
-    def _verify_new(self, entry):
-        prereqs = entry.prerequisites()
-        count = 0
-        for prereq in entry.prerequisites():
-            for te in self._tests:
-                if te.match_prerequisite(prereq):
-                    count += 1
-        if count < len(prereqs):
-            raise TestSuiteAbort, "unable to add test case %s, prerequisite not already added!" % (entry, )
+    def add_test_from_result(self, dbtestresult):
+        """Add a Test from information taken from stored test result.
 
-    def add_suite(self, suite, *args, **kw):
-        """add_suite(TestSuite, [args], [kwargs])
-Appends an embedded test suite in this suite. """
+        This basically means duplicate the test call that originated that test
+        result.
+        """
+        testclass = module.get_class(dbtestresult.testimplementation)
+        testclass.set_test_options()
+        args, kwargs = parse_args(dbtestresult.arguments)
+        testinstance = testclass(self.config)
+        entry = TestEntry(testinstance, args, kwargs, False)
+        self._add_with_prereq(entry)
+
+    def add_incomplete_test(self, queryset):
+        """Add test cases from TestResult queryset that were INCOMPLETE."""
+        for testresult in queryset.is_incomplete():
+            self.add_test_from_result(testresult)
+
+    def add_test_series(self, _testclass, N=100, chooser=None, filter=None, 
+                                        args=None, kwargs=None):
+        """Add a Test case as a series. 
+
+        The arguments must be lists of possible values for each parameter. The
+        args and kwargs arguments are lists that are combined in all possible
+        combinations, except pruned to N values. The pruning policy can be
+        adjusted by the chooser callback, and the N value itself.
+
+        Args:
+            testclass (class): the Test class object (subclass of core.Test).
+
+            N (integer): Maximum iterations to take from resulting set. Default
+                    is 100 just to be safe.
+
+            chooser (callable): callable that takes one number and a list
+                    argument, returns a list of the specified (N) length. 
+                    Default is to chop off the top end of the list.
+
+            filter (callable): callable that takes a set of arguments with the
+                    same semantics as the Test.execute() method and returns True or
+                    False to indicate if that combination should be included in the
+                    test. You might want to set a large N if you use this.
+
+            args (tuple): tuple of positional arguments, each argument is a list.
+                                        example: args=([1,2,3], [4,5]) maps to positional
+                                        argumnts of execute() method of Test class.
+
+            kwargs (dict): Dictionary of keyword arguments, with list of values
+                    as value.
+                                        example: kwargs={"arg1":["a", "b", "c"]}
+                                        maps to keyword arguments of execute() method of Test
+                                        class.
+        """
+        if isinstance(_testclass, str):
+            _testclass = module.get_class(_testclass)
+        _testclass.set_test_options()
+        testinstance = _testclass(self.config)
+        try:
+            entry = TestEntrySeries(testinstance, N, chooser, filter, args, kwargs)
+        except ValueError, err: # ListCounter raises this if there is an empty list.
+            self.info("addTestSeries Error: %s. Not adding %s as series." % (
+                    err, _testclass.__name__))
+        else:
+            # series tests don't get auto-added (can't know what all the args
+            # are, and even so the set could be large.)
+            mysig, myargsig = entry.get_signature()
+            self._multitestset.add(mysig) # only add by id.
+            self._add_with_prereq(entry)
+
+    def add_suite(self, suite, test_name=None):
+        """Add an entire suite of tests to this suite.
+
+    Appends an embedded test suite in this suite. This is called a sub-suite
+    and is treated as a single test by this containing suite.
+    """
+        if isinstance(suite, str):
+            suite = module.get_class(suite)
         if type(suite) is type(Test): # class type
             suite = suite(self.config, 1)
         else:
             suite.config = self.config
             suite._nested = 1
-        self._tests.append(_SuiteEntry(suite, args, kw))
-        suite.test_name = "%s%s" % (suite.__class__.__name__,len(self._tests)-1)
+        self._tests.append(SuiteEntry(suite))
+        # sub-tests need unique names
+        if test_name:
+            suite.test_name = test_name
+        else:
+            # Name plus index into suite list.
+            suite.test_name = "%s-%s" % (suite.test_name, len(self._tests)-1)
         return suite
 
-    def add(self, klass, *args, **kw):
-        """add(classobj, [args], [kwargs])
-Most general method to add test case classes or other test suites."""
-        if issubclass(klass, Test):
-            self.add_test(klass, *args, **kwargs)
-        elif issubclass(klass, TestSuite):
-            self.add_suite(klass, *args, **kwargs)
+    def add(self, klass, *args, **kwargs):
+        """Add a Suite or a Test to this TestSuite.
+
+    Most general method to add test case classes or other test suites.
+    """
+        if type(klass) is type:
+            if issubclass(klass, Test):
+                self.addTest(klass, *args, **kwargs)
+            elif issubclass(klass, TestSuite):
+                self.add_suite(klass, *args, **kwargs)
+            else:
+                raise ValueError, "TestSuite.add: invalid class type."
         else:
-            raise ValueError, "TestSuite.add: invalid class type."
+                raise ValueError, "TestSuite.add: need a class type."
 
-    def get_tests(self):
-        """Return a list of the test objects currrently in this suite."""
-        return self._tests[:]
+    def GetTestEntries(self, name, *args, **kwargs):
+        """Get a list of test entries that matches the signature.
 
-    def get_test(self, name, *args, **kwargs):
+        Return a list of Test entries that match the name and calling
+        arguments.
+        """
         for entry in self._tests:
             if entry.matches(name, args, kwargs):
-                return entry
-        return None
+                yield entry
+
+    def add_arguments(self, name, args, kwargs):
+        """Add calling arguments to an existing test entry that has no
+        arguments.
+        """
+        for entry in self.getTestEntries(name):
+            entry.add_arguments(args, kwargs)
 
     def info(self, msg):
-        """info(msg)
-Put in informational message in the test report."""
-        self.report.info(msg)
+        """Informational messages for the report.
 
-    def prerequisites(self):
-        """Get the list of prerequisites, which could be empty. Primarily
-used by nested suites."""
-        return getattr(self, "PREREQISITES", [])
+        Record non-critical information in the report object.
+        """
+        self.report.info(msg, 1)
 
-    # this is the primary way to invoke a suite of tests. call the instance.
-    # Any supplied parameters are passed onto the suite's initialize()
-    # method.
+    def _get_prerequisites(self):
+        """Get the list of prerequisites.
+
+        This is here for polymorhism with Test objects. Always return empty list.
+        """
+        return ()
+
+    prerequisites = property(_get_prerequisites)
+
+    def run(self, config=None):
+        """Called when run directly from the testrunner."""
+        if config:
+            self.config = config
+            self.report = config.report
+            self._debug = config.flags.DEBUG
+        return self.__call__()
+
+    def get_start_timestamp(self):
+        return timelib.strftime("%m%d%H%M%S", timelib.localtime(self.starttime))
+
     def __call__(self, *args, **kwargs):
-        try:
-            self._initialize(args, kwargs)
-        except TestSuiteAbort, rv:
-            self._finalize()
-            return
-        self.run_tests()
-        self._finalize()
-        return PASSED # suite ran without exception...
+        """Invoke the test suite.
 
-    def _initialize(self, args, kwargs):
-        self.report.add_heading("Test suite: %s" % self.__class__.__name__, 1)
-        # initialize the suite
+        This is the primary way to invoke a suite of tests. call the instance.
+        Any supplied parameters are passed onto the suite's initialize()
+        method. The method name is consistent with other methods of a similiar
+        nature on other objects (e.g. app.run()).
+        """
+        self.starttime = timelib.now()
         try:
-            rv = self.initialize(*args, **kwargs)
+            self._initialize(*args, **kwargs)
+        except TestSuiteAbort:
+            self._finalize()
+            rv = constants.INCOMPLETE
+        else:
+            self._run_tests()
+            rv = self._finalize()
+        endtime = timelib.now()
+        self.report.add_message("STARTTIME", self.starttime, 1)
+        self.report.add_message("ENDTIME", endtime, 1)
+        return rv
+
+    def _initialize(self, *args, **kwargs):
+        """initialize phase handler for suite-level initialization.
+
+        Handles calling the user `initialize()` method, and handling
+        interrupts, reporting, and invoking the debugger if the DEBUG flag is
+        set.
+        """
+        self.report.add_heading(self.test_name, 1)
+        if self.config.flags.VERBOSE:
+            s = ["Tests in suite:"]
+            for i, entry in enumerate(self._tests):
+                s.append("%3d. %r" % (i + 1, entry))
+            self.report.info("\n".join(s), 1)
+            del s
+        try:
+            self.initialize(*args, **kwargs)
         except KeyboardInterrupt:
             self.info("Suite aborted by user in initialize().")
             raise TestSuiteAbort
@@ -591,107 +1174,148 @@ used by nested suites."""
                 debugger.post_mortem(tb, ex, val)
             self.info("Suite failed to initialize: %s (%s)" % (ex, val))
             raise TestSuiteAbort, val
-        # run all the tests
 
-    # verify any prerequisites are met at run time. Note that this
-    # currently only checks this particular suite.
     def check_prerequisites(self, currententry, upto):
-        for prereq in currententry.prerequisites():
+        """Verify that the prerequisite test passed.
+
+        Verify any prerequisites are met at run time.
+        """
+        for prereq in currententry.prerequisites:
             for entry in self._tests[:upto]:
                 if entry.match_prerequisite(prereq):
-                    if entry.result == PASSED:
+                    if entry.result == constants.PASSED:
                         continue
                     else:
-                        self.report.add_heading(repr(currententry), 2)
-                        self.info("WARNING: prerequisite of %s did not pass." % (currententry,))
-                        self.info("%s: %s" % (prereq, entry.result))
-                        currententry.result = INCOMPLETE
+                        self.report.add_heading(currententry.inst.test_name, 2)
+                        self.report.diagnostic("Prerequisite: %s" % (prereq,), 2)
+                        self.report.incomplete("Prerequisite did not pass.", 2)
+                        currententry.result = constants.INCOMPLETE
                         return False
-        return True # no prerequisite
+        return True # No prerequisite or prereq passed.
 
-    def run_tests(self):
-        #for test, testargs, testkwargs in self._tests:
+    def _run_tests(self):
+        """Runs all the tests in the suite. 
+
+        Handles running the TestEntry, reporting interrupts, checking for
+        abort conditions, If a Test returns None (the default), it is reported
+        as a failure since it was not written correctly.
+        """
         for i, entry in enumerate(self._tests):
             if not self.check_prerequisites(entry, i):
                 continue
-            try:
+            # merge any test-class specific configuration.
+            cl = entry.inst.__class__
+            testconf = os.path.join(
+                    os.path.dirname(sys.modules[cl.__module__].__file__), 
+                        "%s.conf" % (cl.__name__,))
+            self.config.mergefile(testconf)
+            self.config.evalupdate(self.config.options_override)
+            # Add a note to the logfile to delimit test cases there.
+            if self.config.flags.VERBOSE:
                 self.config.logfile.note("%s: %r" % (timelib.localtimestamp(), entry))
-                rv = entry()
+            try:
+                rv = entry.run()
             except KeyboardInterrupt:
-                self.info("Test suite aborted by user.")
                 if self._nested:
-                    raise TestSuiteAbort, "aborted by user"
+                    raise TestSuiteAbort, "Sub-suite aborted by user."
                 else:
-                    break
+                    if self.config.UI.yes_no("Test interrupted. Abort suite?"):
+                        self.info("Test suite aborted by user.")
+                        break
             except TestSuiteAbort, err:
-                self.info("Suite aborted by test %s (%s)." % (entry.name(), err))
-                entry.result = INCOMPLETE
-                rv = ABORT
-            # this should only happen with incorrectly written execute().
+                self.info("Suite aborted by test %s (%s)." % (entry.test_name, err))
+                entry.result = constants.INCOMPLETE
+                rv = constants.ABORT
+                break
+            # This should only happen with an incorrectly written execute() method.
             if rv is None:
-                self.report.diagnostic("warning: test returned None, assuming failed. "
-                                      "Please fix the %s.execute()" % (entry.name()))
-                rv = FAILED
-            # keep return value in results
-            # check for abort condition and abort if so
-            if rv == ABORT:
+                self.report.diagnostic(
+                        "warning: test returned None, assuming INCOMPLETE. "
+                        "Please fix the %s.execute() method." % (entry.test_name))
+                rv = constants.INCOMPLETE
+            # check for abort condition and break the loop if so
+            if rv == constants.ABORT:
                 break
 
     def _finalize(self):
-        # finalize the suite
+        """Run the finalize phase for suite level.
+
+        Runs the user finalize and aborts the suite on error or interrupt. If
+        this is a sub-suite then TestSuiteAbort is raised so that the
+        top-level suite can handle it.
+        """
         try:
             self.finalize()
         except KeyboardInterrupt:
             if self._nested:
-                raise TestSuiteAbort, "Suite '%s' aborted by user in finalize()." % (self.suite_name,)
+                raise TestSuiteAbort, \
+                            "Suite '%s' aborted by user in finalize()." % (self.suite_name,)
             else:
                 self.info("Suite aborted by user in finalize().")
         except:
             ex, val, tb = sys.exc_info()
             if self._debug:
-                print
+                print # ensure debugger prompts starts on new line.
                 debugger.post_mortem(tb, ex, val)
             self.info("Suite failed to finalize: %s (%s)" % (ex, val))
             if self._nested:
-                raise TestSuiteAbort, "subordinate suite '%s' failed to finalize." % (self.test_name,)
-        self._report_summary()
+                raise TestSuiteAbort, \
+                        "subordinate suite '%s' failed to finalize." % (self.test_name,)
+        self._summary_report()
+        return self.result
 
-    def _report_summary(self):
+    def _summary_report(self):
+        """Summarize the results.
+
+        Place a summary in the report that list all the test results.
+        """
         self.report.add_heading(
                     "Summarized results for %s." % self.__class__.__name__, 3)
         entries = filter(lambda te: te.result is not None, self._tests)
         self.report.add_summary(entries)
         # check and report suite level result
-        result = PASSED
         for entry in self._tests:
-            if entry.result in (FAILED, INCOMPLETE, ABORT):
-                result = FAILED
+            if entry.result in (constants.FAILED, constants.INCOMPLETE,
+                        constants.ABORT):
+                result = constants.FAILED
                 break
+            elif entry.result is None:
+                result = constants.INCOMPLETE
+                break
+        else:
+            result = constants.PASSED
         self.result = result
         resultmsg = "Aggregate result for %r." % (self.test_name,)
         if not self._nested:
-            if result == PASSED:
+            if result == constants.PASSED:
                 self.report.passed(resultmsg)
-            elif result == FAILED:
+            elif result == constants.FAILED:
                 self.report.failed(resultmsg)
-
-    def results(self):
-        return map(lambda t: t.get_result(), self._tests)
+            elif result == constants.INCOMPLETE:
+                self.report.incomplete(resultmsg)
 
     def __str__(self):
         s = ["Tests in suite:"]
         s.extend(map(str, self._tests))
         return "\n".join(s)
 
-    ### overrideable interface.
-    def initialize(self, *args):
-        """Override this if you need to do some initialization just before the
-suite is run. """ 
+    ### overrideable interface. ###
+    def initialize(self, *args, **kwargs):
+        """
+        Override this if you need to do some initialization just before the
+        suite is run. This is called with the arguments given to the TestSuite
+        object when it was called.
+        """ 
         pass
 
-    def finalize(self, *args):
-        """Override this if you need to do some clean-up after the suite is run."""
+    def finalize(self):
+        """
+        Override this if you need to do some clean-up after the suite is run.
+        """
         pass
 
+
+def timestamp(t):
+    return timelib.strftime("%a, %d %b %Y %H:%M:%S %Z", timelib.localtime(t))
 
 

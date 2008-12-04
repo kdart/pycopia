@@ -1,16 +1,31 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.4 -O
 # -*- coding: ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # License: LGPL
 # Keith Dart <keith@dartworks.biz>
 
-"""
-Run tests from a shell prompt.
-
-"""
-
 import sys
-from pycopia.QA import testrunner
 
-testrunner.main(sys.argv)
+from pycopia.QA import testrunner
+from pycopia.QA import testloader
+from pycopia.storage import Storage
+
+def runtest(argv):
+    config = Storage.get_config()
+    config.userinterfacetype = "default"
+    tr = testrunner.TestRunner(config)
+    tri = testloader.TestRunnerInterface(tr)
+    try:
+        tri(argv)
+    except testrunner.TestRunnerError:
+        ex, val, tb = sys.exc_info()
+        if config.flags.DEBUG:
+            from pycopia import debugger
+            debugger.post_mortem(tb, ex, val)
+        else:
+            import traceback
+            traceback.print_exception(ex, val, tb)
+
+
+runtest(sys.argv)
 

@@ -44,6 +44,9 @@ DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 2972
 
 
+class ConfigError(Exception):
+  pass
+
 class Container(object):
     """Wrapper for a persistent dictionary providing attribute-style access.
     This class should be completely polymorphic with the
@@ -149,6 +152,8 @@ class RootContainer(object):
         self._cache._report = None
         self._cache._logfile = None
         self._cache._configurator = None
+        self._cache._UI = None
+        self._cache._environment = None
 
     def __repr__(self):
         return "<RootContainer>"
@@ -363,13 +368,13 @@ class RootContainer(object):
             name = self.get("reportname", "default")
         params = self.reports.get(name, (None,))
         if type(params) is list:
-            params = map(self._report_param_expand, params)
+            params = map(self._expand_params, params)
         else:
-            params = self._report_param_expand(params)
+            params = self._expand_params(params)
         return reports.get_report( params )
 
     # reconstruct the report parameter list with dollar-variables expanded.
-    def _report_param_expand(self, tup):
+    def _expand_params(self, tup):
         rv = []
         for arg in tup:
             if type(arg) is str:
@@ -427,6 +432,55 @@ class RootContainer(object):
         return os.path.join(os.path.expandvars(self.logfiledir), self.logbasename)
 
     logfilename = property(get_logfilename, None, None, "The logfile object's path name.")
+
+    def _get_environment(self):
+        """Get the EnvironmentRuntime object defined by the test configuration.
+        """
+        if self._cache.get("_environment") is None:
+            name = self.get("environmentname", "default")
+            if name:
+                env = labmodel.EnvironmentRuntime(self)
+                self._cache["_environment"] = env
+            else:
+                raise ConfigError, "Bad environment %r." % (name,)
+        return self._cache["_environment"]
+
+    def _del_environment(self):
+        self._cache["_environment"] = None
+
+    environment = property(_get_environment, None, _del_environment)
+
+    # user interface for interactive tests.
+    def get_userinterface(self):
+        if self._cache.get("_UI") is None:
+            ui = self._build_userinterface()
+            self._cache["_UI"] = ui
+            return ui
+        else:
+            return self._cache["_UI"]
+
+    def _build_userinterface(self):
+        from pycopia import UI
+        uitype = self.get("userinterfacetype", "default")
+        params = self.userinterfaces.get(uitype)
+        if params:
+            params = self._expand_params(params)
+        else:
+            params = self.userinterfaces.get("default")
+        return UI.get_userinterface(*params)
+
+    def del_userinterface(self):
+        """Remove the UI object from the cache.    """
+        ui = self._cache.get("_UI")
+        self._cache["_UI"] = None
+        if ui:
+            try:
+                ui.close()
+            except:
+                pass
+
+    UI = property(get_userinterface, None, del_userinterface, 
+                        "User interface object used for interactive tests.")
 
     _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
 
@@ -522,10 +576,7 @@ this.  """
         db = get_database(dbcf)
     cache = AttrDict()
     cf = db.get_root(cache)
-    # copy default flags to cache so the don't get altered
     cache.flags = cf["flags"].copy()
-    # initialize cache items to default values, so they can be altered at runtime.
-    cf.update(cf["default"])
     for f in FILES:
         if os.path.isfile(f):
             cf.mergefile(f)
@@ -551,12 +602,12 @@ def _initialize(db):
     db["testbeds"] = PersistentAttrDict() # for testbeds (collections of Devices)
     # default report spec
     db["reports"] = PersistentAttrDict()  # For report constructors
-    db["reports"].default = '("StandardReport", "-", "text/ansi")'
-    #
-    db["default"] = PersistentAttrDict()  # for root default values
-    db["default"].logbasename = "pycopia.log"
-    db["default"].logfiledir = "/var/tmp"
-    db["default"].reportbasename = "-"
+    db["reports"].default = ("StandardReport", "-", "text/ansi")
+    db["logbasename"] = "pycopia.log"
+    db["logfiledir"] = "/var/tmp"
+    db["reportbasename"] = "-"
+    db["documentroot"] = "/var/www/localhost"
+    db["baseurl"] = "http://localhost"
     # sub-package test configuration
     unittests = db["unittests"] = PersistentAttrDict()  # For report constructors
     unittests["aid"] = PersistentAttrDict()
@@ -575,6 +626,9 @@ def _initialize(db):
     unittests["XML"] = PersistentAttrDict()
     unittests["WWW"] = PersistentAttrDict()
     unittests["vim"] = PersistentAttrDict()
+    db["userinterfaces"] = PersistentAttrDict()  # For user interface constructors
+    db["userinterfaces"].default = ("UI.UserInterface", "IO.ConsoleIO", "UI.DefaultTheme")
+    db["userinterfaces"].console = ("UI.UserInterface", "IO.ConsoleIO", "UI.DefaultTheme")
 
 
 

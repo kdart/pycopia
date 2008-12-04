@@ -123,22 +123,20 @@ class WindowsXPHome(_MSWindows):
     pass
 
 
-
-class TestBed(PersistentData):
-    """Collection of devices, in different roles, that comprise a test setup.
-    This is called a "testbed". Its contained devices are allocated as a unit."""
+class Environment(PersistentData):
+    """Collection of devices, in different roles, that comprise a test
+    setup.  This is called a "environment", or "test bed"."""
     def __init__(self, name):
-        super(TestBed, self).__init__()
+        super(Environment, self).__init__()
         self.name = name
         self._items = PersistentDict()
         self.user = None # set by test runner at test run time
-
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.name)
 
     def set_owner(self, newowner):
-        super(TestBed, self).set_owner(newowner)
+        super(Environment, self).set_owner(newowner)
         try:
             for device in self._items.values():
                 giveto(device, newowner)
@@ -148,7 +146,7 @@ class TestBed(PersistentData):
 
     def disown(self):
         owner = self.get_owner()
-        super(TestBed, self).disown()
+        super(Environment, self).disown()
         for device in self._items.values():
             try:
                 takeback(device, owner)
@@ -156,14 +154,16 @@ class TestBed(PersistentData):
                 pass
 
 
-class TestBedRuntime(object):
-    def __init__(self, config, tb, logfile):
-        self.config = config
-        self.testbed = tb
+class EnvironmentRuntime(object):
+    def __init__(self, config, tb=None, logfile=None):
+        if tb is None:
+            self.testbed = Environment("default")
+        else:
+            self.testbed = tb
         self.logfile = logfile
 
     def __getitem__(self, name):
-        self.testbed[name]
+        return self.testbed[name]
 
     DUT = property(lambda s: s._items["DUT"])
 

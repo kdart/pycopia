@@ -3,13 +3,17 @@
 # License: LGPL
 # Keith Dart <kdart@kdart.com>
 
+
+# for Durus based storage
 # location shared storage server.
 host = "localhost"
 
 # TCP port server is listening on. Default will be used if not specified.
 #port = 2972
 
-
 dbfile = "/var/tmp/nmsstore.dfs"
 dblog =  "/var/tmp/storage.log"
 
+### For SQL database backend
+
+database = 'postgres://pycstorage@localhost/pycstorage'
