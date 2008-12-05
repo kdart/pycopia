@@ -57,6 +57,9 @@ class Poll(object):
     def __str__(self):
         return "Polling descriptors: %r" % (self.smap.keys())
 
+    def __nonzero__(self):
+        return bool(self.smap)
+
     def register(self, obj):
         flags = self._getflags(obj)
         if flags:
@@ -192,13 +195,13 @@ class SIGIOHandler(object):
     def __init__(self):
         self.handlers = {}
         self.on()
-    
+
     def on(self):
         signal.signal(signal.SIGIO, self)
 
     def off(self):
         signal.signal(signal.SIGIO, signal.SIG_IGN)
-    
+
     def get(self, handle):
         cb, args = self.handlers.get(handle, (None, None))
         return cb
@@ -259,14 +262,14 @@ class DirectoryNotifier(object):
         fcntl.fcntl(self.fd, fcntl.F_SETSIG, 0)
         fcntl.fcntl(self.fd, fcntl.F_NOTIFY, fcntl.DN_DELETE|fcntl.DN_CREATE|fcntl.DN_MULTISHOT)
         self.initialize() # easy initializer for subclasses
-    
+
     def fileno(self):
         return self.fd
 
     def __del__(self):
 #       fcntl.fcntl(self.fd, fcntl.F_SETSIG, self.oldsig)
         os.close(self.fd)
-    
+
     def __str__(self):
         return "%s watching %s" % (self.__class__.__name__, self.dirname)
 

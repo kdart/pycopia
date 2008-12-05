@@ -199,7 +199,6 @@ class TestRunnerInterface(object):
             if opt == "-n":
                 cf.comment = optarg
         cf.update(extraopts)
-        cf.argv = args # test args
         # original command line arguments saved for the report
         cf.arguments = [os.path.basename(argv[0])] + argv[1:]
         # Save extra options for overriding configuration after a mergefile
@@ -220,6 +219,7 @@ class TestRunnerInterface(object):
             for error in errors:
                 print >>sys.stderr, error
         if objects:
+            cf.argv = args
             self.runner.initialize()
             self.runner.run_objects(objects)
             self.runner.finalize()

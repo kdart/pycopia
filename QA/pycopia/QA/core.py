@@ -81,8 +81,14 @@ class TestResult(object):
     def __nonzero__(self):
         return self._value == constants.PASSED
 
+    def __int__(self):
+        return int(self._value)
+
     def is_passed(self):
         return self._value == constants.PASSED
+
+    def not_passed(self):
+            return self._value in (constants.FAILED, constants.INCOMPLETE, constants.ABORT)
 
     def is_failed(self):
         return self._value == constants.FAILED
@@ -908,7 +914,7 @@ class TestSuite(object):
     instance. The 'initialize()' method will be run with the arguments given
     when called.
     """
-    def __init__(self, cf, nested=0):
+    def __init__(self, cf, nested=0, name=None):
         self.config = cf
         self.report = cf.report
         self._debug = cf.flags.DEBUG
@@ -916,9 +922,8 @@ class TestSuite(object):
         self._testset = set()
         self._multitestset = set()
         self._nested = nested
-        self.suite_name = self.__class__.__name__
         cl = self.__class__
-        self.test_name = "%s.%s" % (cl.__module__, cl.__name__)
+        self.test_name = name or "%s.%s" % (cl.__module__, cl.__name__)
         self.result = None
         self._merge_config()
 
@@ -1249,7 +1254,7 @@ class TestSuite(object):
         except KeyboardInterrupt:
             if self._nested:
                 raise TestSuiteAbort, \
-                            "Suite '%s' aborted by user in finalize()." % (self.suite_name,)
+                            "Suite %r aborted by user in finalize()." % (self.test_name,)
             else:
                 self.info("Suite aborted by user in finalize().")
         except:
@@ -1269,14 +1274,12 @@ class TestSuite(object):
 
         Place a summary in the report that list all the test results.
         """
-        self.report.add_heading(
-                    "Summarized results for %s." % self.__class__.__name__, 3)
+        self.report.add_heading("Summarized results for %s." % self.__class__.__name__, 3)
         entries = filter(lambda te: te.result is not None, self._tests)
         self.report.add_summary(entries)
         # check and report suite level result
         for entry in self._tests:
-            if entry.result in (constants.FAILED, constants.INCOMPLETE,
-                        constants.ABORT):
+            if entry.result.not_passed():
                 result = constants.FAILED
                 break
             elif entry.result is None:
@@ -1284,7 +1287,7 @@ class TestSuite(object):
                 break
         else:
             result = constants.PASSED
-        self.result = result
+        self.result = TestResult(result)
         resultmsg = "Aggregate result for %r." % (self.test_name,)
         if not self._nested:
             if result == constants.PASSED:

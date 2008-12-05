@@ -279,7 +279,7 @@ class TestRunner(object):
         # Report file's names. save for future use.
         cf.reportfilenames = rpt.filenames 
         rpt.initialize(cf)
-        rpt.add_title("Test Results for %r." % " ".join(cf.get("argv", [])))
+        rpt.add_title("Test Results for %r." % " ".join(cf.get("argv", ["unknown"])))
         arguments = cf.get("arguments")
         # Report command line arguments, if any.
         if arguments:

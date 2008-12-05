@@ -74,20 +74,21 @@ def start_proc_manager(config, logfile):
             scheduler.sleep(1.0) # give it time to init...
     if config.USEFRONTEND:
         lighttpd = proctools.which("lighttpd")
-        pm.spawnpipe("%s -D -f %s" % (lighttpd, LTCONFIG), persistent=True, logfile=logfile)
+        if asyncio.poller:
+            pm.spawnpipe("%s -D -f %s" % (lighttpd, LTCONFIG), persistent=True, logfile=logfile)
+        else: # no servers, just run frontend alone
+            pm.spawnpipe("%s -f %s" % (lighttpd, LTCONFIG))
     try:
-        while 1:
-            asyncio.poller.loop()
-            for proc in pm.getprocs():
-                if proc.readable():
-                    print proc.read(4096)
+        asyncio.poller.loop()
+        print "No servers, exited loop."
     except KeyboardInterrupt:
+        pass
+    if asyncio.poller:
         asyncio.poller.unregister_all()
         for proc in pm.getprocs():
-            proc.kill()
-            proc.wait()
-        if os.path.exists(config.PIDFILE):
-            os.unlink(config.PIDFILE)
+            proc.killwait()
+    if os.path.exists(config.PIDFILE):
+        os.unlink(config.PIDFILE)
 
 
 def stop(config):

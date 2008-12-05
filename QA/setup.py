@@ -9,7 +9,7 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-QA"
-VERSION = "1.0a3"
+VERSION = "1.0a4"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
@@ -17,8 +17,6 @@ DNAME = NAME.split("-", 1)[-1]
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    # needs Pyro
-    #install_requires = ['pycopia-storage>=0.9,==dev', 'pycopia-CLI>=0.9,==dev', 'Pyro>=3.5'],
     install_requires = ['pycopia-storage>=1.0a1,==dev', 'pycopia-CLI>=1.0a1,==dev'],
     scripts =glob("bin/*"), 
     data_files = [

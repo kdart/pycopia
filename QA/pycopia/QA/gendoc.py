@@ -23,6 +23,7 @@ from types import ModuleType
 
 from pycopia.QA import core
 from pycopia.storage import Storage
+from pycopia.WWW import XHTML
 
 
 def fix_path():
@@ -33,32 +34,34 @@ def fix_path():
     return TESTHOME
 
 def build_testplans(argv):
-    from pycopia.WWW import XHTML
     py_matcher = re.compile(r"(^[a-zA-Z]+)\.py$", re.M)
     HOME = fix_path()
-    STYLESHEET = "/stylesheets/qa_tp.css"
-    hl = len(HOME)+1
+    STYLESHEET = "/media/css/qa_tp.css"
+    home_len = len(HOME)+1
     if len(argv) > 1:
         DOCDIR = os.path.expanduser(os.path.expandvars(argv[1]))
     else:
         DOCDIR = "/var/www/localhost/htdocs/testplans"
     os.chdir(DOCDIR)
-    index = XHTML.new_document(XHTML.STRICT)
+    index = XHTML.new_document()
+    NM = index.nodemaker
     index.add_title("Test Plan Index")
-    index.add_to_head("Link", rel="stylesheet", href=STYLESHEET, type="text/css")
+    index.stylesheet = STYLESHEET
     index.add_header(1, "Test Plan Index")
-    index.add_para("""Below is a list of test packages. Each test module
+    index.new_para("""Below is a list of test packages. Each test module
 located in the package is documented inside the package document.  """)
     UL = index.get_unordered_list()
     index.append(UL)
 
     for dirname, dirs, files in os.walk(HOME):
         if "__init__.py" in files:
-            pkgname = ".".join(dirname[hl:].split("/"))
+            pkgname = ".".join(dirname[home_len:].split("/"))
+            if not pkgname:
+                continue
             rstname = pkgname.replace(".", "_")+".rst"
             htmlname = pkgname.replace(".", "_")+".html"
 
-            A = index.get_element("A", href=htmlname)
+            A = NM("A", {"href":htmlname})
             A.add_text(pkgname)
             UL.add_item(A)
 
@@ -67,7 +70,8 @@ located in the package is documented inside the package document.  """)
             fo.close()
             publish_file(source_path=rstname, parser_name='restructuredtext', 
                         writer_name='html', destination_path=htmlname,
-                        settings_overrides={"stylesheet":STYLESHEET})
+                        #settings_overrides={"stylesheet":STYLESHEET}
+                        )
             for fname in files: # copy any included files to destination
                 if fname[-3:] in ("jpg", "png", "gif", "rst"):
                     shutil.copy(os.path.join(dirname, fname), DOCDIR)
@@ -79,7 +83,7 @@ located in the package is documented inside the package document.  """)
                     rstname = modname.replace(".", "_")+".rst"
                     htmlname = modname.replace(".", "_")+".html"
 
-                    A = index.get_element("A", href=htmlname)
+                    A = NM("A", {"href":htmlname})
                     A.add_text(modname)
                     UL.add_item(A)
 
@@ -88,7 +92,8 @@ located in the package is documented inside the package document.  """)
                     fo.close()
                     publish_file(source_path=rstname, parser_name='restructuredtext', 
                                 writer_name='html', destination_path=htmlname,
-                                settings_overrides={"stylesheet":STYLESHEET})
+                                #settings_overrides={"stylesheet":STYLESHEET},
+                                )
 
     indexfile = file("testplan_index.html", "w")
     index.emit(indexfile)
@@ -101,7 +106,15 @@ located in the package is documented inside the package document.  """)
 def mod_doc(fo, mod):
     setattr(mod, "_visited_", True)
     fo.write("\n.. _%s:\n" % (mod.__name__.split(".")[-1],))
-    fo.write(mod.__doc__) # module doc, should be RST
+    if mod.__doc__:
+        fo.write(mod.__doc__) # module doc, should be RST
+    else:
+        name = mod.__path__[0]
+        fo.write(name)
+        fo.write("\n")
+        fo.write("-" * len(name))
+        fo.write("\n\n")
+
     fo.write("\n:Module Name:\n")
     fo.write("    %s\n" %(mod.__name__,))
     if hasattr(mod, "__all__"):

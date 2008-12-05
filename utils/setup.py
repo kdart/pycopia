@@ -98,7 +98,7 @@ if os.getuid() == 0 and sys.argv[1] == "install":
         print >>sys.stderr, "Could not build helper programs:"
         print >>sys.stderr, "%s (%s)" % (ex, val)
 
-    if extensions:
+    if sys.version_info[:2] < (2, 5):
         unlink_old_modules()
 else:
     print >>sys.stderr, "You must run 'setup.py install' as root to install helper programs."

@@ -133,11 +133,11 @@ Spawns a copy of this process. Note that the log file is not inherited."""
 
     def kill(self, sig=SIGINT):
         if not self.deadchild:
+            self.set_callback(None) # explicit kill means no restart
             os.kill(self.childpid, sig)
 
     def killwait(self, sig=SIGINT):
-        if not self.deadchild:
-            os.kill(self.childpid, sig)
+        self.kill(sig)
         return self.wait()
 
     def stop(self):
@@ -950,8 +950,7 @@ times the process will be respawned if the previous invocation dies.  """
         for p in procs:
             self.kill(p, sig)
 
-    def kill(self, proc, sig=SIGTERM):
-        proc.set_callback(None) # explicit kill means no restart
+    def kill(self, proc, sig=SIGINT):
         proc.kill(sig)
 
     def stopall(self):
