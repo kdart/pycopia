@@ -10,6 +10,10 @@ automated test plans found in the test module location.
 """
 
 import sys, os, re, shutil
+import textwrap
+# for checking base class
+from types import ModuleType
+
 import locale
 try:
     locale.setlocale(locale.LC_ALL, '')
@@ -18,13 +22,13 @@ except:
 
 from docutils.core import publish_file
 
-# for checking base class
-from types import ModuleType
-
 from pycopia.QA import core
 from pycopia.storage import Storage
 from pycopia.WWW import XHTML
 
+
+STYLESHEET = "/media/css/qa_tp.css"
+INDEX_STYLESHEET = "/media/css/qa_tp_index.css"
 
 def fix_path():
     TESTHOME = os.environ.get("TESTHOME")
@@ -36,7 +40,6 @@ def fix_path():
 def build_testplans(argv):
     py_matcher = re.compile(r"(^[a-zA-Z]+)\.py$", re.M)
     HOME = fix_path()
-    STYLESHEET = "/media/css/qa_tp.css"
     home_len = len(HOME)+1
     if len(argv) > 1:
         DOCDIR = os.path.expanduser(os.path.expandvars(argv[1]))
@@ -45,11 +48,10 @@ def build_testplans(argv):
     os.chdir(DOCDIR)
     index = XHTML.new_document()
     NM = index.nodemaker
-    index.add_title("Test Plan Index")
-    index.stylesheet = STYLESHEET
-    index.add_header(1, "Test Plan Index")
-    index.new_para("""Below is a list of test packages. Each test module
-located in the package is documented inside the package document.  """)
+    index.add_title("Package Index")
+    index.stylesheet = INDEX_STYLESHEET
+    index.add_header(1, "Package Index")
+    index.new_para("""Here are the available packages.""")
     UL = index.get_unordered_list()
     index.append(UL)
 
@@ -70,7 +72,7 @@ located in the package is documented inside the package document.  """)
             fo.close()
             publish_file(source_path=rstname, parser_name='restructuredtext', 
                         writer_name='html', destination_path=htmlname,
-                        #settings_overrides={"stylesheet":STYLESHEET}
+                        settings_overrides={"link_stylesheet": True, "embed_stylesheet": False, "stylesheet_path": None, "stylesheet":STYLESHEET}
                         )
             for fname in files: # copy any included files to destination
                 if fname[-3:] in ("jpg", "png", "gif", "rst"):
@@ -92,7 +94,7 @@ located in the package is documented inside the package document.  """)
                     fo.close()
                     publish_file(source_path=rstname, parser_name='restructuredtext', 
                                 writer_name='html', destination_path=htmlname,
-                                #settings_overrides={"stylesheet":STYLESHEET},
+                                settings_overrides={"link_stylesheet": True, "embed_stylesheet": False, "stylesheet_path": None, "stylesheet":STYLESHEET},
                                 )
 
     indexfile = file("testplan_index.html", "w")
@@ -137,16 +139,15 @@ def mod_doc(fo, mod):
                     tid = "%s.%s" % (obj.__module__, obj.__name__)
                     head = "Test Case: %s" % (obj.__name__,)
                     fo.write("\n.. _%s:\n\n%s\n" % (obj.__name__, head))
-                    fo.write("-"*len(head))       # Test class header should be H2
+                    fo.write("*"*len(head))       # Test class header should be H2
                     fo.write("\n:Test Case ID:\n")
                     fo.write("    %s\n" %(tid,))
-                    fo.write(obj.__doc__)
+                    fo.write(textwrap.dedent(obj.__doc__))
                 fo.write("\n")
         elif type(obj) is ModuleType:
             if (hasattr(obj, "__path__") and os.path.split(obj.__file__)[0].startswith(os.path.split(mod.__file__)[0])) or \
                         obj.__name__.startswith(mod.__name__): # sub package or module
                 if not hasattr(obj, "_visited_"):
-                    #setattr(obj, "_visited_", True)
                     mod_doc(fo, obj)
 
 
