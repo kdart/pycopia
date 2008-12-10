@@ -142,7 +142,10 @@ class TrapDispatcher(socket.AsyncSocket):
     def writable(self):
         return False
 
-    def handle_read(self):
+    def priority(self):
+        return False
+
+    def read_handler(self):
         ip = struct.unpack("!I", self.recv(4))[0] # network byte-order
         port = struct.unpack("!H", self.recv(2))[0] # network byte-order
         length = struct.unpack("i", self.recv(4))[0] # host byte-order
@@ -160,17 +163,18 @@ class TrapDispatcher(socket.AsyncSocket):
             # returns True if handled, and no further processing required.
             if handler(*arglist):
                 break
-    
-    def handle_connect(self):
-        pass
 
-    def handle_error(self, ex, val, tb):
+    def error_handler(self, ex, val, tb):
         if self._debug:
             from pycopia import debugger
             debugger.post_mortem(ex, val, tb)
         else:
             import traceback
             traceback.print_exception(ex, val, tb)
+
+
+
+
 
 def start_straps(port=162):
     # the daemonize and straps program source code is in the pycopia-utils

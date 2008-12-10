@@ -3,7 +3,7 @@
 # 
 # $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2008  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -88,18 +88,18 @@ class SyslogMessage(object):
         self.host = host
         self.timestamp = timestamp
         self.tag = tag
-    
+
     def __str__(self):
         return "%.2f|%s|%s: %s" % (self.timestamp, self.host, self.tag, self.message)
-    
+
     def encode(self):
         ts = timelib.strftime("%b %d %H:%M:%S", timelib.localtime(self.timestamp))
         return "<%s>%s %s %s: %s" % ((self.facility<<3) + self.priority, ts, self.tag, self.message)
-    
+
     def __repr__(self):
         return "%s(%r, %r, %r, %r, %r)" % (self.__class__.__name__, self.message, self.facility, self.priority, 
                 self.host, self.timestamp)
-    
+
 
 
 _MSG_RE = re.compile("<(\d+?)>(.*)")
@@ -124,16 +124,17 @@ class SlogDispatcher(socket.AsyncSocket):
     def readable(self):
         return True
 
-    def handle_error(self, ex, val, tb):
+    def error_handler(self, ex, val, tb):
         print >> sys.stderr, "*** Dispatcher:", ex, val
 
-    def handle_read(self):
+    def read_handler(self):
         ip = struct.unpack("!i", self.recv(4))[0] # network byte-order
         port = struct.unpack("!h", self.recv(2))[0] # network byte-order
         length = struct.unpack("i", self.recv(4))[0] # host byte-order
         msg = self.recv(length)
         assert length == len(msg)
         return self.callback(parse_message(now(), IPv4(ip), msg))
+
 
 class UserSlogDispatcher(socket.AsyncSocket):
     def __init__(self, callback, addr=_user_default_addr):
@@ -147,10 +148,10 @@ class UserSlogDispatcher(socket.AsyncSocket):
     def readable(self):
         return True
 
-    def handle_error(self, ex, val, tb):
+    def error_handler(self, ex, val, tb):
         print "*** Dispatcher:", ex, val
 
-    def handle_read(self):
+    def read_handler(self):
         try:
             while 1:
                 msg, addr = self.recvfrom(4096, socket.MSG_DONTWAIT)
@@ -184,7 +185,7 @@ class Syslog(object):
             print >>sys.stderr, "Warning: could not open %r for writing: %s (%s)." % (fname, ex, val)
         else:
             self._FLIST.append(fp)
-    
+
     def openlogs(self, flist):
         for fn in flist:
             self.openlog(fn)

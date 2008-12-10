@@ -52,6 +52,7 @@ def main(argv):
     scheduler.sleep(2)
     trapreceiver = traps.TrapDispatcher(_handler)
     asyncio.register(trapreceiver)
+    asyncio.start_sigio()
 
 main(sys.argv)
 # exits into interactive mode...

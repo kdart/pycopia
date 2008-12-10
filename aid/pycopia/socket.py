@@ -418,6 +418,9 @@ class AsyncSocket(_realsocket):
         self._state = CLOSED
         self._buf = ""
 
+    def read(self, n=4096):
+        return self.recv(n)
+
     # asyncio interface
     def readable(self):
         return True
@@ -429,9 +432,26 @@ class AsyncSocket(_realsocket):
     def priority(self):
         return False
 
-    def handle_read(self):
+    def socket_read(self):
         if __debug__:
             print >>sys.stderr, "unhandled read"
+
+    def write_handler(self):
+        self._send()
+        if __debug__:
+            print >>sys.stderr, "unhandled read"
+
+    def hangup_handler(self):
+        if __debug__:
+            print >>sys.stderr, "unhandled hangup"
+
+    def pri_handler(self):
+        if __debug__:
+            print >>sys.stderr, "unhandled priority"
+
+    def error_handler(self, ex, val, tb):
+        if __debug__:
+            print >>sys.stderr, "unhandled error: %s (%s)"  % (ex, val)
 
     def handle_accept(self):
         if __debug__:
@@ -440,21 +460,8 @@ class AsyncSocket(_realsocket):
     def handle_connect(self):
         if __debug__:
             print >>sys.stderr, "unhandled connect"
-    
-    def handle_hangup(self):
-        if __debug__:
-            print >>sys.stderr, "unhandled hangup"
 
-    def handle_priority(self):
-        if __debug__:
-            print >>sys.stderr, "unhandled priority"
-
-    def handle_error(self, ex, val, tb):
-        if __debug__:
-            print >>sys.stderr, "unhandled error: %s (%s)"  % (ex, val)
-        
-    # async poller interface
-    def handle_read_event(self):
+    def read_handler(self):
         if self._state == ACCEPTING:
             # for an accepting socket, getting a read implies
             # that we are connected
@@ -463,16 +470,9 @@ class AsyncSocket(_realsocket):
         elif self._state == CLOSED:
             self.handle_connect()
             self._state = CONNECTED
-            self.handle_read()
+            self.read()
         else:
-            self.handle_read()
-
-    def handle_write_event(self):
-        self._send()
-
-    def handle_priority_event(self):
-        if __debug__:
-            print >>sys.stderr, "unhandled priority event"
+            self.read()
 
     # socket methods
     def listen(self, num):
