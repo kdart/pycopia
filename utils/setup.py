@@ -9,6 +9,7 @@ import ez_setup
 ez_setup.use_setuptools()
 
 from setuptools import setup, Extension 
+from glob import glob
 
 NAME = "pycopia-utils"
 VERSION = "1.0a4"
@@ -42,6 +43,7 @@ else:
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
+    scripts = glob("bin/*"), 
     ext_modules=extensions,
     install_requires = ['pycopia-aid>=1.0a1,==dev'],
     test_suite = "test.UtilsTests",
