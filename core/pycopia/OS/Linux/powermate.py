@@ -81,7 +81,7 @@ class PowerMate(Input.EventDevice):
             cb = self.EVENT_DISPATCH.get((ev.evtype, ev.code), NULL)
             cb(ev.time, ev.value)
 
-    handle_read_event = poll
+    read_handler = poll
 
 
 if __name__ == "__main__":

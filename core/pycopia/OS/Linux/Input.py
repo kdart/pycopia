@@ -173,7 +173,7 @@ class EventDevice(object):
         for d in range(start, 16):
             try:
                 self._open("/dev/input/event%d" % (d,))
-            except IOError:
+            except (OSError, IOError): # probably no permissions
                 pass
             else:
                 if self.name.startswith(self.DEVNAME):
@@ -228,16 +228,16 @@ class EventDevice(object):
     def priority(self):
         return False
 
-    def handle_read_event(self):
+    def read_handler(self):
         self._fill()
 
-    def handle_write_event(self):
+    def write_handler(self):
         pass
 
-    def handle_priority_event(self):
+    def pri_handler(self):
         pass
 
-    def handle_hangup_event(self):
+    def hangup_handler(self):
         pass
 
 
