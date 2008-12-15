@@ -17,7 +17,10 @@ DNAME = NAME.split("-", 1)[-1]
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-storage>=1.0a1,==dev', 'pycopia-CLI>=1.0a1,==dev'],
+    install_requires = ['pycopia-storage>=1.0a4,==dev', 
+        'pycopia-CLI>=1.0a1,==dev',
+        'docutils>=0.5'
+        ],
     scripts =glob("bin/*"), 
     data_files = [
         ('/etc/pycopia', glob("etc/*.dist")),
