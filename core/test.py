@@ -27,7 +27,6 @@ from pycopia import anypath
 from pycopia import asyncinterface
 from pycopia import asyncio
 from pycopia import asyncserver
-#from pycopia import autodebug
 from pycopia import basicconfig
 from pycopia import benchmarks
 from pycopia import charbuffer
@@ -55,6 +54,7 @@ from pycopia import shparser
 from pycopia import table
 from pycopia import texttools
 from pycopia import passwd
+from pycopia import re_inverse
 
 if os.environ.get("DISPLAY"):
     from pycopia import gtktools
@@ -129,6 +129,16 @@ class CoreTests(unittest.TestCase):
         sh = shparser.ShellParser(_print_argv)
         args = sh.feedline('echo -q -N "" -t tparm -b 1024 -f "bogus one" $PATH ${PATH}')
         print args
+
+    def test_re_inverse(self):
+        import sre_parse
+        RE = r'(firstleft|)somestring(\s.*|) \S(a|b) [fgh]+ {2,3}R(\S)'
+        print sre_parse.parse(RE)
+        for i in range(20):
+            ms = re_inverse.make_match_string(RE)
+        for i in range(20):
+            ms = re_inverse.make_nonmatch_string(RE)
+
 
 if __name__ == "__main__":
     import sys

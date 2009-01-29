@@ -321,15 +321,23 @@ class HTTPRequest(object):
     def _load_post_and_files(self):
         # Populates self._post and self._files
         if self.method == 'POST':
-            if self.environ.get('CONTENT_TYPE', '').startswith('multipart'):
+            content_type = self.environ.get('CONTENT_TYPE', '')
+            if content_type.startswith('multipart'):
                 header_dict = dict([(k, v) for k, v in self.environ.items() if k.startswith('HTTP_')])
-                header_dict['Content-Type'] = self.environ.get('CONTENT_TYPE', '')
+                header_dict['Content-Type'] = content_type
                 self._post, self._files = parse_file_upload(header_dict, self.raw_post_data)
-            else:
+            elif content_type.endswith('urlencoded'):
                 self._post = urlparse.queryparse(self.raw_post_data)
                 self._files = urlparse.URLQuery()
+            else: # punt, use as-is for some broken applications
+                self._post = urlparse.URLQuery()
+                self._files = urlparse.URLQuery()
+                self._files.appendlist({
+                    'content-type': content_type,
+                    'content': self.raw_post_data
+                })
+            self._raw_post_data = None
         else:
-            self._post = urlparse.URLQuery()
             self._post = urlparse.URLQuery()
 
     def __getitem__(self, key):

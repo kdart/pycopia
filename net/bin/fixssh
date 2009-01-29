@@ -10,7 +10,7 @@ Removes the named host from the ssh known_hosts file.
 
 
 import sys
-import sshlib
+from pycopia import sshlib
 
 def fixssh(argv):
 	if len(argv) < 2:
