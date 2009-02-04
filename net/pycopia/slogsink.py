@@ -127,7 +127,7 @@ class SlogDispatcher(socket.AsyncSocket):
     def error_handler(self, ex, val, tb):
         print >> sys.stderr, "*** Dispatcher:", ex, val
 
-    def read_handler(self):
+    def read(self):
         ip = struct.unpack("!i", self.recv(4))[0] # network byte-order
         port = struct.unpack("!h", self.recv(2))[0] # network byte-order
         length = struct.unpack("i", self.recv(4))[0] # host byte-order
@@ -151,7 +151,7 @@ class UserSlogDispatcher(socket.AsyncSocket):
     def error_handler(self, ex, val, tb):
         print "*** Dispatcher:", ex, val
 
-    def read_handler(self):
+    def read(self):
         try:
             while 1:
                 msg, addr = self.recvfrom(4096, socket.MSG_DONTWAIT)
@@ -311,11 +311,11 @@ The -d flag enables debugging mode. The -p flag specifies a non-standard UDP
 port to listen to.
 
     """
-    import getopt
+    from pycopia import getopt
     port = 514
     debug = False
     try:
-        opts, args = getopt.getopt(argv[1:], "p:dh?")
+        opts, longopts, args = getopt.getopt(argv[1:], "p:dh?")
     except getopt.GetoptError:
         print __doc__
         return
