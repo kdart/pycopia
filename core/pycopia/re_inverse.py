@@ -130,6 +130,25 @@ def _make_match_string_from_pattern(parsetree, makebad=False):
     return "".join(collect)
 
 
+class StringGenerator(object):
+    def __init__(self, regexp, N=10, bad=False):
+        self._parsetree = sre_parse.parse(regexp)
+        self.bad = bad
+        self._max = N
+        self._i = 0
+
+    def __iter__(self):
+        self._i = 0
+        return self
+
+    def next(self):
+        if self._i < self._max:
+            self._i += 1
+            return _make_match_string_from_pattern(self._parsetree, self.bad)
+        else:
+            raise StopIteration
+
+
 if __name__ == "__main__":
     from pycopia import autodebug
     RE = r'(firstleft|)somestring(\s.*|) \S(a|b) [fgh]+ R{2,3} M{2,5}? (\S)'
