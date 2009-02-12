@@ -37,16 +37,18 @@ try:
 except ImportError:
     readline = None # ...but try to live without it if it is not available.
 
-import timelib
-import environ
 from types import MethodType
 
-from pycopia import tty
-from pycopia import getopt
 from pycopia.IO import ConsoleIO
 from pycopia.UI import DefaultTheme, UserInterface, method_repr, safe_repr
 from pycopia.fsm import FSM, ANY
 from pycopia.aid import IF, Print, removedups
+
+from pycopia import timelib
+from pycopia import environ
+from pycopia import tty
+from pycopia import getopt
+
 
 # global timer for timing methods
 from pycopia import scheduler
