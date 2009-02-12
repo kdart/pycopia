@@ -330,8 +330,7 @@ class RootContainer(object):
         as the command line. """
         if type(v) is str:
             try:
-                v = eval("self.%s" % (v,))
-                #v = eval(v, vars(self), vars(self._container))
+                v = eval(v, vars(self))
             except:
                 if __debug__:
                     ex, val, tb = sys.exc_info()
