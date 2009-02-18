@@ -57,6 +57,10 @@ def get_server(config):
 
     app = framework.WebApplication(config)
 
+    if "MIDDLEWARE" in config:
+        for mws in config["MIDDLEWARE"]:
+            pass #XXX
+
     if config.DEBUG:
         pass
         #from paste.evalexception.middleware import EvalException

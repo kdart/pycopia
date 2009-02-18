@@ -40,11 +40,9 @@ import sre_parse
 from pprint import pformat
 import itertools
 import traceback
-import cgitb
 from cStringIO import StringIO
-
 import email, email.Message
-# external dependency
+
 import simplejson
 
 from pycopia import urlparse
@@ -61,12 +59,45 @@ class Error(Exception):
   "Base framework error"
 
 class InvalidPath(Error):
-  """Raised if a URL is requested that can't be met by any registered
+  """Raised if a back-URL is requested by the handler that can't be met by any registered
   handlers.
   """
 
-class HTTPError(Error):
-    pass
+class HTTPError(Exception):
+    code = None
+
+    @property
+    def message(self):
+        try:
+            return self.args[0]
+        except IndexError:
+            return ""
+
+    def __str__(self):
+        return "%s %s" % (self.code, STATUSCODES.get(self.code, 'UNKNOWN STATUS CODE'))
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, self.message)
+
+
+class HttpErrorNotAuthenticated(HTTPError):
+    code = 401
+
+class HttpErrorNotAuthorized(HTTPError):
+    code = 403
+
+class HttpErrorNotFound(HTTPError):
+    code = 404
+
+class HttpErrorMethodNotAllowed(HTTPError):
+    code = 405
+
+class HttpErrorUnsupportedMedia(HTTPError):
+    code = 415
+
+class HttpErrorServerError(HTTPError):
+    code = 500
+
 
 ELEMENTCACHE = ObjectCache()
 
@@ -88,7 +119,7 @@ RESERVED_CHARS="!*'();:@&=+$,/?%#[]"
 def parse_file_upload(header_dict, post_data):
     "Returns a tuple of (POST URLQuery, FILES URLQuery)"
     raw_message = '\r\n'.join(['%s:%s' % pair for pair in header_dict.items()])
-    raw_message += '\r\n\r\n' + post_data
+    raw_message += '\r\n\r\n' + post_data # XXX get rid of this mess
     msg = email.message_from_string(raw_message)
     POST = urlparse.URLQuery()
     FILES = urlparse.URLQuery()
@@ -104,13 +135,13 @@ def parse_file_upload(header_dict, post_data):
                 # IE submits the full path, so trim everything but the basename.
                 # (We can't use os.path.basename because it expects Linux paths.)
                 filename = cd.parameters['filename'][cd.parameters['filename'].rfind("\\")+1:]
-                FILES.appendlist(cd.parameters['name'], {
+                FILES[cd.parameters['name']] = {
                     'filename': filename,
                     'content-type': (submessage.has_key('Content-Type') and submessage['Content-Type'] or None),
                     'content': submessage.get_payload(),
-                })
+                }
             else:
-                POST.appendlist(cd.parameters['name'], submessage.get_payload())
+                POST[cd.parameters['name']] = submessage.get_payload()
     return POST, FILES
 
 
@@ -135,9 +166,9 @@ class HttpResponse(object):
 
     def __str__(self):
         "Full HTTP message, including headers"
-        return '\n'.join(['%s: %s' % (key, value)
+        return '\r\n'.join(['%s: %s' % (key, value)
             for key, value in self.headers.asWSGI()]) \
-            + '\n\n' + self.content
+            + '\r\n\r\n' + self.content
 
     def __setitem__(self, header, value):
         self.headers.add_header(header, value)
@@ -189,8 +220,10 @@ class HttpResponse(object):
         return chunk
 
     def close(self):
-        if hasattr(self._container, 'close'):
+        try:
             self._container.close()
+        except AttributeError:
+            pass
 
     # The remaining methods partially implement the file-like object interface.
     # See http://docs.python.org/lib/bltin-file-objects.html
@@ -209,9 +242,13 @@ class HttpResponse(object):
 
 class HttpResponseRedirect(HttpResponse):
     status_code = 302
-    def __init__(self, redirect_to):
+    def __init__(self, redirect_to, **kwargs):
         HttpResponse.__init__(self)
-        self['Location'] = urlparse.quote(redirect_to, safe=RESERVED_CHARS)
+        if kwargs:
+            dest = urlparse.quote(redirect_to, safe=RESERVED_CHARS) + "?" + urlparse.urlencode(kwargs)
+        else:
+            dest = urlparse.quote(redirect_to, safe=RESERVED_CHARS)
+        self['Location'] = dest
 
 class HttpResponsePermanentRedirect(HttpResponse):
     status_code = 301
@@ -224,13 +261,23 @@ class HttpResponseNotModified(HttpResponse):
     def __init__(self):
         HttpResponse.__init__(self)
 
-class HttpResponseNotFound(HttpResponse):
-    status_code = 404
+class HttpResponseNotAuthenticated(HttpResponse):
+    status_code = 401
+    def __init__(self, *args, **kwargs):
+        HttpResponse.__init__(self, *args, **kwargs)
+
+class HttpResponsePaymentRequired(HttpResponse):
+    status_code = 402
     def __init__(self, *args, **kwargs):
         HttpResponse.__init__(self, *args, **kwargs)
 
 class HttpResponseForbidden(HttpResponse):
     status_code = 403
+    def __init__(self, *args, **kwargs):
+        HttpResponse.__init__(self, *args, **kwargs)
+
+class HttpResponseNotFound(HttpResponse):
+    status_code = 404
     def __init__(self, *args, **kwargs):
         HttpResponse.__init__(self, *args, **kwargs)
 
@@ -252,9 +299,9 @@ class HttpResponseServerError(HttpResponse):
 
 def get_host(request):
     "Gets the HTTP host from the environment or request headers."
-    host = request.META.get('HTTP_X_FORWARDED_HOST', '')
+    host = request.environ.get('HTTP_X_FORWARDED_HOST', '')
     if not host:
-        host = request.META.get('HTTP_HOST', '')
+        host = request.environ.get('HTTP_HOST', '')
     return host
 
 def safe_copyfileobj(fsrc, fdst, length=16*1024, size=0):
@@ -276,10 +323,12 @@ def safe_copyfileobj(fsrc, fdst, length=16*1024, size=0):
 class HTTPRequest(object):
     def __init__(self, environ):
         self.environ = environ
-        self.META = environ
         self.method = environ['REQUEST_METHOD'].upper()
         self.path = environ['PATH_INFO']
-        self.get_url = environ["framework.get_url"]
+        self.get_url = None
+        self.get_alias = None
+        self.database = None
+        self.config = None
 
     def log_error(self, message):
         fo = self.environ["wsgi.errors"]
@@ -302,10 +351,10 @@ class HTTPRequest(object):
         except:
             cookies = '<could not parse>'
         try:
-            meta = pformat(self.META)
+            meta = pformat(self.environ)
         except:
             meta = '<could not parse>'
-        return '<HTTPRequest\nGET:%s,\nPOST:%s,\nCOOKIES:%s,\nMETA:%s>' % \
+        return '<HTTPRequest\nGET:%s,\nPOST:%s,\nCOOKIES:%s,\nenviron:%s>' % \
             (get, post, cookies, meta)
 
     def get_full_path(self):
@@ -321,21 +370,21 @@ class HTTPRequest(object):
     def _load_post_and_files(self):
         # Populates self._post and self._files
         if self.method == 'POST':
-            content_type = self.environ.get('CONTENT_TYPE', '')
+            content_type = self.environ.get('CONTENT_TYPE', '').lower()
             if content_type.startswith('multipart'):
                 header_dict = dict([(k, v) for k, v in self.environ.items() if k.startswith('HTTP_')])
                 header_dict['Content-Type'] = content_type
                 self._post, self._files = parse_file_upload(header_dict, self.raw_post_data)
             elif content_type.endswith('urlencoded'):
                 self._post = urlparse.queryparse(self.raw_post_data)
-                self._files = urlparse.URLQuery()
-            else: # punt, use as-is for some broken applications
+                self._files = None
+            else: 
                 self._post = urlparse.URLQuery()
                 self._files = urlparse.URLQuery()
-                self._files.appendlist({
+                self._files["body"] = {
                     'content-type': content_type,
                     'content': self.raw_post_data
-                })
+                }
             self._raw_post_data = None
         else:
             self._post = urlparse.URLQuery()
@@ -414,12 +463,6 @@ class HTTPRequest(object):
 
 
 ### End (modified) code from Django. ###
-
-# Constant responses.
-ONLY_GET = HttpResponseNotAllowed(["GET"])
-ONLY_POST = HttpResponseNotAllowed(["POST"])
-ONLY_GET_AND_POST = HttpResponseNotAllowed(["GET", "POST"])
-
 
 
 class URLMap(object):
@@ -545,21 +588,21 @@ class URLResolver(object):
         return None, None
 
     def dispatch(self, request):
-        path = request.META["PATH_INFO"]
+        path = request.environ["PATH_INFO"]
         for mapper in self._patterns:
             method, kwargs = mapper.match(path)
             if method:
                 response = method(request, **kwargs)
                 if response is None:
                     request.log_error("Handler %r returned none.\n" % (method,))
-                    raise HTTPError(500, "handler returned None")
+                    raise HttpErrorServerError("handler returned None")
                 return response
         else:
-            raise HTTPError(404, path)
+            raise HttpErrorNotFound(path)
 
     def get_url(self, method, **kwargs):
-        """Reverse mapping. How do I call method with the given args from
-        the URL mapping?
+        """Reverse mapping. Answers the question: How do I reach the
+        callable object mapped to in the LOCATIONMAP?
         """
         if type(method) is str:
             if method.find(".") >= 0:
@@ -584,39 +627,48 @@ class URLResolver(object):
         return urlmap.get_url(**kwargs)
 
 
-
 class WebApplication(object):
     """Adapt a WSGI server to a framework style request handler. 
     """
     def __init__(self, config):
         self._config = config
-        self._resolver = URLResolver(config.LOCATIONMAP, config.get("BASEPATH"))
+        self._resolver = URLResolver(config.LOCATIONMAP, 
+                config.get("BASEPATH", "/%s" % (config.SERVERNAME,)))
+        if config.get("DATABASE_URL"):
+            from pycopia.db import models
+            self.DBSession = models.create_session(config.DATABASE_URL)
+        else:
+            self.DBSession = None
 
     def __call__(self, environ, start_response):
-        environ['framework.get_url'] = self._resolver.get_url
-        environ['framework.get_alias'] = self._resolver.get_alias
-        environ['framework.config'] = self._config
         request = HTTPRequest(environ)
+        request.config = self._config
+        request.get_url = self._resolver.get_url
+        request.get_alias = self._resolver.get_alias
+        if self.DBSession is not None:
+            request.database = self.DBSession()
         try:
-            response = self._resolver.dispatch(request)
-        except HTTPError, err:
-            code = err.args[0]
-            status = '%s %s' % (code, STATUSCODES.get(code, 'UNKNOWN STATUS CODE'))
-            start_response(status, [("Content-Type", "text/plain")])
-            return [str(err)]
-        except:
-            excinfo = sys.exc_info()
-            start_response("500 Internal Server Error", [("Content-Type", "text/html")], excinfo)
-            return [cgitb.html(excinfo)]
-        else:
-            start_response(response.get_status(), response.get_response_headers())
-            return response
+            try:
+                response = self._resolver.dispatch(request)
+            except:
+                ex, val, tb = sys.exc_info()
+                if issubclass(ex, HTTPError):
+                    start_response(str(val), [("Content-Type", "text/plain")], (ex, val, tb))
+                    return [val.message]
+                else:
+                    raise ex, val, tb
+            else:
+                start_response(response.get_status(), response.get_response_headers())
+                return response
+        finally:
+            if self.DBSession is not None:
+                request.database.close()
 
 
 # You can subclass this and set and instance to be called by URL mapping.
 class RequestHandler(object):
     METHODS = ["get", "head", "post", "put", "delete", "options", "trace"]
-    def __init__(self, _constructor, **kwargs):
+    def __init__(self, _constructor=None, **kwargs):
         self._methods = {}
         impl = []
         for name in self.METHODS:
@@ -635,7 +687,8 @@ class RequestHandler(object):
         pass
 
     def get_response(self, request, **kwargs):
-        return ResponseDocument(request, self._constructor, **kwargs)
+        if self._constructor is not None:
+            return ResponseDocument(request, self._constructor, **kwargs)
 
     def __call__(self, request, **kwargs):
         meth = self._methods.get(request.method, self._invalid)
@@ -751,7 +804,7 @@ def get_acceptable_document(request):
         else:
             return XHTML.new_document(doctype=None, mimetype=preferred)
     else:
-        raise HTTPError(415, "Unsupported Media Type")
+        raise HttpErrorUnsupportedMedia(", ".join(SUPPORTED))
 
 def default_doc_constructor(request, **kwargs):
     doc = get_acceptable_document(request)
@@ -780,9 +833,9 @@ class ResponseDocument(object):
         self._doc = doc = _constructor(_request, **kwargs)
         self.NM = self._doc.nodemaker # nodemaker shortcut
         # shortcuts
-        self.get_url = _request.environ["framework.get_url"]
-        self.get_alias = _request.environ["framework.get_alias"]
-        self.config = _request.environ["framework.config"]
+        self.get_url = _request.get_url
+        self.get_alias = _request.get_alias
+        self.config = _request.config
 
     doc = property(lambda s: s._doc)
 

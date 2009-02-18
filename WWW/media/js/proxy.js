@@ -3,10 +3,10 @@
  */
 
 /**
- * PythonProxy works with views_base.JSONDispatcher to transparently call
+ * PythonProxy works with json.JSONDispatcher to transparently call
  * functions on the server side, and return the function's return value.
  * This should be mapped with a URL map of the form
- * "/base/path/(?P<methodname>\w+)/" to a views_base.JSONDispatcher
+ * "/base/path/(?P<methodname>\w+)/" to a json.JSONDispatcher
  * instance on the server side. The PythonProxy object, when instantiated,
  * automatically fills in extra methods mapped to the functions that
  * JSONDispatcher exports. They will have the same name. Then call any one

@@ -495,6 +495,15 @@ def str2hex(s):
     res.append("'")
     return "".join(res)
 
+def hexdigest(s):
+    return "".join(["%02x" % ord(c) for c in s])
+
+def unhexdigest(s):
+    l = []
+    for i in xrange(0, len(s), 2):
+        l.append(chr(int(s[i:i+2], 16)))
+    return "".join(l)
+
 def Import(modname):
     try:
         return sys.modules[modname]

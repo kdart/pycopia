@@ -37,29 +37,14 @@ class TCPSocketServer(socket.AsyncSocket):
         worker = self.workerclass(sock, addr)
         asyncio.poller.register(worker)
 
-        #self._workers[addr] = worker
-
-    def handle_read(self):
-        print "XXX server read:"
-        print self.recv(4096)
+    def socket_read(self):
+        self.recv(1024)
 
     def callback(self):
         pass
-        #print "XXX looped",
-        #print asyncio.poller.smap.keys()
 
     def run(self):
         asyncio.poller.loop(5, callback=self.callback)
-        #asyncio.poller.loop()
-
-#       import signal
-#       try:
-#           while 1:
-#               signal.pause()
-#               self.accept()
-#       except KeyboardInterrupt:
-#           return
-
 
 
 class SocketWorker(object):
@@ -81,23 +66,12 @@ class SocketWorker(object):
     def fileno(self):
         return self._sock.fileno()
 
-#   def get_handlers(self):
-#       return (asyncio.HandlerMethods(self._sock.fileno(), 
-#                readable=self.readable, read_handler=self.handle_read,
-#                writable=self.writable, write_handler=self.handle_write_event,
-#                hangup_handler=self.finalize),)
-#
     def initialize(self):
-        print >>sys.stderr, "*** SocketWorker: unhandled initialize event"
+        pass
 
     def finalize(self):
-        print >>sys.stderr, "*** SocketWorker: unhandled finalize event"
         asyncio.poller.unregister(self)
         self.close()
-
-    # delegation to socket object
-#   def __getattr__(self, name):
-#       return getattr(self._sock, name)
 
     def readable(self):
         #return (self._state == socket.CONNECTED)
@@ -109,39 +83,27 @@ class SocketWorker(object):
     def priority(self):
         return (self._state == socket.CONNECTED) and bool(self._pribuf)
 
-    def handle_read(self):
+    def read_handler(self):
         print >>sys.stderr, "SocketWorker: unhandled read"
+
+    def hangup_handler(self):
+        self._state = socket.CLOSED
+        self.close()
+
+    def pri_handler(self):
+        print >>sys.stderr, "SocketWorker: unhandled priority"
+
+    def error_handler(self, ex, val, tb):
+        print >>sys.stderr, "SocketWorker: unhandled error: %s (%s)"  % (ex, val)
+
+    def write_handler(self):
+        self._send()
 
     def handle_accept(self):
         print >>sys.stderr, "SocketWorker: unhandled accept"
 
     def handle_connect(self):
         print >>sys.stderr, "SocketWorker: unhandled connect"
-    
-    def handle_hangup(self):
-        print >>sys.stderr, "SocketWorker: unhandled hangup"
-
-    def handle_priority(self):
-        print >>sys.stderr, "SocketWorker: unhandled priority"
-
-    def handle_error(self, ex, val, tb):
-        print >>sys.stderr, "SocketWorker: unhandled error: %s (%s)"  % (ex, val)
-        
-    def handle_read_event(self):
-        self.handle_read()
-
-    def handle_write_event(self):
-        self._send()
-
-    def handle_priority_event(self):
-        print >>sys.stderr, "SocketWorker: unhandled priority event"
-
-    def handle_hangup_event(self):
-        """Callback that gets called when file desriptor closes for some
-        reason."""
-        print >>sys.stderr, "*** SocketWorker: in hangup event"
-        self._state = socket.CLOSED
-        self.close()
 
     def _send(self, flags=0):
         while 1:
@@ -166,16 +128,16 @@ class SocketWorker(object):
 
 # simple server examples
 class DiscardWorker(SocketWorker):
-    def handle_read(self):
+    def read_handler(self):
         d = self.recv(4096)
 
 class EchoWorker(SocketWorker):
-    def handle_read(self):
+    def read_handler(self):
         d = self.recv(4096)
         self.send(d)
 
 class TestWorker(SocketWorker):
-    def handle_read(self):
+    def read_handler(self):
         d = self.recv(4096)
         self.send(d)
 
@@ -188,7 +150,7 @@ class TCPClientSocket(socket.AsyncSocket):
     def set_callback(self, cb):
         self._callback = cb
 
-    def handle_read(self):
+    def read_handler(self):
         d = self.recv(4096)
         self._callback(d)
 
@@ -213,7 +175,7 @@ class TCPClient(object):
         if self.logfile:
             self.logfile.write('connected\n')
         asyncio.poller.register(s)
-    
+
     def close(self):
         if self._sock:
             self._sock.close()

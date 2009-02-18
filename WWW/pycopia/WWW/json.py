@@ -79,7 +79,7 @@ class JSONDispatcher(object):
 
      (r'^base/path/(?P<methodname>\w+)/$', 'views_module.dispatcher'),
 
-  Your views_module.py will then have a line like this::
+  Your view.py will then have a line like this::
 
     _exported = [my_function]
     dispatcher = json.JSONDispatcher(_exported)
@@ -137,7 +137,8 @@ class JSONDispatcher(object):
       else:
         args = ()
         kwargs = {}
-      json = self._encoder.encode(handler(*args, **kwargs))
+      rv = handler(*args, **kwargs)
+      json = self._encoder.encode(rv)
       return HttpResponse(json, "application/json")
     except: # all exceptions are sent back to client.
       ex, val, tb = sys.exc_info()

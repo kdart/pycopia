@@ -10,26 +10,43 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-WWW"
-VERSION = "1.0a4"
+VERSION = "1.0a5"
 
 DNAME = NAME.split("-", 1)[-1]
 ENAME = NAME.replace("-", "_")
 
-setup (name=NAME, version=VERSION,
-    namespace_packages = ["pycopia"],
-    packages = find_packages(),
-    install_requires = ['pycopia-XML>=1.0a1,==dev', 'simplejson>=0.7'],
-    data_files = [
-        ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
-        ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
+WEBSITE = os.environ.get("WEBSITE")
+
+DATAFILES = [
+    ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
+    ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
+    (os.path.join(sys.prefix, 'libexec', 'pycopia'), glob("libexec/*")),
+]
+
+if WEBSITE:
+    DATAFILES.extend([
+        (os.path.join("/var", "www", WEBSITE, 'htdocs'), glob("doc/html/*.html")),
+        (os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
+        (os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
+        (os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
+    ])
+else:
+    DATAFILES.extend([
         (os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html'), 
              glob("doc/html/*.html")),
         (os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html', 'cgi-bin'), 
              glob("doc/html/cgi-bin/*.py")),
         (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'js'), 
              glob("media/js/*.js")),
-        (os.path.join(sys.prefix, 'libexec', 'pycopia'), glob("libexec/*")),
-    ],
+        (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'css'), 
+             glob("media/css/*.css")),
+    ])
+
+setup (name=NAME, version=VERSION,
+    namespace_packages = ["pycopia"],
+    packages = find_packages(),
+    install_requires = ['pycopia-XML>=1.0a1,==dev', 'simplejson>=0.7'],
+    data_files = DATAFILES,
     scripts = glob("bin/*"), 
     test_suite = "test.WWWTests",
 

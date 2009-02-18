@@ -14,6 +14,6 @@ host = "localhost"
 dbfile = "/var/tmp/nmsstore.dfs"
 dblog =  "/var/tmp/storage.log"
 
-### For SQL database backend
+### For postgres database backend
 
-database = 'postgres://pycstorage@localhost/pycstorage'
+database = 'postgres://pycopia:pycopia@localhost/pycopia'

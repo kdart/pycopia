@@ -1,0 +1,41 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+
+
+# This handler-server must run as root in order to authenticate against
+# PAM "system" service.  users. If you don't need to authenticate using
+# the PAM "system" service profile then you can run this as a less
+# privileged user.
+USERNAME = "root"
+
+ADMINS = (
+    ('Keith Dart', 'keith@dartworks.biz'),
+)
+
+#DATABASE_URL = 'postgres://plinth:pycopia@localhost/plinth'
+DATABASE_URL = 'postgres://authuser@localhost/pycopia'
+
+# Language code for this installation. All choices can be found here:
+# http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
+LANGUAGE_CODE = 'en-us'
+
+
+# Make this unique, and don't share it with anybody.
+# Never change this once you start using the auth module. If you do you
+# will have to change all your user's passwords.
+SECRET_KEY = 'pyPLINthsdk4auth=1s-xk@(b9%#39463flewrt*&(w23526^+'
+
+MIDDLEWARE_CLASSES = ()
+
+# Map pattern to handler functions. 
+LOCATIONMAP = (
+  (r"^/login$", "pycopia.WWW.middleware.auth.login"),
+  (r"^/logout$", "pycopia.WWW.middleware.auth.logout"),
+#  (r'^/reports/(?P<report>\S+)/$', 'nmsapps.reports.views.reports'),
+#  (r"^/selftest/$", "nmsapps.selftest.views.main"),
+    # aliases don't have a dot in the name.
+  (r'/media/css/(?P<name>\S+)', "css"),
+  (r'/media/js/(?P<name>\S+)', "js"),
+  (r'/media/images/(?P<name>\S+)', "images"),
+)
+

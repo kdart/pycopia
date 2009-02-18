@@ -548,7 +548,7 @@ class Request(object):
                 traceback.print_exception(etype, value, tb, None, self.stderr)
                 self.stderr.flush()
                 if not self.stdout.dataWritten:
-                    self.server.error(etype, value, tb, self.stdout)
+                    self.server.error_handler((etype, value, tb), self.stdout)
             finally:
                 etype = value = tb = None
             protocolStatus = FCGI_REQUEST_COMPLETE
@@ -723,10 +723,6 @@ class Connection(object):
         if req is not None:
             req.aborted = True
 
-    def _start_request(self, req):
-        """Run the request."""
-        req.run()
-
     def _do_params(self, inrec):
         """
         Handle an FCGI_PARAMS Record.
@@ -741,7 +737,7 @@ class Connection(object):
                     pos, (name, value) = decode_pair(inrec.contentData, pos)
                     req.params[name] = value
             else:
-                self._start_request(req)
+                req.run()
 
     def _do_stdin(self, inrec):
         """Handle the FCGI_STDIN stream."""
@@ -775,11 +771,11 @@ class ProcessManager(object):
         self._procmanager.subprocess(func)
 
 
-def DefaultErrorHandler(ex, val, tb, stream):
+def DefaultErrorHandler(exc_info, stream):
     stream.write('Status: 500 fcgi error\r\n')
     stream.write('Content-Type: text/html\r\n')
     stream.write('\r\n')
-    stream.write(cgitb.html((ex, val, tb)))
+    stream.write(cgitb.html(exc_info))
     stream.flush()
 
 
@@ -822,7 +818,7 @@ class FCGIServer(object):
 
         """
         self.application = application # the WSGI application
-        self.error = errorhandler or DefaultErrorHandler # error handler
+        self.error_handler = errorhandler or DefaultErrorHandler # error handler
         self._procmanager = procmanager or ProcessManager()
         self._idle_cb = idle # called in select loop when idle
         self.environ = environ or {}
@@ -985,7 +981,6 @@ class FCGIServer(object):
 
         headers_set = []
         headers_sent = []
-        result = None
 
         def write(data):
             assert type(data) is str, 'write() argument must be string'
@@ -993,26 +988,11 @@ class FCGIServer(object):
 
             if not headers_sent:
                 status, responseHeaders = headers_sent[:] = headers_set
-                found = False
-                for header, value in responseHeaders:
-                    if header.lower() == 'content-length':
-                        found = True
-                        break
-                if not found and result is not None:
-                    try:
-                        if len(result) == 1:
-                            responseHeaders.append(('Content-Length',
-                                                    str(len(data))))
-                    except:
-                        if __debug__: 
-                            ex, val, tb = sys.exc_info()
-                            _debug(1, "write: %s: %s" % (ex, val))
                 req.stdout.write('Status: %s\r\n' % status)
                 for header in responseHeaders:
                     req.stdout.write('%s: %s\r\n' % header)
                 req.stdout.write('\r\n')
                 req.stdout.flush()
-
             req.stdout.write(data)
 
         def start_response(status, response_headers, exc_info=None):

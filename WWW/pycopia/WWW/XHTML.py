@@ -40,7 +40,7 @@ from pycopia.textutils import identifier
 from pycopia.aid import partial, newclass, Enums, Enum
 
 from pycopia import dtds
-from pycopia.XML import POM, XMLVisitorContinue, ValidationError
+from pycopia.XML import POM, XMLVisitorContinue, ValidationError, XMLPathError
 
 get_class = dtds.get_class
 
@@ -608,15 +608,22 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
     def add_title(self, title):
         ti = self.head.add(self.dtd.Title)
         ti.append(POM.Text(title))
+
     def _get_title(self):
-        return self.get_path("/html/head/title")
+        try:
+            return self.get_path("/html/head/title")
+        except XMLPathError:
+            return None
     title = property(_get_title, add_title)
 
     def add_stylesheet(self, url):
         self.head.add(self.dtd.Link, rel="stylesheet", 
                                         type="text/css", href=url)
     def _get_stylesheet(self):
-        return self.head.get_element('link[@rel="stylesheet"]')
+        try:
+            return self.head.get_element('link[@rel="stylesheet"]')
+        except XMLPathError:
+            return None
 
     def _del_stylesheet(self):
         ss = self.head.get_element('link[@rel="stylesheet"]')
@@ -629,12 +636,18 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
         if st is None:
             st = self.head.add(self.dtd.Style, type="text/css")
         st.add_cdata(text)
+
     def _get_style(self):
-        return self.head.get_element("style")
+        try:
+            return self.head.get_element("style")
+        except XMLPathError:
+            return None
+
     def _del_style(self):
         st = self.head.get_element("style")
         if st:
             st.destroy()
+
     style = property(_get_style, _set_style, _del_style)
 
     def add_javascript2head(self, text=None, url=None):
@@ -649,7 +662,10 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
                            type="text/javascript;version=1.7", src=url)
 
     def _get_javascript(self):
-        return self.head.get_element("script")
+        try:
+            return self.head.get_element("script")
+        except XMLPathError:
+            return None
 
     def _del_javascript(self):
         sc = self.head.get_element("script")
