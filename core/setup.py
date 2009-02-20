@@ -8,15 +8,21 @@ from setuptools import setup
 from glob import glob
 
 NAME = "pycopia-core"
-VERSION = "1.0a4"
+VERSION = "1.0a5"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
-    packages = ["pycopia", "pycopia.ISO", "pycopia.inet", "pycopia.OS",
-    "pycopia.OS.CYGWIN_NT", "pycopia.OS.Darwin", "pycopia.OS.FreeBSD",
+    packages = ["pycopia", 
+    "pycopia.physics",
+    "pycopia.ISO", 
+    "pycopia.inet", 
+    "pycopia.OS", 
+    "pycopia.OS.CYGWIN_NT", 
+    "pycopia.OS.Darwin", 
+    "pycopia.OS.FreeBSD",
     "pycopia.OS.SunOS",
     "pycopia.OS.Win32",
     "pycopia.OS.Linux",
