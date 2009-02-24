@@ -492,8 +492,10 @@ class URLMap(object):
 
 
 def _make_url_form(regexp):
+    # Build reverse mapping format from RE parse tree. This simplified function
+    # only works with the type of RE used in url mappings in the fcgi
+    # config file.
     cre = re.compile(regexp, re.I)
-    # Build reverse format from re parse tree.
     indexmap = dict([(v,k) for k,v in cre.groupindex.items()])
     collect = []
     for op, val in sre_parse.parse(regexp, re.I):
@@ -552,7 +554,7 @@ class URLResolver(object):
 
     def register(self, pattern, method):
         if type(method) is str:
-            if method.find(".") >= 0:
+            if "." in method:
                 method = get_method(method)
             else:
                 self._aliases[method] = URLAlias(pattern, method)
@@ -605,7 +607,7 @@ class URLResolver(object):
         callable object mapped to in the LOCATIONMAP?
         """
         if type(method) is str:
-            if method.find(".") >= 0:
+            if "." in method:
                 method = get_method(method)
             else:
                 try:
@@ -868,7 +870,11 @@ class ResponseDocument(object):
                        "alt":name, "width":"24", "height":"24"})
 
     def anchor2(self, path, text, **kwargs):
-        return self.NM("A", {"href": self.get_url(path, **kwargs)}, text)
+        try:
+            href = self.get_url(path, **kwargs)
+        except InvalidPath:
+            href = str(path) # use as-is as a fallback for hard-coded destinations.
+        return self.NM("A", {"href": href}, text)
 
 
 
