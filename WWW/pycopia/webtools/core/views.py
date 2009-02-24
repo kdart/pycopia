@@ -61,6 +61,7 @@ def main(request):
                 title="Web Tools", 
                 stylesheet=request.get_url("css", name="default.css"))
     resp.doc.header.add_header(1, "Web Utilities and Tools")
+    resp.doc.nav.append(resp.anchor2("/", "Home"))
     resp.doc.nav.append(resp.anchor2(headers, "Request Headers"))
     return resp.finalize()
 
@@ -69,8 +70,10 @@ def headers(request):
     resp = framework.ResponseDocument(request, doc_constructor, 
              title="Request Headers",
              stylesheet=request.get_url("css", name="headers.css"))
+    resp.doc.nav.append(resp.anchor2("/", "Home"))
     resp.doc.nav.append(resp.anchor2(main, "Web Tools"))
-    get_header_table(resp.doc.content, request.META)
+    resp.doc.header.new_para("These are the headers your browser sent. You can mail a table of them to yourself.")
+    get_header_table(resp.doc.content, request.environ)
     frm = resp.doc.content.add_form(method="get", action=request.get_url(emailrequest))
     frm.add_textinput("rcpt", "Email")
     frm.add_input(type="submit", value="Send")
@@ -88,16 +91,16 @@ def emailrequest(request):
 
     if recipients:
         rpt = XHTML.new_document()
-        get_header_table(rpt.body, request.META)
+        get_header_table(rpt.body, request.environ)
 
         body = ezmail.AutoMessage(EMAILBODY)
         body["Content-Disposition"] = 'inline'
         msg = ezmail.AutoMessage(str(rpt), mimetype=rpt.MIMETYPE, charset=rpt.encoding)
         msg["Content-Disposition"] = 'attachment; filename=headers.html'
         ezmail.mail([body, msg], To=recipients, 
-                  subject="Webtool header request from %s." % (request.META.get("REMOTE_ADDR", "<unknown>"),))
+                  subject="Webtool header request from %s." % (request.environ.get("REMOTE_ADDR", "<unknown>"),))
 
-    get_header_table(resp.doc.content, request.META)
+    get_header_table(resp.doc.content, request.environ)
 
     if recipients:
         resp.doc.content.new_para("Header data emailed to %s." % (", ".join(recipients),))

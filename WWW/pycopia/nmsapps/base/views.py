@@ -16,7 +16,7 @@ def main(request):
 
 def error(request):
   code = request.GET["code"]
-  ref = request.META["HTTP_REFERER"]
+  ref = request.environ["HTTP_REFERER"]
   resp = core.ResponseDocument(request, title="%s %s." % (_("Error"), code), 
       stylesheet="base.css")
   resp.content.add_para().add_anchor(href=ref).add_text(_("Go back."))
