@@ -12,7 +12,7 @@ VERSION = "1.0"
 REVISION= "$Revision$"
 
 DNAME = NAME.split("-", 1)[-1]
-EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION)
+EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
