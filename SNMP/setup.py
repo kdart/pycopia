@@ -18,6 +18,9 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.SNMP", "pycopia.Devices"],
     install_requires = ['pycopia-mibs>=0.9,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     package_data = {
         'pycopia.Devices': ['*.txt'],
     },

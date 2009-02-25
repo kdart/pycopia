@@ -9,7 +9,7 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-QA"
-VERSION = "1.0a4"
+VERSION = "1.0a5"
 
 ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
@@ -17,10 +17,14 @@ DNAME = NAME.split("-", 1)[-1]
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-storage>=1.0a4,==dev', 
-        'pycopia-CLI>=1.0a1,==dev',
+    install_requires = [
+        'pycopia-storage>=1.0a4,==dev', 
+        'pycopia-CLI>=1.0a4,==dev',
         'docutils>=0.5'
         ],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     scripts =glob("bin/*"), 
     data_files = [
         ('/etc/pycopia', glob("etc/*.dist")),

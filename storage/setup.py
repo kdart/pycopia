@@ -24,6 +24,9 @@ setup (name=NAME, version=VERSION,
         #'psycopg>=2.0',
         #'sqlalchemy>=0.5.2',
         ],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     test_suite = "test.StorageTests",
     scripts = glob("bin/*"), 
     data_files = [

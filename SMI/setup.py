@@ -23,6 +23,9 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.SMI"],       # custom Python wrapper - use this one.
     install_requires = ['pycopia-aid>=1.0a1,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     scripts = glob("bin/*"), 
     zip_safe = False,
     test_suite = "test.SMITests",

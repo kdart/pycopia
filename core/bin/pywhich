@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.4
+#!/usr/bin/env python
 
 """pywhich <modname>
 Tell which Python module is imported.

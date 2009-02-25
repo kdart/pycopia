@@ -46,6 +46,9 @@ setup (name=NAME, version=VERSION,
     scripts = glob("bin/*"), 
     ext_modules=extensions,
     install_requires = ['pycopia-aid>=1.0a1,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     test_suite = "test.UtilsTests",
 
     description = "Pycopia helper programs.",

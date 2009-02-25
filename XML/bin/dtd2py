@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.4
+#!/usr/bin/env python
 """
 dtd2py [-m mixinmodule] [-d <directory>] <DTDfile>...
 

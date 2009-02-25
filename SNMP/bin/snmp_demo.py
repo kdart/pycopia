@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>

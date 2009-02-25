@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 
 """
 pybenchmark - use the benchmark module to time functions and measure relative

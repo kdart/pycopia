@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.4
+#!/usr/bin/env python
 
 """
 Convert a Python source file into an XML representation. Uses the python DTD

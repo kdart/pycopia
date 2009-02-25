@@ -17,6 +17,9 @@ setup(name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.mibs"],
     install_requires = ['pycopia-SMI>=1.0a1,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     test_suite = "test.MibsTests",
     zip_safe = True,
 

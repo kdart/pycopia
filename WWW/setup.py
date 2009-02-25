@@ -46,6 +46,9 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
     install_requires = ['pycopia-XML>=1.0a1,==dev', 'simplejson>=0.7'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     data_files = DATAFILES,
     scripts = glob("bin/*"), 
     test_suite = "test.WWWTests",

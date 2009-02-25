@@ -67,6 +67,9 @@ setup (name=NAME, version=VERSION,
     data_files = datafiles,
     scripts = glob("bin/*"), 
     install_requires = ['pycopia-process>=1.0a1,==dev', 'pycopia-WWW>=1.0a1,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
 
     description = "Extend Vim with Python helpers for Python IDE functionality.",
     long_description = """Extend Vim with Python helpers for Python IDE functionality.

@@ -19,6 +19,9 @@ setup (name=NAME, version=VERSION,
     packages = find_packages(),
     install_requires = ['pycopia-process>=1.0a1,==dev', 
                         'pycopia-CLI>=1.0a1,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     scripts = glob("bin/*"), 
     test_suite = "test.NetTests",
 

@@ -22,6 +22,9 @@ Commands:
  build
  install
  develop
+ clean
+ squash
+ eggs
  list
 
 NOTE: install requires sudo to be configured for you.
@@ -71,6 +74,9 @@ def _do_commands(name, cmds, root):
 def do_sdist(name):
     _do_commands(name, ["sdist"], False)
 
+def do_eggs(name):
+    _do_commands(name, ["bdist_egg"], False)
+
 def do_build(name):
     _do_commands(name, ["build"], False)
 
@@ -91,6 +97,9 @@ def do_egg_info(name):
 
 def do_install(name):
     _do_commands(name, ["install"], True)
+
+def do_clean(name):
+    _do_commands(name, ["clean"], False)
 
 # "squash" selected sub packages to a single package. Also removes
 # setuptools dependency when tarballed.

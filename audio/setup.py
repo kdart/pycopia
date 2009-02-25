@@ -21,6 +21,9 @@ setup (name=NAME, version=VERSION,
     data_files=[('/etc/pycopia', glob("etc/*.py") + glob("etc/*.example"))],
     # Also requires the mgetty/vgetty software installed on your system.
     install_requires = ['pycopia-process>=1.0a1,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     test_suite = "test.AudioTests",
 
     description = "Audio and telephony modules for Python.",

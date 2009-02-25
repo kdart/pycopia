@@ -18,6 +18,9 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.XML", "pycopia.dtds"],
     install_requires = ['pycopia-core>=1.0a1,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     data_files=[('/etc/pycopia/dtd', glob("etc/dtd/*.dtd")+glob("etc/dtd/*.ent"))],
     scripts = glob("bin/*"), 
     test_suite = "test.XMLTests",

@@ -17,6 +17,9 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
     install_requires = ['pycopia-aid>=1.0a1,==dev', 'pycopia-CLI>=1.0a1,==dev'],
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     package_data = {
         'pycopia': ['*.doc'],
     },

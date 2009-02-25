@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 
 """
 This utility generates the SMICONSTANTS module for the SMI library. This

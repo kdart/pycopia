@@ -27,6 +27,9 @@ setup (name=NAME, version=VERSION,
     license = "LGPL",
     keywords = "pycopia framework Python extensions",
     url = "http://www.pycopia.net/",
+    dependency_links = [
+            "http://www.pycopia.net/download/"
+                ],
     download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s-%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Programming Language :: Python",  
