@@ -9,17 +9,18 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-QA"
-VERSION = "1.0a5"
+VERSION = "1.0"
+REVISION="$Revision$"
 
-ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
+EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
     install_requires = [
-        'pycopia-storage>=1.0a4,==dev', 
-        'pycopia-CLI>=1.0a4,==dev',
+        'pycopia-storage>=1.0,==dev', 
+        'pycopia-CLI>=1.0,==dev',
         'docutils>=0.5'
         ],
     dependency_links = [
@@ -42,7 +43,7 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@dartworks.biz",
     keywords = "pycopia QA framework",
     url = "http://www.pycopia.net/",
-    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",

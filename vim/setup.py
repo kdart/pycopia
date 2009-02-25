@@ -11,10 +11,11 @@ from glob import glob
 
 
 NAME = "pycopia-vim"
-VERSION = "1.0a4"
+VERSION = "1.0"
+REVISION="$Revision$"
 
-ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
+EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 # Get the VIM value from vim, which is were we need to put the .vim files.
 # There's got to be a better way..., but this screen-scraping program
@@ -66,7 +67,7 @@ setup (name=NAME, version=VERSION,
     test_suite = "test.VimTests",
     data_files = datafiles,
     scripts = glob("bin/*"), 
-    install_requires = ['pycopia-process>=1.0a1,==dev', 'pycopia-WWW>=1.0a1,==dev'],
+    install_requires = ['pycopia-process>=1.0,==dev', 'pycopia-WWW>=1.0,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
@@ -81,7 +82,7 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia vim framework",
     url = "http://www.pycopia.net/",
-    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",

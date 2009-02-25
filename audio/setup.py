@@ -9,10 +9,11 @@ from glob import glob
 from setuptools import setup
 
 NAME = "pycopia-audio"
-VERSION = "1.0a3"
+VERSION = "1.0"
+REVISION="$Revision$"
 
-ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
+EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
@@ -20,7 +21,7 @@ setup (name=NAME, version=VERSION,
     scripts =glob("bin/*"), 
     data_files=[('/etc/pycopia', glob("etc/*.py") + glob("etc/*.example"))],
     # Also requires the mgetty/vgetty software installed on your system.
-    install_requires = ['pycopia-process>=1.0a1,==dev'],
+    install_requires = ['pycopia-process>=1.0,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
@@ -39,7 +40,7 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia audio framework",
     url = "http://www.pycopia.net/",
-    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",

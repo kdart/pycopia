@@ -22,10 +22,11 @@ from setuptools import setup, find_packages
 from glob import glob
 
 NAME = "pycopia-experimental"
-VERSION = "1.0a3"
+VERSION = "1.0"
+REVISION="$Revision$"
 
-ENAME = NAME.replace("-", "_")
 DNAME = NAME.split("-", 1)[-1]
+EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 
 setup(
@@ -50,7 +51,7 @@ setup(
     license = "LGPL",
     keywords = "framework web CLI network SNMP SMI XML XHTML QA automation",
     url = "http://www.pycopia.net/",
-    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     classifiers = [
        "Operating System :: POSIX", 
        "Intended Audience :: Developers",

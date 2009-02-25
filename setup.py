@@ -54,7 +54,7 @@ PACKAGES = [
 "vim",
 ]
 
-SQUASHDIR = "/var/tmp/python"
+SQUASHDIR = os.environ.get("SQUASHDIR", "/var/tmp/python")
 
 def _do_commands(name, cmds, root):
     if root:
@@ -83,11 +83,8 @@ def do_build(name):
 def do_list(name):
     print name,
 
-#def do_register(name):
-#    _do_commands(name, ["register"], False)
-
 def do_develop(name):
-    _do_commands(name, ["develop -s $HOME/bin"], False)
+    _do_commands(name, ["develop -s $HOME/bin -l -N"], False)
 
 def do_publish(name):
     _do_commands(name, ['egg_info -RDb ""', "sdist", "register", "upload"], False)
@@ -96,7 +93,7 @@ def do_egg_info(name):
     _do_commands(name, ['egg_info'], False)
 
 def do_install(name):
-    _do_commands(name, ["install"], True)
+    _do_commands(name, ["install -O"], True)
 
 def do_clean(name):
     _do_commands(name, ["clean"], False)
@@ -126,7 +123,6 @@ def do_squash(name):
 
 def _null_init(directory):
     open(os.path.join(directory, "pycopia", "__init__.py"), "w").close()
-
 
 
 

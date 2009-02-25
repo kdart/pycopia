@@ -10,10 +10,11 @@ from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-WWW"
-VERSION = "1.0a5"
+VERSION = "1.0"
+REVISION="$Revision$"
 
 DNAME = NAME.split("-", 1)[-1]
-ENAME = NAME.replace("-", "_")
+EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 WEBSITE = os.environ.get("WEBSITE")
 
@@ -45,7 +46,7 @@ else:
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-XML>=1.0a1,==dev', 'simplejson>=0.7'],
+    install_requires = ['pycopia-XML>=1.0,==dev', 'simplejson>=1.0,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
@@ -69,7 +70,7 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia WWW framework XHTML FCGI WSGI",
     url = "http://www.pycopia.net/",
-    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s-dev" % (DNAME, ENAME),
+    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX", 
                    "Topic :: Software Development :: Libraries :: Python Modules",
