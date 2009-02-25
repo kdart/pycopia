@@ -20,7 +20,7 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
     test_suite = "test.ProcessTests",
-    install_requires = ['pycopia-core<=1.0,==dev'],
+    install_requires = ['pycopia-core>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],

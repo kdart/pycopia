@@ -67,7 +67,9 @@ setup (name=NAME, version=VERSION,
     test_suite = "test.VimTests",
     data_files = datafiles,
     scripts = glob("bin/*"), 
-    install_requires = ['pycopia-process<=1.0,==dev', 'pycopia-WWW<=1.0,==dev'],
+    install_requires = [
+            'pycopia-process>=1.0.dev-r138,==dev', 
+            'pycopia-WWW>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],

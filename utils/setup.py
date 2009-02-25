@@ -46,7 +46,7 @@ setup (name=NAME, version=VERSION,
     packages = ["pycopia"],
     scripts = glob("bin/*"), 
     ext_modules=extensions,
-    install_requires = ['pycopia-aid<=1.0,==dev'],
+    install_requires = ['pycopia-aid>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],

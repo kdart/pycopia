@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.5
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 

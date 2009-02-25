@@ -21,7 +21,7 @@ setup (name=NAME, version=VERSION,
     scripts =glob("bin/*"), 
     data_files=[('/etc/pycopia', glob("etc/*.py") + glob("etc/*.example"))],
     # Also requires the mgetty/vgetty software installed on your system.
-    install_requires = ['pycopia-process<=1.0,==dev'],
+    install_requires = ['pycopia-process>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
