@@ -19,7 +19,7 @@ setup (name=NAME, version=VERSION,
 #    py_modules = ["XXX"],
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
-    install_requires = ['pycopia-aid>=1.0,==dev'],
+    install_requires = ['pycopia-aid<=1.0,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],

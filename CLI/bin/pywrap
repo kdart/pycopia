@@ -1,0 +1,35 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+# $Id: pyshell,v 1.1 2005/07/25 21:25:16 kdart Exp $
+
+"""
+A generic CLI tool that wraps some class to interact with it. Useful for
+testing. 
+
+"""
+
+
+import sys
+
+from pycopia import CLI
+from pycopia import module
+
+from pycopia import autodebug
+
+# some common objects as aliases
+NAMETOOBJECT = {
+    "ipv4": "pycopia.ipv4.IPv4",
+    "shell": "pycopia.CLI.Shell",
+}
+
+def main(argv):
+    if len(argv) > 1:
+        basename = argv[1]
+        cname = NAMETOOBJECT.get(basename, basename)
+        klass = module.get_class(cname)
+        CLI.run_cli_wrapper(argv[1:], klass)
+    else:
+        CLI.run_generic_cli()
+
+main(sys.argv)
+

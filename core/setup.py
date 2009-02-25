@@ -30,7 +30,7 @@ setup (name=NAME, version=VERSION,
     "pycopia.OS.Linux.proc",
     "pycopia.OS.Linux.proc.net",
     ],
-    install_requires = ['pycopia-utils>=1.0,==dev'],
+    install_requires = ['pycopia-utils<=1.0,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],

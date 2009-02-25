@@ -19,8 +19,8 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
     install_requires = [
-        'pycopia-storage>=1.0,==dev', 
-        'pycopia-CLI>=1.0,==dev',
+        'pycopia-storage<=1.0,<=dev', 
+        'pycopia-CLI<=1.0,<=dev',
         'docutils>=0.5'
         ],
     dependency_links = [

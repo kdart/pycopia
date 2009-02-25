@@ -46,7 +46,8 @@ else:
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-XML>=1.0,==dev', 'simplejson>=1.0,==dev'],
+    install_requires = ['pycopia-XML<=1.0,==dev', 
+        'simplejson>=1.0,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],

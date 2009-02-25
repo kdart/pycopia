@@ -1514,11 +1514,10 @@ class CommandParser(object):
 # get a cli built from sys.argv
 def run_cli_wrapper(argv, wrappedclass=Shell, cliclass=GenericCLI, theme=None):
     """Instantiate a class object (the wrappedclass), and run a CLI wrapper on it."""
-    import getopt # use standard getopt here
     logfile = sourcefile = None
     paged = False
     try:
-        optlist, args = getopt.getopt(argv[1:], "?hgs:", ["help", "script="])
+        optlist, longopts, args = getopt.getopt(argv[1:], "?hgs:")
     except getopt.GetoptError:
             print wrappedclass.__doc__
             return
@@ -1526,11 +1525,11 @@ def run_cli_wrapper(argv, wrappedclass=Shell, cliclass=GenericCLI, theme=None):
         if opt in ("-?", "-h", "--help"):
             print run_cli_wrapper.__doc__
             return
-        elif opt == "-s" or opt == "--script":
+        elif opt == "-s":
             sourcefile = val
         elif opt == "-g":
             paged = True
-        elif opt == "-l" or opt == "--logfile":
+        elif opt == "-l":
             logfile = open(val, "w")
     if args:
         targs, kwargs = breakout_args(args)

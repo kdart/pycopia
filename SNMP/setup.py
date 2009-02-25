@@ -18,7 +18,7 @@ EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].spl
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.SNMP", "pycopia.Devices"],
-    install_requires = ['pycopia-mibs>=1.0,==dev'],
+    install_requires = ['pycopia-mibs<=1.0,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],

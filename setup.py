@@ -93,7 +93,7 @@ def do_egg_info(name):
     _do_commands(name, ['egg_info'], False)
 
 def do_install(name):
-    _do_commands(name, ["install -O"], True)
+    _do_commands(name, ["install -O2"], True)
 
 def do_clean(name):
     _do_commands(name, ["clean"], False)

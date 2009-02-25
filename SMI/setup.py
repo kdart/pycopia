@@ -23,7 +23,7 @@ setup (name=NAME, version=VERSION,
     py_modules = ["libsmi"], # stock SWIG wrapper
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.SMI"],       # custom Python wrapper - use this one.
-    install_requires = ['pycopia-aid>=1.0,==dev'],
+    install_requires = ['pycopia-aid<=1.0,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
