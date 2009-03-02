@@ -21,10 +21,11 @@ Defines an interactive command line that wraps an SMTP session.
 """
 
 import sys, os
-import getopt
 
+from pycopia import getopt
 from pycopia import CLI
 from pycopia import UI
+from pycopia import tty
 from pycopia.inet import SMTP
 from pycopia.aid import IF
 
@@ -66,29 +67,17 @@ class EmailClientCLI(CLI.BaseCommands):
             self._environ["PS1"] = PROMPT
 
     def connect(self, argv):
-        """connect [-s|--bindto <bindto>] <host> [<port>]
+        """connect [-s <bindto>] <host> [<port>]
     Where <host> is the mailhost to connect to, <port> is the TCP port to use
     (defaults to 25), and <bindto> is the local IP address to source from."""
         bindto = None
         port = 25
-        try:
-            optlist, args = getopt.getopt(argv[1:], "s:hp:", 
-                            ["bindto=", "help", "port="])
-        except getopt.GetoptError:
-                self._print(self.connect.__doc__)
-                return
+        optlist, longopts, args = self.getopt(argv, "s:hp:")
         for opt, val in optlist:
-            if opt == "-s" or opt == "--bindto":
+            if opt == "-s":
                 bindto = val
-            elif opt == "-h" or opt == "--help":
-                self._print(self.connect.__doc__)
-                return
-            elif opt == "-p" or opt == "--port":
-                try:
-                    port = int(val)
-                except ValueError:
-                    self._print(self.connect.__doc__)
-                    return
+            elif opt == "-p":
+                port = int(val)
         if len(args) < 1:
             self._print(self.connect.__doc__)
             return
@@ -184,6 +173,17 @@ class EmailClientCLI(CLI.BaseCommands):
     Expand an address (if server permits it)."""
         self._print_msg(self._client.expn(argv[1]))
 
+    def login(self, argv):
+        """login <user> [<password>]
+    Perform an authentication protocol with the given name and password.
+    Perform this after `ehlo`."""
+        user = argv[1]
+        if len(argv) > 2:
+            passwd = argv[2]
+        else:
+            passwd = tty.getpass("AUTH password: ")
+        self._print_msg(self._client.login(user, passwd))
+
     # extra non-protocol methods
     def logfile(self, argv):
         """logfile <name>
@@ -236,7 +236,7 @@ class EmailClientCLI(CLI.BaseCommands):
 
 
 def smtpcli(argv):
-    """smtpcli [-h|--help] [-l|--logfile <logfilename>] [-s|--bindto <portname>] [host] [port]
+    """smtpcli [-h] [-l <logfilename>] [-s <portname>] [host] [port]
 
 Provides an interactive session at a protocol level to an SMTP server. 
     """
@@ -246,24 +246,23 @@ Provides an interactive session at a protocol level to an SMTP server.
     paged = False
     logname = None
     try:
-        optlist, args = getopt.getopt(argv[1:], "b:hp:s:l:g", 
-                        ["bindto=", "help", "port=", "script=", "logfile="])
+        optlist, longopts, args = getopt.getopt(argv[1:], "b:hp:s:l:g")
     except getopt.GetoptError:
             print smtpcli.__doc__
             return
     for opt, val in optlist:
-        if opt == "-b" or opt == "--bindto":
+        if opt == "-b":
             bindto = val
-        if opt == "-l" or opt == "--logfile":
+        if opt == "-l":
             logname = val
-        elif opt == "-s" or opt == "--script":
+        elif opt == "-s":
             sourcefile = val
         elif opt == "-g":
             paged = True
-        elif opt == "-h" or opt == "--help":
+        elif opt == "-h":
             print smtpcli.__doc__
             return
-        elif opt == "-p" or opt == "--port":
+        elif opt == "-p":
             try:
                 port = int(val)
             except ValueError:

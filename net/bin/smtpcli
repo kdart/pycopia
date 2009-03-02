@@ -1,0 +1,19 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+"""
+SMTP test client. Allows ad-hoc interaction with an SMTP server.
+
+"""
+
+
+import sys
+
+from pycopia import smtpCLI
+
+
+try:
+    smtpCLI.smtpcli(sys.argv)
+except KeyboardInterrupt:
+    pass
+
