@@ -1278,13 +1278,30 @@ class TestSuite(object):
         entries = filter(lambda te: te.result is not None, self._tests)
         self.report.add_summary(entries)
         # check and report suite level result
+        resultset = {
+            constants.FAILED: 0,
+            constants.PASSED: 0,
+            constants.INCOMPLETE: 0,
+        }
         for entry in self._tests:
-            if entry.result.not_passed():
-                result = constants.FAILED
-                break
-            elif entry.result is None:
-                result = constants.INCOMPLETE
-                break
+            if entry.result is None:
+                resultset[constants.INCOMPLETE] += 1
+            elif entry.result.is_failed():
+                resultset[constants.FAILED] += 1
+            elif entry.result.is_incomplete():
+                resultset[constants.INCOMPLETE] += 1
+            elif entry.result.is_passed():
+                resultset[constants.PASSED] += 1
+        # If any failed, suite is failed.
+        # If no failures, but incomplete, suite is incomplete.
+        # If nothing passed (empty suite?) then suite is incomplete.
+        # If all passed, then suite is passed.
+        if resultset[constants.FAILED] > 0:
+            result = constants.FAILED
+        elif resultset[constants.INCOMPLETE] > 0:
+            result = constants.INCOMPLETE
+        elif resultset[constants.PASSED] == 0:
+            result = constants.INCOMPLETE
         else:
             result = constants.PASSED
         self.result = TestResult(result)

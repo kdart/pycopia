@@ -34,8 +34,11 @@ from pycopia.db import tables
 def _get_secret():
     global SECRET_KEY
     from pycopia import basicconfig
-    cf = basicconfig.get_config("auth.conf")
-    SECRET_KEY = cf.SECRET_KEY
+    try:
+        cf = basicconfig.get_config("auth.conf")
+        SECRET_KEY = cf.SECRET_KEY
+    except basicconfig.ConfigReadError:
+        SECRET_KEY = "Testkey"
 _get_secret()
 del _get_secret
 
