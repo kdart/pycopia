@@ -574,12 +574,6 @@ def getfqdn(name=''):
 
 get_fqdn = getfqdn # alias
 
-# probably not the best way to get this info
-def get_myaddress():
-    """Return my primary IP address."""
-    hostname, aliases, ipaddrs = gethostbyaddr(gethostname())
-    return ipaddrs[0]
-
 def opentcp(host, port, sobject=SafeSocket):
     msg = "getaddrinfo returns an empty list"
     for res in getaddrinfo(str(host), int(port), 0, SOCK_STREAM):

@@ -4,7 +4,9 @@
 # Author unknown. Found on snippets site
 # $Id$
 
-import array, fcntl, struct, socket, sys
+import array, fcntl, struct
+
+from pycopia import socket
 
 class IfConfig(object):
     """Access to socket interfaces"""
@@ -36,6 +38,15 @@ class IfConfig(object):
     def __init__(self):
         # create a socket so we have a handle to query
         self.sockfd = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        if self.sockfd is not None:
+            sock = self.sockfd
+            self.sockfd = None
+            sock.close()
 
     def _fcntl(self, func, args):
         return fcntl.ioctl(self.sockfd.fileno(), func, args)
@@ -104,8 +115,14 @@ class IfConfig(object):
         return (self.getFlags(ifname) & self.IFF_UP) != 0
 
 
+def get_myaddress(iface="eth0"):
+    """Return my primary IP address."""
+    return IfConfig().getAddr(iface)
+
+
 if __name__ == "__main__":
     ifc = IfConfig()
+    print "My IP:", ifc.getAddr("eth0")
     ifaces = ifc.getInterfaceList()
     for name in ifaces:
         print "%s is %s, addr %s, mask %s, bcast %s" % (name, ('DOWN', 'UP')[ifc.isUp(name)], 
