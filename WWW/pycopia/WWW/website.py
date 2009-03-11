@@ -40,6 +40,7 @@ import sys
 import os
 
 from pycopia.WWW import serverconfig
+from pycopia import passwd
 
 LTCONFIG = "/etc/pycopia/lighttpd/lighttpd.conf"
 
@@ -55,6 +56,28 @@ def start(config):
         fo.write("%s\n" % (os.getpid(),))
         fo.close()
     start_proc_manager(config, lf)
+
+
+def setup(config):
+    siteuser = passwd.getpwnam(config.SITEUSER)
+    siteowner = passwd.getpwnam(config.SITEOWNER)
+    logroot = config.get("LOGROOT", "/var/log/lighttpd")
+    def _mkdir(path):
+        os.mkdir(path, 0755)
+        os.chown(path, siteowner.uid, siteowner.gid)
+    for vhost in config.VHOSTS.keys():
+        vhostdir = config.SITEROOT + "/" + vhost
+        vhostlogdir = logroot + "/" + vhost
+        if not os.path.isdir(vhostlogdir):
+            os.mkdir(vhostlogdir, 0755)
+            os.chown(vhostlogdir, siteuser.uid, siteuser.gid)
+        if not os.path.isdir(vhostdir):
+            _mkdir(vhostdir)
+            _mkdir(vhostdir + "/htdocs")
+            _mkdir(vhostdir + "/media")
+            _mkdir(vhostdir + "/media/js")
+            _mkdir(vhostdir + "/media/css")
+            _mkdir(vhostdir + "/media/images")
 
 
 def start_proc_manager(config, logfile):
@@ -111,7 +134,6 @@ def status(config):
 
 
 def robots(config):
-    from pycopia import passwd
     user = passwd.getpwnam(config.SITEOWNER)
     for vhost, scripts in config.VHOSTS.items():
         rname = os.path.join(config.SITEROOT, vhost, "htdocs", "robots.txt")
@@ -157,6 +179,7 @@ Options:
  -N  do NOT start the web server front end (lighttpd).
 
 Where command is one of:
+    setup   - create directory structures according to config file entries.
     start   - start all web services and virtual hosts
     stop    - stop a running server
     status  - status of server
@@ -207,6 +230,8 @@ def main(argv):
 
     if cmd.startswith("stat"):
         return status(config)
+    elif cmd.startswith("set"):
+        return setup(config)
     elif cmd.startswith("star"):
         return start(config)
     elif cmd.startswith("stop"):

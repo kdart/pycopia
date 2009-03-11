@@ -53,6 +53,7 @@ server.port          = %(port)s
     VHOST_TEMPLATE = """
 $HTTP["host"] == "%(hostname)s" {
   server.document-root = "/var/www/%(hostname)s/htdocs/"
+  accesslog.filename = var.logdir + "/%(hostname)s/access.log"
   #server.error-handler-404 = "/error.xhtml" 
   alias.url = ("/media/" => "/var/www/%(hostname)s/media/")
 """

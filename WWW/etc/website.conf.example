@@ -5,6 +5,8 @@
 PORT = 80
 
 SITEROOT = "/var/www"
+LOGROOT = "/var/log/lighttpd"
+
 # user website services runs as:
 SITEUSER = "lighttpd"
 
