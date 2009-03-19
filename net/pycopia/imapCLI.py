@@ -38,7 +38,7 @@ class ImapCLI(CLI.BaseCommands):
         if self._client:
             self._client.logout()
             self._client = None
-    
+
     def except_hook(self, ex, val, tb):
         self._print(ex, val)
 
@@ -132,7 +132,7 @@ class ImapCLI(CLI.BaseCommands):
         """authenticate <authtype>
     Authenticate the connection, using the specified auth type. Must be in capabilities."""
         pass
-    
+
     def login(self, argv):
         """login [<username>]
     Identify client using plaintext password."""
@@ -147,7 +147,7 @@ class ImapCLI(CLI.BaseCommands):
         """close
     Close the currently selected mailbox."""
         self._print_msg(self._client.close())
-    
+
     def select(self, argv):
         """select [-r] [<mailbox>]
     Select a mailbox. Default is INBOX. The -r option makes it read-only."""
@@ -299,25 +299,24 @@ def imapcli(argv):
 
 Provides an interactive session at a protocol level to an IMAP server. 
     """
-    import getopt
+    from pycopia import getopt
     port = imaplib.IMAP4_PORT
     sourcefile = None
     paged = False
     try:
-        optlist, args = getopt.getopt(argv[1:], "hp:s:g", 
-                        ["help", "port", "script="])
+        optlist, longopts, args = getopt.getopt(argv[1:], "hp:s:g")
     except getopt.GetoptError:
             print imapcli.__doc__
             return
     for opt, val in optlist:
-        if opt == "-s" or opt == "--script":
+        if opt == "-s":
             sourcefile = val
-        elif opt == "-h" or opt == "--help":
+        elif opt == "-h":
             print imapcli.__doc__
             return
         elif opt == "-g":
             paged = True
-        elif opt == "-p" or opt == "--port":
+        elif opt == "-p":
             try:
                 port = int(val)
             except ValueError:

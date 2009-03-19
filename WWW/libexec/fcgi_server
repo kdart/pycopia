@@ -1,4 +1,4 @@
-#!/usr/bin/python2 -OO
+#!/usr/bin/python -OO -u
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 
 # All of the servers configuration, unix socket name, log file, and config

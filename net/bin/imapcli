@@ -1,7 +1,10 @@
-#!/usr/bin/python -OO -u
+#!/usr/bin/python
+# -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+# $Id$
+#
+#    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -13,13 +16,13 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-"""
-Inoke the Master contoller of your web site.
-
-"""
 
 import sys
-from pycopia.WWW import website
 
-sys.exit(website.main(sys.argv))
+from pycopia import imapCLI
+
+try:
+    imapCLI.imapcli(sys.argv)
+except KeyboardInterrupt:
+    pass
 

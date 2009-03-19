@@ -25,14 +25,19 @@ Authentication and authorization middleware.
 import PAM
 from hashlib import sha1
 import struct
+from datetime import datetime, timedelta
+from pytz import timezone
 
 from pycopia.urlparse import quote, unquote
 from pycopia.WWW import framework
 from pycopia.WWW.middleware import Middleware
 from pycopia.db import models
+from pycopia import timelib
 from pycopia import sysrandom as random
 
 
+UTC = timezone('UTC')
+SESSION_KEY_NAME = "pcsess"
 
 class AuthenticationError(Exception):
     pass
@@ -83,21 +88,49 @@ class AuthorizeRemoteUser(Middleware):
         raise framework.HttpErrorNotAuthorized("No user set.")
 
 
-class Authenticate(object):
-    def __init__(self, app, config):
-        self.app = app
+
+class AuthenticateRemoteUser(Middleware):
 
     def __call__(self, environ, start_response):
+        cookies = wsgi.get_cookies(environ)
+        key = cookies[SESSION_KEY_NAME]
+        dbsession = models.DBSession()
+        try:
+            session = dbsession.query(models.Session).filter_by(session_key=key).one()
+        except models.NoResultFound:
+            return wsgi_auth_redirect(environ, start_response)
 
-        def auth_start_response(response, headers, exc_info):
-            if exc_info:
-                if exc_info[0] is framework.HttpErrorNotAuthenticated:
-                    return framework.HttpResponseRedirect("/auth/login") # XXX
-                else:
-                    start_response(response, headers, exc_info)
-            else:
-                pass # XXX
-        return self.app(environ, auth_start_response)
+        if session.expire_date < datetime.now(UTC):
+            dbsession.delete(session)
+            dbsession.commit()
+            #resp = framework.HttpResponseRedirect("/")
+            #resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            #dest = quote(redirect_to)
+            return wsgi_auth_redirect(environ, start_response)
+
+
+def wsgi_auth_redirect(environ, start_response):
+    start_response("302 Redirect", [
+            ("content-type", "text/plain"),
+            ("location", "/auth/login"), # XXX
+            ], 
+            )
+    return ["Not authenticated."]
+
+
+#class Authenticate(object):
+#    def __init__(self, app, config):
+#        self.app = app
+#
+#    def __call__(self, environ, start_response):
+#
+#        def auth_start_response(response, headers, exc_info=None):
+#            if exc_info:
+#                if exc_info[0] is framework.HttpErrorNotAuthenticated:
+#                    return framework.HttpResponseRedirect("/auth/login") # XXX
+#            start_response(response, headers, exc_info)
+#
+#        return self.app(environ, auth_start_response)
 
 
 class Authenticator(object):
@@ -216,19 +249,39 @@ class LoginHandler(framework.RequestHandler):
             return framework.HttpResponseRedirect(request.get_url(login), message=str(err))
         if good:
             request.log_error("Authenticated: %s" % (name,))
-            # XXX set up session
-            return framework.HttpResponseRedirect(redir)
+            resp = framework.HttpResponseRedirect(redir)
+            session = set_session(resp, user, request.get_domain())
+            request.database.add(session)
+            request.database.commit()
+            return resp
         else:
             request.log_error("Authentication no good: %r" % (name, ))
             return framework.HttpResponseRedirect(request.get_url(login), message="Failed to authenticate.")
 
 
+def set_session(response, user, domain):
+    sess = models.Session()
+    user.last_login = datetime.now(UTC)
+    sess["username"] = user.username
+    sess.session_key = user.get_session_key()
+    sess.expire_date = user.last_login + timedelta(days=1)
+    exp = timelib.mktime(sess.expire_date.timetuple())
+    response.set_cookie(SESSION_KEY_NAME, sess.session_key, domain=domain,
+        expires=exp)
+    return sess
+
+
 class LogoutHandler(framework.RequestHandler):
 
     def get(self, request):
-        request.session.close()
-        return framework.HttpResponseRedirect("/")
-
+        if request.session is not None:
+            sess = request.session
+            request.session = None
+            request.database.delete(sess)
+            request.database.commit()
+        resp = framework.HttpResponseRedirect("/")
+        resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+        return resp
 
 
 login = LoginHandler()

@@ -14,43 +14,6 @@ from sqlalchemy.databases.postgres import *
 
 metadata = MetaData()
 
-# This table was made to work with the old StarOffice Addressbook
-# interface.
-addressbook =  Table('addressbook', metadata,
-            Column(u'PREFIX', PGString(length=15, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'FIRSTNAME', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'LASTNAME', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'TITLE', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'COMPANY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'DEPARTMENT', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ADDRESS', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'CITY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'STATEPROV', PGString(length=5, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'POSTALCODE', PGString(length=15, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'COUNTRY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'POSITION', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'INITIALS', PGString(length=10, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'SALUTATION', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PHONEHOME', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PHONEOFFI', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PHONEOTHE', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PHONEWORK', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'MOBILE', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PAGER', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'FAX', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'EMAIL', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'URL', PGString(length=128, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'NOTE', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ALTFIELD1', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ALTFIELD2', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ALTFIELD3', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ALTFIELD4', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ID', PGInteger(), primary_key=True, nullable=False),
-            Column(u'CALENDAR', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'INVITE', PGChar(length=1, convert_unicode=False, assert_unicode=None), primary_key=False),
-    schema='public')
-Index('index_address_pkey', addressbook.c.ID, unique=True)
-
 
 auth_message =  Table('auth_message', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
@@ -65,7 +28,6 @@ client_session =  Table('client_session', metadata,
     Column(u'session_key', PGString(length=40, convert_unicode=False, assert_unicode=None), primary_key=True, nullable=False),
             Column(u'session_data', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'expire_date', PGDateTime(timezone=True), primary_key=False, nullable=False),
-            Column(u'initial_vector', PGString(length=40, convert_unicode=False, assert_unicode=None), primary_key=False),
     schema='public')
 Index('index_client_session_pkey', client_session.c.session_key, unique=True)
 
@@ -130,8 +92,6 @@ corp_attribute_type =  Table('corp_attribute_type', metadata,
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'value_type_c', PGInteger(), primary_key=False, nullable=False),
-    
-    
     schema='public')
 Index('index_corp_attribute_type_name_key', corp_attribute_type.c.name, unique=True)
 
@@ -185,7 +145,6 @@ capability_type =  Table('capability_type', metadata,
             Column(u'group_id', PGInteger(), primary_key=False),
             Column(u'value_type_c', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'group_id'], [u'public.capability_group.id'], name=u'capability_type_group_id_fkey'),
-    
     schema='public')
 Index('index_capability_type_name_key', capability_type.c.name, unique=True)
 Index('capability_type_group_id', capability_type.c.group_id, unique=False)
@@ -959,6 +918,44 @@ software_category =  Table('software_category', metadata,
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
     schema='public')
 Index('index_software_category_name_key', software_category.c.name, unique=True)
+
+# This table was made to work with the old StarOffice Addressbook
+# table. It's still useful as a general contacts list. It's here as an
+# "extra".
+addressbook =  Table('addressbook', metadata,
+            Column(u'PREFIX', PGString(length=15, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'FIRSTNAME', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'LASTNAME', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'TITLE', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'COMPANY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'DEPARTMENT', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'ADDRESS', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'CITY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'STATEPROV', PGString(length=5, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'POSTALCODE', PGString(length=15, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'COUNTRY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'POSITION', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'INITIALS', PGString(length=10, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'SALUTATION', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'PHONEHOME', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'PHONEOFFI', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'PHONEOTHE', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'PHONEWORK', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'MOBILE', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'PAGER', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'FAX', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'EMAIL', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'URL', PGString(length=128, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'NOTE', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'ALTFIELD1', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'ALTFIELD2', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'ALTFIELD3', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'ALTFIELD4', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'ID', PGInteger(), primary_key=True, nullable=False),
+            Column(u'CALENDAR', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'INVITE', PGChar(length=1, convert_unicode=False, assert_unicode=None), primary_key=False),
+    schema='public')
+Index('index_address_pkey', addressbook.c.ID, unique=True)
 
 
 # Run this module to create the tables. The user/role/database should

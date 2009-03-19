@@ -600,7 +600,7 @@ class CookieJar(object):
             del self._cookies[(name, path, dom)]
             c.expires = 0.0
             c.max_age = 0
-        self._deleted.append(c)
+            self._deleted.append(c)
 
     def parse_SetCookie(self, text, url=None):
         c = get_header(text).value
@@ -738,7 +738,7 @@ class RawCookie(object):
         if self.domain:
             s.append("domain=%s" % httpquote(self.domain))
         if self.max_age:
-            s.append("max_age=%s" % httpquote(self.max_age))
+            s.append("max_age=%s" % self.max_age)
         if self.path:
             s.append("path=%s" % httpquote(self.path))
         if self.secure:

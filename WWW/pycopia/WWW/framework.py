@@ -92,6 +92,9 @@ class HttpErrorNotFound(HTTPError):
 class HttpErrorMethodNotAllowed(HTTPError):
     code = 405
 
+class HttpErrorMethodNotAcceptable(HTTPError):
+    code = 406
+
 class HttpErrorUnsupportedMedia(HTTPError):
     code = 415
 
@@ -185,7 +188,7 @@ class HttpResponse(object):
     def add_header(self, header, value=None):
         self.headers.add_header(header, value)
 
-    def set_cookie(self, key, value='', max_age=None, expires=2119102976.0, path='/', 
+    def set_cookie(self, key, value='', max_age=0, expires=2119102976.0, path='/', 
             domain=None, secure=False):
         self.cookies.add_cookie(key, value, domain=domain, 
             max_age=max_age, path=path, secure=secure, expires=expires)
@@ -258,51 +261,37 @@ class HttpResponsePermanentRedirect(HttpResponse):
 
 class HttpResponseNotModified(HttpResponse):
     status_code = 304
-    def __init__(self):
-        HttpResponse.__init__(self)
 
 class HttpResponseNotAuthenticated(HttpResponse):
     status_code = 401
-    def __init__(self, *args, **kwargs):
-        HttpResponse.__init__(self, *args, **kwargs)
 
 class HttpResponsePaymentRequired(HttpResponse):
     status_code = 402
-    def __init__(self, *args, **kwargs):
-        HttpResponse.__init__(self, *args, **kwargs)
 
 class HttpResponseForbidden(HttpResponse):
     status_code = 403
-    def __init__(self, *args, **kwargs):
-        HttpResponse.__init__(self, *args, **kwargs)
 
 class HttpResponseNotFound(HttpResponse):
     status_code = 404
-    def __init__(self, *args, **kwargs):
-        HttpResponse.__init__(self, *args, **kwargs)
 
 class HttpResponseNotAllowed(HttpResponse):
     status_code = 405
     def __init__(self, permitted_methods):
-        HttpResponse.__init__(self)
+        super(HttpResponse, self). __init__)()
         self['Allow'] = ', '.join(permitted_methods)
+
+class HttpResponseNotAcceptable(HttpResponse):
+    status_code = 406
+    def __init__(self):
+        super(HttpResponse, self). __init__)()
+        self['Content-Type'] = ', '.join(SUPPORTED)
 
 class HttpResponseGone(HttpResponse):
     status_code = 410
-    def __init__(self, *args, **kwargs):
-        HttpResponse.__init__(self, *args, **kwargs)
 
 class HttpResponseServerError(HttpResponse):
     status_code = 500
-    def __init__(self, *args, **kwargs):
-        HttpResponse.__init__(self, *args, **kwargs)
 
-def get_host(request):
-    "Gets the HTTP host from the environment or request headers."
-    host = request.environ.get('HTTP_X_FORWARDED_HOST', '')
-    if not host:
-        host = request.environ.get('HTTP_HOST', '')
-    return host
 
 def safe_copyfileobj(fsrc, fdst, length=16*1024, size=0):
     """
@@ -329,6 +318,7 @@ class HTTPRequest(object):
         self.get_alias = None
         self.database = None
         self.config = None
+        self.session = None
 
     def log_error(self, message):
         fo = self.environ["wsgi.errors"]
@@ -356,6 +346,16 @@ class HTTPRequest(object):
             meta = '<could not parse>'
         return '<HTTPRequest\nGET:%s,\nPOST:%s,\nCOOKIES:%s,\nenviron:%s>' % \
             (get, post, cookies, meta)
+
+    def get_host(self):
+        host = self.environ.get('HTTP_X_FORWARDED_HOST', '')
+        if not host:
+            host = self.environ.get('HTTP_HOST', '')
+        return host
+
+    def get_domain(self):
+        host = self.get_host()
+        return host[host.find("."):]
 
     def get_full_path(self):
         qs =self.environ.get('QUERY_STRING')
