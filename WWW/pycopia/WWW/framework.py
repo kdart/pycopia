@@ -277,13 +277,13 @@ class HttpResponseNotFound(HttpResponse):
 class HttpResponseNotAllowed(HttpResponse):
     status_code = 405
     def __init__(self, permitted_methods):
-        super(HttpResponse, self). __init__)()
+        super(HttpResponse, self). __init__()
         self['Allow'] = ', '.join(permitted_methods)
 
 class HttpResponseNotAcceptable(HttpResponse):
     status_code = 406
     def __init__(self):
-        super(HttpResponse, self). __init__)()
+        super(HttpResponse, self). __init__()
         self['Content-Type'] = ', '.join(SUPPORTED)
 
 class HttpResponseGone(HttpResponse):
