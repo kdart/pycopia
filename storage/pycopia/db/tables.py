@@ -679,7 +679,16 @@ Index('index_language_codes_isocode_key', language_codes.c.isocode, unique=True)
 Index('language_codes_name_key', language_codes.c.name, unique=True)
 
 
-equipment =  Table('equipment', metadata,
+networks = Table('networks', metadata,
+    Column(u'id', PGInteger(), primary_key=True, nullable=False),
+            Column(u'name', PGString(length=64, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'bridgeid', PGString(length=20), primary_key=False),
+            Column(u'ipnetwork', PGCidr(), primary_key=False),
+            Column(u'notes', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+    schema='public')
+
+
+equipment = Table('equipment', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'model_id', PGInteger(), primary_key=False, nullable=False),
@@ -693,6 +702,7 @@ equipment =  Table('equipment', metadata,
             Column(u'vendor_id', PGInteger(), primary_key=False),
             Column(u'project_id', PGInteger(), primary_key=False),
             Column(u'account_id', PGInteger(), primary_key=False),
+            Column(u'parent_id', PGInteger(), primary_key=False),
             Column(u'active', PGBoolean(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'project_id'], [u'public.project_versions.id'], name=u'equipment_project_id_fkey'),
             ForeignKeyConstraint([u'language_id'], [u'public.language_codes.id'], name=u'equipment_language_id_fkey'),
@@ -701,6 +711,7 @@ equipment =  Table('equipment', metadata,
             ForeignKeyConstraint([u'owner_id'], [u'public.auth_user.id'], name=u'equipment_owner_id_fkey'),
             ForeignKeyConstraint([u'location_id'], [u'public.location.id'], name=u'equipment_location_id_fkey'),
             ForeignKeyConstraint([u'account_id'], [u'public.account_ids.id'], name=u'equipment_account_id_fkey'),
+            ForeignKeyConstraint([u'parent_id'], [u'public.equipment.id'], name=u'parent_id_refs_corporations_id'),
     schema='public')
 
 Index('index_equipment_model_id', equipment.c.model_id, unique=False)
@@ -710,7 +721,40 @@ Index('index_equipment_project_id', equipment.c.project_id, unique=False)
 Index('index_equipment_vendor_id', equipment.c.vendor_id, unique=False)
 Index('index_equipment_location_id', equipment.c.location_id, unique=False)
 Index('index_equipment_account_id', equipment.c.account_id, unique=False)
+Index('index_equipment_parent_id', equipment.c.parent_id, unique=False)
 
+# IANAifType
+interface_type =  Table('interface_type', metadata,
+    Column(u'id', PGInteger(), primary_key=True, nullable=False),
+            Column(u'name', PGString(length=40, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'enumeration', PGInteger(), primary_key=False),
+    schema='public')
+
+interfaces =  Table('interfaces', metadata,
+    Column(u'id', PGInteger(), primary_key=True, nullable=False),
+            Column(u'name', PGString(length=64, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'alias', PGString(length=64, convert_unicode=False, assert_unicode=None)),
+            Column(u'ifindex', PGInteger(), primary_key=False),
+            Column(u'description', PGText(convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'macaddr', PGMacAddr(), primary_key=False),
+            Column(u'vlan', PGInteger(), primary_key=False),
+            Column(u'ipaddr', PGInet(), primary_key=False),
+            Column(u'mtu', PGInteger(), primary_key=False),
+            Column(u'speed', PGInteger(), primary_key=False),
+            Column(u'status', PGInteger(), primary_key=False),
+            Column(u'interface_type_id', PGInteger(), primary_key=False),
+            Column(u'parent_id', PGInteger(), primary_key=False),
+            Column(u'equipment_id', PGInteger(), primary_key=False),
+            Column(u'network_id', PGInteger(), primary_key=False),
+    ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'interfaces_equipment_id_fkey'),
+            ForeignKeyConstraint([u'parent_id'], [u'public.interfaces.id'], name=u'parent_id_refs_interfaces_id'),
+            ForeignKeyConstraint([u'interface_type_id'], [u'public.interface_type.id'], name=u'interface_type_id_refs_interfaces_id'),
+            ForeignKeyConstraint([u'network_id'], [u'public.networks.id'], name=u'network_id_refs_networks_id'),
+    schema='public')
+Index('index_interfaces_parent_id', interfaces.c.parent_id, unique=False)
+Index('index_interfaces_equipment_id', interfaces.c.equipment_id, unique=False)
+Index('index_interfaces_interface_type_id', interfaces.c.interface_type_id, unique=False)
+Index('index_interfaces_network_id', interfaces.c.network_id, unique=False)
 
 equipment_attributes =  Table('equipment_attributes', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
@@ -789,7 +833,6 @@ equipment_model_embeddedsoftware =  Table('equipment_model_embeddedsoftware', me
 Index('index_equipment_model_embeddedsoftware_equipmentmodel_id_key', equipment_model_embeddedsoftware.c.equipmentmodel_id, equipment_model_embeddedsoftware.c.software_id, unique=True)
 
 
-
 software =  Table('software', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
@@ -821,9 +864,11 @@ equipment_unsupported_projects =  Table('equipment_unsupported_projects', metada
             Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
             Column(u'projectversion_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'equipment_unsupported_projects_equipment_id_fkey'),
-            ForeignKeyConstraint([u'projectversion_id'], [u'public.project_versions.id'], name=u'equipment_unsupported_projects_projectversion_id_fkey'),
+            ForeignKeyConstraint([u'projectversion_id'], [u'public.project_versions.id'], 
+                    name=u'equipment_unsupported_projects_projectversion_id_fkey'),
     schema='public')
-Index('index_equipment_unsupported_projects_equipment_id_key', equipment_unsupported_projects.c.equipment_id, equipment_unsupported_projects.c.projectversion_id, unique=True)
+Index('index_equipment_unsupported_projects_equipment_id_key', equipment_unsupported_projects.c.equipment_id, 
+        equipment_unsupported_projects.c.projectversion_id, unique=True)
 
 
 project_versions =  Table('project_versions', metadata,
@@ -847,7 +892,7 @@ corporations =  Table('corporations', metadata,
             Column(u'address_id', PGInteger(), primary_key=False),
             Column(u'contact_id', PGInteger(), primary_key=False),
             Column(u'country_id', PGInteger(), primary_key=False),
-    ForeignKeyConstraint([u'contact_id'], [u'public.contacts.id'], name=u'contact_id_refs_id_2d4bd3e23054d92f'),
+    ForeignKeyConstraint([u'contact_id'], [u'public.contacts.id'], name=u'contact_id_refs_contacts_id'),
             ForeignKeyConstraint([u'parent_id'], [u'public.corporations.id'], name=u'parent_id_refs_corporations_id'),
             ForeignKeyConstraint([u'country_id'], [u'public.country_codes.id'], name=u'corporations_country_id_fkey'),
             ForeignKeyConstraint([u'address_id'], [u'public.addresses.id'], name=u'corporations_address_id_fkey'),

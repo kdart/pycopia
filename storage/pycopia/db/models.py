@@ -310,7 +310,6 @@ class AttributeType(object):
 
 mapper(AttributeType, tables.attribute_type)
 
-
 #######################################
 # projects
 
@@ -341,6 +340,23 @@ class EquipmentCategory(object):
         return "%s(%d)" % (self.name, self.id + 1)
 
 mapper(EquipmentCategory, tables.equipment_category)
+
+# IANAifType, minus obsolete and deprecated.
+class InterfaceType(object):
+    def __init__(self, name, enum):
+        self.name = name
+        self.enumeration = enum
+
+mapper(InterfaceType, tables.interface_type)
+
+
+class Interface(object):
+    def __init__(self, name):
+        self.name = name
+# XXX
+
+mapper(Interface, tables.interfaces)
+
 
 #######################################
 

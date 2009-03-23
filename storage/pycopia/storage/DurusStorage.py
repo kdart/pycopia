@@ -37,7 +37,8 @@ from durus.persistent_dict import PersistentDict
 # Pycopia extension
 from pycopia.durusplus.persistent_attrdict import PersistentAttrDict
 
-from pycopia.aid import removedups
+from pycopia import aid
+from pycopia.QA import labmodel
 from pycopia.dictlib import AttrDict
 
 DEFAULT_HOST = '127.0.0.1'
@@ -280,7 +281,7 @@ class RootContainer(object):
         del d[key]
 
     def keys(self):
-        return removedups(self._container.keys()+self._cache.keys())
+        return aid.removedups(self._container.keys()+self._cache.keys())
 
     def has_key(self, key):
         return self._container.has_key(key) or self._cache.has_key(key)
