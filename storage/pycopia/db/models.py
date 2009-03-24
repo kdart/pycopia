@@ -199,7 +199,7 @@ class Config(object):
     pass
 
 mapper(Config, tables.config, properties={
-    'children': relation(Config, backref=backref('parent', remote_side=[tables.config.c.id]))
+    'children': relation(Config, backref=backref('container', remote_side=[tables.config.c.id]))
     })
 
 #######################################
@@ -347,16 +347,78 @@ class InterfaceType(object):
         self.name = name
         self.enumeration = enum
 
+    def __str__(self):
+        return "%s(%d)" % (self.name, self.enumeration)
+
 mapper(InterfaceType, tables.interface_type)
 
+class Network(object):
+    def __init__(self, name, ipnetwork=None, bridgeid=None, notes=None):
+        self.name = name
+        self.ipnetwork = ipnetwork.CIDR
+        self.bridgeid = bridgeid
+        self.notes = notes
+
+    def __str__(self):
+        if self.ipnetwork is not None:
+            return "Net: %s (%s)" % (self.name, self.ipnetwork)
+        elif bridgeid is not None:
+            return "Net: %s: %s" % (self.name, self.bridgeid)
+        else:
+            return "Net: %s" % (self.name,)
+
+mapper(Network, tables.networks)
 
 class Interface(object):
-    def __init__(self, name):
+    def __init__(self, name, alias=None, ifindex=None, description=None,
+            macaddr=None, vlan=0, ipaddr=None, mtu=None, speed=None,
+            status=0, iftype=None, equipment=None, network=None):
         self.name = name
-# XXX
+        self.alias = alias
+        self.ifindex = ifindex
+        self.description = description
+        self.macaddr = macaddr
+        self.vlan = vlan
+        self.ipaddr = ipaddr
+        self.mtu = mtu
+        self.speed = speed
+        self.status = status
+#interface_type_id
+#parent_id
+#equipment_id
+#network_id
 
 mapper(Interface, tables.interfaces)
 
+
+class Equipment(object):
+    pass
+
+mapper(Equipment, tables.equipment,
+    properties={
+        "interfaces": relation(Interface, backref="equipment"),
+    })
+
+
+class EquipmentAttribute(object):
+
+    def _get_value(self):
+        return pickle.loads(self.value_c)
+
+    def _set_value(self, value):
+        self.value_c = pickle.dumps(value)
+
+    def _del_value(self):
+        self._set_value(None)
+
+    value = property(_get_value, _set_value, _del_value)
+
+
+mapper(EquipmentAttribute, tables.equipment_attributes,
+        properties={
+                "equipment": relation(Equipment, backref="attributes"),
+            },
+    )
 
 #######################################
 
@@ -388,14 +450,13 @@ tables.test_suites_suites
 tables.corporations_services
 tables.software_variants
 tables.software_variant
+tables.software
 tables.equipment
-tables.equipment_attributes
 tables.equipment_model_attributes
 tables.equipment_subcomponents
 tables.equipment_software
 tables.equipment_model
 tables.equipment_model_embeddedsoftware
-tables.software
 tables.equipment_supported_projects
 tables.equipment_unsupported_projects
 tables.project_versions
