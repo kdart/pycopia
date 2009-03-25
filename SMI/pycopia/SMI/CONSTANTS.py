@@ -24,6 +24,8 @@ import sys
 
 import _libsmi
 
+from pycopia import aid
+
 # map libsmi constant values to RFC 2578 (and other) defined names for the
 # enumeration's name. If not listed here then use the flag name itself.
 _NAMES = {
@@ -52,7 +54,7 @@ _NAMES = {
 # default name with one from the _NAMES mapping, if it exists.
 for name, value in vars(_libsmi).items():
     if name.startswith("SMI_") and type(value) is int:
-        setattr(sys.modules[__name__], name, Enum(value, _NAMES.get(name, name)))
+        setattr(sys.modules[__name__], name, aid.Enum(value, _NAMES.get(name, name)))
 del name, value, _libsmi, sys, _NAMES
 
 
