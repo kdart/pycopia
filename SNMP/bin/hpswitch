@@ -3,7 +3,6 @@
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 # License: LGPL
 # Keith Dart <kdart@kdart.com>
-# $Id: hpswitch,v 1.1 2005/07/25 21:25:16 kdart Exp $
 
 """
 Various simple control functions for the HP switch.
@@ -12,7 +11,7 @@ hpswitch <agent> <community>
 
 """
 
-import sys, scheduler
+import sys
 
 from pycopia.Devices import HPswitch
 
@@ -22,8 +21,8 @@ def main(argv):
     host = argv[1]
     community = argv[2]
     hps = HPswitch.get_manager(host, community)
-    attrnames = hps.get_attributes()
-    attrnames.sort()
+#    attrnames = hps.get_attributes()
+#    attrnames.sort()
     for tn in hps.getall("ipNetToMedia"):
         print tn
 

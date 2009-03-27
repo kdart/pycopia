@@ -21,10 +21,11 @@ Module to assist mapping networks using devices that support CDP and LLDP protoc
 """
 
 
-import ipv4
-import SNMP.SNMP as SNMP
-import SNMP.Manager as Manager
-from SNMP.Basetypes import OctetString
+from pycopia import ipv4
+from pycopia.SNMP import SNMP
+from pycopia.SNMP import Manager
+
+from pycopia.SMI.Basetypes import OctetString
 
 from pycopia.mibs import SNMPv2_MIB
 from pycopia.mibs import IF_MIB

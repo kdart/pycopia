@@ -88,7 +88,7 @@ MIBNAMES = [
  "STATISTICS_MIB",
 ]
 
-MIBS = map(lambda n: __import__("mibs.%s" % n, globals(), locals(), ["*"]), MIBNAMES)
+MIBS = map(lambda n: __import__("pycopia.mibs.%s" % n, globals(), locals(), ["*"]), MIBNAMES)
 
 # main manager object
 class HPSwitchManager(Manager.Manager):
