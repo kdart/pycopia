@@ -1,0 +1,18 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+"""
+SNMP client. Allows ad-hoc interaction with an SNMP managment agent.
+"""
+
+
+import sys
+
+from pycopia.SNMP import snmp_cli
+
+
+try:
+    snmp_cli.snmpcli(sys.argv)
+except KeyboardInterrupt:
+    pass
+

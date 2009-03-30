@@ -12,9 +12,11 @@ import sys
 import os
 
 # TODO get from some config.
-USERMIBPATH = os.environ.get("USERMIBPATH", os.path.join("/", "var", "tmp", "mibs"))
+USERMIBDIR = os.environ.get("USERMIBDIR", os.path.join("/", "var", "tmp", "mibs"))
+if not os.path.isdir(USERMIBDIR):
+  os.mkdir(USERMIBDIR)
 
 
 # Add user generated mibs to path to pick up user generated mib files.
-__path__.append(USERMIBPATH)
+__path__.append(USERMIBDIR)
 
