@@ -39,7 +39,7 @@ def _handler(timestamp, ip, community, pdu):
     print
 
 def load(mibname):
-    exec "import mibs.%s" % (mibname,) in globals(), globals()
+    exec "import pycopia.mibs.%s" % (mibname,) in globals(), globals()
 
 
 # sets up trap reciever and goes into interactive mode. 
