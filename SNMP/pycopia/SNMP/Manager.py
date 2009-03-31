@@ -21,6 +21,7 @@ import sys
 import keyword
 from pycopia.SMI import Objects
 from pycopia.SMI import Basetypes
+from pycopia.SNMP import SNMP
 
 def default_name_mangler(name):
     if name.endswith("Entry"):
@@ -235,7 +236,18 @@ device = Manager( snmp_session )
             rt.add_entry(If)
         return rt
     InterfaceTable = property(_get_interfaces)
-    
+
     def get_interface(self, index):
         return self.get("If", int(index))
+
+
+def get_manager(device, community, manager_class=Manager, mibs=None):
+    sd = SNMP.sessionData(device, version=1)
+    sd.add_community(community, SNMP.RW)
+    sess = SNMP.new_session(sd)
+    dev = manager_class(sess)
+    if mibs:
+        dev.add_mibs(mibs)
+    return dev
+
 

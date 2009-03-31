@@ -79,9 +79,8 @@ class SNMPManagerCommands(CLI.GenericCLI):
 
 
 def get_mib(name):
-    name = name.upper()
     name = name.replace("-", "_")
-    if not name.endswith("MIB"):
+    if not name.endswith("_MIB"):
         name += "_MIB"
     return aid.Import("pycopia.mibs." + name)
 
