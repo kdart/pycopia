@@ -328,6 +328,61 @@ class FunctionalArea(object):
 mapper(FunctionalArea, tables.functional_area)
 
 
+class BaseProject(object):
+    pass
+
+mapper(Project, tables.projects,
+    properties={
+        "components": relation(Component, lazy=True, secondary=tables.projects_components),
+    }
+)
+
+
+class Project(object):
+    pass
+
+mapper(Project, tables.project_versions)
+
+
+
+#######################################
+# Corporations
+
+class Corporation(object):
+    pass
+
+mapper(Corporation, tables.corporations)
+
+
+#######################################
+# Software model
+
+# should also be called role or function
+class SoftwareCategory(object):
+    pass
+mapper(SoftwareCategory, tables.software_category)
+
+
+class SoftwareAttribute(object):
+    pass
+
+mapper(SoftwareAttribute, tables.software_attributes)
+
+
+class Software(object):
+    pass
+
+class SoftwareVariant(object):
+    pass
+mapper(SoftwareVariant, tables.software_variant)
+
+mapper (Software, tables.software,
+    properties={
+        "variants": relation(SoftwareVariant, lazy=True, secondary=tables.software_variants),
+    }
+)
+
+
 #######################################
 # Equipment model
 
@@ -391,13 +446,29 @@ class Interface(object):
 mapper(Interface, tables.interfaces)
 
 
+class EquipmentModel(object):
+    pass
+
+mapper(EquipmentModel, tables.equipment_model)
+
+
+class EquipmentModelAttribute(object):
+    pass
+mapper(EquipmentModelAttribute, tables.equipment_model_attributes)
+
+
 class Equipment(object):
     pass
 
 mapper(Equipment, tables.equipment,
     properties={
         "interfaces": relation(Interface, backref="equipment"),
+        "subcomponents": relation(Equipment, secondary=tables.equipment_subcomponents),
+        "software": relation(Software, secondary=tables.equipment_software),
+        "embeddedsoftware": relation(Software, secondary=tables.equipment_model_embeddedsoftware),
     })
+
+
 
 
 class EquipmentAttribute(object):
@@ -420,24 +491,53 @@ mapper(EquipmentAttribute, tables.equipment_attributes,
             },
     )
 
+
+class Environment(object):
+    pass
+
+mapper(Environment, tables.environments)
+
+
+class TestEquipment(object):
+    """Binds equipment and a test environment.
+    Also specifies the unit under test.
+    """
+    pass
+
+
+mapper(TestEquipment, tables.testequipment,
+    properties={
+        "role": relation(SoftwareCategory, secondary=tables.testequipment_roles),
+        "environment": relation(Environment, backref="testequipment"),
+    },
+)
+
+#######################################
+# Equipment model
+
+
+class Component(object):
+    pass
+
+mapper(Component, tables.components)
+
+tables.components_subcomponents
+
+
+
+
 #######################################
 
 
 """
 tables.corp_attribute_type
 tables.corp_attributes
-tables.software_attributes
 tables.environmentattribute_type
 tables.environment_attributes
 tables.test_jobs
 tables.test_results_data
 tables.test_results
 tables.traps
-tables.components_suites
-tables.components_subcomponents
-tables.projects
-tables.projects_components
-tables.components
 tables.test_cases_areas
 tables.test_cases_prerequisites
 tables.testcase_prerequisites
@@ -447,24 +547,7 @@ tables.test_cases
 tables.test_suites
 tables.test_suites_testcases
 tables.test_suites_suites
+tables.components_suites
 tables.corporations_services
-tables.software_variants
-tables.software_variant
-tables.software
-tables.equipment
-tables.equipment_model_attributes
-tables.equipment_subcomponents
-tables.equipment_software
-tables.equipment_model
-tables.equipment_model_embeddedsoftware
-tables.equipment_supported_projects
-tables.equipment_unsupported_projects
-tables.project_versions
-tables.corporations
-tables.environments
-tables.environments_partners
-tables.testequipment
-tables.testequipment_roles
-tables.software_category
 """
 

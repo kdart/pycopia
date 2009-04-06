@@ -849,28 +849,6 @@ Index('index_software_vendor_id', software.c.vendor_id, unique=False)
 Index('index_software_category_id', software.c.category_id, unique=False)
 
 
-equipment_supported_projects =  Table('equipment_supported_projects', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'projectversion_id', PGInteger(), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'equipment_supported_projects_equipment_id_fkey'),
-            ForeignKeyConstraint([u'projectversion_id'], [u'public.project_versions.id'], name=u'equipment_supported_projects_projectversion_id_fkey'),
-    schema='public')
-Index('index_equipment_supported_projects_equipment_id_key', equipment_supported_projects.c.equipment_id, equipment_supported_projects.c.projectversion_id, unique=True)
-
-
-equipment_unsupported_projects =  Table('equipment_unsupported_projects', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'projectversion_id', PGInteger(), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'equipment_unsupported_projects_equipment_id_fkey'),
-            ForeignKeyConstraint([u'projectversion_id'], [u'public.project_versions.id'], 
-                    name=u'equipment_unsupported_projects_projectversion_id_fkey'),
-    schema='public')
-Index('index_equipment_unsupported_projects_equipment_id_key', equipment_unsupported_projects.c.equipment_id, 
-        equipment_unsupported_projects.c.projectversion_id, unique=True)
-
-
 project_versions =  Table('project_versions', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'project_id', PGInteger(), primary_key=False, nullable=False),
@@ -922,16 +900,6 @@ Index('index_environments_name_key', environments.c.name, unique=True)
 Index('index_environments_countries_id', environments.c.countries_id, unique=False)
 Index('index_environments_languages_id', environments.c.languages_id, unique=False)
 Index('index_environments_owner_id', environments.c.owner_id, unique=False)
-
-
-environments_partners =  Table('environments_partners', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'environment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'corporation_id', PGInteger(), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'corporation_id'], [u'public.corporations.id'], name=u'environments_partners_corporation_id_fkey'),
-            ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'environments_partners_environment_id_fkey'),
-    schema='public')
-Index('index_environments_partners_environment_id_key', environments_partners.c.environment_id, environments_partners.c.corporation_id, unique=True)
 
 
 testequipment =  Table('testequipment', metadata,
