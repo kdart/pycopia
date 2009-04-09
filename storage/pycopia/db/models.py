@@ -348,10 +348,24 @@ mapper(Project, tables.project_versions)
 #######################################
 # Corporations
 
+class CorporateAttributeType(object):
+    pass
+mapper(CorporateAttributeType, tables.corp_attribute_type)
+
+
+class CorporateAttribute(object):
+    pass
+mapper(CorporateAttribute, tables.corp_attributes)
+
+
 class Corporation(object):
     pass
 
-mapper(Corporation, tables.corporations)
+mapper(Corporation, tables.corporations,
+    properties={
+        "services": relation(FunctionalArea, lazy=True, secondary=tables.corporations_services),
+    }
+)
 
 
 #######################################
@@ -491,11 +505,21 @@ mapper(EquipmentAttribute, tables.equipment_attributes,
             },
     )
 
+class EnvironAttributeType(object):
+    pass
+
+mapper(EnvironAttributeType, tables.environmentattribute_type)
+
 
 class Environment(object):
     pass
 
 mapper(Environment, tables.environments)
+
+class EnvironmentAttribute(object):
+    pass
+
+mapper(EnvironmentAttribute, tables.environment_attributes)
 
 
 class TestEquipment(object):
@@ -524,20 +548,29 @@ mapper(Component, tables.components)
 tables.components_subcomponents
 
 
+#######################################
+# trap storage
+
+class Trap(object):
+    def _get_value(self):
+        return pickle.loads(self.value_c)
+
+    def _set_value(self, obj):
+        self.value_c = pickle.dumps(obj)
+
+    value = property(_get_value, _set_value)
+
+
+mapper(Trap, tables.traps)
 
 
 #######################################
 
 
 """
-tables.corp_attribute_type
-tables.corp_attributes
-tables.environmentattribute_type
-tables.environment_attributes
 tables.test_jobs
 tables.test_results_data
 tables.test_results
-tables.traps
 tables.test_cases_areas
 tables.test_cases_prerequisites
 tables.testcase_prerequisites
@@ -548,6 +581,5 @@ tables.test_suites
 tables.test_suites_testcases
 tables.test_suites_suites
 tables.components_suites
-tables.corporations_services
 """
 
