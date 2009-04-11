@@ -1,0 +1,25 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+import sys
+
+from pycopia.SNMP import Stripcharts
+
+from pycopia import getopt
+
+
+def main(argv):
+    community = "public"
+    try:
+        opts, longopts, args = getopt.getopt(argv[1:], "c:")
+    except getopt.GetoptError:
+        print main.__doc__
+        return
+    for opt, optarg in opts:
+        if opt == "-c":
+            community = optarg
+
+    Stripcharts.unicast_packets(args, community=community)
+
+
+main(sys.argv)

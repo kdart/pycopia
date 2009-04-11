@@ -64,20 +64,25 @@ def unicast_packets(argv, community="public"):
     vbox.show()
     win.add(vbox)
 
-    argv = argv[1:]
+    sessions = {}
+
     while argv:
         host = argv.pop(0)
-        port = int(argv.pop(0))
+        ifindex = int(argv.pop(0))
 
-        sess = SNMP.get_session(host, community)
+        if host in sessions:
+            sess = sessions[host]
+        else:
+            sess = SNMP.get_session(host, community)
+            sessions[host] = sess
 
         graph = rtgraph.HScrollLineGraph(
             scrollRate = 2,
             pollInterval = 1000,
             size       = (384,128),
             gridSize   = 32,
-            channels   = [SNMPChannel(sess, IF_MIB.ifInUcastPkts, port, color=(1,0,0)), 
-                          SNMPChannel(sess, IF_MIB.ifOutUcastPkts, port, color=(0,1,0))],
+            channels   = [SNMPChannel(sess, IF_MIB.ifInUcastPkts, ifindex, color=(1,0,0)), 
+                          SNMPChannel(sess, IF_MIB.ifOutUcastPkts, ifindex, color=(0,1,0))],
             bgColor    = (0, 0, 0.3),
             gridColor  = (0, 0, 0.5),
             range      = (0, 3500),
@@ -85,14 +90,15 @@ def unicast_packets(argv, community="public"):
         graph.show()
 
         frame = gtk.Frame()
-        frame.set_label("device %s port %s" % (host, port))
+        frame.set_label("device %s ifindex %s" % (host, ifindex))
         frame.add(graph)
         frame.show()
 
         vbox.pack_end(frame)
 
+    del sessions
     win.show()
-    win.connect("destroy", gtk.mainquit)
+    win.connect("destroy", gtk.main_quit)
     gtk.main()
 
 
