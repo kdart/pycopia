@@ -24,7 +24,7 @@ import cPickle as pickle
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import (sessionmaker, mapper, relation, 
-        backref, column_property, synonym)
+        backref, column_property, synonym, _mapper_registry)
 from sqlalchemy.orm.exc import NoResultFound
 
 from pycopia.aid import hexdigest, unhexdigest
@@ -328,10 +328,20 @@ class FunctionalArea(object):
 mapper(FunctionalArea, tables.functional_area)
 
 
+class Component(object):
+    pass
+
+mapper(Component, tables.components,
+    properties={
+        "subcomponents": relation(Component, lazy=True, secondary=tables.components_subcomponents),
+    },
+)
+
+
 class BaseProject(object):
     pass
 
-mapper(Project, tables.projects,
+mapper(BaseProject, tables.projects,
     properties={
         "components": relation(Component, lazy=True, secondary=tables.projects_components),
     }
@@ -536,16 +546,6 @@ mapper(TestEquipment, tables.testequipment,
     },
 )
 
-#######################################
-# Equipment model
-
-
-class Component(object):
-    pass
-
-mapper(Component, tables.components)
-
-tables.components_subcomponents
 
 
 #######################################
@@ -582,4 +582,14 @@ tables.test_suites_testcases
 tables.test_suites_suites
 tables.components_suites
 """
+
+def class_names():
+    for mapper in _mapper_registry:
+        yield mapper._identity_class.__name__
+
+
+if __name__ == "__main__":
+    for cname in class_names():
+        print cname
+
 
