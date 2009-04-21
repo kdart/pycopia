@@ -50,6 +50,8 @@ import select # XXX Fix this to use asyncio
 from pycopia import socket 
 from pycopia.aid import Enum 
 from pycopia.SMI.Basetypes import *
+from pycopia.SNMP import (SNMPNoResponse, SNMPBadCommunity, 
+        SNMPNotConnected, SNMPBadParameters)
 
 from pycopia.SNMP import (
         SNMPnoError,

@@ -32,7 +32,7 @@ except ImportError:
     or run 'emerge dev-python/rtgraph' in Gentoo Linux."""
     raise
 
-from pycopia.SNMP import SNMP
+from pycopia.SNMP import SNMP, SNMPNoResponse
 from pycopia.mibs import IF_MIB
 
 class SNMPChannel(rtgraph.Channel):
