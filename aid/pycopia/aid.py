@@ -350,6 +350,8 @@ def newclass(name, *bases, **attribs):
     class _NewType(type):
         def __new__(cls):
             return type.__new__(cls, name, bases, attribs)
+        def __init__(self, *args, **kwargs):
+            pass # XXX quick fix for python 2.6, not sure if this is correct.
     return _NewType()
 
 # partial function returns callable with some parameters already setup to run. 

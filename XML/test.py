@@ -36,11 +36,6 @@ class XMLTests(unittest.TestCase):
         cmt =  POM.Comment("some ------- comment-")
         self.assert_(str(cmt) == '<!-- some - - - - comment- -->')
 
-    def test_2POMString(self):
-        print repr(POM.POMString(u'This is a test.'))
-        print repr(POM.POMString(u'This is a test.', 'utf-8'))
-        print repr(POM.POMString('This is a test.', 'utf-8'))
-
     def test_3DTD(self):
         dtdp = DTD.get_dtd_compiler(sys.stdout)
         dtdp.parse_resource("etc/dtd/pomtest.dtd")

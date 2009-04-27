@@ -32,6 +32,10 @@ from pycopia import timelib
 from pycopia import tty
 from pycopia import urlparse
 from pycopia import textutils
+from pycopia import timespec
+
+class MyBaseClass(object):
+    pass
 
 class AidTests(unittest.TestCase):
     def setUp(self):
@@ -51,6 +55,10 @@ class AidTests(unittest.TestCase):
         s = str(TEST) # makes new, substituted, string
         assert s == "someone one\nsomething three\nsomewhere four"
         print TEST.three
+
+    def test_newclass(self):
+        New = aid.newclass("New", MyBaseClass)
+        print New()
 
     def test_AttrDictWrapper(self):
         ld = {"one":1, "two":2, "three":3}
@@ -96,7 +104,7 @@ class AidTests(unittest.TestCase):
         print "Local time:"
         print timelib.localtimestamp()
 
-        p = timelib.TimespecParser()
+        p = timespec.TimespecParser()
         for spec, secs in [
             ("0s", 0.0),
             ("3m", 180.0),

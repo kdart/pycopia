@@ -140,10 +140,6 @@ class CoreTests(unittest.TestCase):
             ms = re_inverse.make_nonmatch_string(RE)
 
 
-if __name__ == "__main__":
-    import sys
-    _test(sys.argv)
-
 def _print_argv(argv):
     print repr(argv)
 

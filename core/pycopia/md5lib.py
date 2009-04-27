@@ -21,7 +21,7 @@ Support for MD5 checking.
 """
 
 import sys, os
-import md5
+from hashlib import md5
 
 if sys.platform == "win32":
     UserFile = file
@@ -73,7 +73,7 @@ class SumFile(UserFile):
 
 
 def md5sum(filename, mode=Binary):
-    m = md5.new()
+    m = md5()
     f = open(filename, IF(mode, "rb", "r"))
     b = f.read(4096)
     while b:

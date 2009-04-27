@@ -19,7 +19,7 @@ from pycopia.HTML import hrefgetter
 from pycopia import interactive
 
 BASEDIR = os.environ["PYTHONDOCS"]
-SUBDIRS = ["api", "lib", "ref" ]
+SUBDIRS = ["api", "c-api", "lib", "ref" ]
 INDEXNAME = "genindex.html"
 OUTFILENAME = interactive.PYDOCINDEXFILE
 
@@ -67,12 +67,13 @@ outfile.write("\nPYINDEX = ")
 writer = HrefWriter()
 hget = hrefgetter.HrefGetter(writer)
 for subdir in SUBDIRS:
-    writer.setdir(subdir)
-    infile = open("%s/%s/%s" % ( BASEDIR, subdir, INDEXNAME), "r")
-    for line in infile:
-        hget.feed(line)
-    hget.reset()
-    infile.close()
+    if os.path.isdir(os.path.join(BASEDIR, subdir)):
+        writer.setdir(subdir)
+        infile = open("%s/%s/%s" % ( BASEDIR, subdir, INDEXNAME), "r")
+        for line in infile:
+            hget.feed(line)
+        hget.reset()
+        infile.close()
 
 writer.write(outfile)
 outfile.close()

@@ -48,7 +48,7 @@ from errno import EALREADY, EINPROGRESS, EWOULDBLOCK, ECONNRESET, \
 
 from pycopia.aid import Enum, systemcall
 
-__all__ = ['SafeSocket', 'AsyncSocket', 'makefile', 'getfqdn', 'get_myaddress',
+__all__ = ['SafeSocket', 'AsyncSocket', 'makefile', 'getfqdn', 
 'opentcp', 'connect_inet', 'connect_tcp', 'connect_udp', 'connect_unix',
 'connect_unix_datagram', 'unix_listener', 'udp_listener', 'tcp_listener',
 'check_port', 'islocal', 'wait_for_port']
@@ -86,7 +86,10 @@ if _have_ssl:
 _realsocket = socket
 
 if _have_ssl:
-    _realssl = ssl
+    try:
+        _realssl = sslwrap # for python 2.6
+    except NameError:
+        _realssl = ssl     # for python <= 2.5
     def ssl(sock, keyfile=None, certfile=None):
         if hasattr(sock, "_sock"):
             sock = sock._sock

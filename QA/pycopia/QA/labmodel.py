@@ -17,7 +17,7 @@ from pycopia.aid import Enum
 
 from pycopia.netobjects import Persistent, OwnedPersistent, PersistentList, PersistentDict, \
         PersistentAttrDict, NetworkDevice, Network, User, Interface, IPAssignments, \
-        PersistentData, MANDATORY, CONTAINER, giveto, takeback
+        PersistentData, MANDATORY, giveto, takeback
 
 
 # abstract base classes

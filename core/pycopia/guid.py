@@ -23,6 +23,7 @@ A Globally Unique Identifier object. Mostly stolen from ASPN snippet.
 
 
 from pycopia import socket
+from pycopia import ifconfig
 from pycopia import timelib
 from pycopia import sysrandom
 
@@ -41,7 +42,7 @@ class GUID(object):
     '''
     ip = ''
     try:
-        ip = socket.get_myaddress()
+        ip = ifconfig.get_myaddress()
     except (socket.gaierror): # if we don't have an ip, default to someting in the 10.x.x.x private range
         ip = '10'
         for i in range(3):

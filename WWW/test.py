@@ -25,6 +25,7 @@ import unittest
 import webbrowser
 import simplejson
 from cStringIO import StringIO
+from datetime import datetime
 
 from pycopia.aid import Enums, NULL
 from pycopia import urlparse
@@ -52,6 +53,10 @@ WML = "text/wml, text/vnd.wap.wml"
 def _JsonTest(arg1):
     return arg1
 
+# function for dynamic content test.
+def thedate():
+    return unicode(datetime.now())
+
 class WWWTests(unittest.TestCase):
 
     def test_lighttpdconfig(self):
@@ -78,6 +83,8 @@ class WWWTests(unittest.TestCase):
         stb = htd.get_new_element("B")
         stb.add_text("bold tags")
         p.text(stb)
+        p.add_text(" Dynamic Date: ")
+        p.append(XHTML.DynamicNode(thedate))
         rp = str(p)
         htd.append(POM.ASIS(rp))
         # table methods
@@ -108,9 +115,11 @@ class WWWTests(unittest.TestCase):
         NM = htd.nodemaker
         ul = NM("Ul", None, 
                 NM("Li", None, "line 1"), 
-                NM("Li", None, "line 2")
+                NM("Li", None, "line 2"),
+                NM("Li", None, "Date: ", NM("code", None, thedate)), # another way to add dynamic node
                 )
         htd.append(ul)
+        htd.append(NM("JS", None, 'var a = new Array(8);'))
         # using the creator object.
         creator = htd.creator
         parts = creator([("Just", "just/"), "How will this turn out?", ["It is hard to tell.", "Well, not too hard."]])

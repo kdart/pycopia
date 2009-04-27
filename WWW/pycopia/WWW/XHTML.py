@@ -37,7 +37,7 @@ from htmlentitydefs import name2codepoint
 
 from pycopia.urlparse import quote_plus
 from pycopia.textutils import identifier
-from pycopia.aid import partial, newclass, Enums, Enum
+from pycopia.aid import partial, Enums, Enum
 
 from pycopia import dtds
 from pycopia.XML import POM, XMLVisitorContinue, ValidationError, XMLPathError
@@ -176,8 +176,13 @@ class FlowMixin(object):
             Scr = self.get_dtd_element("Script")
             elem = Scr(type="text/javascript")
             for cont in content:
-                elem.add_cdata(str(cont))
+                elem.add_cdata(cont)
             return elem
+        elif name == "code": # special dynamic node handler
+            if attribs:
+                return DynamicNode(content[0], **attribs)
+            else:
+                return DynamicNode(content[0])
         else:
             elemclass = self.get_dtd_element(name)
 
@@ -1297,6 +1302,59 @@ class DefinitionListMixin(object):
 class FlowCreator(FormMixin, InlineMixin, DefinitionListMixin):
     def __init__(self, dtd):
         self.dtd = dtd
+
+
+class DynamicNode(object):
+    """A psuedo-node that emits markup that is dynamic. This really wraps
+    a markup generator as a node object, so that it may be emitted later
+    with dynamic data.
+    """
+
+    def __init__(self, _method, *args, **kwargs):
+        self._method = _method
+        self._args = args
+        self._kwargs = kwargs
+        self._parent = None
+        self.encoding = POM.DEFAULT_ENCODING
+
+    def __str__(self):
+        return self.encode(self.encoding)
+
+    def encode(self, encoding):
+        return self._method(*self._args, **self._kwargs).encode(encoding)
+
+    def emit(self, fo, encoding):
+        fo.write(self._method(*self._args, **self._kwargs).encode(encoding))
+
+    def __repr__(self):
+        cl = self.__class__
+        return "%s.%s(%r)" % (cl.__module__, cl.__name__, self._method)
+
+    # dummy methods, to satisfy ElementNode interface.
+#    def get_escape_length(self):
+#        return len(self.data)
+    def insert(self, data, encoding=None):
+        raise NotImplementedError, "Cannot insert into DynamicNode"
+    def destroy(self):
+        self._parent = None
+    def detach(self):
+        self._parent = None
+    def _fullpath(self):
+        if self._parent:
+            return "%s = %r" % (self._parent._fullpath(), repr(self._method))
+        else:
+            return repr(self._method)
+    fullpath = property(_fullpath)
+    def walk(self, visitor):
+        visitor(self)
+    def matchpath(self, pe):
+        return 0
+    def has_children(self):
+        return 0
+    def has_attributes(self):
+        return 0
+
+
 
 # HTML POM parser. This parser populates the POM with XHTML objects, so this
 # HTML parser essentially translates HTML to XHTML, hopefully with good
