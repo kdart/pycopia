@@ -42,7 +42,7 @@ Index('index_project_category_name_key', project_category.c.name, unique=True)
 config =  Table('config', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'value_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'comment', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'parent_id', PGInteger(), primary_key=False),
             Column(u'user_id', PGInteger(), primary_key=False),
@@ -99,7 +99,7 @@ Index('index_corp_attribute_type_name_key', corp_attribute_type.c.name, unique=T
 corp_attributes =  Table('corp_attributes', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'value_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'corporation_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'corporation_id'], [u'public.corporations.id'], name=u'corp_attributes_corporation_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.corp_attribute_type.id'], name=u'corp_attributes_type_id_fkey'),
@@ -153,7 +153,7 @@ Index('capability_type_group_id', capability_type.c.group_id, unique=False)
 capability =  Table('capability', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'value_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'software_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'software_id'], [u'public.software.id'], name=u'capability_software_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.capability_type.id'], name=u'capability_type_id_fkey'),
@@ -186,7 +186,7 @@ Index('index_attribute_type_name_key', attribute_type.c.name, unique=True)
 software_attributes =  Table('software_attributes', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'value_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'software_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'software_id'], [u'public.software.id'], name=u'software_attributes_software_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'software_attributes_type_id_fkey'),
@@ -207,7 +207,7 @@ Index('index_environmentattribute_type_name_key', environmentattribute_type.c.na
 environment_attributes =  Table('environment_attributes', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'value_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'environment_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'environment_attributes_environment_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.environmentattribute_type.id'], name=u'environment_attributes_type_id_fkey'),
@@ -255,8 +255,7 @@ Index('index_schedule_user_id', schedule.c.user_id, unique=False)
 
 test_results_data =  Table('test_results_data', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'datatype_c', PGInteger(), primary_key=False, nullable=False),
-            Column(u'data', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'note', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
     schema='public')
 Index('index_test_results_data_pkey', test_results_data.c.id, unique=True)
@@ -301,7 +300,7 @@ Index('index_test_results_environment_id', test_results.c.environment_id, unique
 traps =  Table('traps', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'timestamp', PGDateTime(timezone=True), primary_key=False, nullable=False),
-            Column(u'value_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
     schema='public')
 Index('index_traps_pkey', traps.c.id, unique=True)
 
@@ -403,16 +402,6 @@ components_suites =  Table('components_suites', metadata,
 Index('index_components_suites_component_id_key', components_suites.c.component_id, components_suites.c.testsuite_id, unique=True)
 
 
-components_subcomponents =  Table('components_subcomponents', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'from_component_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'to_component_id', PGInteger(), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'from_component_id'], [u'public.components.id'], name=u'components_subcomponents_from_component_id_fkey'),
-            ForeignKeyConstraint([u'to_component_id'], [u'public.components.id'], name=u'components_subcomponents_to_component_id_fkey'),
-    schema='public')
-Index('index_components_subcomponents_from_component_id_key', components_subcomponents.c.from_component_id, components_subcomponents.c.to_component_id, unique=True)
-
-
 projects =  Table('projects', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
@@ -455,62 +444,6 @@ test_cases_areas =  Table('test_cases_areas', metadata,
             ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'test_cases_areas_testcase_id_fkey'),
     schema='public')
 Index('index_test_cases_areas_testcase_id_key', test_cases_areas.c.testcase_id, test_cases_areas.c.functionalarea_id, unique=True)
-
-
-test_cases_prerequisites =  Table('test_cases_prerequisites', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'testcase_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'testcaseprerequisite_id', PGInteger(), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'test_cases_prerequisites_testcase_id_fkey'),
-            ForeignKeyConstraint([u'testcaseprerequisite_id'], [u'public.testcase_prerequisites.id'], name=u'test_cases_prerequisites_testcaseprerequisite_id_fkey'),
-    schema='public')
-Index('index_test_cases_prerequisites_testcase_id_key', test_cases_prerequisites.c.testcase_id, test_cases_prerequisites.c.testcaseprerequisite_id, unique=True)
-
-
-testcase_prerequisites =  Table('testcase_prerequisites', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'testcase_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'args_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'kwargs_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-    ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'testcase_prerequisites_testcase_id_fkey'),
-    schema='public')
-Index('index_testcase_prerequisites_testcase_id', testcase_prerequisites.c.testcase_id, unique=False)
-
-
-test_plan =  Table('test_plan', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'valid', PGBoolean(), primary_key=False, nullable=False),
-            Column(u'author_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'reviewer_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'lastchange', PGDateTime(timezone=True), primary_key=False, nullable=False),
-            Column(u'lastchangeauthor_id', PGInteger(), primary_key=False),
-            Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'reference', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'component_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'projectversion_id', PGInteger(), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'author_id'], [u'public.auth_user.id'], name=u'test_plan_author_id_fkey'),
-            ForeignKeyConstraint([u'component_id'], [u'public.components.id'], name=u'test_plan_component_id_fkey'),
-            ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_plan_lastchangeauthor_id_fkey'),
-            ForeignKeyConstraint([u'projectversion_id'], [u'public.project_versions.id'], name=u'test_plan_projectversion_id_fkey'),
-            ForeignKeyConstraint([u'reviewer_id'], [u'public.auth_user.id'], name=u'test_plan_reviewer_id_fkey'),
-    schema='public')
-Index('index_test_plan_author_id', test_plan.c.author_id, unique=False)
-Index('test_plan_reviewer_id', test_plan.c.reviewer_id, unique=False)
-Index('index_test_plan_lastchangeauthor_id', test_plan.c.lastchangeauthor_id, unique=False)
-Index('test_plan_name_key', test_plan.c.name, unique=True)
-Index('index_test_plan_projectversion_id', test_plan.c.projectversion_id, unique=False)
-Index('test_plan_component_id', test_plan.c.component_id, unique=False)
-
-
-test_plan_testcases =  Table('test_plan_testcases', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'testplan_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'testcase_id', PGInteger(), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'test_plan_testcases_testcase_id_fkey'),
-            ForeignKeyConstraint([u'testplan_id'], [u'public.test_plan.id'], name=u'test_plan_testcases_testplan_id_fkey'),
-    schema='public')
-Index('index_test_plan_testcases_testplan_id_key', test_plan_testcases.c.testplan_id, test_plan_testcases.c.testcase_id, unique=True)
 
 
 test_cases =  Table('test_cases', metadata,
@@ -759,7 +692,7 @@ Index('index_interfaces_network_id', interfaces.c.network_id, unique=False)
 equipment_attributes =  Table('equipment_attributes', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'value_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'equipment_attributes_equipment_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'equipment_attributes_type_id_fkey'),
@@ -771,7 +704,7 @@ Index('index_equipment_attributes_equipment_id', equipment_attributes.c.equipmen
 equipment_model_attributes =  Table('equipment_model_attributes', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'value_c', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'pickle', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'equipmentmodel_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipmentmodel_id'], [u'public.equipment_model.id'], name=u'equipment_model_attributes_equipmentmodel_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'equipment_model_attributes_type_id_fkey'),

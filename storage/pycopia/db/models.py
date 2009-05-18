@@ -25,7 +25,9 @@ import cPickle as pickle
 from sqlalchemy import create_engine
 from sqlalchemy.orm import (sessionmaker, mapper, relation, 
         backref, column_property, synonym, _mapper_registry)
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
+
 
 from pycopia.aid import hexdigest, unhexdigest
 from pycopia.db import tables
@@ -331,11 +333,8 @@ mapper(FunctionalArea, tables.functional_area)
 class Component(object):
     pass
 
-mapper(Component, tables.components,
-    properties={
-        "subcomponents": relation(Component, lazy=True, secondary=tables.components_subcomponents),
-    },
-)
+mapper(Component, tables.components)
+
 
 
 class BaseProject(object):
@@ -473,8 +472,11 @@ mapper(Interface, tables.interfaces)
 class EquipmentModel(object):
     pass
 
-mapper(EquipmentModel, tables.equipment_model)
-
+mapper(EquipmentModel, tables.equipment_model,
+    properties={
+        "embeddedsoftware": relation(Software, secondary=tables.equipment_model_embeddedsoftware),
+    }
+)
 
 class EquipmentModelAttribute(object):
     pass
@@ -487,21 +489,19 @@ class Equipment(object):
 mapper(Equipment, tables.equipment,
     properties={
         "interfaces": relation(Interface, backref="equipment"),
-        "subcomponents": relation(Equipment, secondary=tables.equipment_subcomponents),
-        "software": relation(Software, secondary=tables.equipment_software),
-        "embeddedsoftware": relation(Software, secondary=tables.equipment_model_embeddedsoftware),
-    })
-
-
+        "subcomponents": relation(Equipment, backref=backref('parent', remote_side=[tables.equipment.c.id])),
+        "software": relation(Software, lazy=True, secondary=tables.equipment_software),
+    },
+)
 
 
 class EquipmentAttribute(object):
 
     def _get_value(self):
-        return pickle.loads(self.value_c)
+        return pickle.loads(self.pickle)
 
     def _set_value(self, value):
-        self.value_c = pickle.dumps(value)
+        self.pickle = pickle.dumps(value)
 
     def _del_value(self):
         self._set_value(None)
@@ -510,10 +510,10 @@ class EquipmentAttribute(object):
 
 
 mapper(EquipmentAttribute, tables.equipment_attributes,
-        properties={
-                "equipment": relation(Equipment, backref="attributes"),
-            },
-    )
+    properties={
+            "equipment": relation(Equipment, backref="attributes"),
+    },
+)
 
 class EnvironAttributeType(object):
     pass
@@ -553,10 +553,10 @@ mapper(TestEquipment, tables.testequipment,
 
 class Trap(object):
     def _get_value(self):
-        return pickle.loads(self.value_c)
+        return pickle.loads(self.pickle)
 
     def _set_value(self, obj):
-        self.value_c = pickle.dumps(obj)
+        self.pickle = pickle.dumps(obj)
 
     value = property(_get_value, _set_value)
 
@@ -566,22 +566,57 @@ mapper(Trap, tables.traps)
 
 #######################################
 
+#######################################
+# Test relations and results
 
-"""
-tables.test_jobs
-tables.test_results_data
-tables.test_results
-tables.test_cases_areas
-tables.test_cases_prerequisites
-tables.testcase_prerequisites
-tables.test_plan
-tables.test_plan_testcases
-tables.test_cases
-tables.test_suites
-tables.test_suites_testcases
-tables.test_suites_suites
-tables.components_suites
-"""
+class TestCase(object):
+    pass
+
+mapper(TestCase, tables.test_cases,
+    properties={
+        "functionalarea": relation(FunctionalArea, secondary=tables.test_cases_areas),
+    },
+)
+
+
+class TestSuite(object):
+    pass
+
+mapper(TestSuite, tables.test_suites,
+    properties={
+        "testcases": relation(TestCase, secondary=tables.test_suites_testcases, backref="suite"),
+        "components": relation(Component, secondary=tables.components_suites, backref="suites"),
+#        TODO many-to-many join on self?
+#        "subsuites": relation(TestSuite, 
+#                        secondary=tables.test_suites_suites,
+#                        primaryjoin=tables.test_suites_suites.c.from_testsuite_id==tables.test_suites.c.id,
+#                        secondaryjoin=tables.test_suites_suites.c.to_testsuite_id==tables.test_suites.c.id,
+#                    )
+    },
+)
+
+
+class TestJob(object):
+    pass
+
+mapper(TestJob, tables.test_jobs)
+
+
+class TestResultData(object):
+    pass
+
+mapper(TestResultData, tables.test_results_data)
+
+
+class TestResult(object):
+    pass
+
+mapper(TestResult, tables.test_results)
+
+
+
+#######################################
+
 
 def class_names():
     for mapper in _mapper_registry:
