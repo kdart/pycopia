@@ -15,7 +15,7 @@ from RFC1155_SMI import enterprises, IpAddress, Gauge, TimeTicks
 from RFC_1215 import TRAP_TYPE
 
 class PowerNet_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/site/PowerNet-MIB'
+	path = '/usr/share/mibs/site/PowerNet-MIB'
 	conformance = 2
 	name = 'PowerNet-MIB'
 	language = 1
@@ -725,6 +725,34 @@ class emsSensorStatus(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 18])
 	name = 'emsSensorStatus'
 
+class modEnvMgr(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4])
+	name = 'modEnvMgr'
+
+class memModules(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1])
+	name = 'memModules'
+
+class memSensors(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2])
+	name = 'memSensors'
+
+class memInputs(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3])
+	name = 'memInputs'
+
+class memOutputs(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4])
+	name = 'memOutputs'
+
+class memOutlets(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5])
+	name = 'memOutlets'
+
+class memBeacons(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6])
+	name = 'memBeacons'
+
 class netlock(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 11])
 	name = 'netlock'
@@ -753,13 +781,17 @@ class rPDULoadDevice(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1])
 	name = 'rPDULoadDevice'
 
-class rPDULoadConfig(NodeObject):
+class rPDULoadPhaseConfig(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 2])
-	name = 'rPDULoadConfig'
+	name = 'rPDULoadPhaseConfig'
 
 class rPDULoadStatus(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 3])
 	name = 'rPDULoadStatus'
+
+class rPDULoadBankConfig(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 4])
+	name = 'rPDULoadBankConfig'
 
 class rPDUOutlet(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3])
@@ -785,6 +817,10 @@ class rPDUOutletStatus(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 5])
 	name = 'rPDUOutletStatus'
 
+class rPDUOutletBank(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 6])
+	name = 'rPDUOutletBank'
+
 class rPDUPowerSupply(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 4])
 	name = 'rPDUPowerSupply'
@@ -792,6 +828,10 @@ class rPDUPowerSupply(NodeObject):
 class rPDUPowerSupplyDevice(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 4, 1])
 	name = 'rPDUPowerSupplyDevice'
+
+class rPDUStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5])
+	name = 'rPDUStatus'
 
 class airConditioners(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13])
@@ -809,6 +849,10 @@ class airFMStatus(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 1, 2])
 	name = 'airFMStatus'
 
+class airFMGroup(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 1, 3])
+	name = 'airFMGroup'
+
 class airPA(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2])
 	name = 'airPA'
@@ -820,6 +864,98 @@ class airPAIdent(NodeObject):
 class airPAStatus(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2])
 	name = 'airPAStatus'
+
+class airIR(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3])
+	name = 'airIR'
+
+class airIRAlarms(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 1])
+	name = 'airIRAlarms'
+
+class airIRRC(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2])
+	name = 'airIRRC'
+
+class airIRRCGroup(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1])
+	name = 'airIRRCGroup'
+
+class airIRRCGroupStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1])
+	name = 'airIRRCGroupStatus'
+
+class airIRRCGroupSetpoints(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 2])
+	name = 'airIRRCGroupSetpoints'
+
+class airIRRCGroupConfig(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 3])
+	name = 'airIRRCGroupConfig'
+
+class airIRRCUnit(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2])
+	name = 'airIRRCUnit'
+
+class airIRRCUnitIdent(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1])
+	name = 'airIRRCUnitIdent'
+
+class airIRRCUnitStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2])
+	name = 'airIRRCUnitStatus'
+
+class airIRRCUnitRunHours(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3])
+	name = 'airIRRCUnitRunHours'
+
+class airIRRCUnitServiceIntervals(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 4])
+	name = 'airIRRCUnitServiceIntervals'
+
+class airIRRCUnitThresholds(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5])
+	name = 'airIRRCUnitThresholds'
+
+class airIRRCUnitConfig(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 6])
+	name = 'airIRRCUnitConfig'
+
+class airIRSC(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4])
+	name = 'airIRSC'
+
+class airIRSCUnit(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1])
+	name = 'airIRSCUnit'
+
+class airIRSCUnitIdent(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 1])
+	name = 'airIRSCUnitIdent'
+
+class airIRSCUnitStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2])
+	name = 'airIRSCUnitStatus'
+
+class airIRSCUnitRunHours(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3])
+	name = 'airIRSCUnitRunHours'
+
+class airIRSCUnitServiceIntervals(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 4])
+	name = 'airIRSCUnitServiceIntervals'
+
+class airIRSCUnitThresholds(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 5])
+	name = 'airIRSCUnitThresholds'
+
+class airIRSCUnitSetpoints(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 6])
+	name = 'airIRSCUnitSetpoints'
+
+class airIRSCUnitConfig(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7])
+	name = 'airIRSCUnitConfig'
 
 class rARU(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14])
@@ -836,6 +972,18 @@ class rARUConfig(NodeObject):
 class rARUStatus(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 3])
 	name = 'rARUStatus'
+
+class rARUFanStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4])
+	name = 'rARUFanStatus'
+
+class rARUPower(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 5])
+	name = 'rARUPower'
+
+class rARUSensors(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6])
+	name = 'rARUSensors'
 
 class xPDU(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15])
@@ -896,6 +1044,290 @@ class xPDUOutputRelays(NodeObject):
 class xPDUMiscGroup(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 7])
 	name = 'xPDUMiscGroup'
+
+class battMan(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16])
+	name = 'battMan'
+
+class battManIdent(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 1])
+	name = 'battManIdent'
+
+class battManSystemCalib(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 2])
+	name = 'battManSystemCalib'
+
+class battManUnitCalib(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 3])
+	name = 'battManUnitCalib'
+
+class battManStringCalib(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 4])
+	name = 'battManStringCalib'
+
+class battManBatteryCalib(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5])
+	name = 'battManBatteryCalib'
+
+class battManConfig(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6])
+	name = 'battManConfig'
+
+class battManAlarm(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 7])
+	name = 'battManAlarm'
+
+class battManSystemStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8])
+	name = 'battManSystemStatus'
+
+class battManStringStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9])
+	name = 'battManStringStatus'
+
+class battManBatteryStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10])
+	name = 'battManBatteryStatus'
+
+class battManInputContactStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11])
+	name = 'battManInputContactStatus'
+
+class battManControl(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 12])
+	name = 'battManControl'
+
+class battManTestResults(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13])
+	name = 'battManTestResults'
+
+class xATS(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17])
+	name = 'xATS'
+
+class xATSIdent(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1])
+	name = 'xATSIdent'
+
+class xATSDevice(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 2])
+	name = 'xATSDevice'
+
+class xATSSwitch(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3])
+	name = 'xATSSwitch'
+
+class xATSSwitchStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 1])
+	name = 'xATSSwitchStatus'
+
+class xATSSwitchSettings(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2])
+	name = 'xATSSwitchSettings'
+
+class xATSSwitchTimers(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3])
+	name = 'xATSSwitchTimers'
+
+class xATSSwitchBlockMap(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 4])
+	name = 'xATSSwitchBlockMap'
+
+class xATSSwitchStatistics(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 5])
+	name = 'xATSSwitchStatistics'
+
+class xATSACMonitoringPoint(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4])
+	name = 'xATSACMonitoringPoint'
+
+class xATSSource1(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1])
+	name = 'xATSSource1'
+
+class xATSSource2(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2])
+	name = 'xATSSource2'
+
+class xATSSystemOutput(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3])
+	name = 'xATSSystemOutput'
+
+class xATSTesting(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5])
+	name = 'xATSTesting'
+
+class xATSTestingStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 1])
+	name = 'xATSTestingStatus'
+
+class xATSTestingResults(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 2])
+	name = 'xATSTestingResults'
+
+class xATSTestingSchedule(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 3])
+	name = 'xATSTestingSchedule'
+
+class xATSTestingSimulatePowerFail(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 4])
+	name = 'xATSTestingSimulatePowerFail'
+
+class xATSInputContacts(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 6])
+	name = 'xATSInputContacts'
+
+class xATSOutputRelays(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 7])
+	name = 'xATSOutputRelays'
+
+class xATSMisc(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 8])
+	name = 'xATSMisc'
+
+class generator(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18])
+	name = 'generator'
+
+class xATSGenerator(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1])
+	name = 'xATSGenerator'
+
+class xATSGeneratorIdent(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 1])
+	name = 'xATSGeneratorIdent'
+
+class xATSGeneratorStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 2])
+	name = 'xATSGeneratorStatus'
+
+class xATSGeneratorAdvStatus(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 3])
+	name = 'xATSGeneratorAdvStatus'
+
+class xATSGeneratorOutput(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4])
+	name = 'xATSGeneratorOutput'
+
+class xATSGeneratorSettings(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5])
+	name = 'xATSGeneratorSettings'
+
+class xATSGeneratorService(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6])
+	name = 'xATSGeneratorService'
+
+class xATSGeneratorFuelSystem(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7])
+	name = 'xATSGeneratorFuelSystem'
+
+class consolePortServer(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19])
+	name = 'consolePortServer'
+
+class cpsAP930x(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1])
+	name = 'cpsAP930x'
+
+class cpsAP930xSys(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1])
+	name = 'cpsAP930xSys'
+
+class apCPSPower(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 3])
+	name = 'apCPSPower'
+
+class apCPSPcmcia(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4])
+	name = 'apCPSPcmcia'
+
+class cpsAP930xConf(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2])
+	name = 'cpsAP930xConf'
+
+class cpsEthItf(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 4])
+	name = 'cpsEthItf'
+
+class cpsNameService(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 5])
+	name = 'cpsNameService'
+
+class cpsDNSserv(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 5, 3])
+	name = 'cpsDNSserv'
+
+class cpsSerialPortConf(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6])
+	name = 'cpsSerialPortConf'
+
+class cpsSerialGlobal(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1])
+	name = 'cpsSerialGlobal'
+
+class cpsSerialSpec(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2])
+	name = 'cpsSerialSpec'
+
+class cpsAP930xInfo(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3])
+	name = 'cpsAP930xInfo'
+
+class cpsAP930xAdm(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 4])
+	name = 'cpsAP930xAdm'
+
+class accessControl(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20])
+	name = 'accessControl'
+
+class accessPX(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1])
+	name = 'accessPX'
+
+class accessPXIdent(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 1])
+	name = 'accessPXIdent'
+
+class accessPXConfig(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 2])
+	name = 'accessPXConfig'
+
+class accessPXConfigFront(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 3])
+	name = 'accessPXConfigFront'
+
+class accessPXStatusFront(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 4])
+	name = 'accessPXStatusFront'
+
+class accessPXConfigRear(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 5])
+	name = 'accessPXConfigRear'
+
+class accessPXStatusRear(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 6])
+	name = 'accessPXStatusRear'
+
+class accessPXConfigBeacon(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 7])
+	name = 'accessPXConfigBeacon'
+
+class accessPXStatusBeacon(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 8])
+	name = 'accessPXStatusBeacon'
+
+class apcLocalDisplay(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21])
+	name = 'apcLocalDisplay'
+
+class apcLocalDisplayIdent(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 1])
+	name = 'apcLocalDisplayIdent'
+
+class apcLocalDisplayConfig(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 2])
+	name = 'apcLocalDisplayConfig'
 
 class software(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 2])
@@ -985,6 +1417,18 @@ class smartUPS10000(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 2, 15])
 	name = 'smartUPS10000'
 
+class smartUPS1500(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 2, 16])
+	name = 'smartUPS1500'
+
+class smartUPS3000DSP(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 2, 17])
+	name = 'smartUPS3000DSP'
+
+class smartUPS5000DSP(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 2, 18])
+	name = 'smartUPS5000DSP'
+
 class matrixUPS(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 3])
 	name = 'matrixUPS'
@@ -1065,6 +1509,10 @@ class emu2(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 8, 3])
 	name = 'emu2'
 
+class mem(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 8, 4])
+	name = 'mem'
+
 class redundantSwitch(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 9])
 	name = 'redundantSwitch'
@@ -1128,6 +1576,110 @@ class airPASeries(NodeObject):
 class infraXurePDU(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 15])
 	name = 'infraXurePDU'
+
+class ais5000UPS(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 16])
+	name = 'ais5000UPS'
+
+class ais5000UPS10kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 16, 1])
+	name = 'ais5000UPS10kVA'
+
+class ais5000UPS20kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 16, 2])
+	name = 'ais5000UPS20kVA'
+
+class ais5000UPS30kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 16, 3])
+	name = 'ais5000UPS30kVA'
+
+class ais5000UPS40kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 16, 4])
+	name = 'ais5000UPS40kVA'
+
+class ais5000UPS60kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 16, 5])
+	name = 'ais5000UPS60kVA'
+
+class ais5000UPS80kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 16, 6])
+	name = 'ais5000UPS80kVA'
+
+class ais5000UPS100kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 16, 7])
+	name = 'ais5000UPS100kVA'
+
+class smartUPS3Phase(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 17])
+	name = 'smartUPS3Phase'
+
+class smartUPS3Phase10kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 17, 1])
+	name = 'smartUPS3Phase10kVA'
+
+class smartUPS3Phase15kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 17, 2])
+	name = 'smartUPS3Phase15kVA'
+
+class smartUPS3Phase20kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 17, 3])
+	name = 'smartUPS3Phase20kVA'
+
+class smartUPS3Phase30kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 17, 4])
+	name = 'smartUPS3Phase30kVA'
+
+class smartUPS3Phase40kVA(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 17, 5])
+	name = 'smartUPS3Phase40kVA'
+
+class battManager(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 18])
+	name = 'battManager'
+
+class infraXureATS(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 19])
+	name = 'infraXureATS'
+
+class conPortServ(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 20])
+	name = 'conPortServ'
+
+class conPortServAP930x(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 20, 1])
+	name = 'conPortServAP930x'
+
+class gutor(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 21])
+	name = 'gutor'
+
+class gutorPEW(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 21, 1])
+	name = 'gutorPEW'
+
+class gutorPDW(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 21, 2])
+	name = 'gutorPDW'
+
+class gutorWEW(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 21, 3])
+	name = 'gutorWEW'
+
+class gutorWDW(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 21, 4])
+	name = 'gutorWDW'
+
+class gutorSDC(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 21, 5])
+	name = 'gutorSDC'
+
+class accControl(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 22])
+	name = 'accControl'
+
+class accPX(NodeObject):
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 3, 22, 1])
+	name = 'accPX'
 
 class experimental(NodeObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 4])
@@ -1285,6 +1837,34 @@ class upsAdvBatteryNumOfBadBattPacks(ScalarObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
+class upsAdvBatteryNominalVoltage(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 2, 2, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class upsAdvBatteryActualVoltage(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 2, 2, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class upsAdvBatteryCurrent(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 2, 2, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class upsAdvTotalDCCurrent(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 2, 2, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class upsBasicInputPhase(ScalarObject):
 	access = 4
 	status = 3
@@ -1325,7 +1905,7 @@ class upsAdvInputLineFailCause(ScalarObject):
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 3, 2, 5])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'noTransfer'), Enum(2, 'highLineVoltage'), Enum(3, 'brownout'), Enum(4, 'blackout'), Enum(5, 'smallMomentarySag'), Enum(6, 'deepMomentarySag'), Enum(7, 'smallMomentarySpike'), Enum(8, 'largeMomentarySpike'), Enum(9, 'selfTest'), Enum(10, 'rateOfVoltageChnage')]
+	enumerations = [Enum(1, 'noTransfer'), Enum(2, 'highLineVoltage'), Enum(3, 'brownout'), Enum(4, 'blackout'), Enum(5, 'smallMomentarySag'), Enum(6, 'deepMomentarySag'), Enum(7, 'smallMomentarySpike'), Enum(8, 'largeMomentarySpike'), Enum(9, 'selfTest'), Enum(10, 'rateOfVoltageChange')]
 
 
 class upsBasicOutputStatus(ScalarObject):
@@ -1371,6 +1951,20 @@ class upsAdvOutputCurrent(ScalarObject):
 	syntaxobject = pycopia.SMI.Basetypes.Gauge32
 
 
+class upsAdvOutputRedundancy(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 4, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Gauge32
+
+
+class upsAdvOutputKVACapacity(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 4, 2, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class upsBasicConfigNumDevices(ScalarObject):
 	access = 4
 	status = 3
@@ -1404,7 +1998,7 @@ class upsAdvConfigAlarm(ScalarObject):
 	access = 5
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 4])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'timed'), Enum(2, 'atLowBattery'), Enum(3, 'never')]
+	enumerations = [Enum(1, 'timed'), Enum(2, 'atLowBattery'), Enum(3, 'never'), Enum(4, 'mute')]
 
 
 class upsAdvConfigAlarmTimer(ScalarObject):
@@ -1499,7 +2093,7 @@ class upsAdvConfigOutputFreqRange(ScalarObject):
 	access = 5
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 19])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'unknown'), Enum(2, 'freqRangeAUTO'), Enum(3, 'freqRange60Var1'), Enum(4, 'freqRange60Var3'), Enum(5, 'freqRange50Var1'), Enum(6, 'freqRange50Var3'), Enum(7, 'freqRange60Var10'), Enum(8, 'freqRange50Var10')]
+	enumerations = [Enum(1, 'unknown'), Enum(2, 'freqRangeAUTO'), Enum(3, 'freqRange60Var1'), Enum(4, 'freqRange60Var3'), Enum(5, 'freqRange50Var1'), Enum(6, 'freqRange50Var3'), Enum(7, 'freqRange60Var10'), Enum(8, 'freqRange50Var10'), Enum(9, 'freqRange60Var1dot0'), Enum(10, 'freqRange50Var1dot0')]
 
 
 class upsAdvConfigUPSFail(ScalarObject):
@@ -1537,6 +2131,58 @@ class upsAdvConfigVoutReporting(ScalarObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 24])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'unknown'), Enum(2, 'voutAUTO'), Enum(3, 'vout208'), Enum(4, 'vout240')]
+
+
+class upsAdvConfigNumExternalBatteries(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 25])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class upsAdvConfigSimpleSignalShutdowns(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 26])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'unknown'), Enum(2, 'disabled'), Enum(3, 'enabled')]
+
+
+class upsAdvConfigMaxShutdownTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 27])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class upsAsiUpsControlServerRequestShutdown(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 28])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'serverShutdownOff'), Enum(2, 'serverShutdownReboot')]
+
+
+class upsAdvConfigMinReturnRuntime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 29])
+	syntaxobject = pycopia.SMI.Basetypes.TimeTicks
+
+
+class upsAdvConfigBasicSignalLowBatteryDuration(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 30])
+	syntaxobject = pycopia.SMI.Basetypes.TimeTicks
+
+
+class upsAdvConfigBypassPhaseLockRequired(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 1, 5, 2, 31])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'unknown'), Enum(2, 'disabled'), Enum(3, 'enabled')]
 
 
 class upsBasicControlConserveBattery(ScalarObject):
@@ -3618,6 +4264,105 @@ class emsStatusCheckLogLight(ScalarObject):
 	enumerations = [Enum(1, 'lightOff'), Enum(2, 'lightOn')]
 
 
+class emsStatusHardwareStatus(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 12, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memModulesStatusTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memModulesConfigTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsStatusSysTempUnits(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'celsius'), Enum(2, 'fahrenheit')]
+
+
+class memSensorsStatusTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsConfigTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memInputsStatusTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memInputsConfigTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutputStatusTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutputConfigTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutletStatusTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutletConfigTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memBeaconStatusTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memBeaconConfigTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class rPDUIdentName(ScalarObject):
 	access = 5
 	status = 3
@@ -3660,6 +4405,93 @@ class rPDUIdentSerialNumber(ScalarObject):
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
+class rPDUIdentDeviceRating(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUIdentDeviceNumOutlets(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUIdentDeviceNumPhases(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUIdentDeviceNumBreakers(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUIdentDeviceBreakerRating(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUIdentDeviceOrientation(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'orientHorizontal'), Enum(2, 'orientVertical')]
+
+
+class rPDUIdentDeviceOutletLayout(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'seqPhaseToNeutral'), Enum(2, 'seqPhaseToPhase'), Enum(3, 'seqPhToNeu21PhToPh'), Enum(4, 'seqPhToPhGrouped')]
+
+
+class rPDUIdentDeviceDisplayOrientation(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'displayNormal'), Enum(2, 'displayReverse')]
+
+
+class rPDUIdentDeviceLinetoLineVoltage(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUIdentDevicePowerWatts(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUIdentDevicePowerFactor(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUIdentDevicePowerVA(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 1, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class rPDULoadDevMaxPhaseLoad(ScalarObject):
 	access = 4
 	status = 3
@@ -3671,6 +4503,34 @@ class rPDULoadDevNumPhases(ScalarObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevMaxBankLoad(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevNumBanks(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevBankTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevMaxOutletTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 7])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
@@ -3696,12 +4556,33 @@ class rPDUOutletDevNumCntrlOutlets(ScalarObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
+class rPDUOutletDevNumTotalOutlets(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletDevMonitoredOutlets(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletConfigMonitoredTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class rPDUPowerSupply1Status(ScalarObject):
 	status = 3
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 4, 1, 1])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'powerSupply1Ok'), Enum(2, 'powerSupply1Failed')]
+	enumerations = [Enum(1, 'powerSupplyOneOk'), Enum(2, 'powerSupplyOneFailed')]
 
 
 class rPDUPowerSupply2Status(ScalarObject):
@@ -3709,11 +4590,40 @@ class rPDUPowerSupply2Status(ScalarObject):
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 4, 1, 2])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'powerSupply2Ok'), Enum(2, 'powerSupply2Failed')]
+	enumerations = [Enum(1, 'powerSupplyTwoOk'), Enum(2, 'powerSupplyTwoFailed'), Enum(3, 'powerSupplyTwoNotPresent')]
+
+
+class rPDUPowerSupplyAlarm(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'allAvailablePowerSuppliesOK'), Enum(2, 'powerSupplyOneFailed'), Enum(3, 'powerSupplyTwoFailed'), Enum(4, 'powerSupplyOneandTwoFailed')]
+
+
+class rPDUStatusBankTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUStatusPhaseTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUStatusOutletTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class airFMIdentName(ScalarObject):
-	access = 4
+	access = 5
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 1, 1, 1])
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
@@ -3864,6 +4774,29 @@ class airFMStatusModuleTableSize(ScalarObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
+class airFMGroupSysStatus(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 1, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'statusOnLine'), Enum(2, 'statusIdle'), Enum(3, 'statusLoadShare'), Enum(4, 'statusOffLine'), Enum(5, 'statusFailed'), Enum(6, 'statusDisabled'), Enum(7, 'statusUndefined')]
+
+
+class airFMGroupSysRuntime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 1, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airFMGroupSysRole(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 1, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'rolePrimary'), Enum(2, 'roleBackup')]
+
+
 class airPAIdentName(ScalarObject):
 	access = 4
 	status = 3
@@ -3922,17 +4855,24 @@ class airPAOperatingMode(ScalarObject):
 	enumerations = [Enum(1, 'modeOFF'), Enum(2, 'modeVENTING'), Enum(3, 'modeCOOLING')]
 
 
-class airPASetpoint(ScalarObject):
+class airPASetpointTempF(ScalarObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
+class airPASetpointTempC(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class airPABlowerSpeed(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 4])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 5])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'speedLOW'), Enum(2, 'speedHIGH')]
 
@@ -3940,7 +4880,7 @@ class airPABlowerSpeed(ScalarObject):
 class airPACompressor(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 5])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 6])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'statusON'), Enum(2, 'statusOFF')]
 
@@ -3948,7 +4888,7 @@ class airPACompressor(ScalarObject):
 class airPACondenserFan(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 6])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 7])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'statusON'), Enum(2, 'statusOFF')]
 
@@ -3956,7 +4896,7 @@ class airPACondenserFan(ScalarObject):
 class airPACondensatePump(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 7])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 8])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'statusON'), Enum(2, 'statusOFF')]
 
@@ -3964,50 +4904,1182 @@ class airPACondensatePump(ScalarObject):
 class airPASupplyTempF(ScalarObject):
 	access = 4
 	status = 3
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 8])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 9])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class airPASupplyTempC(ScalarObject):
 	access = 4
 	status = 3
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 9])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 10])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class airPAReturnTempF(ScalarObject):
 	access = 4
 	status = 3
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 10])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 11])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class airPAReturnTempC(ScalarObject):
 	access = 4
 	status = 3
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 11])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 12])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class airPARemoteTempF(ScalarObject):
 	access = 4
 	status = 3
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 12])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 13])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class airPARemoteTempC(ScalarObject):
 	access = 4
 	status = 3
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 13])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 14])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class airPARemoteHumidity(ScalarObject):
 	access = 4
 	status = 3
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 14])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 2, 2, 15])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRAlarmConditionsTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupStatusCoolOutput(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupStatusCoolDemand(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupStatusAirFlowUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupStatusAirFlowMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupStatusMaxRackInletTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupStatusMaxRackInletTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupStatusMinRackInletTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupStatusMinRackInletTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupSetpointsCoolUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupSetpointsCoolMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupSetpointsSupplyAirUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupSetpointsSupplyAirMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupSetpointsFanSpeedPreference(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'low'), Enum(2, 'med-low'), Enum(3, 'med'), Enum(4, 'med-high'), Enum(5, 'high')]
+
+
+class airIRRCGroupConfigNumberofCoolingUnits(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupConfigConfigurationType(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'racs'), Enum(2, 'hacs'), Enum(3, 'in-row')]
+
+
+class airIRRCGroupConfigPctGlycol(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupConfigCoolGainP(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 3, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupConfigCoolResetRateI(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 3, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCGroupConfigCoolDerivativeD(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 1, 3, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitIdentID(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitIdentName(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRRCUnitIdentLocation(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRRCUnitIdentModelNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRRCUnitIdentSerialNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRRCUnitIdentFirmwareRevision(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRRCUnitIdentHardwareRevision(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRRCUnitIdentManufactureDate(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRRCUnitStatusOperateMode(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'standby'), Enum(2, 'on'), Enum(3, 'idle')]
+
+
+class airIRRCUnitStatusCoolOutput(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusCoolDemand(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusAirFlowUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusAirFlowMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusRackInletTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusRackInletTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusSupplyAirTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusSupplyAirTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusReturnAirTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusReturnAirTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusContainmtDPUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusContainmtDPMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusFilterDPUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusFilterDPMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusFanSpeed(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusInputState(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class airIRRCUnitStatusOutputState(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class airIRRCUnitStatusActivePowerSource(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 19])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'sourceA'), Enum(2, 'sourceB')]
+
+
+class airIRRCUnitStatusFluidValvePosition(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 20])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusFluidFlowUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 21])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusFluidFlowMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 22])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusEnteringFluidTemperatureUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 23])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusEnteringFluidTemperatureMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 24])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusLeavingFluidTemperatureUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 25])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitStatusLeavingFluidTemperatureMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 2, 26])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursAirFilter(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFan1(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFan2(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFan3(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFan4(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFan5(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFan6(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFan7(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFan8(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFanPowerSupplyLeft(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursFanPowerSupplyRight(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitRunHoursCondensatePump(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 3, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitServiceIntervalsAirFilter(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitServiceIntervalsAirFilterAlarm(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 4, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'enable'), Enum(2, 'disable')]
+
+
+class airIRRCUnitThresholdsRackInletHighTempUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitThresholdsRackInletHighTempMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitThresholdsSupplyAirHighTempUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitThresholdsSupplyAirHighTempMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitThresholdsReturnAirHighTempUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitThresholdsReturnAirHighTempMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitThresholdsEnteringFluidHighTempUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitThresholdsEnteringFluidHighTempMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 5, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitConfigCoolCapacity(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 6, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'automatic'), Enum(2, 'maximum')]
+
+
+class airIRRCUnitConfigStartupDelay(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 6, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRRCUnitConfigIdleOnLeakDetect(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 6, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class airIRRCUnitConfigPowerSource(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 6, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'sourceA'), Enum(2, 'sourceB'), Enum(3, 'sourceAandB')]
+
+
+class airIRRCUnitConfigInputNormalState(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 6, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class airIRRCUnitConfigOutputNormalState(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 6, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class airIRRCUnitConfigOutputSource(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 2, 2, 6, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'anyAlarm'), Enum(2, 'criticalAlarm')]
+
+
+class airIRSCUnitIdentName(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRSCUnitIdentLocation(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRSCUnitIdentModelNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRSCUnitIdentSerialNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRSCUnitIdentFirmwareRevision(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRSCUnitIdentHardwareRevision(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRSCUnitIdentManufactureDate(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class airIRSCUnitStatusOperateMode(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'standby'), Enum(2, 'on'), Enum(3, 'idle')]
+
+
+class airIRSCUnitStatusCoolOutput(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusCoolDemand(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusAirFlowUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusAirFlowMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusRackInletTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusRackInletTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusSupplyAirTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusSupplyAirTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusReturnAirTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusReturnAirTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusSuctionTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusSuctionTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusSuperheatTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusSuperheatTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusContainmtDPUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusContainmtDPMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusFilterDPUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusFilterDPMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 19])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusSuctionPressureUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 20])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusSuctionPressureMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 21])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusDischargePressureUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 22])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusDischargePressureMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 23])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusEvaporatorFanSpeed(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 24])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusCondenserFanSpeed(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 25])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusInputState(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 26])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class airIRSCUnitStatusOutputState(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 27])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class airIRSCUnitStatusCondOutletTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 28])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusCondOutletTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 29])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusCondInletTempUS(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 30])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusCondInletTempMetric(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 31])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitStatusCompressor(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 2, 32])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'off'), Enum(2, 'on')]
+
+
+class airIRSCUnitRunHoursAirFilter(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursEvaporatorFan1(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursEvaporatorFan2(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursEvaporatorFan3(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursCondenserFan1(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursCondenserFan2(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursCondenserFan3(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursFanPowerSupplyLeft(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursFanPowerSupplyRight(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursCondensatePump(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitRunHoursCompressor(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 3, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitServiceIntervalsAirFilter(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitServiceIntervalsAirFilterAlarm(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 4, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'enable'), Enum(2, 'disable')]
+
+
+class airIRSCUnitThresholdsRackInletHighTempUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitThresholdsRackInletHighTempMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 5, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitThresholdsSupplyAirHighTempUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 5, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitThresholdsSupplyAirHighTempMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 5, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitThresholdsReturnAirHighTempUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 5, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitThresholdsReturnAirHighTempMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 5, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitSetptsCoolSetpointUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 6, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitSetptsCoolSetpointMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 6, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitSetptsCoolDeadbandUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 6, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitSetptsCoolDeadbandMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 6, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitSetptsFanSpeedPreference(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 6, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'low'), Enum(2, 'med-low'), Enum(3, 'med'), Enum(4, 'med-high'), Enum(5, 'high')]
+
+
+class airIRSCUnitSetptsSupplyAirSetpointUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 6, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitSetptsSupplyAirSetpointMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 6, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitConfigConfigurationType(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'racs'), Enum(2, 'spot'), Enum(3, 'in-row')]
+
+
+class airIRSCUnitConfigCapacityControlType(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'discrete'), Enum(2, 'proportional')]
+
+
+class airIRSCUnitConfigStartupDelay(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitConfigIdleOnLeakDetect(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class airIRSCUnitConfigInputNormalState(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class airIRSCUnitConfigOutputNormalState(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class airIRSCUnitConfigOutputSource(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'anyAlarm'), Enum(2, 'criticalAlarm')]
+
+
+class airIRSCUnitConfigAltitudeUS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitConfigAltitudeMetric(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRSCUnitConfigOpControl(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 4, 1, 7, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'standby'), Enum(2, 'on')]
 
 
 class rARUStatusAruDeviceCount(ScalarObject):
@@ -4025,6 +6097,20 @@ class rARUStatusSysTempUnits(ScalarObject):
 	enumerations = [Enum(1, 'celsius'), Enum(2, 'fahrenheit')]
 
 
+class rARUSensorsStatusTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsConfigTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class xPDUIdentProductName(ScalarObject):
 	access = 5
 	status = 3
@@ -4039,31 +6125,45 @@ class xPDUIdentHardwareRev(ScalarObject):
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
-class xPDUIdentFirmwareRev(ScalarObject):
+class xPDUIdentFirmwareAppRev(ScalarObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
-class xPDUIdentDateOfManufacture(ScalarObject):
+class xPDUIdentFirmwareAppOSRev(ScalarObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 1, 4])
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
-class xPDUIdentModelNumber(ScalarObject):
+class xPDUIdentFirmwareControllerRev(ScalarObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 1, 5])
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
-class xPDUIdentSerialNumber(ScalarObject):
+class xPDUIdentDateOfManufacture(ScalarObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xPDUIdentModelNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xPDUIdentSerialNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 1, 8])
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
@@ -4111,17 +6211,10 @@ class xPDUDeviceTransformerPresent(ScalarObject):
 	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
 
 
-class xPDUIdentCallibrationDate(ScalarObject):
-	access = 4
-	status = 3
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 7])
-	syntaxobject = pycopia.SMI.Basetypes.DisplayString
-
-
 class xPDUDeviceLoadTieBreakerPresent(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 8])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 7])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
 
@@ -4129,7 +6222,7 @@ class xPDUDeviceLoadTieBreakerPresent(ScalarObject):
 class xPDUDeviceLoadTestPortPresent(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 9])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 8])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
 
@@ -4137,7 +6230,7 @@ class xPDUDeviceLoadTestPortPresent(ScalarObject):
 class xPDUDeviceFusesPresent(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 10])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 9])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
 
@@ -4145,7 +6238,7 @@ class xPDUDeviceFusesPresent(ScalarObject):
 class xPDUDeviceFansPresent(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 11])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 10])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
 
@@ -4153,7 +6246,7 @@ class xPDUDeviceFansPresent(ScalarObject):
 class xPDUDeviceBypassInputPresent(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 12])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 11])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
 
@@ -4161,7 +6254,7 @@ class xPDUDeviceBypassInputPresent(ScalarObject):
 class xPDUDeviceCrossTieOutputPresent(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 13])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 12])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
 
@@ -4169,7 +6262,7 @@ class xPDUDeviceCrossTieOutputPresent(ScalarObject):
 class xPDUDeviceEarthGroundMonitorPresent(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 14])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 13])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
 
@@ -4177,7 +6270,7 @@ class xPDUDeviceEarthGroundMonitorPresent(ScalarObject):
 class xPDUDeviceInfraXureType(ScalarObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 15])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 2, 14])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'typeB'), Enum(2, 'typeC')]
 
@@ -4252,7 +6345,7 @@ class xPDUSystemOutputTotalPower(ScalarObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
-class xPDUSystemOutputTotalVoltAmps(ScalarObject):
+class xPDUSystemOutputTotalApparentPower(ScalarObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 3, 4, 4])
@@ -4267,10 +6360,11 @@ class xPDUSystemOutputTotalPowerFactor(ScalarObject):
 
 
 class xPDUSystemOutputFrequencyTolerance(ScalarObject):
-	access = 5
 	status = 3
+	access = 5
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 3, 4, 6])
-	syntaxobject = pycopia.SMI.Basetypes.Integer32
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'freqToleranceOff'), Enum(2, 'freqTolerancePointTwo'), Enum(3, 'freqTolerancePointFive'), Enum(4, 'freqToleranceOne'), Enum(5, 'freqToleranceOnePointFive'), Enum(6, 'freqToleranceTwo'), Enum(7, 'freqToleranceThree'), Enum(8, 'freqToleranceFour'), Enum(9, 'freqToleranceFive'), Enum(10, 'freqToleranceNine')]
 
 
 class xPDUSystemOutputMaxKWPower(ScalarObject):
@@ -4371,7 +6465,7 @@ class xPDUInputContactTableSize(ScalarObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
-class xPDUOutputRelaysNumContacts(ScalarObject):
+class xPDUOutputRelaysNumRelays(ScalarObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 6, 1])
@@ -4390,7 +6484,7 @@ class xPDUEPOMode(ScalarObject):
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 7, 1])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'armed'), Enum(2, 'disarmed')]
+	enumerations = [Enum(1, 'armed'), Enum(2, 'disarmed'), Enum(3, 'unknown')]
 
 
 class xPDUTransformTempStatus(ScalarObject):
@@ -4398,7 +6492,7 @@ class xPDUTransformTempStatus(ScalarObject):
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 7, 2])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'normal'), Enum(2, 'overtemp')]
+	enumerations = [Enum(1, 'normal'), Enum(2, 'overtemp'), Enum(3, 'noTransformerPresent'), Enum(4, 'unknown')]
 
 
 class xPDUCoolingFanStatus(ScalarObject):
@@ -4406,7 +6500,1890 @@ class xPDUCoolingFanStatus(ScalarObject):
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 7, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'normal'), Enum(2, 'failed')]
+	enumerations = [Enum(1, 'normal'), Enum(2, 'failed'), Enum(3, 'noCoolingFansPresent'), Enum(4, 'unknown')]
+
+
+class battManIdentProductName(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManIdentHardwareRev(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManIdentFirmwareRev(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManIdentDateOfManufacture(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManIdentModelNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManIdentSerialNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManOhmicValueCorrectionFactor(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManUnitCalibTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManStringCalibTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1BatteryCalibTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2BatteryCalibTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigApplication(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'silcon'), Enum(2, 'other')]
+
+
+class battManConfigBatteryChemistry(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'leadAcid'), Enum(2, 'nickel-Cadmium')]
+
+
+class battManConfigBatteryAHCapacity(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigNumberofStrings(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigBatteriesperString(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigCellsperBattery(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMinCellVoltage(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMaxCellVoltage(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMaxPilotTempF(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMaxPilotTempC(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMaxAmbientTempF(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMaxAmbientTempC(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMinAmbientTempF(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMinAmbientTempC(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMaxRippleCurrent(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMaxCurrentAcceptanceDeviation(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigMonitorWireLength(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'fiftyFeetOrLess'), Enum(2, 'moreThanFiftyFeet')]
+
+
+class battManConfigDischargeVoltageAlarmLevel(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManConfigAutoAnnunciatorReset(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 6, 19])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class battManAlarmManagementController(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 7, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManAlarmBatteries(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 7, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManAlarmCharger(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 7, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManAlarmEnvironment(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 7, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManSystemAmbientTempC(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManSystemAmbientTempF(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManSystemPilotTempC(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManSystemPilotTempF(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManSystemAmbientHighTempAlarm(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManSystemAmbientLowTempAlarm(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManSystemPilotBatteryHighTempAlarm(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManSystemPilotProbeDisconnected(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManSystemAmbientProbeDisconnected(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 8, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManStringTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1BatteryTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2BatteryTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManInputContactTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManRemoteAnnunciatorReset(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 12, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noOperation'), Enum(2, 'reset')]
+
+
+class battManResetChargeCurrentDeviationBenchmark(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 12, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noOperation'), Enum(2, 'reset')]
+
+
+class battManResetLowestDischargeVoltages(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 12, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noOperation'), Enum(2, 'reset')]
+
+
+class battManString1OhmicValueLastDischargeInfo(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManString1OhmicValueTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1ResponseTestChangeTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2OhmicValueLastDischargeInfo(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManString2OhmicValueTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2ResponseTestChangeTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSIdentProductName(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSIdentHardwareRev(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSIdentFirmwareAppRev(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSIdentFirmwareAppOSRev(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSIdentFirmwareControllerRev(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSIdentDateOfManufacture(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSIdentModelNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSIdentSerialNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSDeviceServiceType(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'threeWire'), Enum(2, 'fourWire')]
+
+
+class xATSDeviceNominalVoltage(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSDeviceNominalFrequency(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSDeviceTransferSwitchRating(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSDeviceDCBackUpPresent(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class xATSSwitchStatusSelectedSource(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'none'), Enum(2, 'source1'), Enum(3, 'source2'), Enum(4, 'fault'), Enum(5, 'unknown')]
+
+
+class xATSSwitchStatusOperationalMode(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'automatic'), Enum(2, 'notInAutoAbnormal'), Enum(3, 'notInAuto'), Enum(4, 'unknown')]
+
+
+class xATSSwitchStatusAutomaticOperationSwitch(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled'), Enum(3, 'unknown')]
+
+
+class xATSSwitchStatusEngineStartSignal(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'run'), Enum(2, 'stop'), Enum(3, 'unknown')]
+
+
+class xATSSwitchSettingsLowVoltageTransferPoint(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchSettingsHighVoltageTransferPoint(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchSettingsMaxFrequencyDeviation(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchSettingsMinPhaseBalance(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchSettingsNominalRotation(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'abc'), Enum(2, 'cba'), Enum(3, 'any'), Enum(4, 'unknown')]
+
+
+class xATSSwitchSettingsAllowClosedTransfer(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no'), Enum(3, 'unknown')]
+
+
+class xATSSwitchSettingsMaxSyncTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchSettingsNeutralTransferTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchSettingsClearLatchedAlarms(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class xATSSwitchSettingsSetToFactoryDefaults(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 2, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class xATSSwitchTimersTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchBlockMapTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchStatisticsTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSource1Name(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSSource1Position(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'tripped'), Enum(4, 'unknown')]
+
+
+class xATSSource1Frequency(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSource1Quality(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'sourceGood'), Enum(2, 'lowVoltage'), Enum(3, 'highVoltage'), Enum(4, 'phaseImbalance'), Enum(5, 'freqOutOfRange'), Enum(6, 'badRotation'), Enum(7, 'unknown')]
+
+
+class xATSSource1Rotation(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'abc'), Enum(2, 'cba'), Enum(3, 'unknown')]
+
+
+class xATSSource1TableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSource2Name(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSSource2Position(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'tripped'), Enum(4, 'unknown')]
+
+
+class xATSSource2Frequency(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSource2Quality(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'sourceGood'), Enum(2, 'lowVoltage'), Enum(3, 'highVoltage'), Enum(4, 'phaseImbalance'), Enum(5, 'freqOutOfRange'), Enum(6, 'badRotation'), Enum(7, 'unknown')]
+
+
+class xATSSource2Rotation(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'abc'), Enum(2, 'cba'), Enum(3, 'unknown')]
+
+
+class xATSSource2TableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputFrequency(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputTotalPower(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputTotalApparentPower(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputTotalPowerFactor(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputFrequencyTolerance(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'freqToleranceOff'), Enum(2, 'freqTolerancePointTwo'), Enum(3, 'freqTolerancePointFive'), Enum(4, 'freqToleranceOne'), Enum(5, 'freqToleranceOnePointFive'), Enum(6, 'freqToleranceTwo'), Enum(7, 'freqToleranceThree'), Enum(8, 'freqToleranceFour'), Enum(9, 'freqToleranceFive'), Enum(10, 'freqToleranceNine')]
+
+
+class xATSSystemOutputOverVoltThreshold(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputUnderVoltThreshold(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputOverCurrentThreshold(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputUnderCurrentThreshold(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputAlarmDelayThreshold(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSTestingStatusSelectTestProcess(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'engineStartTest'), Enum(2, 'systemLoadTest'), Enum(3, 'generatorHoldTest'), Enum(4, 'cancelTest')]
+
+
+class xATSTestingStatusTestStatus(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noTestInProcess'), Enum(2, 'testPending'), Enum(3, 'startingEngine'), Enum(4, 'engineWarmingUp'), Enum(5, 'awaitingTransferToS2'), Enum(6, 'testingWithLoad'), Enum(7, 'awaitingRetransferToS1'), Enum(8, 'testingWithoutLoad'), Enum(9, 'stoppingEngine'), Enum(10, 'holdingOnGenerator')]
+
+
+class xATSTestingStatusProfileWarmupTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSTestingStatusProfileLoadedTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSTestingStatusProfileUnloadedTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSTestingResultsLastDateOfTest(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSTestingResultsLastResult(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noResultsAvailable'), Enum(2, 'startTestPassed'), Enum(3, 'loadTestPassed'), Enum(4, 'startSignalFailure'), Enum(5, 'failedGenNotInAuto'), Enum(6, 'failedGenEmerStop'), Enum(7, 'failedGenShutdown'), Enum(8, 'failedGenDidNotStart'), Enum(9, 'failedS2NeverGood'), Enum(10, 'genFailedDuringWarmup'), Enum(11, 'failureOnXferToS1'), Enum(12, 'genFailedLoaded'), Enum(13, 'failureOnRexferToS2'), Enum(14, 'failedOnCooldown'), Enum(15, 'genFailedToStop'), Enum(16, 'failedAtsInternalFault'), Enum(17, 'failedAtsNotInAuto'), Enum(18, 'canceledManualTest'), Enum(19, 'canceledScheduledTest')]
+
+
+class xATSTestingResultsTestLastTestTime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSTestingResultsLastCrankDuration(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSTestingResultsLastWarmupDuration(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSTestingResultsLastLoadedDuration(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 2, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSTestingResultsLastUnloadedDuration(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 2, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSTestingScheduleFrequency(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'never'), Enum(2, 'daily'), Enum(3, 'weekly'), Enum(4, 'monthly')]
+
+
+class xATSTestingScheduleTestDay(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSTestingScheduleTestTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSTestingScheduleTestWithLoadInterval(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 3, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'applyLoadEveryTest'), Enum(2, 'neverApplyLoad'), Enum(3, 'applyLoadMonthly'), Enum(4, 'applyLoadMonthlyDetailed')]
+
+
+class xATSTestingScheduleTestWithLoadSelectMonth(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 3, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSTestingScheduleNextTestDate(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 3, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSTestingSimulatePowerFailTest(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'cancelSimulation'), Enum(2, 'fiveSecondsSimulation'), Enum(3, 'tenSecondsSimulation'), Enum(4, 'thirtySecondsSimulation'), Enum(5, 'oneMinuteSimulation'), Enum(6, 'threeMinutesSimulation'), Enum(7, 'fiveMinutesSimulation'), Enum(8, 'tenMinutesSimulation')]
+
+
+class xATSTestingSimulatePowerFailTimeRemaining(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 5, 4, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSInputContactNumContacts(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 6, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSInputContactTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 6, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSOutputRelayNumRelays(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 7, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSOutputRelayTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 7, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorIdentModelNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSGeneratorIdentSerialNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSGeneratorIdentDateofManufacture(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSGeneratorIdentVoltageConfiguration(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorIdentMaxPowerRating(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorIdentAlternatorFrequency(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorStatusGeneratorName(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSGeneratorStatusOperational(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'nocomm'), Enum(2, 'off'), Enum(3, 'ready'), Enum(4, 'starting'), Enum(5, 'idle'), Enum(6, 'running'), Enum(7, 'normalStop'), Enum(8, 'emergencyStop'), Enum(9, 'notInAuto'), Enum(10, 'shutdown'), Enum(11, 'unknown')]
+
+
+class xATSGeneratorStatusModeSwitchPosition(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'off'), Enum(2, 'manual'), Enum(3, 'automatic'), Enum(4, 'unknown')]
+
+
+class xATSGeneratorStatusRemoteStart(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'stop'), Enum(2, 'run'), Enum(3, 'unknown')]
+
+
+class xATSGeneratorAdvStatusBatteryVoltage(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorAdvStatusOilPressure(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorAdvStatusCoolantTemperature(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorAdvStatusEngineRPM(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 3, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorAdvStatusOilLevel(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 3, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'ok'), Enum(2, 'low'), Enum(3, 'unknown')]
+
+
+class xATSGeneratorAdvStatusCoolantLevel(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 3, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'ok'), Enum(2, 'low'), Enum(3, 'unknown')]
+
+
+class xATSGeneratorOutputFrequency(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputTotalPower(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputTotalApparentPower(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputTotalPowerFactor(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputTableSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorSettingsVoltageAdjust(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorSettingsFrequencyAdjust(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorSettingsStartDelay(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorSettingsStopDelay(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorSettingsCrankCycleEnable(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled'), Enum(3, 'unknown')]
+
+
+class xATSGeneratorSettingsCrankTime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorSettingsCrankRestTime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorSettingsNumberCrank(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorSettingsMetricUnit(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 5, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class xATSGeneratorServiceTotalRunHoursLifetime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorServiceEngineStartsLifetime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorServiceTotalkWhLifetime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorServiceTotalRunHoursSinceMaintenance(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorServiceEngineStartsSinceMaintenance(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorServiceTotalkWhMaintenance(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorServiceResetRecord(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class xATSGeneratorServiceRecordResetDate(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 8])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSGeneratorServiceNextServiceDate(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 9])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSGeneratorServiceRunHoursUntilServiceDate(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorServiceRunHoursThreshold(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'runThreshold100Hours'), Enum(3, 'runThreshold150Hours'), Enum(4, 'runThreshold200Hours'), Enum(5, 'runThreshold250Hours'), Enum(6, 'runThreshold300Hours'), Enum(7, 'runThreshold400Hours'), Enum(8, 'runThreshold500Hours')]
+
+
+class xATSGeneratorServiceCalendarIntervalThreshold(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 6, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'interval1month'), Enum(3, 'interval2month'), Enum(4, 'interval3month'), Enum(5, 'interval6month'), Enum(6, 'intervalyearly')]
+
+
+class xATSGeneratorFuelSystemType(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'diesel'), Enum(2, 'propane'), Enum(3, 'naturalGas'), Enum(4, 'unknown')]
+
+
+class xATSGeneratorFuelSystemTankSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorFuelSystemFuelLevel(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorFuelSystemRuntimePower(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorFuelSystemEstimatedRunTime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorFuelSystemLowRunTimeThreshold(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'oneHour'), Enum(3, 'twoHours'), Enum(4, 'threeHours'), Enum(5, 'fourHours'), Enum(6, 'fiveHours'), Enum(7, 'sixHours'), Enum(8, 'twelveHours'), Enum(9, 'oneDay'), Enum(10, 'twoDays'), Enum(11, 'threeDays'), Enum(12, 'fourDays'), Enum(13, 'fiveDays'), Enum(14, 'sixDays'), Enum(15, 'sevenDays')]
+
+
+class xATSGeneratorFuelSystemVeryLowRunTimeThreshold(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'oneHour'), Enum(3, 'twoHours'), Enum(4, 'threeHours'), Enum(5, 'fourHours'), Enum(6, 'fiveHours'), Enum(7, 'sixHours'), Enum(8, 'twelveHours'), Enum(9, 'oneDay'), Enum(10, 'twoDays'), Enum(11, 'threeDays'), Enum(12, 'fourDays'), Enum(13, 'fiveDays'), Enum(14, 'sixDays'), Enum(15, 'sevenDays')]
+
+
+class xATSGeneratorFuelSystemLowFuelLevelThreshold(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorFuelSystemVeryLowFuelLevelThreshold(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 7, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSpname(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class apCPSversion(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class apCPSPwNum(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSPw1(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSPw2(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSNPcmcia(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSFlashSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSRAMSize(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSCPUfreq(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSDevId(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsHostName(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsConsoleBanner(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsMotd(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsEthDhcpc(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsEthIPaddr(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 4, 2])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsEthIPmask(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 4, 3])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsEthMTU(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 4, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsEthIPaddr2(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 4, 5])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsEthIPmask2(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 4, 6])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsResolverOrder(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsMultipleIP(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 5, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsDNSpriserv(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 5, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsDNSsecserv(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 5, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsDNSdomain(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 5, 3, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSerialInclude(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSerialNFS(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSerialLockDir(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSerialRlogin(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSerialPppd(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSerialTelnet(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSerialSsh(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSerialLocalLogins(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSerialFacility(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSerialDBFacility(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSSave(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class apCPSSerialHUP(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 4, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXIdentAlarmStatus(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXIdentProductNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class accessPXIdentHardwareRev(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class accessPXIdentDateOfManufacture(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class accessPXIdentSerialNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class accessPXConfigCardReaderEnableDisableAction(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enable')]
+
+
+class accessPXConfigAutoRelockTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXConfigCardFormat(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'hidStd26'), Enum(2, 'hid37Bit'), Enum(3, 'hid37BitWithFacility'), Enum(4, 'hidCorp1000')]
+
+
+class accessPXConfigFrontDoorLockControl(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 3, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'unlock'), Enum(2, 'lock'), Enum(3, 'notInstalledReadOnly'), Enum(4, 'disconnectedReadOnly')]
+
+
+class accessPXConfigFrontDoorMaxOpenTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 3, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXStatusFrontDoorLock(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 4, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'unlocked'), Enum(2, 'locked'), Enum(3, 'notInstalled'), Enum(4, 'disconnected')]
+
+
+class accessPXStatusFrontDoor(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 4, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'notInstalled'), Enum(4, 'disconnected')]
+
+
+class accessPXStatusFrontDoorHandle(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 4, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'notInstalled'), Enum(4, 'disconnected')]
+
+
+class accessPXStatusFrontDoorMaxOpenTime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 4, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXStatusFrontDoorAlarmStatus(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 4, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXConfigRearDoorLockControl(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 5, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'unlock'), Enum(2, 'lock'), Enum(3, 'notInstalledReadOnly'), Enum(4, 'disconnectedReadOnly')]
+
+
+class accessPXConfigRearDoorMaxOpenTime(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 5, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXStatusRearDoorLock(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 6, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'unlocked'), Enum(2, 'locked'), Enum(3, 'notInstalled'), Enum(4, 'disconnected')]
+
+
+class accessPXStatusRearDoor(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 6, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'notInstalled'), Enum(4, 'disconnected')]
+
+
+class accessPXStatusRearDoorHandle(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 6, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'notInstalled'), Enum(4, 'disconnected')]
+
+
+class accessPXStatusRearDoorMaxOpenTime(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 6, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXStatusRearDoorAlarmStatus(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 6, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class accessPXConfigBeaconName(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 7, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class accessPXConfigBeaconLocation(ScalarObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 7, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class accessPXConfigBeaconAction(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 7, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'turnOff'), Enum(2, 'turnOn'), Enum(3, 'notInstalledReadOnly'), Enum(4, 'disconnectedReadOnly')]
+
+
+class accessPXStatusBeaconName(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 8, 1])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class accessPXStatusBeaconLocation(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 8, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class accessPXStatusBeaconCurrentState(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 20, 1, 8, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'off'), Enum(2, 'on'), Enum(3, 'notInstalled'), Enum(4, 'disconnected')]
+
+
+class apcLocalDisplayIdentDisplayType(ScalarObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noDisplayFound'), Enum(2, 'powerviewRM'), Enum(3, 'powerviewWW')]
+
+
+class apcLocalDisplayIdentModelNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class apcLocalDisplayIdentFirmwareRev(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class apcLocalDisplayIdentOptions(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class apcLocalDisplayIdentDateOfManufacture(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class apcLocalDisplayIdentSerialNumber(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class apcLocalDisplayConfigAlarmBeeper(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 2, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'beeperDisabled'), Enum(2, 'beeperEnabled')]
+
+
+class apcLocalDisplayConfigBeeperVolume(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 2, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'beeperDisabled'), Enum(2, 'beeperLow'), Enum(3, 'beeperMedium'), Enum(4, 'beeperHigh')]
+
+
+class apcLocalDisplayConfigCheckLogIndicator(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 2, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'checklogNotPresent'), Enum(2, 'checklogDisabled'), Enum(3, 'checklogInformational'), Enum(4, 'checklogWarning'), Enum(5, 'checklogCritical')]
+
+
+class apcLocalDisplayConfigKeyClick(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 2, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'keyclickDisabled'), Enum(2, 'keyclickEnabled')]
+
+
+class apcLocalDisplayConfigContrast(ScalarObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 21, 2, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'contrast1'), Enum(2, 'contrast2'), Enum(3, 'contrast3'), Enum(4, 'contrast4'), Enum(5, 'contrast5'), Enum(6, 'contrast6'), Enum(7, 'contrast7'), Enum(8, 'contrast8')]
 
 
 class powerNetSoftwareSystemDescription(ScalarObject):
@@ -4486,7 +8463,7 @@ class mcontrolRestartAgent(ScalarObject):
 	access = 5
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 2, 2, 1])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'restartCurrentAgent'), Enum(2, 'continueCurrentAgent'), Enum(3, 'loadAndExecuteNewAgent'), Enum(4, 'restartWithoutAgent'), Enum(5, 'resetNetworkAndRestart')]
+	enumerations = [Enum(1, 'restartCurrentAgent'), Enum(2, 'continueCurrentAgent'), Enum(3, 'loadAndExecuteNewAgent'), Enum(4, 'restartWithoutAgent'), Enum(5, 'resetNetworkAndRestart'), Enum(6, 'resetNetworkLeaveModeAndRestart')]
 
 
 class mtrapargsInteger(ScalarObject):
@@ -4592,6 +8569,34 @@ class mtrapargsTimeTicks03(ScalarObject):
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 2, 3, 15])
 	syntaxobject = pycopia.SMI.Basetypes.TimeTicks
+
+
+class mtrapargsString04(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 2, 3, 16])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class mtrapargsString05(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 2, 3, 17])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class mtrapargsInteger04(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 2, 3, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class mtrapargsInteger05(ScalarObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 2, 3, 19])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class mfiletransferStatusLastTransferResult(ScalarObject):
@@ -7590,6 +11595,87 @@ class emConfigProbeLowHumidEnable(ColumnObject):
 	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
 
 
+class emConfigProbeMaxTempThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emConfigProbeMinTempThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emConfigProbeMaxHumidThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emConfigProbeMinHumidThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emConfigProbeMaxTempEnable(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class emConfigProbeMinTempEnable(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class emConfigProbeMaxHumidEnable(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class emConfigProbeMinHumidEnable(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 19])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class emConfigProbeTempHysteresis(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 20])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emConfigProbeHumidHysteresis(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 21])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emConfigProbeLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1, 22])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
 class emConfigContactNumber(ColumnObject):
 	access = 4
 	status = 3
@@ -7610,6 +11696,29 @@ class emConfigContactEnable(ColumnObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 4, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class emConfigContactSeverity(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'critical'), Enum(2, 'warning'), Enum(3, 'informational')]
+
+
+class emConfigContactNormalState(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class emConfigContactLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 4, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
 class emStatusProbeNumber(ColumnObject):
@@ -7686,6 +11795,38 @@ class emStatusProbeLowHumidViolation(ColumnObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 3, 3, 1, 10])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'noViolation'), Enum(2, 'lowHumidViolation'), Enum(3, 'disabled')]
+
+
+class emStatusProbeMaxTempViolation(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 3, 3, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noViolation'), Enum(2, 'maxTempViolation'), Enum(3, 'disabled')]
+
+
+class emStatusProbeMinTempViolation(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 3, 3, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noViolation'), Enum(2, 'minTempViolation'), Enum(3, 'disabled')]
+
+
+class emStatusProbeMaxHumidViolation(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 3, 3, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noViolation'), Enum(2, 'maxHumidViolation'), Enum(3, 'disabled')]
+
+
+class emStatusProbeMinHumidViolation(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 3, 3, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noViolation'), Enum(2, 'minHumidViolation'), Enum(3, 'disabled')]
 
 
 class emStatusContactNumber(ColumnObject):
@@ -7792,6 +11933,87 @@ class iemConfigProbeLowHumidEnable(ColumnObject):
 	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
 
 
+class iemConfigProbeMaxTempThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class iemConfigProbeMinTempThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class iemConfigProbeMaxHumidThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class iemConfigProbeMinHumidThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class iemConfigProbeMaxTempEnable(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class iemConfigProbeMinTempEnable(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class iemConfigProbeMaxHumidEnable(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class iemConfigProbeMinHumidEnable(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 19])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class iemConfigProbeTempHysteresis(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 20])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class iemConfigProbeHumidHysteresis(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 21])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class iemConfigProbeLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1, 22])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
 class iemConfigContactNumber(ColumnObject):
 	access = 4
 	status = 3
@@ -7812,6 +12034,29 @@ class iemConfigContactEnable(ColumnObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 4, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class iemConfigContactSeverity(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'critical'), Enum(2, 'warning'), Enum(3, 'informational')]
+
+
+class iemConfigContactNormalState(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class iemConfigContactLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 4, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
 class iemStatusProbeNumber(ColumnObject):
@@ -7888,6 +12133,38 @@ class iemStatusProbeLowHumidViolation(ColumnObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 3, 2, 1, 10])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'noViolation'), Enum(2, 'lowHumidViolation'), Enum(3, 'disabled')]
+
+
+class iemStatusProbeMaxTempViolation(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 3, 2, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noViolation'), Enum(2, 'maxTempViolation'), Enum(3, 'disabled')]
+
+
+class iemStatusProbeMinTempViolation(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 3, 2, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noViolation'), Enum(2, 'minTempViolation'), Enum(3, 'disabled')]
+
+
+class iemStatusProbeMaxHumidViolation(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 3, 2, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noViolation'), Enum(2, 'maxHumidViolation'), Enum(3, 'disabled')]
+
+
+class iemStatusProbeMinHumidViolation(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 3, 2, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noViolation'), Enum(2, 'minHumidViolation'), Enum(3, 'disabled')]
 
 
 class iemStatusContactNumber(ColumnObject):
@@ -8071,6 +12348,104 @@ class emsProbeConfigProbeLowHumidityThresh(ColumnObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
+class emsProbeConfigProbeMaxTempThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeMinTempThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeDeltaTemp(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeMaxHumidityThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeMinHumidityThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeDeltaHumidity(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeSTIncTempVariance(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeSTIncTempTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeSTDecTempVariance(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeSTDecTempTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeLTIncTempVariance(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeLTIncTempTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeLTDecTempVariance(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 19])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeConfigProbeLTDecTempTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1, 20])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class emsInputContactConfigInputContactIndex(ColumnObject):
 	access = 4
 	status = 3
@@ -8244,6 +12619,41 @@ class emsProbeStatusProbeCommStatus(ColumnObject):
 	enumerations = [Enum(1, 'commsNeverDiscovered'), Enum(2, 'commsEstablished'), Enum(3, 'commsLost')]
 
 
+class emsProbeStatusProbeAlarmStatus(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 13, 1, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeStatusProbeMaxTempThresh(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 13, 1, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeStatusProbeMinTempThresh(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 13, 1, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeStatusProbeMaxHumidityThresh(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 13, 1, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class emsProbeStatusProbeMinHumidityThresh(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 13, 1, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class emsInputContactStatusInputContactIndex(ColumnObject):
 	access = 4
 	status = 3
@@ -8400,7 +12810,801 @@ class emsSensorStatusSensorAlarmDelay(ColumnObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
-class rPDULoadConfigIndex(ColumnObject):
+class memModulesStatusModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memModulesStatusModuleName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memModulesStatusModuleLocation(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memModulesStatusModelNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memModulesStatusSerialNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memModulesStatusFirmwareRev(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 2, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memModulesStatusHardwareRev(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 2, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memModulesConfigModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memModulesConfigModuleName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memModulesConfigModuleLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memSensorsStatusModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsStatusSensorNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsStatusSensorName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memSensorsStatusSensorLocation(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memSensorsTemperature(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsHumidity(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsCommStatus(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'notInstalled'), Enum(2, 'commsOK'), Enum(3, 'commsLost')]
+
+
+class memSensorsAlarmStatus(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'memNormal'), Enum(2, 'memWarning'), Enum(3, 'memCritical')]
+
+
+class memSensorsConfigModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsConfigSensorNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memSensorsLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memSensorsAlarmGeneration(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class memSensorsTempMaxThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempHighThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempLowThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempMinThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempThreshHysteresis(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempShortDecRateThreshValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempShortDecRateThreshTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempShortIncRateThreshValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempShortIncRateThreshTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempLongDecRateThreshValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempLongDecRateThreshTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempLongIncRateThreshValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsTempLongIncRateThreshTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsHumidityMaxThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 19])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsHumidityHighThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 20])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsHumidityLowThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 21])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsHumidityMinThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 22])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memSensorsHumidityThreshHysteresis(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1, 23])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memInputsStatusModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memInputsStatusInputNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memInputsStatusInputName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputsStatusInputLocation(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputsStatusCurrentState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'inputClosedHighMEM'), Enum(2, 'inputOpenLowMEM'), Enum(3, 'inputDisabled'), Enum(4, 'inputStateNotApplicable')]
+
+
+class memInputsStatusCurrentAnalogValue(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 2, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputsStatusAlarmStatus(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 2, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'memNormal'), Enum(2, 'memWarning'), Enum(3, 'memCritical')]
+
+
+class memInputsConfigModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memInputsConfigInputNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memInputName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputType(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noConnection'), Enum(2, 'dryContact'), Enum(3, 'digital'), Enum(4, 'analogmAmps'), Enum(5, 'analogVolts')]
+
+
+class memInputAlarmGeneration(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'enabled')]
+
+
+class memInputNormalState(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'inputClosedHighMEM'), Enum(2, 'inputOpenLowMEM'), Enum(3, 'inputDisabled'), Enum(4, 'inputStateNotApplicable')]
+
+
+class memInputAbnormalSeverity(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'inputSeverityinformational'), Enum(2, 'inputSeveritywarning'), Enum(3, 'inputSeveritysevere'), Enum(4, 'inputSeverityNotApplicable')]
+
+
+class memInputNumberCalibrationPoints(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memInputAnalogCalibrationPoint1(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint2(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint3(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint4(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint5(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint1Value(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint2Value(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint3Value(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 17])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint4Value(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 18])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogCalibrationPoint5Value(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 19])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogMeasurementUnits(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 20])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogMaxThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 21])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogHighThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 22])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogLowThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 23])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogMinThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 24])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memInputAnalogThreshHysteresis(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1, 25])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutputStatusModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutputStatusOutputNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutputStatusOutputName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutputStatusOutputLocation(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutputStatusCurrentState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'memOutputClosed'), Enum(2, 'memOutputOpen')]
+
+
+class memOutputConfigModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutputConfigOutputNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutputName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutputLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutputNormalState(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'memOutputClosed'), Enum(2, 'memOutputOpen')]
+
+
+class memOutputAction(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 4, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'memActionClose'), Enum(2, 'memActionOpen')]
+
+
+class memOutletStatusModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutletStatusOutletNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutletStatusOutletName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutletStatusOutletLocation(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutletStatusCurrentState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'off'), Enum(2, 'on')]
+
+
+class memOutletConfigModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutletConfigOutletNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memOutletName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutletLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memOutletNormalState(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'off'), Enum(2, 'on')]
+
+
+class memOutletAction(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 4, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'turnOff'), Enum(2, 'turnOn')]
+
+
+class memBeaconStatusModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memBeaconStatusBeaconNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memBeaconStatusBeaconName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memBeaconStatusBeaconLocation(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memBeaconStatusCurrentState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'off'), Enum(2, 'on')]
+
+
+class memBeaconConfigModuleNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memBeaconConfigBeaconNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class memBeaconConfigName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memBeaconConfigLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class memBeaconAction(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'turnOff'), Enum(2, 'turnOn')]
+
+
+class rPDULoadDevBankIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 6, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevBankNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 6, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevBankMaxLoad(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 6, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevOutletIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 8, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevOutletNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 8, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadDevMaxOutletLoad(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 8, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadPhaseConfigIndex(ColumnObject):
 	status = 3
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 2, 1, 1, 1])
@@ -8408,48 +13612,105 @@ class rPDULoadConfigIndex(ColumnObject):
 	enumerations = [Enum(1, 'phase1'), Enum(2, 'phase2'), Enum(3, 'phase3')]
 
 
-class rPDULoadConfigLowLoadThreshold(ColumnObject):
+class rPDULoadPhaseConfigLowLoadThreshold(ColumnObject):
 	access = 5
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 2, 1, 1, 2])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
-class rPDULoadConfigNearOverloadThreshold(ColumnObject):
+class rPDULoadPhaseConfigNearOverloadThreshold(ColumnObject):
 	access = 5
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 2, 1, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
-class rPDULoadConfigOverloadThreshold(ColumnObject):
+class rPDULoadPhaseConfigOverloadThreshold(ColumnObject):
 	access = 5
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 2, 1, 1, 4])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
-class rPDULoadStatusIndex(ColumnObject):
+class rPDULoadPhaseConfigAlarm(ColumnObject):
 	status = 3
 	access = 4
-	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 3, 1, 1, 1])
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 2, 1, 1, 5])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'phase1'), Enum(2, 'phase2'), Enum(3, 'phase3')]
+	enumerations = [Enum(1, 'noLoadAlarm'), Enum(2, 'underCurrentAlarm'), Enum(3, 'nearOverCurrentAlarm'), Enum(4, 'overCurrentAlarm')]
 
 
-class rPDULoadStatusPhaseLoad(ColumnObject):
+class rPDULoadStatusIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 3, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadStatusLoad(ColumnObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 3, 1, 1, 2])
 	syntaxobject = pycopia.SMI.Basetypes.Gauge32
 
 
-class rPDULoadStatusPhaseLoadState(ColumnObject):
+class rPDULoadStatusLoadState(ColumnObject):
 	status = 3
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 3, 1, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'phaseLoadNormal'), Enum(2, 'phaseLoadLow'), Enum(3, 'phaseLoadNearOverload'), Enum(4, 'phaseLoadOverload')]
+
+
+class rPDULoadStatusPhaseNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 3, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadStatusBankNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 3, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadBankConfigIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 4, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadBankConfigLowLoadThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 4, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadBankConfigNearOverloadThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 4, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadBankConfigOverloadThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 4, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDULoadBankConfigAlarm(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 4, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'noLoadAlarm'), Enum(2, 'underCurrentAlarm'), Enum(3, 'nearOverCurrentAlarm'), Enum(4, 'overCurrentAlarm')]
 
 
 class rPDUOutletPhaseIndex(ColumnObject):
@@ -8498,6 +13759,13 @@ class rPDUOutletControlOutletCommand(ColumnObject):
 	enumerations = [Enum(1, 'immediateOn'), Enum(2, 'immediateOff'), Enum(3, 'immediateReboot'), Enum(4, 'delayedOn'), Enum(5, 'delayedOff'), Enum(6, 'delayedReboot'), Enum(7, 'cancelPendingCommand')]
 
 
+class rPDUOutletControlOutletBank(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 3, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class rPDUOutletConfigIndex(ColumnObject):
 	access = 4
 	status = 3
@@ -8541,6 +13809,55 @@ class rPDUOutletConfigRebootDuration(ColumnObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
+class rPDUOutletConfigOutletBank(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletConfigMonitoredIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 3, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletConfigMonitoredName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 3, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class rPDUOutletConfigMonitoredNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 3, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletConfigMonitoredLowLoadThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 3, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletConfigMonitoredNearOverloadThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 3, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletConfigMonitoredOverloadThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 3, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class rPDUOutletStatusIndex(ColumnObject):
 	access = 4
 	status = 3
@@ -8577,6 +13894,101 @@ class rPDUOutletStatusCommandPending(ColumnObject):
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 5, 1, 1, 5])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'outletStatusCommandPending'), Enum(2, 'outletStatusNoCommandPending')]
+
+
+class rPDUOutletStatusOutletBank(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 5, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletStatusLoad(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 5, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Gauge32
+
+
+class rPDUOutletBankIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 6, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUOutletBankOverloadRestriction(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 6, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'alwaysAllowTurnON'), Enum(2, 'restrictOnNearOverload'), Enum(3, 'restrictOnOverload')]
+
+
+class rPDUStatusBankIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUStatusBankNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUStatusBankState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'bankLoadNormal'), Enum(2, 'bankLoadLow'), Enum(3, 'bankLoadNearOverload'), Enum(4, 'bankLoadOverload')]
+
+
+class rPDUStatusPhaseIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUStatusPhaseNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUStatusPhaseState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'phaseLoadNormal'), Enum(2, 'phaseLoadLow'), Enum(3, 'phaseLoadNearOverload'), Enum(4, 'phaseLoadOverload')]
+
+
+class rPDUStatusOutletIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 6, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUStatusOutletNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 6, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rPDUStatusOutletState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 6, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'outletLoadNormal'), Enum(2, 'outletLoadLow'), Enum(3, 'outletLoadNearOverload'), Enum(4, 'outletLoadOverload')]
 
 
 class airFMIdentModuleIndex(ColumnObject):
@@ -8677,7 +14089,28 @@ class airFMStatusModuleReturnHum(ColumnObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
-class rARUIdentIndex(ColumnObject):
+class airIRAlarmConditionsIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 1, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIREventCode(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 1, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class airIRAlarmDescription(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 1, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class rARUIdentAruIndex(ColumnObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 1, 1, 1, 1])
@@ -8710,7 +14143,7 @@ class rARUConfigAruRemoteSetpoint(ColumnObject):
 	access = 5
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 2, 1, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'aruOff'), Enum(2, 'aru85F-29C'), Enum(3, 'aru90F-32C'), Enum(4, 'aru95F-35C'), Enum(5, 'aru100F-38C'), Enum(6, 'aru7kW'), Enum(7, 'aru5kW'), Enum(8, 'aru3kW'), Enum(9, 'aru2kW')]
+	enumerations = [Enum(1, 'aruOff'), Enum(2, 'aru85F-29C'), Enum(3, 'aru90F-32C'), Enum(4, 'aru95F-35C'), Enum(5, 'aru100F-38C'), Enum(6, 'aru7kW-1200cfm'), Enum(7, 'aru5kW-800cfm'), Enum(8, 'aru3kW-500cfm'), Enum(9, 'aru2kW-300cfm'), Enum(10, 'aru400cfm'), Enum(11, 'aru600cfm'), Enum(12, 'aru700cfm'), Enum(13, 'aru900cfm'), Enum(14, 'aru1000cfm'), Enum(15, 'aru1400cfm'), Enum(16, 'aru1600cfm'), Enum(17, 'aru1800cfm'), Enum(18, 'aru2000cfm')]
 
 
 class rARUConfigAruTempOvrdEnableDisable(ColumnObject):
@@ -8726,6 +14159,14 @@ class rARUConfigAruTempOvrdSetpoint(ColumnObject):
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 2, 1, 1, 5])
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUConfigAruMasterControl(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 2, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'aruOn'), Enum(2, 'aruOff')]
 
 
 class rARUStatusAruIndex(ColumnObject):
@@ -8747,7 +14188,7 @@ class rARUStatusAruRemoteSetpoint(ColumnObject):
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 3, 3, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'aruOff'), Enum(2, 'aru85F-29C'), Enum(3, 'aru90F-32C'), Enum(4, 'aru95F-35C'), Enum(5, 'aru100F-38C'), Enum(6, 'aru7kW'), Enum(7, 'aru5kW'), Enum(8, 'aru3kW'), Enum(9, 'aru2kW')]
+	enumerations = [Enum(1, 'aruOff'), Enum(2, 'aru85F-29C'), Enum(3, 'aru90F-32C'), Enum(4, 'aru95F-35C'), Enum(5, 'aru100F-38C'), Enum(6, 'aru7kW-1200cfm'), Enum(7, 'aru5kW-800cfm'), Enum(8, 'aru3kW-500cfm'), Enum(9, 'aru2kW-300cfm'), Enum(10, 'aru400cfm'), Enum(11, 'aru600cfm'), Enum(12, 'aru700cfm'), Enum(13, 'aru900cfm'), Enum(14, 'aru1000cfm'), Enum(15, 'aru1400cfm'), Enum(16, 'aru1600cfm'), Enum(17, 'aru1800cfm'), Enum(18, 'aru2000cfm')]
 
 
 class rARUStatusAruManualSetpoint(ColumnObject):
@@ -8809,6 +14250,280 @@ class rARUStatusAruCommStatus(ColumnObject):
 	enumerations = [Enum(1, 'commsNeverDiscovered'), Enum(2, 'commsEstablished'), Enum(3, 'commsLost')]
 
 
+class rARUStatusAruTempOvrdStatus(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 3, 3, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'inactive'), Enum(2, 'active')]
+
+
+class rARUStatusAruMasterControl(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 3, 3, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'aruOn'), Enum(2, 'aruOff')]
+
+
+class rARUStatusAruTotalAirflow(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 3, 3, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUFanStatusAruIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUFanStatusNominalFanSpeed(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUFanStatusSelectedFanLevel(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUFanStatusReplacementThreshold(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'disabled'), Enum(2, 'khr20'), Enum(3, 'khr25'), Enum(4, 'khr30'), Enum(5, 'khr35'), Enum(6, 'khr40'), Enum(7, 'khr50')]
+
+
+class rARUFanStatusFanIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUFanStatusFanOperatingStatus(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'unknown'), Enum(2, 'off'), Enum(3, 'onOk'), Enum(4, 'onDegraded'), Enum(5, 'offFailed')]
+
+
+class rARUFanStatusFanRpmSpeed(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUFanStatusFanFlowRate(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUFanStatusFanInServiceDate(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class rARUFanStatusFanRunhourCounter(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUFanStatusFanRunhourReset(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class rARUPowerStatusAruIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 5, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUPowerStatusPrimaryAcPresent(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 5, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class rARUPowerStatusAuxiliaryAcPresent(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 5, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class rARUPowerStatusRedundantAcConfig(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 5, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'singleCord'), Enum(2, 'dualCord')]
+
+
+class rARUSensorsStatusAruIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsStatusSensorNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTemperature(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsConfigAruIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsConfigSensorNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class rARUSensorsLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class rARUSensorsTempMaxThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempHighThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempLowThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempMinThresh(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempThreshHysteresis(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempShortDecRateThreshValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempShortDecRateThreshTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempShortIncRateThreshValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempShortIncRateThreshTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempLongDecRateThreshValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempLongDecRateThreshTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempLongIncRateThreshValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class rARUSensorsTempLongIncRateThreshTime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
 class xPDUMainInputVoltagePhaseIndex(ColumnObject):
 	status = 3
 	access = 4
@@ -8832,10 +14547,11 @@ class xPDUMainInputVoltageLtoN(ColumnObject):
 
 
 class xPDUBypassInputVoltagePhaseIndex(ColumnObject):
-	access = 4
 	status = 3
+	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 3, 2, 4, 1, 1])
-	syntaxobject = pycopia.SMI.Basetypes.Integer32
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'phase1'), Enum(2, 'phase2'), Enum(3, 'phase3')]
 
 
 class xPDUBypassInputVoltageLtoL(ColumnObject):
@@ -8865,7 +14581,7 @@ class xPDUUPSInputVoltageLtoNPresent(ColumnObject):
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 3, 3, 2, 1, 2])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present')]
+	enumerations = [Enum(1, 'notPresent'), Enum(2, 'present'), Enum(3, 'unknown')]
 
 
 class xPDUSystemOutputPhaseIndex(ColumnObject):
@@ -8904,7 +14620,7 @@ class xPDUSystemOutputPower(ColumnObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
-class xPDUSystemOutputVoltAmps(ColumnObject):
+class xPDUSystemOutputApparentPower(ColumnObject):
 	access = 4
 	status = 3
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 3, 4, 14, 1, 6])
@@ -8937,7 +14653,7 @@ class xPDUSystemBreakerPosition(ColumnObject):
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 4, 1, 2, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'unknown')]
 
 
 class xPDUBranchBreakerTableIndex(ColumnObject):
@@ -8956,7 +14672,7 @@ class xPDUBranchBreakerRating(ColumnObject):
 
 class xPDUBranchBreakerRDPFeed(ColumnObject):
 	status = 3
-	access = 5
+	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 4, 2, 3, 1, 3])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'remoteDistribution'), Enum(2, 'noRemoteDistribution')]
@@ -8967,7 +14683,7 @@ class xPDUBranchBreakerTieIndicator(ColumnObject):
 	access = 5
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 4, 2, 3, 1, 4])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'breakerTied'), Enum(2, 'breakerUntied')]
+	enumerations = [Enum(1, 'breakerUnTied'), Enum(2, 'breakerTied')]
 
 
 class xPDUBranchBreakerCurrent(ColumnObject):
@@ -8991,6 +14707,34 @@ class xPDUBranchBreakerUnderCurrentThreshold(ColumnObject):
 	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
+class xPDUBranchBreakerMaxCurrentThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 4, 2, 3, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xPDUBranchBreakerMinCurrentThreshold(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 4, 2, 3, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xPDUBranchBreakerName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 4, 2, 3, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xPDUBranchBreakerLocation(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 4, 2, 3, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
 class xPDUInputContactNumber(ColumnObject):
 	access = 4
 	status = 3
@@ -9005,7 +14749,7 @@ class xPDUInputContactName(ColumnObject):
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
-class xPDUNormalState(ColumnObject):
+class xPDUInputContactNormalState(ColumnObject):
 	status = 3
 	access = 5
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 5, 3, 1, 3])
@@ -9013,12 +14757,12 @@ class xPDUNormalState(ColumnObject):
 	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
 
 
-class xPDUCurrentState(ColumnObject):
+class xPDUInputContactCurrentState(ColumnObject):
 	status = 3
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 5, 3, 1, 4])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
-	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'unknown')]
 
 
 class xPDUOutputRelayNumber(ColumnObject):
@@ -9035,7 +14779,7 @@ class xPDUOutputRelayName(ColumnObject):
 	syntaxobject = pycopia.SMI.Basetypes.DisplayString
 
 
-class xPDUOutputNormalState(ColumnObject):
+class xPDUOutputRelayNormalState(ColumnObject):
 	status = 3
 	access = 5
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 6, 3, 1, 3])
@@ -9043,12 +14787,1345 @@ class xPDUOutputNormalState(ColumnObject):
 	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
 
 
-class xPDUOutputCurrentState(ColumnObject):
+class xPDUOutputRelayCurrentState(ColumnObject):
 	status = 3
 	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 6, 3, 1, 4])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed'), Enum(3, 'unknown')]
+
+
+class battManUnitCalibIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 3, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManUnitSerialNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 3, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManBatteryVoltageZeroCalib(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 3, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManBatteryVoltageSpanCalib(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 3, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManStringCalibIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 4, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManDCCurrentZeroCalib(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 4, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManACCurrentZeroCalib(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 4, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManProbeRange(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 4, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'amps1000'), Enum(2, 'amps500'), Enum(3, 'amps100'), Enum(4, 'amps200'), Enum(5, 'amps2000')]
+
+
+class battManString1BatteryCalibIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1BatteryInterTierOhmicValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2BatteryCalibIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2BatteryInterTierOhmicValue(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManStringIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManStringCurrent(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManStringRippleCurrent(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManStringChargerHighVoltageAlarm(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManStringChargerLowVoltageAlarm(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManStringCurrentProbeDisconnected(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 2, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManStringOnBattery(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 2, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString1BatteryIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1BatteryVoltage(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1BatteryLowestVoltage(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1BatteryCellShorted(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString1BatteryOpenFuseOrConnection(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString1BatteryLowCapacity(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString1BatteryHighOhmicValue(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString1BatteryThermalRunaway(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString1BatteryDryout(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString2BatteryIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2BatteryVoltage(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2BatteryLowestVoltage(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2BatteryCellShorted(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString2BatteryOpenFuseOrConnection(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString2BatteryLowCapacity(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString2BatteryHighOhmicValue(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString2BatteryThermalRunaway(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManString2BatteryDryout(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManInputContactIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManInputContactName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class battManInputContactAlarmState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'normal'), Enum(2, 'alarm')]
+
+
+class battManInputContactState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class battManInputContactNormalState(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class battManInputContactAlarmDelay(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11, 2, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1OhmicValueIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 3, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1OhmicValueData(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 3, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1ResponseTestChangeIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 5, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString1ResponseTestChangeData(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 5, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2OhmicValueIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 8, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2OhmicValueData(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 8, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2ResponseTestChangeIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 10, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class battManString2ResponseTestChangeData(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 10, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchTimersIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchTimersName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSSwitchTimersAbort(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class xATSSwitchTimersStatus(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'inactive'), Enum(2, 'active')]
+
+
+class xATSSwitchTimersRemainingTime(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchTimersDelaySetting(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3, 2, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchBlockMapIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 4, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchBlockMapName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 4, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSSwitchBlockMapStatus(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 4, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchBlockMapSetting(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 4, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchStatisticsIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 5, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSwitchStatisticsName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 5, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSSwitchStatisticsValue(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 5, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSSwitchStatisticsReset(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 5, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'yes'), Enum(2, 'no')]
+
+
+class xATSSource1Index(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 7, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'phase1'), Enum(2, 'phase2'), Enum(3, 'phase3')]
+
+
+class xATSSource1VoltageLtoL(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 7, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSource1VoltageLtoN(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 7, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSource2Index(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 7, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'phase1'), Enum(2, 'phase2'), Enum(3, 'phase3')]
+
+
+class xATSSource2VoltageLtoL(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 7, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSource2VoltageLtoN(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 7, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputPhaseIndex(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 12, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'phase1'), Enum(2, 'phase2'), Enum(3, 'phase3')]
+
+
+class xATSSystemOutputVoltageLtoL(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 12, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputVoltageLtoN(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 12, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputPhaseCurrent(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 12, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputPower(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 12, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputApparentPower(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 12, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSSystemOutputPowerFactor(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 12, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSInputContactNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 6, 3, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSInputContactName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 6, 3, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSInputContactNormalState(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 6, 3, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class xATSInputContactCurrentState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 6, 3, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class xATSOutputRelayNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 7, 3, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSOutputRelayName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 7, 3, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class xATSOutputRelayNormalState(ColumnObject):
+	status = 3
+	access = 5
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 7, 3, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class xATSOutputRelayCurrentState(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 7, 3, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'open'), Enum(2, 'closed')]
+
+
+class xATSGeneratorOutputPhaseIndex(ColumnObject):
+	status = 3
+	access = 4
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 6, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Enumeration
+	enumerations = [Enum(1, 'phase1'), Enum(2, 'phase2'), Enum(3, 'phase3')]
+
+
+class xATSGeneratorOutputVoltageLtoL(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 6, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputVoltageLtoN(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 6, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputPhaseCurrent(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 6, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputPower(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 6, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputApparentPower(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 6, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class xATSGeneratorOutputPowerFactor(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 6, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsCardIdentIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 2, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsCardIdentProd(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 2, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardIdentMan(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 2, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardIdentFunc(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 2, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardIdentPCI(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 2, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardConfIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsCardConfPower(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardConfType(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardConfInter(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardConfFunc(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardConfCardv(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardConfPort1(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardConfPort2(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardStatusIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 4, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsCardStatusCard(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 4, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsCardStatusFunc(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 4, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsGroupIndex(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 11, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsGroupName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 11, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsGroupUsers(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 11, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortTty(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortName(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortSpeed(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortDataSize(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortStopBits(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortParity(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortFlowCtrl(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortDTRdelay(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortDCDCtrl(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortLogUtmp(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortLogWtmp(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortLogform(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortAuthtype(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortAuthSrv1(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsSPortAccSrv1(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsSPortAuthTmo(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 17])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortAuthRetr(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 18])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortAuthSrv2(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 19])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsSPortAccSrv2(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 20])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsSPortAuthSecret(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 21])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortAuthRadP(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 22])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortAuthAcc(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 23])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortProtocol(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 24])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortRemoteIP(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 25])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortSocketPort(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 26])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortRemHost(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 27])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsSPortBanner(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 28])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortPrompt(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 29])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortTermType(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 30])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortAutomUsr(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 31])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortNetMask(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 32])
+	syntaxobject = pycopia.SMI.Basetypes.IpAddress
+
+
+class cpsSPortPppMtu(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 33])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortPppMru(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 34])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortPppOptions(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 35])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortPppFoption(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 36])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortModemChat(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 37])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortSttyCmd(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 38])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortSockTx(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 39])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortSockPoll(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 40])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortSockIdle(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 41])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortDBsize(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 42])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortDBtime(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 43])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortDBmode(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 44])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortDBsyslog(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 45])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortDBmenu(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 46])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortDBalarm(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 47])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortSSHbreak(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 48])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortSniffSess(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 49])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortSniffAdm(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 50])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortSniffEsc(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 51])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortSniffMsess(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 52])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortTelnetMode(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 53])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortSysBufSess(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 54])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortLFSuppress(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 55])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsSPortAutoInput(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 56])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortAutoOutput(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 57])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsSPortBreakInterval(ColumnObject):
+	access = 5
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1, 58])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortNumber(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 1])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortTty(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 2])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsISPortName(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 3])
+	syntaxobject = pycopia.SMI.Basetypes.DisplayString
+
+
+class cpsISPortSpeed(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 4])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortTxBytes(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 5])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortRXBytes(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 6])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortErrFrame(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 7])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortErrParity(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 8])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortErrBreaks(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 9])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortErrOverrun(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 10])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortSigDTR(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 11])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortSigCD(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 12])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortSigDSR(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 13])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortSigRTS(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 14])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortSigCTS(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 15])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
+
+
+class cpsISPortSigRI(ColumnObject):
+	access = 4
+	status = 3
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1, 16])
+	syntaxobject = pycopia.SMI.Basetypes.Integer32
 
 
 class moduleNumber(ColumnObject):
@@ -9117,8 +16194,8 @@ class acceptThisReceiver(ColumnObject):
 
 
 class receiveTrapType(ColumnObject):
-	status = 3
-	access = 5
+	status = 5
+	access = 4
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 2, 1, 2, 1, 6])
 	syntaxobject = pycopia.SMI.Basetypes.Enumeration
 	enumerations = [Enum(1, 'powernet'), Enum(2, 'ietf'), Enum(3, 'both')]
@@ -9690,7 +16767,7 @@ class emConfigProbesEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([emConfigProbeNumber], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 2, 1])
 	access = 2
-	columns = {'emConfigProbeNumber': emConfigProbeNumber, 'emConfigProbeName': emConfigProbeName, 'emConfigProbeHighTempThreshold': emConfigProbeHighTempThreshold, 'emConfigProbeLowTempThreshold': emConfigProbeLowTempThreshold, 'emConfigProbeTempUnits': emConfigProbeTempUnits, 'emConfigProbeHighHumidThreshold': emConfigProbeHighHumidThreshold, 'emConfigProbeLowHumidThreshold': emConfigProbeLowHumidThreshold, 'emConfigProbeHighTempEnable': emConfigProbeHighTempEnable, 'emConfigProbeLowTempEnable': emConfigProbeLowTempEnable, 'emConfigProbeHighHumidEnable': emConfigProbeHighHumidEnable, 'emConfigProbeLowHumidEnable': emConfigProbeLowHumidEnable}
+	columns = {'emConfigProbeNumber': emConfigProbeNumber, 'emConfigProbeName': emConfigProbeName, 'emConfigProbeHighTempThreshold': emConfigProbeHighTempThreshold, 'emConfigProbeLowTempThreshold': emConfigProbeLowTempThreshold, 'emConfigProbeTempUnits': emConfigProbeTempUnits, 'emConfigProbeHighHumidThreshold': emConfigProbeHighHumidThreshold, 'emConfigProbeLowHumidThreshold': emConfigProbeLowHumidThreshold, 'emConfigProbeHighTempEnable': emConfigProbeHighTempEnable, 'emConfigProbeLowTempEnable': emConfigProbeLowTempEnable, 'emConfigProbeHighHumidEnable': emConfigProbeHighHumidEnable, 'emConfigProbeLowHumidEnable': emConfigProbeLowHumidEnable, 'emConfigProbeMaxTempThreshold': emConfigProbeMaxTempThreshold, 'emConfigProbeMinTempThreshold': emConfigProbeMinTempThreshold, 'emConfigProbeMaxHumidThreshold': emConfigProbeMaxHumidThreshold, 'emConfigProbeMinHumidThreshold': emConfigProbeMinHumidThreshold, 'emConfigProbeMaxTempEnable': emConfigProbeMaxTempEnable, 'emConfigProbeMinTempEnable': emConfigProbeMinTempEnable, 'emConfigProbeMaxHumidEnable': emConfigProbeMaxHumidEnable, 'emConfigProbeMinHumidEnable': emConfigProbeMinHumidEnable, 'emConfigProbeTempHysteresis': emConfigProbeTempHysteresis, 'emConfigProbeHumidHysteresis': emConfigProbeHumidHysteresis, 'emConfigProbeLocation': emConfigProbeLocation}
 
 
 class emConfigContactsEntry(RowObject):
@@ -9698,7 +16775,7 @@ class emConfigContactsEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([emConfigContactNumber], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 2, 4, 1])
 	access = 2
-	columns = {'emConfigContactNumber': emConfigContactNumber, 'emConfigContactName': emConfigContactName, 'emConfigContactEnable': emConfigContactEnable}
+	columns = {'emConfigContactNumber': emConfigContactNumber, 'emConfigContactName': emConfigContactName, 'emConfigContactEnable': emConfigContactEnable, 'emConfigContactSeverity': emConfigContactSeverity, 'emConfigContactNormalState': emConfigContactNormalState, 'emConfigContactLocation': emConfigContactLocation}
 
 
 class emStatusProbesEntry(RowObject):
@@ -9706,7 +16783,7 @@ class emStatusProbesEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([emStatusProbeNumber], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 1, 3, 3, 1])
 	access = 2
-	columns = {'emStatusProbeNumber': emStatusProbeNumber, 'emStatusProbeName': emStatusProbeName, 'emStatusProbeStatus': emStatusProbeStatus, 'emStatusProbeCurrentTemp': emStatusProbeCurrentTemp, 'emStatusProbeTempUnits': emStatusProbeTempUnits, 'emStatusProbeCurrentHumid': emStatusProbeCurrentHumid, 'emStatusProbeHighTempViolation': emStatusProbeHighTempViolation, 'emStatusProbeLowTempViolation': emStatusProbeLowTempViolation, 'emStatusProbeHighHumidViolation': emStatusProbeHighHumidViolation, 'emStatusProbeLowHumidViolation': emStatusProbeLowHumidViolation}
+	columns = {'emStatusProbeNumber': emStatusProbeNumber, 'emStatusProbeName': emStatusProbeName, 'emStatusProbeStatus': emStatusProbeStatus, 'emStatusProbeCurrentTemp': emStatusProbeCurrentTemp, 'emStatusProbeTempUnits': emStatusProbeTempUnits, 'emStatusProbeCurrentHumid': emStatusProbeCurrentHumid, 'emStatusProbeHighTempViolation': emStatusProbeHighTempViolation, 'emStatusProbeLowTempViolation': emStatusProbeLowTempViolation, 'emStatusProbeHighHumidViolation': emStatusProbeHighHumidViolation, 'emStatusProbeLowHumidViolation': emStatusProbeLowHumidViolation, 'emStatusProbeMaxTempViolation': emStatusProbeMaxTempViolation, 'emStatusProbeMinTempViolation': emStatusProbeMinTempViolation, 'emStatusProbeMaxHumidViolation': emStatusProbeMaxHumidViolation, 'emStatusProbeMinHumidViolation': emStatusProbeMinHumidViolation}
 
 
 class emStatusContactsEntry(RowObject):
@@ -9722,7 +16799,7 @@ class iemConfigProbesEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([iemConfigProbeNumber], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 2, 1])
 	access = 2
-	columns = {'iemConfigProbeNumber': iemConfigProbeNumber, 'iemConfigProbeName': iemConfigProbeName, 'iemConfigProbeHighTempThreshold': iemConfigProbeHighTempThreshold, 'iemConfigProbeLowTempThreshold': iemConfigProbeLowTempThreshold, 'iemConfigProbeTempUnits': iemConfigProbeTempUnits, 'iemConfigProbeHighHumidThreshold': iemConfigProbeHighHumidThreshold, 'iemConfigProbeLowHumidThreshold': iemConfigProbeLowHumidThreshold, 'iemConfigProbeHighTempEnable': iemConfigProbeHighTempEnable, 'iemConfigProbeLowTempEnable': iemConfigProbeLowTempEnable, 'iemConfigProbeHighHumidEnable': iemConfigProbeHighHumidEnable, 'iemConfigProbeLowHumidEnable': iemConfigProbeLowHumidEnable}
+	columns = {'iemConfigProbeNumber': iemConfigProbeNumber, 'iemConfigProbeName': iemConfigProbeName, 'iemConfigProbeHighTempThreshold': iemConfigProbeHighTempThreshold, 'iemConfigProbeLowTempThreshold': iemConfigProbeLowTempThreshold, 'iemConfigProbeTempUnits': iemConfigProbeTempUnits, 'iemConfigProbeHighHumidThreshold': iemConfigProbeHighHumidThreshold, 'iemConfigProbeLowHumidThreshold': iemConfigProbeLowHumidThreshold, 'iemConfigProbeHighTempEnable': iemConfigProbeHighTempEnable, 'iemConfigProbeLowTempEnable': iemConfigProbeLowTempEnable, 'iemConfigProbeHighHumidEnable': iemConfigProbeHighHumidEnable, 'iemConfigProbeLowHumidEnable': iemConfigProbeLowHumidEnable, 'iemConfigProbeMaxTempThreshold': iemConfigProbeMaxTempThreshold, 'iemConfigProbeMinTempThreshold': iemConfigProbeMinTempThreshold, 'iemConfigProbeMaxHumidThreshold': iemConfigProbeMaxHumidThreshold, 'iemConfigProbeMinHumidThreshold': iemConfigProbeMinHumidThreshold, 'iemConfigProbeMaxTempEnable': iemConfigProbeMaxTempEnable, 'iemConfigProbeMinTempEnable': iemConfigProbeMinTempEnable, 'iemConfigProbeMaxHumidEnable': iemConfigProbeMaxHumidEnable, 'iemConfigProbeMinHumidEnable': iemConfigProbeMinHumidEnable, 'iemConfigProbeTempHysteresis': iemConfigProbeTempHysteresis, 'iemConfigProbeHumidHysteresis': iemConfigProbeHumidHysteresis, 'iemConfigProbeLocation': iemConfigProbeLocation}
 
 
 class iemConfigContactsEntry(RowObject):
@@ -9730,7 +16807,7 @@ class iemConfigContactsEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([iemConfigContactNumber], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 2, 4, 1])
 	access = 2
-	columns = {'iemConfigContactNumber': iemConfigContactNumber, 'iemConfigContactName': iemConfigContactName, 'iemConfigContactEnable': iemConfigContactEnable}
+	columns = {'iemConfigContactNumber': iemConfigContactNumber, 'iemConfigContactName': iemConfigContactName, 'iemConfigContactEnable': iemConfigContactEnable, 'iemConfigContactSeverity': iemConfigContactSeverity, 'iemConfigContactNormalState': iemConfigContactNormalState, 'iemConfigContactLocation': iemConfigContactLocation}
 
 
 class iemStatusProbesEntry(RowObject):
@@ -9738,7 +16815,7 @@ class iemStatusProbesEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([iemStatusProbeNumber], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 2, 3, 2, 1])
 	access = 2
-	columns = {'iemStatusProbeNumber': iemStatusProbeNumber, 'iemStatusProbeName': iemStatusProbeName, 'iemStatusProbeStatus': iemStatusProbeStatus, 'iemStatusProbeCurrentTemp': iemStatusProbeCurrentTemp, 'iemStatusProbeTempUnits': iemStatusProbeTempUnits, 'iemStatusProbeCurrentHumid': iemStatusProbeCurrentHumid, 'iemStatusProbeHighTempViolation': iemStatusProbeHighTempViolation, 'iemStatusProbeLowTempViolation': iemStatusProbeLowTempViolation, 'iemStatusProbeHighHumidViolation': iemStatusProbeHighHumidViolation, 'iemStatusProbeLowHumidViolation': iemStatusProbeLowHumidViolation}
+	columns = {'iemStatusProbeNumber': iemStatusProbeNumber, 'iemStatusProbeName': iemStatusProbeName, 'iemStatusProbeStatus': iemStatusProbeStatus, 'iemStatusProbeCurrentTemp': iemStatusProbeCurrentTemp, 'iemStatusProbeTempUnits': iemStatusProbeTempUnits, 'iemStatusProbeCurrentHumid': iemStatusProbeCurrentHumid, 'iemStatusProbeHighTempViolation': iemStatusProbeHighTempViolation, 'iemStatusProbeLowTempViolation': iemStatusProbeLowTempViolation, 'iemStatusProbeHighHumidViolation': iemStatusProbeHighHumidViolation, 'iemStatusProbeLowHumidViolation': iemStatusProbeLowHumidViolation, 'iemStatusProbeMaxTempViolation': iemStatusProbeMaxTempViolation, 'iemStatusProbeMinTempViolation': iemStatusProbeMinTempViolation, 'iemStatusProbeMaxHumidViolation': iemStatusProbeMaxHumidViolation, 'iemStatusProbeMinHumidViolation': iemStatusProbeMinHumidViolation}
 
 
 class iemStatusContactsEntry(RowObject):
@@ -9794,7 +16871,7 @@ class emsProbeConfigEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([emsProbeConfigProbeIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 7, 1, 1])
 	access = 2
-	columns = {'emsProbeConfigProbeIndex': emsProbeConfigProbeIndex, 'emsProbeConfigProbeName': emsProbeConfigProbeName, 'emsProbeConfigProbeHighTempThresh': emsProbeConfigProbeHighTempThresh, 'emsProbeConfigProbeLowTempThresh': emsProbeConfigProbeLowTempThresh, 'emsProbeConfigProbeHighHumidityThresh': emsProbeConfigProbeHighHumidityThresh, 'emsProbeConfigProbeLowHumidityThresh': emsProbeConfigProbeLowHumidityThresh}
+	columns = {'emsProbeConfigProbeIndex': emsProbeConfigProbeIndex, 'emsProbeConfigProbeName': emsProbeConfigProbeName, 'emsProbeConfigProbeHighTempThresh': emsProbeConfigProbeHighTempThresh, 'emsProbeConfigProbeLowTempThresh': emsProbeConfigProbeLowTempThresh, 'emsProbeConfigProbeHighHumidityThresh': emsProbeConfigProbeHighHumidityThresh, 'emsProbeConfigProbeLowHumidityThresh': emsProbeConfigProbeLowHumidityThresh, 'emsProbeConfigProbeMaxTempThresh': emsProbeConfigProbeMaxTempThresh, 'emsProbeConfigProbeMinTempThresh': emsProbeConfigProbeMinTempThresh, 'emsProbeConfigProbeDeltaTemp': emsProbeConfigProbeDeltaTemp, 'emsProbeConfigProbeMaxHumidityThresh': emsProbeConfigProbeMaxHumidityThresh, 'emsProbeConfigProbeMinHumidityThresh': emsProbeConfigProbeMinHumidityThresh, 'emsProbeConfigProbeDeltaHumidity': emsProbeConfigProbeDeltaHumidity, 'emsProbeConfigProbeSTIncTempVariance': emsProbeConfigProbeSTIncTempVariance, 'emsProbeConfigProbeSTIncTempTime': emsProbeConfigProbeSTIncTempTime, 'emsProbeConfigProbeSTDecTempVariance': emsProbeConfigProbeSTDecTempVariance, 'emsProbeConfigProbeSTDecTempTime': emsProbeConfigProbeSTDecTempTime, 'emsProbeConfigProbeLTIncTempVariance': emsProbeConfigProbeLTIncTempVariance, 'emsProbeConfigProbeLTIncTempTime': emsProbeConfigProbeLTIncTempTime, 'emsProbeConfigProbeLTDecTempVariance': emsProbeConfigProbeLTDecTempVariance, 'emsProbeConfigProbeLTDecTempTime': emsProbeConfigProbeLTDecTempTime}
 
 
 class emsInputContactConfigEntry(RowObject):
@@ -9834,7 +16911,7 @@ class emsProbeStatusEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([emsProbeStatusProbeIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 3, 13, 1, 1])
 	access = 2
-	columns = {'emsProbeStatusProbeIndex': emsProbeStatusProbeIndex, 'emsProbeStatusProbeName': emsProbeStatusProbeName, 'emsProbeStatusProbeTemperature': emsProbeStatusProbeTemperature, 'emsProbeStatusProbeHighTempThresh': emsProbeStatusProbeHighTempThresh, 'emsProbeStatusProbeLowTempThresh': emsProbeStatusProbeLowTempThresh, 'emsProbeStatusProbeHumidity': emsProbeStatusProbeHumidity, 'emsProbeStatusProbeHighHumidityThresh': emsProbeStatusProbeHighHumidityThresh, 'emsProbeStatusProbeLowHumidityThresh': emsProbeStatusProbeLowHumidityThresh, 'emsProbeStatusProbeSerialNumber': emsProbeStatusProbeSerialNumber, 'emsProbeStatusProbeCommStatus': emsProbeStatusProbeCommStatus}
+	columns = {'emsProbeStatusProbeIndex': emsProbeStatusProbeIndex, 'emsProbeStatusProbeName': emsProbeStatusProbeName, 'emsProbeStatusProbeTemperature': emsProbeStatusProbeTemperature, 'emsProbeStatusProbeHighTempThresh': emsProbeStatusProbeHighTempThresh, 'emsProbeStatusProbeLowTempThresh': emsProbeStatusProbeLowTempThresh, 'emsProbeStatusProbeHumidity': emsProbeStatusProbeHumidity, 'emsProbeStatusProbeHighHumidityThresh': emsProbeStatusProbeHighHumidityThresh, 'emsProbeStatusProbeLowHumidityThresh': emsProbeStatusProbeLowHumidityThresh, 'emsProbeStatusProbeSerialNumber': emsProbeStatusProbeSerialNumber, 'emsProbeStatusProbeCommStatus': emsProbeStatusProbeCommStatus, 'emsProbeStatusProbeAlarmStatus': emsProbeStatusProbeAlarmStatus, 'emsProbeStatusProbeMaxTempThresh': emsProbeStatusProbeMaxTempThresh, 'emsProbeStatusProbeMinTempThresh': emsProbeStatusProbeMinTempThresh, 'emsProbeStatusProbeMaxHumidityThresh': emsProbeStatusProbeMaxHumidityThresh, 'emsProbeStatusProbeMinHumidityThresh': emsProbeStatusProbeMinHumidityThresh}
 
 
 class emsInputContactStatusEntry(RowObject):
@@ -9877,12 +16954,124 @@ class emsSensorStatusEntry(RowObject):
 	columns = {'emsSensorStatusSensorIndex': emsSensorStatusSensorIndex, 'emsSensorStatusSensorSystemName': emsSensorStatusSensorSystemName, 'emsSensorStatusSensorName': emsSensorStatusSensorName, 'emsSensorStatusSensorState': emsSensorStatusSensorState, 'emsSensorStatusSensorNormalState': emsSensorStatusSensorNormalState, 'emsSensorStatusSensorAlarmDelay': emsSensorStatusSensorAlarmDelay}
 
 
-class rPDULoadConfigEntry(RowObject):
+class memModulesStatusTableEntry(RowObject):
 	status = 3
-	index = pycopia.SMI.Objects.IndexObjects([rPDULoadConfigIndex], False)
+	index = pycopia.SMI.Objects.IndexObjects([memModulesStatusModuleNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 2, 1])
+	access = 2
+	columns = {'memModulesStatusModuleNumber': memModulesStatusModuleNumber, 'memModulesStatusModuleName': memModulesStatusModuleName, 'memModulesStatusModuleLocation': memModulesStatusModuleLocation, 'memModulesStatusModelNumber': memModulesStatusModelNumber, 'memModulesStatusSerialNumber': memModulesStatusSerialNumber, 'memModulesStatusFirmwareRev': memModulesStatusFirmwareRev, 'memModulesStatusHardwareRev': memModulesStatusHardwareRev}
+
+
+class memModulesConfigTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memModulesConfigModuleNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 1, 4, 1])
+	access = 2
+	columns = {'memModulesConfigModuleNumber': memModulesConfigModuleNumber, 'memModulesConfigModuleName': memModulesConfigModuleName, 'memModulesConfigModuleLocation': memModulesConfigModuleLocation}
+
+
+class memSensorsStatusTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memSensorsStatusModuleNumber, memSensorsStatusSensorNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 3, 1])
+	access = 2
+	columns = {'memSensorsStatusModuleNumber': memSensorsStatusModuleNumber, 'memSensorsStatusSensorNumber': memSensorsStatusSensorNumber, 'memSensorsStatusSensorName': memSensorsStatusSensorName, 'memSensorsStatusSensorLocation': memSensorsStatusSensorLocation, 'memSensorsTemperature': memSensorsTemperature, 'memSensorsHumidity': memSensorsHumidity, 'memSensorsCommStatus': memSensorsCommStatus, 'memSensorsAlarmStatus': memSensorsAlarmStatus}
+
+
+class memSensorsConfigTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memSensorsConfigModuleNumber, memSensorsConfigSensorNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 2, 5, 1])
+	access = 2
+	columns = {'memSensorsConfigModuleNumber': memSensorsConfigModuleNumber, 'memSensorsConfigSensorNumber': memSensorsConfigSensorNumber, 'memSensorsName': memSensorsName, 'memSensorsLocation': memSensorsLocation, 'memSensorsAlarmGeneration': memSensorsAlarmGeneration, 'memSensorsTempMaxThresh': memSensorsTempMaxThresh, 'memSensorsTempHighThresh': memSensorsTempHighThresh, 'memSensorsTempLowThresh': memSensorsTempLowThresh, 'memSensorsTempMinThresh': memSensorsTempMinThresh, 'memSensorsTempThreshHysteresis': memSensorsTempThreshHysteresis, 'memSensorsTempShortDecRateThreshValue': memSensorsTempShortDecRateThreshValue, 'memSensorsTempShortDecRateThreshTime': memSensorsTempShortDecRateThreshTime, 'memSensorsTempShortIncRateThreshValue': memSensorsTempShortIncRateThreshValue, 'memSensorsTempShortIncRateThreshTime': memSensorsTempShortIncRateThreshTime, 'memSensorsTempLongDecRateThreshValue': memSensorsTempLongDecRateThreshValue, 'memSensorsTempLongDecRateThreshTime': memSensorsTempLongDecRateThreshTime, 'memSensorsTempLongIncRateThreshValue': memSensorsTempLongIncRateThreshValue, 'memSensorsTempLongIncRateThreshTime': memSensorsTempLongIncRateThreshTime, 'memSensorsHumidityMaxThresh': memSensorsHumidityMaxThresh, 'memSensorsHumidityHighThresh': memSensorsHumidityHighThresh, 'memSensorsHumidityLowThresh': memSensorsHumidityLowThresh, 'memSensorsHumidityMinThresh': memSensorsHumidityMinThresh, 'memSensorsHumidityThreshHysteresis': memSensorsHumidityThreshHysteresis}
+
+
+class memInputsStatusTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memInputsStatusModuleNumber, memInputsStatusInputNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 2, 1])
+	access = 2
+	columns = {'memInputsStatusModuleNumber': memInputsStatusModuleNumber, 'memInputsStatusInputNumber': memInputsStatusInputNumber, 'memInputsStatusInputName': memInputsStatusInputName, 'memInputsStatusInputLocation': memInputsStatusInputLocation, 'memInputsStatusCurrentState': memInputsStatusCurrentState, 'memInputsStatusCurrentAnalogValue': memInputsStatusCurrentAnalogValue, 'memInputsStatusAlarmStatus': memInputsStatusAlarmStatus}
+
+
+class memInputsConfigTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memInputsConfigModuleNumber, memInputsConfigInputNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 3, 4, 1])
+	access = 2
+	columns = {'memInputsConfigModuleNumber': memInputsConfigModuleNumber, 'memInputsConfigInputNumber': memInputsConfigInputNumber, 'memInputName': memInputName, 'memInputLocation': memInputLocation, 'memInputType': memInputType, 'memInputAlarmGeneration': memInputAlarmGeneration, 'memInputNormalState': memInputNormalState, 'memInputAbnormalSeverity': memInputAbnormalSeverity, 'memInputNumberCalibrationPoints': memInputNumberCalibrationPoints, 'memInputAnalogCalibrationPoint1': memInputAnalogCalibrationPoint1, 'memInputAnalogCalibrationPoint2': memInputAnalogCalibrationPoint2, 'memInputAnalogCalibrationPoint3': memInputAnalogCalibrationPoint3, 'memInputAnalogCalibrationPoint4': memInputAnalogCalibrationPoint4, 'memInputAnalogCalibrationPoint5': memInputAnalogCalibrationPoint5, 'memInputAnalogCalibrationPoint1Value': memInputAnalogCalibrationPoint1Value, 'memInputAnalogCalibrationPoint2Value': memInputAnalogCalibrationPoint2Value, 'memInputAnalogCalibrationPoint3Value': memInputAnalogCalibrationPoint3Value, 'memInputAnalogCalibrationPoint4Value': memInputAnalogCalibrationPoint4Value, 'memInputAnalogCalibrationPoint5Value': memInputAnalogCalibrationPoint5Value, 'memInputAnalogMeasurementUnits': memInputAnalogMeasurementUnits, 'memInputAnalogMaxThresh': memInputAnalogMaxThresh, 'memInputAnalogHighThresh': memInputAnalogHighThresh, 'memInputAnalogLowThresh': memInputAnalogLowThresh, 'memInputAnalogMinThresh': memInputAnalogMinThresh, 'memInputAnalogThreshHysteresis': memInputAnalogThreshHysteresis}
+
+
+class memOutputStatusTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memOutputStatusModuleNumber, memOutputStatusOutputNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 2, 1])
+	access = 2
+	columns = {'memOutputStatusModuleNumber': memOutputStatusModuleNumber, 'memOutputStatusOutputNumber': memOutputStatusOutputNumber, 'memOutputStatusOutputName': memOutputStatusOutputName, 'memOutputStatusOutputLocation': memOutputStatusOutputLocation, 'memOutputStatusCurrentState': memOutputStatusCurrentState}
+
+
+class memOutputConfigTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memOutputConfigModuleNumber, memOutputConfigOutputNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 4, 4, 1])
+	access = 2
+	columns = {'memOutputConfigModuleNumber': memOutputConfigModuleNumber, 'memOutputConfigOutputNumber': memOutputConfigOutputNumber, 'memOutputName': memOutputName, 'memOutputLocation': memOutputLocation, 'memOutputNormalState': memOutputNormalState, 'memOutputAction': memOutputAction}
+
+
+class memOutletStatusTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memOutletStatusModuleNumber, memOutletStatusOutletNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 2, 1])
+	access = 2
+	columns = {'memOutletStatusModuleNumber': memOutletStatusModuleNumber, 'memOutletStatusOutletNumber': memOutletStatusOutletNumber, 'memOutletStatusOutletName': memOutletStatusOutletName, 'memOutletStatusOutletLocation': memOutletStatusOutletLocation, 'memOutletStatusCurrentState': memOutletStatusCurrentState}
+
+
+class memOutletConfigTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memOutletConfigModuleNumber, memOutletConfigOutletNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 5, 4, 1])
+	access = 2
+	columns = {'memOutletConfigModuleNumber': memOutletConfigModuleNumber, 'memOutletConfigOutletNumber': memOutletConfigOutletNumber, 'memOutletName': memOutletName, 'memOutletLocation': memOutletLocation, 'memOutletNormalState': memOutletNormalState, 'memOutletAction': memOutletAction}
+
+
+class memBeaconStatusTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memBeaconStatusModuleNumber, memBeaconStatusBeaconNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 2, 1])
+	access = 2
+	columns = {'memBeaconStatusModuleNumber': memBeaconStatusModuleNumber, 'memBeaconStatusBeaconNumber': memBeaconStatusBeaconNumber, 'memBeaconStatusBeaconName': memBeaconStatusBeaconName, 'memBeaconStatusBeaconLocation': memBeaconStatusBeaconLocation, 'memBeaconStatusCurrentState': memBeaconStatusCurrentState}
+
+
+class memBeaconConfigTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([memBeaconConfigModuleNumber, memBeaconConfigBeaconNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 10, 4, 6, 4, 1])
+	access = 2
+	columns = {'memBeaconConfigModuleNumber': memBeaconConfigModuleNumber, 'memBeaconConfigBeaconNumber': memBeaconConfigBeaconNumber, 'memBeaconConfigName': memBeaconConfigName, 'memBeaconConfigLocation': memBeaconConfigLocation, 'memBeaconAction': memBeaconAction}
+
+
+class rPDULoadDevBankEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDULoadDevBankIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 6, 1])
+	access = 2
+	columns = {'rPDULoadDevBankIndex': rPDULoadDevBankIndex, 'rPDULoadDevBankNumber': rPDULoadDevBankNumber, 'rPDULoadDevBankMaxLoad': rPDULoadDevBankMaxLoad}
+
+
+class rPDULoadDevMaxOutletEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDULoadDevOutletIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 1, 8, 1])
+	access = 2
+	columns = {'rPDULoadDevOutletIndex': rPDULoadDevOutletIndex, 'rPDULoadDevOutletNumber': rPDULoadDevOutletNumber, 'rPDULoadDevMaxOutletLoad': rPDULoadDevMaxOutletLoad}
+
+
+class rPDULoadPhaseConfigEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDULoadPhaseConfigIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 2, 1, 1])
 	access = 2
-	columns = {'rPDULoadConfigIndex': rPDULoadConfigIndex, 'rPDULoadConfigLowLoadThreshold': rPDULoadConfigLowLoadThreshold, 'rPDULoadConfigNearOverloadThreshold': rPDULoadConfigNearOverloadThreshold, 'rPDULoadConfigOverloadThreshold': rPDULoadConfigOverloadThreshold}
+	columns = {'rPDULoadPhaseConfigIndex': rPDULoadPhaseConfigIndex, 'rPDULoadPhaseConfigLowLoadThreshold': rPDULoadPhaseConfigLowLoadThreshold, 'rPDULoadPhaseConfigNearOverloadThreshold': rPDULoadPhaseConfigNearOverloadThreshold, 'rPDULoadPhaseConfigOverloadThreshold': rPDULoadPhaseConfigOverloadThreshold, 'rPDULoadPhaseConfigAlarm': rPDULoadPhaseConfigAlarm}
 
 
 class rPDULoadStatusEntry(RowObject):
@@ -9890,7 +17079,15 @@ class rPDULoadStatusEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([rPDULoadStatusIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 3, 1, 1])
 	access = 2
-	columns = {'rPDULoadStatusIndex': rPDULoadStatusIndex, 'rPDULoadStatusPhaseLoad': rPDULoadStatusPhaseLoad, 'rPDULoadStatusPhaseLoadState': rPDULoadStatusPhaseLoadState}
+	columns = {'rPDULoadStatusIndex': rPDULoadStatusIndex, 'rPDULoadStatusLoad': rPDULoadStatusLoad, 'rPDULoadStatusLoadState': rPDULoadStatusLoadState, 'rPDULoadStatusPhaseNumber': rPDULoadStatusPhaseNumber, 'rPDULoadStatusBankNumber': rPDULoadStatusBankNumber}
+
+
+class rPDULoadBankConfigEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDULoadBankConfigIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 2, 4, 1, 1])
+	access = 2
+	columns = {'rPDULoadBankConfigIndex': rPDULoadBankConfigIndex, 'rPDULoadBankConfigLowLoadThreshold': rPDULoadBankConfigLowLoadThreshold, 'rPDULoadBankConfigNearOverloadThreshold': rPDULoadBankConfigNearOverloadThreshold, 'rPDULoadBankConfigOverloadThreshold': rPDULoadBankConfigOverloadThreshold, 'rPDULoadBankConfigAlarm': rPDULoadBankConfigAlarm}
 
 
 class rPDUOutletPhaseEntry(RowObject):
@@ -9906,7 +17103,7 @@ class rPDUOutletControlEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([rPDUOutletControlIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 3, 1, 1])
 	access = 2
-	columns = {'rPDUOutletControlIndex': rPDUOutletControlIndex, 'rPDUOutletControlOutletName': rPDUOutletControlOutletName, 'rPDUOutletControlOutletPhase': rPDUOutletControlOutletPhase, 'rPDUOutletControlOutletCommand': rPDUOutletControlOutletCommand}
+	columns = {'rPDUOutletControlIndex': rPDUOutletControlIndex, 'rPDUOutletControlOutletName': rPDUOutletControlOutletName, 'rPDUOutletControlOutletPhase': rPDUOutletControlOutletPhase, 'rPDUOutletControlOutletCommand': rPDUOutletControlOutletCommand, 'rPDUOutletControlOutletBank': rPDUOutletControlOutletBank}
 
 
 class rPDUOutletConfigEntry(RowObject):
@@ -9914,7 +17111,15 @@ class rPDUOutletConfigEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([rPDUOutletConfigIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 1, 1])
 	access = 2
-	columns = {'rPDUOutletConfigIndex': rPDUOutletConfigIndex, 'rPDUOutletConfigOutletName': rPDUOutletConfigOutletName, 'rPDUOutletConfigOutletPhase': rPDUOutletConfigOutletPhase, 'rPDUOutletConfigPowerOnTime': rPDUOutletConfigPowerOnTime, 'rPDUOutletConfigPowerOffTime': rPDUOutletConfigPowerOffTime, 'rPDUOutletConfigRebootDuration': rPDUOutletConfigRebootDuration}
+	columns = {'rPDUOutletConfigIndex': rPDUOutletConfigIndex, 'rPDUOutletConfigOutletName': rPDUOutletConfigOutletName, 'rPDUOutletConfigOutletPhase': rPDUOutletConfigOutletPhase, 'rPDUOutletConfigPowerOnTime': rPDUOutletConfigPowerOnTime, 'rPDUOutletConfigPowerOffTime': rPDUOutletConfigPowerOffTime, 'rPDUOutletConfigRebootDuration': rPDUOutletConfigRebootDuration, 'rPDUOutletConfigOutletBank': rPDUOutletConfigOutletBank}
+
+
+class rPDUOutletConfigMonitoredEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDUOutletConfigMonitoredIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 4, 3, 1])
+	access = 2
+	columns = {'rPDUOutletConfigMonitoredIndex': rPDUOutletConfigMonitoredIndex, 'rPDUOutletConfigMonitoredName': rPDUOutletConfigMonitoredName, 'rPDUOutletConfigMonitoredNumber': rPDUOutletConfigMonitoredNumber, 'rPDUOutletConfigMonitoredLowLoadThreshold': rPDUOutletConfigMonitoredLowLoadThreshold, 'rPDUOutletConfigMonitoredNearOverloadThreshold': rPDUOutletConfigMonitoredNearOverloadThreshold, 'rPDUOutletConfigMonitoredOverloadThreshold': rPDUOutletConfigMonitoredOverloadThreshold}
 
 
 class rPDUOutletStatusEntry(RowObject):
@@ -9922,7 +17127,39 @@ class rPDUOutletStatusEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([rPDUOutletStatusIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 5, 1, 1])
 	access = 2
-	columns = {'rPDUOutletStatusIndex': rPDUOutletStatusIndex, 'rPDUOutletStatusOutletName': rPDUOutletStatusOutletName, 'rPDUOutletStatusOutletPhase': rPDUOutletStatusOutletPhase, 'rPDUOutletStatusOutletState': rPDUOutletStatusOutletState, 'rPDUOutletStatusCommandPending': rPDUOutletStatusCommandPending}
+	columns = {'rPDUOutletStatusIndex': rPDUOutletStatusIndex, 'rPDUOutletStatusOutletName': rPDUOutletStatusOutletName, 'rPDUOutletStatusOutletPhase': rPDUOutletStatusOutletPhase, 'rPDUOutletStatusOutletState': rPDUOutletStatusOutletState, 'rPDUOutletStatusCommandPending': rPDUOutletStatusCommandPending, 'rPDUOutletStatusOutletBank': rPDUOutletStatusOutletBank, 'rPDUOutletStatusLoad': rPDUOutletStatusLoad}
+
+
+class rPDUOutletBankEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDUOutletBankIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 3, 6, 1, 1])
+	access = 2
+	columns = {'rPDUOutletBankIndex': rPDUOutletBankIndex, 'rPDUOutletBankOverloadRestriction': rPDUOutletBankOverloadRestriction}
+
+
+class rPDUStatusBankEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDUStatusBankIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 2, 1])
+	access = 2
+	columns = {'rPDUStatusBankIndex': rPDUStatusBankIndex, 'rPDUStatusBankNumber': rPDUStatusBankNumber, 'rPDUStatusBankState': rPDUStatusBankState}
+
+
+class rPDUStatusPhaseEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDUStatusPhaseIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 4, 1])
+	access = 2
+	columns = {'rPDUStatusPhaseIndex': rPDUStatusPhaseIndex, 'rPDUStatusPhaseNumber': rPDUStatusPhaseNumber, 'rPDUStatusPhaseState': rPDUStatusPhaseState}
+
+
+class rPDUStatusOutletEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rPDUStatusOutletIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 12, 5, 6, 1])
+	access = 2
+	columns = {'rPDUStatusOutletIndex': rPDUStatusOutletIndex, 'rPDUStatusOutletNumber': rPDUStatusOutletNumber, 'rPDUStatusOutletState': rPDUStatusOutletState}
 
 
 class airFMIdentTableEntry(RowObject):
@@ -9941,12 +17178,20 @@ class airFMStatusModuleEntry(RowObject):
 	columns = {'airFMStatusModuleIndex': airFMStatusModuleIndex, 'airFMStatusModuleOutputCapacity': airFMStatusModuleOutputCapacity, 'airFMStatusModuleSupplyTempC': airFMStatusModuleSupplyTempC, 'airFMStatusModuleSupplyTempF': airFMStatusModuleSupplyTempF, 'airFMStatusModuleSupplyHum': airFMStatusModuleSupplyHum, 'airFMStatusModuleReturnTempC': airFMStatusModuleReturnTempC, 'airFMStatusModuleReturnTempF': airFMStatusModuleReturnTempF, 'airFMStatusModuleReturnHum': airFMStatusModuleReturnHum}
 
 
+class airIRAlarmConditionsEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([airIRAlarmConditionsIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 13, 3, 1, 2, 1])
+	access = 2
+	columns = {'airIRAlarmConditionsIndex': airIRAlarmConditionsIndex, 'airIREventCode': airIREventCode, 'airIRAlarmDescription': airIRAlarmDescription}
+
+
 class rARUIdentEntry(RowObject):
 	status = 3
-	index = pycopia.SMI.Objects.IndexObjects([rARUIdentIndex], False)
+	index = pycopia.SMI.Objects.IndexObjects([rARUIdentAruIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 1, 1, 1])
 	access = 2
-	columns = {'rARUIdentIndex': rARUIdentIndex, 'rARUIdentName': rARUIdentName}
+	columns = {'rARUIdentAruIndex': rARUIdentAruIndex, 'rARUIdentName': rARUIdentName}
 
 
 class rARUConfigEntry(RowObject):
@@ -9954,7 +17199,7 @@ class rARUConfigEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([rARUConfigAruIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 2, 1, 1])
 	access = 2
-	columns = {'rARUConfigAruIndex': rARUConfigAruIndex, 'rARUConfigAruName': rARUConfigAruName, 'rARUConfigAruRemoteSetpoint': rARUConfigAruRemoteSetpoint, 'rARUConfigAruTempOvrdEnableDisable': rARUConfigAruTempOvrdEnableDisable, 'rARUConfigAruTempOvrdSetpoint': rARUConfigAruTempOvrdSetpoint}
+	columns = {'rARUConfigAruIndex': rARUConfigAruIndex, 'rARUConfigAruName': rARUConfigAruName, 'rARUConfigAruRemoteSetpoint': rARUConfigAruRemoteSetpoint, 'rARUConfigAruTempOvrdEnableDisable': rARUConfigAruTempOvrdEnableDisable, 'rARUConfigAruTempOvrdSetpoint': rARUConfigAruTempOvrdSetpoint, 'rARUConfigAruMasterControl': rARUConfigAruMasterControl}
 
 
 class rARUStatusEntry(RowObject):
@@ -9962,7 +17207,39 @@ class rARUStatusEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([rARUStatusAruIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 3, 3, 1])
 	access = 2
-	columns = {'rARUStatusAruIndex': rARUStatusAruIndex, 'rARUStatusAruName': rARUStatusAruName, 'rARUStatusAruRemoteSetpoint': rARUStatusAruRemoteSetpoint, 'rARUStatusAruManualSetpoint': rARUStatusAruManualSetpoint, 'rARUStatusAruTemp1': rARUStatusAruTemp1, 'rARUStatusAruTemp2': rARUStatusAruTemp2, 'rARUStatusAruTemp3': rARUStatusAruTemp3, 'rARUStatusAruTempOvrdEnableDisable': rARUStatusAruTempOvrdEnableDisable, 'rARUStatusAruTempOvrdSetpoint': rARUStatusAruTempOvrdSetpoint, 'rARUStatusAruAlarmState': rARUStatusAruAlarmState, 'rARUStatusAruCommStatus': rARUStatusAruCommStatus}
+	columns = {'rARUStatusAruIndex': rARUStatusAruIndex, 'rARUStatusAruName': rARUStatusAruName, 'rARUStatusAruRemoteSetpoint': rARUStatusAruRemoteSetpoint, 'rARUStatusAruManualSetpoint': rARUStatusAruManualSetpoint, 'rARUStatusAruTemp1': rARUStatusAruTemp1, 'rARUStatusAruTemp2': rARUStatusAruTemp2, 'rARUStatusAruTemp3': rARUStatusAruTemp3, 'rARUStatusAruTempOvrdEnableDisable': rARUStatusAruTempOvrdEnableDisable, 'rARUStatusAruTempOvrdSetpoint': rARUStatusAruTempOvrdSetpoint, 'rARUStatusAruAlarmState': rARUStatusAruAlarmState, 'rARUStatusAruCommStatus': rARUStatusAruCommStatus, 'rARUStatusAruTempOvrdStatus': rARUStatusAruTempOvrdStatus, 'rARUStatusAruMasterControl': rARUStatusAruMasterControl, 'rARUStatusAruTotalAirflow': rARUStatusAruTotalAirflow}
+
+
+class rARUFanStatusEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rARUFanStatusAruIndex, rARUFanStatusFanIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 4, 1, 1])
+	access = 2
+	columns = {'rARUFanStatusAruIndex': rARUFanStatusAruIndex, 'rARUFanStatusNominalFanSpeed': rARUFanStatusNominalFanSpeed, 'rARUFanStatusSelectedFanLevel': rARUFanStatusSelectedFanLevel, 'rARUFanStatusReplacementThreshold': rARUFanStatusReplacementThreshold, 'rARUFanStatusFanIndex': rARUFanStatusFanIndex, 'rARUFanStatusFanOperatingStatus': rARUFanStatusFanOperatingStatus, 'rARUFanStatusFanRpmSpeed': rARUFanStatusFanRpmSpeed, 'rARUFanStatusFanFlowRate': rARUFanStatusFanFlowRate, 'rARUFanStatusFanInServiceDate': rARUFanStatusFanInServiceDate, 'rARUFanStatusFanRunhourCounter': rARUFanStatusFanRunhourCounter, 'rARUFanStatusFanRunhourReset': rARUFanStatusFanRunhourReset}
+
+
+class rARUPowerStatusEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rARUPowerStatusAruIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 5, 1, 1])
+	access = 2
+	columns = {'rARUPowerStatusAruIndex': rARUPowerStatusAruIndex, 'rARUPowerStatusPrimaryAcPresent': rARUPowerStatusPrimaryAcPresent, 'rARUPowerStatusAuxiliaryAcPresent': rARUPowerStatusAuxiliaryAcPresent, 'rARUPowerStatusRedundantAcConfig': rARUPowerStatusRedundantAcConfig}
+
+
+class rARUSensorsStatusTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rARUSensorsStatusAruIndex, rARUSensorsStatusSensorNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 2, 1])
+	access = 2
+	columns = {'rARUSensorsStatusAruIndex': rARUSensorsStatusAruIndex, 'rARUSensorsStatusSensorNumber': rARUSensorsStatusSensorNumber, 'rARUSensorsTemperature': rARUSensorsTemperature}
+
+
+class rARUSensorsConfigTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([rARUSensorsConfigAruIndex, rARUSensorsConfigSensorNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 14, 6, 4, 1])
+	access = 2
+	columns = {'rARUSensorsConfigAruIndex': rARUSensorsConfigAruIndex, 'rARUSensorsConfigSensorNumber': rARUSensorsConfigSensorNumber, 'rARUSensorsName': rARUSensorsName, 'rARUSensorsLocation': rARUSensorsLocation, 'rARUSensorsTempMaxThresh': rARUSensorsTempMaxThresh, 'rARUSensorsTempHighThresh': rARUSensorsTempHighThresh, 'rARUSensorsTempLowThresh': rARUSensorsTempLowThresh, 'rARUSensorsTempMinThresh': rARUSensorsTempMinThresh, 'rARUSensorsTempThreshHysteresis': rARUSensorsTempThreshHysteresis, 'rARUSensorsTempShortDecRateThreshValue': rARUSensorsTempShortDecRateThreshValue, 'rARUSensorsTempShortDecRateThreshTime': rARUSensorsTempShortDecRateThreshTime, 'rARUSensorsTempShortIncRateThreshValue': rARUSensorsTempShortIncRateThreshValue, 'rARUSensorsTempShortIncRateThreshTime': rARUSensorsTempShortIncRateThreshTime, 'rARUSensorsTempLongDecRateThreshValue': rARUSensorsTempLongDecRateThreshValue, 'rARUSensorsTempLongDecRateThreshTime': rARUSensorsTempLongDecRateThreshTime, 'rARUSensorsTempLongIncRateThreshValue': rARUSensorsTempLongIncRateThreshValue, 'rARUSensorsTempLongIncRateThreshTime': rARUSensorsTempLongIncRateThreshTime}
 
 
 class xPDUMainInputVoltagePhaseEntry(RowObject):
@@ -9994,7 +17271,7 @@ class xPDUSystemOutputPhaseEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([xPDUSystemOutputPhaseIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 3, 4, 14, 1])
 	access = 2
-	columns = {'xPDUSystemOutputPhaseIndex': xPDUSystemOutputPhaseIndex, 'xPDUSystemOutputVoltageLtoL': xPDUSystemOutputVoltageLtoL, 'xPDUSystemOutputVoltageLtoN': xPDUSystemOutputVoltageLtoN, 'xPDUSystemOutputPhaseCurrent': xPDUSystemOutputPhaseCurrent, 'xPDUSystemOutputPower': xPDUSystemOutputPower, 'xPDUSystemOutputVoltAmps': xPDUSystemOutputVoltAmps, 'xPDUSystemOutputPowerFactor': xPDUSystemOutputPowerFactor}
+	columns = {'xPDUSystemOutputPhaseIndex': xPDUSystemOutputPhaseIndex, 'xPDUSystemOutputVoltageLtoL': xPDUSystemOutputVoltageLtoL, 'xPDUSystemOutputVoltageLtoN': xPDUSystemOutputVoltageLtoN, 'xPDUSystemOutputPhaseCurrent': xPDUSystemOutputPhaseCurrent, 'xPDUSystemOutputPower': xPDUSystemOutputPower, 'xPDUSystemOutputApparentPower': xPDUSystemOutputApparentPower, 'xPDUSystemOutputPowerFactor': xPDUSystemOutputPowerFactor}
 
 
 class xPDUSystemBreakerTableEntry(RowObject):
@@ -10010,7 +17287,7 @@ class xPDUBranchBreakerEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([xPDUBranchBreakerTableIndex], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 4, 2, 3, 1])
 	access = 2
-	columns = {'xPDUBranchBreakerTableIndex': xPDUBranchBreakerTableIndex, 'xPDUBranchBreakerRating': xPDUBranchBreakerRating, 'xPDUBranchBreakerRDPFeed': xPDUBranchBreakerRDPFeed, 'xPDUBranchBreakerTieIndicator': xPDUBranchBreakerTieIndicator, 'xPDUBranchBreakerCurrent': xPDUBranchBreakerCurrent, 'xPDUBranchBreakerOverCurrentThreshold': xPDUBranchBreakerOverCurrentThreshold, 'xPDUBranchBreakerUnderCurrentThreshold': xPDUBranchBreakerUnderCurrentThreshold}
+	columns = {'xPDUBranchBreakerTableIndex': xPDUBranchBreakerTableIndex, 'xPDUBranchBreakerRating': xPDUBranchBreakerRating, 'xPDUBranchBreakerRDPFeed': xPDUBranchBreakerRDPFeed, 'xPDUBranchBreakerTieIndicator': xPDUBranchBreakerTieIndicator, 'xPDUBranchBreakerCurrent': xPDUBranchBreakerCurrent, 'xPDUBranchBreakerOverCurrentThreshold': xPDUBranchBreakerOverCurrentThreshold, 'xPDUBranchBreakerUnderCurrentThreshold': xPDUBranchBreakerUnderCurrentThreshold, 'xPDUBranchBreakerMaxCurrentThreshold': xPDUBranchBreakerMaxCurrentThreshold, 'xPDUBranchBreakerMinCurrentThreshold': xPDUBranchBreakerMinCurrentThreshold, 'xPDUBranchBreakerName': xPDUBranchBreakerName, 'xPDUBranchBreakerLocation': xPDUBranchBreakerLocation}
 
 
 class xPDUInputContactEntry(RowObject):
@@ -10018,7 +17295,7 @@ class xPDUInputContactEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([xPDUInputContactNumber], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 5, 3, 1])
 	access = 2
-	columns = {'xPDUInputContactNumber': xPDUInputContactNumber, 'xPDUInputContactName': xPDUInputContactName, 'xPDUNormalState': xPDUNormalState, 'xPDUCurrentState': xPDUCurrentState}
+	columns = {'xPDUInputContactNumber': xPDUInputContactNumber, 'xPDUInputContactName': xPDUInputContactName, 'xPDUInputContactNormalState': xPDUInputContactNormalState, 'xPDUInputContactCurrentState': xPDUInputContactCurrentState}
 
 
 class xPDUOutputRelayEntry(RowObject):
@@ -10026,7 +17303,223 @@ class xPDUOutputRelayEntry(RowObject):
 	index = pycopia.SMI.Objects.IndexObjects([xPDUOutputRelayNumber], False)
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 15, 6, 3, 1])
 	access = 2
-	columns = {'xPDUOutputRelayNumber': xPDUOutputRelayNumber, 'xPDUOutputRelayName': xPDUOutputRelayName, 'xPDUOutputNormalState': xPDUOutputNormalState, 'xPDUOutputCurrentState': xPDUOutputCurrentState}
+	columns = {'xPDUOutputRelayNumber': xPDUOutputRelayNumber, 'xPDUOutputRelayName': xPDUOutputRelayName, 'xPDUOutputRelayNormalState': xPDUOutputRelayNormalState, 'xPDUOutputRelayCurrentState': xPDUOutputRelayCurrentState}
+
+
+class battManUnitCalibTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManUnitCalibIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 3, 2, 1])
+	access = 2
+	columns = {'battManUnitCalibIndex': battManUnitCalibIndex, 'battManUnitSerialNumber': battManUnitSerialNumber, 'battManBatteryVoltageZeroCalib': battManBatteryVoltageZeroCalib, 'battManBatteryVoltageSpanCalib': battManBatteryVoltageSpanCalib}
+
+
+class battManStringCalibTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManStringCalibIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 4, 2, 1])
+	access = 2
+	columns = {'battManStringCalibIndex': battManStringCalibIndex, 'battManDCCurrentZeroCalib': battManDCCurrentZeroCalib, 'battManACCurrentZeroCalib': battManACCurrentZeroCalib, 'battManProbeRange': battManProbeRange}
+
+
+class battManString1BatteryCalibTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManString1BatteryCalibIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5, 2, 1])
+	access = 2
+	columns = {'battManString1BatteryCalibIndex': battManString1BatteryCalibIndex, 'battManString1BatteryInterTierOhmicValue': battManString1BatteryInterTierOhmicValue}
+
+
+class battManString2BatteryCalibTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManString2BatteryCalibIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 5, 4, 1])
+	access = 2
+	columns = {'battManString2BatteryCalibIndex': battManString2BatteryCalibIndex, 'battManString2BatteryInterTierOhmicValue': battManString2BatteryInterTierOhmicValue}
+
+
+class battManStringTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManStringIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 9, 2, 1])
+	access = 2
+	columns = {'battManStringIndex': battManStringIndex, 'battManStringCurrent': battManStringCurrent, 'battManStringRippleCurrent': battManStringRippleCurrent, 'battManStringChargerHighVoltageAlarm': battManStringChargerHighVoltageAlarm, 'battManStringChargerLowVoltageAlarm': battManStringChargerLowVoltageAlarm, 'battManStringCurrentProbeDisconnected': battManStringCurrentProbeDisconnected, 'battManStringOnBattery': battManStringOnBattery}
+
+
+class battManString1BatteryTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManString1BatteryIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 2, 1])
+	access = 2
+	columns = {'battManString1BatteryIndex': battManString1BatteryIndex, 'battManString1BatteryVoltage': battManString1BatteryVoltage, 'battManString1BatteryLowestVoltage': battManString1BatteryLowestVoltage, 'battManString1BatteryCellShorted': battManString1BatteryCellShorted, 'battManString1BatteryOpenFuseOrConnection': battManString1BatteryOpenFuseOrConnection, 'battManString1BatteryLowCapacity': battManString1BatteryLowCapacity, 'battManString1BatteryHighOhmicValue': battManString1BatteryHighOhmicValue, 'battManString1BatteryThermalRunaway': battManString1BatteryThermalRunaway, 'battManString1BatteryDryout': battManString1BatteryDryout}
+
+
+class battManString2BatteryTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManString2BatteryIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 10, 4, 1])
+	access = 2
+	columns = {'battManString2BatteryIndex': battManString2BatteryIndex, 'battManString2BatteryVoltage': battManString2BatteryVoltage, 'battManString2BatteryLowestVoltage': battManString2BatteryLowestVoltage, 'battManString2BatteryCellShorted': battManString2BatteryCellShorted, 'battManString2BatteryOpenFuseOrConnection': battManString2BatteryOpenFuseOrConnection, 'battManString2BatteryLowCapacity': battManString2BatteryLowCapacity, 'battManString2BatteryHighOhmicValue': battManString2BatteryHighOhmicValue, 'battManString2BatteryThermalRunaway': battManString2BatteryThermalRunaway, 'battManString2BatteryDryout': battManString2BatteryDryout}
+
+
+class battManInputContactTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManInputContactIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 11, 2, 1])
+	access = 2
+	columns = {'battManInputContactIndex': battManInputContactIndex, 'battManInputContactName': battManInputContactName, 'battManInputContactAlarmState': battManInputContactAlarmState, 'battManInputContactState': battManInputContactState, 'battManInputContactNormalState': battManInputContactNormalState, 'battManInputContactAlarmDelay': battManInputContactAlarmDelay}
+
+
+class battManString1OhmicValueTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManString1OhmicValueIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 3, 1])
+	access = 2
+	columns = {'battManString1OhmicValueIndex': battManString1OhmicValueIndex, 'battManString1OhmicValueData': battManString1OhmicValueData}
+
+
+class battManString1ResponseTestChangeTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManString1ResponseTestChangeIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 5, 1])
+	access = 2
+	columns = {'battManString1ResponseTestChangeIndex': battManString1ResponseTestChangeIndex, 'battManString1ResponseTestChangeData': battManString1ResponseTestChangeData}
+
+
+class battManString2OhmicValueTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManString2OhmicValueIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 8, 1])
+	access = 2
+	columns = {'battManString2OhmicValueIndex': battManString2OhmicValueIndex, 'battManString2OhmicValueData': battManString2OhmicValueData}
+
+
+class battManString2ResponseTestChangeTableEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([battManString2ResponseTestChangeIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 16, 13, 10, 1])
+	access = 2
+	columns = {'battManString2ResponseTestChangeIndex': battManString2ResponseTestChangeIndex, 'battManString2ResponseTestChangeData': battManString2ResponseTestChangeData}
+
+
+class xATSSwitchTimersEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSSwitchTimersIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 3, 2, 1])
+	access = 2
+	columns = {'xATSSwitchTimersIndex': xATSSwitchTimersIndex, 'xATSSwitchTimersName': xATSSwitchTimersName, 'xATSSwitchTimersAbort': xATSSwitchTimersAbort, 'xATSSwitchTimersStatus': xATSSwitchTimersStatus, 'xATSSwitchTimersRemainingTime': xATSSwitchTimersRemainingTime, 'xATSSwitchTimersDelaySetting': xATSSwitchTimersDelaySetting}
+
+
+class xATSSwitchBlockMapEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSSwitchBlockMapIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 4, 2, 1])
+	access = 2
+	columns = {'xATSSwitchBlockMapIndex': xATSSwitchBlockMapIndex, 'xATSSwitchBlockMapName': xATSSwitchBlockMapName, 'xATSSwitchBlockMapStatus': xATSSwitchBlockMapStatus, 'xATSSwitchBlockMapSetting': xATSSwitchBlockMapSetting}
+
+
+class xATSSwitchStatisticsEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSSwitchStatisticsIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 3, 5, 2, 1])
+	access = 2
+	columns = {'xATSSwitchStatisticsIndex': xATSSwitchStatisticsIndex, 'xATSSwitchStatisticsName': xATSSwitchStatisticsName, 'xATSSwitchStatisticsValue': xATSSwitchStatisticsValue, 'xATSSwitchStatisticsReset': xATSSwitchStatisticsReset}
+
+
+class xATSSource1PhaseEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSSource1Index], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 1, 7, 1])
+	access = 2
+	columns = {'xATSSource1Index': xATSSource1Index, 'xATSSource1VoltageLtoL': xATSSource1VoltageLtoL, 'xATSSource1VoltageLtoN': xATSSource1VoltageLtoN}
+
+
+class xATSSource2PhaseEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSSource2Index], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 2, 7, 1])
+	access = 2
+	columns = {'xATSSource2Index': xATSSource2Index, 'xATSSource2VoltageLtoL': xATSSource2VoltageLtoL, 'xATSSource2VoltageLtoN': xATSSource2VoltageLtoN}
+
+
+class xATSSystemOutputPhaseEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSSystemOutputPhaseIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 4, 3, 12, 1])
+	access = 2
+	columns = {'xATSSystemOutputPhaseIndex': xATSSystemOutputPhaseIndex, 'xATSSystemOutputVoltageLtoL': xATSSystemOutputVoltageLtoL, 'xATSSystemOutputVoltageLtoN': xATSSystemOutputVoltageLtoN, 'xATSSystemOutputPhaseCurrent': xATSSystemOutputPhaseCurrent, 'xATSSystemOutputPower': xATSSystemOutputPower, 'xATSSystemOutputApparentPower': xATSSystemOutputApparentPower, 'xATSSystemOutputPowerFactor': xATSSystemOutputPowerFactor}
+
+
+class xATSInputContactEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSInputContactNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 6, 3, 1])
+	access = 2
+	columns = {'xATSInputContactNumber': xATSInputContactNumber, 'xATSInputContactName': xATSInputContactName, 'xATSInputContactNormalState': xATSInputContactNormalState, 'xATSInputContactCurrentState': xATSInputContactCurrentState}
+
+
+class xATSOutputRelayEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSOutputRelayNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 17, 7, 3, 1])
+	access = 2
+	columns = {'xATSOutputRelayNumber': xATSOutputRelayNumber, 'xATSOutputRelayName': xATSOutputRelayName, 'xATSOutputRelayNormalState': xATSOutputRelayNormalState, 'xATSOutputRelayCurrentState': xATSOutputRelayCurrentState}
+
+
+class xATSGeneratorOutputPhaseEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([xATSGeneratorOutputPhaseIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 18, 1, 4, 6, 1])
+	access = 2
+	columns = {'xATSGeneratorOutputPhaseIndex': xATSGeneratorOutputPhaseIndex, 'xATSGeneratorOutputVoltageLtoL': xATSGeneratorOutputVoltageLtoL, 'xATSGeneratorOutputVoltageLtoN': xATSGeneratorOutputVoltageLtoN, 'xATSGeneratorOutputPhaseCurrent': xATSGeneratorOutputPhaseCurrent, 'xATSGeneratorOutputPower': xATSGeneratorOutputPower, 'xATSGeneratorOutputApparentPower': xATSGeneratorOutputApparentPower, 'xATSGeneratorOutputPowerFactor': xATSGeneratorOutputPowerFactor}
+
+
+class cpsCardIdentEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([cpsCardIdentIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 2, 1])
+	access = 2
+	columns = {'cpsCardIdentIndex': cpsCardIdentIndex, 'cpsCardIdentProd': cpsCardIdentProd, 'cpsCardIdentMan': cpsCardIdentMan, 'cpsCardIdentFunc': cpsCardIdentFunc, 'cpsCardIdentPCI': cpsCardIdentPCI}
+
+
+class cpsCardConfEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([cpsCardConfIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 3, 1])
+	access = 2
+	columns = {'cpsCardConfIndex': cpsCardConfIndex, 'cpsCardConfPower': cpsCardConfPower, 'cpsCardConfType': cpsCardConfType, 'cpsCardConfInter': cpsCardConfInter, 'cpsCardConfFunc': cpsCardConfFunc, 'cpsCardConfCardv': cpsCardConfCardv, 'cpsCardConfPort1': cpsCardConfPort1, 'cpsCardConfPort2': cpsCardConfPort2}
+
+
+class cpsCardStatusEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([cpsCardStatusIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 1, 4, 4, 1])
+	access = 2
+	columns = {'cpsCardStatusIndex': cpsCardStatusIndex, 'cpsCardStatusCard': cpsCardStatusCard, 'cpsCardStatusFunc': cpsCardStatusFunc}
+
+
+class cpsgroupEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([cpsGroupIndex], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 1, 11, 1])
+	access = 2
+	columns = {'cpsGroupIndex': cpsGroupIndex, 'cpsGroupName': cpsGroupName, 'cpsGroupUsers': cpsGroupUsers}
+
+
+class cpssportEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([cpsSPortNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 2, 6, 2, 1, 1])
+	access = 2
+	columns = {'cpsSPortNumber': cpsSPortNumber, 'cpsSPortTty': cpsSPortTty, 'cpsSPortName': cpsSPortName, 'cpsSPortSpeed': cpsSPortSpeed, 'cpsSPortDataSize': cpsSPortDataSize, 'cpsSPortStopBits': cpsSPortStopBits, 'cpsSPortParity': cpsSPortParity, 'cpsSPortFlowCtrl': cpsSPortFlowCtrl, 'cpsSPortDTRdelay': cpsSPortDTRdelay, 'cpsSPortDCDCtrl': cpsSPortDCDCtrl, 'cpsSPortLogUtmp': cpsSPortLogUtmp, 'cpsSPortLogWtmp': cpsSPortLogWtmp, 'cpsSPortLogform': cpsSPortLogform, 'cpsSPortAuthtype': cpsSPortAuthtype, 'cpsSPortAuthSrv1': cpsSPortAuthSrv1, 'cpsSPortAccSrv1': cpsSPortAccSrv1, 'cpsSPortAuthTmo': cpsSPortAuthTmo, 'cpsSPortAuthRetr': cpsSPortAuthRetr, 'cpsSPortAuthSrv2': cpsSPortAuthSrv2, 'cpsSPortAccSrv2': cpsSPortAccSrv2, 'cpsSPortAuthSecret': cpsSPortAuthSecret, 'cpsSPortAuthRadP': cpsSPortAuthRadP, 'cpsSPortAuthAcc': cpsSPortAuthAcc, 'cpsSPortProtocol': cpsSPortProtocol, 'cpsSPortRemoteIP': cpsSPortRemoteIP, 'cpsSPortSocketPort': cpsSPortSocketPort, 'cpsSPortRemHost': cpsSPortRemHost, 'cpsSPortBanner': cpsSPortBanner, 'cpsSPortPrompt': cpsSPortPrompt, 'cpsSPortTermType': cpsSPortTermType, 'cpsSPortAutomUsr': cpsSPortAutomUsr, 'cpsSPortNetMask': cpsSPortNetMask, 'cpsSPortPppMtu': cpsSPortPppMtu, 'cpsSPortPppMru': cpsSPortPppMru, 'cpsSPortPppOptions': cpsSPortPppOptions, 'cpsSPortPppFoption': cpsSPortPppFoption, 'cpsSPortModemChat': cpsSPortModemChat, 'cpsSPortSttyCmd': cpsSPortSttyCmd, 'cpsSPortSockTx': cpsSPortSockTx, 'cpsSPortSockPoll': cpsSPortSockPoll, 'cpsSPortSockIdle': cpsSPortSockIdle, 'cpsSPortDBsize': cpsSPortDBsize, 'cpsSPortDBtime': cpsSPortDBtime, 'cpsSPortDBmode': cpsSPortDBmode, 'cpsSPortDBsyslog': cpsSPortDBsyslog, 'cpsSPortDBmenu': cpsSPortDBmenu, 'cpsSPortDBalarm': cpsSPortDBalarm, 'cpsSPortSSHbreak': cpsSPortSSHbreak, 'cpsSPortSniffSess': cpsSPortSniffSess, 'cpsSPortSniffAdm': cpsSPortSniffAdm, 'cpsSPortSniffEsc': cpsSPortSniffEsc, 'cpsSPortSniffMsess': cpsSPortSniffMsess, 'cpsSPortTelnetMode': cpsSPortTelnetMode, 'cpsSPortSysBufSess': cpsSPortSysBufSess, 'cpsSPortLFSuppress': cpsSPortLFSuppress, 'cpsSPortAutoInput': cpsSPortAutoInput, 'cpsSPortAutoOutput': cpsSPortAutoOutput, 'cpsSPortBreakInterval': cpsSPortBreakInterval}
+
+
+class cpsisPortEntry(RowObject):
+	status = 3
+	index = pycopia.SMI.Objects.IndexObjects([cpsISPortNumber], False)
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 1, 1, 19, 1, 3, 1, 1])
+	access = 2
+	columns = {'cpsISPortNumber': cpsISPortNumber, 'cpsISPortTty': cpsISPortTty, 'cpsISPortName': cpsISPortName, 'cpsISPortSpeed': cpsISPortSpeed, 'cpsISPortTxBytes': cpsISPortTxBytes, 'cpsISPortRXBytes': cpsISPortRXBytes, 'cpsISPortErrFrame': cpsISPortErrFrame, 'cpsISPortErrParity': cpsISPortErrParity, 'cpsISPortErrBreaks': cpsISPortErrBreaks, 'cpsISPortErrOverrun': cpsISPortErrOverrun, 'cpsISPortSigDTR': cpsISPortSigDTR, 'cpsISPortSigCD': cpsISPortSigCD, 'cpsISPortSigDSR': cpsISPortSigDSR, 'cpsISPortSigRTS': cpsISPortSigRTS, 'cpsISPortSigCTS': cpsISPortSigCTS, 'cpsISPortSigRI': cpsISPortSigRI}
 
 
 class powerNetSoftwareEntry(RowObject):
@@ -10926,31 +18419,31 @@ class pduContactFaultCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 221])
 
-class rmPDUUndercurrent(NotificationObject):
+class rPDUBankPhaseLowLoad(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 222])
 
-class rmPDUUndercurrentCleared(NotificationObject):
+class rPDUBankPhaseLowLoadCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 223])
 
-class rmPDUOvercurrent(NotificationObject):
+class rPDUBankPhaseNearOverload(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 224])
 
-class rmPDUOvercurrentCleared(NotificationObject):
+class rPDUBankPhaseNearOverloadCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 225])
 
-class rmPDUOverload(NotificationObject):
+class rPDUBankPhaseOverload(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 226])
 
-class rmPDUOverloadCleared(NotificationObject):
+class rPDUBankPhaseOverloadCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 227])
 
-class rmPDUCommunicationEstablished(NotificationObject):
+class aruDeviceConfigChange(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 228])
 
@@ -11266,137 +18759,1269 @@ class airInformationalConditionCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 311])
 
-class xPDUThreePhaseInputVoltageAlarm(NotificationObject):
+class xPDUInputVoltageLowAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 312])
 
-class xPDUThreePhaseInputVoltageNormal(NotificationObject):
+class xPDUInputVoltageLowAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 313])
 
-class xPDUThreePhaseBypassVoltageAlarm(NotificationObject):
+class xPDUInputVoltageHighAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 314])
 
-class xPDUThreePhaseBypassVoltageNormal(NotificationObject):
+class xPDUInputVoltageHighAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 315])
 
-class xPDUThreePhaseOutputVoltageAlarm(NotificationObject):
+class xPDUBypassVoltageLowAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 316])
 
-class xPDUThreePhaseOutputVoltageNormal(NotificationObject):
+class xPDUBypassVoltageLowAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 317])
 
-class xPDUThreePhaseOutputCurrentAlarm(NotificationObject):
+class xPDUBypassVoltageHighAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 318])
 
-class xPDUThreePhaseOutputCurrentNormal(NotificationObject):
+class xPDUBypassVoltageHighAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 319])
 
-class xPDUOutputFrequencyAlarm(NotificationObject):
+class xPDUOutputVoltageLowAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 320])
 
-class xPDUOutputFrequencyNormal(NotificationObject):
+class xPDUOutputVoltageLowAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 321])
 
-class xPDUSystemGroundCurrentAlarm(NotificationObject):
+class xPDUOutputVoltageHighAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 322])
 
-class xPDUSystemGroundCurrentNormal(NotificationObject):
+class xPDUOutputVoltageHighAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 323])
 
-class xPDUInputContactStateAbnormal(NotificationObject):
+class xPDUOutputCurrentLowAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 324])
 
-class xPDUInputContactStateNormal(NotificationObject):
+class xPDUOutputCurrentLowAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 325])
 
-class xPDUOutputRelayStateAbnormal(NotificationObject):
+class xPDUOutputCurrentHighAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 326])
 
-class xPDUOutputRelayStateNormal(NotificationObject):
+class xPDUOutputCurrentHighAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 327])
 
-class xPDUCoolingFanAlarm(NotificationObject):
+class xPDUOutputFrequencyAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 328])
 
-class xPDUCoolingFanAlarmCleared(NotificationObject):
+class xPDUOutputFrequencyAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 329])
 
-class xPDUTransformerTempAlarm(NotificationObject):
+class xPDUSystemGroundCurrentAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 330])
 
-class xPDUTransformerTempAlarmCleared(NotificationObject):
+class xPDUSystemGroundCurrentAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 331])
 
-class xPDUBranchCurrentAlarm(NotificationObject):
+class xPDUInputContactStateAbnormal(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 332])
 
-class xPDUBranchCurrentNormal(NotificationObject):
+class xPDUInputContactStateNormal(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 333])
 
-class xPDUBreakerChangeEvent(NotificationObject):
+class xPDUOutputNeutralCurrentHighAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 334])
 
-class xPDUInternalCommError(NotificationObject):
+class xPDUOutputNeutralCurrentHighAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 335])
 
-class xPDUInternalCommEstablished(NotificationObject):
+class xPDUCoolingFanAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 336])
 
-class xPDUSystemStateAlarm(NotificationObject):
+class xPDUCoolingFanAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 337])
 
-class xPDUSystemStateNormal(NotificationObject):
+class xPDUTransformerTempAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 338])
 
-class xPDUEpoTestMode(NotificationObject):
+class xPDUTransformerTempAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 339])
 
-class xPDUEpoArmed(NotificationObject):
+class xPDUBranchCurrentLowAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 340])
 
-class xPDUFuseBlownAlarm(NotificationObject):
+class xPDUBranchCurrentLowAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 341])
 
-class xPDUFuseBlownAlarmCleared(NotificationObject):
+class xPDUBranchCurrentHighAlarm(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 342])
 
-class xPDUBreakerPositionAlarm(NotificationObject):
+class xPDUBranchCurrentHighAlarmCleared(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 343])
 
-class xPDUBreakerPositionAlarmCleared(NotificationObject):
+class xPDUInternalCommError(NotificationObject):
 	status = 1
 	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 344])
+
+class emsHardwareStateAbnormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 345])
+
+class emsHardwareStateNormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 346])
+
+class ceSevereCondition(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 347])
+
+class ceSevereConditionCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 348])
+
+class ceWarningCondition(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 349])
+
+class ceWarningConditionCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 350])
+
+class ceInformationalCondition(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 351])
+
+class ceInformationalConditionCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 352])
+
+class upsInternalOverTemperature(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 353])
+
+class upsInternalOverTemperatureCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 354])
+
+class upsMpuReset(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 355])
+
+class upsOutputSwitchClosed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 356])
+
+class upsOutputSwitchOpened(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 357])
+
+class upsCalibrationStackChanged(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 358])
+
+class envMaxTempThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 359])
+
+class envMaxTempThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 360])
+
+class envMinTempThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 361])
+
+class envMinTempThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 362])
+
+class envMaxHumidityThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 363])
+
+class envMaxHumidityThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 364])
+
+class envMinHumidityThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 365])
+
+class envMinHumidityThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 366])
+
+class envSTIncTempRateViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 367])
+
+class envSTIncTempRateViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 368])
+
+class envSTDecTempRateViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 369])
+
+class envSTDecTempRateViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 370])
+
+class envLTIncTempRateViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 371])
+
+class envLTIncTempRateViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 372])
+
+class envLTDecTempRateViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 373])
+
+class envLTDecTempRateViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 374])
+
+class bmsCriticalCondition(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 375])
+
+class bmsCriticalConditionCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 376])
+
+class bmsWarningCondition(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 377])
+
+class bmsWarningConditionCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 378])
+
+class bmsInformationalCondition(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 379])
+
+class bmsInformationalConditionCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 380])
+
+class xATSOutputVoltageLowAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 381])
+
+class xATSOutputVoltageLowAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 382])
+
+class xATSOutputVoltageHighAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 383])
+
+class xATSOutputVoltageHighAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 384])
+
+class xATSOutputCurrentLowAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 385])
+
+class xATSOutputCurrentLowAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 386])
+
+class xATSOutputCurrentHighAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 387])
+
+class xATSOutputCurrentHighAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 388])
+
+class xATSOutputFrequencyAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 389])
+
+class xATSOutputFrequencyAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 390])
+
+class xATSInternalCommError(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 391])
+
+class xATSInternalCommErrorCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 392])
+
+class xATSDataCommMismatchError(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 393])
+
+class xATSDataCommMismatchErrorCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 394])
+
+class xATSGenCommLost(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 395])
+
+class xATSGenCommEstablished(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 396])
+
+class xATSNeutralPosition(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 397])
+
+class xATSSwitchTransferEvent(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 398])
+
+class xATSInternalATSFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 399])
+
+class xATSInternalATSFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 400])
+
+class xATSEngineStartAsserted(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 401])
+
+class xATSEngineStopAsserted(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 402])
+
+class xATSStartFailure(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 403])
+
+class xATSStopFailure(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 404])
+
+class xATSNotInAutomaticMode(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 405])
+
+class xATSNotInAutomaticModeCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 406])
+
+class xATSEpoTripped(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 407])
+
+class xATSEpoReset(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 408])
+
+class xATSEpoTestMode(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 409])
+
+class xATSEpoArmed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 410])
+
+class xATSTestInitiated(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 411])
+
+class xATSTestCanceled(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 412])
+
+class xATSTestFailed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 413])
+
+class xATSTestPassed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 414])
+
+class xATSInputContactStateAbnormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 415])
+
+class xATSInputContactStateNormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 416])
+
+class xATSRemoteStartContactMismatch(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 417])
+
+class xATSRemoteStartContactMismatchCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 418])
+
+class xATSDoorOpenAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 419])
+
+class xATSDoorOpenAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 420])
+
+class xATSDCBackupAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 421])
+
+class xATSDCBackupAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 422])
+
+class xATSGeneratorLowCoolantLevelAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 423])
+
+class xATSGeneratorLowCoolantLevelAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 424])
+
+class xATSGeneratorVeryLowCoolantLevelAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 425])
+
+class xATSGeneratorVeryLowCoolantLevelAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 426])
+
+class xATSGeneratorHighCoolantTempAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 427])
+
+class xATSGeneratorHighCoolantTempAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 428])
+
+class xATSGeneratorVeryHighCoolantTempAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 429])
+
+class xATSGeneratorVeryHighCoolantTempAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 430])
+
+class xATSGeneratorLowCoolantTempAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 431])
+
+class xATSGeneratorLowCoolantTempAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 432])
+
+class xATSGeneratorLowOilLevelAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 433])
+
+class xATSGeneratorLowOilLevelAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 434])
+
+class xATSGeneratorLowBatteryVoltDuringCrankAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 435])
+
+class xATSGeneratorLowBatteryVoltDuringCrankAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 436])
+
+class xATSGeneratorVeryLowBatteryVoltDuringCrankAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 437])
+
+class xATSGeneratorVeryLowBatteryVoltDuringCrankAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 438])
+
+class xATSGeneratorEStop(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 439])
+
+class xATSGeneratorEStopCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 440])
+
+class xATSGeneratorHighBatteryVolt(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 441])
+
+class xATSGeneratorHighBatteryVoltCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 442])
+
+class xATSGeneratorLowBatteryVolt(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 443])
+
+class xATSGeneratorLowBatteryVoltCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 444])
+
+class xATSGeneratorControlSwitchNotAuto(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 445])
+
+class xATSGeneratorControlSwitchNotAutoCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 446])
+
+class xATSGeneratorLowOilPressure(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 447])
+
+class xATSGeneratorLowOilPressureCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 448])
+
+class xATSGeneratorVeryLowOilPressure(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 449])
+
+class xATSGeneratorVeryLowOilPressureCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 450])
+
+class xATSGeneratorOverload(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 451])
+
+class xATSGeneratorOverloadCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 452])
+
+class xATSGeneratorLowACVEvent(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 453])
+
+class xATSGeneratorLowACVEventCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 454])
+
+class xATSGeneratorHighACVEvent(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 455])
+
+class xATSGeneratorHighACVEventCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 456])
+
+class xATSGeneratorOverspeed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 457])
+
+class xATSGeneratorOverspeedCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 458])
+
+class xATSGeneratorEngineCold(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 459])
+
+class xATSGeneratorEngineColdCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 460])
+
+class xATSGeneratorOutputBreakerOpen(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 461])
+
+class xATSGeneratorOutputBreakerOpenCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 462])
+
+class xATSGeneratorLowFuelLevelAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 463])
+
+class xATSGeneratorLowFuelLevelAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 464])
+
+class xATSGeneratorVeryLowFuelLevelAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 465])
+
+class xATSGeneratorVeryLowFuelLevelAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 466])
+
+class xATSGeneratorLowRunTimeAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 467])
+
+class xATSGeneratorLowRunTimeAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 468])
+
+class xATSGeneratorVeryLowRunTimeAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 469])
+
+class xATSGeneratorVeryLowRunTimeAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 470])
+
+class xATSGeneratorServiceDueAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 471])
+
+class xATSGeneratorServiceDueAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 472])
+
+class xATSGeneratorShutdown(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 473])
+
+class xATSGeneratorShutdownCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 474])
+
+class xATSGeneratorBatteryCharger(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 475])
+
+class xATSGeneratorBatteryChargerCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 476])
+
+class xATSGeneratorGenericEvent(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 477])
+
+class xATSGeneratorGenericEventCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 478])
+
+class xPDUInternalCommErrorCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 479])
+
+class xPDUSystemStateAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 480])
+
+class xPDUSystemStateAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 481])
+
+class xPDUEpoTestMode(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 482])
+
+class xPDUEpoArmed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 483])
+
+class xPDUFuseBlownAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 484])
+
+class xPDUFuseBlownAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 485])
+
+class xPDUBreakerPositionAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 486])
+
+class xPDUBreakerPositionAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 487])
+
+class xPDUBreakerChangeEvent(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 488])
+
+class xPDUDataCommMismatchError(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 489])
+
+class xPDUDataCommMismatchErrorCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 490])
+
+class xPDUSystemInMaintenanceBypassMode(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 491])
+
+class xPDUSystemInUPSOperationalMode(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 492])
+
+class xATSGeneratorFuelTankRuptureAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 493])
+
+class xATSGeneratorFuelTankRuptureAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 494])
+
+class xATSGeneratorGroundFaultAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 495])
+
+class xATSGeneratorGroundFaultAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 496])
+
+class xATSOutputLoadPoweredByGeneratorAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 497])
+
+class xATSOutputLoadPoweredByGeneratorAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 498])
+
+class xAPCControllerFirmwareUpdateTransferStart(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 499])
+
+class xAPCControllerFirmwareUpdateTransferComplete(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 500])
+
+class xAPCControllerFirmwareUpdateTransferFailed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 501])
+
+class upsPfcInputRelayFailure(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 502])
+
+class upsPfcInputRelayFailureCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 503])
+
+class upsInverterOverTemperature(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 504])
+
+class upsInverterOverTemperatureCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 505])
+
+class upsBatteryOverVoltage(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 506])
+
+class upsBatteryOverVoltageCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 507])
+
+class upsEepromFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 508])
+
+class upsEepromFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 509])
+
+class aruFanRuntimeAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 510])
+
+class aruFanRuntimeAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 511])
+
+class aruFanPoorPerformanceAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 512])
+
+class aruFanPoorPerformanceAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 513])
+
+class aruRedundantPowerLostAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 514])
+
+class aruRedundantPowerLostAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 515])
+
+class apcDeviceConfigChange(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 516])
+
+class apcEnvSensorConnected(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 517])
+
+class apcEnvSensorDisconnected(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 518])
+
+class apcEnvMaxTempThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 519])
+
+class apcEnvMaxTempThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 520])
+
+class apcEnvHighTempThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 521])
+
+class apcEnvHighTempThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 522])
+
+class apcEnvLowTempThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 523])
+
+class apcEnvLowTempThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 524])
+
+class apcEnvMinTempThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 525])
+
+class apcEnvMinTempThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 526])
+
+class apcEnvSTIncTempRateViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 527])
+
+class apcEnvSTIncTempRateViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 528])
+
+class apcEnvSTDecTempRateViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 529])
+
+class apcEnvSTDecTempRateViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 530])
+
+class apcEnvLTIncTempRateViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 531])
+
+class apcEnvLTIncTempRateViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 532])
+
+class apcEnvLTDecTempRateViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 533])
+
+class apcEnvLTDecTempRateViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 534])
+
+class apcEnvMaxHumidityThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 535])
+
+class apcEnvMaxHumidityThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 536])
+
+class apcEnvHighHumidityThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 537])
+
+class apcEnvHighHumidityThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 538])
+
+class apcEnvLowHumidityThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 539])
+
+class apcEnvLowHumidityThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 540])
+
+class apcEnvMinHumidityThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 541])
+
+class apcEnvMinHumidityThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 542])
+
+class apcBeaconConnected(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 543])
+
+class apcBeaconDisconnected(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 544])
+
+class apcBeaconOn(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 545])
+
+class apcBeaconOff(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 546])
+
+class apcOutletStateAbnormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 547])
+
+class apcOutletStateNormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 548])
+
+class apcOutputRelayStateAbnormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 549])
+
+class apcOutputRelayStateNormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 550])
+
+class apcHardwareStateAbnormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 551])
+
+class apcHardwareStateNormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 552])
+
+class apcCriticalDiscreteInputContactStateAbnormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 553])
+
+class apcCriticalDiscreteInputContactStateNormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 554])
+
+class apcWarningDiscreteInputContactStateAbnormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 555])
+
+class apcWarningDiscreteInputContactStateNormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 556])
+
+class apcInformationalDiscreteInputContactStateAbnormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 557])
+
+class apcInformationalDiscreteInputContactStateNormal(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 558])
+
+class apcAnalogInputMaxThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 559])
+
+class apcAnalogInputMaxThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 560])
+
+class apcAnalogInputHighThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 561])
+
+class apcAnalogInputHighThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 562])
+
+class apcAnalogInputLowThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 563])
+
+class apcAnalogInputLowThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 564])
+
+class apcAnalogInputMinThresholdViolation(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 565])
+
+class apcAnalogInputMinThresholdViolationCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 566])
+
+class apcDeviceClearLostComms(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 567])
+
+class apcDeviceConnected(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 568])
+
+class apcDeviceDisconnected(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 569])
+
+class apcUnregisteredUserAccessDenied(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 570])
+
+class apcRegisteredUserAccessDenied(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 571])
+
+class apcRegisteredUserConfigChange(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 572])
+
+class apcDoorUnlocked(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 573])
+
+class apcDoorLocked(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 574])
+
+class apcHandleOpened(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 575])
+
+class apcHandleClosed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 576])
+
+class apcDoorOpened(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 577])
+
+class apcDoorClosed(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 578])
+
+class apcKeyOverrideUnlocked(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 580])
+
+class apcKeyOverrideLocked(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 581])
+
+class apcForcedEntry(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 582])
+
+class apcForcedEntryCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 583])
+
+class apcRelockTimeout(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 584])
+
+class apcRelockTimeoutCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 585])
+
+class apcDoorSenseDisconnected(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 586])
+
+class apcDoorSenseConnected(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 587])
+
+class apcDoorLostComms(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 588])
+
+class apcDoorEstablishedComms(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 589])
+
+class apcRegisteredUserAccessChange(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 590])
+
+class apcUnregisteredUserStatusChange(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 591])
+
+class apcDeviceClearUserConfigs(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 592])
+
+class upsBatteryTempSensorFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 600])
+
+class upsBatteryTempSensorFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 601])
+
+class upsBatterySoftBusStartFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 602])
+
+class upsBatterySoftBusStartFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 603])
+
+class apcOutputShortCircuit(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 604])
+
+class apcOutputShortCircuitCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 605])
+
+class apcOutputRelayFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 606])
+
+class apcOutputRelayFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 607])
+
+class upsPfcFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 608])
+
+class upsPfcFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 609])
+
+class apcDcBusOverVoltage(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 610])
+
+class apcDcBusOverVoltageCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 611])
+
+class upsInverterFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 612])
+
+class upsInverterFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 613])
+
+class apcAdConverterFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 614])
+
+class apcAdConverterFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 615])
+
+class apcLogicPowerSupplyFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 616])
+
+class apcLogicPowerSupplyFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 617])
+
+class apcTransformerDCImbalanceFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 618])
+
+class apcTransformerDCImbalanceFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 619])
+
+class upsBackfeedRelayFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 620])
+
+class upsBackfeedRelayFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 621])
+
+class upsBypassRelayFault(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 622])
+
+class upsBypassRelayFaultCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 623])
+
+class xPDUBranchCurrentMinAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 626])
+
+class xPDUBranchCurrentMinAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 627])
+
+class xPDUBranchCurrentMaxAlarm(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 628])
+
+class xPDUBranchCurrentMaxAlarmCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 629])
+
+class rPDUOutletLowLoad(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 630])
+
+class rPDUOutletLowLoadCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 631])
+
+class rPDUOutletNearOverload(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 632])
+
+class rPDUOutletNearOverloadCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 633])
+
+class rPDUOutletOverload(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 634])
+
+class rPDUOutletOverloadCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 635])
+
+class apcTestTrap(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 636])
+
+class baseFanFailureCleared(NotificationObject):
+	status = 1
+	OID = pycopia.SMI.Basetypes.ObjectIdentifier([1, 3, 6, 1, 4, 1, 318, 0, 637])
 
 # groups 
 # capabilities 
