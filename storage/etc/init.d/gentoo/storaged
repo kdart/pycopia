@@ -1,0 +1,27 @@
+#!/sbin/runscript
+
+depend() {
+	need localmount
+}
+
+checkconfig() {
+	if [ ! -e /etc/pycopia/storage.conf ] ; then
+		eerror "No storage.conf in /etc/pycopia."
+		return 1
+	fi
+}
+
+start() {
+	checkconfig || return 1
+
+	ebegin "Starting storaged"
+	start-stop-daemon -bm --start --quiet --pidfile /var/run/storaged.pid --exec /usr/bin/storaged -- -n
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping storaged"
+	start-stop-daemon --stop --pidfile /var/run/storaged.pid
+	eend $?
+}
+

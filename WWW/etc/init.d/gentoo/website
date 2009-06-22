@@ -1,0 +1,28 @@
+#!/sbin/runscript
+# vim:ts=4:sw=4:softtabstop=0:smarttab:ft=sh
+
+depend() {
+	need net
+}
+
+checkconfig() {
+	if [ ! -e /etc/pycopia/website.conf ] ; then
+		eerror "No website.conf in /etc/pycopia."
+		return 1
+	fi
+}
+
+start() {
+	checkconfig || return 1
+
+	ebegin "Starting Pycopia webserver"
+	websitectl start
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping Pycopia webserver"
+	websitectl stop
+	eend $?
+}
+

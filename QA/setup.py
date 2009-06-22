@@ -29,6 +29,8 @@ setup (name=NAME, version=VERSION,
     scripts =glob("bin/*"), 
     data_files = [
         ('/etc/pycopia', glob("etc/*.dist")),
+        # XXX only Gentoo Linux supported for now.
+        ('/etc/init.d', glob("etc/init.d/gentoo/*")),
     ],
     test_suite = "test.QATests",
 

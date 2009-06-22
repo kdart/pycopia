@@ -198,7 +198,24 @@ mapper(Session, tables.client_session,
 # configuration data
 
 class Config(object):
-    pass
+
+    def __init__(self, **kwargs):
+        for name, value in kwargs.items():
+            setattr(self, name, value)
+
+    def _set_value(self, value):
+        self.pickle = pickle.dumps(value)
+
+    def _get_value(self):
+        return pickle.loads(self.pickle)
+
+    def _del_value(self):
+        self.pickle = pickle.dumps(None)
+
+    value = property(_get_value, _set_value, _del_value)
+
+    def __str__(self):
+        return "%s=%r" % (self.name, self.value)
 
 mapper(Config, tables.config, properties={
     'children': relation(Config, backref=backref('container', remote_side=[tables.config.c.id]))

@@ -1,0 +1,32 @@
+#!/sbin/runscript
+# vim:ts=8:sw=8:softtabstop=0:smarttab:ft=sh
+
+# init script for Pyro name server and event server as used by Pycopia.QA.
+
+depend() {
+	need net
+	use dns logger
+}
+
+export PYRO_CONFIG_FILE="/etc/pycopia/Pyro.conf"
+
+checkconfig() {
+	if [ ! -f $PYRO_CONFIG_FILE ] ; then
+		eerror "Please create $PYRO_CONFIG_FILE file."
+		return 1
+	fi
+	return 0
+}
+
+start() {
+	checkconfig || return $?
+	ebegin "Starting Plinth name server"
+
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping Plinth name server"
+	eend $?
+}
+

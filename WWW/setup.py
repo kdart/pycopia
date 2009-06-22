@@ -20,6 +20,7 @@ WEBSITE = os.environ.get("WEBSITE")
 
 DATAFILES = [
     ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
+    ('/etc/init.d', glob("etc/init.d/gentoo/*")),
     ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
     (os.path.join(sys.prefix, 'libexec', 'pycopia'), glob("libexec/*")),
 ]
