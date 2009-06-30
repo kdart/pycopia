@@ -1,0 +1,35 @@
+#!/sbin/runscript
+# vim:ts=8:sw=8:softtabstop=0:smarttab:ft=sh
+
+description="Control the Pyro event server as used by Pycopia.QA."
+
+depend() {
+	need pyro-ns
+	provide pyro-es
+}
+
+PIDFILE=/var/run/${SVCNAME}.pid
+
+PYRO_CONFIG_FILE=${NS_CONFIG_FILE:-"/etc/pycopia/Pyro.conf"}
+export PYRO_CONFIG_FILE
+source $PYRO_CONFIG_FILE
+
+
+start() {
+	einfo "${SVCNAME}: Removing any old name server entry." 
+	python -m Pyro.nsc remove :Pyro.EventService >/dev/null 2>&1
+	ebegin "Starting ${SVCNAME}"
+	start-stop-daemon --start -m -b --pidfile $PIDFILE \
+	--user ${NS_USER:-tester}:${NS_GROUP:-tester} \
+	--stdout ${PYRO_STORAGE}/${SVCNAME}.log \
+	--stderr ${PYRO_STORAGE}/${SVCNAME}.log \
+	-- python -OO -m Pyro.EventService.Server < /dev/null
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${SVCNAME}"
+	start-stop-daemon --stop --pidfile $PIDFILE
+	eend $?
+}
+

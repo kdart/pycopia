@@ -1,0 +1,58 @@
+# Pycopia.QA Pyro configuration.
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:ft=sh
+
+# This config file is read by Pyro (using the values literally), and also
+# sourced by the startup shell script. Make user it stays parse-able by a
+# shell.
+
+#PYRO_CONFIG_FILE=This file, set in init.d script
+# most other files relative to here.
+PYRO_STORAGE=/var/cache/pycopia
+
+PYRO_BC_RETRIES=1
+PYRO_BC_TIMEOUT=0.75
+PYRO_BROKEN_MSGWAITALL=0
+PYRO_CHECKSUM=0
+PYRO_COMPRESSION=0
+PYRO_DETAILED_TRACEBACK=0
+PYRO_DNS_URI=1
+PYRO_ES_BLOCKQUEUE=1
+PYRO_ES_QUEUESIZE=1000
+PYRO_GNOSIS_PARANOIA=0
+PYRO_MAXCONNECTIONS=200
+PYRO_TCP_LISTEN_BACKLOG=200
+PYRO_SOCK_KEEPALIVE=1
+PYRO_MOBILE_CODE=0
+PYRO_MULTITHREADED=1
+#PYRO_NS2_BC_ADDR=None
+PYRO_NS2_BC_PORT=9091
+#PYRO_NS2_HOSTNAME=None
+PYRO_NS2_PORT=9091
+#PYRO_NS_BC_ADDR=None
+PYRO_NS_BC_PORT=9090
+PYRO_NS_DEFAULTGROUP=:Default
+#PYRO_NS_HOSTNAME=None
+PYRO_NS_PORT=9090
+PYRO_ONEWAY_THREADED=1
+#PYRO_HOST=None
+PYRO_PORT=7766
+PYRO_PORT_RANGE=100
+#PYRO_PUBLISHHOST=None
+
+### logging
+PYRO_STDLOGGING=1
+PYRO_STDLOGGING_CFGFILE=/etc/pycopia/logging.cfg
+PYRO_TRACELEVEL=0
+PYRO_USER_TRACELEVEL=0
+
+### picklink
+PYRO_PICKLE_FORMAT=2
+#PYRO_XML_PICKLE=None
+
+### SSL connections
+PYROSSL_CA_CERT=/etc/ssl/certs/ca.pem
+PYROSSL_CERTDIR=/etc/ssl/certs
+PYROSSL_CLIENT_CERT=pyro_client.pem
+PYROSSL_SERVER_CERT=pyro_server.pem
+PYROSSL_POSTCONNCHECK=1
+

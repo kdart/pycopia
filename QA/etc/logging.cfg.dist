@@ -1,0 +1,64 @@
+# logging configuration file for Pyro and Pycopia QA.
+# I mostly use syslog-ng, and don't see a need to duplicate its
+# functionality in Python. Therefore I just hand off logging
+# responsibility to syslog/syslog-ng with minimal processing by Python or
+# Pyro.
+
+# Pyro uses two loggers:
+#	Pyro.system		(pyro itself)
+#	Pyro.user		(user logger)
+
+[loggers]
+keys=root,systemLog,userLog
+
+[handlers]
+keys=rootLog_stderr,PyrosystemLogFile,PyrouserLogFile,PycopiaLog
+
+[formatters]
+keys=pyroFormatter
+
+[logger_root]
+level=NOTSET
+handlers=rootLog_stderr
+
+[logger_systemLog]
+qualname=Pyro.system
+level=DEBUG
+handlers=PyrosystemLogFile
+propagate=0
+
+[logger_userLog]
+qualname=Pyro.user
+level=INFO
+handlers=PyrouserLogFile
+propagate=0
+
+[logger_PycopiaLog]
+qualname=pycopia
+level=DEBUG
+handlers=PycopiaLog
+propagate=0
+
+[handler_rootLog_stderr]
+class=StreamHandler
+level=NOTSET
+args=(sys.stderr,)
+
+[handler_PyrosystemLogFile]
+class=handlers.SysLogHandler
+formatter=pyroFormatter
+args=("/dev/log", handlers.SysLogHandler.LOG_DAEMON)
+
+[handler_PyrouserLogFile]
+class=handlers.SysLogHandler
+formatter=pyroFormatter
+args=("/dev/log", handlers.SysLogHandler.LOG_USER)
+
+[handler_PycopiaLog]
+class=handlers.SysLogHandler
+formatter=pyroFormatter
+args=("/dev/log", handlers.SysLogHandler.LOG_USER)
+
+[formatter_pyroFormatter]
+format= %(name)s[%(process)d]: %(message)s
+

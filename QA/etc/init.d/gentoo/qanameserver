@@ -1,32 +1,54 @@
 #!/sbin/runscript
 # vim:ts=8:sw=8:softtabstop=0:smarttab:ft=sh
 
-# init script for Pyro name server and event server as used by Pycopia.QA.
+description="Control the Pyro name server as used by Pycopia.QA."
 
 depend() {
 	need net
 	use dns logger
+	provide pyro-ns
 }
 
-export PYRO_CONFIG_FILE="/etc/pycopia/Pyro.conf"
+PIDFILE=/var/run/${SVCNAME}.pid
+
+PYRO_CONFIG_FILE=${NS_CONFIG_FILE:-"/etc/pycopia/Pyro.conf"}
+export PYRO_CONFIG_FILE
+
 
 checkconfig() {
 	if [ ! -f $PYRO_CONFIG_FILE ] ; then
-		eerror "Please create $PYRO_CONFIG_FILE file."
+		eerror "Please create $PYRO_CONFIG_FILE config file first."
 		return 1
 	fi
-	return 0
+	# The config file is source-able by a shell, make sure it stays that way.
+	source $PYRO_CONFIG_FILE
+	return $?
 }
 
 start() {
 	checkconfig || return $?
-	ebegin "Starting Plinth name server"
-
-	eend $?
+	export PYRO_NS_URIFILE=${PYRO_STORAGE}/Pyro_NS_URI
+	ebegin "Starting ${SVCNAME}"
+	start-stop-daemon --start -m -b -p $PIDFILE \
+	--user ${NS_USER:-tester}:${NS_GROUP:-tester} \
+	--stdout ${PYRO_STORAGE}/${SVCNAME}.log \
+	--stderr ${PYRO_STORAGE}/${SVCNAME}.log \
+	-- python -OO -m Pyro.naming -r -k -d < /dev/null
+	if [ $? == 0 ] ; then
+		einfo "Waiting for ${PYRO_NS_URIFILE}"
+		ewaitfile 10 ${PYRO_NS_URIFILE}
+		eend $?
+	else
+		eend $?
+	fi
 }
 
 stop() {
-	ebegin "Stopping Plinth name server"
+	checkconfig || return $?
+	export PYRO_NS_URIFILE=${PYRO_STORAGE}/Pyro_NS_URI
+	ebegin "Stopping ${SVCNAME}"
+	rm -f ${PYRO_NS_URIFILE}
+	start-stop-daemon --stop --pidfile $PIDFILE
 	eend $?
 }
 
