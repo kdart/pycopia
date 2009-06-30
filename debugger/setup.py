@@ -26,6 +26,7 @@ setup (name=NAME, version=VERSION,
     package_data = {
         'pycopia': ['*.doc'],
     },
+    scripts =glob("bin/*"), 
     test_suite = "test.DebuggerTests",
 
     description = "Enhanced Python debugger.",
