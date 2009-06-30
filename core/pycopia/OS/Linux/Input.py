@@ -241,4 +241,23 @@ class EventDevice(object):
         pass
 
 
+def get_device_list(start=0):
+    """Returns a list of tuples containing (index, devicename).
+    """
+    names = []
+    for d in range(start, 16):
+        try:
+            filename = "/dev/input/event%d" % (d,)
+            fd = os.open(filename, os.O_RDWR)
+            try:
+                name = fcntl.ioctl(fd, EVIOCGNAME, chr(0) * 256)
+            finally:
+                os.close(fd)
+            name = name.replace(chr(0), '')
+        except (OSError, IOError): # probably no permissions
+            continue
+        else:
+            names.append((d, name))
+    return names
+
 
