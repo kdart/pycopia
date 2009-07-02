@@ -6,6 +6,7 @@ import ez_setup
 ez_setup.use_setuptools()
 
 from setuptools import setup
+from glob import glob
 
 NAME = "pycopia-debugger"
 VERSION = "1.0"
