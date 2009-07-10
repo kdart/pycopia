@@ -52,6 +52,7 @@ PACKAGES = [
 "XML",
 "WWW",
 "vim",
+"fepy",
 ]
 
 SQUASHDIR = os.environ.get("SQUASHDIR", "/var/tmp/python")
@@ -65,65 +66,74 @@ def _do_commands(name, cmds, root):
     print "========", name, "==", cmd
     os.chdir(name)
     try:
-        os.system(cmd)
+        rv = os.WEXITSTATUS(os.system(cmd)) == 0
     finally:
         os.chdir("..")
         print "====================== END", name
         print
+    return rv
 
 def do_sdist(name):
-    _do_commands(name, ["sdist"], False)
+    return _do_commands(name, ["sdist"], False)
 
 def do_eggs(name):
-    _do_commands(name, ["bdist_egg"], False)
+    return _do_commands(name, ["bdist_egg"], False)
 
 def do_build(name):
-    _do_commands(name, ["build"], False)
+    return _do_commands(name, ["build"], False)
 
 def do_list(name):
     print name,
+    return True
 
 def do_develop(name):
-    _do_commands(name, ["develop -s $HOME/bin -l -N"], False)
+    return _do_commands(name, ["develop -s $HOME/bin -l -N"], False)
 
 def do_publish(name):
-    _do_commands(name, ['egg_info -RDb ""', "sdist", "register", "upload"], False)
+    return _do_commands(name, ['egg_info -RDb ""', "sdist", "register", "upload"], False)
 
 def do_egg_info(name):
-    _do_commands(name, ['egg_info'], False)
+    return _do_commands(name, ['egg_info'], False)
 
 def do_install(name):
-    _do_commands(name, ["install -O2"], True)
+    return _do_commands(name, ["install -O2"], True)
 
 def do_clean(name):
-    _do_commands(name, ["clean"], False)
+    return _do_commands(name, ["clean"], False)
 
 # "squash" selected sub packages to a single package. Also removes
 # setuptools dependency when tarballed.
 def do_squash(name):
+    if not _check_rsync():
+        print "Squash requires rsync tool to be installed."
+        return False
     if not os.path.isdir(SQUASHDIR):
         os.mkdir(SQUASHDIR)
-    #_do_commands(name, ["build"], False)
     os.chdir(name)
     uname = os.uname()
     bin_dir = "build/lib.%s-%s-%s" % (uname[0].lower(), uname[4], sys.version[:3])
     # e.g: build/lib.linux-x86_64-2.5/pycopia
     print "======== SQUASH", name, "to", SQUASHDIR
     try:
-        os.system("%s setup.py build" % (sys.executable,))
+        if os.WEXITSTATUS(os.system("%s setup.py build" % (sys.executable,))) != 0:
+            return False
         for pydir in ("build/lib", bin_dir):
             if os.path.isdir(pydir):
                 cmd = "rsync -azvu %s/ %s" % (pydir, SQUASHDIR)
-                os.system(cmd)
+                if os.WEXITSTATUS(os.system(cmd)) != 0:
+                    return False
     finally:
         os.chdir("..")
     _null_init(SQUASHDIR)
-    print "====================== END", name
+    print "====================== END", name, "squashed into", SQUASHDIR
     print
+    return True
 
 def _null_init(directory):
     open(os.path.join(directory, "pycopia", "__init__.py"), "w").close()
 
+def _check_rsync():
+    return os.WEXITSTATUS(os.system("rsync --version >/dev/null")) == 0
 
 
 def main(argv):
@@ -138,7 +148,8 @@ def main(argv):
         print __doc__
         return 2
     for name in (argv[2:] or PACKAGES):
-        meth(name)
+        if not meth(name):
+            break
     print
     return 0
 
