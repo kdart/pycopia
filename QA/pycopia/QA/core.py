@@ -507,6 +507,22 @@ class Test(object):
         """
         self._report.diagnostic(msg, 2)
 
+    def manual(self):
+        """Perform a purely manual test according to the instructions in the document string."""
+        UI = self.config.UI
+        UI.write(self.__class__.__doc__)
+        UI.Print("\nPlease perform this test according to the instructions above.")
+        completed = UI.yes_no("%IWas it completed%N?")
+        if completed:
+            passed = UI.yes_no("Did it pass?")
+            msg = UI.user_input(aid.IF(passed, "%gComments%N? ", "%rReason%N? "))
+            if passed:
+                return self.passed(msg)
+            else:
+                return self.failed(msg)
+        else:
+            return self.incomplete("Could not perform test.")
+
     # assertion methods make it convenient to check conditions. These names
     # match those in the standard `unittest` module for the benefit of those
     # people using that module.
