@@ -19,17 +19,12 @@
 The Client for Remote controllers.
 
 """
-__all__ = ["get_remote", "remote_copy"]
+__all__ = ["get_remote", "remote_copy", "get_proxy"]
 
 import sys, os
 
-import Pyro.util
 import Pyro.core
 
-from pycopia import basicconfig
-cf = basicconfig.get_config("remote.conf")
-Pyro.config.PYRO_NS_HOSTNAME = cf.nameserver
-del cf, basicconfig
 
 # some platform specific stuff. Should be minimal
 if sys.platform == "linux2":
@@ -41,6 +36,10 @@ elif sys.platform == "cygwin":
 elif sys.platform == "win32":
     from pycopia.remote.WindowsClient import *
 del sys
+
+
+class ProxyError(Exception):
+    pass
 
 
 def get_remote(name):
@@ -64,5 +63,14 @@ def remote_copy(agent, remfile, dst):
         dest.write(data)
     dest.close()
     agent.fclose(h)
+
+
+def get_proxy(name):
+    """Returns client from Default name space."""
+    srv = Pyro.core.getProxyForURI("PYRONAME://%s" % (name,))
+    if srv.alive():
+        return srv
+    else:
+        raise ProxyError("Could not get living proxy %r" % (name,))
 
 

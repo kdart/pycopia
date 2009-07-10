@@ -15,6 +15,18 @@ REVISION="$Revision$"
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
+# Some services, such as the Pyro nameserver, are set up to run as the
+# "tester" psuedo-user. That currently has to be set up manually. This
+# function should automate it, but here are the steps (for Gentoo Linux).
+def system_install():
+    #useradd -c Tester -G uucp,audio,cdrom,dialout,video,games,postgres,usb,crontab,messagebus,plugdev,realtime,pulse-access -m -U tester
+    #passwd tester
+    #mkdir /var/cache/pycopia
+    #chown tester:tester /var/cache/pycopia
+    #chmod g+w /var/cache/pycopia
+    pass
+
+
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
