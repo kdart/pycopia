@@ -31,6 +31,15 @@ if sys.platform == "win32":
         else:
             import pdb
             pdb.post_mortem(tb)
+# IronPython
+elif sys.platform == "cli":
+    def debugger_hook(exc, value, tb):
+        if (not hasattr(sys.stderr, "isatty") or
+            not sys.stderr.isatty() or exc in (SyntaxError, IndentationError, KeyboardInterrupt)):
+            sys.__excepthook__(exc, value, tb)
+        else:
+            from pycopia.fepy import debugger
+            debugger.post_mortem(tb, exc, value)
 else:
     def debugger_hook(exc, value, tb):
         if (not hasattr(sys.stderr, "isatty") or 
