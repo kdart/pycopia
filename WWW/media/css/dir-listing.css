@@ -1,0 +1,115 @@
+/* 
+ vim:ts=4:sw=4:expandtab:softtabstop=4:smarttab
+*/
+
+body {
+    width: 800px;
+    margin-left: 2em;
+    color: black;
+    background: #fff url(/media/images/pycopia_logo.png) no-repeat top left; 
+    padding-top: 250px;
+    font-family: "Helvetica", sans-serif; 
+}
+a {
+    text-decoration: none;
+}
+a:link {
+    background-color: transparent;
+    color: #60402D;
+}
+a:visited	{
+    background-color: transparent;
+    color: #4F3525;
+}
+a:active	{
+    background-color: transparent;
+    color: #AB7350;
+}
+a:hover {
+    background-color: transparent;
+    color: #AB7350;
+    text-decoration:underline;
+}
+
+img {
+    margin: 10px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    background: transparent;
+    text-decoration: none;
+    color: #003163;
+}
+
+h1 {
+    font-size:	135%;
+}
+
+h2 {
+    font-size:	115%;
+}
+
+div.list {
+}
+
+div.foot {
+    margin: 0;
+    padding: .5em 0em .5em .5em;
+    text-align: right;
+    color: gray;
+}
+
+hr {
+  width: 75% 
+}
+
+table {
+    width: 100%;
+}
+
+table > thead > tr {
+    background: #B56F4B;
+}
+
+td, th {
+  text-align: left;
+  padding: 2px;
+}
+
+th.n {
+    font-weight: bold;
+    width: 60%;
+}
+
+th.m {
+    font-weight: bold;
+}
+
+th.s {
+    font-weight: bold;
+}
+
+th.t {
+    font-weight: bold;
+}
+
+td.n {
+    width: 60%;
+}
+
+td.m {
+}
+
+td.s {
+}
+
+td.t {
+}
+
+
+pre.header {
+    width: 70%;
+    margin-top: -200px;
+    float: right;
+}
+
