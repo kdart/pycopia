@@ -482,6 +482,23 @@ class RootContainer(object):
     UI = property(get_userinterface, None, del_userinterface, 
                         "User interface object used for interactive tests.")
 
+    def _get_dbsession(self):
+        if self._cache.get("_dbsession") is None:
+            from pycopia.db import models
+            self._cache["_dbsession"] = dbsession = models.get_config(self.dburl)
+            return dbsession
+        else:
+            return self._cache["_dbsession"]
+
+    def _del_dbsession(self):
+        dbs = self._cache.get("_dbsession")
+        self._cache["_dbsession"] = None
+        if dbs:
+            sbs.close()
+
+    dbsession = property(_get_dbsession, None, _del_dbsession, 
+                        "Relational database session.")
+
     _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
 
     # perform shell-like variable expansion
@@ -583,6 +600,7 @@ this.  """
     if type(initdict) is dict:
         cf.evalupdate(initdict)
     cf.update(kwargs)
+    cf.dburl = dbcf.database
     return cf
 
 # performs an initial set up of the persistent storage. This usually only

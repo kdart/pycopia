@@ -16,6 +16,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+"""
+Report for UTF-8 capable terminals. The font DejavuSansMono works well.
+"""
+
 from pycopia import reports
 from pycopia import timelib
 

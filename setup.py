@@ -55,7 +55,8 @@ PACKAGES = [
 "fepy",
 ]
 
-SQUASHDIR = os.environ.get("SQUASHDIR", "/var/tmp/python")
+SQUASHDIR = os.environ.get("SQUASHDIR", 
+        os.path.expandvars("$HOME/.local/lib/python%s/site-packages" % (sys.version[:3],)))
 
 def _do_commands(name, cmds, root):
     if root:

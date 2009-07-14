@@ -157,15 +157,15 @@ class Environment(PersistentData):
 class EnvironmentRuntime(object):
     def __init__(self, config, tb=None, logfile=None):
         if tb is None:
-            self.testbed = Environment("default")
+            self.environment = Environment("default")
         else:
-            self.testbed = tb
+            self.environment = tb
         self.logfile = logfile
 
     def __getitem__(self, name):
-        return self.testbed[name]
+        return self.environment[name]
 
-    DUT = property(lambda s: s._items["DUT"])
+    DUT = property(lambda s: s.environment._items["DUT"])
 
 
 def IPGetter(user, network):

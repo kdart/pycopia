@@ -810,14 +810,15 @@ class SuiteEntry(TestEntry):
     def _get_result(self):
         self._results = self.inst.results
         for res in self._results:
-            if res != constants.PASSED:
+            if res.not_passed():
                 self._result = res
                 return res
-        self._result = constants.PASSED
-        return constants.PASSED
+        self._result = TestResult(constants.PASSED)
+        return TestResult(constants.PASSED)
 
     def _setResult(self, val):
         self._result = val
+
     result = property(lambda s: s._get_result(),
                                         _setResult, None,
         """The test rusult enumeration PASSED if all tests in suite passed.""")
@@ -839,7 +840,7 @@ class TestEntrySeries(TestEntry):
         self.args = args or ()
         self.kwargs = kwargs or {}
         self._sig = methods.MethodSignature(testinstance.execute)
-        self.result = constants.INCOMPLETE # Aggregate of test results
+        self.result = TestResult(constants.INCOMPLETE) # Aggregate of test results
         chooser = chooser or PruneEnd
         arglist = []
         if args:
@@ -873,11 +874,11 @@ class TestEntrySeries(TestEntry):
                 entryresult = entry.run()
                 resultset[entryresult] += 1
         if resultset[constants.FAILED] > 0:
-            self.result = constants.FAILED
+            self.result = TestResult(constants.FAILED)
         elif resultset[constants.INCOMPLETE] > 0:
-            self.result = constants.INCOMPLETE
+            self.result = TestResult(constants.INCOMPLETE)
         elif resultset[constants.PASSED] > 0: # must have all passed, anyway.
-            self.result = constants.PASSED
+            self.result = TestResult(constants.PASSED)
         return self.result
 
 
@@ -1204,13 +1205,13 @@ class TestSuite(object):
         for prereq in currententry.prerequisites:
             for entry in self._tests[:upto]:
                 if entry.match_prerequisite(prereq):
-                    if entry.result == constants.PASSED:
+                    if entry.result.is_passed():
                         continue
                     else:
                         self.report.add_heading(currententry.inst.test_name, 2)
                         self.report.diagnostic("Prerequisite: %s" % (prereq,), 2)
                         self.report.incomplete("Prerequisite did not pass.", 2)
-                        currententry.result = constants.INCOMPLETE
+                        currententry.result = TestResult(constants.INCOMPLETE)
                         return False
         return True # No prerequisite or prereq passed.
 
@@ -1245,7 +1246,7 @@ class TestSuite(object):
                         break
             except TestSuiteAbort, err:
                 self.info("Suite aborted by test %s (%s)." % (entry.test_name, err))
-                entry.result = constants.INCOMPLETE
+                entry.result = TestResult(constants.INCOMPLETE)
                 rv = constants.ABORT
                 break
             # This should only happen with an incorrectly written execute() method.

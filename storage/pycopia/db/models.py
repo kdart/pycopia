@@ -19,6 +19,7 @@ Defines database ORM objects.
 
 """
 
+from datetime import datetime
 from hashlib import sha1
 import cPickle as pickle
 
@@ -29,13 +30,21 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
 
 
-from pycopia.aid import hexdigest, unhexdigest
+from pycopia.aid import hexdigest, unhexdigest, Enums
 from pycopia.db import tables
 
 
 # type codes
 OBJECT=0; STRING=1; UNICODE=2; INTEGER=3; FLOAT=4; BOOLEAN=5
 
+# Test result types
+OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
+[MODULE, SUITE, TEST, RUNNER, UNKNOWN] = OBJECTTYPES
+
+# results a test case can produce.
+TESTRESULTS = Enums(PASSED=1, FAILED=0, INCOMPLETE=-1, ABORT=-2, NA=-3, EXPECTED_FAIL=-4)
+TESTRESULTS.sort()
+[EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = TESTRESULTS
 
 def _get_secret():
     global SECRET_KEY
@@ -58,6 +67,13 @@ def create_session(addr):
 def get_session(addr):
     session_class = create_session(addr)
     return session_class()
+
+def get_config(url=None):
+    if url is None:
+        from pycopia import basicconfig
+        cf = basicconfig.get_config("storage.conf")
+        url = cf["database"]
+    return get_session(url)
 
 
 #######################################
@@ -106,6 +122,18 @@ mapper(UserMessage, tables.auth_message)
 
 
 class User(object):
+    def __init__(self, username=None, first_name=None, last_name=None, address=None, authservice="local",
+            is_staff=True, is_active=True, is_superuser=False, last_login=None, date_joined=None):
+        self.username = username
+        self.first_name = first_name
+        self.last_name = last_name
+        self.address = address
+        self.is_staff = is_staff
+        self.is_active = is_active
+        self.last_login = last_login
+        self.date_joined = date_joined
+        self.is_superuser = is_superuser
+        self.authservice = authservice
 
     # Passwords are stored in the database encrypted.
     def _set_password(self, passwd):
@@ -145,6 +173,31 @@ mapper(User, tables.auth_user,
         "full_name": column_property( (tables.auth_user.c.first_name + " " + 
                 tables.auth_user.c.last_name).label('full_name') ),
     })
+
+
+
+def create_user(session, pwent):
+  """Create a new user with a default password and name taken from the
+  password entry (from the passwd module). 
+  """
+  now = datetime.now()
+  fullname = pwent.gecos
+  if fullname.find(",") > 0:
+    [last, first] = fullname.split(",", 1)
+  else:
+    fnparts = fullname.split(None, 1)
+    if len(fnparts) == 2:
+      [first, last] = fnparts
+    else:
+      first, last = pwent.name, fnparts[0]
+  grp = session.query(Group).filter(Group.name=="tester").one() # should already exist
+  user = User(username=pwent.name, first_name=first, last_name=last, authservice="system",
+      is_staff=True, is_active=True, last_login=now, date_joined=now)
+  user.password = pwent.name + "123" # default, temporary password
+  user.groups = [grp]
+  session.add(user)
+  session.commit()
+  return user
 
 
 # end USERS
@@ -620,13 +673,27 @@ mapper(TestJob, tables.test_jobs)
 
 
 class TestResultData(object):
-    pass
+    def __init__(self, data, note=None):
+        self.pickle = pickle.dumps(data)
+        self.note = note
 
 mapper(TestResultData, tables.test_results_data)
 
 
 class TestResult(object):
-    pass
+    def __init__(self, **kwargs):
+        for name, value in kwargs.items():
+            if name == "tester" and value is not None:
+                self.tester_id = value.id
+            elif name == "environment" and value is not None:
+                #self.environment_id = value.id
+                self.environment_id = None # TODO fix when there are proper environments in db
+            elif name == "testcase" and value is not None:
+                self.testcase_id = value.id
+            elif name == "parent" and value is not None:
+                self.parent_id = value.id
+            else:
+                setattr(self, name, value)
 
 mapper(TestResult, tables.test_results)
 
