@@ -1,13 +1,13 @@
 " Vim syntax file
-" assumes Vim version 6.x
+" assumes Vim version > 6.x
 
 syntax clear
 
 syn keyword pythonStatement	break continue del
 syn keyword pythonStatement	except exec finally
-syn keyword pythonStatement	pass print raise
+syn keyword pythonStatement	pass raise
 syn keyword pythonStatement	return try
-syn keyword pythonStatement	global assert yield
+syn keyword pythonStatement	global assert yield with
 " syn keyword pythonStatement	def class nextgroup=pythonFunction skipwhite
 " syn match   pythonFunction	"[a-zA-Z_][a-zA-Z0-9_]*" contained
 " syn match   pythonSpecial	"__[a-zA-Z0-9]+__"
@@ -19,11 +19,18 @@ syn keyword pythonPreCondit	import from as
 syn match   pythonComment	"#.*$" contains=pythonTodo
 syn keyword pythonTodo		contained TODO FIXME XXX
 
+
 " strings
 syn region pythonString		matchgroup=Normal start=+[uU]\='+ end=+'+ skip=+\\\\\|\\'+ contains=pythonEscape
 syn region pythonString		matchgroup=Normal start=+[uU]\="+ end=+"+ skip=+\\\\\|\\"+ contains=pythonEscape
 syn region pythonString		matchgroup=Normal start=+[uU]\="""+ end=+"""+ contains=pythonEscape
 syn region pythonString		matchgroup=Normal start=+[uU]\='''+ end=+'''+ contains=pythonEscape
+
+syn region pythonString		matchgroup=Normal start=+[bB]\='+ end=+'+ skip=+\\\\\|\\'+ contains=pythonEscape
+syn region pythonString		matchgroup=Normal start=+[bB]\="+ end=+"+ skip=+\\\\\|\\"+ contains=pythonEscape
+syn region pythonString		matchgroup=Normal start=+[bB]\="""+ end=+"""+ contains=pythonEscape
+syn region pythonString		matchgroup=Normal start=+[bB]\='''+ end=+'''+ contains=pythonEscape
+
 syn region pythonRawString	matchgroup=Normal start=+[uU]\=[rR]'+ end=+'+ skip=+\\\\\|\\'+
 syn region pythonRawString	matchgroup=Normal start=+[uU]\=[rR]"+ end=+"+ skip=+\\\\\|\\"+
 syn region pythonRawString	matchgroup=Normal start=+[uU]\=[rR]"""+ end=+"""+
@@ -33,12 +40,6 @@ syn match  pythonEscape		"\\\o\o\=\o\=" contained
 syn match  pythonEscape		"\\x\x\+" contained
 syn match  pythonEscape		"\(\\u\x\{4}\|\\U\x\{8}\)" contained
 syn match  pythonEscape		"\\$"
-
-if exists("python_highlight_all")
-  let python_highlight_numbers = 1
-  let python_highlight_builtins = 1
-  let python_highlight_exceptions = 1
-endif
 
 " numbers (including longs and complex)
 syn match   pythonNumber	"\<0x\x\+[Ll]\=\>"
@@ -70,17 +71,21 @@ syn keyword pythonBuiltin	issubclass iter len list locals long map max
 syn keyword pythonBuiltin	min object oct open ord pow property range
 syn keyword pythonBuiltin	raw_input reduce reload repr round setattr
 syn keyword pythonBuiltin	slice staticmethod str super tuple type unichr
-syn keyword pythonBuiltin	unicode vars xrange zip iter bool 
+syn keyword pythonBuiltin	unicode vars xrange zip bool 
+syn keyword pythonBuiltin	bytearray enumerate True False all any
+syn keyword pythonBuiltin	basestring bin bytes format frozenset next
+syn keyword pythonBuiltin	print reversed set sorted sum 
+
 " following added by nmsbuiltins module
-syn keyword pythonBuiltin	enumerate reorder pprint_list Print IF
-syn keyword pythonBuiltin	Queue Stack removedups YES NO True False
+syn keyword pythonBuiltin	reorder pprint_list Print IF
+syn keyword pythonBuiltin	Queue Stack removedups YES NO 
 syn keyword pythonBuiltin	mapstr Enum Enums add_exception Write str2hex  
-syn keyword pythonBuiltin	curry newclass NULL unsigned unsigned64 sortedlist
+syn keyword pythonBuiltin	partial newclass NULL unsigned unsigned64 sortedlist
 syn keyword pythonBuiltin	sgn add2builtin 
 
 " builtin exceptions and warnings
-syn keyword pythonException	ArithmeticError AssertionError AttributeError
-syn keyword pythonException	DeprecationWarning EOFError EnvironmentError
+syn keyword pythonException	ArithmeticError AssertionError AttributeError BaseException
+syn keyword pythonException	DeprecationWarning EOFError EnvironmentError BufferError
 syn keyword pythonException	Exception FloatingPointError IOError
 syn keyword pythonException	ImportError IndentiationError IndexError
 syn keyword pythonException	KeyError KeyboardInterrupt LookupError
@@ -92,11 +97,14 @@ syn keyword pythonException	SyntaxWarning SystemError SystemExit TabError
 syn keyword pythonException	TypeError UnboundLocalError UnicodeError
 syn keyword pythonException	UserWarning ValueError Warning WindowsError
 syn keyword pythonException	ZeroDivisionError IndentationError
+syn keyword pythonException	BytesWarning FutureWarning GeneratorExit ImportWarning
+syn keyword pythonException	PendingDeprecationWarning UnicodeDecodeError
+syn keyword pythonException	UnicodeEncodeError UnicodeTranslateError UnicodeWarning
 
 syn keyword pyDebug            __debug__
 syn keyword pyBuiltinVariable  __bases__ __class__ __dict__ __doc__ __slots__
 syn keyword pyBuiltinVariable  __file__ __name__ __methods__ __members__
-syn keyword pyBuiltinVariable  __module__ __self__ self
+syn keyword pyBuiltinVariable  __module__ __self__ self __package__
 
 " all of the special methods. So you know you got the right one. 8-)
 syn keyword pySpecialMethod  __init__ __del__ __repr__ __str__ __iter__
