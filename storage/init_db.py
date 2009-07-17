@@ -350,6 +350,10 @@ def do_interface_types(session):
         session.add(models.InterfaceType(name, enumeration))
     session.commit()
 
+def do_default_environment(session):
+    session.add(models.Environment("default"))
+    session.commit()
+
 def init_database(argv):
     try:
         url = argv[1]
@@ -366,6 +370,7 @@ def init_database(argv):
         do_country(dbsession)
         do_equipment_category(dbsession)
         do_interface_types(dbsession)
+        do_default_environment(dbsession)
     finally:
         dbsession.close()
 

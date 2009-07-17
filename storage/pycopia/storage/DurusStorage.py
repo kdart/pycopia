@@ -32,14 +32,15 @@ import sys, os, re, itertools
 from durus.client_storage import ClientStorage
 from durus.file_storage import FileStorage
 from durus.connection import Connection
-from durus.persistent import Persistent
+#from durus.persistent import Persistent
 from durus.persistent_dict import PersistentDict
 # Pycopia extension
 from pycopia.durusplus.persistent_attrdict import PersistentAttrDict
 
 from pycopia import aid
-from pycopia.QA import labmodel
+#from pycopia.QA import labmodel
 from pycopia.dictlib import AttrDict
+from pycopia.db import models
 
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 2972
@@ -439,7 +440,9 @@ class RootContainer(object):
         if self._cache.get("_environment") is None:
             name = self.get("environmentname", "default")
             if name:
-                env = labmodel.EnvironmentRuntime(self)
+                db = self._get_dbsession()
+                env = db.query(models.Environment).filter(models.Environment.name==name).one()
+                #env = EnvironmentRuntime(self, env) # XXX might need this..
                 self._cache["_environment"] = env
             else:
                 raise ConfigError, "Bad environment %r." % (name,)
@@ -484,7 +487,6 @@ class RootContainer(object):
 
     def _get_dbsession(self):
         if self._cache.get("_dbsession") is None:
-            from pycopia.db import models
             self._cache["_dbsession"] = dbsession = models.get_config(self.dburl)
             return dbsession
         else:

@@ -142,7 +142,7 @@ class DatabaseReport(reports.NullReport):
         # needed in the database record is kept until the records are written
         # in the finalize method.
         self._debug = cf.flags.DEBUG
-        self._environment = cf.environment.environment
+        self._environment = cf.environment
         self._testid = None
         self._rootresult = ResultHolder()
         self._rootresult.set("environment", self._environment)

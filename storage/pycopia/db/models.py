@@ -23,10 +23,10 @@ from datetime import datetime
 from hashlib import sha1
 import cPickle as pickle
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_, select
 from sqlalchemy.orm import (sessionmaker, mapper, relation, 
         backref, column_property, synonym, _mapper_registry)
-from sqlalchemy.orm.collections import attribute_mapped_collection
+#from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
 
 
@@ -247,34 +247,6 @@ mapper(Session, tables.client_session,
 # end SESSIONS
 #######################################
 
-#######################################
-# configuration data
-
-class Config(object):
-
-    def __init__(self, **kwargs):
-        for name, value in kwargs.items():
-            setattr(self, name, value)
-
-    def _set_value(self, value):
-        self.pickle = pickle.dumps(value)
-
-    def _get_value(self):
-        return pickle.loads(self.pickle)
-
-    def _del_value(self):
-        self.pickle = pickle.dumps(None)
-
-    value = property(_get_value, _set_value, _del_value)
-
-    def __str__(self):
-        return "%s=%r" % (self.name, self.value)
-
-mapper(Config, tables.config, properties={
-    'children': relation(Config, backref=backref('container', remote_side=[tables.config.c.id]))
-    })
-
-#######################################
 
 class Country(object):
     def __init__(self, name, isocode):
@@ -374,11 +346,21 @@ class Capability(object):
 mapper(Capability, tables.capability)
 
 
+# The base types that an AttributeType may have.
+VALUETYPES = Enums("object", "string", "unicode", 
+                    "integer", "float", "boolean")
+
 class AttributeType(object):
     def __init__(self, name, vtype, description):
         self.name = name
-        self.value_type_c = vtype
+        self.value_type_c = int(vtype)
         self.description = description
+
+    value_type = property(lambda s: VALUETYPES.find(int(s.value_type_c)),
+        lambda s, v: setattr(s, "value_type_c", int(v)))
+
+    def __str__(self):
+        return "%s(%s): %s" % (self.name, VALUETYPES.find(s.value_type_c), self.description)
 
 mapper(AttributeType, tables.attribute_type)
 
@@ -407,20 +389,24 @@ mapper(Component, tables.components)
 
 
 
-class BaseProject(object):
+
+class Project(object):
     pass
 
-mapper(BaseProject, tables.projects,
+mapper(Project, tables.projects,
     properties={
         "components": relation(Component, lazy=True, secondary=tables.projects_components),
     }
 )
 
-
-class Project(object):
+class ProjectVersion(object):
     pass
 
-mapper(Project, tables.project_versions)
+mapper(ProjectVersion, tables.project_versions, 
+    properties={
+        "project": relation(Project),
+    }
+)
 
 
 
@@ -531,13 +517,24 @@ class Interface(object):
         self.mtu = mtu
         self.speed = speed
         self.status = status
+
 #interface_type_id
 #parent_id
 #equipment_id
 #network_id
 
-mapper(Interface, tables.interfaces)
+mapper(Interface, tables.interfaces,
+    properties = {
+        "interface_type": relation(InterfaceType, order_by=tables.interfaces.c.id),
+        "parent": relation(Interface, backref=backref("subinterface",
+                                remote_side=[tables.interfaces.c.id])),
+        "network": relation(Network, order_by=tables.networks.c.id),
+    }
+)
 
+class EquipmentModelAttribute(object):
+    pass
+mapper(EquipmentModelAttribute, tables.equipment_model_attributes)
 
 class EquipmentModel(object):
     pass
@@ -545,12 +542,11 @@ class EquipmentModel(object):
 mapper(EquipmentModel, tables.equipment_model,
     properties={
         "embeddedsoftware": relation(Software, secondary=tables.equipment_model_embeddedsoftware),
+        "category": relation(EquipmentCategory, order_by=tables.equipment_category.c.id),
+        "manufacturer": relation(Corporation, order_by=tables.corporations.c.id),
+        "attributes": relation(EquipmentModelAttribute),
     }
 )
-
-class EquipmentModelAttribute(object):
-    pass
-mapper(EquipmentModelAttribute, tables.equipment_model_attributes)
 
 
 class Equipment(object):
@@ -591,15 +587,33 @@ class EnvironAttributeType(object):
 mapper(EnvironAttributeType, tables.environmentattribute_type)
 
 
-class Environment(object):
-    pass
-
-mapper(Environment, tables.environments)
-
 class EnvironmentAttribute(object):
     pass
 
 mapper(EnvironmentAttribute, tables.environment_attributes)
+
+
+class Environment(object):
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return "Environment(%r)" % (self.name,)
+
+mapper(Environment, tables.environments,
+    properties={
+        "owner": relation(User),
+        "countries": relation(CountrySet),
+        "languages": relation(LanguageSet),
+        "project": relation(Project),
+        # testequipment is a backref
+        "DUT": column_property(
+                and_(tables.testequipment.c.environment_id==id,
+                    tables.testequipment.c.UUT==True).label("DUT"),
+               ),
+
+    },
+)
 
 
 class TestEquipment(object):
@@ -613,6 +627,7 @@ mapper(TestEquipment, tables.testequipment,
     properties={
         "role": relation(SoftwareCategory, secondary=tables.testequipment_roles),
         "environment": relation(Environment, backref="testequipment"),
+        "equipment": relation(Equipment),
     },
 )
 
@@ -656,12 +671,10 @@ mapper(TestSuite, tables.test_suites,
     properties={
         "testcases": relation(TestCase, secondary=tables.test_suites_testcases, backref="suite"),
         "components": relation(Component, secondary=tables.components_suites, backref="suites"),
-#        TODO many-to-many join on self?
-#        "subsuites": relation(TestSuite, 
-#                        secondary=tables.test_suites_suites,
-#                        primaryjoin=tables.test_suites_suites.c.from_testsuite_id==tables.test_suites.c.id,
-#                        secondaryjoin=tables.test_suites_suites.c.to_testsuite_id==tables.test_suites.c.id,
-#                    )
+        "subsuites": relation(TestSuite, secondary=tables.test_suites_suites, 
+            primaryjoin=tables.test_suites.c.id==tables.test_suites_suites.c.from_testsuite_id,
+            secondaryjoin=tables.test_suites_suites.c.to_testsuite_id==tables.test_suites.c.id,
+            backref="suite"),
     },
 )
 
@@ -683,21 +696,121 @@ mapper(TestResultData, tables.test_results_data)
 class TestResult(object):
     def __init__(self, **kwargs):
         for name, value in kwargs.items():
-            if name == "tester" and value is not None:
-                self.tester_id = value.id
-            elif name == "environment" and value is not None:
-                #self.environment_id = value.id
-                self.environment_id = None # TODO fix when there are proper environments in db
-            elif name == "testcase" and value is not None:
-                self.testcase_id = value.id
-            elif name == "parent" and value is not None:
-                self.parent_id = value.id
-            else:
-                setattr(self, name, value)
+             setattr(self, name, value)
 
-mapper(TestResult, tables.test_results)
+    testresult = property(lambda self: TESTRESULTS.find(int(self.result)))
+    objecttype = property(lambda self: OBJECTTYPES.find(int(self.objecttype_c)))
 
 
+mapper(TestResult, tables.test_results,
+    properties = {
+        "tester": relation(User),
+        "data": relation(TestResultData, backref="testresult"),
+        "environment": relation(Environment, order_by=tables.environments.c.name),
+        "testcase": relation(TestCase),
+        "subresults": relation(TestResult, backref=backref("parent",
+                                remote_side=[tables.test_results.c.id])),
+    }
+)
+
+
+#######################################
+# configuration data
+
+class Config(object):
+
+    def __init__(self, name, value, container=None, testcase=None,
+            testsuite=None, user=None):
+        self.name = name
+        self._set_value(value)
+        self.parent_id = container.id
+        self.testcase = testcase
+        self.testsuite = testsuite
+        self.user = user
+
+    def _set_value(self, value):
+        self.pickle = pickle.dumps(value)
+
+    def _get_value(self):
+        return pickle.loads(self.pickle)
+
+    def _del_value(self):
+        self.pickle = pickle.dumps(None)
+
+    value = property(_get_value, _set_value, _del_value)
+
+    def __str__(self):
+        return "%s=%r" % (self.name, self.value)
+
+    def add_container(self, name):
+        return Config(name, None, container=self, user=self.user,
+            testcase=self.testcase, testsuite=self.testsuite)
+
+    def get_container(self, name, session):
+        c = session.query(Config).filter(
+                Config.name==name, Config.parent_id==self.id, Config.user==self.user).one()
+        return ConfigWrapper(session, c)
+
+
+mapper(Config, tables.config, 
+    properties={
+        'children': relation(Config, cascade="all", 
+            backref=backref("container", remote_side=[tables.config.c.id, tables.config.c.user_id])),
+        'testcase': relation(TestCase),
+        'testsuite': relation(TestSuite),
+        'user': relation(User),
+    }
+)
+
+
+class ConfigWrapper(object):
+    def __init__(self, session, config):
+        self.session = session
+        self.node = config
+
+    def __setitem__(self, name, value):
+        new = Config(name, value, container=self.node, user=self.node.user,
+            testcase=self.node.testcase, testsuite=self.node.testsuite)
+        self.session.add(new)
+        self.session.commit()
+
+    def __getitem__(self, name):
+        return self.session.query(Config).filter(and_(Config.parent_id==self.node.id,
+                Config.name==name)).one()
+
+    def __delitem__(self, name):
+        try:
+            o = self.__getitem__(name)
+        except NoResultFound:
+            return
+        self.session.delete(o)
+
+    def keys(self):
+        for name, in self.session.query(Config.name).filter(and_(
+            Config.parent_id==self.node.id, 
+            Config.user==self.node.user, 
+            Config.testcase==self.node.testcase, 
+            Config.testsuite==self.node.testsuite)):
+            yield name
+
+    def items(self):
+        for name, value in self.session.query(Config.name, Config.pickle).filter(and_(
+            Config.parent_id==self.node.id, 
+            Config.user==self.node.user, 
+            Config.testcase==self.node.testcase, 
+            Config.testsuite==self.node.testsuite)):
+            yield name, pickle.loads(value)
+
+    def values(self):
+        for value, in self.session.query(Config.pickle).filter(and_(
+            Config.parent_id==self.node.id, 
+            Config.user==self.node.user, 
+            Config.testcase==self.node.testcase, 
+            Config.testsuite==self.node.testsuite)):
+            yield pickle.loads(value)
+
+
+#######################################
 
 #######################################
 

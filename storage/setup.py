@@ -23,6 +23,7 @@ setup (name=NAME, version=VERSION,
         'pycopia-CLI>=1.0.dev-r138,==dev', 
         'Durus>=3.5',
         'sqlalchemy>=0.5.2',
+        'pycrypto>=2.0',
         #'psycopg>=2.0',
         ],
     dependency_links = [
