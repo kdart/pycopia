@@ -80,6 +80,9 @@ def do_sdist(name):
 def do_eggs(name):
     return _do_commands(name, ["bdist_egg"], False)
 
+def do_rpms(name):
+    return _do_commands(name, ["bdist_rpm"], False)
+
 def do_build(name):
     return _do_commands(name, ["build"], False)
 
