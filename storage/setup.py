@@ -30,9 +30,9 @@ if platinfo.is_linux():
         ('/etc/pam.d', glob("etc/pam.d/*")),
     ]
     if platinfo.is_gentoo():
-        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/gentoo/*")))
+        DATAFILES.append(('/etc/init.d', glob("etc/init.d/gentoo/*")))
     elif platinfo.is_redhat():
-        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
+        DATAFILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
 
     WEBSITE = os.environ.get("WEBSITE")
     if WEBSITE:
