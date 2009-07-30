@@ -1,0 +1,69 @@
+#!/bin/bash
+#
+#	/etc/rc.d/init.d/storaged
+#
+# Starts the QA storage server
+#
+# chkconfig: 345 44 56
+# description: Run the QA storage server.
+# processname: storaged
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+[ -x /usr/bin/storaged ] || exit 0
+
+RETVAL=0
+
+
+start() {
+	# Check if it is already running
+	if [ ! -f /var/lock/subsys/storaged ]; then
+	    echo -n $"Starting storaged daemon: "
+	    daemon /usr/bin/storaged -n
+	    RETVAL=$?
+	    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/storaged
+	    echo
+	fi
+	return $RETVAL
+}
+
+stop() {
+	echo -n $"Stopping storaged daemon: "
+	killproc /usr/bin/storaged
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/storaged
+	echo
+        return $RETVAL
+}
+
+
+restart() {
+	stop
+	start
+}	
+
+case "$1" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+restart)
+	restart
+	;;
+condrestart)
+	if [ -f /var/lock/subsys/storaged ]; then
+	    restart
+	fi
+	;;
+status)
+	status storaged
+	;;
+*)
+	echo $"Usage: $0 {start|stop|status|restart|condrestart}"
+	exit 1
+esac
+
+exit $RETVAL

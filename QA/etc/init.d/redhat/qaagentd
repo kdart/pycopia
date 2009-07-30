@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+#	/etc/rc.d/init.d/qaagentd
+#
+# Starts the QA agent daemon
+#
+# chkconfig: 345 44 56
+# description: Run a remote-control agent for the QA framework.
+# processname: qaagentd
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+[ -x /usr/bin/qaagentd ] || exit 0
+
+RETVAL=0
+
+
+start() {
+	# Check if it is already running
+	if [ ! -f /var/lock/subsys/qaagentd ]; then
+	    echo -n $"Starting qaagentd daemon: "
+	    daemon /usr/bin/qaagentd -n
+	    RETVAL=$?
+	    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/qaagentd
+	    echo
+	fi
+	return $RETVAL
+}
+
+stop() {
+	echo -n $"Stopping qaagentd daemon: "
+	killproc /usr/bin/qaagentd
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/qaagentd
+	echo
+        return $RETVAL
+}
+
+
+restart() {
+	stop
+	start
+}	
+
+reload() {
+	trap "" SIGHUP
+	killall -HUP qaagentd
+}	
+
+case "$1" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+reload)
+	reload
+	;;
+restart)
+	restart
+	;;
+condrestart)
+	if [ -f /var/lock/subsys/qaagentd ]; then
+	    restart
+	fi
+	;;
+status)
+	status qaagentd
+	;;
+*)
+	echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
+	exit 1
+esac
+
+exit $RETVAL
