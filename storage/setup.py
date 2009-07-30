@@ -2,11 +2,16 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 
+import sys, os
+
 import ez_setup
 ez_setup.use_setuptools()
 
 from glob import glob
 from setuptools import setup, find_packages
+
+import platutils
+platinfo = platutils.get_platform()
 
 NAME = "pycopia-storage"
 VERSION = "1.0"
@@ -14,6 +19,42 @@ REVISION="$Revision$"
 
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
+
+
+
+if platinfo.is_linux():
+
+
+    DATAFILES = [
+        ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
+        ('/etc/pam.d', glob("etc/pam.d/*")),
+    ]
+    if platinfo.is_gentoo():
+        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/gentoo/*")))
+    elif platinfo.is_redhat():
+        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
+
+    WEBSITE = os.environ.get("WEBSITE")
+    if WEBSITE:
+        DATAFILES.extend([
+            #(os.path.join("/var", "www", WEBSITE, 'htdocs'), glob("doc/html/*.html")),
+            #(os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
+            (os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
+            #(os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
+        ])
+    else:
+        DATAFILES.extend([
+            #(os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html'), glob("doc/html/*.html")),
+            #(os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html', 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
+            (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'js'), glob("media/js/*.js")),
+            #(os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'css'), glob("media/css/*.css")),
+        ])
+
+    SCRIPTS = glob("bin/*")
+else:
+    DATAFILES = []
+    SCRIPTS = []
+
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
@@ -30,10 +71,8 @@ setup (name=NAME, version=VERSION,
             "http://www.pycopia.net/download/"
                 ],
     test_suite = "test.StorageTests",
-    scripts = glob("bin/*"), 
-    data_files = [
-        ('/etc/pycopia', glob("etc/*.example")),
-    ],
+    scripts = SCRIPTS,
+    data_files = DATAFILES,
 
     description = "Pycopia storage and object model.",
     long_description = """Pycopia persistent storage and object model.

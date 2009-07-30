@@ -16,33 +16,46 @@ REVISION="$Revision$"
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
-WEBSITE = os.environ.get("WEBSITE")
+import platutils
+platinfo = platutils.get_platform()
 
-DATAFILES = [
-    ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
-    ('/etc/init.d', glob("etc/init.d/gentoo/*")),
-    ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
-    (os.path.join(sys.prefix, 'libexec', 'pycopia'), glob("libexec/*")),
-]
+if platinfo.is_linux():
 
-if WEBSITE:
-    DATAFILES.extend([
-        (os.path.join("/var", "www", WEBSITE, 'htdocs'), glob("doc/html/*.html")),
-        (os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
-        (os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
-        (os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
-    ])
+    WEBSITE = os.environ.get("WEBSITE")
+
+    DATAFILES = [
+        ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
+        ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
+        (os.path.join(sys.prefix, 'libexec', 'pycopia'), glob("libexec/*")),
+    ]
+    if platinfo.is_gentoo():
+        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/gentoo/*")))
+    elif platinfo.is_redhat():
+        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
+
+    if WEBSITE:
+        DATAFILES.extend([
+            (os.path.join("/var", "www", WEBSITE, 'htdocs'), glob("doc/html/*.html")),
+            (os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
+            (os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
+            (os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
+        ])
+    else:
+        DATAFILES.extend([
+            (os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html'), 
+                 glob("doc/html/*.html")),
+            (os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html', 'cgi-bin'), 
+                 glob("doc/html/cgi-bin/*.py")),
+            (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'js'), 
+                 glob("media/js/*.js")),
+            (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'css'), 
+                 glob("media/css/*.css")),
+        ])
+    SCRIPTS = glob("bin/*")
 else:
-    DATAFILES.extend([
-        (os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html'), 
-             glob("doc/html/*.html")),
-        (os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html', 'cgi-bin'), 
-             glob("doc/html/cgi-bin/*.py")),
-        (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'js'), 
-             glob("media/js/*.js")),
-        (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'css'), 
-             glob("media/css/*.css")),
-    ])
+    DATAFILES = []
+    SCRIPTS = []
+
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
@@ -54,7 +67,7 @@ setup (name=NAME, version=VERSION,
             "http://www.pycopia.net/download/"
                 ],
     data_files = DATAFILES,
-    scripts = glob("bin/*"), 
+    scripts = SCRIPTS,
     test_suite = "test.WWWTests",
 
     description = "Pycopia WWW tools and web application framework.",

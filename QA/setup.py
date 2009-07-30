@@ -5,6 +5,8 @@
 import ez_setup
 ez_setup.use_setuptools()
 
+import platutils
+
 from glob import glob
 from setuptools import setup, find_packages
 
@@ -15,16 +17,44 @@ REVISION="$Revision$"
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
+platinfo = platutils.get_platform()
+CACHEDIR="/var/cache/pycopia"
+
 # Some services, such as the Pyro nameserver, are set up to run as the
-# "tester" psuedo-user. That currently has to be set up manually. This
-# function should automate it, but here are the steps (for Gentoo Linux).
-def system_install():
-    #useradd -c Tester -G uucp,audio,cdrom,dialout,video,games,postgres,usb,crontab,messagebus,plugdev,realtime,pulse-access -m -U tester
-    #passwd tester
-    #mkdir /var/cache/pycopia
-    #chown tester:tester /var/cache/pycopia
-    #chmod g+w /var/cache/pycopia
-    pass
+# "tester" psuedo-user.  This also creates the "tester" group that testing
+# personnel should also be a member of.
+def system_setup():
+    if platinfo.is_linux():
+        import os, pwd
+        if os.getuid() == 0:
+            if platinfo.is_gentoo():
+                try:
+                    pwent = pwd.getpwnam("tester")
+                except KeyError:
+                    os.system("useradd -c Tester " 
+                    "-G users,uucp,audio,cdrom,dialout,video,games,postgres,usb,crontab,messagebus,plugdev,pulse-access " 
+                    "-m -U tester") # also creates tester group
+                    print "Change password for new user tester:"
+                    os.system("passwd tester")
+                    pwent = pwd.getpwnam("tester")
+                if not os.path.isdir(CACHEDIR):
+                    os.mkdir(CACHEDIR)
+                    os.chown(CACHEDIR, pwent.pw_uid, pwent.pw_gid)
+                    os.chmod(CACHEDIR, 0770)
+
+
+if platinfo.is_linux():
+    DATA_FILES = [
+            ('/etc/pycopia', glob("etc/*.dist")),
+    ]
+    if platinfo.is_gentoo():
+        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/gentoo/*")))
+    elif platinfo.is_redhat():
+        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
+    SCRIPTS = glob("bin/*")
+else:
+    DATA_FILES = []
+    SCRIPTS = []
 
 
 setup (name=NAME, version=VERSION,
@@ -38,12 +68,8 @@ setup (name=NAME, version=VERSION,
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
-    scripts =glob("bin/*"), 
-    data_files = [
-        ('/etc/pycopia', glob("etc/*.dist")),
-        # XXX only Gentoo Linux supported for now.
-        ('/etc/init.d', glob("etc/init.d/gentoo/*")),
-    ],
+    scripts = SCRIPTS,
+    data_files = DATA_FILES,
     test_suite = "test.QATests",
 
     description = "Pycopia packages to support professional QA roles.",
@@ -65,4 +91,6 @@ setup (name=NAME, version=VERSION,
                    "Intended Audience :: Developers"],
 )
 
+
+system_setup()
 
