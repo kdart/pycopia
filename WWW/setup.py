@@ -29,9 +29,9 @@ if platinfo.is_linux():
         (os.path.join(sys.prefix, 'libexec', 'pycopia'), glob("libexec/*")),
     ]
     if platinfo.is_gentoo():
-        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/gentoo/*")))
+        DATAFILES.append(('/etc/init.d', glob("etc/init.d/gentoo/*")))
     elif platinfo.is_redhat():
-        DATA_FILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
+        DATAFILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
 
     if WEBSITE:
         DATAFILES.extend([

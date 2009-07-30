@@ -63,7 +63,8 @@ setup (name=NAME, version=VERSION,
     install_requires = [
         'pycopia-storage>=1.0.dev-r138,<=dev', 
         'pycopia-CLI>=1.0.dev-r138,<=dev',
-        'docutils>=0.5'
+        'docutils>=0.5',
+        'Pyro>=3.9',
         ],
     dependency_links = [
             "http://www.pycopia.net/download/"
