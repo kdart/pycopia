@@ -1,9 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2009  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -16,21 +14,19 @@
 #    Lesser General Public License for more details.
 
 """
-Command line interface to Remote servers.
+Command line interface to Remote QA agent servers.
 
 """
 
-# python modules
 import sys, os, time, errno
 
-# python third party
+import Pyro.core
 import Pyro.naming
 import Pyro.errors
 
 from pycopia import CLI
 from pycopia import UI
-
-import pycopia.remote.Client as remoteclient
+from pycopia.remote import Client
 
 PROMPT = "remote> "
 
@@ -47,7 +43,7 @@ class FileCommand(CLI.BaseCommands):
         """close
     Close the file object."""
         self._client.fclose(self._handle)
-        raise CommandQuit, self._handle
+        raise CLI.CommandQuit, self._handle
 
     def read(self, argv):
         """read <N>
@@ -208,7 +204,7 @@ class ProcCommand(CLI.BaseCommands):
     Kills this interactive process."""
         es = self._client.kill(self._pid)
         self._print(str(es))
-        raise CommandQuit, self._pid
+        raise CLI.CommandQuit, self._pid
 
     def poll(self, argv):
         """poll
@@ -218,11 +214,11 @@ class ProcCommand(CLI.BaseCommands):
             self._print("running.")
         elif sts == -errno.ENOENT:
             self._print("Process disappeared!")
-            raise CommandQuit, self._pid
+            raise CLI.CommandQuit, self._pid
         else:
             self._print(sts)
             self._print("Exited.")
-            raise CommandQuit, self._pid
+            raise CLI.CommandQuit, self._pid
 
 
 # main command class
@@ -245,7 +241,7 @@ class RemoteCLI(CLI.BaseCommands):
     def up(self, argv):
         """up
     Move context up to global context."""
-        raise CommandQuit
+        raise CLI.CommandQuit
 
     def alive(self, argv):
         """alive
@@ -264,21 +260,45 @@ class RemoteCLI(CLI.BaseCommands):
         """suicide
     Make the remote agent exit."""
         self._client.suicide()
-        raise CommandQuit
+        raise CLI.CommandQuit
 
     def run(self, argv):
-        """run <cmd>
+        """run [-u <user>] <cmd>
     Runs the command on this client. Waits for process to exit.  """
-        es, res = self._client.run(" ".join(argv[1:]))
+        user = None
+        opts, longopts, args = self.getopt(argv, "u:")
+        for opt, arg in opts:
+            if opt == "-u":
+                user = arg
+        es, res = self._client.run(" ".join(args), user=user)
         self._print(res)
         return es
 
-    def run_async(self, argv):
-        """run_async <cmd>
-    Runs the command on this client, and returns immediatly.  """
-        pid = self._client.run_async(" ".join(argv[1:]))
+    def spawn(self, argv):
+        """spawn [-a] [-u <user>] <cmd>
+    Runs the command on this client, and returns immediatly.  
+        Options:
+          -u  <user> run as given user account.
+          -a run async (performs automatic reads of process output).  """
+        user = None
+        async = False
+        opts, longopts, args = self.getopt(argv, "au:")
+        for opt, arg in opts:
+            if opt == "-u":
+                user = arg
+            elif opt == "-a":
+                async = True
+        pid = self._client.spawn(" ".join(args), user=user, async=async)
         self._print(pid)
         return pid
+
+    def waitpid(self, argv):
+        """waitpid <pid>
+    Wait on a spawned process."""
+        pid = int(argv[1])
+        es = self._client.waitpid(pid)
+        self._print(es)
+        return es
 
     def plist(self, argv):
         """plist
@@ -301,11 +321,13 @@ class RemoteCLI(CLI.BaseCommands):
     Determine that status of a background process."""
         pid = int(argv[1])
         sts = self._client.poll(pid)
-        if sts is None:
-            self._print("Still running.")
+        if sts == -errno.EAGAIN:
+            self._print("running.")
+        elif sts == -errno.ENOENT:
+            self._print("No such process.")
         else:
             self._print(sts)
-        return sts
+            self._print("Exited.")
 
     def interact(self, argv):
         """interact <pid>
@@ -313,17 +335,16 @@ class RemoteCLI(CLI.BaseCommands):
     supplied from plist."""
         args, kwargs = CLI.breakout_args(argv[1:], vars(self._client))
         if args:
-            handle = int(args[0])
+            pid = int(args[0])
         else:
-            handle = self._client.plist()[0]
-        pid = self._client.poll(handle)
+            pid = self._client.plist()[0]
+        pid = self._client.poll(pid)
         if pid:
             cmd = self.clone(ProcCommand)
             cmd._setup(self._client, pid, "pid %s> " % (pid,))
-            raise NewCommand, cmd # signal parser to use new cmd object
+            raise CLI.NewCommand, cmd
         else:
             self._print("No such pid on server.")
-        
 
     # called when subcommand FileCommand closes a file
     def handle_subcommand(self, value):
@@ -342,16 +363,9 @@ class RemoteCLI(CLI.BaseCommands):
         if finfo:
             cmd = self.clone(FileCommand)
             cmd._setup(self._client, handle, "%s> " % (finfo,))
-            raise NewCommand, cmd # signal parser to use new cmd object
+            raise CLI.NewCommand, cmd 
         else:
             self._print("No such handle on server.")
-
-    def spawn(self, argv):
-        """spawn <cmd>
-    Runs cmd asyncronously."""
-        handle = self._client.spawn(" ".join(argv[1:]))
-        self._print(handle)
-        return handle
 
     def fopen(self, argv):
         """fopen <fname> [mode="r"] [bufsize=-1]
@@ -537,16 +551,16 @@ class RemoteCLI(CLI.BaseCommands):
         self._print(res)
         return es
 
-    def python(self, argv):
-        """python <snippet>
-    Evaluate some arbitrary Python code on the Client server. """
+    def pyeval(self, argv):
+        """pyeval <snippet>
+    Evaluate some arbitrary Python code on the agent. """
         rv = self._client.python(" ".join(argv[1:]))
         self._print(rv)
         return rv
 
     def pyexec(self, argv):
         """pyexec <snippet>
-    Execute some arbitrary Python code on the Client server. """
+    Execute some arbitrary Python code on the agent. """
         self._client.pyexec(" ".join(argv[1:]))
 
     def copyfile(self, argv):
@@ -599,22 +613,6 @@ class RemoteCLI(CLI.BaseCommands):
         """clean
         Reset the Agent server. Closes all open files and kills open
         processes."""
-        return self._generic_call(argv[1:])
-
-#    # windows methods under cygwin
-    def net_use(self, argv):
-        """net_use drive share
-    On Windows only, map <drive> to the <share>."""
-        return self._generic_call(argv)
-
-    def net_use_delete(self, argv):
-        """net_use_delete drive
-    On Windows, unmap a drive."""
-        return self._generic_call(argv)
-
-    def run_as(self, argv):
-        """run_as <command> <user> <password>
-    On Windows, run a command as another user (given by user and password)."""
         return self._generic_call(argv)
 
     def md5sums(self, argv):
@@ -674,7 +672,7 @@ class RemoteCLI(CLI.BaseCommands):
                 else:
                     self._print(self.script.__doc__)
                     return
-    
+
     # helper for script
     def _runscript(self, text):
         sts, out = self._client.run_script(text)
@@ -684,39 +682,12 @@ class RemoteCLI(CLI.BaseCommands):
             self._print(str(sts))
         return sts
 
-    def listen(self, argv):
-        """listen ["tcp"|"udp"] <address> <port>
-    Start a TCP or UDP listener on the agent."""
-        st = argv[1]
-        addr = (argv[2], int(argv[3]))
-        if st.lower() == "tcp":
-            self._client.tcp_listener(addr)
-        if st.lower() == "udp":
-            self._client.udp_listener(addr)
-
-    def shutdown(self, argv):
-        """shutdown ["tcp"|"udp"] <address> <port>
-    Stop a TCP or UDP listener on the agent."""
-        st = argv[1]
-        addr = (argv[2], int(argv[3]))
-        if st.lower() == "tcp":
-            self._client.tcp_listener_shutdown(addr)
-        if st.lower() == "udp":
-            self._client.udp_listener_shutdown(addr)
-        
-    def sockets(self, argv):
-        """sockets
-    Display the currently active listeners."""
-        socks = self._client.get_socket_list()
-        for st, addr in socks:
-            self._print("%s socket on %s." % (st, addr))
-
     def rcopy(self, argv):
         """rcopy <remotefile> <localfile>
     Copies a file from the remote agent to the local file system."""
         src = argv[1]
         dest = argv[2]
-        remoteclient.remote_copy(self._client, src, dest)
+        Client.remote_copy(self._client, src, dest)
 
 
 class PosixRemoteCLI(RemoteCLI):
@@ -750,12 +721,23 @@ class PosixRemoteCLI(RemoteCLI):
 
 class WindowsRemoteCLI(RemoteCLI):
     """WindowsServer specific method interface."""
-    
+
     def shortname(self, argv):
         """shortname <path>...
     Print the short file name for the given paths."""
         for path in argv[1:]:
             self._print(self._client.get_short_pathname(path))
+
+    # windows methods under cygwin
+    def net_use(self, argv):
+        """net_use drive share
+    On Windows only, map <drive> to the <share>."""
+        return self._generic_call(argv)
+
+    def net_use_delete(self, argv):
+        """net_use_delete drive
+    On Windows, unmap a drive."""
+        return self._generic_call(argv)
 
     def share(self, argv):
         """share <"add"|"del"> <pathname>
@@ -839,17 +821,18 @@ class WindowsRemoteCLI(RemoteCLI):
 class TopLevelCLI(CLI.BaseCommands):
     def initialize(self):
         self._clients = {}
-        import Pyro.core
         Pyro.core.initClient(banner=0)
         self._rescan()
 
     def _rescan(self):
         locator = Pyro.naming.NameServerLocator()
         ns = locator.getNS()
-        for name, isobject in ns.list(":Client"):
+        for name, isobject in ns.list("Agents"):
             if isobject:
-                self._clients[name] = remoteclient.get_remote(name)
-        self.add_completion_scope("host", self._clients.keys())
+                self._clients[name] = Client.get_remote(name)
+        agents = self._clients.keys()
+        self.add_completion_scope("use", agents)
+        self.add_completion_scope("ping", agents)
 
     def finalize(self):
         self._clients = {}
@@ -866,13 +849,14 @@ class TopLevelCLI(CLI.BaseCommands):
     def ls(self, argv):
         """ls
     Print available clients."""
-        self._print("Current clients:")
+        self._print("Currently available agents:")
         for name in self._clients.keys():
             self._print("  %s" % (name,))
+    dir = ls # alias
 
-    def host(self, argv):
-        """host
-    Change to specified client."""
+    def use(self, argv):
+        """use
+    Use the specified agent. """
         name = argv[1]
         clnt = self._clients[name]
         try:
@@ -885,9 +869,8 @@ class TopLevelCLI(CLI.BaseCommands):
             cmd = self.clone(WindowsRemoteCLI)
         else:
             cmd = self.clone(PosixRemoteCLI)
-        cmd._setup(clnt, ":Client.%s> " % (name,))
-        raise NewCommand, cmd
-    cd = host # alias
+        cmd._setup(clnt, "Agent.%s> " % (name,))
+        raise CLI.NewCommand, cmd
 
     def ping(self, argv):
         """ping <name>
@@ -908,8 +891,8 @@ class TopLevelCLI(CLI.BaseCommands):
 def remotecli(argv):
     """remotecli [-h|-?] [-g] [-s <script>]
 
-Provides an interactive session to a remote Client server object. Most of the
-methods in the module remote.Server may be called this way.
+Provides an interactive session to a remote agent object. Most of the
+methods in the module remote.??????Server may be invoked with this tool.
 
 """
     from pycopia import getopt
@@ -933,15 +916,13 @@ methods in the module remote.Server may be called this way.
 
     # do runtime setup
     cf = Storage.get_config(initdict=longopts)
-    #testrunner.connect_user(cf)
-    #testrunner.runtime_config(cf)
     # fake test module attributes
     cf.reportfile = "remotecli"
     cf.logbasename = "remotecli.log"
     cf.arguments = argv
 
     theme = UI.DefaultTheme(PROMPT)
-    history=os.path.expandvars("$HOME/.hist_clientcli")
+    history=os.path.expandvars("$HOME/.hist_remotecli")
     parser = CLI.get_cli(TopLevelCLI, env=cf, paged=paged, theme=theme, historyfile=history)
 
     if script:
@@ -953,10 +934,6 @@ methods in the module remote.Server may be called this way.
         parser.interact()
 
 
-
-def _test(argv):
-    remotecli(argv)
-
 if __name__ == "__main__":
-    _test(sys.argv)
+    remotecli(sys.argv)
 

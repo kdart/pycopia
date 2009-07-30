@@ -1,0 +1,11 @@
+#!/usr/bin/python
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+# Start the remote_cli tool.
+
+import sys
+from pycopia.remote import RemoteCLI
+
+
+RemoteCLI.remotecli(sys.argv)

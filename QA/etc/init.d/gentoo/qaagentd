@@ -1,0 +1,27 @@
+#!/sbin/runscript
+# vim:ts=8:sw=8:softtabstop=0:smarttab:ft=sh
+
+description="Run a remote-control agent for QA framework."
+
+depend() {
+	need net
+	use dns logger
+	provide qaagent
+}
+
+PIDFILE=/var/run/${SVCNAME}.pid
+
+
+start() {
+	ebegin "Starting ${SVCNAME}"
+	start-stop-daemon --start -m -b -p $PIDFILE \
+		-- python -OO -m pycopia.remote.PosixServer -n < /dev/null
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${SVCNAME}"
+	start-stop-daemon --stop --pidfile $PIDFILE
+	eend $?
+}
+

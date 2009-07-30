@@ -46,7 +46,7 @@ def get_remote(name):
     Pyro.core.initClient(banner=0)
     if "." in name: # only use base name for agent name
         name =  name.split(".")[0]
-    myname = ":Client.%s" % (name,)
+    myname = "Agents.%s" % (name,)
     return Pyro.core.getProxyForURI("PYRONAME://%s" % (myname,))
 
 

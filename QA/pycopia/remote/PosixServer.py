@@ -1,9 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2009  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -25,11 +23,11 @@ import os, sys, shutil, errno
 def setConfig():
     Pyro.config.PYRO_MULTITHREADED = 0
     Pyro.config.PYRO_STORAGE = "/root"
-    Pyro.config.PYRO_LOGFILE = "/var/log/PosixServer.log"
+    Pyro.config.PYRO_LOGFILE = "/var/log/qaagent.log"
     Pyro.config.PYRO_TRACELEVEL=3
-    Pyro.config.PYRO_USER_LOGFILE = "/var/log/PosixServer_user.log"
+    Pyro.config.PYRO_USER_LOGFILE = "/var/log/qaagent_user.log"
     Pyro.config.PYRO_USER_TRACELEVEL = 3
-    Pyro.config.PYRO_NS_URIFILE = os.path.join(Pyro.config.PYRO_STORAGE, "PosixServer_URI.txt")
+#    Pyro.config.PYRO_NS_URIFILE = os.path.join(Pyro.config.PYRO_STORAGE, "PosixServer_URI.txt")
 
 import Pyro
 import Pyro.util
@@ -45,6 +43,7 @@ from pycopia import asyncio
 from pycopia import socket
 from pycopia import proctools
 from pycopia import UserFile
+from pycopia import passwd
 
 _EXIT = False # singals the server wants to exit. 
 
@@ -52,19 +51,14 @@ class PosixFile(UserFile.UserFile):
     def __repr__(self):
         return "PosixFile(%r, %r)" % (self.name, self.mode)
 
-# A server that performs filer client operations. This mostly delegates to the
+# A server that performs client operations. This mostly delegates to the
 # os module. But some special methods are provided for common functions.
-class ClientServer(Pyro.core.ObjBase, object):
+class PosixAgent(Pyro.core.ObjBase, object):
     def __init__(self):
-        super(ClientServer, self).__init__()
+        super(PosixAgent, self).__init__()
         self._files = {}
-        self._sockets = {}
-        self._servers = {}
-        self._clients = {}
         self._status = {} # holds async process pids
         self._dirstack = []
-        self._pinger = None
-        self._tcpdump = None
 
     def platform(self):
         return sys.platform
@@ -211,14 +205,12 @@ class ClientServer(Pyro.core.ObjBase, object):
             return path
 
     def get_pwent(self, name=None, uid=None):
-        import pwd
         if uid is not None:
-            return pwd.getpwuid(int(uid))
-        return pwd.getpwnam(name)
+            return passwd.getpwuid(int(uid))
+        return passwd.getpwnam(name)
 
     def listdir(self, path):
         return os.listdir(path)
-    ls = listdir
 
     def listfiles(self, path):
         isfile = os.path.isfile
@@ -304,24 +296,50 @@ class ClientServer(Pyro.core.ObjBase, object):
     def _status_cb(self, proc):
         self._status[proc.childpid] = proc.exitstatus
 
-    # process control, these calls are syncronous (they block)
     def system(self, cmd):
-        return os.system(cmd) # remember, stdout is on the server
+        return proctools.system("%s >/dev/null 2>&1" % cmd)
 
     def run(self, cmd, user=None):
-        UserLog.msg("run", cmd, str(user))
+        """Run a subprocess, wait for completion and return status and
+        stdout as text.
+        """
+        UserLog.msg("run", cmd, "user=", str(user))
         pm = proctools.get_procmanager()
+        if type(user) is str:
+            user = passwd.getpwnam(user)
         proc = pm.spawnpty(cmd, pwent=user)
         text = proc.read()
         sts = proc.wait()
         return sts, text
 
-    def run_async(self, cmd, user=None):
-        UserLog.msg("run_async", cmd, str(user))
+    def pipe(self, cmd, user=None):
+        """Run a subprocess, but connect by pipes rather than pty."""
+        UserLog.msg("pipe", cmd, "user=", str(user))
         pm = proctools.get_procmanager()
-        proc = pm.spawnpty(cmd, callback=self._status_cb, pwent=user)
+        if type(user) is str:
+            user = passwd.getpwnam(user)
+        proc = pm.spawnpipe(cmd, pwent=user, callback=self._status_cb)
+        text = proc.read()
+        sts = proc.wait()
+        return sts, text
+
+    def spawn(self, cmd, user=None, async=False):
+        """Spawn a subprocess and return immediatly."""
+        pm = proctools.get_procmanager()
+        if type(user) is str:
+            user = passwd.getpwnam(user)
+        proc = pm.spawnpty(cmd, callback=self._status_cb, pwent=user, async=async)
         # status with a key present, but None value means a running process.
         self._status[proc.childpid] = None 
+        UserLog.msg("spawn", cmd, "user=%s async=%s pid=%d" % (user, async, proc.childpid))
+        return proc.childpid
+
+    def subprocess(self, _meth, *args, **kwargs):
+        """Run a python method asynchronously as a subprocess."""
+        UserLog.msg("subprocess", str(meth))
+        pm = proctools.get_procmanager()
+        proc = pm.submethod(_meth, args, kwargs)
+        self._status[proc.childpid] = proc 
         return proc.childpid
 
     def _get_process(self, pid):
@@ -369,7 +387,8 @@ class ClientServer(Pyro.core.ObjBase, object):
                 return es
 
     def kill(self, pid):
-        """Kills a process that was started by run_async."""
+        """Kills a process that was started by spawn."""
+        UserLog.msg("kill", str(pid))
         try:
             sts = self._status.pop(pid)
         except KeyError:
@@ -393,29 +412,6 @@ class ClientServer(Pyro.core.ObjBase, object):
 
     def plist(self):
         return self._status.keys()
-
-    def subprocess(self, meth, *args, **kwargs):
-        UserLog.msg("subprocess", str(meth))
-        pm = proctools.get_procmanager()
-        proc = pm.subprocess(meth, *args, **kwargs)
-        self._status[proc.childpid] = proc 
-        return proc.childpid
-
-    def pipe(self, cmd, user=None):
-        UserLog.msg("pipe", cmd)
-        pm = proctools.get_procmanager()
-        proc = pm.spawnpipe(cmd, pwent=user)
-        text = proc.read()
-        sts = proc.wait()
-        return sts, text
-
-    def spawn(self, cmd, user=None):
-        UserLog.msg("spawn", cmd)
-        pm = proctools.get_procmanager()
-        proc = pm.spawnpty(cmd, pwent=user, async=True)
-        handle = id(proc)
-        self._files[handle] = proc
-        return handle
 
     def python(self, snippet):
         try:
@@ -441,7 +437,7 @@ class ClientServer(Pyro.core.ObjBase, object):
     def alive(self):
         return True
     ping = alive
-    
+
     # used to force external shell script to reload us
     def suicide(self):
         global _EXIT
@@ -464,15 +460,6 @@ class ClientServer(Pyro.core.ObjBase, object):
         """Returns the client hosts name."""
         return socket.gethostname()
 
-    def run_as(self, cmd, user, password=None):
-        #cmd = 'su - %s %s' % (user.pw_name, cmd)
-        UserLog.msg("run_as", cmd, user)
-        pm = proctools.get_procmanager()
-        proc = pm.spawnpty(cmd, pwent=user)
-        out = proc.read()
-        es = proc.wait()
-        return es, out
-
     def md5sums(self, path):
         """Reads the md5sums.txt file in path and returns the number of files
         checked good, then number bad (failures), and a list of the failures."""
@@ -482,7 +469,7 @@ class ClientServer(Pyro.core.ObjBase, object):
     def get_tarball(self, url):
         self.pushd(os.environ["HOME"])
         # the ncftpget will check if the file is current, will not download if not necessary
-        exitstatus, out = self.pipe('ncftpget -V "%s"' % (url,))
+        exitstatus, out = self.pipe('wget -q "%s"' % (url,))
         self.popd()
         return exitstatus
 
@@ -506,15 +493,16 @@ class ClientServer(Pyro.core.ObjBase, object):
 ###################################
 ######## main program #############
 
+_DOC = """qaagentd [-nh?] 
+
+Starts the Posix QA agent (server).
+
+Where:
+    -n = Do NOT run as a daemon, but stay in foreground.
+
+"""
+
 def run_server(argv):
-    """pyserver [-nh?] 
-
-    Starts the Posix Client Operations Server.
-
-    Where:
-        -n = Do NOT run as a daemon, but stay in foreground.
-
-    """
     global _EXIT
     from pycopia import daemonize
     import getopt
@@ -522,12 +510,12 @@ def run_server(argv):
     try:
         optlist, args = getopt.getopt(argv[1:], "nh?")
     except getopt.GetoptError:
-        print run_server.__doc__
+        print _DOC
         sys.exit(2)
 
     for opt, optarg in optlist:
         if opt in ("-h", "-?"):
-            print run_server.__doc__
+            print _DOC
             return
         elif opt == "-n":
             do_daemon = False
@@ -536,14 +524,14 @@ def run_server(argv):
         daemonize.daemonize()
 
     Pyro.core.initServer(banner=0, storageCheck=0)
-    Log.msg("ClientServer", "initializing")
+    Log.msg("qaagent", "initializing")
 
     ns=Pyro.naming.NameServerLocator().getNS()
 
     daemon=Pyro.core.Daemon()
     daemon.useNameServer(ns)
 
-    uri=daemon.connectPersistent(ClientServer(), ":Client.%s" % (os.uname()[1].split(".")[0],))
+    uri=daemon.connectPersistent(PosixAgent(), "Agents.%s" % (os.uname()[1].split(".")[0],))
 
     while True:
         try:
@@ -558,8 +546,6 @@ def run_server(argv):
             print >>sys.stderr, ex, val
 
 
-
 if __name__ == "__main__":
-    import sys
     run_server(sys.argv)
 

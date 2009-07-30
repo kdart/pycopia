@@ -1,0 +1,11 @@
+#!/usr/bin/python -OO
+
+# start the remote control agent.
+
+import sys
+from pycopia.remote import PosixServer
+
+
+PosixServer.run_server(sys.argv)
+
+
