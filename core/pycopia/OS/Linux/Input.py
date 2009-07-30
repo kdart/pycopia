@@ -261,3 +261,7 @@ def get_device_list(start=0):
     return names
 
 
+if __name__ == "__main__":
+    for d, name in get_device_list():
+        print d, name
+
