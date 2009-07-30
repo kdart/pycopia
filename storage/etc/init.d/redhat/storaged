@@ -20,7 +20,7 @@ start() {
 	# Check if it is already running
 	if [ ! -f /var/lock/subsys/storaged ]; then
 	    echo -n $"Starting storaged daemon: "
-	    daemon /usr/bin/storaged -n
+	    daemon /usr/bin/storaged
 	    RETVAL=$?
 	    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/storaged
 	    echo
