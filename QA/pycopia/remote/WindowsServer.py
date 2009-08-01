@@ -81,8 +81,6 @@ USE_CHARDEV = 2
 USE_IPC = 3
 
 def setConfig():
-    #Pyro.config.PYRO_MULTITHREADED = 0
-    #Pyro.config.PYRO_STORAGE = os.path.splitdrive(win32api.GetSystemDirectory())[0]+os.sep
     Pyro.config.PYRO_STORAGE = "C:\\tmp\\"
     Pyro.config.PYRO_LOGFILE = "C:\\tmp\\agent_svc.log"
     Pyro.config.PYRO_TRACELEVEL=3
@@ -909,7 +907,8 @@ class RemoteAgentService(BasicNTService):
     _svc_description_ = 'Provides Windows remote control agent.'
     def __init__(self, args):
         super(RemoteAgentService, self).__init__(args)
-        setConfig()
+        if not os.path.isdir(Pyro.config.PYRO_STORAGE):
+            os.mkdir(Pyro.config.PYRO_STORAGE)
         self._thread = AgentThread(self.SvcStop)
 
     def _doRun(self):
