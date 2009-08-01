@@ -36,8 +36,7 @@ setup (name=NAME, version=VERSION,
     url = "http://www.pycopia.net/",
     download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
-    classifiers = ["Operating System :: CLR", 
-                   "Topic :: Software Development :: Libraries :: Python Modules",
+    classifiers = [ "Topic :: Software Development :: Libraries :: Python Modules",
                    "Intended Audience :: Developers"],
 )
 
