@@ -83,6 +83,9 @@ def do_eggs(name):
 def do_rpms(name):
     return _do_commands(name, ["bdist_rpm"], False)
 
+def do_msis(name):
+    return _do_commands(name, ["bdist_msi"], False)
+
 def do_build(name):
     return _do_commands(name, ["build"], False)
 

@@ -82,11 +82,11 @@ def get_platform():
         rv.osversion = kernel
         rv.distribution, rv.release = _get_linux_dist()
     elif sys.platform in ("win32", "cli"):
-        rv.arch = os.environ["PROCESSOR_ARCHITECTURE"]
-        rv.osname = os.environ["OS"]
         rv.distribution = "Microsoft"
         if sys.platform == "win32":
-            import win32api
+            import win32api, os
+            rv.arch = os.environ["PROCESSOR_ARCHITECTURE"]
+            rv.osname = os.environ["OS"]
             major, minor, build, api, extra = win32api.GetVersionEx()
             rv.osversion = "%d.%d.%d-%s" % (major, minor, build, extra)
             rv.release = "Unknown"
