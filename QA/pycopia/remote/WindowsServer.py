@@ -21,24 +21,33 @@ Install on a Windows server:
 
 Place the following lines in c:\autoexec.bat::
 
-    PATH=%PATH%;C:\Python23;C:\Python23\Scripts
+    PATH=%PATH%;C:\Python26;C:\Python26\Scripts
 
 Now run (all on one line)::
 
-    C:\Python23>python.exe %PYTHONLIB%\lib\remote\WindowsServer.py 
+    C:\Python26>python.exe %PYTHONLIB%\site-packages\pycopia\remote\WindowsServer.py 
             --username DOMAIN\Administrator --password xxxxxxxx install
+
+Note: if you get an error about an account not existing, you may need
+to supply the username like this:
+
+    .\Administrator
 
 Now, go to the Service Manger from the Windows control panel, and perform the following.
 
-    - Select "Client Operations Server" from the list. Right-clieck and select "properties".
+    - Select "Remote Agent Server" from the list. Right-clieck and select "properties".
     - Select the "Log On" tab. 
     - Click the "This account:" radio button.
-    - Enter QA1\Administrator in the account box (or something else appropriate).
+    - Enter DOMAIN\Administrator in the account box (or something else appropriate).
     - Enter the proper password (twice).
     - Click "Apply". You should confirm a message saying Administrator is being
-      added to services group or some such.
+      added to services group or enabled to log in as a service.
     - Click "General" tab.
     - You may now start the service.
+
+You may also need to disable the Windows firewall for this to function
+properly. This service is a massive security hole, so only run it on
+a throw-away test machine on an isolated network.
 
 """
 
@@ -75,12 +84,11 @@ def setConfig():
     #Pyro.config.PYRO_MULTITHREADED = 0
     #Pyro.config.PYRO_STORAGE = os.path.splitdrive(win32api.GetSystemDirectory())[0]+os.sep
     Pyro.config.PYRO_STORAGE = "C:\\tmp\\"
-    Pyro.config.PYRO_LOGFILE = "C:\\tmp\\ClientServer_svc.log"
+    Pyro.config.PYRO_LOGFILE = "C:\\tmp\\agent_svc.log"
     Pyro.config.PYRO_TRACELEVEL=3
-    Pyro.config.PYRO_USER_LOGFILE = "C:\\tmp\\COS_user.log"
+    Pyro.config.PYRO_USER_LOGFILE = "C:\\tmp\\agent_user.log"
     Pyro.config.PYRO_USER_TRACELEVEL = 3
     Pyro.config.PYRO_PORT = 7867 # don't conflict with cygwin Pyro
-    Pyro.config.PYRO_NS_URIFILE = os.path.join(Pyro.config.PYRO_STORAGE, "ClientServer_URI.txt")
 
 
 import Pyro
@@ -269,7 +277,7 @@ class WindowsProcess(object):
 
 # A server that performs filer client operations. This mostly delegates to the
 # os module. But some special methods are provided for common functions.
-class ClientServer(Pyro.core.SynchronizedObjBase, object):
+class RemoteAgent(Pyro.core.SynchronizedObjBase):
     def __init__(self):
         Pyro.core.SynchronizedObjBase.__init__(self)
         self._files = {}
@@ -560,7 +568,6 @@ class ClientServer(Pyro.core.SynchronizedObjBase, object):
         return os.system(cmd) # remember, stdout is on the server
 
     def run(self, cmd, user=None):
-        UserLog.msg("run", cmd, str(user))
         if user is None:
             return self.pipe(cmd)
         else:
@@ -648,7 +655,7 @@ class ClientServer(Pyro.core.SynchronizedObjBase, object):
             sts = 0
         return ExitStatus(cmd, sts), text
 
-    def python(self, snippet):
+    def pyeval(self, snippet):
         try:
             code = compile(str(snippet) + '\n', '<WindowsServer>', 'eval')
             rv = eval(code, globals(), vars(self))
@@ -746,7 +753,7 @@ class ClientServer(Pyro.core.SynchronizedObjBase, object):
     def get_tarball(self, url):
         self.pushd(self._get_home())
         # the ncftpget will check if the file is current, will not download if not needed
-        exitstatus, out = self.pipe('ncftpget -V "%s"' % (url,))
+        exitstatus, out = self.pipe('wget -q "%s"' % (url,))
         self.popd()
         return exitstatus
 
@@ -763,7 +770,7 @@ class ClientServer(Pyro.core.SynchronizedObjBase, object):
             os.unlink(name)
         return ExitStatus("cmd.exe", sts), out
 
-    # for PosixServer polymorphism
+    # for PosixServer duck typing
     def mount(self, host, export, mountpoint):
         """Map a drive on a client. Same as mount on NFS. The mountpoint should
         be a drive letter (without the colon).  """
@@ -775,7 +782,6 @@ class ClientServer(Pyro.core.SynchronizedObjBase, object):
 
     def run_as(self, cmd, user, password):
         cmd = 'runas /user:%s %s' % (user, cmd)
-        UserLog.msg("run_as", cmd)
         return self.pipe(cmd)
 
     def get_short_pathname(self, path):
@@ -863,13 +869,12 @@ class Counter(object):
 
 ######## main program #####
 
-class ClientServerThread(threading.Thread):
-    """ The Pyro Naming Service will run in this thread
+class AgentThread(threading.Thread):
+    """ Agent runs in this thread.
     """
-    def __init__(self, args, stopcallback):
+    def __init__(self, stopcallback):
         threading.Thread.__init__(self)
-        Log.msg("ClientServer", "initializing")
-        self._args = list(args)
+        Log.msg("RemoteAgent", "initializing")
         self._stopcallback = stopcallback
 
     def run(self):
@@ -882,15 +887,15 @@ class ClientServerThread(threading.Thread):
 
 
 def run_server():
-    os.chdir("C:\\tmp")
+    os.chdir(r"C:\tmp")
     Pyro.core.initServer(banner=0, storageCheck=0)
     ns=Pyro.naming.NameServerLocator().getNS()
 
     daemon=Pyro.core.Daemon()
     daemon.useNameServer(ns)
 
-    uri=daemon.connectPersistent(ClientServer(), 
-                ":Client.%s" % (win32api.GetComputerName().lower(),))
+    uri=daemon.connectPersistent(RemoteAgent(), 
+                "Agents.%s" % (win32api.GetComputerName().lower(),))
     daemon.requestLoop(_checkexit)
     daemon.shutdown()
 
@@ -898,18 +903,14 @@ def _checkexit():
     global _EXIT
     return not _EXIT
 
-class ClientServerService(BasicNTService):
-    _svc_name_ = 'ClientServerService'
-    _svc_display_name_ = "Client Operations Server"
-    _svc_description_ = 'Provides Windows Client API methods.'
+class RemoteAgentService(BasicNTService):
+    _svc_name_ = 'RemoteAgentService'
+    _svc_display_name_ = "Remote Agent Server"
+    _svc_description_ = 'Provides Windows remote control agent.'
     def __init__(self, args):
-        BasicNTService.__init__(self, args)
+        super(RemoteAgentService, self).__init__(args)
         setConfig()
-        try:
-            args = getRegistryParameters(self._svc_name_).split()
-        except Exception,x:
-            Log.error("PyroNS_svc","PROBLEM GETTING ARGS FROM REGISTRY:",x)
-        self._thread = ClientServerThread(args, self.SvcStop)
+        self._thread = AgentThread(self.SvcStop)
 
     def _doRun(self):
         self._thread.start()
@@ -920,5 +921,5 @@ class ClientServerService(BasicNTService):
 
 
 if __name__ == '__main__':
-    ClientServerService.HandleCommandLine()
+    RemoteAgentService.HandleCommandLine()
 
