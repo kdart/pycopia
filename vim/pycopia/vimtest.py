@@ -23,7 +23,6 @@ without errors.
 """
 
 import sys
-from pycopia import charbuffer
 
 class error(Exception):
     pass
@@ -40,7 +39,7 @@ class Range(object):
 def command(s):
     print "vim command:", s
 
-buffers = [charbuffer.Buffer()]
+buffers = [bytearray()]
 buffers[0].name = "<unknown>"
 windows = [Window()]
 

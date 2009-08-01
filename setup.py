@@ -45,6 +45,9 @@ except AttributeError: # running on Windows
     def WEXITSTATUS(arg):
         return arg
     os.environ["HOME"] = os.environ["USERPROFILE"]
+    RSYNCCHECK = "rsync --version >nul"
+else:
+    RSYNCCHECK = "rsync --version >/dev/null"
 
 PACKAGES = [
 "aid",
@@ -128,7 +131,7 @@ def do_squash(name):
         os.mkdir(SQUASHDIR)
     os.chdir(name)
     uname = os.uname()
-    bin_dir = "build/lib.%s-%s-%s" % (uname[0].lower(), uname[4], sys.version[:3])
+    bin_dir = ps.path.join("build", "lib.%s-%s-%s" % (uname[0].lower(), uname[4], sys.version[:3]))
     # e.g: build/lib.linux-x86_64-2.5/pycopia
     print "======== SQUASH", name, "to", SQUASHDIR
     try:
@@ -150,7 +153,7 @@ def _null_init(directory):
     open(os.path.join(directory, "pycopia", "__init__.py"), "w").close()
 
 def _check_rsync():
-    return WEXITSTATUS(os.system("rsync --version >/dev/null")) == 0
+    return WEXITSTATUS(os.system(RSYNCCHECK)) == 0
 
 def do_generic(name):
     pass

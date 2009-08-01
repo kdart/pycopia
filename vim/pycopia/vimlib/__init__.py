@@ -17,7 +17,7 @@ try:
     import vim
 except ImportError:
     # for running outside of vim
-    import pycopia.vimlib.vimtest as vim
+    import pycopia.vimtest as vim
 
 # buffers command current error eval windows
 
@@ -526,7 +526,6 @@ class Whitespace:
         return a
 
 def format_witnesses(w):
-    import string
     firsts = map(lambda tup: str(tup[0]), w)
     prefix = "at tab size"
     if len(w) > 1:

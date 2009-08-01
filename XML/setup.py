@@ -2,6 +2,7 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 
+import sys
 import ez_setup
 ez_setup.use_setuptools()
 
@@ -15,6 +16,11 @@ REVISION="$Revision$"
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
+if sys.platform not in ("win32", "cli"):
+    DATA_FILES=[('/etc/pycopia/dtd', glob("etc/dtd/*.dtd")+glob("etc/dtd/*.ent"))]
+else:
+    DATA_FILES=[]
+
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.XML", "pycopia.dtds"],
@@ -22,7 +28,7 @@ setup (name=NAME, version=VERSION,
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
-    data_files=[('/etc/pycopia/dtd', glob("etc/dtd/*.dtd")+glob("etc/dtd/*.ent"))],
+    data_files=DATA_FILES,
     scripts = glob("bin/*"), 
     test_suite = "test.XMLTests",
 

@@ -107,8 +107,8 @@ try:
     execfile(RCFILE, env, env) 
 except:
     ex, val, tb = sys.exc_info()
-    print >>sys.stderr, "warning: could not read config file."
-    print >>sys.stderr, ex, val
+    print >>sys.stderr, "warning: could not read config file:", RCFILE
+    print >>sys.stderr, val
 else:
     for name, val in env.items():
         if type(val) is str:
