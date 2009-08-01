@@ -16,6 +16,15 @@ REVISION="$Revision$"
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
+if sys.platform not in ("win32", "cli"):
+    DATA_FILES = [
+        ('/etc/pycopia', glob("etc/*")),
+        (os.path.join(sys.prefix, 'share', 'pycopia', 'docs'), 
+             glob("doc/*.rst")),
+    ]
+else:
+    DATA_FILES = []
+
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
@@ -24,11 +33,7 @@ setup (name=NAME, version=VERSION,
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
-    data_files = [
-        ('/etc/pycopia', glob("etc/*")),
-        (os.path.join(sys.prefix, 'share', 'pycopia', 'docs'), 
-             glob("doc/*.rst")),
-    ],
+    data_files = DATA_FILES,
 
     description = "Modules for running, interacting with, and managing processes.",
     long_description = """Modules for running, interacting with, and managing processes.

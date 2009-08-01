@@ -18,11 +18,15 @@ REVISION="$Revision$"
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
+SCRIPTS = []
+EXTENSIONS = []
+
 if sys.platform == "darwin":
-    itimer = Extension('pycopia.itimer', ['pycopia.itimer.pyx'])
-else:
-    itimer = Extension('pycopia.itimer', ['pycopia.itimer.pyx'],
-                   libraries=["rt"])
+    EXTENSIONS.append(Extension('pycopia.itimer', ['pycopia.itimer.pyx']))
+elif sys.platform == "linux2":
+    EXTENSIONS.append(Extension('pycopia.itimer', ['pycopia.itimer.pyx'], libraries=["rt"]))
+    SCRIPTS = glob("bin/*")
+
 
 if sys.version_info[:2] < (2, 5):
 # The readline and mmap modules here are copies of the Python 2.5 modules.
@@ -34,18 +38,17 @@ if sys.version_info[:2] < (2, 5):
                     define_macros=[("HAVE_RL_COMPLETION_MATCHES", None)],
                     library_dirs=['/usr/lib/termcap'],
                    libraries=["readline", "ncurses"])
+    EXTENSIONS.append(readline)
 
     mmap = Extension('mmap', ['mmapmodule.c'],)
-    extensions  = [readline, mmap, itimer]
-else:
-    extensions  = [itimer]
+    EXTENSIONS.append(mmap)
 
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia"],
-    scripts = glob("bin/*"), 
-    ext_modules=extensions,
+    scripts = SCRIPTS,
+    ext_modules = EXTENSIONS,
     install_requires = ['pycopia-aid>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
@@ -95,17 +98,18 @@ def unlink_old_modules():
             pass
 
 
-if os.getuid() == 0 and sys.argv[1] == "install":
-    print "Installing SUID helpers."
-    try:
-        build_tools()
-    except:
-        ex, val, tb = sys.exc_info()
-        print >>sys.stderr, "Could not build helper programs:"
-        print >>sys.stderr, "%s (%s)" % (ex, val)
+if sys.platform == "linux2":
+    if os.getuid() == 0 and sys.argv[1] == "install":
+        print "Installing SUID helpers."
+        try:
+            build_tools()
+        except:
+            ex, val, tb = sys.exc_info()
+            print >>sys.stderr, "Could not build helper programs:"
+            print >>sys.stderr, "%s (%s)" % (ex, val)
 
-    if sys.version_info[:2] < (2, 5):
-        unlink_old_modules()
-else:
-    print >>sys.stderr, "You must run 'setup.py install' as root to install helper programs."
+        if sys.version_info[:2] < (2, 5):
+            unlink_old_modules()
+    else:
+        print >>sys.stderr, "You must run 'setup.py install' as root to install helper programs."
 

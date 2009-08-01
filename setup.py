@@ -17,15 +17,20 @@
 Master builder (custom script).
 
 Commands:
- sdist
  publish
  build
  install
+ eggs
+ rpms
+ msis
+ wininst
  develop
  clean
  squash
  eggs
  list
+
+Most regular setuptools commands also work.
 
 NOTE: install requires sudo to be configured for you.
 
@@ -34,6 +39,12 @@ NOTE: install requires sudo to be configured for you.
 import sys
 import os
 
+try:
+    WEXITSTATUS = os.WEXITSTATUS
+except AttributeError: # running on Windows
+    def WEXITSTATUS(arg):
+        return arg
+    os.environ["HOME"] = os.environ["USERPROFILE"]
 
 PACKAGES = [
 "aid",
@@ -59,7 +70,9 @@ SQUASHDIR = os.environ.get("SQUASHDIR",
         os.path.expandvars("$HOME/.local/lib/python%s/site-packages" % (sys.version[:3],)))
 
 def _do_commands(name, cmds, root):
-    if root:
+    # use sudo on Linux and possibly other platforms. On Windows it's
+    # assumed you're running as Administrator (everybody does it...)
+    if root and sys.platform not in ("win32", "cli"):
         sudo = "sudo "
     else:
         sudo = ""
@@ -67,15 +80,12 @@ def _do_commands(name, cmds, root):
     print "========", name, "==", cmd
     os.chdir(name)
     try:
-        rv = os.WEXITSTATUS(os.system(cmd)) == 0
+        rv = WEXITSTATUS(os.system(cmd)) == 0
     finally:
         os.chdir("..")
         print "====================== END", name
         print
     return rv
-
-def do_sdist(name):
-    return _do_commands(name, ["sdist"], False)
 
 def do_eggs(name):
     return _do_commands(name, ["bdist_egg"], False)
@@ -86,12 +96,8 @@ def do_rpms(name):
 def do_msis(name):
     return _do_commands(name, ["bdist_msi"], False)
 
-def do_build(name):
-    return _do_commands(name, ["build"], False)
-
-def do_list(name):
-    print name,
-    return True
+def do_wininst(name):
+    return _do_commands(name, ["bdist_wininst"], False)
 
 def do_develop(name):
     return _do_commands(name, ["develop -s $HOME/bin -l -N"], False)
@@ -108,6 +114,10 @@ def do_install(name):
 def do_clean(name):
     return _do_commands(name, ["clean"], False)
 
+def do_list(name):
+    print name,
+    return True
+
 # "squash" selected sub packages to a single package. Also removes
 # setuptools dependency when tarballed.
 def do_squash(name):
@@ -122,12 +132,12 @@ def do_squash(name):
     # e.g: build/lib.linux-x86_64-2.5/pycopia
     print "======== SQUASH", name, "to", SQUASHDIR
     try:
-        if os.WEXITSTATUS(os.system("%s setup.py build" % (sys.executable,))) != 0:
+        if WEXITSTATUS(os.system("%s setup.py build" % (sys.executable,))) != 0:
             return False
         for pydir in ("build/lib", bin_dir):
             if os.path.isdir(pydir):
                 cmd = "rsync -azvu %s/ %s" % (pydir, SQUASHDIR)
-                if os.WEXITSTATUS(os.system(cmd)) != 0:
+                if WEXITSTATUS(os.system(cmd)) != 0:
                     return False
     finally:
         os.chdir("..")
@@ -140,8 +150,10 @@ def _null_init(directory):
     open(os.path.join(directory, "pycopia", "__init__.py"), "w").close()
 
 def _check_rsync():
-    return os.WEXITSTATUS(os.system("rsync --version >/dev/null")) == 0
+    return WEXITSTATUS(os.system("rsync --version >/dev/null")) == 0
 
+def do_generic(name):
+    pass
 
 def main(argv):
     try:
@@ -152,8 +164,8 @@ def main(argv):
     try:
         meth = globals()["do_" + cmd]
     except KeyError:
-        print __doc__
-        return 2
+        def meth(name):
+            return _do_commands(name, [cmd], False)
     for name in (argv[2:] or PACKAGES):
         if not meth(name):
             break

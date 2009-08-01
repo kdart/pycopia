@@ -56,16 +56,19 @@ def get_vimfiles():
             (vimsyntax, glob("vimfiles/syntax/*")),
            ]
 
-try:
-    datafiles = get_vimfiles()
-except (ImportError, AttributeError):
-    datafiles = []
+if sys.platform not in ("win32", "cli"):
+    try:
+        DATA_FILES = get_vimfiles()
+    except (ImportError, AttributeError):
+        DATA_FILES = []
+else:
+    DATA_FILES = []
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.vimlib"],
     test_suite = "test.VimTests",
-    data_files = datafiles,
+    data_files = DATA_FILES,
     scripts = glob("bin/*"), 
     install_requires = [
             'pycopia-process>=1.0.dev-r138,==dev', 
@@ -91,4 +94,7 @@ setup (name=NAME, version=VERSION,
                    "Intended Audience :: Developers"],
 )
 
+if not DATA_FILES:
+    print ("Be sure to take a look at the files in vimfiles directory " 
+    "and copy them to your preferred vimfiles location.")
 
