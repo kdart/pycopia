@@ -638,7 +638,11 @@ class RemoteAgent(Pyro.core.SynchronizedObjBase):
     def plist(self):
         return self._procs.keys()
 
-    def spawn(self, cmd):
+    def spawn(self, cmd, user=None, async=True):
+        # keep the "async" parameter for compatibility with the
+        # PosixServer.
+        if user:
+            cmd = ("runas /user:%s " % user) + cmd
         UserLog.msg("spawn", cmd)
         L = split_command_line(cmd)
         pid = os.spawnv(os.P_DETACH, L[0], L)
@@ -653,7 +657,7 @@ class RemoteAgent(Pyro.core.SynchronizedObjBase):
             sts = 0
         return ExitStatus(cmd, sts), text
 
-    def pyeval(self, snippet):
+    def python(self, snippet):
         try:
             code = compile(str(snippet) + '\n', '<WindowsServer>', 'eval')
             rv = eval(code, globals(), vars(self))

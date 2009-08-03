@@ -26,6 +26,7 @@ import Pyro.errors
 
 from pycopia import CLI
 from pycopia import UI
+from pycopia import cliutils
 from pycopia.remote import Client
 
 PROMPT = "remote> "
@@ -33,7 +34,7 @@ PROMPT = "remote> "
 class FileCommand(CLI.BaseCommands):
     WHENCES = {"set":0, "current":1, "end":2}
     def _setup(self, client, handle, prompt):
-        self._client = client
+        self._obj = client
         self._handle = handle
         self._environ["PS1"] = prompt
         self._namespace = {"client":client, "environ":self._environ}
@@ -42,7 +43,7 @@ class FileCommand(CLI.BaseCommands):
     def close(self, argv):
         """close
     Close the file object."""
-        self._client.fclose(self._handle)
+        self._obj.fclose(self._handle)
         raise CLI.CommandQuit, self._handle
 
     def read(self, argv):
@@ -52,7 +53,7 @@ class FileCommand(CLI.BaseCommands):
             n = int(argv[1])
         except:
             n = -1
-        rv = self._client.fread(self._handle, n)
+        rv = self._obj.fread(self._handle, n)
         if rv:
             self._print(rv)
         return rv
@@ -61,7 +62,7 @@ class FileCommand(CLI.BaseCommands):
         """write <data>
     Writes <data> to file object."""
         data = " ".join(argv[1:])
-        rv = self._client.fwrite(self._handle, data)
+        rv = self._obj.fwrite(self._handle, data)
         return rv
 
     def writefrom(self, argv):
@@ -72,7 +73,7 @@ class FileCommand(CLI.BaseCommands):
         try:
             data = fo.read(1024)
             while data:
-                self._client.fwrite(self._handle, data)
+                self._obj.fwrite(self._handle, data)
                 data = fo.read(1024)
         finally:
             fo.close()
@@ -80,7 +81,7 @@ class FileCommand(CLI.BaseCommands):
     def fileno(self, argv):
         """fileno
     Get the file descriptor."""
-        return self._client.fileno(self._handle)
+        return self._obj.fileno(self._handle)
 
     def lock(self, argv):
         """lock <length> <start> [whence]
@@ -97,7 +98,7 @@ class FileCommand(CLI.BaseCommands):
             whence = self.WHENCES.get(argv[3], 0)
         else:
             whence = 0
-        return self._client.flock(self._handle, length, start, whence)
+        return self._obj.flock(self._handle, length, start, whence)
 
     def unlock(self, argv):
         """unlock <length> <start> <whence>
@@ -108,7 +109,7 @@ class FileCommand(CLI.BaseCommands):
             whence = self.WHENCES.get(argv[3], 0)
         else:
             whence = 0
-        self._client.funlock(self._handle, length, start, whence)
+        self._obj.funlock(self._handle, length, start, whence)
 
     def seek(self, argv):
         """seek <pos> [<whence>]
@@ -119,29 +120,29 @@ class FileCommand(CLI.BaseCommands):
             whence = self.WHENCES.get(argv[2], 0)
         else:
             whence = 0
-        return self._client.fseek(self._handle, pos, whence)
+        return self._obj.fseek(self._handle, pos, whence)
 
     def tell(self, argv):
         """tell
     Prints the current seek pointer offset."""
-        offset = self._client.ftell(self._handle)
+        offset = self._obj.ftell(self._handle)
         self._print(offset)
         return offset
 
     def flush(self, argv):
         """flush
     Flush the buffered data to the file."""
-        return self._client.fflush(self._handle)
+        return self._obj.fflush(self._handle)
 
     def sync(self, argv):
         """sync
     Syncs this file to disk."""
-        return self._client.fsync(self._handle)
+        return self._obj.fsync(self._handle)
 
     def statvfs(self, argv):
         """statvfs 
     Print information about the volume that this file is located in."""
-        vfsstat = self._client.fstatvfs(self._handle)
+        vfsstat = self._obj.fstatvfs(self._handle)
         self._print("Volume stats:")
         self._print("               fragment size = %s" % (vfsstat.f_frsize,))
         self._print("                      blocks = %s" % (vfsstat.f_blocks,))
@@ -157,7 +158,7 @@ class FileCommand(CLI.BaseCommands):
     def stat(self, argv):
         """stat
     Print information about this file."""
-        stat = self._client.fstat(self._handle)
+        stat = self._obj.fstat(self._handle)
         self._print("Stats:")
         self._print("      inode = %s" % (stat.st_ino,))
         self._print("       mode = %o" % (stat.st_mode,))
@@ -174,7 +175,7 @@ class FileCommand(CLI.BaseCommands):
 
 class ProcCommand(CLI.BaseCommands):
     def _setup(self, client, pid, prompt):
-        self._client = client
+        self._obj = client
         self._pid = pid
         self._environ["PS1"] = prompt
         self._namespace = {"client":client, "pid":pid, "environ":self._environ}
@@ -187,7 +188,7 @@ class ProcCommand(CLI.BaseCommands):
             n = int(argv[1])
         except:
             n = -1
-        rv = self._client.read_process(self._pid, n)
+        rv = self._obj.read_process(self._pid, n)
         if rv:
             self._print(rv)
         return rv
@@ -196,20 +197,20 @@ class ProcCommand(CLI.BaseCommands):
         """write <data>
     Writes <data> to process object."""
         data = " ".join(argv[1:])
-        rv = self._client.write_process(self._pid, data)
+        rv = self._obj.write_process(self._pid, data)
         return rv
 
     def kill(self, argv):
         """kill
     Kills this interactive process."""
-        es = self._client.kill(self._pid)
+        es = self._obj.kill(self._pid)
         self._print(str(es))
         raise CLI.CommandQuit, self._pid
 
     def poll(self, argv):
         """poll
     Polls this process object."""
-        sts = self._client.poll(self._pid)
+        sts = self._obj.poll(self._pid)
         if sts == -errno.EAGAIN:
             self._print("running.")
         elif sts == -errno.ENOENT:
@@ -225,14 +226,14 @@ class ProcCommand(CLI.BaseCommands):
 class RemoteCLI(CLI.BaseCommands):
 
     def _setup(self, client, prompt):
-        self._client = client
+        self._obj = client
         self._environ["PS1"] = prompt
         self._namespace = {"client":client, "environ":self._environ}
         self._reset_scopes()
 
     def _generic_call(self, argv):
-        meth = getattr(self._client, argv[0])
-        args, kwargs = CLI.breakout_args(argv[1:], vars(self._client))
+        meth = getattr(self._obj, argv[0])
+        args, kwargs = CLI.breakout_args(argv[1:], vars(self._obj))
         rv = apply(meth, args, kwargs)
         if rv:
             self._print(rv)
@@ -247,7 +248,7 @@ class RemoteCLI(CLI.BaseCommands):
         """alive
     Check that the server is alive and kicking."""
         try:
-            if self._client.alive():
+            if self._obj.alive():
                 self._print("Server is alive.")
             else:
                 self._print("Server is NOT alive.")
@@ -259,7 +260,7 @@ class RemoteCLI(CLI.BaseCommands):
     def suicide(self, argv):
         """suicide
     Make the remote agent exit."""
-        self._client.suicide()
+        self._obj.suicide()
         raise CLI.CommandQuit
 
     def run(self, argv):
@@ -270,7 +271,7 @@ class RemoteCLI(CLI.BaseCommands):
         for opt, arg in opts:
             if opt == "-u":
                 user = arg
-        es, res = self._client.run(" ".join(args), user=user)
+        es, res = self._obj.run(" ".join(args), user=user)
         self._print(res)
         return es
 
@@ -288,7 +289,7 @@ class RemoteCLI(CLI.BaseCommands):
                 user = arg
             elif opt == "-a":
                 async = True
-        pid = self._client.spawn(" ".join(args), user=user, async=async)
+        pid = self._obj.spawn(" ".join(args), user=user, async=async)
         self._print(pid)
         return pid
 
@@ -296,7 +297,7 @@ class RemoteCLI(CLI.BaseCommands):
         """waitpid <pid>
     Wait on a spawned process."""
         pid = int(argv[1])
-        es = self._client.waitpid(pid)
+        es = self._obj.waitpid(pid)
         self._print(es)
         return es
 
@@ -314,13 +315,13 @@ class RemoteCLI(CLI.BaseCommands):
             except ValueError, err:
                 self._print(err)
             else:
-                self._client.kill(pid)
+                self._obj.kill(pid)
 
     def poll(self, argv):
         """poll <pid>
     Determine that status of a background process."""
         pid = int(argv[1])
-        sts = self._client.poll(pid)
+        sts = self._obj.poll(pid)
         if sts == -errno.EAGAIN:
             self._print("running.")
         elif sts == -errno.ENOENT:
@@ -333,15 +334,15 @@ class RemoteCLI(CLI.BaseCommands):
         """interact <pid>
     Interact with the raw file-like interface of a process. Provide the pid as
     supplied from plist."""
-        args, kwargs = CLI.breakout_args(argv[1:], vars(self._client))
+        args, kwargs = CLI.breakout_args(argv[1:], vars(self._obj))
         if args:
             pid = int(args[0])
         else:
-            pid = self._client.plist()[0]
-        pid = self._client.poll(pid)
+            pid = self._obj.plist()[0]
+        pid = self._obj.poll(pid)
         if pid:
             cmd = self.clone(ProcCommand)
-            cmd._setup(self._client, pid, "pid %s> " % (pid,))
+            cmd._setup(self._obj, pid, "pid %s> " % (pid,))
             raise CLI.NewCommand, cmd
         else:
             self._print("No such pid on server.")
@@ -354,15 +355,15 @@ class RemoteCLI(CLI.BaseCommands):
     def fiddle(self, argv):
         """fiddle <handle>
     fiddle with a remote file object. Provide the handle id obtained from 'flist'."""
-        args, kwargs = CLI.breakout_args(argv[1:], vars(self._client))
+        args, kwargs = CLI.breakout_args(argv[1:], vars(self._obj))
         if args:
             handle = args[0]
         else:
-            handle = self._client.flist()[0]
-        finfo = self._client.get_handle_info(handle)
+            handle = self._obj.flist()[0]
+        finfo = self._obj.get_handle_info(handle)
         if finfo:
             cmd = self.clone(FileCommand)
-            cmd._setup(self._client, handle, "%s> " % (finfo,))
+            cmd._setup(self._obj, handle, "%s> " % (finfo,))
             raise CLI.NewCommand, cmd 
         else:
             self._print("No such handle on server.")
@@ -487,7 +488,7 @@ class RemoteCLI(CLI.BaseCommands):
     def stat(self, argv):
         """stat <path>
     Return a stat tuple for the path."""
-        stat = self._client.stat(argv[1])
+        stat = self._obj.stat(argv[1])
         self._print("Stats for %s:" % (argv[1],))
         self._print("      inode = %s" % (stat.st_ino,))
         self._print("       mode = %o" % (stat.st_mode,))
@@ -504,7 +505,7 @@ class RemoteCLI(CLI.BaseCommands):
     def statvfs(self, argv):
         """statvfs <path>
     Return a statvfs tuple for the path. That is, the information of the volume."""
-        vfsstat = self._client.statvfs(argv[1])
+        vfsstat = self._obj.statvfs(argv[1])
         self._print("Volume stats for %s:" % (argv[1],))
         self._print("               fragment size = %s" % (vfsstat.f_frsize,))
         self._print("                      blocks = %s" % (vfsstat.f_blocks,))
@@ -540,28 +541,32 @@ class RemoteCLI(CLI.BaseCommands):
     def system(self, argv):
         """system <command>
     Run the <command> through the 'system' function."""
-        es = self._client.system(" ".join(argv[1:]))
+        es = self._obj.system(" ".join(argv[1:]))
         self._print(es)
         return es
 
     def pipe(self, argv):
         """pipe <command>
     Run a remote co-process connected by a pipe. """
-        es, res = self._client.pipe(" ".join(argv[1:]))
+        es, res = self._obj.pipe(" ".join(argv[1:]))
         self._print(res)
         return es
 
     def pyeval(self, argv):
         """pyeval <snippet>
     Evaluate some arbitrary Python code on the agent. """
-        rv = self._client.python(" ".join(argv[1:]))
+        rv = self._obj.python(" ".join(argv[1:]))
         self._print(rv)
         return rv
 
     def pyexec(self, argv):
-        """pyexec <snippet>
+        """pyexec [<snippet>]
     Execute some arbitrary Python code on the agent. """
-        self._client.pyexec(" ".join(argv[1:]))
+        text = " ".join(argv[1:])
+        if not text:
+            text = cliutils.get_text("py> ")
+        if text:
+            return self._obj.pyexec(text)
 
     def copyfile(self, argv):
         """copyfile <src> <dst>
@@ -619,7 +624,7 @@ class RemoteCLI(CLI.BaseCommands):
         """md5sums <path>
     Reads the md5sums.txt file in the given path and reports the number checked
     and failed files."""
-        good, bad, failed = self._client.md5sums(argv[1])
+        good, bad, failed = self._obj.md5sums(argv[1])
         self._print("Checked %d files, %d passed and %d failed." % (good+bad, good, bad))
         if failed:
             self._print("The following failed the md5 check:")
@@ -635,7 +640,7 @@ class RemoteCLI(CLI.BaseCommands):
         else:
             url = self._environ.tarballurl
             self._print("Pushing %r to client." % (url,))
-        es = self._client.get_tarball(url)
+        es = self._obj.get_tarball(url)
         if es:
             self._print("Push successful.")
         else:
@@ -645,7 +650,7 @@ class RemoteCLI(CLI.BaseCommands):
     def hostname(self, argv):
         """hostname
     Print the server's host name."""
-        name =  self._client.hostname()
+        name =  self._obj.hostname()
         self._print(name)
         return name
 
@@ -665,7 +670,6 @@ class RemoteCLI(CLI.BaseCommands):
             if text:
                 return self._runscript(text)
             else:
-                from pycopia import cliutils
                 text = cliutils.get_text("script> ")
                 if text:
                     return self._runscript(text)
@@ -675,7 +679,7 @@ class RemoteCLI(CLI.BaseCommands):
 
     # helper for script
     def _runscript(self, text):
-        sts, out = self._client.run_script(text)
+        sts, out = self._obj.run_script(text)
         if sts:
             self._print(out)
         else:
@@ -687,7 +691,7 @@ class RemoteCLI(CLI.BaseCommands):
     Copies a file from the remote agent to the local file system."""
         src = argv[1]
         dest = argv[2]
-        Client.remote_copy(self._client, src, dest)
+        Client.remote_copy(self._obj, src, dest)
 
 
 class PosixRemoteCLI(RemoteCLI):
@@ -700,7 +704,7 @@ class PosixRemoteCLI(RemoteCLI):
         pathname = argv[2]
         if cmd == "add":
             try:
-                export = self._client.add_export(pathname)
+                export = self._obj.add_export(pathname)
             except:
                 ex, val, tb = sys.exc_info()
                 self._print("Could not add export: %s (%s)" % (ex,val))
@@ -708,14 +712,14 @@ class PosixRemoteCLI(RemoteCLI):
                 self._print("Export %r created." % (export,))
                 return
         elif cmd == "del":
-            es = self._client.del_export(pathname)
+            es = self._obj.del_export(pathname)
             if es:
                 self._print("Export removed.")
             else:
                 self._print("Did not remove export: %s" % (es,))
             return
         else:
-            explist = self._client.list_export()
+            explist = self._obj.list_export()
             self._print(explist)
             return
 
@@ -726,7 +730,7 @@ class WindowsRemoteCLI(RemoteCLI):
         """shortname <path>...
     Print the short file name for the given paths."""
         for path in argv[1:]:
-            self._print(self._client.get_short_pathname(path))
+            self._print(self._obj.get_short_pathname(path))
 
     # windows methods under cygwin
     def net_use(self, argv):
@@ -746,7 +750,7 @@ class WindowsRemoteCLI(RemoteCLI):
         pathname = argv[2]
         if cmd == "add":
             try:
-                sharename = self._client.add_share(pathname)
+                sharename = self._obj.add_share(pathname)
             except:
                 ex, val, tb = sys.exc_info()
                 self._print("Could not add share: %s (%s)" % (ex,val))
@@ -754,7 +758,7 @@ class WindowsRemoteCLI(RemoteCLI):
                 self._print("Share %r created, served from %r." % (sharename, pathname))
                 return
         elif cmd == "del":
-            rv = self._client.del_share(pathname)
+            rv = self._obj.del_share(pathname)
             if rv:
                 self._print("Share removed.")
             else:
@@ -769,29 +773,29 @@ class WindowsRemoteCLI(RemoteCLI):
     Copies a file from src path the dst path."""
         src = argv[1]
         dst = argv[2]
-        rv = self._client.CopyFile(src, dst)
+        rv = self._obj.CopyFile(src, dst)
         return rv
 
     def win32(self, argv):
         """win32 <funcname> args...
     Calls the win32api function named <funcname> with the supplied arguments and return the results."""
         funcname = argv[1]
-        args, kwargs = CLI.breakout_args(argv[2:], vars(self._client))
-        rv = self._client.win32(funcname, *args, **kwargs)
+        args, kwargs = CLI.breakout_args(argv[2:], vars(self._obj))
+        rv = self._obj.win32(funcname, *args, **kwargs)
         return rv
 
     def attributes(self, argv):
         """attributes <"list"|"get"|"set"|"clear"> <fname> [flags...]
     Get or show the files attributes. The possible attribute names may also be listed."""
         cmd = argv[1]
-        attrmap = self._client.GetFileAttributeFlags()
+        attrmap = self._obj.GetFileAttributeFlags()
         if cmd == "list":
             self._print("Possible attributes:")
             for attrname in attrmap.keys():
                 self._print("  %s" % (attrname,))
             return
         fname = argv[2]
-        flags = self._client.GetFileAttributes(fname)
+        flags = self._obj.GetFileAttributes(fname)
         if cmd == "get":
             self._print("Attributes for %s:" % (fname,))
             for name, flag in attrmap.items():
@@ -804,7 +808,7 @@ class WindowsRemoteCLI(RemoteCLI):
                 for setflag in toset:
                     if attrname.startswith(setflag):
                         newflags |= attrvalue
-            return self._client.SetFileAttributes(fname, newflags)
+            return self._obj.SetFileAttributes(fname, newflags)
         elif cmd == "clear":
             newflags = flags
             toset = map(str.upper, argv[3:])
@@ -812,7 +816,7 @@ class WindowsRemoteCLI(RemoteCLI):
                 for setflag in toset:
                     if attrname.startswith(setflag):
                         newflags &= ~attrvalue
-            return self._client.SetFileAttributes(fname, newflags)
+            return self._obj.SetFileAttributes(fname, newflags)
         else:
             self._print(self.attributes.__doc__)
             return
@@ -820,7 +824,7 @@ class WindowsRemoteCLI(RemoteCLI):
 
 class TopLevelCLI(CLI.BaseCommands):
     def initialize(self):
-        self._clients = {}
+        self._objs = {}
         Pyro.core.initClient(banner=0)
         self._rescan()
 
@@ -829,13 +833,13 @@ class TopLevelCLI(CLI.BaseCommands):
         ns = locator.getNS()
         for name, isobject in ns.list("Agents"):
             if isobject:
-                self._clients[name] = Client.get_remote(name)
-        agents = self._clients.keys()
+                self._objs[name] = Client.get_remote(name)
+        agents = self._objs.keys()
         self.add_completion_scope("use", agents)
         self.add_completion_scope("ping", agents)
 
     def finalize(self):
-        self._clients = {}
+        self._objs = {}
 
     def except_hook(self, ex, val, tb):
         self._print(ex, val)
@@ -850,7 +854,7 @@ class TopLevelCLI(CLI.BaseCommands):
         """ls
     Print available clients."""
         self._print("Currently available agents:")
-        for name in self._clients.keys():
+        for name in self._objs.keys():
             self._print("  %s" % (name,))
     dir = ls # alias
 
@@ -858,11 +862,11 @@ class TopLevelCLI(CLI.BaseCommands):
         """use
     Use the specified agent. """
         name = argv[1]
-        clnt = self._clients[name]
+        clnt = self._objs[name]
         try:
             plat = clnt.platform()
         except Pyro.errors.ConnectionClosedError:
-            del self._clients[name]
+            del self._objs[name]
             self._print("Remote agent has disconnected.")
             return
         if plat == "win32":
@@ -876,7 +880,7 @@ class TopLevelCLI(CLI.BaseCommands):
         """ping <name>
     Checks that the named server is alive."""
         host = argv[1]
-        clnt = self._clients[host]
+        clnt = self._objs[host]
         try:
             if clnt.alive():
                 self._print("%s is alive." % (host,))

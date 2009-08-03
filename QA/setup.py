@@ -32,7 +32,7 @@ def system_setup():
                     pwent = pwd.getpwnam("tester")
                 except KeyError:
                     os.system("useradd -c Tester " 
-                    "-G users,uucp,audio,cdrom,dialout,video,games,postgres,usb,crontab,messagebus,plugdev,pulse-access " 
+                    "-G users,uucp,audio,cdrom,dialout,video,games,usb,crontab,messagebus,plugdev " 
                     "-m -U tester") # also creates tester group
                     print "Change password for new user tester:"
                     os.system("passwd tester")
@@ -93,5 +93,6 @@ setup (name=NAME, version=VERSION,
 )
 
 
-system_setup()
+if "install" in sys.argv:
+    system_setup()
 
