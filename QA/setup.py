@@ -2,6 +2,8 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 
+import sys
+
 import ez_setup
 ez_setup.use_setuptools()
 
