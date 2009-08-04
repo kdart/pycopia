@@ -28,26 +28,33 @@ Now run (all on one line)::
     C:\Python26>python.exe %PYTHONLIB%\site-packages\pycopia\remote\WindowsServer.py 
             --username DOMAIN\Administrator --password xxxxxxxx install
 
+OR, for system process that can interact with console::
+
+    C:\Python26>python.exe %PYTHONLIB%\site-packages\pycopia\remote\WindowsServer.py 
+            --interactive install
+
 Note: if you get an error about an account not existing, you may need
 to supply the username like this:
 
     .\Administrator
 
-Now, go to the Service Manger from the Windows control panel, and perform the following.
+
+If a username was supplied to run as, go to the Service Manger from the
+Windows control panel, and perform the following.
 
     - Select "Remote Agent Server" from the list. Right-clieck and select "properties".
     - Select the "Log On" tab. 
     - Click the "This account:" radio button.
     - Enter DOMAIN\Administrator in the account box (or something else appropriate).
     - Enter the proper password (twice).
-    - Click "Apply". You should confirm a message saying Administrator is being
-      added to services group or enabled to log in as a service.
+    - Click "Apply". You should confirm a message saying user is
+      enabled to log in as a service.
     - Click "General" tab.
     - You may now start the service.
 
 You may also need to disable the Windows firewall for this to function
 properly. This service is a massive security hole, so only run it on
-a throw-away test machine on an isolated network.
+a throw-away test machine on an isolated network. 
 
 """
 
