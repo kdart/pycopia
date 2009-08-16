@@ -17,7 +17,7 @@
 #    Lesser General Public License for more details.
 
 """
-Interface to produce Linux event stream from ascii stream.
+Interface to produce Linux event stream from ascii data.
 
 """
 
@@ -851,6 +851,8 @@ class KeyEventGenerator(object):
 
 
 
+# run module as root like this:
+# python -i event.py
 if __name__ == "__main__":
     from pycopia.OS import Input
 
@@ -861,9 +863,12 @@ if __name__ == "__main__":
             pass
 
     #fo = MockDevice()
-    fo = Input.EventDevice("/dev/input/event1")
+    fo = Input.EventDevice()
+    fo.find(name="keyboard")
     g = KeyEventGenerator(fo)
     scheduler.sleep(2)
+    expected = (ascii.lowercase + "\n" + ascii.uppercase + "\n" + ascii.digits + "\n" +
+        r"""!"#$&'()*+,-./:;<=>?@[\]^_`{|}~""" + "\n" + "ab%c\tDEF\tghi%\n" )
     g('sent = """')
     g(ascii.lowercase)
     g("\n")
@@ -877,7 +882,6 @@ if __name__ == "__main__":
     g("ab\%c<TAB>%Sdef%s%Ci%cghi%%" )
     g("\n")
     g('"""\n')
+    g('sent == expected\n')
     fo.close()
-    expected = (ascii.lowercase + "\n" + ascii.uppercase + "\n" + ascii.digits + "\n" +
-        r"""!"#$&'()*+,-./:;<=>?@[\]^_`{|}~""" + "\n" + "ab%c\tDEF\tghi%\n" )
 

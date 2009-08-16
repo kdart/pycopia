@@ -87,7 +87,7 @@ class PowerMate(Input.EventDevice):
 if __name__ == "__main__":
     import time
     pm = PowerMate()
-    pm.open()
+    pm.find()
     print pm
     print "devname:", pm.name
     print "driverversion: 0x%x" % (pm.get_driverversion(),)
