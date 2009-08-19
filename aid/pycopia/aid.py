@@ -27,6 +27,7 @@ builtins. ;-)
 import sys
 from math import ceil
 from errno import EINTR
+from collections import deque
 
 
 # Works like None, but is callable and iterable.
@@ -300,11 +301,11 @@ def frange(limit1, limit2=None, increment=1.0):
   count = int(ceil((limit2 - limit1)/increment))
   return (limit1 + n*increment for n in xrange(0, count))
 
-class Queue(list):
+class Queue(deque):
     def push(self, obj):
-        self.insert(0, obj)
+        self.appendleft(obj)
 
-class Stack(list):
+class Stack(deque):
     def push(self, obj):
         self.append(obj)
 
