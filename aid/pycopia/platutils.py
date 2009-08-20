@@ -24,6 +24,7 @@ import sys
 import re
 
 LINUX_RELEASE_FILES = [
+    "/etc/vmware-release",
     "/etc/redhat-release",
     "/etc/gentoo-release",
     "/etc/lsb-release", # Ubuntu, possibly others
@@ -55,11 +56,21 @@ class OSInfo(object):
     def is_gentoo(self):
         return self.distribution.startswith("Gentoo")
 
-    def is_redhat(self):
+    def is_vmware(self):
+        return self.distribution.startswith("VMware")
+
+    def is_rhel(self):
         return self.distribution.startswith("Red")
+
+    def is_centos(self):
+        return self.distribution.startswith("Cent")
 
     def is_ubuntu(self):
         return self.distribution.startswith("Ubu")
+
+    def is_redhat(self): # rpm-based
+        dist = self.distribution
+        return dist.startswith("Red") or dist.startswith("Cent")
 
 
 def _get_linux_dist():
@@ -67,7 +78,10 @@ def _get_linux_dist():
         if os.path.exists(fname):
             text = open(fname).read()
             mo = LINUX_RELEASE_RE.search(text)
-            return map(str.strip, mo.groups())
+            if mo:
+                return map(str.strip, mo.groups())
+            else:
+                pass
     return "Unknown", "Unknown"
 
 def get_platform():
