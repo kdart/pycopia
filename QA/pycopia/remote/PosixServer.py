@@ -22,12 +22,10 @@ import os, sys, shutil, errno
 
 def setConfig():
     Pyro.config.PYRO_MULTITHREADED = 0
-    Pyro.config.PYRO_STORAGE = "/root"
     Pyro.config.PYRO_LOGFILE = "/var/log/qaagent.log"
     Pyro.config.PYRO_TRACELEVEL=3
     Pyro.config.PYRO_USER_LOGFILE = "/var/log/qaagent_user.log"
     Pyro.config.PYRO_USER_TRACELEVEL = 3
-#    Pyro.config.PYRO_NS_URIFILE = os.path.join(Pyro.config.PYRO_STORAGE, "PosixServer_URI.txt")
 
 import Pyro
 import Pyro.util
