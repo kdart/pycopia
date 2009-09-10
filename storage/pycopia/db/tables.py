@@ -355,11 +355,8 @@ Index('index_auth_group_name_key', auth_group.c.name, unique=True)
 auth_permission =  Table('auth_permission', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'content_type_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'codename', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+            Column(u'description', PGText(convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
     schema='public')
-Index('index_auth_permission_content_type_id_key', auth_permission.c.content_type_id, auth_permission.c.codename, unique=True)
-Index('auth_permission_content_type_id', auth_permission.c.content_type_id, unique=False)
 
 
 auth_user_user_permissions =  Table('auth_user_user_permissions', metadata,
