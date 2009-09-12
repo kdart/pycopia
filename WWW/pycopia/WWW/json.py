@@ -46,6 +46,17 @@ def _DtDecoder(timestamp):
   return datetime.fromtimestamp(float(timestamp)/1000.0)
 ### End datetime conversions ###
 
+### set encoding
+def _set_checker(obj):
+  return isinstance(obj, set)
+
+def _set_simplifier(s):
+  return {"_class_": "set",
+      "value": list(s),
+      }
+
+def _set_decoder(s):
+  return set(s)
 
 class JSONEncoder(simplejson.JSONEncoder):
   def __init__(self):
@@ -196,6 +207,7 @@ def GetJSONDecoder():
   if _DECODER is None:
     decoder = JSONObjectDecoder()
     decoder.register("date", _DtDecoder) # pre-register date objects
+    decoder.register("set", _set_decoder) # pre-register set objects
     _DECODER =  simplejson.JSONDecoder(object_hook=decoder)
   return _DECODER
 
@@ -205,6 +217,7 @@ def GetJSONEncoder():
   if _ENCODER is None:
     _ENCODER = JSONEncoder()
     _ENCODER.register("date", _DtChecker, _DtSimplifier)
+    _ENCODER.register("set", _set_checker, _set_simplifier)
   return _ENCODER
 
 

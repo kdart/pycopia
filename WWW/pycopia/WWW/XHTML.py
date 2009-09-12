@@ -526,6 +526,9 @@ class ContainerMixin(FlowMixin):
         method = kwargs.get("method")
         if method is None:
             f.method = method = "post"
+        action = kwargs.get("action")
+        if action is None:
+            f.action = "."
         enctype = kwargs.get("enctype")
         if enctype is None:
             if method == "get":

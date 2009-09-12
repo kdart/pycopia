@@ -39,6 +39,8 @@ if platinfo.is_linux():
             (os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
             (os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
             (os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
+            (os.path.join("/var", "www", WEBSITE, 'media', 'images'), glob("media/images/*.png")),
+            #(os.path.join("/var", "www", WEBSITE, 'media', 'images'), glob("media/images/*.jpg")),
         ])
     else:
         DATAFILES.extend([

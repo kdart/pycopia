@@ -164,12 +164,6 @@ class InputStream(object):
             self._avail -= self._pos
             self._pos = 0
 
-            assert self._avail >= 0
-
-    def _waitForData(self):
-        """Waits for more data to become available."""
-        self._conn.process_input()
-
     def read(self, n=-1):
         if self._pos == self._avail and self._eof:
             return ''
@@ -182,7 +176,7 @@ class InputStream(object):
                     break
                 else:
                     # Wait for more data.
-                    self._waitForData()
+                    self._conn.process_input()
                     continue
             else:
                 newPos = self._pos + n
@@ -214,7 +208,7 @@ class InputStream(object):
                     break
                 else:
                     # Wait for more to come.
-                    self._waitForData()
+                    self._conn.process_input()
                     continue
             else:
                 newPos = i + 1

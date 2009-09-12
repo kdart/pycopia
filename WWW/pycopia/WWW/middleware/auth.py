@@ -25,8 +25,6 @@ Authentication and authorization middleware.
 import PAM
 from hashlib import sha1
 import struct
-from datetime import datetime, timedelta
-from pytz import timezone
 
 from pycopia.urlparse import quote, unquote
 from pycopia.WWW import framework
@@ -36,8 +34,7 @@ from pycopia import timelib
 from pycopia import sysrandom as random
 
 
-UTC = timezone('UTC')
-SESSION_KEY_NAME = "pcsess"
+SESSION_KEY_NAME = "PYCOPIA"
 
 class AuthenticationError(Exception):
     pass
@@ -50,6 +47,7 @@ _SERVICEMAP = {
     "system": "pycopia", # alias
     "ldap": "pycopia_ldap", # ldap via PAM
     "local": None, # local means use password in DB (sha1 hashed)
+    "clear": None, # clear means use password in DB (clear text)
 }
 
 
@@ -74,50 +72,50 @@ def _strxor(s1, s2):
     return "".join(map(lambda x, y: chr(ord(x) ^ ord(y)), s1, s2))
 
 
-class AuthorizeRemoteUser(Middleware):
-    """Middleware that assures REMOTE_USER is set."""
-    def __init__(self, app, config):
-        self.app = app
-        self.accept_empty = config.get("accept_empty_user", False)
-
-    def __call__(self, environ, start_response):
-        if 'REMOTE_USER' not in environ:
-            raise framework.HttpErrorNotAuthenticated()
-        elif environ['REMOTE_USER'] or self.accept_empty:
-            return self.app(environ, start_response)
-        raise framework.HttpErrorNotAuthorized("No user set.")
-
-
-
-class AuthenticateRemoteUser(Middleware):
-
-    def __call__(self, environ, start_response):
-        cookies = wsgi.get_cookies(environ)
-        key = cookies[SESSION_KEY_NAME]
-        dbsession = models.DBSession()
-        try:
-            session = dbsession.query(models.Session).filter_by(session_key=key).one()
-        except models.NoResultFound:
-            return wsgi_auth_redirect(environ, start_response)
-
-        if session.expire_date < datetime.now(UTC):
-            dbsession.delete(session)
-            dbsession.commit()
-            #resp = framework.HttpResponseRedirect("/")
-            #resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
-            #dest = quote(redirect_to)
-            return wsgi_auth_redirect(environ, start_response)
-
-
-def wsgi_auth_redirect(environ, start_response):
-    start_response("302 Redirect", [
-            ("content-type", "text/plain"),
-            ("location", "/auth/login"), # XXX
-            ], 
-            )
-    return ["Not authenticated."]
-
-
+#class AuthorizeRemoteUser(Middleware):
+#    """Middleware that assures REMOTE_USER is set."""
+#    def __init__(self, app, config):
+#        self.app = app
+#        self.accept_empty = config.get("accept_empty_user", False)
+#
+#    def __call__(self, environ, start_response):
+#        if 'REMOTE_USER' not in environ:
+#            raise framework.HttpErrorNotAuthenticated()
+#        elif environ['REMOTE_USER'] or self.accept_empty:
+#            return self.app(environ, start_response)
+#        raise framework.HttpErrorNotAuthorized("No user set.")
+#
+#
+#
+#class AuthenticateRemoteUser(Middleware):
+#
+#    def __call__(self, environ, start_response):
+#        cookies = get_cookies(environ)
+#        key = cookies[SESSION_KEY_NAME]
+#        dbsession = models.get_session()
+#        try:
+#            session = dbsession.query(models.Session).filter_by(session_key=key).one()
+#        except models.NoResultFound:
+#            return wsgi_auth_redirect(environ, start_response)
+#
+#        if session.is_expired():
+#            dbsession.delete(session)
+#            dbsession.commit()
+#            #resp = framework.HttpResponseRedirect("/")
+#            #resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+#            #dest = quote(redirect_to)
+#            return wsgi_auth_redirect(environ, start_response)
+#
+#
+#def wsgi_auth_redirect(environ, start_response):
+#    start_response("302 Redirect", [
+#            ("content-type", "text/plain"),
+#            ("location", "/auth/login"), # XXX
+#            ], 
+#            )
+#    return ["Not authenticated."]
+#
+#
 #class Authenticate(object):
 #    def __init__(self, app, config):
 #        self.app = app
@@ -155,9 +153,15 @@ class Authenticator(object):
         return resp
 
     def authenticate(self, authtoken, key, **kwargs):
+        if self.authservice == "clear":
+            if authtoken != self.password:
+                raise AuthenticationError("Invalid cleartext password.")
+            else:
+                return True
+
         cram = HMAC_SHA1(key, self.password)
         if authtoken != cram:
-            raise AuthenticationError("Invalid password.")
+            raise AuthenticationError("Invalid local password.")
 
         # at this point the password is known, further authentication may
         # be specified in the user table via PAM.
@@ -223,7 +227,7 @@ class LoginHandler(framework.RequestHandler):
         # This key has to fit into a 32 bit int for the javascript side.
         key = quote(struct.pack("I", random.randint(0, 4294967295)))
         parms = {
-            "redirect": request.GET.get("redir", '/'),
+            "redirect": request.GET.get("redir", request.environ.get("referer", "/")),
             "key": key,
         }
         msg = request.GET.get("message")
@@ -249,22 +253,20 @@ class LoginHandler(framework.RequestHandler):
             return framework.HttpResponseRedirect(request.get_url(login), message=str(err))
         if good:
             request.log_error("Authenticated: %s" % (name,))
+            user.set_last_login()
             resp = framework.HttpResponseRedirect(redir)
-            session = set_session(resp, user, request.get_domain())
+            session = _set_session(resp, user, request.get_domain())
             request.database.add(session)
             request.database.commit()
             return resp
         else:
-            request.log_error("Authentication no good: %r" % (name, ))
-            return framework.HttpResponseRedirect(request.get_url(login), message="Failed to authenticate.")
+            request.log_error("Invalid Authentication for %r" % (name, ))
+            return framework.HttpResponseRedirect(request.get_url(login), 
+                    message="Failed to authenticate.")
 
 
-def set_session(response, user, domain):
-    sess = models.Session()
-    user.last_login = datetime.now(UTC)
-    sess["username"] = user.username
-    sess.session_key = user.get_session_key()
-    sess.expire_date = user.last_login + timedelta(days=1)
+def _set_session(response, user, domain):
+    sess = models.Session(user, lifetime=24)
     exp = timelib.mktime(sess.expire_date.timetuple())
     response.set_cookie(SESSION_KEY_NAME, sess.session_key, domain=domain,
         expires=exp)
@@ -274,11 +276,17 @@ def set_session(response, user, domain):
 class LogoutHandler(framework.RequestHandler):
 
     def get(self, request):
-        if request.session is not None:
-            sess = request.session
-            request.session = None
-            request.database.delete(sess)
-            request.database.commit()
+        key = request.COOKIES.get(SESSION_KEY_NAME)
+        if key is not None:
+            dbsession = request.database
+            try:
+                sess = dbsession.query(models.Session).filter_by(session_key=key).one()
+            except models.NoResultFound:
+                pass
+            else:
+                request.database.delete(sess)
+                request.database.commit()
+        request.session = None
         resp = framework.HttpResponseRedirect("/")
         resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
         return resp
@@ -286,4 +294,57 @@ class LogoutHandler(framework.RequestHandler):
 
 login = LoginHandler()
 logout = LogoutHandler()
+
+# decorator that requires a handler to served on a valid session
+def need_login(handler):
+    def newhandler(request, *args, **kwargs):
+        key = request.COOKIES.get(SESSION_KEY_NAME)
+        redir = "/auth/login?redir=%s" % request.path
+        if not key:
+            return framework.HttpResponseRedirect(redir)
+        dbsession = request.database
+        try:
+            session = dbsession.query(models.Session).filter_by(session_key=key).one()
+        except models.NoResultFound:
+            resp = framework.HttpResponseRedirect(redir)
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            return resp
+
+        if session.is_expired():
+            dbsession.delete(session)
+            dbsession.commit()
+            resp = framework.HttpResponseRedirect(redir)
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            return resp
+        request.session = session
+
+        return handler(request, *args, **kwargs)
+    return newhandler
+
+
+def need_authentication(handler):
+    def newhandler(request, *args, **kwargs):
+        key = request.COOKIES.get(SESSION_KEY_NAME)
+        if not key:
+            return framework.HttpResponseNotAuthenticated()
+        dbsession = request.database
+        try:
+            session = dbsession.query(models.Session).filter_by(session_key=key).one()
+        except models.NoResultFound:
+            resp = framework.HttpResponseNotAuthenticated()
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            return resp
+
+        if session.is_expired():
+            dbsession.delete(session)
+            dbsession.commit()
+            resp = framework.HttpResponseNotAuthenticated()
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            return resp
+        request.session = session
+
+        return handler(request, *args, **kwargs)
+    return newhandler
+
+
 

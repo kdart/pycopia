@@ -335,18 +335,25 @@ class ContentMD5(HTTPHeader):
 class ContentRange(HTTPHeader):
     HEADER="Content-Range"
 
-class ContentType(HTTPHeader):
-    HEADER="Content-Type"
+class ContentDisposition(HTTPHeader):
+    HEADER="Content-Disposition"
+
     def parse_value(self, text):
         parts = text.split(";")
-        value = parts.pop(0).strip().lower()
-        self.parameters = dict(map(lambda s: tuple(s.split("=",1)), 
-                                        map(str.strip, parts)
-                              ))
+        value = parts.pop(0).strip()
+        params = {}
+        for part in map(str.strip, parts):
+            n, v = part.split("=", 1)
+            if v.startswith('"'):
+                params[n] = v[1:-1]
+            else:
+                params[n] = v
+        self.parameters = params
         return value
 
     def initialize(self, **kwargs):
-        self.parameters = kwargs
+        if kwargs:
+            self.parameters = kwargs
 
     def __str__(self):
         if self.parameters:
@@ -354,6 +361,51 @@ class ContentType(HTTPHeader):
                 "; ".join(['%s="%s"' % t for t in self.parameters.iteritems()]))
         else:
             return "%s: %s" % (self._name, self.value)
+
+    def __repr__(self):
+        if self.parameters:
+            return "%s(%r, %s)" % (
+                self.__class__.__name__, self.value, 
+                ", ".join(["%s=%r" % t for t in self.parameters.iteritems()]))
+        else:
+            return "%s(%r)" % (self.__class__.__name__, self.value)
+
+
+class ContentType(HTTPHeader):
+    HEADER="Content-Type"
+
+    def parse_value(self, text):
+        parts = text.split(";")
+        value = parts.pop(0).strip()
+        params = {}
+        for part in map(str.strip, parts):
+            n, v = part.split("=", 1)
+            if v.startswith('"'):
+                params[n] = v[1:-1]
+            else:
+                params[n] = v
+        self.parameters = params
+        return value
+
+    def initialize(self, **kwargs):
+        if kwargs:
+            self.parameters = kwargs
+
+    def __str__(self):
+        if self.parameters:
+            return "%s: %s; %s" % (self._name, self.value, 
+                "; ".join(['%s="%s"' % t for t in self.parameters.iteritems()]))
+        else:
+            return "%s: %s" % (self._name, self.value)
+
+    def __repr__(self):
+        if self.parameters:
+            return "%s(%r, %s)" % (
+                self.__class__.__name__, self.value, 
+                ", ".join(["%s=%r" % t for t in self.parameters.iteritems()]))
+        else:
+            return "%s(%r)" % (self.__class__.__name__, self.value)
+
 
 class ETag(HTTPHeader):
     HEADER="ETag"
@@ -1122,7 +1174,10 @@ def get_header(line):
     if isinstance(line, str):
         parts = line.split(":", 1)
         name = parts[0].strip()
-        value = parts[1]
+        try:
+            value = parts[1]
+        except IndexError:
+            value = ""
         try:
             cls = _HEADERMAP[name.upper()]
             obj = cls(_value=value)
@@ -1148,6 +1203,35 @@ def make_header(name, _value=None, **kwargs):
         return obj
 
 
+### form parsing
+
+HTAB   = "\t"
+SP     = "\x20"
+CRLF   = "\r\n"
+WSP    = SP+HTAB
+MARKER = CRLF+CRLF
+
+FOLDED   = re.compile(r'%s([%s]+)' % (CRLF, WSP))
+
+def headerlines(bigstring):
+    """
+    Return list of unfolded header from a chunk of multipart text, and rest of
+    text.
+    """
+    m = bigstring.find(MARKER)
+    heads = FOLDED.sub(r"\1", (bigstring[0:m]))
+    return heads.split(CRLF), bigstring[m+4:-2]
+
+def get_headers_and_body(text):
+    rv = Headers()
+    headers, body = headerlines(text)
+    for line in headers:
+        if ":" not in line:
+            continue
+        rv.append(get_header(line))
+    return rv, body
+
+
 # self test
 if __name__ == "__main__":
     print "cookies:"
@@ -1158,5 +1242,10 @@ if __name__ == "__main__":
     print auth
     a = Accept('Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5')
     print a.value
+    print "========================"
+    part = part = '\r\nContent-Disposition: form-data; name="name"\r\n\r\nsomename\r\n'
+    headers, body = parse_header_text(part)
+    print repr(headers)
+    print repr(body)
 
 

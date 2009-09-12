@@ -41,7 +41,6 @@ from pprint import pformat
 import itertools
 import traceback
 from cStringIO import StringIO
-import email, email.Message
 
 import simplejson
 
@@ -53,7 +52,11 @@ from pycopia.XML import Plaintext
 from pycopia.WWW.middleware import POMadapter
 
 
+SESSION_KEY_NAME = "PYCOPIA"
+
 STATUSCODES = httputils.STATUSCODES
+PAGESIZE = os.sysconf("SC_PAGESIZE")
+
 
 class Error(Exception):
   "Base framework error"
@@ -74,7 +77,8 @@ class HTTPError(Exception):
             return ""
 
     def __str__(self):
-        return "%s %s" % (self.code, STATUSCODES.get(self.code, 'UNKNOWN STATUS CODE'))
+        return "%s %s\n%s" % (self.code, 
+                STATUSCODES.get(self.code, 'UNKNOWN STATUS CODE'), self.message)
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.message)
@@ -95,6 +99,9 @@ class HttpErrorMethodNotAllowed(HTTPError):
 class HttpErrorMethodNotAcceptable(HTTPError):
     code = 406
 
+class HttpErrorLengthRequired(HTTPError):
+    code = 411
+
 class HttpErrorUnsupportedMedia(HTTPError):
     code = 415
 
@@ -107,54 +114,17 @@ ELEMENTCACHE = ObjectCache()
 # supported mime types.
 SUPPORTED = [ "application/xhtml+xml", "text/vnd.wap.wml", "text/plain" ]
 
-
-# The following, until end marker:
-
-# Copyright (c) 2005, the Lawrence Journal-World
-# All rights reserved.
-# from Django project (BSD license).
-# Forked so I can separate HTTP functions from the database/ORM parts, and
-# customize it (cherry picking the good parts...).
-# It's so heavily modified it can hardly be recognized as such.
-
 RESERVED_CHARS="!*'();:@&=+$,/?%#[]"
 
-def parse_file_upload(header_dict, post_data):
-    "Returns a tuple of (POST URLQuery, FILES URLQuery)"
-    raw_message = '\r\n'.join(['%s:%s' % pair for pair in header_dict.items()])
-    raw_message += '\r\n\r\n' + post_data # XXX get rid of this mess
-    msg = email.message_from_string(raw_message)
-    POST = urlparse.URLQuery()
-    FILES = urlparse.URLQuery()
-    for submessage in msg.get_payload():
-        if isinstance(submessage, email.Message.Message):
-            cd = httputils.get_header(submessage['Content-Disposition'])
-
-            if cd.parameters.has_key('filename'):
-                assert type(submessage.get_payload()) is not list, \
-                                   "Nested MIME messages are not supported"
-                if not cd.parameters['filename'].strip():
-                    continue
-                # IE submits the full path, so trim everything but the basename.
-                # (We can't use os.path.basename because it expects Linux paths.)
-                filename = cd.parameters['filename'][cd.parameters['filename'].rfind("\\")+1:]
-                FILES[cd.parameters['name']] = {
-                    'filename': filename,
-                    'content-type': (submessage.has_key('Content-Type') and submessage['Content-Type'] or None),
-                    'content': submessage.get_payload(),
-                }
-            else:
-                POST[cd.parameters['name']] = submessage.get_payload()
-    return POST, FILES
 
 
 class HttpResponse(object):
     "A basic HTTP response, with content and dictionary-accessed headers"
     status_code = 200
-    def __init__(self, content='', mimetype=None):
+    def __init__(self, content='', mimetype=None, encoding="utf-8"):
         self.headers = httputils.Headers()
         self.cookies = httputils.CookieJar()
-        self._charset = sys.getdefaultencoding() # XXX
+        self._charset = encoding
         if mimetype:
             self.headers.add_header(httputils.ContentType(mimetype, charset=self._charset))
         if hasattr(content, '__iter__'):
@@ -228,8 +198,6 @@ class HttpResponse(object):
         except AttributeError:
             pass
 
-    # The remaining methods partially implement the file-like object interface.
-    # See http://docs.python.org/lib/bltin-file-objects.html
     def write(self, content):
         if not self._is_string:
             raise Exception, "This %s instance is not writable" % self.__class__
@@ -242,6 +210,7 @@ class HttpResponse(object):
         if not self._is_string:
             raise Exception, "This %s instance cannot tell its position" % self.__class__
         return sum([len(chunk) for chunk in self._container])
+
 
 class HttpResponseRedirect(HttpResponse):
     status_code = 302
@@ -293,27 +262,29 @@ class HttpResponseServerError(HttpResponse):
     status_code = 500
 
 
-def safe_copyfileobj(fsrc, fdst, length=16*1024, size=0):
-    """
-    A version of shutil.copyfileobj that will not read more than 'size' bytes.
-    This makes it safe from clients sending more than CONTENT_LENGTH bytes of
-    data in the body.
-    """
-    if not size:
-        return
-    while size > 0:
-        buf = fsrc.read(min(length, size))
-        if not buf:
-            break
-        fdst.write(buf)
-        size -= len(buf)
+def parse_formdata(contenttype, post_data):
+    post = {}
+    files = {}
+    boundary = "--" + contenttype.parameters["boundary"]
+    for part in post_data.split(boundary):
+        if not part:
+            continue
+        if part.startswith("--"):
+            continue
+        headers, body = httputils.get_headers_and_body(part)
+        cd = headers[0]
+        if "filename" in cd.parameters:
+            files[cd.parameters['name']] = body
+        else:
+            post[cd.parameters['name']] = body.strip()
+    return post, files
 
 
 class HTTPRequest(object):
     def __init__(self, environ):
         self.environ = environ
         self.method = environ['REQUEST_METHOD'].upper()
-        self.path = environ['PATH_INFO']
+        self.path = None
         self.get_url = None
         self.get_alias = None
         self.database = None
@@ -367,27 +338,27 @@ class HTTPRequest(object):
     def is_secure(self):
         return self.environ.get('HTTPS', "off") == "on"
 
-    def _load_post_and_files(self):
-        # Populates self._post and self._files
+    def _parse_post_content(self):
         if self.method == 'POST':
             content_type = self.environ.get('CONTENT_TYPE', '').lower()
             if content_type.startswith('multipart'):
-                header_dict = dict([(k, v) for k, v in self.environ.items() if k.startswith('HTTP_')])
-                header_dict['Content-Type'] = content_type
-                self._post, self._files = parse_file_upload(header_dict, self.raw_post_data)
+                self._post, self._files = parse_formdata(
+                        httputils.ContentType(content_type), self._get_raw_post_data())
             elif content_type.endswith('urlencoded'):
-                self._post = urlparse.queryparse(self.raw_post_data)
+                self._post = urlparse.queryparse(self._get_raw_post_data())
                 self._files = None
-            else: 
-                self._post = urlparse.URLQuery()
-                self._files = urlparse.URLQuery()
+            else: # some buggy clients don't set proper content-type, so
+                  # just preserve the raw data as a file.
+                self._post = None
+                self._files = {}
                 self._files["body"] = {
                     'content-type': content_type,
-                    'content': self.raw_post_data
+                    'content': self._get_raw_post_data()
                 }
             self._raw_post_data = None
         else:
-            self._post = urlparse.URLQuery()
+            self._post = None
+            self._files = None
 
     def __getitem__(self, key):
         for d in (self.POST, self.GET):
@@ -412,37 +383,31 @@ class HTTPRequest(object):
         try:
             return self._post
         except AttributeError:
-            self._load_post_and_files()
+            self._parse_post_content()
             return self._post
 
     def _get_cookies(self):
         try:
             return self._cookies
         except AttributeError:
-            self._cookies = httputils.parse_cookie(self.environ.get('HTTP_COOKIE', ''))
-            return self._cookies
+            self._cookies = cookies = {}
+            for cookie in httputils.parse_cookie(self.environ.get('HTTP_COOKIE', '')):
+                cookies[cookie.name] = cookie.value
+            return cookies
 
     def _get_files(self):
         try:
             return self._files
         except AttributeError:
-            self._load_post_and_files()
+            self._parse_post_content()
             return self._files
 
     def _get_raw_post_data(self):
         try:
-            return self._raw_post_data
-        except AttributeError:
-            buf = StringIO()
-            try:
-                # CONTENT_LENGTH might be absent if POST doesn't have content at all (lighttpd)
-                content_length = int(self.environ.get('CONTENT_LENGTH', 0))
-            except ValueError: # if CONTENT_LENGTH was empty string or not an integer
-                content_length = 0
-            safe_copyfileobj(self.environ['wsgi.input'], buf, size=content_length)
-            self._raw_post_data = buf.getvalue()
-            buf.close()
-            return self._raw_post_data
+            content_length = int(self.environ.get("CONTENT_LENGTH"))
+        except ValueError: # if CONTENT_LENGTH was empty string or not an integer
+            raise HttpErrorLengthRequired("A Content-Length header is required.")
+        return self.environ['wsgi.input'].read(content_length)
 
     def _get_headers(self):
         try:
@@ -451,18 +416,15 @@ class HTTPRequest(object):
             self._headers = hdrs = httputils.Headers()
             for k, v in self.environ.iteritems():
                 if k.startswith("HTTP"):
-                    hdrs.append(httputils.make_header(k[5:].replace("_", "-"), v))
+                    hdrs.append(httputils.make_header(k[5:].replace("_", "-").lower(), v))
             return self._headers
 
     GET = property(_get_get)
     POST = property(_get_post)
     COOKIES = property(_get_cookies)
     FILES = property(_get_files)
-    raw_post_data = property(_get_raw_post_data)
     headers = property(_get_headers)
 
-
-### End (modified) code from Django. ###
 
 
 class URLMap(object):
@@ -646,6 +608,7 @@ class WebApplication(object):
         request = HTTPRequest(environ)
         request.config = self._config
         request.get_url = self._resolver.get_url
+        request.path = self._resolver._urlbase + environ['PATH_INFO']
         request.get_alias = self._resolver.get_alias
         if self.DBSession is not None:
             request.database = self.DBSession()
@@ -833,7 +796,8 @@ class ResponseDocument(object):
     """
     def __init__(self, _request, _constructor=default_doc_constructor, **kwargs):
         self._doc = doc = _constructor(_request, **kwargs)
-        self.NM = self._doc.nodemaker # nodemaker shortcut
+        self.nodemaker = self._doc.nodemaker # nodemaker shortcut
+        self.creator = self._doc.creator
         # shortcuts
         self.get_url = _request.get_url
         self.get_alias = _request.get_alias
@@ -849,7 +813,8 @@ class ResponseDocument(object):
 
     def finalize(self):
         doc = self._doc
-        self.NM = None
+        self.nodemaker = None
+        self.creator = None
         self.get_url = None
         self.config = None
         self._doc = None
@@ -866,15 +831,23 @@ class ResponseDocument(object):
             namepair = self.config.ICONMAP[name]
         except KeyError:
             namepair = self.config.ICONMAP["default"]
-        return self.NM("Img", {"src": self.get_url("images", name=namepair[1]), 
+        return self.nodemaker("Img", {"src": self.get_url("images", name=namepair[1]), 
                        "alt":name, "width":"24", "height":"24"})
+
+    def get_small_icon(self, name):
+        try:
+            filename = self.config.ICONMAP_SMALL[name]
+        except KeyError:
+            filename = self.config.ICONMAP_SMALL["default"]
+        return self.nodemaker("Img", {"src": self.get_url("images", name=filename), 
+                       "alt":name, "width":"10", "height":"10"})
 
     def anchor2(self, path, text, **kwargs):
         try:
             href = self.get_url(path, **kwargs)
         except InvalidPath:
             href = str(path) # use as-is as a fallback for hard-coded destinations.
-        return self.NM("A", {"href": href}, text)
+        return self.nodemaker("A", {"href": href}, text)
 
 
 
@@ -894,7 +867,6 @@ def _get_module(name):
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
-
 
 
 
