@@ -487,7 +487,7 @@ class RootContainer(object):
 
     def _get_dbsession(self):
         if self._cache.get("_dbsession") is None:
-            self._cache["_dbsession"] = dbsession = models.get_config(self.dburl)
+            self._cache["_dbsession"] = dbsession = models.get_session(self.dburl)
             return dbsession
         else:
             return self._cache["_dbsession"]

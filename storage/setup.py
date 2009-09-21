@@ -40,14 +40,16 @@ if platinfo.is_linux():
             #(os.path.join("/var", "www", WEBSITE, 'htdocs'), glob("doc/html/*.html")),
             #(os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
             (os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
-            #(os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
+            (os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
+            #(os.path.join("/var", "www", WEBSITE, 'media', 'images'), glob("media/images/*.png")),
         ])
     else:
         DATAFILES.extend([
             #(os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html'), glob("doc/html/*.html")),
             #(os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html', 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
             (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'js'), glob("media/js/*.js")),
-            #(os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'css'), glob("media/css/*.css")),
+            (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'css'), glob("media/css/*.css")),
+            #(os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'images'), glob("media/images/*.css")),
         ])
 
     SCRIPTS = glob("bin/*")

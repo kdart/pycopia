@@ -1,0 +1,207 @@
+
+html,body {margin:10px; padding:2px}
+body {font-family: Helvetica, sans-serif;}
+
+a {
+  text-decoration: none;
+}
+
+div.navigation {
+    border-style:outset;
+    background: lightBlue;
+    border-color: darkBlue;
+    padding: 3px;
+    border-width:5px;
+    margin-bottom: 10px;
+}
+
+div.navigation p {
+  width: 33%;
+  display: inline-block;
+  text-align: center;
+}
+
+p.title {
+  font-weight: bold;
+}
+
+
+img { 
+  border:none; 
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+table {
+  width: 100%;
+  border:outset ;
+  border-color:#CCC; 
+}
+
+table caption {
+  font-weight: bold;
+  text-align:left; 
+  font-size:110%; 
+  margin:5px; 
+}
+
+
+tr.row1 {
+  background-color: #FFF4B3;
+}
+
+tr.row2 {
+  background-color: #FFFAD9;
+}
+
+table.rowdisplay td  {
+    padding-top: 5px;
+}
+
+
+table tr th {
+  background-color: #FFE65C;
+  text-align:left; 
+  font-size:12px; 
+  font-weight:bold; 
+}
+
+table tr td {
+  font-size:12px; 
+}
+
+
+p.error {
+  padding: 1em;
+  color: #FF0000;
+}
+
+
+tr td:first-child, tr th:first-child { width: 80px; }
+
+fieldset {
+  background-color: #FFFAD9;
+}
+
+fieldset>legend {
+    font-weight:bold;
+}
+
+fieldset input {
+    width: 70%;
+    margin-bottom: 5px;
+}
+
+fieldset label {
+    display: inline-block;
+    font-weight:bold;
+    width: 20%;
+}
+
+fieldset select {
+    width: 50em;
+    margin-bottom: 5px;
+}
+
+
+input.PGArray {
+}
+
+input.PGBigInteger {
+  background-color: #EEFFB3;
+}
+
+input.PGBinary {
+}
+
+input.PGBit {
+}
+
+input.PGBoolean {
+  background-color: #F2F345;
+}
+
+input.PGChar {
+  background-color: #EEBBBB;
+}
+
+input.PGCidr {
+  background-color: #F2E345;
+}
+
+input.PGDate {
+    background-color: #A0DFF1;
+}
+
+input.PGDateTime {
+    background-color: #A0DFF1;
+}
+
+input.PGFloat {
+  background-color: #EEFFB3;
+}
+
+input.PGInet {
+  background-color: #F2E345;
+}
+
+input.PGInteger {
+  background-color: #EEFFB3;
+}
+
+input.PGInterval {
+    background-color: #A0DFF1;
+}
+
+input.PGMacAddr {
+    background-color: #C9B912;
+}
+
+input.PGNumeric {
+  background-color: #EEFFB3;
+}
+
+input.PGSmallInteger {
+  background-color: #EEFFB3;
+}
+
+input.PGString {
+  background-color: #DDBBBB;
+}
+
+textarea.PGText {
+    width: 100%;
+}
+
+input.PGTime {
+    background-color: #A0DFF1;
+}
+
+input.PGUuid {
+}
+
+fieldset.ValueType label {
+  font-weight:normal;
+  margin-left:1em;
+  width:auto;
+}
+
+input:focus {
+  border-width: 2px;
+  border-color: black;
+}
+
+input[type="submit"] {
+    background-color:#BBFFBB;
+    font-weight:bold;
+    margin-top:10px;
+    width:100%;
+    padding:4px;
+}
+
+input:hover[type="submit"] { 
+  background-color: #AAEEAA;
+}
+
+hr {color: silver; width: 80%;}
+
