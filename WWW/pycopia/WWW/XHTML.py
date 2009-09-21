@@ -1057,23 +1057,23 @@ class FormMixin(ContainerMixin):
         self.append(fs)
         return fs
 
-    def get_textinput(self, name, label=None, default="", maxlength=80):
+    def get_textinput(self, name, label=None, default="", maxlength=255, **kwargs):
         if label:
             lbl = self.get_label(label, "id_%s" % (name,))
         else:
             lbl = None
         inp = self.dtd.Input(type="text", name=name, value=default, 
-                maxlength=maxlength, id="id_%s" % (name,))
+                maxlength=maxlength, id="id_%s" % (name,), **kwargs)
         return lbl, inp
 
-    def add_textinput(self, name, label=None, default="", maxlength=80):
-        lbl, inp = self.get_textinput(name, label, default, maxlength)
+    def add_textinput(self, name, label=None, default="", maxlength=255, **kwargs):
+        lbl, inp = self.get_textinput(name, label, default, maxlength, **kwargs)
         if lbl:
             self.append(lbl)
         self.append(inp)
         return inp
 
-    def get_password(self, name, label=None, default="", maxlength=80):
+    def get_password(self, name, label=None, default="", maxlength=255):
         if label:
             lbl = self.get_label(label, "id_%s" % (name,))
         else:
@@ -1082,7 +1082,7 @@ class FormMixin(ContainerMixin):
                 maxlength=maxlength, id="id_%s" % (name,))
         return lbl, inp
 
-    def add_password(self, name, label=None, default="", maxlength=80):
+    def add_password(self, name, label=None, default="", maxlength=255):
         lbl, inp = self.get_password(name, label, default, maxlength)
         if lbl:
             self.append(lbl)
@@ -1092,7 +1092,7 @@ class FormMixin(ContainerMixin):
     def get_label(self, text, _for=None):
         lbl = self.dtd.Label()
         if _for:
-            lbl.set_attribute("for", _for) # 'for' is a keyword...
+            lbl.set_attribute("for_", _for) # 'for' is a keyword...
         lbl.append(check_object(text))
         return lbl
 
@@ -1161,55 +1161,64 @@ class FormMixin(ContainerMixin):
         self.append(sl)
         return sl
 
-    def get_radiobuttons(self, name, items, vertical=False):
-        frags = POM.Fragments()
+    def get_radiobuttons(self, name, items, vertical=False, checked=0, **kwargs):
+        fs = self.get_fieldset(name, **kwargs)
         for i, item in enumerate(items):
             ID = "id_%s%s" % (name, i)
             l = self.get_label(item, ID)
             inp = self.dtd.Input(type="radio", name=name, value=i, id=ID)
-            l.append(inp)
-            frags.append(l)
-            if i == 0:
+            if i == checked:
                 inp.checked = "checked"
+            fs.append(l)
+            fs.append(inp)
             if vertical:
-                frags.append(self.dtd.Br())
-        return frags
+                fs.append(self.dtd.Br())
+        return fs
 
-    def add_radiobuttons(self, name, items, vertical=False):
+    def add_radiobuttons(self, name, items, vertical=False, checked=0, **kwargs):
+        fs = self.add_fieldset(name, **kwargs)
         for i, item in enumerate(items):
             ID = "id_%s%s" % (name, i)
-            l = self.add_label(item, ID)
+            fs.add_label(item, ID)
+            kwargs
             inp = self.dtd.Input(type="radio", name=name, value=i, id=ID)
-            l.append(inp)
-            if i == 0:
-                inp.checked = "checked" # default to first one checked
+            if i == checked:
+                inp.checked = "checked"
+            fs.append(inp)
             if vertical:
-                self.append(self.dtd.Br())
+                fs.append(self.dtd.Br())
+        return fs
 
     def get_checkboxes(self, name, items, vertical=False):
-        frags = POM.Fragments()
+        fs = self.get_fieldset(name, **kwargs)
         for i, item in enumerate(items):
             ID = "id_%s%s" % (name, i)
             l = self.get_label(item, ID)
-            l.append(self.dtd.Input(type="checkbox", name=name, value=i, id=ID))
-            frags.append(l)
+            fs.append(l)
+            fs.append(self.dtd.Input(type="checkbox", name=name, value=i, id=ID))
             if vertical:
-                frags.append(self.dtd.Br())
-        return frags
+                fs.append(self.dtd.Br())
+        return fs
 
     def add_checkboxes(self, name, items, vertical=False):
+        fs = self.add_fieldset(name, **kwargs)
         for i, item in enumerate(items):
             ID = "id_%s%s" % (name, i)
-            l = self.add_label(item, ID)
-            l.append(self.dtd.Input(type="checkbox", name=name, value=i, id=ID))
+            fs.add_label(item, ID)
+            fs.append(self.dtd.Input(type="checkbox", name=name, value=i, id=ID))
             if vertical:
-                self.append(self.dtd.Br())
+                fs.append(self.dtd.Br())
+        return fs
 
     def add_fileinput(self, name="fileinput", default=None):
-        self.append(self.dtd.Input(type="file", name=name, value=default))
+        inp = self.dtd.Input(type="file", name=name, value=default)
+        self.append(inp)
+        return inp
 
     def add_hidden(self, name, value):
-        self.append(self.dtd.Input(type="hidden", name=name, value=value))
+        inp = self.dtd.Input(type="hidden", name=name, value=value)
+        self.append(inp)
+        return inp
 
     # the following methods mimic the cliutils functions
     def choose(self, somelist, defidx=0, prompt="choose"):

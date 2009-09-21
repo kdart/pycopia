@@ -34,13 +34,12 @@ markup will be generated, however. Most of the application would be
 written in Javascript.
 """
 
-import sys, os
+import sys
 import re
 import sre_parse
 from pprint import pformat
 import itertools
 import traceback
-from cStringIO import StringIO
 
 import simplejson
 
@@ -55,7 +54,6 @@ from pycopia.WWW.middleware import POMadapter
 SESSION_KEY_NAME = "PYCOPIA"
 
 STATUSCODES = httputils.STATUSCODES
-PAGESIZE = os.sysconf("SC_PAGESIZE")
 
 
 class Error(Exception):
@@ -263,8 +261,8 @@ class HttpResponseServerError(HttpResponse):
 
 
 def parse_formdata(contenttype, post_data):
-    post = {}
-    files = {}
+    post = urlparse.URLQuery()
+    files = urlparse.URLQuery()
     boundary = "--" + contenttype.parameters["boundary"]
     for part in post_data.split(boundary):
         if not part:
@@ -341,23 +339,23 @@ class HTTPRequest(object):
     def _parse_post_content(self):
         if self.method == 'POST':
             content_type = self.environ.get('CONTENT_TYPE', '').lower()
-            if content_type.startswith('multipart'):
+            if content_type.startswith('multipart/form-data'):
                 self._post, self._files = parse_formdata(
                         httputils.ContentType(content_type), self._get_raw_post_data())
-            elif content_type.endswith('urlencoded'):
+            elif content_type.startswith("application/x-www-form-urlencoded"):
                 self._post = urlparse.queryparse(self._get_raw_post_data())
                 self._files = None
             else: # some buggy clients don't set proper content-type, so
                   # just preserve the raw data as a file.
-                self._post = None
+                data = self._get_raw_post_data()
+                self._post = urlparse.queryparse(data)
                 self._files = {}
                 self._files["body"] = {
                     'content-type': content_type,
-                    'content': self._get_raw_post_data()
+                    'content': data,
                 }
-            self._raw_post_data = None
         else:
-            self._post = None
+            self._post = urlparse.URLQuery()
             self._files = None
 
     def __getitem__(self, key):
@@ -849,6 +847,12 @@ class ResponseDocument(object):
             href = str(path) # use as-is as a fallback for hard-coded destinations.
         return self.nodemaker("A", {"href": href}, text)
 
+
+# general purpose URL scheme "hole" filler. Use as a handler in the URL
+# map that doesn't otherwise handle anything. A little better than just
+# returning 404.
+def redirectup(request, **kwargs):
+    return HttpResponsePermanentRedirect("..")
 
 
 def get_method(name):

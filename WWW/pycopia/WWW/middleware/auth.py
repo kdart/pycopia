@@ -84,51 +84,6 @@ def _strxor(s1, s2):
 #        elif environ['REMOTE_USER'] or self.accept_empty:
 #            return self.app(environ, start_response)
 #        raise framework.HttpErrorNotAuthorized("No user set.")
-#
-#
-#
-#class AuthenticateRemoteUser(Middleware):
-#
-#    def __call__(self, environ, start_response):
-#        cookies = get_cookies(environ)
-#        key = cookies[SESSION_KEY_NAME]
-#        dbsession = models.get_session()
-#        try:
-#            session = dbsession.query(models.Session).filter_by(session_key=key).one()
-#        except models.NoResultFound:
-#            return wsgi_auth_redirect(environ, start_response)
-#
-#        if session.is_expired():
-#            dbsession.delete(session)
-#            dbsession.commit()
-#            #resp = framework.HttpResponseRedirect("/")
-#            #resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
-#            #dest = quote(redirect_to)
-#            return wsgi_auth_redirect(environ, start_response)
-#
-#
-#def wsgi_auth_redirect(environ, start_response):
-#    start_response("302 Redirect", [
-#            ("content-type", "text/plain"),
-#            ("location", "/auth/login"), # XXX
-#            ], 
-#            )
-#    return ["Not authenticated."]
-#
-#
-#class Authenticate(object):
-#    def __init__(self, app, config):
-#        self.app = app
-#
-#    def __call__(self, environ, start_response):
-#
-#        def auth_start_response(response, headers, exc_info=None):
-#            if exc_info:
-#                if exc_info[0] is framework.HttpErrorNotAuthenticated:
-#                    return framework.HttpResponseRedirect("/auth/login") # XXX
-#            start_response(response, headers, exc_info)
-#
-#        return self.app(environ, auth_start_response)
 
 
 class Authenticator(object):

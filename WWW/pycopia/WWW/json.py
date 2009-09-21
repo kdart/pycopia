@@ -88,7 +88,7 @@ class JSONDispatcher(object):
 
   Requires a URL mapping of the form::
 
-     (r'^base/path/(?P<methodname>\w+)/$', 'views_module.dispatcher'),
+     (r'^base/path/(?P<methodname>\w+)$', 'views_module.dispatcher'),
 
   Your view.py will then have a line like this::
 
@@ -121,7 +121,9 @@ class JSONDispatcher(object):
     self._decoder = GetJSONDecoder()
 
   def _methods(self):
-    return self._fmap.keys()
+    keys = self._fmap.keys()
+    keys.remove("_methods")
+    return keys
 
   def __call__(self, request, methodname):
     handler = self._fmap.get(methodname)
