@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.6
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 #
@@ -20,15 +20,15 @@ Defines database ORM objects.
 """
 
 import warnings
-from datetime import datetime, timedelta
-from pytz import timezone
+import collections
+from datetime import timedelta
 from hashlib import sha1
 import cPickle as pickle
 
 from sqlalchemy import create_engine, and_, select
 
 from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
-        backref, column_property, synonym, _mapper_registry)
+        backref, column_property, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
 
@@ -38,14 +38,12 @@ from pycopia.aid import hexdigest, unhexdigest, Enums
 from pycopia.db import tables
 
 
-UTC = timezone('UTC')
 
 # type codes
-OBJECT=0; STRING=1; UNICODE=2; INTEGER=3; FLOAT=4; BOOLEAN=5
+#OBJECT=0; STRING=1; UNICODE=2; INTEGER=3; FLOAT=4; BOOLEAN=5
 
-# The base types that an AttributeType may have.
-VALUETYPES = Enums("object", "string", "unicode", 
-                    "integer", "float", "boolean")
+# Attribute value base types.
+[VT_OBJECT, VT_STRING, VT_UNICODE, VT_INTEGER, VT_FLOAT, VT_BOOLEAN] = tables.VALUETYPES
 
 # Test result types - these objects may report a result
 OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
@@ -55,6 +53,36 @@ OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
 TESTRESULTS = Enums(PASSED=1, FAILED=0, INCOMPLETE=-1, ABORT=-2, NA=-3, EXPECTED_FAIL=-4)
 TESTRESULTS.sort()
 [EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = TESTRESULTS
+
+
+class ValidationError(AssertionError):
+    pass
+
+
+def create_session(addr):
+    db = create_engine(addr)
+    tables.metadata.bind = db
+    return sessionmaker(bind=db, autoflush=False)
+
+
+# Get a database session instance from a database url. If URL is not
+# provided then get it from the storage.conf configuration file.
+def get_session(url=None):
+    if url is None:
+        from pycopia import basicconfig
+        cf = basicconfig.get_config("storage.conf")
+        url = cf["database"]
+    session_class = create_session(url)
+    return session_class()
+
+
+# Due to the way sqlalchemy instruments attributes you cannot instantiate
+# new model objects in the usual way. Use this general factory function instead.
+def create(klass, **kwargs):
+    inst = klass()
+    for k, v in kwargs.iteritems():
+        setattr(inst, k, v)
+    return inst
 
 
 # Set password encryption key for the site.
@@ -71,20 +99,55 @@ _get_secret()
 del _get_secret
 
 
+### attribute base type validation and conversion
+def _validate_float(value):
+    return float(value)
 
-def create_session(addr):
-    db = create_engine(addr)
-    tables.metadata.bind = db
-    return sessionmaker(bind=db)
+def _validate_int(value):
+    return int(value)
+
+def _validate_boolean(value):
+    if type(value) is str:
+        value = value.lower()
+        if value in ("on", "1", "true", "t", "y", "yes"):
+            return True
+        elif value in ("off", "0", "false", "f", "n", "no"):
+            return False
+        else:
+            raise ValidationError("Invalid boolean string")
+    else:
+        return bool(value)
+
+def _validate_object(value):
+    if type(value) is str:
+        try:
+            return eval(value, {}, {})
+        except:
+            return value
+    else:
+        return value
+
+def _validate_string(value):
+    return str(value)
+
+def _validate_unicode(value):
+    return unicode(value)
+
+_VALIDATOR_MAP = {
+    VT_OBJECT: _validate_object, 
+    VT_STRING: _validate_string, 
+    VT_UNICODE: _validate_unicode,
+    VT_INTEGER: _validate_int, 
+    VT_FLOAT: _validate_float,
+    VT_BOOLEAN: _validate_boolean,
+}
 
 
-def get_session(url=None):
-    if url is None:
-        from pycopia import basicconfig
-        cf = basicconfig.get_config("storage.conf")
-        url = cf["database"]
-    session_class = create_session(url)
-    return session_class()
+def _validate_value_type(dbtype, value):
+    try:
+        return _VALIDATOR_MAP[dbtype.value_type](value)
+    except (ValueError, TypeError), err:
+        raise ValidationError(err)
 
 
 #######################################
@@ -100,9 +163,6 @@ mapper(AddressBookEntry, tables.addressbook)
 # User management for AAA for web applications.
 
 class Permission(object):
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
 
     def __str__(self):
         return self.name
@@ -115,8 +175,6 @@ mapper(Permission, tables.auth_permission)
 
 class Group(object):
     ROW_DISPLAY = ("name", "permissions")
-    def __init__(self, name):
-        self.name = str(name)
 
     def __str__(self):
         return self.name
@@ -134,21 +192,11 @@ mapper(Group, tables.auth_group,
 class User(object):
     ROW_DISPLAY = ("username", "first_name", "last_name", "email")
 
-    def __init__(self, username=None, first_name=None, last_name=None, email=None, authservice="local",
-            is_staff=True, is_active=True, is_superuser=False, last_login=None, date_joined=None):
-        self.username = username
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.is_staff = is_staff
-        self.is_active = is_active
-        self.last_login = last_login
-        self.date_joined = date_joined
-        self.is_superuser = is_superuser
-        self.authservice = authservice
-
     def __str__(self):
         return "%s %s (%s)" % (self.first_name, self.last_name, self.username)
+
+    def __repr__(self):
+        return "User(%r, %r, %r)" % (self.username, self.first_name, self.last_name)
 
     # Passwords are stored in the database encrypted.
     def _set_password(self, passwd):
@@ -165,7 +213,7 @@ class User(object):
     password = property(_get_password, _set_password)
 
     def set_last_login(self):
-            self.last_login = datetime.now(UTC)
+            self.last_login = tables.time_now()
 
     def get_session_key(self):
         h = sha1()
@@ -187,8 +235,8 @@ mapper(User, tables.auth_user,
         "permissions": relation(Permission, lazy=True, secondary=tables.auth_user_user_permissions),
         "groups": relation(Group, lazy=True, secondary=tables.auth_user_groups),
         "password": synonym('_password', map_column=True),
-        "full_name": column_property( (tables.auth_user.c.first_name + " " +
-                tables.auth_user.c.last_name).label('full_name') ),
+#        "full_name": column_property( (tables.auth_user.c.first_name + " " +
+#                tables.auth_user.c.last_name).label('full_name') ),
     })
 
 
@@ -197,7 +245,7 @@ def create_user(session, pwent):
     """Create a new user with a default password and name taken from the
     password entry (from the passwd module). 
     """
-    now = datetime.now(UTC)
+    now = tables.time_now()
     fullname = pwent.gecos
     if fullname.find(",") > 0:
         [last, first] = fullname.split(",", 1)
@@ -208,7 +256,7 @@ def create_user(session, pwent):
         else:
             first, last = pwent.name, fnparts[0]
     grp = session.query(Group).filter(Group.name=="tester").one() # should already exist
-    user = User(username=pwent.name, first_name=first, last_name=last, authservice="system",
+    user = create(User, username=pwent.name, first_name=first, last_name=last, authservice="system",
             is_staff=True, is_active=True, last_login=now, date_joined=now)
     user.password = pwent.name + "123" # default, temporary password
     user.groups = [grp]
@@ -219,8 +267,12 @@ def create_user(session, pwent):
 
 class UserMessage(object):
     ROW_DISPLAY = ("user", "message")
+
     def __unicode__(self):
-        return self.message
+        return unicode(self.message)
+
+    def __str__(self):
+        return "%s: %s" % (self.user, self.message)
 
 mapper(UserMessage, tables.auth_message,
     properties={
@@ -243,33 +295,23 @@ class Session(object):
     def __init__(self, user, lifetime=48):
         self.session_key = user.get_session_key()
         self.expire_date = user.last_login + timedelta(hours=lifetime)
-        self.session_data = pickle.dumps({
-            "username": user.username,
-            })
-
-    def _get_data(self):
-        return pickle.loads(self.session_data)
-
-    def _set_data(self, d):
-        self.session_data = pickle.dumps(d)
-
-    data = property(_get_data, _set_data)
+        self.data = { "username": user.username }
 
     def __getitem__(self, key):
-        return self._get_data()[key]
+        return self.data[key]
 
     def __setitem__(self, key, value):
-        d = self._get_data()
+        d = self.data
         d[key] = value
-        self._set_data(d)
+        self.data = d
 
     def __delitem__(self, key):
-        d = self._get_data()
+        d = self.data
         del d[key]
-        self._set_data(d)
+        self.data = d
 
     def is_expired(self):
-        return datetime.now(UTC) >= self.expire_date
+        return tables.time_now() >= self.expire_date
 
 
 mapper(Session, tables.client_session)
@@ -279,18 +321,22 @@ mapper(Session, tables.client_session)
 
 
 class Country(object):
-    def __init__(self, name, isocode):
-        self.name = name
-        self.isocode = isocode
 
     def __str__(self):
         return "%s(%s)" % (self.name, self.isocode)
+
+    def __repr__(self):
+        return "Country(%r, %r)" % (self.name, self.isocode)
+
 
 mapper(Country, tables.country_codes)
 
 
 class CountrySet(object):
-    pass
+
+    def __repr__(self):
+        return self.name
+
 
 mapper(CountrySet, tables.country_sets,
     properties={
@@ -303,24 +349,29 @@ mapper(CountrySet, tables.country_sets,
 # Misc
 
 class LoginAccount(object):
-    pass
+    ROW_DISPLAY = ("identifier", "login")
+
+    def __str__(self):
+        return self.identifier
 
 mapper(LoginAccount, tables.account_ids)
 
 
 class Language(object):
-    def __init__(self, name, isocode):
-        self.name = name
-        self.isocode = isocode
 
     def __str__(self):
         return "%s(%s)" % (self.name, self.isocode)
+
+    def __repr__(self):
+        return "Language(%r, %r)" % (self.name, self.isocode)
 
 mapper(Language, tables.language_codes)
 
 
 class LanguageSet(object):
-    pass
+
+    def __str__(self):
+        return self.name
 
 mapper(LanguageSet, tables.language_sets, 
     properties={
@@ -328,19 +379,16 @@ mapper(LanguageSet, tables.language_sets,
     }
 )
 
+
 class Address(object):
     ROW_DISPLAY = ("address", "address2", "city", "stateprov", "postalcode")
 
-    def __init__(self, address, address2, city, stateprov, postalcode, country=None):
-        self.address = address
-        self.address2 = address2
-        self.city = city
-        self.stateprov = stateprov
-        self.postalcode = postalcode
-        self.country = country
-
     def __str__(self):
         return "%s, %s, %s %s" % (self.address, self.city, self.stateprov, self.postalcode)
+
+    def __repr__(self):
+        return "Address(%r, %r, %r, %r, %r)" % (
+                self.address, self.address2, self.city, self.stateprov, self.postalcode)
 
 mapper(Address, tables.addresses,
     properties={
@@ -352,27 +400,11 @@ mapper(Address, tables.addresses,
 class Contact(object):
     ROW_DISPLAY = ("prefix", "firstname", "middlename", "lastname")
 
-    def __init__(self, firstname, lastname, middlename=None, prefix=None, title=None, position=None, 
-            phonehome=None, phoneoffice=None, phoneother=None, phonework=None, phonemobile=None,
-            pager=None, fax=None, email=None, note=None):
-        self.prefix = prefix
-        self.firstname = firstname
-        self.middlename = middlename
-        self.lastname = lastname
-        self.title = title
-        self.position = position
-        self.phonehome = phonehome
-        self.phoneoffice = phoneoffice
-        self.phoneother = phoneother
-        self.phonework = phonework
-        self.phonemobile = phonemobile
-        self.pager = pager
-        self.fax = fax
-        self.email = email
-        self.note = note
-
     def __str__(self):
-        return "%s %s" % (self.firstname, self.lastname)
+        if self.email:
+            return "%s %s <%s>" % (self.firstname, self.lastname, self.email)
+        else:
+            return "%s %s" % (self.firstname, self.lastname)
 
 mapper(Contact, tables.contacts,
     properties={
@@ -384,18 +416,6 @@ mapper(Contact, tables.contacts,
 
 class Schedule(object):
     ROW_DISPLAY = ("name", "user", "minute", "hour", "day_of_month", "month", "day_of_week")
-    def __init__(self, name, minute="*", hour="*", day_of_month="*", month="*", day_of_week="*", 
-                user=None):
-        self.name = name
-        self.minute = minute
-        self.hour = hour
-        self.day_of_month = day_of_month
-        self.month = month
-        self.day_of_week = day_of_week
-        if user is not None:
-            self.user_id = user.id
-        else:
-            self.user_id = None
 
     def __str__(self):
         return "%s: %s %s %s %s %s" % (self.name, self.minute, self.hour,
@@ -411,6 +431,9 @@ mapper(Schedule, tables.schedule,
 class Location(object):
     ROW_DISPLAY = ("locationcode",)
 
+    def __str__(self):
+        return self.locationcode
+
 mapper(Location, tables.location,
     properties={
         "address": relation(Address),
@@ -418,70 +441,15 @@ mapper(Location, tables.location,
     }
 )
 
-#######################################
-# capabilities and attributes
-
-class CapabilityGroup(object):
-    pass
-
-mapper(CapabilityGroup, tables.capability_group)
-
-
-class CapabilityType(object):
-    ROW_DISPLAY = ("name", "value_type", "description", "group")
-
-    value_type = property(lambda s: VALUETYPES.find(s.value_type_c),
-        lambda s, v: setattr(s, "value_type_c", int(v)))
-
-mapper(CapabilityType, tables.capability_type,
-    properties={
-        "group": relation(CapabilityGroup),
-    }
-)
-
-
-
-class Capability(object):
-    ROW_DISPLAY = ("type", "value")
-
-    def _get_value(self):
-        return pickle.loads(self.pickle)
-
-    def _set_value(self, value):
-        self.pickle = pickle.dumps(value)
-
-    def _del_value(self):
-        self._set_value(None)
-
-    value = property(_get_value, _set_value, _del_value)
-
-mapper(Capability, tables.capability,
-)
-
+### general attributes
 
 class AttributeType(object):
     ROW_DISPLAY = ("name", "value_type", "description")
-    def __init__(self, name, vtype, description):
-        self.name = name
-        self.value_type_c = int(vtype)
-        self.description = description
-
-    value_type = property(lambda s: VALUETYPES.find(s.value_type_c),
-        lambda s, v: setattr(s, "value_type_c", int(v)))
 
     def __str__(self):
-        return "%s(%s)" % (self.name, VALUETYPES.find(s.value_type_c), self.description)
+        return "%s(%s)" % (self.name, self.value_type)
 
 mapper(AttributeType, tables.attribute_type)
-
-
-# deal consistently with the value_type_c field.
-
-#def get_value_type_enum(obj):
-#    return VALUETYPES.find(obj.value_type_c)
-#
-#def set_value_type_from_enum(obj, val):
-#        setattr(obj, "value_type_c", int(val))
 
 
 
@@ -490,19 +458,15 @@ mapper(AttributeType, tables.attribute_type)
 
 class ProjectCategory(object):
     ROW_DISPLAY = ("name",)
-    def __init__(self, name):
-        self.name = name
 
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
 mapper(ProjectCategory, tables.project_category)
 
 
 class FunctionalArea(object):
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
+    ROW_DISPLAY = ("name",)
 
     def __str__(self):
         return self.name
@@ -516,12 +480,8 @@ mapper(FunctionalArea, tables.functional_area)
 
 class Component(object):
     ROW_DISPLAY = ("name", "description", "created")
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
-        self.created = datetime.now(UTC)
 
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
 mapper(Component, tables.components)
@@ -529,12 +489,6 @@ mapper(Component, tables.components)
 
 class Project(object):
     ROW_DISPLAY = ("name", "category", "description")
-
-    def __init__(self, name, description, leader=None):
-        self.name = name
-        self.description = description
-        self.leader = leader
-        self.created = datetime.now(UTC)
 
     def __str__(self):
         return self.name
@@ -549,13 +503,6 @@ mapper(Project, tables.projects,
 
 class ProjectVersion(object):
     ROW_DISPLAY = ("project", "major", "minor", "subminor", "build")
-
-    def __init__(self, project, major=1, minor=0, subminor=0, build=0):
-        self.project = project
-        self.major = major
-        self.minor = minor
-        self.subminor = subminor
-        self.build = build
 
     def __str__(self):
         return "%s %s.%s.%s-%s" % (self.project, self.major, self.minor,
@@ -574,8 +521,8 @@ mapper(ProjectVersion, tables.project_versions,
 class CorporateAttributeType(object):
     ROW_DISPLAY = ("name", "value_type", "description")
 
-    value_type = property(lambda s: VALUETYPES.find(s.value_type_c),
-        lambda s, v: setattr(s, "value_type_c", int(v)))
+    def __str__(self):
+        return "%s(%s)" % (self.name, self.value_type)
 
 mapper(CorporateAttributeType, tables.corp_attribute_type)
 
@@ -587,12 +534,23 @@ class Corporation(object):
     def __str__(self):
         return self.name
 
+    def add_service(self, session, service):
+        svc = session.query(FunctionalArea).filter(FunctionArea.name == service).one()
+        self.services.append(svc)
+
+    def del_service(self, session, service):
+        svc = session.query(FunctionalArea).filter(FunctionArea.name == service).one()
+        self.services.remove(svc)
+
+
 mapper(Corporation, tables.corporations,
     properties={
         "services": relation(FunctionalArea, lazy=True, secondary=tables.corporations_services),
         "address": relation(Address),
         "contact": relation(Contact),
         "country": relation(Country),
+        "parent": relation(Corporation,  backref=backref("subsidiaries",
+                                remote_side=[tables.corporations.c.id])),
     }
 )
 
@@ -600,21 +558,19 @@ mapper(Corporation, tables.corporations,
 class CorporateAttribute(object):
     ROW_DISPLAY = ("type", "value")
 
-    def _get_value(self):
-        return pickle.loads(self.pickle)
+    def __repr__(self):
+        return "%s=%s" % (self.type, self.value)
 
-    def _set_value(self, value):
-        self.pickle = pickle.dumps(value)
+    @validates("value")
+    def validate_value(self, attrname, value):
+        return _validate_value_type(self.type, value)
 
-    def _del_value(self):
-        self._set_value(None)
-
-    value = property(_get_value, _set_value, _del_value)
 
 mapper(CorporateAttribute, tables.corp_attributes,
     properties={
         "type": relation(CorporateAttributeType),
-        "corporation": relation(Corporation, backref="attributes"),
+        "corporation": relation(Corporation, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
     }
 )
 
@@ -622,27 +578,24 @@ mapper(CorporateAttribute, tables.corp_attributes,
 #######################################
 # Software model
 
-# should also be called role or function
+# This SoftwareCategory also specifies the role, function, or service.
+# It's used for Software to categorize the type or role of it, and for
+# Equipment functions that run that sofware to provide that role or
+# service.
+
 class SoftwareCategory(object):
     ROW_DISPLAY = ("name", "description")
 
-    def __init__(self, name, description):
-        self.name = name
-        self.description = description
-
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
 mapper(SoftwareCategory, tables.software_category)
 
 
+# A localized version of a software that indicates the current
+# configuration of encoding and language.
 class SoftwareVariant(object):
-    ROW_DISPLAY = ("name", "country", "language", "encoding")
-    def __init__(self, name, encoding, country=None, language=None):
-        self.name = name
-        self.encoding = encoding
-        self.country = country
-        self.language = language
+    ROW_DISPLAY = ("name", "encoding")
 
     def __str__(self):
         return "%s(%s)" % (self.name, self.encoding)
@@ -658,6 +611,9 @@ mapper(SoftwareVariant, tables.software_variant,
 class Software(object):
     ROW_DISPLAY = ("name", "category", "manufacturer", "vendor")
 
+    def __repr__(self):
+        return self.name
+
 mapper (Software, tables.software,
     properties={
         "variants": relation(SoftwareVariant, lazy=True, secondary=tables.software_variants),
@@ -670,23 +626,19 @@ mapper (Software, tables.software,
 )
 
 class SoftwareAttribute(object):
-
     ROW_DISPLAY = ("type", "value")
 
-    def _get_value(self):
-        return pickle.loads(self.pickle)
+    def __repr__(self):
+        return "%s=%s" % (self.type, self.value)
 
-    def _set_value(self, value):
-        self.pickle = pickle.dumps(value)
-
-    def _del_value(self):
-        self._set_value(None)
-
-    value = property(_get_value, _set_value, _del_value)
+    @validates("value")
+    def validate_value(self, attrname, value):
+        return _validate_value_type(self.type, value)
 
 mapper(SoftwareAttribute, tables.software_attributes,
     properties={
-            "software": relation(Software, backref="attributes"),
+            "software": relation(Software, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
             "type": relation(AttributeType),
     },
 )
@@ -698,8 +650,6 @@ mapper(SoftwareAttribute, tables.software_attributes,
 
 # similar to ENTITY-MIB::PhysicalClass
 class EquipmentCategory(object):
-    def __init__(self, name):
-        self.name = name
 
     def __str__(self):
         return "%s(%d)" % (self.name, self.id + 1)
@@ -708,30 +658,25 @@ mapper(EquipmentCategory, tables.equipment_category)
 
 # IANAifType, minus obsolete and deprecated.
 class InterfaceType(object):
-    def __init__(self, name, enum):
-        self.name = name
-        self.enumeration = enum
 
     def __str__(self):
         return "%s(%d)" % (self.name, self.enumeration)
 
 mapper(InterfaceType, tables.interface_type)
 
+
 class Network(object):
-    ROW_DISPLAY = ("name", "bridgeid", "ipnetwork", "notes")
-    def __init__(self, name, ipnetwork=None, bridgeid=None, notes=None):
-        self.name = name
-        self.ipnetwork = ipnetwork.CIDR
-        self.bridgeid = bridgeid
-        self.notes = notes
+    ROW_DISPLAY = ("name", "ipnetwork", "notes")
 
     def __str__(self):
         if self.ipnetwork is not None:
-            return "Net: %s (%s)" % (self.name, self.ipnetwork)
-        elif bridgeid is not None:
-            return "Net: %s: %s" % (self.name, self.bridgeid)
+            return "%s (%s)" % (self.name, self.ipnetwork)
         else:
-            return "Net: %s" % (self.name,)
+            return self.name
+
+    def __repr__(self):
+        return "Network(%r, %r)" % (self.name, self.ipnetwork)
+
 
 mapper(Network, tables.networks)
 
@@ -745,8 +690,8 @@ class EquipmentModel(object):
 mapper(EquipmentModel, tables.equipment_model,
     properties={
         "embeddedsoftware": relation(Software, secondary=tables.equipment_model_embeddedsoftware),
-        "category": relation(EquipmentCategory, order_by=tables.equipment_category.c.id),
-        "manufacturer": relation(Corporation, order_by=tables.corporations.c.id),
+        "category": relation(EquipmentCategory, order_by=tables.equipment_category.c.name),
+        "manufacturer": relation(Corporation, order_by=tables.corporations.c.name),
     }
 )
 
@@ -754,23 +699,17 @@ mapper(EquipmentModel, tables.equipment_model,
 class EquipmentModelAttribute(object):
     ROW_DISPLAY = ("type", "value")
 
-    def _get_value(self):
-        return pickle.loads(self.pickle)
+    def __repr__(self):
+        return "%s=%s" % (self.type, self.value)
 
-    def _set_value(self, value):
-        self.pickle = pickle.dumps(value)
-
-    def _del_value(self):
-        self._set_value(None)
-
-    value = property(_get_value, _set_value, _del_value)
-
-    def __str__(self):
-        return "%s = %s" % (self.name, self.value)
+    @validates("value")
+    def validate_value(self, attrname, value):
+        return _validate_value_type(self.type, value)
 
 mapper(EquipmentModelAttribute, tables.equipment_model_attributes,
     properties={
-            "equipmentmodel": relation(EquipmentModel, backref="attributes"),
+            "equipmentmodel": relation(EquipmentModel, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
             "type": relation(AttributeType),
     },
 
@@ -783,9 +722,41 @@ class Equipment(object):
     def __str__(self):
         return self.name
 
+    def add_attribute(self, session, attrtype, value):
+        if not isinstance(attrtype, AttributeType):
+            attrtype = session.query(AttributeType).filter(AttributeType.name==str(attrtype)).one()
+        attrib = create(EquipmentAttribute, type=attrtype, value=value)
+        self.attributes.append(attrib)
+
+    def del_attribute(self, session, attrtype):
+        if not isinstance(attrtype, AttributeType):
+            attrtype = session.query(AttributeType).filter(AttributeType.name==str(attrtype)).one()
+        attrib = session.query(EquipmentAttribute).filter(EquipmentAttribute.equipment==self).one()
+        if attrib:
+            self.attributes.remove(attrib)
+
+    def add_capability(self, session, captype, value):
+        if not isinstance(captype, CapabilityType):
+            captype = session.query(CapabilityType).filter(CapabilityType.name==str(captype)).one()
+        cap = create(Capability, type=captype, value=value)
+        self.capabilities.append(cap)
+
+    def del_capability(self, session, captype):
+        if not isinstance(captype, CapabilityType):
+            captype = session.query(CapabilityType).filter(CapabilityType.name==str(captype)).one()
+        cap = session.query(Capability).filter(Capability.equipment==self).one()
+        if cap:
+            self.attributes.remove(cap)
+
 mapper(Equipment, tables.equipment,
     properties={
         "model": relation(EquipmentModel),
+        "owner": relation(User),
+        "vendor": relation(Corporation),
+        "project": relation(ProjectVersion),
+        "account": relation(LoginAccount),
+        "language": relation(Language),
+        "location": relation(Location),
         "subcomponents": relation(Equipment, 
                 backref=backref('parent', remote_side=[tables.equipment.c.id])),
         "software": relation(Software, lazy=True, secondary=tables.equipment_software),
@@ -794,55 +765,39 @@ mapper(Equipment, tables.equipment,
 
 
 class EquipmentAttribute(object):
-    ROW_DISPLAY = ("name", "value")
+    ROW_DISPLAY = ("type", "value")
 
-    def _get_value(self):
-        return pickle.loads(self.pickle)
+    def __repr__(self):
+        return "%s=%s" % (self.type, self.value)
 
-    def _set_value(self, value):
-        self.pickle = pickle.dumps(value)
-
-    def _del_value(self):
-        self._set_value(None)
-
-    value = property(_get_value, _set_value, _del_value)
-
-    def __str__(self):
-        return "%s = %s" % (self.name, self.value)
+    @validates("value")
+    def validate_value(self, attrname, value):
+        return _validate_value_type(self.type, value)
 
 mapper(EquipmentAttribute, tables.equipment_attributes,
     properties={
-            "equipment": relation(Equipment, backref="attributes"),
+            "equipment": relation(Equipment, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
+            "type": relation(AttributeType),
     },
 )
 
 
-
 class Interface(object):
     ROW_DISPLAY = ("name", "ifindex", "interface_type", "equipment", "macaddr", "ipaddr", "network")
-    def __init__(self, name, alias=None, ifindex=None, description=None,
-            macaddr=None, vlan=0, ipaddr=None, mtu=None, speed=None,
-            status=0, iftype=None, equipment=None, network=None):
-        self.name = name
-        self.alias = alias
-        self.ifindex = ifindex
-        self.description = description
-        self.macaddr = macaddr
-        self.vlan = vlan
-        self.ipaddr = ipaddr
-        self.mtu = mtu
-        self.speed = speed
-        self.status = status
 
     def __str__(self):
         return "%s (%s)" % (self.name, self.ipaddr)
 
+    def __repr__(self):
+        return "Interface(%r, idaddr=%r)" % (self.name, self.ipaddr)
+
 mapper(Interface, tables.interfaces,
     properties = {
-        "interface_type": relation(InterfaceType, order_by=tables.interfaces.c.id),
+        "interface_type": relation(InterfaceType, order_by=tables.interface_type.c.name),
         "parent": relation(Interface, backref=backref("subinterface",
                                 remote_side=[tables.interfaces.c.id])),
-        "network": relation(Network, backref="interfaces", order_by=tables.networks.c.id),
+        "network": relation(Network, backref="interfaces", order_by=tables.networks.c.name),
         "equipment": relation(Equipment, backref="interfaces"),
     }
 )
@@ -852,16 +807,9 @@ mapper(Interface, tables.interfaces,
 
 class EnvironmentAttributeType(object):
     ROW_DISPLAY = ("name", "value_type", "description")
-    def __init__(self, name, vtype, description):
-        self.name = name
-        self.value_type_c = int(vtype)
-        self.description = description
-
-    value_type = property(lambda s: VALUETYPES.find(s.value_type_c),
-        lambda s, v: setattr(s, "value_type_c", int(v)))
 
     def __str__(self):
-        return "%s(%s)" % (self.name, VALUETYPES.find(s.value_type_c))
+        return "%s(%s)" % (self.name, self.value_type)
 
 mapper(EnvironmentAttributeType, tables.environmentattribute_type,
 )
@@ -869,14 +817,11 @@ mapper(EnvironmentAttributeType, tables.environmentattribute_type,
 
 class Environment(object):
     ROW_DISPLAY = ("name", "owner")
-    def __init__(self, name):
-        self.name = name
 
-    def __str__(self):
+    def __repr__(self):
         return self.name
 
     equipment = association_proxy('testequipment', 'equipment')
-
 
 mapper(Environment, tables.environments,
     properties={
@@ -898,6 +843,12 @@ class TestEquipment(object):
     """
     ROW_DISPLAY = ("equipment", "UUT")
 
+    def __str__(self):
+        if self.UUT:
+            return self.equipment.name + " (DUT)"
+        else:
+            return self.equipment.name
+
 mapper(TestEquipment, tables.testequipment,
     properties={
         "roles": relation(SoftwareCategory, secondary=tables.testequipment_roles),
@@ -910,23 +861,17 @@ mapper(TestEquipment, tables.testequipment,
 class EnvironmentAttribute(object):
     ROW_DISPLAY = ("type", "value")
 
-    def _get_value(self):
-        return pickle.loads(self.pickle)
+    def __repr__(self):
+        return "%s=%s" % (self.type, self.value)
 
-    def _set_value(self, value):
-        self.pickle = pickle.dumps(value)
-
-    def _del_value(self):
-        self._set_value(None)
-
-    value = property(_get_value, _set_value, _del_value)
-
-    def __str__(self):
-        return "%s = %s" % (self.type, self.value)
+    @validates("value")
+    def validate_value(self, attrname, value):
+        return _validate_value_type(self.type, value)
 
 mapper(EnvironmentAttribute, tables.environment_attributes,
     properties={
-            "environment": relation(Environment, backref="attributes"),
+            "environment": relation(Environment, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
             "type": relation(EnvironmentAttributeType),
     },
 )
@@ -938,14 +883,12 @@ mapper(EnvironmentAttribute, tables.environment_attributes,
 
 class Trap(object):
     ROW_DISPLAY = ("timestamp", "value")
-    def _get_value(self):
-        return pickle.loads(self.pickle)
+    def __init__(self, timestamp, trap):
+        self.timestamp = timestamp
+        self.trap = trap # pickled
 
-    def _set_value(self, obj):
-        self.pickle = pickle.dumps(obj)
-
-    value = property(_get_value, _set_value)
-
+    def __str__(self):
+        return "%s: %s" % (self.timestamp, self.trap)
 
 mapper(Trap, tables.traps)
 
@@ -961,15 +904,26 @@ class TestCase(object):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return "TestCase(%r)" % (self.name,)
+
 mapper(TestCase, tables.test_cases,
     properties={
         "functionalarea": relation(FunctionalArea, secondary=tables.test_cases_areas),
+        "prerequisite": relation(TestCase, 
+                primaryjoin=tables.test_cases.c.prerequisite_id==tables.test_cases.c.id),
     },
 )
 
 
 class TestSuite(object):
     ROW_DISPLAY = ("name", "suiteimplementation")
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return "TestSuite(%r)" % (self.name,)
 
 mapper(TestSuite, tables.test_suites,
     properties={
@@ -986,6 +940,12 @@ mapper(TestSuite, tables.test_suites,
 class TestJob(object):
     ROW_DISPLAY = ("name", "schedule")
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return "TestJob(%r)" % (self.name,)
+
 mapper(TestJob, tables.test_jobs,
     properties = {
         "user": relation(User),
@@ -998,17 +958,8 @@ mapper(TestJob, tables.test_jobs,
 
 class TestResultData(object):
     def __init__(self, data, note=None):
-        self.pickle = pickle.dumps(data)
+        self.data = data
         self.note = note
-
-    def _get_data(self):
-        return pickle.loads(self.pickle)
-
-    def _set_data(self, obj):
-        self.pickle = pickle.dumps(obj)
-
-    data = property(_get_data, _set_data)
-
 
 mapper(TestResultData, tables.test_results_data)
 
@@ -1019,8 +970,11 @@ class TestResult(object):
         for name, value in kwargs.items():
              setattr(self, name, value)
 
-    testresult = property(lambda self: TESTRESULTS.find(int(self.result)))
-    objecttype = property(lambda self: OBJECTTYPES.find(int(self.objecttype_c)))
+    def __str__(self):
+        return "%s(%s): %s" % (self.testcase, self.objecttype, self.testresult)
+
+    testresult = property(lambda self: TESTRESULTS.find(self.result))
+    objecttype = property(lambda self: OBJECTTYPES.find(self.objecttype_c))
 
 
 mapper(TestResult, tables.test_results,
@@ -1034,6 +988,49 @@ mapper(TestResult, tables.test_results,
     }
 )
 
+#######################################
+# capabilities for hardware
+
+class CapabilityGroup(object):
+    ROW_DISPLAY = ("name",)
+
+    def __str__(self):
+        return self.name
+
+mapper(CapabilityGroup, tables.capability_group)
+
+
+class CapabilityType(object):
+    ROW_DISPLAY = ("name", "value_type", "description", "group")
+
+    def __str__(self):
+        return "%s(%s)" % (self.name, self.value_type)
+
+mapper(CapabilityType, tables.capability_type,
+    properties={
+        "group": relation(CapabilityGroup),
+    }
+)
+
+
+class Capability(object):
+    ROW_DISPLAY = ("type", "value")
+
+    def __repr__(self):
+        return "%s=%s" % (self.type, self.value)
+
+    @validates("value")
+    def validate_value(self, attrname, value):
+        return _validate_value_type(self.type, value)
+
+mapper(Capability, tables.capability,
+    properties={
+        "type": relation(CapabilityType),
+        "equipment": relation(Equipment, backref=backref("capabilities", 
+                    cascade="all, delete, delete-orphan")),
+    }
+)
+
 
 #######################################
 # configuration data
@@ -1041,34 +1038,17 @@ mapper(TestResult, tables.test_results,
 class Config(object):
     ROW_DISPLAY = ("name", "value", "user", "testcase", "testsuite")
 
-    def __init__(self, name, value, container=None, testcase=None,
-            testsuite=None, user=None):
-        self.name = name
-        self._set_value(value)
-        self.parent_id = container.id
-        self.testcase = testcase
-        self.testsuite = testsuite
-        self.user = user
-
-    def _set_value(self, value):
-        self.pickle = pickle.dumps(value)
-
-    def _get_value(self):
-        return pickle.loads(self.pickle)
-
-    def _del_value(self):
-        self.pickle = pickle.dumps(None)
-
-    value = property(_get_value, _set_value, _del_value)
-
-    def __str__(self):
-        return "%s=%r" % (self.name, self.value)
+    def __repr__(self):
+        if self.value is None:
+            return self.name
+        else:
+            return "%s=%s" % (self.name, self.value)
 
     def add_container(self, name):
         return Config(name, None, container=self, user=self.user,
             testcase=self.testcase, testsuite=self.testsuite)
 
-    def get_container(self, name, session):
+    def get_container(self, session, name):
         c = session.query(Config).filter(
                 Config.name==name, Config.parent_id==self.id, Config.user==self.user).one()
         return ConfigWrapper(session, c)
@@ -1092,7 +1072,7 @@ class ConfigWrapper(object):
         self.node = config
 
     def __setitem__(self, name, value):
-        new = Config(name, value, container=self.node, user=self.node.user,
+        new = create(Config, name=name, value=value, container=self.node, user=self.node.user,
             testcase=self.node.testcase, testsuite=self.node.testsuite)
         self.session.add(new)
         self.session.commit()
@@ -1117,60 +1097,81 @@ class ConfigWrapper(object):
             yield name
 
     def items(self):
-        for name, value in self.session.query(Config.name, Config.pickle).filter(and_(
+        for name, value in self.session.query(Config.name, Config.value).filter(and_(
             Config.parent_id==self.node.id, 
             Config.user==self.node.user, 
             Config.testcase==self.node.testcase, 
             Config.testsuite==self.node.testsuite)):
-            yield name, pickle.loads(value)
+            yield name, value
 
     def values(self):
-        for value, in self.session.query(Config.pickle).filter(and_(
+        for value, in self.session.query(Config.value).filter(and_(
             Config.parent_id==self.node.id, 
             Config.user==self.node.user, 
             Config.testcase==self.node.testcase, 
             Config.testsuite==self.node.testsuite)):
-            yield pickle.loads(value)
+            yield value
+
 
 
 #######################################
-
+## Utility functions
 #######################################
-
 
 def class_names():
     for mapper in _mapper_registry:
         yield mapper._identity_class.__name__
 
 
+MetaDataTuple = collections.namedtuple("MetaDataTuple", 
+        "coltype, colname, default, m2m, nullable, uselist")
+
 def get_metadata(class_):
-    rv = [("Column Name", "ColumnType", "Default")]
+    """Returns a list of MetaDataTuple structures.
+    """
+    rv = []
     for prop in class_mapper(class_).iterate_properties:
-        proptype = type(prop)
-        if prop.key.startswith("_") or prop.key == "id":
-            continue
         name = prop.key
+        if name.startswith("_") or name == "id" or name.endswith("_id"):
+            continue
+        proptype = type(prop)
+        m2m = False
+        default = None
+        nullable = None
+        uselist = None
         if proptype is ColumnProperty:
             coltype = type(prop.columns[0].type).__name__
             try:
                 default = prop.columns[0].default
             except AttributeError:
                 default = None
+            else:
+                if default is not None:
+                    default = str(default.arg(None))
         elif proptype is RelationProperty:
             coltype = RelationProperty.__name__
-            default = None
+            m2m = prop.secondary is not None
+            nullable = prop.local_side[0].nullable
+            uselist = prop.uselist
         else:
             continue
-        rv.append((name, coltype, default))
+        rv.append(MetaDataTuple(coltype, str(name), default, m2m, nullable, uselist))
     return rv
 
 
 def get_rowdisplay(class_):
-    return getattr(class_, "ROW_DISPLAY", None) or [t[0] for t in get_metadata(class_)[1:]]
+    return getattr(class_, "ROW_DISPLAY", None) or [t.colname for t in get_metadata(class_)]
 
 
 if __name__ == "__main__":
+    import sys
     from pycopia import autodebug
-    print get_metadata(Location)
+    if sys.flags.interactive:
+        from pycopia import interactive
+    print get_metadata(Equipment)
+    sess = get_session()
+    eq = sess.query(Equipment).get(6)
+    print "eq = ", eq
+    props = list(class_mapper(Equipment).iterate_properties)
 
 
