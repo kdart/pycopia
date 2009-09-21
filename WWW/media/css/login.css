@@ -1,5 +1,4 @@
-/* Pycopia login css. */
-
+/* Pycopia default login page css. */
 
 body {
   font-family: Helvetica, sans-serif;
@@ -9,13 +8,15 @@ body {
 
 h1 {
   text-align: center;
-  width: 100%;
-  background-color: #DAD;
+  border-style:outset;
+  background-color: lightBlue;
+  border-color: darkBlue;
+  padding: 3px;
+  border-width:5px;
 }
 
 form {
-  width: 100%;
-  padding: 2em;
+  margin-left: 2em;
   border-color: #EEE;
 }
 
@@ -25,14 +26,39 @@ p.error {
 }
 
 #id_username {
-  background-color: #AAAAEE;
+  background-color: #BBBBEE;
 }
 
 #id_password {
-  background-color: #EEAAAA;
+  background-color: #EEBBBB;
 }
 
-#id_submit {
-
+input {
+    width: 40em;
+    display: block;
 }
+
+label {
+    display: block;
+    font-weight:bold;
+    margin-top: 1em;
+}
+
+input:focus {
+  border-width: 2px;
+  border-color: black;
+}
+
+input[type="submit"] {
+    background-color:#BBFFBB;
+    font-weight:bold;
+    margin-top:10px;
+    padding:4px;
+}
+
+input[type="submit"]:hover { 
+  background-color: #AAEEAA;
+}
+
+hr {color: silver; width: 80%;}
 

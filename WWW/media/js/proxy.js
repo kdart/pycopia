@@ -39,7 +39,7 @@ function PythonProxy(basepath) {
  */
 
 PythonProxy.prototype._call = function(methodname /* more */) {
-  var url = this.basepath + methodname + "/";
+  var url = this.basepath + methodname;
   var req = doXHR(url, {
                   method: "POST",
                   mimeType: 'text/plain',
@@ -143,6 +143,7 @@ function simplifyDate(dt) {
   return {_class_: "date", value: dt.getTime()};
 };
 
+
 // For JSON -> Date object
 function jsonDecodeCheckDate(obj) {
   return obj._class_ == "date";
@@ -154,15 +155,54 @@ function jsonConvertDate(obj) {
 };
 
 
+
+// Mimic Python set type
+function Set(arr) {
+  for (var i = 0; i < arr.length; i++) {
+    this[arr[i]] = null;
+  };
+}
+Set.prototype = new Object()
+Set.prototype.constructor = Set
+
+Set.prototype.contains = function(v) {
+  return this.hasOwnProperty(v);
+};
+
+
+// For Set --> JSON
+function jsonCheckSet(obj) {
+  return (typeof(obj) == "object") && (obj.constructor == Set);
+};
+
+function simplifySet(s) {
+  var l = [];
+  for (var k in s) {l.push(k);};
+  return {_class_: "set", value: l};
+};
+
+// For JSON -> Set
+function jsonDecodeCheckSet(obj) {
+  return obj._class_ == "set";
+};
+
+function jsonConvertSet(obj) {
+  var theset = new Set(obj.value);
+  return theset;
+};
+
+
 function proxyInit() {
   registerJSON("date", jsonCheckDate, simplifyDate);
+  registerJSON("set", jsonCheckSet, simplifySet);
   // Create a new registry for special JSON deserialization handlers.
   window.jsonEvalRegistry = new AdapterRegistry();
   // and add first handler, a Date handler.
   jsonEvalRegistry.register("date", jsonDecodeCheckDate, jsonConvertDate);
+  jsonEvalRegistry.register("set", jsonDecodeCheckSet, jsonConvertSet);
 };
 
-// Initialize after page load.
-connect(window, "onload", proxyInit);
+// connect(window, "onload", proxyInit);
 
+proxyInit();
 
