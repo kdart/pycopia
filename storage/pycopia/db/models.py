@@ -84,6 +84,9 @@ def create(klass, **kwargs):
         setattr(inst, k, v)
     return inst
 
+def update(inst, **kwargs):
+    for k, v in kwargs.iteritems():
+        setattr(inst, k, v)
 
 # Set password encryption key for the site.
 def _get_secret():
@@ -255,9 +258,9 @@ def create_user(session, pwent):
             [first, last] = fnparts
         else:
             first, last = pwent.name, fnparts[0]
-    grp = session.query(Group).filter(Group.name=="tester").one() # should already exist
+    grp = session.query(Group).filter(Group.name=="testing").one() # should already exist
     user = create(User, username=pwent.name, first_name=first, last_name=last, authservice="system",
-            is_staff=True, is_active=True, last_login=now, date_joined=now)
+            is_staff=True, is_active=True, is_superuser=False, last_login=now, date_joined=now)
     user.password = pwent.name + "123" # default, temporary password
     user.groups = [grp]
     session.add(user)
@@ -276,7 +279,8 @@ class UserMessage(object):
 
 mapper(UserMessage, tables.auth_message,
     properties={
-        "user": relation(User, backref="messages"),
+        "user": relation(User, backref=backref("messages",
+                    cascade="all, delete, delete-orphan")),
     }
 )
 
@@ -712,7 +716,6 @@ mapper(EquipmentModelAttribute, tables.equipment_model_attributes,
                     cascade="all, delete, delete-orphan")),
             "type": relation(AttributeType),
     },
-
 )
 
 

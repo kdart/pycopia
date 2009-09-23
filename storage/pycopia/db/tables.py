@@ -82,7 +82,8 @@ auth_message =  Table('auth_message', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'user_id', PGInteger(), primary_key=False, nullable=False),
             Column(u'message', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_message_user_id_fkey'),
+    ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_message_user_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_auth_message_user_id', auth_message.c.user_id, unique=False)
 
@@ -114,7 +115,8 @@ config =  Table('config', metadata,
     ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'config_testcase_id_fkey'),
             ForeignKeyConstraint([u'testsuite_id'], [u'public.test_suites.id'], name=u'config_testsuite_id_fkey'),
             ForeignKeyConstraint([u'parent_id'], [u'public.config.id'], name=u'parent_id_refs_config_id'),
-            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'config_user_id_fkey'),
+            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'config_user_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_config_testcase_id', config.c.testcase_id, unique=False)
 Index('config_name_key', config.c.name, config.c.parent_id, config.c.user_id, unique=True)
@@ -143,7 +145,8 @@ contacts =  Table('contacts', metadata,
             Column(u'address_id', PGInteger(), primary_key=False),
             Column(u'user_id', PGInteger(), primary_key=False),
     ForeignKeyConstraint([u'address_id'], [u'public.addresses.id'], name=u'contacts_address_id_fkey'),
-            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'contacts_user_id_fkey'),
+            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'contacts_user_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_contacts_address_id', contacts.c.address_id, unique=False)
 Index('contacts_lastname', contacts.c.lastname, unique=False)
@@ -232,7 +235,8 @@ location =  Table('location', metadata,
             Column(u'address_id', PGInteger(), primary_key=False),
             Column(u'contact_id', PGInteger(), primary_key=False),
     ForeignKeyConstraint([u'address_id'], [u'public.addresses.id'], name=u'location_address_id_fkey'),
-            ForeignKeyConstraint([u'contact_id'], [u'public.auth_user.id'], name=u'location_contact_id_fkey'),
+            ForeignKeyConstraint([u'contact_id'], [u'public.auth_user.id'], name=u'location_contact_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_location_address_id', location.c.address_id, unique=False)
 Index('location_contact_id', location.c.contact_id, unique=False)
@@ -293,7 +297,8 @@ test_jobs =  Table('test_jobs', metadata,
     ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'test_jobs_environment_id_fkey'),
             ForeignKeyConstraint([u'schedule_id'], [u'public.schedule.id'], name=u'test_jobs_schedule_id_fkey'),
             ForeignKeyConstraint([u'testsuite_id'], [u'public.test_suites.id'], name=u'test_jobs_testsuite_id_fkey'),
-            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'test_jobs_user_id_fkey'),
+            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'test_jobs_user_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_test_jobs_user_id', test_jobs.c.user_id, unique=False)
 Index('test_jobs_testsuite_id', test_jobs.c.testsuite_id, unique=False)
@@ -312,7 +317,8 @@ schedule =  Table('schedule', metadata,
             Column(u'day_of_month', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'month', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'day_of_week', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-    ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'schedule_user_id_fkey'),
+    ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'schedule_user_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_schedule_user_id', schedule.c.user_id, unique=False)
 
@@ -330,7 +336,7 @@ test_results =  Table('test_results', metadata,
             Column(u'testcase_id', PGInteger(), primary_key=False),
             Column(u'testimplementation', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'testversion', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'tester_id', PGInteger(), primary_key=False, nullable=False),
+            Column(u'tester_id', PGInteger(), primary_key=False),
             Column(u'environment_id', PGInteger(), primary_key=False),
             Column(u'build_id', PGInteger(), primary_key=False),
             Column(u'parent_id', PGInteger(), primary_key=False),
@@ -345,7 +351,8 @@ test_results =  Table('test_results', metadata,
             Column(u'reportfilename', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'note', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'valid', PGBoolean(), primary_key=False, nullable=False, default=default_active),
-    ForeignKeyConstraint([u'tester_id'], [u'public.auth_user.id'], name=u'test_results_tester_id_fkey'),
+    ForeignKeyConstraint([u'tester_id'], [u'public.auth_user.id'], name=u'test_results_tester_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'parent_id'], [u'public.test_results.id'], name=u'parent_id_refs_test_results_id'),
             ForeignKeyConstraint([u'build_id'], [u'public.project_versions.id'], name=u'test_results_build_id_fkey'),
             ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'test_results_environment_id_fkey'),
@@ -385,7 +392,8 @@ cookies =  Table('cookies', metadata,
             Column(u'comment_url', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'port', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'user_id', PGInteger(), primary_key=False),
-    ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'cookies_user_id_fkey'),
+    ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'cookies_user_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_cookies_user_id', cookies.c.user_id, unique=False)
 
@@ -405,7 +413,8 @@ auth_user_groups =  Table('auth_user_groups', metadata,
             Column(u'user_id', PGInteger(), primary_key=False, nullable=False),
             Column(u'group_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'group_id'], [u'public.auth_group.id'], name=u'auth_user_groups_group_id_fkey'),
-            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_user_groups_user_id_fkey'),
+            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_user_groups_user_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_auth_user_groups_user_id_key', auth_user_groups.c.user_id, auth_user_groups.c.group_id, unique=True)
 
@@ -429,7 +438,8 @@ auth_user_user_permissions =  Table('auth_user_user_permissions', metadata,
             Column(u'user_id', PGInteger(), primary_key=False, nullable=False),
             Column(u'permission_id', PGInteger(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'permission_id'], [u'public.auth_permission.id'], name=u'auth_user_user_permissions_permission_id_fkey'),
-            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_user_user_permissions_user_id_fkey'),
+            ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_user_user_permissions_user_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_auth_user_user_permissions_user_id_key', auth_user_user_permissions.c.user_id, auth_user_user_permissions.c.permission_id, unique=True)
 
@@ -469,11 +479,12 @@ projects =  Table('projects', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'category_id', PGInteger(), primary_key=False),
-            Column(u'leader_id', PGInteger(), primary_key=False, nullable=False),
+            Column(u'leader_id', PGInteger(), primary_key=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'created', PGDateTime(timezone=True), primary_key=False, nullable=False, default=time_now),
     ForeignKeyConstraint([u'category_id'], [u'public.project_category.id'], name=u'projects_category_id_fkey'),
-            ForeignKeyConstraint([u'leader_id'], [u'public.auth_user.id'], name=u'projects_leader_id_fkey'),
+            ForeignKeyConstraint([u'leader_id'], [u'public.auth_user.id'], name=u'projects_leader_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_projects_name_key', projects.c.name, unique=True)
 Index('projects_leader_id', projects.c.leader_id, unique=False)
@@ -534,10 +545,14 @@ test_cases =  Table('test_cases', metadata,
             Column(u'testimplementation', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'bugid', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'prerequisite_id', PGInteger(), primary_key=False),
-    ForeignKeyConstraint([u'author_id'], [u'public.auth_user.id'], name=u'test_cases_author_id_fkey'),
-            ForeignKeyConstraint([u'reviewer_id'], [u'public.auth_user.id'], name=u'test_cases_reviewer_id_fkey'),
-            ForeignKeyConstraint([u'tester_id'], [u'public.auth_user.id'], name=u'test_cases_tester_id_fkey'),
-            ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_cases_lastchangeauthor_id_fkey'),
+    ForeignKeyConstraint([u'author_id'], [u'public.auth_user.id'], name=u'test_cases_author_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
+            ForeignKeyConstraint([u'reviewer_id'], [u'public.auth_user.id'], name=u'test_cases_reviewer_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
+            ForeignKeyConstraint([u'tester_id'], [u'public.auth_user.id'], name=u'test_cases_tester_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
+            ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_cases_lastchangeauthor_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'prerequisite_id'], [u'public.test_cases.id'], name=u'test_cases_prerequisite_id_fkey'),
     schema='public')
 Index('index_test_cases_lastchangeauthor_id', test_cases.c.lastchangeauthor_id, unique=False)
@@ -557,7 +572,8 @@ test_suites =  Table('test_suites', metadata,
             Column(u'lastchangeauthor_id', PGInteger(), primary_key=False),
             Column(u'suiteimplementation', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'projectversion_id', PGInteger(), primary_key=False),
-    ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_suites_lastchangeauthor_id_fkey'),
+    ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_suites_lastchangeauthor_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'projectversion_id'], [u'public.project_versions.id'], name=u'test_suites_projectversion_id_fkey'),
     schema='public')
 Index('index_test_suites_lastchangeauthor_id', test_suites.c.lastchangeauthor_id, unique=False)
@@ -892,7 +908,8 @@ environments =  Table('environments', metadata,
             Column(u'countries_id', PGInteger(), primary_key=False),
             Column(u'project_id', PGInteger(), primary_key=False),
     ForeignKeyConstraint([u'countries_id'], [u'public.country_sets.id'], name=u'environments_countries_id_fkey'),
-            ForeignKeyConstraint([u'owner_id'], [u'public.auth_user.id'], name=u'environments_owner_id_fkey'),
+            ForeignKeyConstraint([u'owner_id'], [u'public.auth_user.id'], name=u'environments_owner_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'languages_id'], [u'public.language_sets.id'], name=u'environments_languages_id_fkey'),
             ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], name=u'environments_project_id_fkey'),
     schema='public')
@@ -977,17 +994,30 @@ Index('index_address_pkey', addressbook.c.ID, unique=True)
 if __name__ == '__main__':
     import sys
     from pycopia import autodebug
+    from pycopia import getopt
     from sqlalchemy import create_engine
 
-    url = sys.argv[1]
-    # e.g: 'postgres://keith@localhost/pycopia'
+    tname = None
+    opts, longopts, args = getopt.getopt(sys.argv[1:], "t:")
+    try:
+        url = args[0]
+    except IndexError:
+        from pycopia import basicconfig
+        cf = basicconfig.get_config("storage.conf")
+        url = cf["database"]
+    # e.g: 'postgres://pycopia@localhost/pycopia'
     print "creating tables in", url
+    for opt, optarg in opts:
+        if opt == "-t":
+            tname = optarg
     db = create_engine(unicode(url))
     metadata.bind = db
-    if len(sys.argv) > 2:
-        tname = sys.argv[2]
-        t = getattr(sys.modules[__name__], tname)
-        t.create()
+    if tname:
+        tbl = getattr(sys.modules[__name__], tname)
+        #tbl.drop(checkfirst=True)
+        #tbl.create()
+        print tbl
     else:
         metadata.create_all()
+
 

@@ -20,10 +20,11 @@ CLI interface to Pycopia database storage.
 
 """
 
-import sys
 import os
 
 from pycopia import CLI
+from pycopia import tty
+from pycopia import passwd
 from pycopia.db import models
 
 
@@ -36,6 +37,10 @@ class SessionCommands(CLI.BaseCommands):
 #'delete', 'execute', 'expire', 'expire_all', 'expunge', 'expunge_all',
 #'flush', 'get_bind', 'is_modified', 'merge', 'query', 'refresh',
 #'rollback', 'save', 'save_or_update', 'scalar', 'update'
+
+    def initialize(self):
+        tables = list(models.class_names())
+        self.add_completion_scope("use", tables)
 
     def close(self, argv):
         """close
@@ -58,13 +63,14 @@ class SessionCommands(CLI.BaseCommands):
     Roll back edits to the database."""
         self._obj.rollback()
 
-    def edit(self, argv):
-        """edit <table>
-    Edit the given table. Name is class name of mapped table."""
+    def use(self, argv):
+        """use <table>
+    Use the given table. Name is class name of mapped table."""
         name = argv[1] 
         t = getattr(models, name)
-        cmd = self.clone(TableCommands)
-        cmd._setup(t, "%s> " % (name,))
+        cls = _EDITOR_MAP.get(name, TableCommands)
+        cmd = self.clone(cls)
+        cmd._setup(t, cls.get_prompt(t))
         raise CLI.NewCommand(cmd)
 
     def ls(self, argv):
@@ -73,7 +79,30 @@ class SessionCommands(CLI.BaseCommands):
         self._print_list(list(models.class_names()))
 
 
+class RowCommands(CLI.BaseCommands):
+
+    @classmethod
+    def get_prompt(cls, dbrow):
+        return "%%I%s%%N%s> " % (dbrow.id, dbrow)
+
+    def show(self, argv):
+        """show
+    show the selected rows data."""
+    #relmodel = self._obj.property.mapper.class_
+        for metadata in sorted(models.get_metadata(self._obj.class_)):
+            self._print("%20.20s: %s" % (metadata.colname, getattr(self._obj, metadata.colname)))
+
+    def set(self, argv):
+        """set <attribute> <value>
+    Set the column attribute for this row."""
+        self._print("Not implemented")
+
+
 class TableCommands(CLI.BaseCommands):
+
+    @classmethod
+    def get_prompt(cls, table):
+        return "%%B%s%%N> " % table.__name__
 
     def query(self, argv):
         """query
@@ -98,6 +127,114 @@ class TableCommands(CLI.BaseCommands):
         cmd._setup(self._obj(), "Create:%s> " % (self._obj.__name__,))
         raise CLI.NewCommand(cmd)
 
+    def ls(self, argv):
+        """ls [--<attribute>=<criteria>...]
+    List all current entries."""
+        opts, longopts, args = self.getopt(argv, "")
+        q = _session.query(self._obj)
+        for k, v in longopts.iteritems():
+            q = q.filter(getattr(self._obj, k) == v)
+        for item in q.all():
+            self._print(item.id, ":", item)
+
+    def describe(self, argv):
+        """describe
+    Desribe the table columns."""
+        for metadata in sorted(models.get_metadata(self._obj)):
+            self._print("%20.20s: %s (%s)" % (
+                    metadata.colname, metadata.coltype, metadata.default))
+
+    def edit(self, argv):
+        """edit <id>
+    Edit a row object from the table."""
+        rowid = int(argv[1])
+        dbrow = _session.query(self._obj).get(rowid)
+        cls = RowCommands
+        cmd = self.clone(cls)
+        cmd._setup(dbrow, cls.get_prompt(dbrow))
+        raise CLI.NewCommand(cmd)
+
+    def show(self, argv):
+        """show <id>
+    show the row with the given id."""
+        rowid = int(argv[1])
+        dbrow = _session.query(self._obj).get(rowid)
+        for metadata in sorted(models.get_metadata(self._obj)):
+            self._print("%20.20s: %s" % (metadata.colname, getattr(dbrow, metadata.colname)))
+
+
+class UserCommands(TableCommands):
+
+    @classmethod
+    def get_prompt(cls, table):
+        return "%%R%s%%N> " % table.__name__
+
+    def add(self, argv):
+        """add [--first_name=<firstname> --last_name=<lastname>] <username>
+    Add a new user to the database."""
+        args, kwargs = CLI.breakout_args(argv[1:], self._environ)
+        username = args[0]
+        try:
+            pwent = passwd.getpwnam(username)
+        except KeyError:
+            pass
+        else:
+            models.create_user(_session, pwent)
+            return
+        grp = _session.query(models.Group).filter(models.Group.name=="testing").one()
+        kwargs["username"] = username
+        kwargs["authservice"] = "local"
+        kwargs.setdefault("is_staff", True)
+        kwargs.setdefault("is_active", True)
+        kwargs.setdefault("is_superuser", False)
+        if "first_name" not in kwargs:
+            kwargs["first_name"] = self._user_input("First Name? ")
+        if "last_name" not in kwargs:
+            kwargs["last_name"] = self._user_input("Last Name? ")
+        user = models.create(models.User, **kwargs)
+        user.groups = [grp]
+        _session.add(user)
+        _session.commit()
+
+    def passwd(self, argv):
+        """passwd [-a <authservice> | -l | -s ] <username>
+    Change the password for the given user. Also change the authorization method."""
+        opts, longopts, args = self.getopt(argv, "a:sl")
+        for opt, arg in opts:
+            if opt == "-a":
+                longopts["authservice"] = arg
+            elif opt == "-l":
+                longopts["authservice"] = "local"
+            elif opt == "-s":
+                longopts["authservice"] = "system"
+        username = args[0]
+        user = _session.query(models.User).filter(models.User.username==username).one()
+        tries = 0
+        while tries < 3:
+            newpass = tty.getpass("New password for %s: " % (user,))
+            newpass2 = tty.getpass("New password again: ")
+            if newpass == newpass2:
+                break
+            tries += 1
+        else:
+            self._print("Password not updated.")
+            return
+        if newpass:
+            user.password = newpass
+            models.update(user, **longopts)
+            _session.commit()
+        else:
+            self._print("No password, not updated.")
+
+    def delete(self, argv):
+        """delete <username>
+    Delete a user from the database."""
+        username = argv[1]
+        user = _session.query(models.User).filter(models.User.username==username).one()
+        if user:
+            _session.delete(user)
+            _session.commit()
+
 
 class QueryCommands(CLI.BaseCommands):
 
@@ -107,26 +244,21 @@ class QueryCommands(CLI.BaseCommands):
         for row in self._obj.all():
             self._print(row)
 
-    def show(self, argv):
-        """show
-    Show the current SQL."""
-        self._print(self._obj.statement)
-
     def one(self, argv):
         """one
     Get one unique row from query, or throw exception."""
         self._print(self._obj.one())
 
-    def scalar(self, argv):
-        """scalar
-    Get one unique row from query."""
-        self._print(self._obj.one())
+    def show(self, argv):
+        """show
+    Show the current SQL."""
+        self._print(self._obj.statement)
 
     def filter(self, argv):
         """filter
     Apply filters by keyword arguments."""
         args, kwargs = CLI.breakout_args(argv[1:], vars(self._obj))
-        self._obj = self._obj.filter_by(**kwargs)
+        self._obj = self._obj.filter(**kwargs)
 
     def count(self, argv):
         """count
@@ -166,6 +298,12 @@ class CreateCommands(CLI.BaseCommands):
         _session.add(self._obj)
         _session.commit()
         raise CLI.CommandQuit
+
+
+# Maps table names to editor classes
+_EDITOR_MAP = {
+    "User": UserCommands,
+}
 
 
 # main program
@@ -217,4 +355,8 @@ Options:
     else:
         parser.interact()
 
+
+if __name__ == "__main__":
+    import sys
+    dbcli(sys.argv)
 

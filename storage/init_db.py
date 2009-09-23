@@ -354,6 +354,14 @@ def do_default_environment(session):
     session.add(models.create(models.Environment, name="default"))
     session.commit()
 
+def do_default_environment(session):
+    session.add(models.create(models.Environment, name="default"))
+    session.commit()
+
+def do_default_group(session):
+    session.add(models.create(models.Group, name="testing"))
+    session.commit()
+
 def init_database(argv):
     try:
         url = argv[1]
@@ -371,6 +379,7 @@ def init_database(argv):
         do_equipment_category(dbsession)
         do_interface_types(dbsession)
         do_default_environment(dbsession)
+        do_default_group(dbsession)
     finally:
         dbsession.close()
 
