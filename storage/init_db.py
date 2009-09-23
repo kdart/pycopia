@@ -41,7 +41,7 @@ def do_schedules(session):
           ("Monthly", "45", "5", "1", "*", "*"),
           ("Yearly", "55", "6", "1", "12", "*"),
           ):
-        session.add(models.Schedule(name, minute=m, hour=h, day_of_month=dom, month=mon, day_of_week=dow))
+        session.add(models.create(models.Schedule, name=name, minute=m, hour=h, day_of_month=dom, month=mon, day_of_week=dow))
     session.commit()
 
 
@@ -52,7 +52,7 @@ def do_functional_areas(session):
             ("webUI", "Browser based user interface"),
             ("Network", "Routing, bridging, etc."),
             ):
-        session.add(models.FunctionalArea(name, desc))
+        session.add(models.create(models.FunctionalArea, name=name, description=desc))
     session.commit()
 
 def do_attribute_types(session):
@@ -81,18 +81,18 @@ def do_attribute_types(session):
             ("protocol", 1, "Internet protocol a software implements."),
             ("hostname", 1, "Name to use as host name. Overrides base name."),
             ):
-        session.add(models.AttributeType(name, vtype, desc))
+        session.add(models.create(models.AttributeType, name=name, type=vtype, description=desc))
         session.commit()
 
 def do_language(session):
     for code, name in iso639a.LANGUAGECODES.items():
-        session.add(models.Language(name=name.encode("utf-8"), isocode=code.strip()))
+        session.add(models.create(models.Language, name=name.encode("utf-8"), isocode=code.strip()))
     session.commit()
 
 def do_country(session):
     for code, name in iso3166.COUNTRYCODES.items():
           name = unicode(name, "ISO-8859-1").title()
-          session.add(models.Country(name=name, isocode=code.strip()))
+          session.add(models.create(models.Country, name=name, isocode=code.strip()))
     session.commit()
 
 def do_equipment_category(session):
@@ -109,7 +109,7 @@ def do_equipment_category(session):
            "port",
            "stack",        # stack of multiple chassis entities
            "cpu"):
-        session.add(models.EquipmentCategory(name))
+        session.add(models.create(models.EquipmentCategory, name=name))
     session.commit()
 
 
@@ -347,11 +347,11 @@ def do_interface_types(session):
             ("wwanPP", 243), #  3GPP WWAN
             ("wwanPP2", 244), #  3GPP2 WWAN
         ):
-        session.add(models.InterfaceType(name, enumeration))
+        session.add(models.create(models.InterfaceType, name=name, enumeration=enumeration))
     session.commit()
 
 def do_default_environment(session):
-    session.add(models.Environment("default"))
+    session.add(models.create(models.Environment, name="default"))
     session.commit()
 
 def init_database(argv):

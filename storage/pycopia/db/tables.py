@@ -61,6 +61,8 @@ UTC = timezone('UTC')
 def time_now():
     return datetime.now(UTC)
 
+def default_object():
+    return VALUETYPES[0]
 
 def default_active():
     return True
@@ -152,7 +154,7 @@ corp_attribute_type =  Table('corp_attribute_type', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'value_type', ValueType(), primary_key=False, nullable=False),
+            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=default_object),
     schema='public')
 Index('index_corp_attribute_type_name_key', corp_attribute_type.c.name, unique=True)
 
@@ -204,7 +206,7 @@ capability_type =  Table('capability_type', metadata,
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'group_id', PGInteger(), primary_key=False),
-            Column(u'value_type', ValueType(), primary_key=False, nullable=False),
+            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=default_object),
     ForeignKeyConstraint([u'group_id'], [u'public.capability_group.id'], name=u'capability_type_group_id_fkey'),
     schema='public')
 Index('index_capability_type_name_key', capability_type.c.name, unique=True)
@@ -240,7 +242,7 @@ attribute_type =  Table('attribute_type', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'value_type', ValueType(), primary_key=False, nullable=False),
+            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=default_object),
     schema='public')
 Index('index_attribute_type_name_key', attribute_type.c.name, unique=True)
 
@@ -261,7 +263,7 @@ environmentattribute_type =  Table('environmentattribute_type', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'value_type', ValueType(), primary_key=False, nullable=False),
+            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=default_object),
     schema='public')
 Index('index_environmentattribute_type_name_key', environmentattribute_type.c.name, unique=True)
 
