@@ -340,19 +340,6 @@ _CREATORS = {
 }
 
 
-
-class DeleteRequestHandler(framework.RequestHandler):
-
-    def get(self, request, tablename=None, rowid=None):
-        klass = get_model(tablename)
-        resp = framework.ResponseDocument(request, doc_constructor, 
-                 title="Delete id %s from %s" % (rowid, tablename))
-        resp.new_para("Delete") # TODO
-        return resp.finalize()
-
-delete_row = auth.need_login(DeleteRequestHandler(doc_constructor))
-
-
 class EditRequestHandler(framework.RequestHandler):
 
     def get(self, request, tablename=None, rowid=None):
