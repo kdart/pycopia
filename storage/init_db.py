@@ -45,15 +45,56 @@ def do_schedules(session):
     session.commit()
 
 
+# functional areas of systems and corporate entities.
 def do_functional_areas(session):
     for name, desc in (
-            ("System", "System configuration."),
-            ("UI", "User interface"),
+            ("computing", "Basic computing, such as operating system."),
+            ("UI", "Any user interface"),
+            ("GUI", "Graphical user interface"),
+            ("TUI", "Text user interface"),
             ("webUI", "Browser based user interface"),
-            ("Network", "Routing, bridging, etc."),
+            ("Documentation", "Documentation of something."),
+            ("Networking", "Routing, bridging, etc."),
+            ("telephony", "Telephony service."),
+            ("datacom", "Data communications service"),
+            ("repair", "Repair service"),
+            ("cloud", "Cloud computing."),
+            ("AAA", "Authentication, authorization, and accounting."),
+            ("CA", "Certificate authority."),
             ):
         session.add(models.create(models.FunctionalArea, name=name, description=desc))
     session.commit()
+
+def do_software_category(session):
+    for name, desc in (
+            ("OS", "An operating system."),
+            ("spreadsheet", "A spreadsheet."),
+            ("wordprocessor", "A wordprocessor."),
+            ("texteditor", "A plain text editor."),
+            ("proxy", "A type of network protocol proxy."),
+            ("browser", "Can render web content."),
+            ("webserver", "Serves web pages and content."),
+            ("mua", "A mail user agent (e.g. pine, thunderbird, or claws-mail)."),
+            ("mta", "A Mail transfer agent or SMTP server (e.g. sendmail, courier)."),
+            ("dnsserver", "Responds to DNS queries."),
+            ("database", "A database server."),
+            ("remoteshell", "Provides some remote command shell."),
+            ("remotedesktop", "Provides a remote desktop."),
+            ("dhcpserver", "Provides DHCP services."),
+            ("tftpserver", "Provides TFTP server, usually for network booting."),
+            ("cupsserver", "A CUPS printer server."),
+            ("nfsserver", "An NFS server."),
+            ("nfsclient", "An NFS client."),
+            ("iscsiserver", "A iSCSI target (server)."),
+            ("iscsi_initiator", "A iSCSI initiator (client)."),
+            ("ntp", "Provides network time sync service."),
+            ("ftpserver", "Provides an FTP server."),
+            ("vixclient", "A VMware VIX client."),
+            ("hypervisor", "A hypervisor (e.g. VMware ESX)."),
+        ):
+        session.add(models.create(models.SoftwareCategory, name=name, description=desc))
+    session.commit()
+
 
 def do_attribute_types(session):
     for name, vtype, desc in (
@@ -77,11 +118,11 @@ def do_attribute_types(session):
             ("url",1, "base URL to access device, if required."),
             ("serviceport", 1, "TCP/UDP/IP service port in the form 'tcp/80'."),
             ("servicepath", 1, "Path part of a URL pointing to service location."),
-            ("servicequery", 1, "Mandatory URL query term that is constant."),
             ("protocol", 1, "Internet protocol a software implements."),
             ("hostname", 1, "Name to use as host name. Overrides base name."),
             ):
-        session.add(models.create(models.AttributeType, name=name, type=vtype, description=desc))
+        session.add(models.create(models.AttributeType, name=name, value_type=vtype, 
+                description=desc))
         session.commit()
 
 def do_language(session):
@@ -354,13 +395,76 @@ def do_default_environment(session):
     session.add(models.create(models.Environment, name="default"))
     session.commit()
 
-def do_default_environment(session):
-    session.add(models.create(models.Environment, name="default"))
-    session.commit()
-
 def do_default_group(session):
     session.add(models.create(models.Group, name="testing"))
     session.commit()
+
+def do_capability_groups(session):
+    for name in (
+        "CPU",
+        "system",
+        ):
+        session.add(models.create(models.CapabilityGroup, name=name))
+    session.commit()
+
+def do_capability_types(session):
+    for name, desc, group_id, type in (
+        ("vmtechnology", "Virtualization support in hardware.", 1, 5),
+        ("sleep", "Can be put in low power state (sleep).", 2, 5),
+        ):
+        session.add(models.create(models.CapabilityType, name=name,
+            description=desc, group_id=group_id, value_type=type))
+    session.commit()
+
+
+# addresses can be filled in later by user.
+def do_corporations(session):
+    for name, desc, in (
+        ("AMD", ""),
+        ("Dell", "Dell computers."),
+        ("Hewlett Packard", "The HP PC company."),
+        ("Agilent", "Maker of test and measurement equipment (was HP)."),
+        ("Intel", ""),
+        ("IBM", ""),
+        ("Sun", ""),
+        ("Oracle", ""),
+        ("Cisco", ""),
+        ("Foundry", ""),
+        ("Nvidia", ""),
+        ("Sonicwall", ""),
+        ("Comcast", ""),
+        ("Aberdeen", ""),
+        ("AT&T", ""),
+        ("T-mobile", ""),
+        ("American Power Conversion", "APC"),
+        ("Belkin", "Maker of console switchers"),
+        ("Supermicro", ""),
+        ("Apple", ""),
+        ("Google", ""),
+        ("Microsoft", ""),
+        ("Netgear", ""),
+        ("Asus", "Maker of PC motherboards."),
+        ("Biostar", "Maker of PC motherboards."),
+        ("Antec", "Maker of PC cases."),
+        ("Tyan", ""),
+        ("Newegg", ""),
+        ("Amazon", ""),
+        ("Central Computer", "PC component reseller."),
+        ("Vmware", "Purveyor of virtualization software."),
+        ("Mozilla", "The Mozilla foundation."),
+        ("Community","a pseudo-corporation that represents the open-source community."),
+        ("Custom", "A psuedo-corporation that represents a custom built thing."),
+        ):
+        session.add(models.create(models.Corporation, name=name, notes=desc))
+    session.commit()
+
+def do_XXX(session):
+    for name, desc, in (
+        ("XXX", "XXX"),
+        ):
+        session.add(models.create(models.XXX, name=name, description=desc))
+    session.commit()
+
 
 def init_database(argv):
     try:
@@ -380,6 +484,10 @@ def init_database(argv):
         do_interface_types(dbsession)
         do_default_environment(dbsession)
         do_default_group(dbsession)
+        do_software_category(dbsession)
+        do_capability_groups(dbsession)
+        do_capability_types(dbsession)
+        do_corporations(dbsession)
     finally:
         dbsession.close()
 

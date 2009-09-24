@@ -4,8 +4,11 @@
 # see http://code.google.com/p/sqlautocode/
 
 """
-Basic set of tables useful for web applications and QA work.
-There's also an addressbook for use with OpenOffice and StarOffice.
+Basic set of tables useful for web applications, test automation, and lab
+management.
+
+typical database:
+  create DATABASE pycopia ENCODING 'utf-8' OWNER pycopia;
 
 """
 
@@ -235,7 +238,7 @@ location =  Table('location', metadata,
             Column(u'address_id', PGInteger(), primary_key=False),
             Column(u'contact_id', PGInteger(), primary_key=False),
     ForeignKeyConstraint([u'address_id'], [u'public.addresses.id'], name=u'location_address_id_fkey'),
-            ForeignKeyConstraint([u'contact_id'], [u'public.auth_user.id'], name=u'location_contact_id_fkey',
+            ForeignKeyConstraint([u'contact_id'], [u'public.contacts.id'], name=u'location_contact_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_location_address_id', location.c.address_id, unique=False)
@@ -483,7 +486,7 @@ projects =  Table('projects', metadata,
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'created', PGDateTime(timezone=True), primary_key=False, nullable=False, default=time_now),
     ForeignKeyConstraint([u'category_id'], [u'public.project_category.id'], name=u'projects_category_id_fkey'),
-            ForeignKeyConstraint([u'leader_id'], [u'public.auth_user.id'], name=u'projects_leader_id_fkey',
+            ForeignKeyConstraint([u'leader_id'], [u'public.contacts.id'], name=u'projects_leader_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_projects_name_key', projects.c.name, unique=True)
@@ -716,12 +719,10 @@ equipment = Table('equipment', metadata,
             Column(u'language_id', PGInteger(), primary_key=False),
             Column(u'owner_id', PGInteger(), primary_key=False),
             Column(u'vendor_id', PGInteger(), primary_key=False),
-            Column(u'project_id', PGInteger(), primary_key=False),
             Column(u'account_id', PGInteger(), primary_key=False),
             Column(u'parent_id', PGInteger(), primary_key=False),
             Column(u'active', PGBoolean(), primary_key=False, nullable=False, default=default_active),
-    ForeignKeyConstraint([u'project_id'], [u'public.project_versions.id'], name=u'equipment_project_id_fkey'),
-            ForeignKeyConstraint([u'language_id'], [u'public.language_codes.id'], name=u'equipment_language_id_fkey'),
+    ForeignKeyConstraint([u'language_id'], [u'public.language_codes.id'], name=u'equipment_language_id_fkey'),
             ForeignKeyConstraint([u'model_id'], [u'public.equipment_model.id'], name=u'equipment_model_id_fkey'),
             ForeignKeyConstraint([u'vendor_id'], [u'public.corporations.id'], name=u'equipment_vendor_id_fkey'),
             ForeignKeyConstraint([u'owner_id'], [u'public.auth_user.id'], name=u'equipment_owner_id_fkey',
@@ -734,7 +735,6 @@ equipment = Table('equipment', metadata,
 Index('index_equipment_model_id', equipment.c.model_id, unique=False)
 Index('index_equipment_language_id', equipment.c.language_id, unique=False)
 Index('index_equipment_owner_id', equipment.c.owner_id, unique=False)
-Index('index_equipment_project_id', equipment.c.project_id, unique=False)
 Index('index_equipment_vendor_id', equipment.c.vendor_id, unique=False)
 Index('index_equipment_location_id', equipment.c.location_id, unique=False)
 Index('index_equipment_account_id', equipment.c.account_id, unique=False)
@@ -904,19 +904,10 @@ environments =  Table('environments', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'owner_id', PGInteger(), primary_key=False),
-            Column(u'languages_id', PGInteger(), primary_key=False),
-            Column(u'countries_id', PGInteger(), primary_key=False),
-            Column(u'project_id', PGInteger(), primary_key=False),
-    ForeignKeyConstraint([u'countries_id'], [u'public.country_sets.id'], name=u'environments_countries_id_fkey'),
-            ForeignKeyConstraint([u'owner_id'], [u'public.auth_user.id'], name=u'environments_owner_id_fkey',
+    ForeignKeyConstraint([u'owner_id'], [u'public.auth_user.id'], name=u'environments_owner_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
-            ForeignKeyConstraint([u'languages_id'], [u'public.language_sets.id'], name=u'environments_languages_id_fkey'),
-            ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], name=u'environments_project_id_fkey'),
     schema='public')
-Index('index_environments_project_id', environments.c.project_id, unique=False)
 Index('index_environments_name_key', environments.c.name, unique=True)
-Index('index_environments_countries_id', environments.c.countries_id, unique=False)
-Index('index_environments_languages_id', environments.c.languages_id, unique=False)
 Index('index_environments_owner_id', environments.c.owner_id, unique=False)
 
 
@@ -925,8 +916,10 @@ testequipment =  Table('testequipment', metadata,
             Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
             Column(u'environment_id', PGInteger(), primary_key=False, nullable=False),
             Column(u'UUT', PGBoolean(), primary_key=False, nullable=False, default=default_inactive),
-    ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'testequipment_environment_id_fkey'),
-            ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'testequipment_equipment_id_fkey'),
+    ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'testequipment_environment_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
+            ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'testequipment_equipment_id_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 
 Index('index_testequipment_equipment_id', testequipment.c.equipment_id, unique=False)
@@ -1014,9 +1007,9 @@ if __name__ == '__main__':
     metadata.bind = db
     if tname:
         tbl = getattr(sys.modules[__name__], tname)
-        #tbl.drop(checkfirst=True)
-        #tbl.create()
         print tbl
+        tbl.drop(checkfirst=True)
+        tbl.create()
     else:
         metadata.create_all()
 

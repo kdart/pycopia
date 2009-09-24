@@ -166,6 +166,7 @@ mapper(AddressBookEntry, tables.addressbook)
 # User management for AAA for web applications.
 
 class Permission(object):
+    ROW_DISPLAY = ("name", "description")
 
     def __str__(self):
         return self.name
@@ -325,6 +326,7 @@ mapper(Session, tables.client_session)
 
 
 class Country(object):
+    ROW_DISPLAY = ("name", "isocode")
 
     def __str__(self):
         return "%s(%s)" % (self.name, self.isocode)
@@ -337,6 +339,7 @@ mapper(Country, tables.country_codes)
 
 
 class CountrySet(object):
+    ROW_DISPLAY = ("name",)
 
     def __repr__(self):
         return self.name
@@ -362,6 +365,7 @@ mapper(LoginAccount, tables.account_ids)
 
 
 class Language(object):
+    ROW_DISPLAY = ("name", "isocode")
 
     def __str__(self):
         return "%s(%s)" % (self.name, self.isocode)
@@ -373,6 +377,7 @@ mapper(Language, tables.language_codes)
 
 
 class LanguageSet(object):
+    ROW_DISPLAY = ("name", )
 
     def __str__(self):
         return self.name
@@ -402,7 +407,7 @@ mapper(Address, tables.addresses,
 
 
 class Contact(object):
-    ROW_DISPLAY = ("prefix", "firstname", "middlename", "lastname")
+    ROW_DISPLAY = ("lastname", "firstname", "middlename", "email")
 
     def __str__(self):
         if self.email:
@@ -441,7 +446,7 @@ class Location(object):
 mapper(Location, tables.location,
     properties={
         "address": relation(Address),
-        "contact": relation(User),
+        "contact": relation(Contact),
     }
 )
 
@@ -501,7 +506,7 @@ mapper(Project, tables.projects,
     properties={
         "components": relation(Component, lazy=True, secondary=tables.projects_components),
         "category": relation(ProjectCategory, backref="projects"),
-        "leader": relation(User),
+        "leader": relation(Contact),
     }
 )
 
@@ -601,7 +606,7 @@ mapper(SoftwareCategory, tables.software_category)
 class SoftwareVariant(object):
     ROW_DISPLAY = ("name", "encoding")
 
-    def __str__(self):
+    def __repr__(self):
         return "%s(%s)" % (self.name, self.encoding)
 
 mapper(SoftwareVariant, tables.software_variant,
@@ -756,7 +761,6 @@ mapper(Equipment, tables.equipment,
         "model": relation(EquipmentModel),
         "owner": relation(User),
         "vendor": relation(Corporation),
-        "project": relation(ProjectVersion),
         "account": relation(LoginAccount),
         "language": relation(Language),
         "location": relation(Location),
@@ -829,9 +833,6 @@ class Environment(object):
 mapper(Environment, tables.environments,
     properties={
         "owner": relation(User),
-        "countries": relation(CountrySet),
-        "languages": relation(LanguageSet),
-        "project": relation(Project),
 #        "DUT": column_property(
 #                and_(tables.testequipment.c.environment_id==tables.environments.c.id,
 #                    tables.testequipment.c.UUT==True).label("DUT"),
@@ -930,6 +931,7 @@ class TestSuite(object):
 
 mapper(TestSuite, tables.test_suites,
     properties={
+        "project": relation(ProjectVersion),
         "testcases": relation(TestCase, secondary=tables.test_suites_testcases, backref="suite"),
         "components": relation(Component, secondary=tables.components_suites, backref="suites"),
         "subsuites": relation(TestSuite, secondary=tables.test_suites_suites, 
