@@ -562,17 +562,21 @@ def getfqdn(name=''):
     name = str(name).strip()
     if not name or name == '0.0.0.0':
         name = gethostname()
-    try:
-        hostname, aliases, ipaddrs = gethostbyaddr(name)
-    except error:
-        pass
-    else:
-        aliases.insert(0, hostname)
-        for aname in aliases:
-            if '.' in aname and aname.startswith(name):
-                return aname
+    tries = 0
+    while tries < 3:
+        try:
+            hostname, aliases, ipaddrs = gethostbyaddr(name)
+        except error:
+            pass
         else:
-            name = hostname
+            if '.' in hostname and hostname.startswith(name):
+                return hostname
+            for aname in aliases:
+                if '.' in aname and aname.startswith(name):
+                    return aname
+            else:
+                name = hostname
+        tries += 1
     return name
 
 get_fqdn = getfqdn # alias
