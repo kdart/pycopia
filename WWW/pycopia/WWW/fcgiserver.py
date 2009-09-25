@@ -24,7 +24,7 @@ Web server using FCGI interface of lighttpd, adapted to WSGI.
 import sys
 import os
 import getopt
-import cgitb
+import warnings
 
 from pycopia.OS import procfs
 from pycopia import passwd
@@ -60,11 +60,6 @@ def get_server(config):
     if "MIDDLEWARE" in config:
         for mws in config["MIDDLEWARE"]:
             pass #XXX
-
-    if config.DEBUG:
-        pass
-        #from paste.evalexception.middleware import EvalException
-        #app = EvalException(app)
 
     return FCGIServer(app,
             procmanager=pm,
@@ -136,7 +131,7 @@ def run_server(argv):
             return 2
 
     try:
-        config = basicconfig.get_config(cffilename, 
+        config = basicconfig.get_config(cffilename,
                     CONFIGFILE=cffilename,
                     PIDFILE=pidfile,
                     SOCKETPATH=socketpath,
@@ -145,7 +140,7 @@ def run_server(argv):
                     SERVERNAME=servername)
     except:
         ex, val, tb = sys.exc_info()
-        print >>sys.stderr, "Could not get server config: %s (%s)" % (ex, val)
+        warnings.warn("Could not get server config: %s (%s)" % (ex, val))
         return 1
 
     if username:
@@ -156,7 +151,7 @@ def run_server(argv):
         return 0
 
     if check4server(config):
-        print >>sys.stderr, "Server %r already running on socket %r." % (servername, socketpath)
+        warnings.warn("Server %r already running on socket %r." % (servername, socketpath))
         return 1
 
     if do_daemon and not debug:
@@ -174,7 +169,7 @@ def run_server(argv):
     return int(server.run())
 
 
-# Add it this way since server is run in optimized mode.
+# Add documentation this way since server is run in optimized mode.
 run_server._doc = """Run the Pycopia FCGI web server.
 
     %s [-ndk?] [-l <logfile>] [-f <configfile>] [-p <pidfile>] 

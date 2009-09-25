@@ -21,10 +21,7 @@ DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 
-
 if platinfo.is_linux():
-
-
     DATAFILES = [
         ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
         ('/etc/pam.d', glob("etc/pam.d/*")),
@@ -34,24 +31,14 @@ if platinfo.is_linux():
     elif platinfo.is_redhat():
         DATAFILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
 
-    WEBSITE = os.environ.get("WEBSITE")
-    if WEBSITE:
-        DATAFILES.extend([
-            #(os.path.join("/var", "www", WEBSITE, 'htdocs'), glob("doc/html/*.html")),
-            #(os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
-            (os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
-            (os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
-            #(os.path.join("/var", "www", WEBSITE, 'media', 'images'), glob("media/images/*.png")),
-        ])
-    else:
-        DATAFILES.extend([
-            #(os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html'), glob("doc/html/*.html")),
-            #(os.path.join(sys.prefix, 'share', 'pycopia', 'docs', 'html', 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
-            (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'js'), glob("media/js/*.js")),
-            (os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'css'), glob("media/css/*.css")),
-            #(os.path.join(sys.prefix, 'share', 'pycopia', 'media', 'images'), glob("media/images/*.css")),
-        ])
-
+    WEBSITE = os.environ.get("WEBSITE", "localhost")
+    DATAFILES.extend([
+        #(os.path.join("/var", "www", WEBSITE, 'htdocs'), glob("doc/html/*.html")),
+        #(os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
+        (os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
+        (os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
+        #(os.path.join("/var", "www", WEBSITE, 'media', 'images'), glob("media/images/*.png")),
+    ])
     SCRIPTS = glob("bin/*")
 else:
     DATAFILES = []

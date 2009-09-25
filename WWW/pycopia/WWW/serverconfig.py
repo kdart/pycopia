@@ -28,10 +28,10 @@ In a lighttpd.conf file, add this:
 import os
 
 from pycopia import basicconfig
+from pycopia import socket
 
-
-# Master site config. controls all virtual host configuration.
 SITE_CONFIG = "/etc/pycopia/website.conf"
+
 
 class LighttpdConfig(object):
     GLOBAL = """
@@ -73,7 +73,7 @@ $HTTP["host"] == "%(hostname)s" {
         if servers:
             self._parts.append(self.FCGI_HEAD)
             for server in servers:
-                cf = get_server_config(server)
+                cf = _get_server_config(server)
                 self._parts.append(self.FCGI_TEMPLATE % {
                         "name": server,
                         "socketpath":cf.SOCKETPATH,
@@ -89,13 +89,12 @@ $HTTP["host"] == "%(hostname)s" {
             fo.write(part)
 
 
-def get_server_config(servername):
+def _get_server_config(servername):
     logfilename = "/var/log/%s.log" % (servername,)
     cffilename = "/etc/pycopia/%s.conf" % (servername,)
     pidfile="/var/run/%s.pid" % (servername,)
     socketpath = "/tmp/%s.sock" % (servername,)
-
-    config = basicconfig.get_config(cffilename, 
+    config = basicconfig.get_config(cffilename,
                 CONFIGFILE=cffilename,
                 PIDFILE=pidfile,
                 SOCKETPATH=socketpath,
@@ -103,7 +102,9 @@ def get_server_config(servername):
                 SERVERNAME=servername)
     return config
 
+
 def get_site_config(filename=SITE_CONFIG):
-    return basicconfig.get_config(filename)
+    glbl = {"FQDN": socket.get_fqdn()}
+    return basicconfig.get_config(filename, glbl)
 
 

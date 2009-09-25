@@ -39,12 +39,17 @@ The lighttpd build was configured like this:
 import sys
 import os
 
-from pycopia.WWW import serverconfig
+from pycopia import basicconfig
 from pycopia import passwd
+from pycopia import socket
 
 LTCONFIG = "/etc/pycopia/lighttpd/lighttpd.conf"
+# Master site config. controls all virtual host configuration.
+SITE_CONFIG = "/etc/pycopia/website.conf"
+
 
 def start(config):
+    setup(config)
     if config.DAEMON:
         from pycopia import daemonize
         from pycopia import logfile
@@ -62,9 +67,11 @@ def setup(config):
     siteuser = passwd.getpwnam(config.SITEUSER)
     siteowner = passwd.getpwnam(config.SITEOWNER)
     logroot = config.get("LOGROOT", "/var/log/lighttpd")
+    fqdn = socket.get_fqdn()
     def _mkdir(path):
-        os.mkdir(path, 0755)
-        os.chown(path, siteowner.uid, siteowner.gid)
+        if not os.path.isdir(path):
+            os.mkdir(path, 0755)
+            os.chown(path, siteowner.uid, siteowner.gid)
     for vhost in config.VHOSTS.keys():
         vhostdir = config.SITEROOT + "/" + vhost
         vhostlogdir = logroot + "/" + vhost
@@ -72,7 +79,10 @@ def setup(config):
             os.mkdir(vhostlogdir, 0755)
             os.chown(vhostlogdir, siteuser.uid, siteuser.gid)
         if not os.path.isdir(vhostdir):
-            _mkdir(vhostdir)
+            if fqdn == vhost:
+                os.symlink(config.SITEROOT + "/localhost", vhostdir)
+            else:
+                _mkdir(vhostdir)
             _mkdir(vhostdir + "/htdocs")
             _mkdir(vhostdir + "/media")
             _mkdir(vhostdir + "/media/js")
@@ -177,6 +187,8 @@ Options:
  -n  do NOT become a daemon when starting.
  -d  Enable automatic debugging.
  -N  do NOT start the web server front end (lighttpd).
+ -f  <cffile> Override config file to use.
+ -D  <fqdn> Override FQDN config variable.
 
 Where command is one of:
     setup   - create directory structures according to config file entries.
@@ -191,11 +203,13 @@ def main(argv):
     import getopt
     daemonize = True
     frontend = True
+    dname = None
     servername = os.path.basename(argv[0])
     logfilename = "/var/log/%s.log" % (servername,)
     pidfilename = "/var/run/%s.pid" % (servername,)
+    cffile = SITE_CONFIG
     try:
-        optlist, args = getopt.getopt(argv[1:], "?hdnNl:p:")
+        optlist, args = getopt.getopt(argv[1:], "?hdnNl:p:f:D:")
     except getopt.GetoptError:
         print _doc % (servername,)
         return
@@ -210,12 +224,18 @@ def main(argv):
             daemonize = False
         elif opt == "-N":
             frontend = False
+        elif opt == "-D":
+            dname = optarg
+        elif opt == "-f":
+            cffile = optarg
         elif opt == "-p":
             pidfilename = optarg
         elif opt == "-d":
             from pycopia import autodebug # Sets up auto debugging handler.
 
-    config = serverconfig.get_site_config()
+    glbl = {"FQDN": dname or socket.get_fqdn()}
+
+    config = basicconfig.get_config(cffile, glbl)
 
     config.SERVERNAME = servername
     config.LOGFILENAME = logfilename
