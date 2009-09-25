@@ -556,8 +556,8 @@ def getfqdn(name=''):
     An empty argument is interpreted as meaning the local host.
 
     First the hostname returned by gethostbyaddr() is checked, then
-    possibly existing aliases. In case no FQDN is available, hostname
-    is returned.
+    possibly existing aliases that start with hostname. In case no FQDN is
+    available, hostname is returned.
     """
     name = str(name).strip()
     if not name or name == '0.0.0.0':
@@ -568,9 +568,9 @@ def getfqdn(name=''):
         pass
     else:
         aliases.insert(0, hostname)
-        for name in aliases:
-            if '.' in name:
-                break
+        for aname in aliases:
+            if '.' in aname and aname.startswith(name):
+                return aname
         else:
             name = hostname
     return name
