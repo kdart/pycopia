@@ -574,8 +574,6 @@ def getfqdn(name=''):
             for aname in aliases:
                 if '.' in aname and aname.startswith(name):
                     return aname
-            else:
-                name = hostname
         tries += 1
     return name
 
