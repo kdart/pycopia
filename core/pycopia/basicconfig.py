@@ -22,6 +22,7 @@ Basic configuration holder objects.
 """
 
 import sys, os
+import warnings
 
 class BasicConfigError(Exception):
     pass
@@ -104,12 +105,12 @@ class SECTION(ConfigHolder):
 
 
 class BasicConfig(ConfigHolder):
-    def mergefile(self, filename):
+    def mergefile(self, filename, globalspace=None):
         """Merge in a Python syntax configuration file that should assign
         global variables that become keys in the configuration. Returns
         True if file read OK, False otherwise."""
         if os.path.isfile(filename):
-            gb = {} # temporary global namespace for config files.
+            gb = globalspace or {} # temporary global namespace for config files.
             gb["SECTION"] = SECTION
             gb["sys"] = sys # in case config stuff needs these.
             gb["os"] = os
@@ -117,8 +118,7 @@ class BasicConfig(ConfigHolder):
                 execfile(filename, gb, self)
             except:
                 ex, val, tb = sys.exc_info()
-                print >>sys.stderr, "BasicConfig error in %s: %s (%s)." % (
-                        filename, ex, val)
+                warnings.warn("BasicConfig: error reading %s: %s (%s)." % (filename, ex, val))
                 return False
             else:
                 return True
@@ -134,12 +134,10 @@ def get_pathname(basename):
 # main function for getting a configuration file. gets it from the common
 # configuration location (/etc/pycopia), but if a full path is given then
 # use that instead.
-def get_config(fname, initdict=None, **kwargs):
+def get_config(fname, globalspace=None, **kwargs):
     fname = get_pathname(fname)
     cf = BasicConfig()
-    if cf.mergefile(fname):
-        if isinstance(initdict, dict):
-            cf.update(initdict)
+    if cf.mergefile(fname, globalspace):
         cf.update(kwargs)
         return cf
     else:
