@@ -205,3 +205,24 @@ input:hover[type="submit"] {
 
 hr {color: silver; width: 80%;}
 
+
+select.draglist { 
+  width:100%; 
+  float:right; 
+  cursor: move;
+  padding: 2px 2px 2px 2px;
+  border: 2px solid #FFFFFF;
+  margin: 2px 2px 2px 2px;
+}
+
+select.dragtarget { 
+  border: 2px dotted  #AA8888;
+}
+
+select.draglist option { 
+  list-style-type: none; 
+  padding: 2px 2px 2px 2px;
+  border: thin solid silver;
+  margin: 2px 2px 2px 2px;
+}
+

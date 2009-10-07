@@ -23,7 +23,9 @@ Place initial values in database.
 
 import sys
 
+from pycopia import aid
 from pycopia.db import models
+from pycopia.storage import DBStorage
 
 from pycopia.ISO import iso639a
 from pycopia.ISO import iso3166
@@ -458,11 +460,58 @@ def do_corporations(session):
         session.add(models.create(models.Corporation, name=name, notes=desc))
     session.commit()
 
-def do_XXX(session):
-    for name, desc, in (
-        ("XXX", "XXX"),
-        ):
-        session.add(models.create(models.XXX, name=name, description=desc))
+
+
+#def do_XXX(session):
+#    for name, desc, in (
+#        ("XXX", "XXX"),
+#        ):
+#        session.add(models.create(models.XXX, name=name, description=desc))
+#    session.commit()
+
+
+def create_db(url):
+    url = urlparse.UniversalResourceLocator(url, True)
+    scheme = url.scheme
+    if scheme == "postgres":
+        cmd = 'sudo su postgres -c "createuser --host %s --createdb --no-superuser --no-createrole %s"' % (url.host, url.user)
+        os.system(cmd)
+        cmd = 'sudo su postgres -c "createdb --host %s --owner %s --encoding utf-8 %s"' % (url.host, url.user, url.path[1:])
+        os.system(cmd)
+    else:
+        raise NotImplementedError
+
+
+def do_config(session):
+    rn = models.create(models.Config, name="root", user=None, parent=None,
+            value=aid.NULL)
+    session.add(rn)
+    flags = models.create(models.Config, name="flags", user=None, container=rn, 
+            value=aid.NULL)
+    session.add(flags)
+    session.commit()
+    root = DBStorage.Container(session, rn)
+    flags = DBStorage.Container(session, flags)
+    flags.VERBOSE = 0 # levels of verbosity
+    flags.DEBUG = 0 # levels of debugging
+    flags.INTERACTIVE = False # Don't run interactive tests also, by default
+    root["logbasename"] = "pycopia.log"
+    root["logfiledir"] = "/var/tmp"
+    root["reportbasename"] = "-"
+    root["resultsdirbase"] = '/var/www/localhost/htdocs/testresults'
+    root["documentroot"] = "/var/www/localhost"
+    # this one, at least, will have to be changed by installer.
+    root["baseurl"] = "http://localhost"
+
+    ui = root.add_container("userinterfaces")
+    ui.default = ("UI.UserInterface", "IO.ConsoleIO", "UI.DefaultTheme")
+    ui.console = ("UI.UserInterface", "IO.ConsoleIO", "UI.DefaultTheme")
+
+    reports = root.add_container("reports")
+    reports.ansi = ('StandardReport', '-', 'text/ansi; charset=utf8')
+    reports.database = ('pycopia.reports.database.DatabaseReport',)
+    reports.default = ('StandardReport', '-', 'text/ansi')
+    reports.email = ('pycopia.reports.Email.EmailReport', 'text/html', None)
     session.commit()
 
 
@@ -488,8 +537,10 @@ def init_database(argv):
         do_capability_groups(dbsession)
         do_capability_types(dbsession)
         do_corporations(dbsession)
+        do_config(dbsession)
     finally:
         dbsession.close()
+
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
-#    Copyright (C) 1999-2007  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2009  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -18,81 +18,267 @@
 Pycopia Configuration and Information storage
 ---------------------------------------------
 
+Wrap the Config table in the database and make it look like a tree of
+name-value pairs (mappings). 
+
 """
 
 
-import sys, os, re, itertools
-import cPickle as pickle
+import sys, os, re
 
-from pycopia import aid
+from sqlalchemy import and_
+from sqlalchemy.orm.exc import NoResultFound
+
+from pycopia.db import models
 from pycopia import dictlib
 from pycopia import urlparse
+from pycopia import aid
+
+Config = models.Config
 
 
-DEFAULT_URL = "postgres://pycstorage@localhost/pycstorage"
+class ConfigError(Exception):
+  pass
 
-# types
-OBJECT, INTEGER, STRING, FLOAT, LONG, CONTAINER = aid.Enums(
-    "OBJECT", "INTEGER", "STRING", "FLOAT", "LONG", "CONTAINER")
+# container node marker, containers contain no useful value.
+#CONTAINER = aid.NULLType("CONTAINER", (type,), {})
+
+
+def get_root(session):
+    c = session.query(Config).filter(and_(
+            Config.name=="root", Config.parent_id==None, Config.user==None)).one()
+    return c
+
 
 class Container(object):
-    """Wrapper for a persistent dictionary providing attribute-style access.
-    ."""
-    def __init__(self, container):
-        self.__dict__["_container"] = container
+    """Make a relational table quack like a dictionary."""
+    def __init__(self, session, configrow):
+        self.__dict__["session"] = session
+        self.__dict__["node"] = configrow
 
-    def __repr__(self):
-        return "<Container>"
+    def __str__(self):
+        if self.node.value is aid.NULL:
+            s = []
+            for ch in self.node.children:
+                s.append(str(ch))
+            return "(%s: %s)" % (self.node.name, ", ".join(s))
+        else:
+            return str(self.node)
 
-    def __getitem__(self, key):
-        pass
+    def __setitem__(self, name, value):
+        try:
+            item = self.session.query(Config).filter(and_(Config.parent_id==self.node.id,
+                Config.name==name)).one()
+        except NoResultFound:
+            me = self.node
+            item = models.create(Config, name=name, value=value, container=me, user=me.user,
+                testcase=me.testcase, testsuite=me.testsuite)
+            self.session.add(item)
+            self.session.commit()
+        else:
+            item.value = value
+            self.session.update(item)
+            self.session.commit()
 
-    def __setitem__(self, key, value):
-        pass
+    def __getitem__(self, name):
+        try:
+            item = self.session.query(Config).filter(and_(Config.parent_id==self.node.id,
+                Config.name==name)).one()
+        except NoResultFound:
+            raise KeyError(name)
+        if item.value is aid.NULL:
+            return Container(self.session, item)
+        return item.value
 
-    def __delitem__(self, key):
-        pass
+    def __delitem__(self, name):
+        item = self.__getitem__(name)
+        self.session.delete(item)
+        self.session.commit()
+
+    value = property(lambda s: s.node.value)
 
     def get(self, key, default=None):
-        pass
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            return default
 
-    def getpath(self, key, default=None):
-        pass
+    def setdefault(self, key, default=None):
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            self.__setitem__(key, default)
+            return default
 
-    def set(self, key, obj):
-        pass
+    def iterkeys(self):
+        for name, in self.session.query(Config.name).filter(and_(
+            Config.parent_id==self.node.id, 
+            Config.user==self.node.user, 
+            Config.testcase==self.node.testcase, 
+            Config.testsuite==self.node.testsuite)):
+            yield name
 
-    def delete(self, key):
-        pass
+    def keys(self):
+        return list(self.iterkeys())
 
-    def rename(self, oldkey, newkey):
-        pass
+    def iteritems(self):
+        for name, value in self.session.query(Config.name, Config.value).filter(and_(
+            Config.parent_id==self.node.id, 
+            Config.user==self.node.user, 
+            Config.testcase==self.node.testcase, 
+            Config.testsuite==self.node.testsuite)):
+            yield name, value
 
-    # attribute-style access to container contents
+    def items(self):
+        return list(self.iteritems())
+
+    def itervalues(self):
+        for value, in self.session.query(Config.value).filter(and_(
+            Config.parent_id==self.node.id, 
+            Config.user==self.node.user, 
+            Config.testcase==self.node.testcase, 
+            Config.testsuite==self.node.testsuite)):
+            yield value
+
+    def values(self):
+        return list(self.itervalues())
+
+    def copy(self):
+        return self.__class__(self._session, self.node) # XXX
+
+    def add_container(self, name):
+        me = self.node
+        if me.value is aid.NULL:
+            new = models.create(Config, name=name, value=aid.NULL, container=me, user=me.user,
+                testcase=me.testcase, testsuite=me.testsuite)
+            self.session.add(new)
+            self.session.commit()
+            return Container(self.session, new)
+        else:
+            raise ConfigError("Cannot add container to value pair.")
+
+    def get_container(self, name):
+        me = self.node
+        c = session.query(Config).filter(and_(
+                Config.name==name, 
+                Config.value==aid.NULL, 
+                Config.parent_id==me.id, 
+                Config.user==me.user)).one()
+        return Container(self.session, c)
+
+    def __contains__(self, key):
+        return self.has_key(key)
+
+    def __iter__(self):
+        me = self.node
+        self.__dict__["_set"] = iter(self.session.query(Config).filter(and_(
+            Config.parent_id==me.id, 
+            Config.user==me.user, 
+            Config.testcase==me.testcase, 
+            Config.testsuite==me.testsuite)))
+        return self
+
+    def next(self):
+        try:
+            item = self.__dict__["_set"].next()
+            if item.value is aid.NULL:
+                return Container(self.session, item)
+            else:
+                return item.value
+        except StopIteration:
+            del self.__dict__["_set"]
+            raise
+
     def __getattribute__(self, key):
         try:
             return super(Container, self).__getattribute__(key)
         except AttributeError:
-            pass # XXX
+            node = self.__dict__["node"]
+            session = self.__dict__["session"]
+            try:
+                item = session.query(Config).filter(and_(
+                        Config.container==node, Config.name==key)).one()
+                if item.value is aid.NULL:
+                    return Container(session, item)
+                else:
+                    return item.value
+            except NoResultFound, err:
+                raise AttributeError("Container: No attribute or key '%s' found: %s" % (key, err))
 
     def __setattr__(self, key, obj):
-        pass
+        if self.__class__.__dict__.has_key(key): # to force property access
+            type.__setattr__(self.__class__, key, obj)
+        elif self.__dict__.has_key(key): # existing local attribute
+            self.__dict__[key] =  obj
+        else:
+            self.__setitem__(key, obj)
 
     def __delattr__(self, key):
-        pass
+        try:
+            self.__delitem__(key)
+        except KeyError:
+            object.__delattr__(self, key)
 
-    # attribute-style access to container contents, also prefer the local cache.
+    def has_key(self, key):
+        me = self.node
+        q = session.query(Config).filter(and_(
+                Config.name==key,
+                Config.parent_id==me.id,
+                Config.testcase==me.testcase,
+                Config.testsuite==me.testsuite,
+                Config.user==me.user))
+        return q.count() > 0
+
+
+class RootContainer(Container):
+    """RootContainer is the primary configuration holder.
+
+    The root container is special. It contains special object
+    constructor methods, and a local writeable cache. It also supports
+    path access using the dot as path separator. 
+    """
+
+    def __init__(self, session, container, cache):
+        super(RootContainer, self).__init__(session, container)
+        self.__dict__["_cache"] = cache
+        # cacheable objects
+        cache._report = None
+        cache._logfile = None
+        cache._environment = None
+        cache._configurator = None
+        cache._UI = None
+
+    def __repr__(self):
+        return "<RootContainer>"
+
     def __getattribute__(self, key):
         try:
             return super(RootContainer, self).__getattribute__(key)
         except AttributeError:
-            pass # XXX
+
+            try:
+                # check the local cache first, overrides persistent storage
+                obj = self.__dict__["_cache"].__getitem__(key)
+                return obj
+            except KeyError:
+                pass
+            node = self.__dict__["node"]
+            session = self.__dict__["session"]
+            try:
+                item = session.query(Config).filter(and_(
+                        Config.container==node, Config.name==key)).one()
+                if item.value is aid.NULL:
+                    return Container(session, item)
+                else:
+                    return item.value
+            except NoResultFound, err:
+                raise AttributeError("Container: No attribute or key '%s' found: %s" % (key, err))
+
 
     def __setattr__(self, key, obj):
-        pass
-        if key in self.__class__.__dict__:
+        if self.__class__.__dict__.has_key(key): # to force property access
             type.__setattr__(self.__class__, key, obj)
-        elif key in self.__dict__:
+        elif self.__dict__.has_key(key): # existing local attribute
             self.__dict__[key] =  obj
         else:
             self.__dict__["_cache"].__setitem__(key, obj)
@@ -103,62 +289,44 @@ class Container(object):
         except KeyError:
             object.__delattr__(self, key)
 
-    def copy(self):
-        pass
-
     def __getitem__(self, key):
         try:
             return getattr(self._cache, key)
         except (AttributeError, KeyError, NameError):
             pass
-        pass # XXX
+        return super(RootContainer, self).__getitem__(key)
 
     def __setitem__(self, key, value):
-        if key in self._cache:
+        if self._cache.has_key(key):
             self._cache[key] = value
         else:
-            pass # XXX
+            return super(RootContainer, self).__setitem__(key, value)
 
     def __delitem__(self, key):
-        if key in self._cache:
+        if self._cache.has_key(key):
             del self._cache[key]
         else:
-            pass # XXX
-
-    def get(self, name, default=None):
-        try:
-            obj = self._cache[name]
-        except KeyError:
-            pass # XXX
-
-    def set(self, key, obj):
-        pass
-
-    def delete(self, key):
-        pass
-
-    def keys(self):
-        pass
+            super(RootContainer, self).__delitem__(key)
 
     def has_key(self, key):
-        pass
+        return self._cache.has_key(key) or super(RootContainer, self).has_key(key)
 
-    def iteritems(self):
-        pass
 
-    def iterkeys(self):
-        pass
+    def commit(self):
+        self.session.commit()
 
-    def itervalues(self):
-        pass
+    def rollback(self):
+        self.session.rollback()
 
-    def add_container(self, name):
-        pass
+    def close(self):
+        if self.session is not None:
+            self.session.close()
+            self.session = None
 
     # files update the local cache only. 
     def mergefile(self, filename):
         if os.path.isfile(filename):
-            gb = dict(self._container)
+            gb = dict(list(self.items()))
             execfile(filename, gb, self._cache)
 
     # Updates done from external dicts only update the local cache. If you
@@ -207,7 +375,7 @@ class Container(object):
             return value
         i = 0
         while 1:
-            m = self._var_re.search(value, i)
+            m = RootContainer._var_re.search(value, i)
             if not m:
                 return value
             i, j = m.span(0)
@@ -218,31 +386,6 @@ class Container(object):
             value = value[:i] + str(self.get(vname, "$"+oname))
             i = len(value)
             value += tail
-
-
-class RootContainer(Container):
-    """The root container is special, it contains the computed methods, and a
-    local writeable cache. It also supports path access using the dot as path separator. """
-    def __init__(self, connection, cache):
-        super(RootContainer, self).__init__(connection)
-        self.__dict__["_cache"] = cache
-        # cacheable objects
-        self._cache._report = None
-        self._cache._logfile = None
-
-    def __repr__(self):
-        return "<RootContainer>"
-
-    def commit(self):
-        self._connection.commit()
-
-    def abort(self):
-        self._connection.rollback()
-
-    def close(self):
-        if self._connection is not None:
-            self._connection.close()
-            self._connection = None
 
     reportpath = property(lambda s: os.path.join(s.reportdir, s.reportbasename))
 
@@ -261,13 +404,13 @@ class RootContainer(Container):
             name = self.get("reportname", "default")
         params = self.reports.get(name, (None,))
         if type(params) is list:
-            params = map(self._report_param_expand, params)
+            params = map(self._param_expand, params)
         else:
-            params = self._report_param_expand(params)
+            params = self._param_expand(params)
         return reports.get_report( params )
 
     # reconstruct the report parameter list with dollar-variables expanded.
-    def _report_param_expand(self, tup):
+    def _param_expand(self, tup):
         rv = []
         for arg in tup:
             if type(arg) is str:
@@ -325,45 +468,59 @@ class RootContainer(Container):
 
     logfilename = property(get_logfilename, None, None, "The logfile object's path name.")
 
+    def _get_environment(self):
+        """Get the Environment object defined by the test configuration.
+        """
+        if self._cache.get("_environment") is None:
+            name = self.get("environmentname", "default")
+            if name:
+                db = self._dbsession
+                env = db.query(models.Environment).filter(models.Environment.name==name).one()
+                self._cache["_environment"] = env
+            else:
+                raise ConfigError, "Bad environment %r." % (name,)
+        return self._cache["_environment"]
+
+    def _del_environment(self):
+        self._cache["_environment"] = None
+
+    environment = property(_get_environment, None, _del_environment)
+
+    # user interface for interactive tests.
+    def get_userinterface(self):
+        if self._cache.get("_UI") is None:
+            ui = self._build_userinterface()
+            self._cache["_UI"] = ui
+            return ui
+        else:
+            return self._cache["_UI"]
+
+    def _build_userinterface(self):
+        from pycopia import UI
+        uitype = self.get("userinterfacetype", "default")
+        params = self.userinterfaces.get(uitype)
+        if params:
+            params = self._param_expand(params)
+        else:
+            params = self.userinterfaces.get("default")
+        return UI.get_userinterface(*params)
+
+    def del_userinterface(self):
+        """Remove the UI object from the cache.    """
+        ui = self._cache.get("_UI")
+        self._cache["_UI"] = None
+        if ui:
+            try:
+                ui.close()
+            except:
+                pass
+
+    UI = property(get_userinterface, None, del_userinterface, 
+                        "User interface object used for interactive tests.")
+
+
 ##### end of RootContainer ######
 
-
-def connect(url):
-    url = urlparse.UniversalResourceLocator(url, True)
-    scheme = url.scheme
-    if scheme == "postgres":
-        global psycopg
-        import psycopg2
-        def _connectpg(host, database, user, password):
-            if password:
-                return psycopg2.connect("dbname=%r user=%r host=%r password=%r" % (
-                    database, user, host, password))
-            else:
-                return psycopg2.connect("dbname=%r user=%r host=%r" % (
-                    database, user, host))
-        try:
-            return _connectpg(url.host, url.path[1:], url.user, url.password)
-        except psycopg2.OperationalError:
-            print >>sys.stderr, "No database, creating: %r" % (url,)
-            create_db(url)
-            db = _connectpg(url.host, url.path[1:], url.user, url.password)
-            _initialize(db)
-            return db
-    elif scheme == "mysql":
-        raise NotImplementedError
-    elif scheme == "sqlite":
-        raise NotImplementedError
-
-def create_db(url):
-    url = urlparse.UniversalResourceLocator(url, True)
-    scheme = url.scheme
-    if scheme == "postgres":
-        cmd = 'sudo su postgres -c "createuser --host %s --createdb --no-superuser --no-createrole %s"' % (url.host, url.user)
-        os.system(cmd)
-        cmd = 'sudo su postgres -c "createdb --host %s --owner %s --encoding utf-8 %s"' % (url.host, url.user, url.path[1:])
-        os.system(cmd)
-    else:
-        raise NotImplementedError
 
 
 def get_config(_extrafiles=None, initdict=None, **kwargs):
@@ -372,19 +529,17 @@ Returns a RootContainer instance containing configuration parameters.
 An extra dictionary may be merged in with the 'initdict' parameter.
 And finally, extra options may be added with keyword parameters when calling
 this.  """
-    from pycopia import basicconfig
     files = []
     files.append(os.path.join(os.environ["HOME"], ".pycopiarc"))
-    dbcf = basicconfig.get_config("storage.conf")
+
     if type(_extrafiles) is str:
         _extrafiles = [_extrafiles]
     if _extrafiles:
         files.extend(_extrafiles)
-    url = dbcf.get("database", DEFAULT_URL)
-    connection = connect(url)
+    session = models.get_session()
+    container = get_root(session)
     cache = dictlib.AttrDict()
-    cf = RootContainer(connection, cache)
-    #cache.flags = cf["flags"].copy()
+    cf = RootContainer(session, container, cache)
     for f in files:
         if os.path.isfile(f):
             cf.mergefile(f)
@@ -394,58 +549,18 @@ this.  """
     return cf
 
 
-# performs an initial set up of the persistent storage. This usually only
-# runs once, when first installing. This is the default structure for a
-# new storage.
-def _initialize(db):
-    curs = db.cursor()
-    curs.execute(
-      """CREATE SEQUENCE public.config_seq_id INCREMENT 1 MINVALUE 1 MAXVALUE 2147483646 START 1 CACHE 1"""
-    )
-    curs.execute(
-      """CREATE TABLE config (
-        id integer NOT NULL DEFAULT nextval('public."config_seq_id"'), 
-        key text NOT NULL, 
-        type integer NOT NULL DEFAULT 0, 
-        value text, 
-        parent integer)"""
-    )
-#    flags = db["flags"] = PersistentAttrDict()
-#    flags.VERBOSE = 0 # levels of verbosity
-#    flags.DEBUG = 0 # levels of debugging
-#    flags.INTERACTIVE = False # Don't run interactive tests also, by default
-#    # collections of objects defined in the netobjects module.
-#    db["users"] = PersistentAttrDict()    # for User objects
-#    db["traps"] = PersistentAttrDict()    # for traps
-#    db["devices"] = PersistentAttrDict()  # for Device subclasses
-#    db["networks"] = PersistentAttrDict() # For Network objects
-#    db["ipranges"] = PersistentAttrDict() # for IP range assignments
-#    db["testbeds"] = PersistentAttrDict() # for testbeds (collections of Devices)
-#    # default report spec
-#    db["reports"] = PersistentAttrDict()  # For report constructors
-#    db["reports"].default = ("StandardReport", "-", "text/ansi")
-#    #
-#    db["default"] = PersistentAttrDict()  # for root default values
-#    db["default"].logbasename = "pycopia.log"
-#    db["default"].logfiledir = "/var/tmp"
-#    db["default"].reportbasename = "-"
-#    # sub-package test configuration
-#    unittests = db["unittests"] = PersistentAttrDict()  # For report constructors
-#    unittests["aid"] = PersistentAttrDict()
-#    unittests["utils"] = PersistentAttrDict() 
-#    unittests["core"] = PersistentAttrDict()
-#    unittests["CLI"] = PersistentAttrDict()
-#    unittests["debugger"] = PersistentAttrDict()
-#    unittests["process"] = PersistentAttrDict()
-#    unittests["SMI"] = PersistentAttrDict()
-#    unittests["mibs"] = PersistentAttrDict()
-#    unittests["SNMP"] = PersistentAttrDict()
-#    unittests["storage"] = PersistentAttrDict()
-#    unittests["QA"] = PersistentAttrDict()
-#    unittests["net"] = PersistentAttrDict()
-#    unittests["audio"] = PersistentAttrDict()
-#    unittests["XML"] = PersistentAttrDict()
-#    unittests["WWW"] = PersistentAttrDict()
-#    unittests["vim"] = PersistentAttrDict()
+if __name__ == "__main__":
+    from pycopia import autodebug
+    if sys.flags.interactive:
+        from pycopia import interactive
+    sess = models.get_session()
+    cf = get_config()
+    print cf
+    #print cf.flags
+    #print cf.flags.DEBUG
+    #cf.reportname = "default"
+    print cf.get("reportname")
+    print cf.report
+
 
 

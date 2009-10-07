@@ -23,13 +23,11 @@ import warnings
 import collections
 from datetime import timedelta
 from hashlib import sha1
-import cPickle as pickle
 
 from sqlalchemy import create_engine, and_, select
 
 from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
-        backref, column_property, synonym, _mapper_registry, validates)
-from sqlalchemy.orm.exc import NoResultFound
+        backref, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
 
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -38,9 +36,6 @@ from pycopia.aid import hexdigest, unhexdigest, Enums
 from pycopia.db import tables
 
 
-
-# type codes
-#OBJECT=0; STRING=1; UNICODE=2; INTEGER=3; FLOAT=4; BOOLEAN=5
 
 # Attribute value base types.
 [VT_OBJECT, VT_STRING, VT_UNICODE, VT_INTEGER, VT_FLOAT, VT_BOOLEAN] = tables.VALUETYPES
@@ -1047,76 +1042,19 @@ class Config(object):
         if self.value is None:
             return self.name
         else:
-            return "%s=%s" % (self.name, self.value)
-
-    def add_container(self, name):
-        return Config(name, None, container=self, user=self.user,
-            testcase=self.testcase, testsuite=self.testsuite)
-
-    def get_container(self, session, name):
-        c = session.query(Config).filter(
-                Config.name==name, Config.parent_id==self.id, Config.user==self.user).one()
-        return ConfigWrapper(session, c)
+            return "%s=%r" % (self.name, self.value)
 
 
 mapper(Config, tables.config, 
     properties={
         'children': relation(Config, cascade="all", 
-            backref=backref("container", remote_side=[tables.config.c.id, tables.config.c.user_id])),
+            backref=backref("container", 
+                    remote_side=[tables.config.c.id, tables.config.c.user_id])),
         'testcase': relation(TestCase),
         'testsuite': relation(TestSuite),
         'user': relation(User),
     }
 )
-
-
-class ConfigWrapper(object):
-    """Make a relational table quack like a dictionary."""
-    def __init__(self, session, config):
-        self.session = session
-        self.node = config
-
-    def __setitem__(self, name, value):
-        new = create(Config, name=name, value=value, container=self.node, user=self.node.user,
-            testcase=self.node.testcase, testsuite=self.node.testsuite)
-        self.session.add(new)
-        self.session.commit()
-
-    def __getitem__(self, name):
-        return self.session.query(Config).filter(and_(Config.parent_id==self.node.id,
-                Config.name==name)).one()
-
-    def __delitem__(self, name):
-        try:
-            o = self.__getitem__(name)
-        except NoResultFound:
-            return
-        self.session.delete(o)
-
-    def keys(self):
-        for name, in self.session.query(Config.name).filter(and_(
-            Config.parent_id==self.node.id, 
-            Config.user==self.node.user, 
-            Config.testcase==self.node.testcase, 
-            Config.testsuite==self.node.testsuite)):
-            yield name
-
-    def items(self):
-        for name, value in self.session.query(Config.name, Config.value).filter(and_(
-            Config.parent_id==self.node.id, 
-            Config.user==self.node.user, 
-            Config.testcase==self.node.testcase, 
-            Config.testsuite==self.node.testsuite)):
-            yield name, value
-
-    def values(self):
-        for value, in self.session.query(Config.value).filter(and_(
-            Config.parent_id==self.node.id, 
-            Config.user==self.node.user, 
-            Config.testcase==self.node.testcase, 
-            Config.testsuite==self.node.testsuite)):
-            yield value
-
 
 
 #######################################
@@ -1178,5 +1116,6 @@ if __name__ == "__main__":
     eq = sess.query(Equipment).get(6)
     print "eq = ", eq
     props = list(class_mapper(Equipment).iterate_properties)
+
 
 

@@ -1,10 +1,8 @@
 #!/usr/bin/python
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=0:smarttab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2004  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2009  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -18,5 +16,6 @@
 
 
 # This is temporary until the DBStorage is complete.
-from pycopia.storage.DurusStorage import *
+#from pycopia.storage.DurusStorage import *
+from pycopia.storage.DBStorage import *
 
