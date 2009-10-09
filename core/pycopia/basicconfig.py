@@ -134,10 +134,12 @@ def get_pathname(basename):
 # main function for getting a configuration file. gets it from the common
 # configuration location (/etc/pycopia), but if a full path is given then
 # use that instead.
-def get_config(fname, globalspace=None, **kwargs):
+def get_config(fname, initdict=None, globalspace=None, **kwargs):
     fname = get_pathname(fname)
     cf = BasicConfig()
     if cf.mergefile(fname, globalspace):
+        if initdict:
+            cf.update(initdict)
         cf.update(kwargs)
         return cf
     else:

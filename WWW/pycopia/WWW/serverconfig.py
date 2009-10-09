@@ -105,6 +105,6 @@ def _get_server_config(servername):
 
 def get_site_config(filename=SITE_CONFIG):
     glbl = {"FQDN": socket.get_fqdn()}
-    return basicconfig.get_config(filename, glbl)
+    return basicconfig.get_config(filename, globalspace=glbl)
 
 

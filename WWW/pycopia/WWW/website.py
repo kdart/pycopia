@@ -235,7 +235,7 @@ def main(argv):
 
     glbl = {"FQDN": dname or socket.get_fqdn()}
 
-    config = basicconfig.get_config(cffile, glbl)
+    config = basicconfig.get_config(cffile, globalspace=glbl)
 
     config.SERVERNAME = servername
     config.LOGFILENAME = logfilename

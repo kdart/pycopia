@@ -204,10 +204,10 @@ class LoginHandler(framework.RequestHandler):
         try:
             good = Authenticator(user).authenticate(unquote(cram), unquote(key))
         except AuthenticationError, err:
-            request.log_error("Did NOT authenticate: %r" % (name, ))
+            request.log_error("Did NOT authenticate: %r\n" % (name, ))
             return framework.HttpResponseRedirect(request.get_url(login), message=str(err))
         if good:
-            request.log_error("Authenticated: %s" % (name,))
+            request.log_error("Authenticated: %s\n" % (name,))
             user.set_last_login()
             resp = framework.HttpResponseRedirect(redir)
             session = _set_session(resp, user, request.get_domain())
@@ -215,7 +215,7 @@ class LoginHandler(framework.RequestHandler):
             request.database.commit()
             return resp
         else:
-            request.log_error("Invalid Authentication for %r" % (name, ))
+            request.log_error("Invalid Authentication for %r\n" % (name, ))
             return framework.HttpResponseRedirect(request.get_url(login), 
                     message="Failed to authenticate.")
 

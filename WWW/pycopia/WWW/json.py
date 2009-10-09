@@ -145,7 +145,7 @@ class JSONDispatcher(object):
         except: # error in parameter conversion
           ex, val, tb = sys.exc_info()
           tblist = traceback.extract_tb(tb)
-          request.log_error("JSONDispatcher args: %s (%s)" % (ex, val))
+          request.log_error("JSONDispatcher args: %s (%s)\n" % (ex, val))
           return JSONServerError(ex, val, tblist)
       else:
         args = ()
@@ -157,7 +157,7 @@ class JSONDispatcher(object):
       ex, val, tb = sys.exc_info()
       tblist = traceback.extract_tb(tb)
       del tb
-      request.log_error("JSONDispatcher: %s (%s)" % (ex, val))
+      request.log_error("JSONDispatcher: %s (%s)\n" % (ex, val))
       return JSONServerError(ex, val, tblist)
 
   def register_encoder(self, name, check, simplifier):
