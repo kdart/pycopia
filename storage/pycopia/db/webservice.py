@@ -246,7 +246,7 @@ class CreateRequestHandler(framework.RequestHandler):
             update_row(request, klass, dbrow)
         except models.ValidationError, err:
             _dbsession.rollback()
-            request.log_error("create ValidationError: %s: %s" % (tablename, err))
+            request.log_error("create ValidationError: %s: %s\n" % (tablename, err))
             title = "Recreate new %s %s" % (tablename, dbrow)
             resp = self.get_response(request, title=title)
             resp.new_para(title)
@@ -259,7 +259,7 @@ class CreateRequestHandler(framework.RequestHandler):
         try:
             _dbsession.commit()
         except (DataError, IntegrityError), err:
-            request.log_error("create error: %s: %s" % (tablename, err))
+            request.log_error("create error: %s: %s\n" % (tablename, err))
             _dbsession.rollback()
             title = "Create new %s" % (tablename, )
             resp = framework.ResponseDocument(request, doc_constructor, title=title)

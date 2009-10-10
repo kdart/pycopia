@@ -21,6 +21,9 @@ Pycopia Configuration and Information storage
 Wrap the Config table in the database and make it look like a tree of
 name-value pairs (mappings). 
 
+Also provides runtime wrappers for persistent (database) objects with
+extra methods for constructing active controllers.
+
 """
 
 
@@ -29,19 +32,16 @@ import sys, os, re
 from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 
-from pycopia.db import models
 from pycopia import dictlib
 from pycopia import urlparse
 from pycopia import aid
+from pycopia.db import models
 
 Config = models.Config
 
 
 class ConfigError(Exception):
   pass
-
-# container node marker, containers contain no useful value.
-#CONTAINER = aid.NULLType("CONTAINER", (type,), {})
 
 
 def get_root(session):
@@ -474,8 +474,9 @@ class RootContainer(Container):
         if self._cache.get("_environment") is None:
             name = self.get("environmentname", "default")
             if name:
-                db = self._dbsession
+                db = self.session
                 env = db.query(models.Environment).filter(models.Environment.name==name).one()
+                env = EnvironmentRuntime(db, env)
                 self._cache["_environment"] = env
             else:
                 raise ConfigError, "Bad environment %r." % (name,)
@@ -521,6 +522,60 @@ class RootContainer(Container):
 
 ##### end of RootContainer ######
 
+## Runtime objects that bind sessions and database rows and provide helper
+## methods and properties.
+
+class EnvironmentRuntime(object):
+    def __init__(self, session, environmentrow):
+        self._session = session
+        self._environment = environmentrow
+
+    def __str__(self):
+        s = []
+        for teq in self._environment.testequipment:
+            s.append(str(teq))
+        return "%s:\n  %s" % (self._environment.name, "\n  ".join(s))
+
+    def _get_DUT(self):
+        return EquipmentRuntime(self._session, self._environment.get_DUT(self._session))
+
+    DUT = property(_get_DUT)
+
+    def get_role(self, rolename):
+        eq = self._environment.get_equipment_with_role(self._session, rolename)
+        return EquipmentRuntime(self._session, eq)
+
+
+class EquipmentRuntime(object):
+    def __init__(self, session, equipmentrow):
+        self._session = session
+        self._equipment = equipmentrow
+        self._controller = None
+        d = {}
+        for prop in equipmentrow.attributes:
+            d[prop.type.name] = prop.value
+        if equipmentrow.account:
+            d["login"] = equipmentrow.account.login
+            d["password"] = equipmentrow.account.password
+        self._attributes = d
+        self._controller = None
+
+    def get_controller(self):
+        if self._controller is None:
+            self._controller = controllers.get_controller(self) # XXX move
+        return self._controller
+
+    controller = property(get_controller)
+
+    def __getattr__(self, name):
+        try:
+            return self._attributes[name]
+        except KeyError:
+            raise AttributeError("Equipment has no attribute %r" % (name,))
+
+    def __getitem__(self):
+        return self._attributes[name]
+
 
 
 def get_config(_extrafiles=None, initdict=None, **kwargs):
@@ -553,14 +608,17 @@ if __name__ == "__main__":
     from pycopia import autodebug
     if sys.flags.interactive:
         from pycopia import interactive
-    sess = models.get_session()
+    #sess = models.get_session()
     cf = get_config()
     print cf
     #print cf.flags
     #print cf.flags.DEBUG
     #cf.reportname = "default"
-    print cf.get("reportname")
-    print cf.report
-
+    #print cf.get("reportname")
+    #print cf.report
+    env = cf.environment
+    print env
+    print env.get_role("testcontroller")
+    print env.DUT
 
 

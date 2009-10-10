@@ -751,6 +751,10 @@ class Equipment(object):
         if cap:
             self.attributes.remove(cap)
 
+# properties provided elsewhere:
+#    attributes
+#    capabilities
+
 mapper(Equipment, tables.equipment,
     properties={
         "model": relation(EquipmentModel),
@@ -825,14 +829,21 @@ class Environment(object):
 
     equipment = association_proxy('testequipment', 'equipment')
 
+    def get_equipment_with_role(self, session, rolename):
+        role = session.query(SoftwareCategory).filter(SoftwareCategory.name == rolename).one()
+        qq = session.query(TestEquipment).filter(and_(TestEquipment.environment==self,
+                TestEquipment.roles.contains(role)))
+        return qq.scalar().equipment
+
+    def get_DUT(self, session):
+        qq = session.query(TestEquipment).filter(and_(TestEquipment.environment==self,
+                TestEquipment.UUT==True))
+        return qq.scalar().equipment
+
+
 mapper(Environment, tables.environments,
     properties={
         "owner": relation(User),
-#        "DUT": column_property(
-#                and_(tables.testequipment.c.environment_id==tables.environments.c.id,
-#                    tables.testequipment.c.UUT==True).label("DUT"),
-#               ),
-
     },
 )
 
@@ -842,7 +853,7 @@ class TestEquipment(object):
     """
     ROW_DISPLAY = ("equipment", "UUT")
 
-    def __str__(self):
+    def __repr__(self):
         if self.UUT:
             return self.equipment.name + " (DUT)"
         else:
@@ -1112,10 +1123,14 @@ if __name__ == "__main__":
     if sys.flags.interactive:
         from pycopia import interactive
     print get_metadata(Equipment)
+    #props = list(class_mapper(Equipment).iterate_properties)
     sess = get_session()
-    eq = sess.query(Equipment).get(6)
+    eq = sess.query(Equipment).get(2)
     print "eq = ", eq
-    props = list(class_mapper(Equipment).iterate_properties)
+    print "Attributes:"
+    print eq.attributes
+    print "Capabilities:"
+    print eq.capabilities
 
 
 
