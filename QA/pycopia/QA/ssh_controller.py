@@ -1,44 +1,32 @@
-#!/usr/bin/python
-# -*- coding: ascii -*-
+#!/usr/bin/python2.6
+# -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# License: LGPL
-# Keith Dart <keith@dartworks.biz>
+# 
 # $Id$
+#
+#    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
+#
+#    This library is free software; you can redistribute it and/or
+#    modify it under the terms of the GNU Lesser General Public
+#    License as published by the Free Software Foundation; either
+#    version 2.1 of the License, or (at your option) any later version.
+#
+#    This library is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
 
 """
-Abstract interfaces for object controllers.
+Controller that wraps an SSH session.
 
 """
 
-import sys, os
-
+from pycopia.QA import controller
 from pycopia import proctools
 from pycopia import sshlib
 
-class ConfigError(AssertionError):
-    pass
 
-# base class for all types of Controllers.
-class Controller(object):
-    def __init__(self, intf):
-        self._intf = intf # the low-level device interface, whatever it is.
-        self.initialize()
-
-    def __del__(self):
-        self.finalize()
-
-    def initialize(self):
-        pass
-
-    def finalize(self):
-        pass
-
-    def set_logfile(self, lf): # XXX assumes expect object wrapping process object
-        fo = self._intf.fileobject()
-        fo.newlog(lf)
-
-
-class ControllerShell(Controller):
+class ShellController(Controller):
     """A Controller for a POSIX shell."""
     def initialize(self):
         self._iamroot = False
@@ -47,7 +35,6 @@ class ControllerShell(Controller):
 
     def _reset(self, newprompt):
         s = self._intf
-        #s.send("\r")
         s.wait_for_prompt()
         s.set_prompt(newprompt)
         s.send("export PS1=%r ; unset PROMPT_COMMAND\r" % (newprompt,))
@@ -91,20 +78,20 @@ class ControllerShell(Controller):
             if el:
                 return True
             else:
-                raise ConfigError, "could not set hostname"
+                raise ControllerError, "could not set hostname"
         else:
             resp, el = self.command("hostname")
             if el:
                 return resp.strip()
             else:
-                raise ConfigError, "could not get hostname"
+                raise ControllerError, "could not get hostname"
 
     def version(self):
         resp, rv = self.command("uname -a")
         if rv:
             return resp.strip()
         else:
-            raise ConfigError, "could not get version string."
+            raise ControllerError, "could not get version string."
 
     def routes(self):
         "Return a report of current IP routes."
@@ -112,7 +99,7 @@ class ControllerShell(Controller):
         if es:
             return resp
         else:
-            raise ConfigError, es
+            raise ControllerError, es
 
     def reboot(self):
         "Reboot this device"
@@ -196,38 +183,16 @@ class ControllerShell(Controller):
 
 
 
-# factory for figuring out the correct Controller to use, and returning it.
 def get_controller(dut, logfile=None):
-    return _get_controller(dut, dut.accessmethod, logfile)
-
-def get_initial_controller(dut, logfile=None):
-    return _get_controller(dut, dut.initialaccessmethod, logfile)
-
-def _get_controller(dut, cm, logfile):
-    if cm == "ssh":
-        try:
-            del os.environ["TERM"]
-        except KeyError:
-            pass
-        ssh = sshlib.get_ssh(dut, dut.user, dut.password, prompt=dut.prompt, logfile=logfile)
-        ctor = ControllerShell(ssh)
-        ctor.host = str(dut)
-        ctor.user = dut.user
-        ctor.password = dut.password
-        return ctor
-    elif cm == "serial":
-        return NotImplemented
-    elif cm == "telnet":
-        return NotImplemented
-    elif cm == "http":
-        return NotImplemented
-    elif cm == "https":
-        return NotImplemented
-    elif cm == "console":
-        return NotImplemented
-    elif cm == "snmp":
-        return NotImplemented
-    else:
-        raise ValueError, "invalid configuration method: %s." % (cm,)
-
+    props = dut.properties # XXX
+    try:
+        del os.environ["TERM"]
+    except KeyError:
+        pass
+    ssh = sshlib.get_ssh(dut, dut.user, dut.password, prompt=dut.prompt, logfile=logfile)
+    ctor = ShellController(ssh)
+    ctor.host = str(dut)
+    ctor.user = dut.user
+    ctor.password = dut.password
+    return ctor
 
