@@ -81,7 +81,6 @@ class RootContainer(config.Container):
             except config.NoResultFound, err:
                 raise AttributeError("RootContainer: No attribute or key '%s' found: %s" % (key, err))
 
-
     def __setattr__(self, key, obj):
         if self.__class__.__dict__.has_key(key): # to force property access
             type.__setattr__(self.__class__, key, obj)
@@ -118,6 +117,8 @@ class RootContainer(config.Container):
     def has_key(self, key):
         return self._cache.has_key(key) or super(RootContainer, self).has_key(key)
 
+    def copy(self):
+        return self.__class__(self.session, self.node, self._cache.copy())
 
     def commit(self):
         self.session.commit()

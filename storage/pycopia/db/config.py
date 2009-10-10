@@ -69,7 +69,8 @@ class Container(object):
             self.session.commit()
         else:
             item.value = value
-            self.session.update(item)
+            #self.session.update(item) # SA says deprecated.
+            self.session.add(item)
             self.session.commit()
 
     def __getitem__(self, name):
@@ -135,8 +136,10 @@ class Container(object):
     def values(self):
         return list(self.itervalues())
 
+    # for compatibility with real dictionaries, but this object is not a
+    # true copy but only a new wrapper instance.
     def copy(self):
-        return self.__class__(self._session, self.node) # XXX
+        return self.__class__(self.session, self.node)
 
     def add_container(self, name):
         me = self.node
