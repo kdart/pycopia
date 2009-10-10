@@ -456,7 +456,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
 
     def hostname(self):
         """Returns the client hosts name."""
-        return socket.gethostname()
+        return socket.getfqdn()
 
     def md5sums(self, path):
         """Reads the md5sums.txt file in path and returns the number of files
@@ -529,7 +529,7 @@ def run_server(argv):
     daemon=Pyro.core.Daemon()
     daemon.useNameServer(ns)
 
-    uri=daemon.connectPersistent(PosixAgent(), "Agents.%s" % (os.uname()[1].split(".")[0],))
+    uri=daemon.connectPersistent(PosixAgent(), "Agents.%s" % socket.getfqdn().replace(".", "_"))
 
     while True:
         try:
