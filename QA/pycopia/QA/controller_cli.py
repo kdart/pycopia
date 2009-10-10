@@ -80,9 +80,9 @@ def configurator_cli(argv):
 
     """
     import os
-    from pycopia.QA import configurator
     from pycopia import getopt
-    from pycopia.storage import Storage
+    from pycopia.QA import configurator
+    from pycopia.QA import config
 
     paged = False 
     script = None
@@ -112,7 +112,7 @@ def configurator_cli(argv):
         io = IO.ConsoleIO()
 
     # do runtime setup
-    cf = Storage.get_config(initdict=longopts)
+    cf = config.get_config(initdict=longopts)
     cf.reportfile = "configurator_cli"
     cf.logbasename = "configurator_cli.log"
     cf.arguments = argv

@@ -8,18 +8,18 @@ import sys
 
 from pycopia.QA import testrunner
 from pycopia.QA import testloader
-from pycopia.storage import Storage
+from pycopia.QA import config
 
 def runtest(argv):
-    config = Storage.get_config()
-    config.userinterfacetype = "default"
-    tr = testrunner.TestRunner(config)
+    cfg = config.get_config()
+    cfg.userinterfacetype = "default"
+    tr = testrunner.TestRunner(cfg)
     tri = testloader.TestRunnerInterface(tr)
     try:
         tri(argv)
     except testrunner.TestRunnerError:
         ex, val, tb = sys.exc_info()
-        if config.flags.DEBUG:
+        if cfg.flags.DEBUG:
             from pycopia import debugger
             debugger.post_mortem(tb, ex, val)
         else:

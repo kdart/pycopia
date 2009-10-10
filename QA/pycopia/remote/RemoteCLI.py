@@ -900,7 +900,7 @@ methods in the module remote.??????Server may be invoked with this tool.
 
 """
     from pycopia import getopt
-    from pycopia.storage import Storage
+    from pycopia.QA import config
 
     paged = False
     script = None
@@ -919,7 +919,7 @@ methods in the module remote.??????Server may be invoked with this tool.
             script = val
 
     # do runtime setup
-    cf = Storage.get_config(initdict=longopts)
+    cf = config.get_config(initdict=longopts)
     # fake test module attributes
     cf.reportfile = "remotecli"
     cf.logbasename = "remotecli.log"

@@ -23,7 +23,7 @@ except:
 from docutils.core import publish_file
 
 from pycopia.QA import core
-from pycopia.storage import Storage
+from pycopia.QA import config
 from pycopia.WWW import XHTML
 
 
@@ -125,7 +125,7 @@ def mod_doc(fo, mod):
             fo.write("    - %s_\n" %(name,))
     if hasattr(mod, "get_suite"):
         fo.write("\n:Default Tests:\n")
-        cf = Storage.get_config()
+        cf = config.get_config()
         suite = mod.get_suite(cf)
         for test in suite:
             fo.write("    - %r\n" %(test,))
