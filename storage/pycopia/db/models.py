@@ -29,6 +29,7 @@ from sqlalchemy import create_engine, and_, select
 from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
         backref, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
+from sqlalchemy.orm.exc import NoResultFound
 
 from sqlalchemy.ext.associationproxy import association_proxy
 
