@@ -44,14 +44,15 @@ class ProxyError(Exception):
 
 def get_remote(name):
     Pyro.core.initClient(banner=0)
-    if "." in name: # only use base name for agent name
-        name =  name.split(".")[0]
-    myname = "Agents.%s" % (name,)
-    return Pyro.core.getProxyForURI("PYRONAME://%s" % (myname,))
+    return get_proxy("Agents.%s" % name.replace(".", "_"))
+
+
+def get_proxy(name):
+    return Pyro.core.getProxyForURI("PYRONAME://%s" % (name,))
 
 
 def remote_copy(agent, remfile, dst):
-    "Copies a file from the remote agent to the local file system."
+    """Copies a file from the remote agent to the local file system."""
     h = agent.fopen(remfile, "rb")
     if os.path.isdir(dst):
         dst = os.path.join(dst, os.path.basename(remfile))
@@ -63,14 +64,5 @@ def remote_copy(agent, remfile, dst):
         dest.write(data)
     dest.close()
     agent.fclose(h)
-
-
-def get_proxy(name):
-    """Returns client from Default name space."""
-    srv = Pyro.core.getProxyForURI("PYRONAME://%s" % (name,))
-    if srv.alive():
-        return srv
-    else:
-        raise ProxyError("Could not get living proxy %r" % (name,))
 
 

@@ -34,6 +34,7 @@ from pycopia import aid
 from pycopia.db import models
 from pycopia.db import config
 
+from pycopia.QA import controller
 
 Config = models.Config
 
@@ -283,7 +284,7 @@ class RootContainer(config.Container):
             if name:
                 db = self.session
                 env = db.query(models.Environment).filter(models.Environment.name==name).one()
-                env = EnvironmentRuntime(db, env)
+                env = EnvironmentRuntime(db, env, self.logfile)
                 self._cache["_environment"] = env
             else:
                 raise config.ConfigError, "Bad environment %r." % (name,)
@@ -314,7 +315,7 @@ class RootContainer(config.Container):
         return UI.get_userinterface(*params)
 
     def del_userinterface(self):
-        """Remove the UI object from the cache.    """
+        """Remove the UI object from the cache."""
         ui = self._cache.get("_UI")
         self._cache["_UI"] = None
         if ui:
@@ -333,9 +334,11 @@ class RootContainer(config.Container):
 ## methods and properties.
 
 class EnvironmentRuntime(object):
-    def __init__(self, session, environmentrow):
+    def __init__(self, session, environmentrow, logfile):
         self._session = session
         self._environment = environmentrow
+        self._eqcache = {}
+        self.logfile = logfile
 
     def __str__(self):
         s = []
@@ -344,44 +347,90 @@ class EnvironmentRuntime(object):
         return "%s:\n  %s" % (self._environment.name, "\n  ".join(s))
 
     def _get_DUT(self):
-        return EquipmentRuntime(self._session, self._environment.get_DUT(self._session))
+        return EquipmentRuntime(
+                self._environment.get_DUT(self._session), 
+                "DUT",
+                self.logfile)
 
     DUT = property(_get_DUT)
 
     def get_role(self, rolename):
+        try:
+            return self._eqcache[rolename]
+        except KeyError:
+            pass
         eq = self._environment.get_equipment_with_role(self._session, rolename)
-        return EquipmentRuntime(self._session, eq)
-
-
-class EquipmentRuntime(object):
-    def __init__(self, session, equipmentrow):
-        self._session = session
-        self._equipment = equipmentrow
-        self._controller = None
-        d = {}
-        for prop in equipmentrow.attributes:
-            d[prop.type.name] = prop.value
-        if equipmentrow.account:
-            d["login"] = equipmentrow.account.login
-            d["password"] = equipmentrow.account.password
-        self._attributes = d
-        self._controller = None
-
-    def get_controller(self):
-        if self._controller is None:
-            self._controller = controllers.get_controller(self) # XXX move
-        return self._controller
-
-    controller = property(get_controller)
+        eq = EquipmentRuntime(eq, rolename, self.logfile)
+        self._eqcache[rolename] = eq
+        return eq
 
     def __getattr__(self, name):
         try:
-            return self._attributes[name]
-        except KeyError:
-            raise AttributeError("Equipment has no attribute %r" % (name,))
+            return self.get_role(name)
+        except:
+            ex, val, tb = sys.exc_info()
+            raise AttributeError("%s: %s" % (ex, val))
 
-    def __getitem__(self):
+
+class EquipmentRuntime(object):
+
+    def __init__(self, equipmentrow, rolename, logfile):
+        self.logfile = logfile
+        self.name = equipmentrow.name
+        self._equipment = equipmentrow
+        self._controller = None
+        self._init_controller = None
+        d = {}
+        d["hostname"] = equipmentrow.name
+        d["role"] = rolename
+        if equipmentrow.software:
+            d["default_role"] = equipmentrow.software[0].category.name
+        else:
+            d["default_role"] = None
+        for prop in equipmentrow.attributes: # These may override the attributes above.
+            d[prop.type.name] = prop.value
+        if equipmentrow.account: # Account info takes precedence
+            d["login"] = equipmentrow.account.login
+            d["password"] = equipmentrow.account.password
+        self._attributes = d
+
+    def __str__(self):
+        return self._equipment.name
+
+    def __getattr__(self, name):
+        return getattr(self._equipment, name)
+
+    def __getitem__(self, name):
         return self._attributes[name]
+
+    def __del__(self):
+        if self._controller is not None:
+            try:
+                self._controller.close()
+            except:
+                pass
+
+    def get_controller(self):
+        if self._init_controller is not None:
+            self._init_controller = None
+        if self._controller is None:
+            self._controller = controller.get_controller(
+                    self,
+                    self["accessmethod"], 
+                    self.logfile)
+        return self._controller
+
+    def get_initial_controller(self):
+        if self._init_controller is None:
+            self._init_controller = controller.get_controller(
+                    self,
+                    self["initialaccessmethod"], 
+                    self.logfile)
+        return self._init_controller
+
+    controller = property(get_controller)
+
+    initial_controller = property(get_initial_controller)
 
 
 
@@ -425,6 +474,8 @@ if __name__ == "__main__":
     env = cf.environment
     print env
     print env.get_role("testcontroller")
-    print env.DUT
+    print env._get_DUT()
+    dut = env.DUT
+    print dut["default_role"]
 
 
