@@ -69,6 +69,7 @@ def get_model(modelname):
     except AttributeError:
         raise framework.HHttpErrorNotFound("No model %r found." % modelname)
 
+
 def get_table_metadata(modelname):
     klass = get_model(modelname)
     return models.get_metadata(klass)
@@ -262,7 +263,7 @@ class CreateRequestHandler(framework.RequestHandler):
             request.log_error("create error: %s: %s\n" % (tablename, err))
             _dbsession.rollback()
             title = "Create new %s" % (tablename, )
-            resp = framework.ResponseDocument(request, doc_constructor, title=title)
+            resp = self.get_response(request, title=title)
             resp.new_para(title + ", again.")
             resp.new_para(err, class_="error")
             form = resp.add_form(action=request.get_url(addentry, tablename=tablename))
@@ -275,6 +276,34 @@ addentry = auth.need_login(CreateRequestHandler(doc_constructor))
 
 
 def build_add_form(form, modelclass):
+    builder = _FORMBUILDERS.get(modelclass.__name__)
+    if builder is None:
+        return build_generic_add_form(form, modelclass)
+    return builder(form, modelclass)
+
+
+def build_test_case_add(form, modelclass):
+    BR = form.get_new_element("Br")
+    fs = form.add_fieldset(modelclass.__name__)
+
+    metamap = dict((c.colname, c) for c in models.get_metadata(modelclass))
+
+    for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
+                    'procedure', 'reference', 'testimplementation', 'automated', 'interactive', 
+                    'functionalarea', 'suite', 'prerequisite',):
+
+        metadata = metamap[colname]
+        ctor = _CREATORS.get(metadata.coltype)
+        node = ctor(fs, modelclass, metadata)
+        node.class_ = metadata.coltype
+        fs.append(BR)
+    form.add_input(type="submit", name="submit", value="submit")
+
+_FORMBUILDERS = {
+    "TestCase": build_test_case_add,
+}
+
+def build_generic_add_form(form, modelclass):
     BR = form.get_new_element("Br")
     fs = form.add_fieldset(modelclass.__name__)
     for metadata in sorted(models.get_metadata(modelclass)):
@@ -303,12 +332,14 @@ def new_pickleinput(node, modelclass, metadata):
 
 def new_relation_input(node, modelclass, metadata):
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
-    vlist = [(str(relrow), relrow.id) for relrow in _dbsession.query(relmodel).all()]
+    choices = [(str(relrow), relrow.id) for relrow in _dbsession.query(relmodel).all()]
+    if not choices:
+        return node.new_para("%s has no choices." % metadata.colname)
     if metadata.nullable:
-        vlist.insert(0, ("----", 0))
+        choices.insert(0, ("----", 0))
     elid = "id_" + metadata.colname
     node.add_label(metadata.colname, elid)
-    return node.add_select(vlist, name=metadata.colname, multiple=metadata.uselist, id=elid)
+    return node.add_select(choices, name=metadata.colname, multiple=metadata.uselist, id=elid)
 
 def new_valuetypeinput(node, modelclass, metadata):
     return node.add_radiobuttons(metadata.colname, map(str, models.tables.VALUETYPES), checked=0)
