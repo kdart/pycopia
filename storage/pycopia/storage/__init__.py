@@ -15,12 +15,14 @@
 
 """
 Pycopia Persistent Storage
-======================
+==========================
 
 Module for Pycopia persistent storage. Based on the Durus persistence package.
 
-This package works with the netobjects module to provide persistent Python
-objects. 
+This package is provides a wrapper around Durus to make it sumulate a
+hierarchical structure. It provides persistent storage of Python data that
+is fast and direct. It's here for your use if you need it, but nothing
+else in Pycopia currently uses it. 
 
 """
 
