@@ -96,6 +96,7 @@ def get_platform():
         rv.osversion = kernel
         rv.distribution, rv.release = _get_linux_dist()
     elif sys.platform in ("win32", "cli"):
+        import os
         rv.arch = os.environ["PROCESSOR_ARCHITECTURE"]
         rv.osname = os.environ["OS"]
         rv.distribution = "Microsoft"

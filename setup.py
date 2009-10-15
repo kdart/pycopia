@@ -131,7 +131,7 @@ def do_squash(name):
         os.mkdir(SQUASHDIR)
     os.chdir(name)
     uname = os.uname()
-    bin_dir = ps.path.join("build", "lib.%s-%s-%s" % (uname[0].lower(), uname[4], sys.version[:3]))
+    bin_dir = os.path.join("build", "lib.%s-%s-%s" % (uname[0].lower(), uname[4], sys.version[:3]))
     # e.g: build/lib.linux-x86_64-2.5/pycopia
     print "======== SQUASH", name, "to", SQUASHDIR
     try:
