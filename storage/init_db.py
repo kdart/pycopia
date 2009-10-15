@@ -25,7 +25,7 @@ import sys
 
 from pycopia import aid
 from pycopia.db import models
-from pycopia.storage import DBStorage
+from pycopia.db import config
 
 from pycopia.ISO import iso639a
 from pycopia.ISO import iso3166
@@ -490,8 +490,8 @@ def do_config(session):
             value=aid.NULL)
     session.add(flags)
     session.commit()
-    root = DBStorage.Container(session, rn)
-    flags = DBStorage.Container(session, flags)
+    root = config.Container(session, rn)
+    flags = config.Container(session, flags)
     flags.VERBOSE = 0 # levels of verbosity
     flags.DEBUG = 0 # levels of debugging
     flags.INTERACTIVE = False # Don't run interactive tests also, by default
