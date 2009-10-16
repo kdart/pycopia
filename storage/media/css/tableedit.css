@@ -192,6 +192,10 @@ fieldset.radioset label {
   width:auto;
 }
 
+fieldset.radioset input {
+  width:auto;
+}
+
 
 input:focus {
   border-width: 2px;
