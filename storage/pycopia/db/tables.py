@@ -13,50 +13,11 @@ typical database:
 
 """
 
-import cPickle as pickle
 from pytz import timezone
 from datetime import datetime
 
-from pycopia.aid import Enums
-
 from sqlalchemy import *
-from sqlalchemy.databases.postgres import *
-from sqlalchemy import types
-
-
-# custom column types.
-
-class PickleText(types.TypeDecorator):
-
-    impl = PGText
-
-    def process_bind_param(self, value, dialect):
-        return pickle.dumps(value)
-
-    def process_result_value(self, value, dialect):
-        return pickle.loads(value)
-
-    def copy(self):
-        return PickleText(self.impl.length)
-
-# The basic type that an AttributeType may have (for value_type columns).
-VALUETYPES = Enums("object", "string", "unicode", 
-                    "integer", "float", "boolean")
-
-
-class ValueType(types.TypeDecorator):
-
-    impl = PGInteger
-
-    def process_bind_param(self, value, dialect):
-        return  int(value)
-
-    def process_result_value(self, value, dialect):
-        return VALUETYPES.find(value)
-
-    def copy(self):
-        return ValueType()
-
+from pycopia.db.types import *
 
 # default value constructors
 
@@ -65,18 +26,14 @@ UTC = timezone('UTC')
 def time_now():
     return datetime.now(UTC)
 
-def default_object():
-    return VALUETYPES[0]
-
 def default_active():
     return True
 
 def default_inactive():
     return False
 
-def default_int(x):
+def default_obj(x): # call this one in default attribute
     return lambda: x
-
 
 
 metadata = MetaData()
@@ -162,7 +119,7 @@ corp_attribute_type =  Table('corp_attribute_type', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=default_object),
+            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=ValueType.get_default),
     schema='public')
 Index('index_corp_attribute_type_name_key', corp_attribute_type.c.name, unique=True)
 
@@ -214,7 +171,7 @@ capability_type =  Table('capability_type', metadata,
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'group_id', PGInteger(), primary_key=False),
-            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=default_object),
+            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=ValueType.get_default),
     ForeignKeyConstraint([u'group_id'], [u'public.capability_group.id'], name=u'capability_type_group_id_fkey'),
     schema='public')
 Index('index_capability_type_name_key', capability_type.c.name, unique=True)
@@ -251,7 +208,7 @@ attribute_type =  Table('attribute_type', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=default_object),
+            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=ValueType.get_default),
     schema='public')
 Index('index_attribute_type_name_key', attribute_type.c.name, unique=True)
 
@@ -272,7 +229,7 @@ environmentattribute_type =  Table('environmentattribute_type', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
             Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=default_object),
+            Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=ValueType.get_default),
     schema='public')
 Index('index_environmentattribute_type_name_key', environmentattribute_type.c.name, unique=True)
 
@@ -296,7 +253,7 @@ test_jobs =  Table('test_jobs', metadata,
             Column(u'environment_id', PGInteger(), primary_key=False, nullable=False),
             Column(u'testsuite_id', PGInteger(), primary_key=False, nullable=False),
             Column(u'reportname', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'parameters', PickleText(), primary_key=False, nullable=False, default=()),
+            Column(u'parameters', PickleText(), primary_key=False, nullable=False, default=default_obj(None)),
             Column(u'isscheduled', PGBoolean(), primary_key=False, nullable=False, default=False),
             Column(u'schedule_id', PGInteger(), primary_key=False),
     ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'test_jobs_environment_id_fkey'),
@@ -541,9 +498,9 @@ test_cases =  Table('test_cases', metadata,
             Column(u'endcondition', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'procedure', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'comments', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'priority', PGInteger(), primary_key=False, nullable=False, default=default_int(3)),
-            Column(u'cycle', PGInteger(), primary_key=False, nullable=False, default=default_int(0)),
-            Column(u'status', PGInteger(), primary_key=False, nullable=False, default=default_int(1)),
+            Column(u'priority', TestPriorityType(), primary_key=False, nullable=False, default=TestPriorityType.get_default),
+            Column(u'cycle', TestCaseType(), primary_key=False, nullable=False, default=TestCaseType.get_default),
+            Column(u'status', TestCaseStatus(), primary_key=False, nullable=False, default=TestCaseStatus.get_default),
             Column(u'automated', PGBoolean(), primary_key=False, nullable=False, default=default_active),
             Column(u'interactive', PGBoolean(), primary_key=False, nullable=False, default=default_inactive),
             Column(u'valid', PGBoolean(), primary_key=False, nullable=False, default=default_active),
@@ -871,9 +828,9 @@ Index('index_software_category_id', software.c.category_id, unique=False)
 project_versions =  Table('project_versions', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'project_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'major', PGInteger(), primary_key=False, nullable=False, default=default_int(1)),
-            Column(u'minor', PGInteger(), primary_key=False, nullable=False, default=default_int(0)),
-            Column(u'subminor', PGInteger(), primary_key=False, nullable=False, default=default_int(0)),
+            Column(u'major', PGInteger(), primary_key=False, nullable=False, default=default_obj(1)),
+            Column(u'minor', PGInteger(), primary_key=False, nullable=False, default=default_obj(0)),
+            Column(u'subminor', PGInteger(), primary_key=False, nullable=False, default=default_obj(0)),
             Column(u'build', PGInteger(), primary_key=False),
             Column(u'valid', PGBoolean(), primary_key=False, nullable=False, default=default_active),
     ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], name=u'project_versions_project_id_fkey'),
@@ -997,22 +954,22 @@ if __name__ == '__main__':
     try:
         url = args[0]
     except IndexError:
-        from pycopia import basicconfig
-        cf = basicconfig.get_config("storage.conf")
-        url = cf["database"]
-    # e.g: 'postgres://pycopia@localhost/pycopia'
-    print "creating tables in", url
-    for opt, optarg in opts:
-        if opt == "-t":
-            tname = optarg
-    db = create_engine(unicode(url))
-    metadata.bind = db
-    if tname:
-        tbl = getattr(sys.modules[__name__], tname)
-        print tbl
-        tbl.drop(checkfirst=True)
-        tbl.create()
+        print "Please supply a database URL."
+        print "e.g: postgres://pycopia@localhost/pycopia"
+        print "Use -t <name> to select single table."
     else:
-        metadata.create_all()
+        for opt, optarg in opts:
+            if opt == "-t":
+                tname = optarg
+        db = create_engine(unicode(url))
+        metadata.bind = db
+        if tname:
+            tbl = getattr(sys.modules[__name__], tname)
+            print tbl
+            tbl.drop(checkfirst=True)
+            tbl.create()
+        else:
+            print "creating tables in", url
+            metadata.create_all()
 
 

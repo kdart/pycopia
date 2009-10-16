@@ -28,6 +28,7 @@ import sys
 import itertools
 
 from pycopia.aid import IF
+from pycopia.db import types
 from pycopia.db import models
 from pycopia.WWW import json
 from pycopia.WWW import framework
@@ -289,18 +290,56 @@ def build_test_case_add(form, modelclass):
     metamap = dict((c.colname, c) for c in models.get_metadata(modelclass))
 
     for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
-                    'procedure', 'reference', 'testimplementation', 'automated', 'interactive', 
-                    'functionalarea', 'suite', 'prerequisite',):
+                    'procedure', 'reference', 'testimplementation',
+                    'functionalarea', 'suite', 'prerequisite', 'automated', 'interactive'):
 
         metadata = metamap[colname]
         ctor = _CREATORS.get(metadata.coltype)
         node = ctor(fs, modelclass, metadata)
         node.class_ = metadata.coltype
         fs.append(BR)
+    for colname in ('priority', 'cycle', 'status'):
+        metadata = metamap[colname]
+        ctor = _CREATORS.get(metadata.coltype)
+        node = ctor(fs, modelclass, metadata)
+        node.class_ = "radioset"
+        fs.append(BR)
+
     form.add_input(type="submit", name="submit", value="submit")
+
+
+def build_testcase_edit_form(form, modelclass, row, error=None):
+    BR = form.get_new_element("Br")
+    if error is not None:
+        form.new_para(error, class_="error")
+    fs = form.add_fieldset(modelclass.__name__)
+
+    metamap = dict((c.colname, c) for c in models.get_metadata(modelclass))
+
+    for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
+                    'procedure', 'reference', 'testimplementation',
+                    'functionalarea', 'suite', 'prerequisite', 'automated', 'interactive'):
+        metadata = metamap[colname]
+        ctor = _CONSTRUCTORS.get(metadata.coltype)
+        node = ctor(fs, modelclass, metadata, row)
+        node.class_ = metadata.coltype
+        fs.append(BR)
+    for colname in ('priority', 'cycle', 'status'):
+        metadata = metamap[colname]
+        ctor = _CONSTRUCTORS.get(metadata.coltype)
+        node = ctor(fs, modelclass, metadata, row)
+        node.class_ = "radioset"
+        fs.append(BR)
+
+    form.add_input(type="submit", name="submit", value="submit")
+
 
 _FORMBUILDERS = {
     "TestCase": build_test_case_add,
+}
+
+_EDITFORMBUILDERS = {
+    "TestCase": build_testcase_edit_form,
 }
 
 def build_generic_add_form(form, modelclass):
@@ -342,7 +381,22 @@ def new_relation_input(node, modelclass, metadata):
     return node.add_select(choices, name=metadata.colname, multiple=metadata.uselist, id=elid)
 
 def new_valuetypeinput(node, modelclass, metadata):
-    return node.add_radiobuttons(metadata.colname, map(str, models.tables.VALUETYPES), checked=0)
+    return node.add_radiobuttons(metadata.colname, types.ValueType.get_choices(), checked=0)
+
+def new_testcasestatus(node, modelclass, metadata):
+    return node.add_radiobuttons(metadata.colname, 
+            types.TestCaseStatus.get_choices(), 
+            checked=types.TestCaseStatus.get_default())
+
+def new_testcasetype(node, modelclass, metadata):
+    return node.add_radiobuttons(metadata.colname, 
+            types.TestCaseType.get_choices(), 
+            checked=types.TestCaseType.get_default())
+
+def new_testpriority(node, modelclass, metadata):
+    return node.add_radiobuttons(metadata.colname, 
+            types.TestPriorityType.get_choices(), 
+            checked=types.TestPriorityType.get_default())
 
 _CREATORS = {
     "PGArray": None,
@@ -368,6 +422,9 @@ _CREATORS = {
     "PickleText": new_pickleinput,
     "ValueType": new_valuetypeinput,
     "RelationProperty": new_relation_input,
+    "TestCaseStatus": new_testcasestatus,
+    "TestCaseType": new_testcasetype,
+    "TestPriorityType": new_testpriority,
 }
 
 
@@ -414,6 +471,12 @@ edit = auth.need_login(EditRequestHandler(doc_constructor))
 
 
 def build_edit_form(form, modelclass, row, error=None):
+    builder = _EDITFORMBUILDERS.get(modelclass.__name__)
+    if builder is None:
+        return build_generic_edit_form(form, modelclass, row, error)
+    return builder(form, modelclass, row, error)
+
+def build_generic_edit_form(form, modelclass, row, error=None):
     BR = form.get_new_element("Br")
     if error is not None:
         form.new_para(error, class_="error")
@@ -427,7 +490,6 @@ def build_edit_form(form, modelclass, row, error=None):
             fs.new_para("No entry for type %r." % (metadata.colname,), class_="error")
         fs.append(BR)
     form.add_input(type="submit", name="submit", value="submit")
-
 
 def create_textarea(node, modelclass, metadata, row):
     value = getattr(row, metadata.colname)
@@ -449,7 +511,7 @@ def create_pickleinput(node, modelclass, metadata, row):
 
 def create_valuetypeinput(node, modelclass, metadata, row):
     value = int(getattr(row, metadata.colname))
-    return node.add_radiobuttons(metadata.colname, map(str, models.tables.VALUETYPES), checked=value)
+    return node.add_radiobuttons(metadata.colname, types.ValueType.get_choices(), checked=value)
 
 def create_relation_input(node, modelclass, metadata, row):
     vlist = []
@@ -471,6 +533,24 @@ def create_relation_input(node, modelclass, metadata, row):
     elid = "id_" + metadata.colname
     node.add_label(metadata.colname, elid)
     return node.add_select(vlist, name=metadata.colname, multiple=metadata.uselist, id=elid)
+
+def create_testcasestatus(node, modelclass, metadata, row):
+    value = int(getattr(row, metadata.colname))
+    return node.add_radiobuttons(metadata.colname, 
+            types.TestCaseStatus.get_choices(), 
+            checked=value)
+
+def create_testcasetype(node, modelclass, metadata, row):
+    value = int(getattr(row, metadata.colname))
+    return node.add_radiobuttons(metadata.colname, 
+            types.TestCaseType.get_choices(), 
+            checked=value)
+
+def create_testpriority(node, modelclass, metadata, row):
+    value = int(getattr(row, metadata.colname))
+    return node.add_radiobuttons(metadata.colname, 
+            types.TestPriorityType.get_choices(), 
+            checked=value)
 
 
 _CONSTRUCTORS = {
@@ -497,6 +577,9 @@ _CONSTRUCTORS = {
     "PickleText": create_pickleinput,
     "ValueType": create_valuetypeinput,
     "RelationProperty": create_relation_input,
+    "TestCaseStatus": create_testcasestatus,
+    "TestCaseType": create_testcasetype,
+    "TestPriorityType": create_testpriority,
 }
 
 def update_row(request, klass, dbrow):
@@ -553,9 +636,6 @@ def validate_pickle(value):
     except:
         return value
 
-def validate_valuetype(value):
-    return models.tables.VALUETYPES.find(int(value))
-
 _VALIDATORS = {
     "PGArray": None,
     "PGBigInteger": validate_bigint,
@@ -579,7 +659,10 @@ _VALIDATORS = {
     "PGUuid": None,
     "PickleText": validate_pickle,
     "RelationProperty": None,
-    "ValueType": validate_valuetype,
+    "ValueType": types.ValueType.validate,
+    "TestCaseStatus": types.TestCaseStatus.validate,
+    "TestCaseType": types.TestCaseType.validate,
+    "TestPriorityType": types.TestPriorityType.validate,
 }
 
 

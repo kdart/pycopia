@@ -25,21 +25,21 @@ from datetime import timedelta
 from hashlib import sha1
 
 from sqlalchemy import create_engine, and_, select
-
 from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
         backref, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
 from sqlalchemy.orm.exc import NoResultFound
-
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from pycopia.aid import hexdigest, unhexdigest, Enums
+
 from pycopia.db import tables
+from pycopia.db.types import validate_value_type
 
 
 
 # Attribute value base types.
-[VT_OBJECT, VT_STRING, VT_UNICODE, VT_INTEGER, VT_FLOAT, VT_BOOLEAN] = tables.VALUETYPES
+#[VT_OBJECT, VT_STRING, VT_UNICODE, VT_INTEGER, VT_FLOAT, VT_BOOLEAN] = tables.VALUETYPES
 
 # Test result types - these objects may report a result
 OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
@@ -48,11 +48,17 @@ OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
 # results a test case can produce.
 TESTRESULTS = Enums(PASSED=1, FAILED=0, INCOMPLETE=-1, ABORT=-2, NA=-3, EXPECTED_FAIL=-4)
 TESTRESULTS.sort()
-[EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = TESTRESULTS
+#[EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = TESTRESULTS
 
+# Priority codes
+#P_UNKNOWN, P1, P2, P3, P4, P5 = tables.PRIORITIES 
+#
+# TestCase test type 
+#TC_UNIT, TC_SYSTEM, TC_INTEGRATION, TC_REGRESSION, TC_PERFORMANCE = tables.TESTCASETYPES
+#
+## TestCase status enums
+#TC_NEW, TC_REVIEWED, TC_DEPRECATED = tables.STATUSES
 
-class ValidationError(AssertionError):
-    pass
 
 
 def create_session(addr):
@@ -97,56 +103,6 @@ def _get_secret():
 _get_secret()
 del _get_secret
 
-
-### attribute base type validation and conversion
-def _validate_float(value):
-    return float(value)
-
-def _validate_int(value):
-    return int(value)
-
-def _validate_boolean(value):
-    if type(value) is str:
-        value = value.lower()
-        if value in ("on", "1", "true", "t", "y", "yes"):
-            return True
-        elif value in ("off", "0", "false", "f", "n", "no"):
-            return False
-        else:
-            raise ValidationError("Invalid boolean string")
-    else:
-        return bool(value)
-
-def _validate_object(value):
-    if type(value) is str:
-        try:
-            return eval(value, {}, {})
-        except:
-            return value
-    else:
-        return value
-
-def _validate_string(value):
-    return str(value)
-
-def _validate_unicode(value):
-    return unicode(value)
-
-_VALIDATOR_MAP = {
-    VT_OBJECT: _validate_object, 
-    VT_STRING: _validate_string, 
-    VT_UNICODE: _validate_unicode,
-    VT_INTEGER: _validate_int, 
-    VT_FLOAT: _validate_float,
-    VT_BOOLEAN: _validate_boolean,
-}
-
-
-def _validate_value_type(dbtype, value):
-    try:
-        return _VALIDATOR_MAP[dbtype.value_type](value)
-    except (ValueError, TypeError), err:
-        raise ValidationError(err)
 
 
 #######################################
@@ -568,7 +524,7 @@ class CorporateAttribute(object):
 
     @validates("value")
     def validate_value(self, attrname, value):
-        return _validate_value_type(self.type, value)
+        return validate_value_type(self.type.value_type, value)
 
 
 mapper(CorporateAttribute, tables.corp_attributes,
@@ -638,7 +594,7 @@ class SoftwareAttribute(object):
 
     @validates("value")
     def validate_value(self, attrname, value):
-        return _validate_value_type(self.type, value)
+        return validate_value_type(self.type.value_type, value)
 
 mapper(SoftwareAttribute, tables.software_attributes,
     properties={
@@ -709,7 +665,7 @@ class EquipmentModelAttribute(object):
 
     @validates("value")
     def validate_value(self, attrname, value):
-        return _validate_value_type(self.type, value)
+        return validate_value_type(self.type.value_type, value)
 
 mapper(EquipmentModelAttribute, tables.equipment_model_attributes,
     properties={
@@ -779,7 +735,7 @@ class EquipmentAttribute(object):
 
     @validates("value")
     def validate_value(self, attrname, value):
-        return _validate_value_type(self.type, value)
+        return validate_value_type(self.type.value_type, value)
 
 mapper(EquipmentAttribute, tables.equipment_attributes,
     properties={
@@ -877,7 +833,7 @@ class EnvironmentAttribute(object):
 
     @validates("value")
     def validate_value(self, attrname, value):
-        return _validate_value_type(self.type, value)
+        return validate_value_type(self.type.value_type, value)
 
 mapper(EnvironmentAttribute, tables.environment_attributes,
     properties={
@@ -986,6 +942,7 @@ class TestResult(object):
         return "%s(%s): %s" % (self.testcase, self.objecttype, self.testresult)
 
     testresult = property(lambda self: TESTRESULTS.find(self.result))
+
     objecttype = property(lambda self: OBJECTTYPES.find(self.objecttype_c))
 
 
@@ -1033,7 +990,7 @@ class Capability(object):
 
     @validates("value")
     def validate_value(self, attrname, value):
-        return _validate_value_type(self.type, value)
+        return validate_value_type(self.type.value_type, value)
 
 mapper(Capability, tables.capability,
     properties={
