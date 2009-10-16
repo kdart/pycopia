@@ -1161,13 +1161,13 @@ class FormMixin(ContainerMixin):
         self.append(sl)
         return sl
 
-    def get_radiobuttons(self, name, items, vertical=False, checked=0, **kwargs):
+    def get_radiobuttons(self, name, choices, vertical=False, checked=0, **kwargs):
         fs = self.get_fieldset(name, **kwargs)
-        for i, item in enumerate(items):
-            ID = "id_%s%s" % (name, i)
-            l = self.get_label(item, ID)
-            inp = self.dtd.Input(type="radio", name=name, value=i, id=ID)
-            if i == checked:
+        for value, valname in choices:
+            ID = "id_%s%s" % (name, value)
+            l = self.get_label(valname, ID)
+            inp = self.dtd.Input(type="radio", name=name, value=value, id=ID)
+            if value == checked:
                 inp.checked = "checked"
             fs.append(l)
             fs.append(inp)
@@ -1175,37 +1175,36 @@ class FormMixin(ContainerMixin):
                 fs.append(self.dtd.Br())
         return fs
 
-    def add_radiobuttons(self, name, items, vertical=False, checked=0, **kwargs):
+    def add_radiobuttons(self, name, choices, vertical=False, checked=0, **kwargs):
         fs = self.add_fieldset(name, **kwargs)
-        for i, item in enumerate(items):
-            ID = "id_%s%s" % (name, i)
-            fs.add_label(item, ID)
-            kwargs
-            inp = self.dtd.Input(type="radio", name=name, value=i, id=ID)
-            if i == checked:
+        for value, valname in choices:
+            ID = "id_%s%s" % (name, value)
+            fs.add_label(valname, ID)
+            inp = self.dtd.Input(type="radio", name=name, value=value, id=ID)
+            if value == checked:
                 inp.checked = "checked"
             fs.append(inp)
             if vertical:
                 fs.append(self.dtd.Br())
         return fs
 
-    def get_checkboxes(self, name, items, vertical=False):
+    def get_checkboxes(self, name, choices, vertical=False):
         fs = self.get_fieldset(name, **kwargs)
-        for i, item in enumerate(items):
-            ID = "id_%s%s" % (name, i)
-            l = self.get_label(item, ID)
+        for value, valname in choices:
+            ID = "id_%s%s" % (name, value)
+            l = self.get_label(valname, ID)
             fs.append(l)
-            fs.append(self.dtd.Input(type="checkbox", name=name, value=i, id=ID))
+            fs.append(self.dtd.Input(type="checkbox", name=name, value=value, id=ID))
             if vertical:
                 fs.append(self.dtd.Br())
         return fs
 
-    def add_checkboxes(self, name, items, vertical=False):
+    def add_checkboxes(self, name, choices, vertical=False):
         fs = self.add_fieldset(name, **kwargs)
-        for i, item in enumerate(items):
-            ID = "id_%s%s" % (name, i)
-            fs.add_label(item, ID)
-            fs.append(self.dtd.Input(type="checkbox", name=name, value=i, id=ID))
+        for value, valname in choices:
+            ID = "id_%s%s" % (name, value)
+            fs.add_label(valname, ID)
+            fs.append(self.dtd.Input(type="checkbox", name=name, value=value, id=ID))
             if vertical:
                 fs.append(self.dtd.Br())
         return fs
