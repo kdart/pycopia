@@ -364,6 +364,11 @@ class EnvironmentRuntime(object):
         self._eqcache[rolename] = eq
         return eq
 
+    def get_supported_roles(self):
+        return self._environment.get_supported_roles(self._session)
+
+    supported_roles = property(get_supported_roles)
+
     def __getattr__(self, name):
         try:
             return self.get_role(name)
@@ -472,7 +477,10 @@ if __name__ == "__main__":
     #print cf.get("reportname")
     #print cf.report
     env = cf.environment
+    print "Environment:"
     print env
+    print "Supported roles:"
+    print env.get_supported_roles()
     print env.get_role("testcontroller")
     print env._get_DUT()
     dut = env.DUT

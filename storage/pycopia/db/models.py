@@ -31,7 +31,7 @@ from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from pycopia.aid import hexdigest, unhexdigest, Enums
+from pycopia.aid import hexdigest, unhexdigest, Enums, removedups
 
 from pycopia.db import tables
 from pycopia.db.types import validate_value_type
@@ -796,6 +796,14 @@ class Environment(object):
         qq = session.query(TestEquipment).filter(and_(TestEquipment.environment==self,
                 TestEquipment.UUT==True))
         return qq.scalar().equipment
+
+    def get_supported_roles(self, session):
+        rv = []
+        for te in session.query(TestEquipment).filter(TestEquipment.environment==self).all():
+            for role in te.roles:
+                rv.append(role.name)
+        rv = removedups(rv)
+        return rv
 
 
 mapper(Environment, tables.environments,
