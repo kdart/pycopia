@@ -1067,7 +1067,7 @@ def get_metadata(class_):
                 default = None
             else:
                 if default is not None:
-                    default = str(default.arg(None))
+                    default = default.arg(None)
         elif proptype is RelationProperty:
             coltype = RelationProperty.__name__
             m2m = prop.secondary is not None

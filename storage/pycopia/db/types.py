@@ -47,17 +47,26 @@ class ValidationError(AssertionError):
 # custom column types.
 
 class PickleText(types.TypeDecorator):
+    """For columns that store Python objects in a TEXT column.
+
+    Be aware there is an issue when using this type for a column that
+    allows NULL values. The ORM maps NULL values to Python None value. But
+    if you store a None value as a pickled value you can then not tell the
+    difference between them when you extract the value. Therefore, make
+    the column NOT NULL whenever possible.
+    """
 
     impl = PGText
 
     def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
         return pickle.dumps(value)
 
     def process_result_value(self, value, dialect):
+        if value is None:
+            return None
         return pickle.loads(value)
-
-    def copy(self):
-        return PickleText(self.impl.length)
 
 
 # special enumeration types

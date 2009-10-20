@@ -119,6 +119,7 @@ input.PGBit {
 
 input.PGBoolean {
   background-color: #F2F345;
+  width: auto;
 }
 
 input.PGChar {

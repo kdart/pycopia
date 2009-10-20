@@ -246,7 +246,7 @@ class CreateRequestHandler(framework.RequestHandler):
         dbrow = klass()
         try:
             update_row(request, klass, dbrow)
-        except models.ValidationError, err:
+        except types.ValidationError, err:
             _dbsession.rollback()
             request.log_error("create ValidationError: %s: %s\n" % (tablename, err))
             title = "Recreate new %s %s" % (tablename, dbrow)
@@ -367,7 +367,11 @@ def new_textinput(node, modelclass, metadata):
     return node.add_textinput(metadata.colname, metadata.colname, metadata.default or "")
 
 def new_pickleinput(node, modelclass, metadata):
-    return node.add_textinput(metadata.colname, metadata.colname, repr(metadata.default))
+    if metadata.default is None:
+        default = ""
+    else:
+        default = repr(metadata.default)
+    return node.add_textinput(metadata.colname, metadata.colname, default)
 
 def new_relation_input(node, modelclass, metadata):
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
@@ -445,7 +449,7 @@ class EditRequestHandler(framework.RequestHandler):
         dbrow = get_row(klass, rowid)
         try:
             update_row(request, klass, dbrow)
-        except models.ValidationError, err:
+        except types.ValidationError, err:
             _dbsession.rollback()
             title = "Re-edit %s %s" % (tablename, dbrow)
             resp = self.get_response(request, title=title)
@@ -503,11 +507,15 @@ def create_boolean_input(node, modelclass, metadata, row):
 
 def create_textinput(node, modelclass, metadata, row):
     value = getattr(row, metadata.colname)
-    return node.add_textinput(metadata.colname, metadata.colname, value)
+    return node.add_textinput(metadata.colname, metadata.colname, value or "")
 
 def create_pickleinput(node, modelclass, metadata, row):
     value = getattr(row, metadata.colname)
-    return node.add_textinput(metadata.colname, metadata.colname, repr(value))
+    if metadata.nullable and value is None:
+        value = ""
+    else:
+        value = repr(value)
+    return node.add_textinput(metadata.colname, metadata.colname, value)
 
 def create_valuetypeinput(node, modelclass, metadata, row):
     value = int(getattr(row, metadata.colname))
@@ -585,14 +593,16 @@ _CONSTRUCTORS = {
 def update_row(request, klass, dbrow):
     for metadata in models.get_metadata(klass):
         value = request.POST.get(metadata.colname)
-        if not value:
-            continue
         if metadata.coltype == "RelationProperty":
             relmodel = getattr(klass, metadata.colname).property.mapper.class_
             if isinstance(value, list) and value:
                 t = _dbsession.query(relmodel).filter(
                                 relmodel.id.in_([int(i) for i in value])).all()
                 setattr(dbrow, metadata.colname, t)
+            elif value is None:
+                if metadata.uselist:
+                    value = []
+                setattr(dbrow, metadata.colname, value)
             else:
                 value = int(value)
                 if value:
@@ -600,6 +610,23 @@ def update_row(request, klass, dbrow):
                     if metadata.uselist:
                         t = [t]
                     setattr(dbrow, metadata.colname, t)
+        elif metadata.coltype == "PickleText":
+            if value is None:
+                if metadata.nullable:
+                    setattr(dbrow, metadata.colname, value)
+                else:
+                    setattr(dbrow, metadata.colname, "")
+            else:
+                try:
+                    value = eval(value, {}, {})
+                except: # allows use of unquoted strings.
+                    ex, exval, tb = sys.exc_info()
+                    request.log_error("warning: %r did not evaluate: %s.\n" % (value, exval))
+                setattr(dbrow, metadata.colname, value)
+        elif metadata.coltype == "PGText":
+            if not value and metadata.nullable:
+                value = None
+            setattr(dbrow, metadata.colname, value)
         else:
             validator = _VALIDATORS.get(metadata.coltype)
             if validator is not None:
@@ -609,12 +636,18 @@ def update_row(request, klass, dbrow):
 
 
 def validate_float(value):
+    if value is None:
+        return None
     return float(value)
 
 def validate_int(value):
+    if value is None:
+        return None
     return int(value)
 
 def validate_bigint(value):
+    if value is None:
+        return None
     return long(value)
 
 def validate_datetime(value):
@@ -624,17 +657,13 @@ def validate_datetime(value):
         return value
 
 def validate_bool(value):
+    if value is None:
+        return False
     if value.lower() in ("on", "1", "true", "t"):
         return True
     else:
         return False
 
-# try to evaluate to Python object, failing that just use as a string.
-def validate_pickle(value):
-    try:
-        return eval(value, {}, {})
-    except:
-        return value
 
 _VALIDATORS = {
     "PGArray": None,
@@ -657,7 +686,7 @@ _VALIDATORS = {
     "PGText": None,
     "PGTime": validate_datetime,
     "PGUuid": None,
-    "PickleText": validate_pickle,
+    "PickleText": None,
     "RelationProperty": None,
     "ValueType": types.ValueType.validate,
     "TestCaseStatus": types.TestCaseStatus.validate,
