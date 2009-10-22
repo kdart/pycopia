@@ -31,7 +31,7 @@ from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.associationproxy import association_proxy
 
-from pycopia.aid import hexdigest, unhexdigest, Enums, removedups
+from pycopia.aid import hexdigest, unhexdigest, Enums, removedups, NULL
 
 from pycopia.db import tables
 from pycopia.db.types import validate_value_type
@@ -380,6 +380,10 @@ class Schedule(object):
 
     def __str__(self):
         return "%s: %s %s %s %s %s" % (self.name, self.minute, self.hour,
+                self.day_of_month, self.month, self.day_of_week)
+
+    def __repr__(self):
+        return "Schedule(%r, %r, %r, %r, %r, %r)" % (self.name, self.minute, self.hour,
                 self.day_of_month, self.month, self.day_of_week)
 
 mapper(Schedule, tables.schedule,
@@ -947,7 +951,18 @@ class TestResult(object):
              setattr(self, name, value)
 
     def __str__(self):
-        return "%s(%s): %s" % (self.testcase, self.objecttype, self.testresult)
+        #"TestSuite", "Test"
+        if self.objecttype_c in (1, 2):
+            if self.testcase is None:
+                return "%s(%s): %s" % (self.testimplementation, self.objecttype, self.testresult)
+            else:
+                return "%s(%s): %s" % (self.testcase, self.objecttype, self.testresult)
+        else:
+            return "%s: %s" % (self.objecttype, self.testresult)
+
+    def __repr__(self):
+        return "TestResult(testimplementation=%r, objecttype=%r, testresult=%r)" % (
+                self.testimplementation, self.objecttype, self.testresult)
 
     testresult = property(lambda self: TESTRESULTS.find(self.result))
 
@@ -1015,11 +1030,14 @@ mapper(Capability, tables.capability,
 class Config(object):
     ROW_DISPLAY = ("name", "value", "user", "testcase", "testsuite")
 
-    def __repr__(self):
-        if self.value is None:
-            return self.name
+    def __str__(self):
+        if self.value is NULL:
+            return "[%s]" % self.name
         else:
             return "%s=%r" % (self.name, self.value)
+
+    def __repr__(self):
+        return "Config(%r, %r)" % (self.name, self.value)
 
 
 mapper(Config, tables.config, 

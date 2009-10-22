@@ -354,6 +354,8 @@ class EnvironmentRuntime(object):
 
     DUT = property(_get_DUT)
 
+    environment = property(lambda s: s._environment)
+
     def get_role(self, rolename):
         try:
             return self._eqcache[rolename]

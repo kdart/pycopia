@@ -25,8 +25,13 @@ import os
 from pycopia import CLI
 from pycopia import tty
 from pycopia import passwd
-from pycopia.db import models
+from pycopia.aid import NULL
 
+from pycopia.db import models
+from pycopia.db import config
+
+from sqlalchemy import and_
+from sqlalchemy.orm.exc import NoResultFound
 
 _session = None
 
@@ -41,12 +46,20 @@ class SessionCommands(CLI.BaseCommands):
     def initialize(self):
         tables = list(models.class_names())
         self.add_completion_scope("use", tables)
+        self.add_completion_scope("edit", tables)
 
     def close(self, argv):
         """close
     Close the database."""
         self._obj.close()
         raise CLI.CommandQuit
+
+    def finalize(self):
+        if bool(self._obj.dirty):
+            if self._ui.yes_no("Changes have been made. Commit?"):
+                self._obj.commit()
+            else:
+                self._obj.rollback()
 
     def begin(self, argv):
         """begin
@@ -73,29 +86,35 @@ class SessionCommands(CLI.BaseCommands):
         cmd._setup(t, cls.get_prompt(t))
         raise CLI.NewCommand(cmd)
 
+    edit = use # alias
+
     def ls(self, argv):
         """ls
     List persistent objects."""
         self._print_list(list(models.class_names()))
 
+    def config(self, argv):
+        """config
+    Enter configuration table edit mode."""
+        root = config.get_root(self._obj)
+        cmd = self.clone(ConfigCommands)
+        cmd._setup(root, "%%YConfig%%N:%s> " % (root.name,))
+        raise CLI.NewCommand(cmd)
 
-class RowCommands(CLI.BaseCommands):
+
+class RowCommands(CLI.GenericCLI):
 
     @classmethod
     def get_prompt(cls, dbrow):
-        return "%%I%s%%N%s> " % (dbrow.id, dbrow)
+        cls._metadata = sorted(models.get_metadata(dbrow.__class__))
+        return "%%I%s%%N:%s> " % (dbrow.id, dbrow)
 
     def show(self, argv):
         """show
     show the selected rows data."""
-    #relmodel = self._obj.property.mapper.class_
-        for metadata in sorted(models.get_metadata(self._obj.class_)):
+        for metadata in RowCommands._metadata:
             self._print("%20.20s: %s" % (metadata.colname, getattr(self._obj, metadata.colname)))
 
-    def set(self, argv):
-        """set <attribute> <value>
-    Set the column attribute for this row."""
-        self._print("Not implemented")
 
 
 class TableCommands(CLI.BaseCommands):
@@ -230,10 +249,14 @@ class UserCommands(TableCommands):
         """delete <username>
     Delete a user from the database."""
         username = argv[1]
-        user = _session.query(models.User).filter(models.User.username==username).one()
-        if user:
-            _session.delete(user)
-            _session.commit()
+        try:
+            user = _session.query(models.User).filter(models.User.username==username).one()
+        except NoResultFound:
+            self._ui.error("No user %r found." % (username,))
+        else:
+            if self._ui.yes_no("Delete %r, are you sure?" % (username,)):
+                _session.delete(user)
+                _session.commit()
 
 
 class QueryCommands(CLI.BaseCommands):
@@ -298,6 +321,99 @@ class CreateCommands(CLI.BaseCommands):
         _session.add(self._obj)
         _session.commit()
         raise CLI.CommandQuit
+
+
+class ConfigCommands(CLI.BaseCommands):
+
+    def ls(self, argv):
+        """ls
+    Show container."""
+        for ch in self._obj.children:
+            self._print("  ", ch)
+
+    def chdir(self, argv):
+        """chdir/cd <container>
+    Make <container> the current container."""
+        name = argv[1]
+        if name == "..":
+            raise CLI.CommandQuit
+        row = _session.query(models.Config).filter(and_(
+                models.Config.name==name,
+                models.Config.container==self._obj)).one()
+        if row.value is NULL:
+            pathname = ".".join([self._obj.name, row.name])
+            cmd = self.clone(ConfigCommands)
+            cmd._setup(row, "%%YConfig%%N:%s> " % pathname)
+            raise CLI.NewCommand(cmd)
+        else:
+            self._print("%s: not a container." % (name,))
+
+    cd = chdir
+
+    def set(self, argv):
+        """set [-t <type>] <name> <value>
+    Sets the named attribute to a new value. The value will be converted into a
+    likely suspect, but you can specify a type with the -t flag.  """
+        tval = CLI.clieval
+        optlist, longoptdict, args = self.getopt(argv, "t:")
+        for opt, optarg in optlist:
+            if opt == "-t":
+                tval = eval(optarg, {}, {})
+                if type(tval) is not type:
+                    self._ui.error("Bad type.")
+                    return
+        value = tval(*tuple(args[1:]))
+        name = args[0]
+        row = self._get(name)
+        if row is None:
+            myself = self._obj
+            newrow = models.create(models.Config, 
+                name=name, 
+                value=value, 
+                container=myself, 
+                user=myself.user,
+                testcase=myself.testcase,
+                testsuite=myself.testsuite,
+                )
+            _session.add(newrow)
+            self._print("Added %r with value %r." % (name, value))
+        else:
+            row.value = value
+            self._print("Set %r to %r." % (name, value))
+        _session.commit()
+
+    def delete(self, argv):
+        name = argv[1]
+        row = self._get(name)
+        if row is not None:
+            _session.delete(row)
+            _session.commit()
+            self._print("%r deleted." % (name,))
+        else:
+            self._ui.error("No such item: %r." % (name,))
+
+    def get(self, argv):
+        """get/show <name>
+    Show the value of <name>."""
+        row = self._get(argv[1])
+        if row is not None:
+            self._print(repr(row.value))
+        else:
+            self._ui.error("No such item.")
+
+    def _get(self, name):
+        try:
+            return _session.query(models.Config).filter(and_(
+                    models.Config.name==name,
+                    models.Config.container==self._obj,
+                    models.Config.user==self._obj.user,
+                    models.Config.testcase==self._obj.testcase,
+                    models.Config.testsuite==self._obj.testsuite,
+                    )).one()
+        except NoResultFound:
+            return None
+
+
 
 
 # Maps table names to editor classes

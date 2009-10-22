@@ -92,7 +92,7 @@ class ResultHolder(object):
     def commit(self, dbsession, parentrecord=None):
         self._data["parent"] = parentrecord
         self.resolve_testcase(dbsession)
-        tr = models.TestResult(**self._data)
+        tr = models.create(models.TestResult, **self._data)
         dbsession.add(tr)
         for child in self._children:
             child.commit(dbsession, tr)
@@ -117,7 +117,7 @@ class ResultHolder(object):
 
 
 def get_user(conf):
-    sess = conf.dbsession
+    sess = conf.session
     pwent = passwd.getpwuid(os.getuid())
     try:
 #        user = models.User.objects.get(username=pwent.name)
@@ -142,7 +142,7 @@ class DatabaseReport(reports.NullReport):
         # needed in the database record is kept until the records are written
         # in the finalize method.
         self._debug = cf.flags.DEBUG
-        self._environment = cf.environment
+        self._environment = cf.environment.environment
         self._testid = None
         self._rootresult = ResultHolder()
         self._rootresult.set("environment", self._environment)
@@ -155,7 +155,7 @@ class DatabaseReport(reports.NullReport):
             user = get_user(cf)
         self._user = user
         self._rootresult.set("tester", self._user)
-        self._dbsession = cf.dbsession
+        self._dbsession = cf.session
 
     MIMETYPE = property(lambda self: self._MIMETYPE)
 
@@ -297,7 +297,7 @@ class DatabaseReport(reports.NullReport):
         pass
 
     def add_data(self, data, note=None): 
-        testdata = models.TestResultData(data=data, note=note)
+        testdata = models.create(models.TestResultData, data=data, note=note)
         if not self._debug:
             self._dbsession.add(testdata)
         self._currentresult.set("testresultdata", testdata)

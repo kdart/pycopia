@@ -26,7 +26,7 @@ name-value pairs (mappings).
 from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 
-from pycopia import aid
+from pycopia.aid import NULL
 from pycopia.db import models
 
 Config = models.Config
@@ -49,7 +49,7 @@ class Container(object):
         self.__dict__["node"] = configrow
 
     def __str__(self):
-        if self.node.value is aid.NULL:
+        if self.node.value is NULL:
             s = []
             for ch in self.node.children:
                 s.append(str(ch))
@@ -79,7 +79,7 @@ class Container(object):
                 Config.name==name)).one()
         except NoResultFound:
             raise KeyError(name)
-        if item.value is aid.NULL:
+        if item.value is NULL:
             return Container(self.session, item)
         return item.value
 
@@ -143,8 +143,8 @@ class Container(object):
 
     def add_container(self, name):
         me = self.node
-        if me.value is aid.NULL:
-            new = models.create(Config, name=name, value=aid.NULL, container=me, user=me.user,
+        if me.value is NULL:
+            new = models.create(Config, name=name, value=NULL, container=me, user=me.user,
                 testcase=me.testcase, testsuite=me.testsuite)
             self.session.add(new)
             self.session.commit()
@@ -156,7 +156,7 @@ class Container(object):
         me = self.node
         c = session.query(Config).filter(and_(
                 Config.name==name, 
-                Config.value==aid.NULL, 
+                Config.value==NULL, 
                 Config.parent_id==me.id, 
                 Config.user==me.user)).one()
         return Container(self.session, c)
@@ -176,7 +176,7 @@ class Container(object):
     def next(self):
         try:
             item = self.__dict__["_set"].next()
-            if item.value is aid.NULL:
+            if item.value is NULL:
                 return Container(self.session, item)
             else:
                 return item.value
@@ -193,7 +193,7 @@ class Container(object):
             try:
                 item = session.query(Config).filter(and_(
                         Config.container==node, Config.name==key)).one()
-                if item.value is aid.NULL:
+                if item.value is NULL:
                     return Container(session, item)
                 else:
                     return item.value

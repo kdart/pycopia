@@ -730,7 +730,7 @@ def _convert(val, namespace):
 # public "safe" evaluator
 def clieval(val):
     try:
-        return eval(val)
+        return eval(val, {}, {})
     except:
         return val # just assume some string otherwise
 
@@ -747,7 +747,7 @@ class DictCLI(BaseCommands):
         self.add_completion_scope("set", names)
         self.add_completion_scope("pop", names)
         self.add_completion_scope("delete", names)
-    
+
     def set(self, argv):
         """set [-t <type>] <name> <value>
     Set the mapping key to value. Specify a type of the value with the -t
@@ -998,7 +998,7 @@ methods/commands that correspond to the wrapped objects methods.  """
         s = []
         ms = []
         for name in d:
-            if name.startswith("__") or name.startswith("_p_"): # hide class-private and persistence overhead objects.
+            if name.startswith("_"):
                 continue
             attr = getattr(self._obj, name)
             if type(attr) is MethodType:
