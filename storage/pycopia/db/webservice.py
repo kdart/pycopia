@@ -330,7 +330,7 @@ def build_testcase_edit_form(form, modelclass, row, error=None):
         node = ctor(fs, modelclass, metadata, row)
         node.class_ = "radioset"
         fs.append(BR)
-
+    form.add_hidden("lastchange", str(models.tables.time_now()))
     form.add_input(type="submit", name="submit", value="submit")
 
 
