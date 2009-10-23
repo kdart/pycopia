@@ -52,6 +52,7 @@ def update(modelname, entry_id, data):
 
 def table_get(modelname, filt, order_by=None, start=None, end=None):
     klass = get_model(modelname)
+    order_by = order_by or klass.ROW_DISPLAY[0]
     q = _dbsession.query(klass)
     for name, value in filt.items():
         attrib = getattr(klass, name)
@@ -86,8 +87,9 @@ def get_row(modelclass, rowid):
     return dbrow
 
 
-def get_choices(modelname, attribute):
-    return [] # XXX
+def get_choices(modelname, attribute, order_by=None):
+    modelclass = get_model(modelname)
+    return models.get_choices(_dbsession, modelclass, attribute, order_by)
 
 
 def delete(modelname, entry_id):
@@ -373,13 +375,14 @@ def new_pickleinput(node, modelclass, metadata):
         default = repr(metadata.default)
     return node.add_textinput(metadata.colname, metadata.colname, default)
 
-def new_relation_input(node, modelclass, metadata):
-    relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
-    choices = [(str(relrow), relrow.id) for relrow in _dbsession.query(relmodel).all()]
+def new_relation_input(node, modelclass, metadata, order_by=None):
+    #relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
+    #choices = [(relrow.id, str(relrow)) for relrow in _dbsession.query(relmodel).all()]
+    choices = models.get_choices(_dbsession, modelclass, metadata.colname, order_by)
     if not choices:
         return node.new_para("%s has no choices." % metadata.colname)
     if metadata.nullable:
-        choices.insert(0, ("----", 0))
+        choices.insert(0, (0, "----"))
     elid = "id_" + metadata.colname
     node.add_label(metadata.colname, elid)
     return node.add_select(choices, name=metadata.colname, multiple=metadata.uselist, id=elid)
@@ -525,19 +528,23 @@ def create_relation_input(node, modelclass, metadata, row):
     vlist = []
     current = getattr(row, metadata.colname)
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
-    for relrow in _dbsession.query(relmodel).all():
+    try:
+        order_by = relmodel.ROW_DISPLAY[0]
+    except (AttributeError, IndexError):
+        order_by = "id"
+    for relrow in _dbsession.query(relmodel).order_by(order_by).all():
         if metadata.uselist:
             if relrow in current:
-                vlist.append((str(relrow), relrow.id, True))
+                vlist.append((relrow.id, str(relrow), True))
             else:
-                vlist.append((str(relrow), relrow.id, False))
+                vlist.append((relrow.id, str(relrow), False))
         else:
             if relrow is current:
-                vlist.append((str(relrow), relrow.id, True))
+                vlist.append((relrow.id, str(relrow), True))
             else:
-                vlist.append((str(relrow), relrow.id, False))
+                vlist.append((relrow.id, str(relrow), False))
     if metadata.nullable:
-        vlist.insert(0, ("----", 0))
+        vlist.insert(0, (0, "----"))
     elid = "id_" + metadata.colname
     node.add_label(metadata.colname, elid)
     return node.add_select(vlist, name=metadata.colname, multiple=metadata.uselist, id=elid)
@@ -702,4 +709,6 @@ if __name__ == "__main__":
     #print _convert_instance(test_results(0, 10)[0])
     print _tables
     print table_get("InterfaceType", {"enumeration": 3})[0]
+    for it in table_get("InterfaceType", {}, order_by="name"):
+        print it
 

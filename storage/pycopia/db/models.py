@@ -437,7 +437,7 @@ class FunctionalArea(object):
         return self.name
 
     def __repr__(self):
-        return "FunctionalArea(%r, %r)" % (self.name, self.description)
+        return "FunctionalArea(%r)" % self.name
 
 
 mapper(FunctionalArea, tables.functional_area)
@@ -1061,6 +1061,31 @@ def class_names():
         yield mapper._identity_class.__name__
 
 
+def get_choices(session, modelclass, colname, order_by=None):
+    """Get possible choices for a field.
+
+    Returns a list of tuples, (id/value, name/label) of available choices.
+    """
+    mapper = class_mapper(modelclass)
+    try:
+        return mapper.columns[colname].type.get_choices()
+    except (AttributeError, KeyError):
+        pass
+    try:
+        relmodel = getattr(modelclass, colname).property.mapper.class_
+    except AttributeError:
+        return []
+    try:
+        order_by = order_by or relmodel.ROW_DISPLAY[0]
+    except (AttributeError, IndexError):
+        pass
+    q = session.query(relmodel)
+    if order_by:
+        q = q.order_by(getattr(relmodel, order_by))
+    return [(relrow.id, str(relrow)) for relrow in q.all()]
+
+
+# structure returned by get_metadata function.
 MetaDataTuple = collections.namedtuple("MetaDataTuple", 
         "coltype, colname, default, m2m, nullable, uselist")
 
@@ -1115,6 +1140,7 @@ if __name__ == "__main__":
     print eq.attributes
     print "Capabilities:"
     print eq.capabilities
+
 
 
 

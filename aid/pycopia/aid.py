@@ -102,7 +102,7 @@ class Enums(list):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, list.__repr__(self))
 
-    # works nicely with Django ORM. :-)
+    # works nicely with WWW framework.
     choices = property(lambda s: map(lambda e: (int(e), str(e)), s))
 
     def find(self, value):

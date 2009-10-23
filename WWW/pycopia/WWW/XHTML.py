@@ -1117,22 +1117,22 @@ class FormMixin(ContainerMixin):
                 sl.append(opt)
             return 
         if et is dict and enums:
-            for i, (key, val) in enumerate(enums.items()):
+            for key, val in enums.items():
                 opt = self.dtd.Optgroup(label=key)
                 self._add_options(opt, val)
                 sl.append(opt)
-            return i
+            return
         if et is tuple and enums:
             name, value = enums
             opt = self.dtd.Option(value=value)
             opt.append(POM.Text(name))
             return
         if et is list and enums:
-            for i, item in enumerate(enums):
+            for item in enums:
                 it = type(item)
                 if it is tuple: # add "selected" item by adding (value, flag)
-                    opt = self.dtd.Option(value=item[1])
-                    opt.append(POM.Text(item[0]))
+                    opt = self.dtd.Option(value=item[0])
+                    opt.append(POM.Text(item[1]))
                     if len(item) > 2 and item[2]:
                         opt.selected = "selected"
                 elif it is dict: # make option groups by passing dictionaries
@@ -1143,13 +1143,13 @@ class FormMixin(ContainerMixin):
                 elif it is Enum: # a named number
                     opt = self.dtd.Option(value=int(item))
                     opt.append(POM.Text(item))
-                elif it is list: # for nested lists
+                elif it is list: # nested lists will be flattened
                     self._add_options(sl, item)
                 else:
                     opt = self.dtd.Option(value=item)
                     opt.append(POM.Text(item))
                 sl.append(opt)
-            return i
+            return
         else:
             opt = self.dtd.Option(value=enums)
             opt.append(POM.Text(enums))
