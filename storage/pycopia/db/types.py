@@ -25,6 +25,7 @@ __all__ = [
     "PGInteger", "PGInterval", "PGMacAddr", "PGNumeric", "PGSmallInteger",
     "PGString", "PGText", "PGTime", "PGUuid",
     "PickleText", "TestCaseStatus", "TestCaseType", "TestPriorityType", "ValueType",
+    "TestResultType", "TestObjectType", 
     "validate_value_type",
 ]
 
@@ -144,6 +145,63 @@ class TestPriorityType(types.TypeDecorator):
     @classmethod
     def get_default(cls):
         return cls.enumerations[0]
+
+    @classmethod
+    def validate(cls, value):
+        return cls.enumerations.find(int(value))
+
+
+TESTRESULTS = Enums(PASSED=1, FAILED=0, INCOMPLETE=-1, ABORT=-2, NA=-3, EXPECTED_FAIL=-4)
+TESTRESULTS.sort()
+
+class TestResultType(types.TypeDecorator):
+    """Possible status of test case or test runner objects."""
+
+    impl = PGInteger
+    enumerations = TESTRESULTS
+
+    def process_bind_param(self, value, dialect):
+        return  int(value)
+
+    @classmethod
+    def process_result_value(cls, value, dialect):
+        return cls.enumerations.find(value)
+
+    @classmethod
+    def get_choices(cls):
+        return cls.enumerations.choices
+
+    @classmethod
+    def get_default(cls):
+        return cls.enumerations[1]
+
+    @classmethod
+    def validate(cls, value):
+        return cls.enumerations.find(int(value))
+
+
+OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
+
+class TestObjectType(types.TypeDecorator):
+    """Possible test runner objects that produce results."""
+
+    impl = PGInteger
+    enumerations = OBJECTTYPES
+
+    def process_bind_param(self, value, dialect):
+        return  int(value)
+
+    @classmethod
+    def process_result_value(cls, value, dialect):
+        return cls.enumerations.find(value)
+
+    @classmethod
+    def get_choices(cls):
+        return cls.enumerations.choices
+
+    @classmethod
+    def get_default(cls):
+        return cls.enumerations[4]
 
     @classmethod
     def validate(cls, value):

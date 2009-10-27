@@ -25,6 +25,7 @@ from pycopia import reports
 from sqlalchemy.orm.exc import NoResultFound
 
 from pycopia.db import models
+from pycopia.db import types
 
 
 _COLUMNS = {
@@ -34,7 +35,7 @@ _COLUMNS = {
     "tester": None,             # user running the test
     "testversion": None,        # Version of test implementation
     "parent": None,             # container object
-    "objecttype_c": None,       # Object type enumeration
+    "objecttype": None,       # Object type enumeration
     "starttime": None,          # STARTTIME (Test, Suite),    RUNNERSTART (module)
     "endtime": None,            # ENDTIME (Test, Suite), RUNNEREND (module)
     "arguments": None,          # TESTARGUMENTS (Test), RUNNERARGUMENTS (module)
@@ -45,13 +46,11 @@ _COLUMNS = {
     "testimplementation": None, # implementation 
     "reportfilename": None,
     "note": None,               # COMMENT
-    "valid": True,              
+    "valid": True,
 }
 
-# The enumerations in models need to be converted to pure ints for the
-# database to get updated properly.
-[MODULE, SUITE, TEST, RUNNER, UNKNOWN] = map(int, models.OBJECTTYPES)
-[EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = map(int, models.TESTRESULTS)
+[MODULE, SUITE, TEST, RUNNER, UNKNOWN] = types.OBJECTTYPES
+[EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = types.TESTRESULTS
 
 
 class ResultHolder(object):
@@ -63,7 +62,7 @@ class ResultHolder(object):
     def __str__(self):
         d = self._data
         return "%s (%s) - %s start: %s end: %s" % (
-            models.OBJECTTYPES[d["objecttype_c"]], d["testimplementation"], 
+            types.OBJECTTYPES[d["objecttype"]], d["testimplementation"], 
             d["result"], d["starttime"], d["endtime"])
 
     def get_result(self):
@@ -147,7 +146,7 @@ class DatabaseReport(reports.NullReport):
         self._rootresult = ResultHolder()
         self._rootresult.set("environment", self._environment)
         self._rootresult.set("result", NA)
-        self._rootresult.set("objecttype_c", RUNNER)
+        self._rootresult.set("objecttype", RUNNER)
         self._currentresult = self._rootresult
         self._MIMETYPE = "text/plain" # all reports have a mime type
         user = cf.get("user")
@@ -176,7 +175,7 @@ class DatabaseReport(reports.NullReport):
         new.set("environment", self._environment)
         new.set("testversion", self._testid)
         new.set("tester", self._user)
-        new.set("objecttype_c", int(models.OBJECTTYPES[otype]))
+        new.set("objecttype", types.OBJECTTYPES[otype])
         return new
 
     def add_result(self, otype):     # really a pop-push operation.
@@ -185,7 +184,7 @@ class DatabaseReport(reports.NullReport):
 
     def push_result(self, otype):
         if self._debug:
-            sys.stdout.write("     *** push_result: %s\n" % (models.OBJECTTYPES[otype],))
+            sys.stdout.write("     *** push_result: %s\n" % (types.OBJECTTYPES[otype],))
         new = self.new_result(otype)
         self._currentresult.append(new)
         self._currentresult = new
@@ -205,7 +204,7 @@ class DatabaseReport(reports.NullReport):
     def add_heading(self, text, level): 
         # level = 1 for suites, 2 for tests, 3 for other
         # signals new test and test suite record.
-        currenttype = self._currentresult.get("objecttype_c")
+        currenttype = self._currentresult.get("objecttype")
         if currenttype == RUNNER: 
             self.push_result(level)     # runner -> (suite | test)
         elif currenttype == MODULE:
@@ -244,7 +243,7 @@ class DatabaseReport(reports.NullReport):
         elif msgtype == "MODULEVERSION":
             self._testid = msg
         elif msgtype == "MODULESTARTTIME":
-            currenttype = self._currentresult.get("objecttype_c")
+            currenttype = self._currentresult.get("objecttype")
             if currenttype == RUNNER:
                 self.push_result(0)    # runner -> module
                 self._currentresult.set("starttime", datetime.fromtimestamp(msg))
@@ -256,7 +255,7 @@ class DatabaseReport(reports.NullReport):
             elif currenttype == TEST:
                 self.pop_result()             # test -> module
         elif msgtype == "MODULEENDTIME":
-            currenttype = self._currentresult.get("objecttype_c")
+            currenttype = self._currentresult.get("objecttype")
             if currenttype == SUITE:
                 self.pop_result()             # suite -> runner
             elif currenttype == TEST:

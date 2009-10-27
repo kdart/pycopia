@@ -52,7 +52,10 @@ def update(modelname, entry_id, data):
 
 def table_get(modelname, filt, order_by=None, start=None, end=None):
     klass = get_model(modelname)
-    order_by = order_by or klass.ROW_DISPLAY[0]
+    try:
+        order_by = order_by or klass.ROW_DISPLAY[0]
+    except AttributeError:
+        pass
     q = _dbsession.query(klass)
     for name, value in filt.items():
         attrib = getattr(klass, name)
@@ -376,8 +379,6 @@ def new_pickleinput(node, modelclass, metadata):
     return node.add_textinput(metadata.colname, metadata.colname, default)
 
 def new_relation_input(node, modelclass, metadata, order_by=None):
-    #relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
-    #choices = [(relrow.id, str(relrow)) for relrow in _dbsession.query(relmodel).all()]
     choices = models.get_choices(_dbsession, modelclass, metadata.colname, order_by)
     if not choices:
         return node.new_para("%s has no choices." % metadata.colname)
@@ -528,11 +529,13 @@ def create_relation_input(node, modelclass, metadata, row):
     vlist = []
     current = getattr(row, metadata.colname)
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
+    q = _dbsession.query(relmodel)
     try:
         order_by = relmodel.ROW_DISPLAY[0]
+        q = q.order_by(getattr(relmodel, order_by))
     except (AttributeError, IndexError):
-        order_by = "id"
-    for relrow in _dbsession.query(relmodel).order_by(order_by).all():
+        pass
+    for relrow in q.all():
         if metadata.uselist:
             if relrow in current:
                 vlist.append((relrow.id, str(relrow), True))
@@ -700,6 +703,56 @@ _VALIDATORS = {
     "TestCaseType": types.TestCaseType.validate,
     "TestPriorityType": types.TestPriorityType.validate,
 }
+
+
+### test result reports 
+
+def testresult_constructor(request, **kwargs):
+    doc = framework.get_acceptable_document(request)
+    doc.stylesheet = request.get_url("css", name="tableedit.css")
+    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
+    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
+    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
+    for name, val in kwargs.items():
+        setattr(doc, name, val)
+    nav = doc.add_section("navigation")
+    NM = doc.nodemaker
+    nav.append(NM("P", None,
+         NM("A", {"href":"/"}, "Home"),
+    ))
+    nav.append(NM("P", {"class_": "title"}, "Test Results"))
+    nav.append(NM("P", None, 
+            NM("A", {"href": "/auth/logout"}, "logout")))
+    #doc.add_section("messages", id="messages")
+    return doc
+
+
+class TestResultHandler(framework.RequestHandler):
+
+    def get(self, request):
+        resp = self.get_response(request)
+
+        TR = models.TestResult
+        cycler = itertools.cycle(["row1", "row2"])
+        tbl = resp.doc.add_table(width="100%")
+        tbl.caption("Test Runs")
+        tbl.new_headings("Runner", "Result", "Results Location")
+
+        for res in TR.get_latest_results(_dbsession):
+            row = tbl.new_row()
+            setattr(row, "class_", cycler.next())
+            row.new_column(str(res))
+            row.new_column(res.result)
+            row.new_column(resp.nodemaker("A", 
+                    {"href": res.resultslocation},  "Results location"))
+        return resp.finalize()
+
+
+#    def post(self, request, tablename=None, rowid=None):
+#        pass
+
+testresults = auth.need_login(TestResultHandler(testresult_constructor))
+
 
 
 if __name__ == "__main__":

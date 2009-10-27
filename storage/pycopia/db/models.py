@@ -38,29 +38,6 @@ from pycopia.db.types import validate_value_type
 
 
 
-# Attribute value base types.
-#[VT_OBJECT, VT_STRING, VT_UNICODE, VT_INTEGER, VT_FLOAT, VT_BOOLEAN] = tables.VALUETYPES
-
-# Test result types - these objects may report a result
-OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
-[MODULE, SUITE, TEST, RUNNER, UNKNOWN] = OBJECTTYPES
-
-# results a test case can produce.
-TESTRESULTS = Enums(PASSED=1, FAILED=0, INCOMPLETE=-1, ABORT=-2, NA=-3, EXPECTED_FAIL=-4)
-TESTRESULTS.sort()
-#[EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = TESTRESULTS
-
-# Priority codes
-#P_UNKNOWN, P1, P2, P3, P4, P5 = tables.PRIORITIES 
-#
-# TestCase test type 
-#TC_UNIT, TC_SYSTEM, TC_INTEGRATION, TC_REGRESSION, TC_PERFORMANCE = tables.TESTCASETYPES
-#
-## TestCase status enums
-#TC_NEW, TC_REVIEWED, TC_DEPRECATED = tables.STATUSES
-
-
-
 def create_session(addr):
     db = create_engine(addr)
     tables.metadata.bind = db
@@ -103,15 +80,6 @@ def _get_secret():
 _get_secret()
 del _get_secret
 
-
-
-#######################################
-# Basic address book table. This table originally mapped to
-# StarOffice Addresses database and is here just for nostalgia. ;-)
-
-class AddressBookEntry(object):
-    pass
-mapper(AddressBookEntry, tables.addressbook)
 
 
 #######################################
@@ -945,28 +913,36 @@ mapper(TestResultData, tables.test_results_data)
 
 
 class TestResult(object):
-    ROW_DISPLAY = ("testcase", "testimplementation", "tester", "testresult", "resultslocation")
+    ROW_DISPLAY = ("testcase", "testimplementation", "tester", "result", "resultslocation")
     def __init__(self, **kwargs):
         for name, value in kwargs.items():
              setattr(self, name, value)
 
     def __str__(self):
         #"TestSuite", "Test"
-        if self.objecttype_c in (1, 2):
+        if self.objecttype in (1, 2):
             if self.testcase is None:
-                return "%s(%s): %s" % (self.testimplementation, self.objecttype, self.testresult)
+                return "%s(%s): %s" % (self.testimplementation, self.objecttype, self.result)
             else:
-                return "%s(%s): %s" % (self.testcase, self.objecttype, self.testresult)
+                return "%s(%s): %s" % (self.testcase, self.objecttype, self.result)
         else:
-            return "%s: %s" % (self.objecttype, self.testresult)
+            return "%s: %s" % (self.objecttype, self.result)
 
     def __repr__(self):
-        return "TestResult(testimplementation=%r, objecttype=%r, testresult=%r)" % (
-                self.testimplementation, self.objecttype, self.testresult)
+        return "TestResult(testimplementation=%r, objecttype=%r, result=%r)" % (
+                self.testimplementation, self.objecttype, self.result)
 
-    testresult = property(lambda self: TESTRESULTS.find(self.result))
+    #testresult = property(lambda self: TESTRESULTS.find(self.result))
 
-    objecttype = property(lambda self: OBJECTTYPES.find(self.objecttype_c))
+    #objecttype = property(lambda self: OBJECTTYPES.find(self.objecttype_c))
+
+    @classmethod
+    def get_latest_results(cls, session):
+        q = session.query(cls).filter(and_(
+                cls.objecttype==3,
+                cls.valid==True,
+                )).order_by(cls.starttime).all()
+        return q
 
 
 mapper(TestResult, tables.test_results,
@@ -1025,7 +1001,8 @@ mapper(Capability, tables.capability,
 
 
 #######################################
-# configuration data
+# configuration data. This models a hierarchical storage structures. It
+# should be updated with the pycopia.db.config wrapper objects.
 
 class Config(object):
     ROW_DISPLAY = ("name", "value", "user", "testcase", "testsuite")
@@ -1050,6 +1027,16 @@ mapper(Config, tables.config,
         'user': relation(User),
     }
 )
+
+
+#######################################
+# Basic address book table. This table originally mapped to
+# StarOffice Addresses database and is here just for nostalgia. ;-)
+
+class AddressBookEntry(object):
+    pass
+mapper(AddressBookEntry, tables.addressbook)
+
 
 
 #######################################
@@ -1134,12 +1121,15 @@ if __name__ == "__main__":
     print get_metadata(Equipment)
     #props = list(class_mapper(Equipment).iterate_properties)
     sess = get_session()
-    eq = sess.query(Equipment).get(2)
-    print "eq = ", eq
-    print "Attributes:"
-    print eq.attributes
-    print "Capabilities:"
-    print eq.capabilities
+#    eq = sess.query(Equipment).get(2)
+#    print "eq = ", eq
+#    print "Attributes:"
+#    print eq.attributes
+#    print "Capabilities:"
+#    print eq.capabilities
+
+    for res in  TestResult.get_latest_results(sess):
+        print res
 
 
 
