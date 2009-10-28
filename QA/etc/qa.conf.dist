@@ -1,0 +1,60 @@
+#!/usr/bin/python
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+# License: LGPL
+# Keith Dart <kdart@kdart.com>
+
+
+DATABASE_URL = 'postgres://pycopia@localhost/pycopia'
+
+### web interface
+
+# User to run handler as. Main server must be run as root for this to have
+# any effect.
+USERNAME = "tester"
+
+ADMINS = [
+    ('keith@hytrust.com', 'Keith Dart'),
+]
+
+# Map pattern to handler functions. 
+LOCATIONMAP = (
+#  (r"^/api/(?P<methodname>\w+)$", "pycopia.db.webservice.dispatcher"),
+  (r"^/?$", "pycopia.QA.webui.main"),
+  (r"^/testresults/?$", "pycopia.QA.webui.testresults"),
+#  (r"^/table/(?P<tablename>\w+)/delete/(?P<rowid>\d+)/?$", "pycopia.db.webservice.delete_row"),
+    # aliases don't have a dot in the name.
+  (r'/media/css/(?P<name>\S+)', "css"),
+  (r'/media/js/(?P<name>\S+)', "js"),
+  (r'/media/images/(?P<name>\S+)', "images"),
+)
+
+# These should all be 24x24 icons
+ICONMAP = {
+# simplename     active         inactive (base state)
+#"xxx": ("icon_xxx_active.png", "icon_xxx_inactive.png"),
+  "default": (None, "icon_default_inactive.png"),
+  "add": ("icon_add_active.png", "icon_add_inactive.png"),
+  "edit": ("icon_edit_active.png", "icon_edit_inactive.png"),
+  "delete": ("icon_delete_active.png", "icon_delete_inactive.png"),
+  "activate": ("icon_activate_active.png", "icon_activate_inactive.png"),
+  "isactive": ("icon_isactive_active.png", "icon_isactive_inactive.png"),
+  "isinactive": ("icon_isinactive_active.png", "icon_isinactive_inactive.png"),
+  "unknown": ("icon_unknown_active.png", "icon_unknown_inactive.png"),
+  "plus": ("icon_plus_active.png", "icon_plus_inactive.png"),
+  "minus": ("icon_minus_active.png", "icon_minus_inactive.png"),
+  "alert": (None, "icon_alert_inactive.png"),
+}
+
+# these should all be 10x10 icons
+ICONMAP_SMALL = {
+# simplename     active         inactive (base state)
+#"xxx": "icon_xxx.png",
+  "default": "icon-unknown.png",
+  "edit": "icon_changelink.png",
+  "delete": "icon_deletelink.png",
+  "add": "icon_addlink.png",
+  "unknown": "icon-unknown.png",
+  "yes": "icon-yes.png",
+  "no": "icon-no.png",
+}
+

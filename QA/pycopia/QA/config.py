@@ -61,16 +61,16 @@ class RootContainer(config.Container):
         return "<RootContainer>"
 
     def __getattribute__(self, key):
+        if key == "__dict__":
+            return object.__getattribute__(self, key)
+        try:
+            # check the local cache first, overrides persistent storage
+            return self.__dict__["_cache"].__getitem__(key)
+        except KeyError:
+            pass
         try:
             return super(RootContainer, self).__getattribute__(key)
         except AttributeError:
-
-            try:
-                # check the local cache first, overrides persistent storage
-                obj = self.__dict__["_cache"].__getitem__(key)
-                return obj
-            except KeyError:
-                pass
             node = self.__dict__["node"]
             session = self.__dict__["session"]
             try:
@@ -455,9 +455,16 @@ this.  """
     if _extrafiles:
         files.extend(_extrafiles)
     session = models.get_session()
-    container = config.get_root(session)
+    rootnode = config.get_root(session)
     cache = dictlib.AttrDict()
-    cf = RootContainer(session, container, cache)
+    flags = dictlib.AttrDict()
+    # copy flag values to cache so changes don't persist.
+    flagsnode = session.query(Config).filter(and_(Config.parent_id==rootnode.id,
+                Config.name=="flags")).one()
+    for valnode in flagsnode.children:
+        flags[valnode.name] = valnode.value
+    cache.flags = flags
+    cf = RootContainer(session, rootnode, cache)
     for f in files:
         if os.path.isfile(f):
             cf.mergefile(f)
@@ -473,19 +480,19 @@ if __name__ == "__main__":
         from pycopia import interactive
     cf = get_config()
     print cf
-    #print cf.flags
-    #print cf.flags.DEBUG
+    print cf.flags
+    print cf.flags.DEBUG
     #cf.reportname = "default"
     #print cf.get("reportname")
     #print cf.report
-    env = cf.environment
-    print "Environment:"
-    print env
-    print "Supported roles:"
-    print env.get_supported_roles()
-    print env.get_role("testcontroller")
-    print env._get_DUT()
-    dut = env.DUT
-    print dut["default_role"]
+    #env = cf.environment
+    #print "Environment:"
+    #print env
+    #print "Supported roles:"
+    #print env.get_supported_roles()
+    #print env.get_role("testcontroller")
+    #print env._get_DUT()
+    #dut = env.DUT
+    #print dut["default_role"]
 
 

@@ -26,8 +26,9 @@ name-value pairs (mappings).
 from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 
-from pycopia.aid import NULL
 from pycopia.db import models
+# The NULL value is used to flag a container node.
+from pycopia.aid import NULL
 
 Config = models.Config
 

@@ -3,6 +3,7 @@
 
 
 import sys
+import os
 
 import ez_setup
 ez_setup.use_setuptools()
@@ -54,6 +55,16 @@ if platinfo.is_linux():
     elif platinfo.is_redhat():
         DATA_FILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
     SCRIPTS = glob("bin/*")
+
+    WEBSITE = os.environ.get("WEBSITE", "localhost")
+    DATA_FILES.extend([
+        #(os.path.join("/var", "www", WEBSITE, 'htdocs'), glob("doc/html/*.html")),
+        #(os.path.join("/var", "www", WEBSITE, 'cgi-bin'), glob("doc/html/cgi-bin/*.py")),
+        #(os.path.join("/var", "www", WEBSITE, 'media', 'js'), glob("media/js/*.js")),
+        (os.path.join("/var", "www", WEBSITE, 'media', 'css'), glob("media/css/*.css")),
+        #(os.path.join("/var", "www", WEBSITE, 'media', 'images'), glob("media/images/*.png")),
+    ])
+
 else:
     DATA_FILES = []
     SCRIPTS = []

@@ -198,7 +198,7 @@ class LoginHandler(framework.RequestHandler):
         key = request.POST["key"]
         redir = request.POST["redir"]
         try:
-            user = request.database.query(models.User).filter_by(username=name).one()
+            user = request.dbsession.query(models.User).filter_by(username=name).one()
         except models.NoResultFound:
             return framework.HttpResponseRedirect(request.get_url(login), message="No such user.")
         try:
@@ -211,8 +211,8 @@ class LoginHandler(framework.RequestHandler):
             user.set_last_login()
             resp = framework.HttpResponseRedirect(redir)
             session = _set_session(resp, user, request.get_domain())
-            request.database.add(session)
-            request.database.commit()
+            request.dbsession.add(session)
+            request.dbsession.commit()
             return resp
         else:
             request.log_error("Invalid Authentication for %r\n" % (name, ))
@@ -233,14 +233,14 @@ class LogoutHandler(framework.RequestHandler):
     def get(self, request):
         key = request.COOKIES.get(SESSION_KEY_NAME)
         if key is not None:
-            dbsession = request.database
+            dbsession = request.dbsession
             try:
                 sess = dbsession.query(models.Session).filter_by(session_key=key).one()
             except models.NoResultFound:
                 pass
             else:
-                request.database.delete(sess)
-                request.database.commit()
+                dbsession.delete(sess)
+                dbsession.commit()
         request.session = None
         resp = framework.HttpResponseRedirect("/")
         resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
@@ -257,7 +257,7 @@ def need_login(handler):
         redir = "/auth/login?redir=%s" % request.path
         if not key:
             return framework.HttpResponseRedirect(redir)
-        dbsession = request.database
+        dbsession = request.dbsession
         try:
             session = dbsession.query(models.Session).filter_by(session_key=key).one()
         except models.NoResultFound:
@@ -282,7 +282,7 @@ def need_authentication(handler):
         key = request.COOKIES.get(SESSION_KEY_NAME)
         if not key:
             return framework.HttpResponseNotAuthenticated()
-        dbsession = request.database
+        dbsession = request.dbsession
         try:
             session = dbsession.query(models.Session).filter_by(session_key=key).one()
         except models.NoResultFound:

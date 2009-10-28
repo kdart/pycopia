@@ -35,7 +35,6 @@ from pycopia.WWW import framework
 from pycopia.WWW.middleware import auth
 
 from sqlalchemy.exc import DataError, IntegrityError
-#from sqlalchemy.sql import select
 
 _dbsession = models.get_session()
 _tables = set(models.class_names())
@@ -47,7 +46,7 @@ def get_tables():
 
 
 def update(modelname, entry_id, data):
-    pass
+    pass # XXX
 
 
 def table_get(modelname, filt, order_by=None, start=None, end=None):
@@ -703,55 +702,6 @@ _VALIDATORS = {
     "TestCaseType": types.TestCaseType.validate,
     "TestPriorityType": types.TestPriorityType.validate,
 }
-
-
-### test result reports 
-
-def testresult_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="tableedit.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
-    for name, val in kwargs.items():
-        setattr(doc, name, val)
-    nav = doc.add_section("navigation")
-    NM = doc.nodemaker
-    nav.append(NM("P", None,
-         NM("A", {"href":"/"}, "Home"),
-    ))
-    nav.append(NM("P", {"class_": "title"}, "Test Results"))
-    nav.append(NM("P", None, 
-            NM("A", {"href": "/auth/logout"}, "logout")))
-    #doc.add_section("messages", id="messages")
-    return doc
-
-
-class TestResultHandler(framework.RequestHandler):
-
-    def get(self, request):
-        resp = self.get_response(request)
-
-        TR = models.TestResult
-        cycler = itertools.cycle(["row1", "row2"])
-        tbl = resp.doc.add_table(width="100%")
-        tbl.caption("Test Runs")
-        tbl.new_headings("Runner", "Result", "Results Location")
-
-        for res in TR.get_latest_results(_dbsession):
-            row = tbl.new_row()
-            setattr(row, "class_", cycler.next())
-            row.new_column(str(res))
-            row.new_column(res.result)
-            row.new_column(resp.nodemaker("A", 
-                    {"href": res.resultslocation},  "Results location"))
-        return resp.finalize()
-
-
-#    def post(self, request, tablename=None, rowid=None):
-#        pass
-
-testresults = auth.need_login(TestResultHandler(testresult_constructor))
 
 
 

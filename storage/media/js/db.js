@@ -4,6 +4,9 @@
  * Client side code for general pycopia model access. 
  * MochiKit is used here  <http://www.mochikit.com/> (loaded seperately).
  *
+ * Depends on:
+ *   MochiKit.js
+ *   proxy.js
  */
 
 

@@ -285,7 +285,7 @@ class HTTPRequest(object):
         self.path = None
         self.get_url = None
         self.get_alias = None
-        self.database = None
+        self.dbsession = None
         self.config = None
         self.session = None
 
@@ -598,9 +598,9 @@ class WebApplication(object):
                 config.get("BASEPATH", "/%s" % (config.SERVERNAME,)))
         if config.get("DATABASE_URL"):
             from pycopia.db import models
-            self.DBSession = models.create_session(config.DATABASE_URL)
+            self.dbsession = models.create_session(config.DATABASE_URL)
         else:
-            self.DBSession = None
+            self.dbsession = None
 
     def __call__(self, environ, start_response):
         request = HTTPRequest(environ)
@@ -608,8 +608,8 @@ class WebApplication(object):
         request.get_url = self._resolver.get_url
         request.path = self._resolver._urlbase + environ['PATH_INFO']
         request.get_alias = self._resolver.get_alias
-        if self.DBSession is not None:
-            request.database = self.DBSession()
+        if self.dbsession is not None:
+            request.dbsession = self.dbsession()
         try:
             try:
                 response = self._resolver.dispatch(request)
@@ -624,8 +624,8 @@ class WebApplication(object):
                 start_response(response.get_status(), response.get_response_headers())
                 return response
         finally:
-            if self.DBSession is not None:
-                request.database.close()
+            if self.dbsession is not None:
+                request.dbsession.close()
 
 
 # You can subclass this and set and instance to be called by URL mapping.
