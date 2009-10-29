@@ -38,8 +38,12 @@ from pycopia.db.types import validate_value_type
 
 
 
-def create_session(addr):
-    db = create_engine(addr)
+def create_session(url=None):
+    if url is None:
+        from pycopia import basicconfig
+        cf = basicconfig.get_config("storage.conf")
+        url = cf["database"]
+    db = create_engine(url)
     tables.metadata.bind = db
     return sessionmaker(bind=db, autoflush=False)
 
@@ -47,10 +51,6 @@ def create_session(addr):
 # Get a database session instance from a database url. If URL is not
 # provided then get it from the storage.conf configuration file.
 def get_session(url=None):
-    if url is None:
-        from pycopia import basicconfig
-        cf = basicconfig.get_config("storage.conf")
-        url = cf["database"]
     session_class = create_session(url)
     return session_class()
 
@@ -875,12 +875,12 @@ class TestSuite(object):
 mapper(TestSuite, tables.test_suites,
     properties={
         "project": relation(ProjectVersion),
-        "testcases": relation(TestCase, secondary=tables.test_suites_testcases, backref="suite"),
         "components": relation(Component, secondary=tables.components_suites, backref="suites"),
+        "testcases": relation(TestCase, secondary=tables.test_suites_testcases, backref="suites"),
         "subsuites": relation(TestSuite, secondary=tables.test_suites_suites, 
             primaryjoin=tables.test_suites.c.id==tables.test_suites_suites.c.from_testsuite_id,
             secondaryjoin=tables.test_suites_suites.c.to_testsuite_id==tables.test_suites.c.id,
-            backref="suite"),
+            backref="suites"),
     },
 )
 

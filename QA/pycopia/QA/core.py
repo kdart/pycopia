@@ -155,17 +155,6 @@ class Test(object):
         self._debug = config.flags.DEBUG 
         self._verbose = config.flags.VERBOSE 
         self.__datapoints = []
-        self._merge_config()
-
-    def _merge_config(self):
-        """Merge Test specific config file."""
-        cl = self.__class__
-        cf = self.config
-        mod = sys.modules[cl.__module__]
-        testcnf = os.path.join(os.path.dirname(mod.__file__), 
-                    "%s.conf" % (cl.__name__,))
-        if cf.mergefile(testcnf):
-            cf.evalupdate(cf.options_override)
 
     @classmethod
     def set_test_options(cls):
@@ -942,24 +931,6 @@ class TestSuite(object):
         cl = self.__class__
         self.test_name = name or "%s.%s" % (cl.__module__, cl.__name__)
         self.result = None
-        self._merge_config()
-
-    def _merge_config(self):
-        # Merge any test-suite specific config files. Config file name is the
-        # name of the suite class plus ".conf", located in the same directory
-        # as the module it's in.
-        cl = self.__class__
-        mod = sys.modules[cl.__module__]
-        # merge module config
-        modconf = os.path.join(os.path.dirname(mod.__file__), 
-                    "%s.conf" % (mod.__name__.split(".")[-1],))
-        if self.config.mergefile(modconf):
-            self.config.evalupdate(self.config.options_override)
-        # merge suite config
-        suiteconf = os.path.join(os.path.dirname(mod.__file__), 
-                    "%s.conf" % (cl.__name__,))
-        if self.config.mergefile(suiteconf):
-            self.config.evalupdate(self.config.options_override)
 
     def __iter__(self):
         return iter(self._tests)
@@ -1011,11 +982,6 @@ class TestSuite(object):
         testinstance = testclass(self.config)
         entry = TestEntry(testinstance, args, kwargs, False)
         self._add_with_prereq(entry)
-
-    def add_incomplete_test(self, queryset):
-        """Add test cases from TestResult queryset that were INCOMPLETE."""
-        for testresult in queryset.is_incomplete():
-            self.add_test_from_result(testresult)
 
     def add_test_series(self, _testclass, N=100, chooser=None, filter=None, 
                                         args=None, kwargs=None):
@@ -1104,7 +1070,7 @@ class TestSuite(object):
         else:
                 raise ValueError, "TestSuite.add: need a class type."
 
-    def GetTestEntries(self, name, *args, **kwargs):
+    def get_test_entries(self, name, *args, **kwargs):
         """Get a list of test entries that matches the signature.
 
         Return a list of Test entries that match the name and calling
@@ -1118,7 +1084,7 @@ class TestSuite(object):
         """Add calling arguments to an existing test entry that has no
         arguments.
         """
-        for entry in self.getTestEntries(name):
+        for entry in self.get_test_entries(name):
             entry.add_arguments(args, kwargs)
 
     def info(self, msg):
@@ -1225,13 +1191,6 @@ class TestSuite(object):
         for i, entry in enumerate(self._tests):
             if not self.check_prerequisites(entry, i):
                 continue
-            # merge any test-class specific configuration.
-            cl = entry.inst.__class__
-            testconf = os.path.join(
-                    os.path.dirname(sys.modules[cl.__module__].__file__), 
-                        "%s.conf" % (cl.__name__,))
-            self.config.mergefile(testconf)
-            self.config.evalupdate(self.config.options_override)
             # Add a note to the logfile to delimit test cases there.
             if self.config.flags.VERBOSE:
                 self.config.logfile.note("%s: %r" % (timelib.localtimestamp(), entry))

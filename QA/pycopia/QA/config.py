@@ -162,7 +162,7 @@ class RootContainer(config.Container):
         as the command line. """
         if type(v) is str:
             try:
-                v = eval("self.%s" % (v,))
+                v = eval(v, {}, vars(self))
             except:
                 pass
         d = self._cache
@@ -283,11 +283,14 @@ class RootContainer(config.Container):
             name = self.get("environmentname", "default")
             if name:
                 db = self.session
-                env = db.query(models.Environment).filter(models.Environment.name==name).one()
+                try:
+                    env = db.query(models.Environment).filter(models.Environment.name==name).one()
+                except config.NoResultFound, err:
+                    raise config.ConfigError("Bad environmentname %r: %s" % (name, err))
                 env = EnvironmentRuntime(db, env, self.logfile)
                 self._cache["_environment"] = env
             else:
-                raise config.ConfigError, "Bad environment %r." % (name,)
+                raise config.ConfigError, "Bad environmentname %r." % (name,)
         return self._cache["_environment"]
 
     def _del_environment(self):

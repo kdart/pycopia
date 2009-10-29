@@ -20,7 +20,7 @@ Report objects that sends a text email.
 
 """
 
-import sys, os
+import os
 from cStringIO import StringIO
 
 from pycopia import reports
@@ -75,10 +75,10 @@ class EmailReport(reports.NullReport):
                 lfd = open(self._logfile).read()
             except:
                 pass # non-fatal
-                print >>sys.stderr, "could not read or attach log file: %r" % (self._logfile,)
             else:
                 logmsg = ezmail.MIMEText.MIMEText(lfd)
-                logmsg["Content-Disposition"] = 'attachment; filename=%s' % (os.path.basename(self._logfile), )
+                logmsg["Content-Disposition"] = 'attachment; filename=%s' % (
+                        os.path.basename(self._logfile), )
                 self._message.attach(logmsg)
         ezmail.mail(self._message)
 

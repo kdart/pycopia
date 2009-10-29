@@ -40,7 +40,6 @@ from pycopia import reports
 
 # for object type checking
 ModuleType = type(sys)
-ObjectType = object
 TypeType = type
 
 
@@ -103,8 +102,9 @@ class TestRunner(object):
         # is also where any report object or log files are placed.
         cf.resultsdir = os.path.join(
             os.path.expandvars(cf.get("resultsdirbase", "/var/tmp")),
-            "%s-%s-%s" % (cf.reportfilename, cf.username, timelib.strftime("%Y%m%d%H%M", 
+            "%s-%s-%s" % (cf.reportfilename, cf.username, timelib.strftime("%Y%m%d%H%M%S", 
             timelib.localtime(cf.runnerstarttime))))
+        cf.evalupdate(cf.options_override)
         self._create_results_dir()
         self._set_report_url()
         cf.report.logfile(cf.logfilename)
@@ -126,9 +126,9 @@ class TestRunner(object):
             if objecttype is ModuleType and hasattr(obj, "run"):
                 self.run_module(obj)
             elif objecttype is TypeType and issubclass(obj, core.Test):
-                    self.run_test(obj)
+                self.run_test(obj)
             elif isinstance(obj, core.TestSuite):
-                    self.run_suite(obj)
+                self.run_object(suite)
             else:
                 raise TestRunnerError("%r is not a runnable object." % (obj,))
 
@@ -148,13 +148,6 @@ class TestRunner(object):
             module raised an exception.
         """
         cf = self.config
-        # merge any test-module specific config files. The config file name is
-        # the same as the module name, with ".conf" appended. Located in the
-        # same directory as the module itself.
-        testconf = os.path.join(os.path.dirname(mod.__file__), 
-                    "%s.conf" % (mod.__name__.split(".")[-1],))
-        cf.mergefile(testconf)
-        cf.evalupdate(cf.options_override)
         # make the module look like a test.
         mod.test_name = mod.__name__
         try:
@@ -206,7 +199,8 @@ class TestRunner(object):
             The return value of the suite. Should be PASSED or FAILED.
 
         """
-        assert isinstance(suite, core.TestSuite), "Must supply TestSuite object."
+        if not isinstance(suite, core.TestSuite):
+            raise TestRunnerError("Must supply TestSuite object.")
         return self.run_object(suite)
 
     def run_test(self, testclass, *args, **kwargs):
@@ -223,15 +217,10 @@ class TestRunner(object):
             The return value of the Test instance. Should be PASSED, FAILED, 
             INCOMPLETE, or ABORT.
         """
-        cf = self.config
-        testinstance = testclass(cf)
-        entry = core.TestEntry(testinstance, args, kwargs)
-        try:
-            return self.run_object(entry)
-        except core.TestSuiteAbort, err:
-            cf.report.info("%r aborted (%s)." % (entry.test_name, err))
-            entry.result = constants.INCOMPLETE
-            return constants.ABORT
+
+        suite = core.TestSuite(self.config, name="%sSuite" % testclass.__name__)
+        suite.add_test(testclass, *args, **kwargs)
+        return self.run_object(suite)
 
     def _create_results_dir(self):
         """Make results dir, don't worry if it already exists."""
@@ -277,8 +266,8 @@ class TestRunner(object):
             cf.UI.print_list(err.args[0])
             raise TestRunnerError, "No such report name: %r" % (cf.reportname,)
         # Report file's names. save for future use.
-        cf.reportfilenames = rpt.filenames 
         rpt.initialize(cf)
+        cf.reportfilenames = rpt.filenames 
         rpt.add_title("Test Results for %r." % " ".join(cf.get("argv", ["unknown"])))
         arguments = cf.get("arguments")
         # Report command line arguments, if any.

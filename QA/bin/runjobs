@@ -10,15 +10,15 @@ import site
 
 from pycopia.QA import config
 from pycopia.QA import testrunner
-from pycopia.QA import shellinterface
+from pycopia.QA import jobrunner
 
-def runtest(argv):
+
+def runjobs(argv):
     cfg = config.get_config()
-    cfg.userinterfacetype = "default"
     tr = testrunner.TestRunner(cfg)
-    tri = shellinterface.TestRunnerInterface(tr)
+    jri = jobrunner.JobRunnerInterface(tr)
     try:
-        tri(argv)
+        jri(argv)
     except testrunner.TestRunnerError:
         ex, val, tb = sys.exc_info()
         if cfg.flags.DEBUG:
@@ -29,5 +29,5 @@ def runtest(argv):
             traceback.print_exception(ex, val, tb)
 
 
-runtest(sys.argv)
+runjobs(sys.argv)
 
