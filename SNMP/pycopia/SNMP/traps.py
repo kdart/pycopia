@@ -164,6 +164,9 @@ class TrapDispatcher(socket.AsyncSocket):
             if handler(*arglist):
                 break
 
+    def handle_connect(self):
+        pass
+
     def error_handler(self, ex, val, tb):
         if self._debug:
             from pycopia import debugger
