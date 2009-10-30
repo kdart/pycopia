@@ -55,9 +55,11 @@ Alternatively, you can just 'import interactive' at the original Python prompt.
 
 """
 
-# stock modules
 import sys, os, types
+import rlcompleter
+import atexit
 from pprint import pprint
+
 from pycopia.cliutils import *
 from pycopia.aid import add2builtin, IF
 
@@ -102,6 +104,29 @@ if sys.platform == "win32":
 else:
     RCFILE = os.path.join(os.path.expandvars("$HOME"), ".pyinteractiverc")
 
+# Create default rc file if it doesn't exist.
+if not os.path.exists(RCFILE):
+    rcfo = open(RCFILE, "w")
+    rcfo.write("""#!/usr/bin/python
+# some configuration stuff primarily for the 'interactive' module.
+
+PYPS1 = "Python> "
+PYPS2 = ".more.> "
+
+PYTHONDOCS = "/usr/share/doc/python-docs-2.6.2-r1/html"
+# programs
+#XTERM = "urxvtc -title Python -name Python -e %s"
+XTERM = "xterm -title Python -name Python -e %s"
+EDITOR = '/usr/bin/vim'
+XEDITOR = "/usr/bin/gvim"
+VIEWER = "/usr/bin/view"
+XVIEWER = "/usr/bin/gview"
+BROWSER = '/usr/bin/epiphany "%s"'
+CBROWSER = '/usr/bin/links "%s"'
+""")
+    rcfo.close()
+    del rcfo
+
 try:
     env = {}
     execfile(RCFILE, env, env) 
@@ -115,7 +140,7 @@ else:
             os.environ[name] = val
 del env
 
-PYTHON = os.environ.get("PYTHONBIN", "python") # use for alternate interpreter
+PYTHON = os.environ.get("PYTHONBIN", "python") # set PYTHONBIN for alternate interpreter
 sys.ps1 = os.environ.get("PYPS1", "Python> ")
 sys.ps2 = os.environ.get("PYPS2", ".more.> ")
 
@@ -288,7 +313,6 @@ Choose from a list if more than one document is found."""
 def mydisplayhook(obj):
     pprint(obj)
     setattr(sys.modules["__main__"], "_", obj)
-    #__builtins__._ =  obj
 setattr(sys.modules["__main__"], "_", None)
 
 sys.displayhook = mydisplayhook
@@ -309,30 +333,23 @@ else:
 PYHISTFILE = os.environ.get("PYHISTFILE", _default_hist)
 
 try:
-    import rlcompleter2
-    rlcompleter2.setup(PYHISTFILE, verbose=0)
-except ImportError:
-    import rlcompleter
-    import atexit
-    try:
-        readline.read_history_file(PYHISTFILE)
-    except IOError:
-        pass
-    def savehist():
-        readline.write_history_file(PYHISTFILE)
-    atexit.register( savehist )     
-    readline.parse_and_bind("tab: complete")
+    readline.read_history_file(PYHISTFILE)
+except IOError:
+    pass
+def savehist():
+    readline.write_history_file(PYHISTFILE)
+atexit.register( savehist )
+readline.parse_and_bind("tab: complete")
 
 ## readline key bindings
 ##readline.parse_and_bind("tab: menu-complete")
-#readline.parse_and_bind("tab: complete")
 #readline.parse_and_bind('"?": possible-completions')
-readline.parse_and_bind('"\M-h": "help()\n"')
-readline.parse_and_bind('"\eOP": "help()\n"')
 readline.parse_and_bind('"\M-?": possible-completions')
-readline.parse_and_bind('"\M-f": dump-functions')
-readline.parse_and_bind('"\M-v": dump-variables')
-readline.parse_and_bind('"\M-m": dump-macros')
+#readline.parse_and_bind('"\M-h": "help()\n"')
+#readline.parse_and_bind('"\eOP": "help()\n"')
+#readline.parse_and_bind('"\M-f": dump-functions')
+#readline.parse_and_bind('"\M-v": dump-variables')
+#readline.parse_and_bind('"\M-m": dump-macros')
 # additional readline options
 ##readline.parse_and_bind("set editing-mode vi")
 #readline.parse_and_bind("set show-all-if-ambiguous on")
