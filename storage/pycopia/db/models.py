@@ -77,8 +77,6 @@ def _get_secret():
     except basicconfig.ConfigReadError:
         warnings.warn("User encryption key not found for auth app, using default.")
         SECRET_KEY = "Testkey"
-_get_secret()
-del _get_secret
 
 
 
@@ -148,6 +146,10 @@ class User(object):
 
 
 def get_key():
+    global SECRET_KEY, _get_secret
+    if SECRET_KEY is None:
+        _get_secret()
+        del _get_secret
     h = sha1()
     h.update(SECRET_KEY)
     h.update("ifucnrdthsurtoocls")
