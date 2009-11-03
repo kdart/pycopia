@@ -68,6 +68,7 @@ def update(inst, **kwargs):
         setattr(inst, k, v)
 
 # Set password encryption key for the site.
+SECRET_KEY = None
 def _get_secret():
     global SECRET_KEY
     from pycopia import basicconfig
