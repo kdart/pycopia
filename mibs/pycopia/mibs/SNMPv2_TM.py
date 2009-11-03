@@ -13,7 +13,7 @@ from SNMPv2_SMI import MODULE_IDENTITY, OBJECT_IDENTITY, snmpModules, snmpDomain
 from SNMPv2_TC import TEXTUAL_CONVENTION
 
 class SNMPv2_TM(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMPv2-TM'
+	path = '/usr/share/mibs/ietf/SNMPv2-TM'
 	conformance = 5
 	name = 'SNMPv2-TM'
 	language = 2

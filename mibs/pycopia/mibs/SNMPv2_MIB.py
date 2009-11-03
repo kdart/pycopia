@@ -14,7 +14,7 @@ from SNMPv2_CONF import MODULE_COMPLIANCE, OBJECT_GROUP, NOTIFICATION_GROUP
 from SNMPv2_TC import DisplayString, TestAndIncr, TimeStamp
 
 class SNMPv2_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMPv2-MIB'
+	path = '/usr/share/mibs/ietf/SNMPv2-MIB'
 	conformance = 5
 	name = 'SNMPv2-MIB'
 	language = 2

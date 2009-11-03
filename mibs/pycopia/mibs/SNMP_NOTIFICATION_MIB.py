@@ -16,7 +16,7 @@ from SNMP_TARGET_MIB import SnmpTagValue, snmpTargetParamsName, snmpTargetBasicG
 from SNMP_FRAMEWORK_MIB import SnmpAdminString
 
 class SNMP_NOTIFICATION_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-NOTIFICATION-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-NOTIFICATION-MIB'
 	conformance = 3
 	name = 'SNMP-NOTIFICATION-MIB'
 	language = 2

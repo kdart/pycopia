@@ -16,7 +16,7 @@ from SNMPv2_TC import TEXTUAL_CONVENTION
 from SNMP_FRAMEWORK_MIB import SnmpAdminString
 
 class SNMP_USM_DH_OBJECTS_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-USM-DH-OBJECTS-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-USM-DH-OBJECTS-MIB'
 	conformance = 5
 	name = 'SNMP-USM-DH-OBJECTS-MIB'
 	language = 2

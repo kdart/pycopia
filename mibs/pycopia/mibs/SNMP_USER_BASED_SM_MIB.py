@@ -15,7 +15,8 @@ from SNMPv2_TC import TEXTUAL_CONVENTION, TestAndIncr, RowStatus, RowPointer, St
 from SNMP_FRAMEWORK_MIB import SnmpAdminString, SnmpEngineID, snmpAuthProtocols, snmpPrivProtocols
 
 class SNMP_USER_BASED_SM_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-USER-BASED-SM-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-USER-BASED-SM-MIB'
+	conformance = 5
 	name = 'SNMP-USER-BASED-SM-MIB'
 	language = 2
 	description = 'The management information definitions for the\nSNMP User-based Security Model.\n\nCopyright (C) The Internet Society (2002). This\nversion of this MIB module is part of RFC 3414;\nsee the RFC itself for full legal notices.'

@@ -15,7 +15,7 @@ from SNMPv2_TC import TestAndIncr, RowStatus, StorageType
 from SNMP_FRAMEWORK_MIB import SnmpAdminString, SnmpSecurityLevel, SnmpSecurityModel
 
 class SNMP_VIEW_BASED_ACM_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-VIEW-BASED-ACM-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-VIEW-BASED-ACM-MIB'
 	conformance = 3
 	name = 'SNMP-VIEW-BASED-ACM-MIB'
 	language = 2

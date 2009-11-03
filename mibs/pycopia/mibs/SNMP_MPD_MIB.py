@@ -13,7 +13,7 @@ from SNMPv2_CONF import MODULE_COMPLIANCE, OBJECT_GROUP
 from SNMPv2_SMI import MODULE_IDENTITY, OBJECT_TYPE, snmpModules, Counter32
 
 class SNMP_MPD_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-MPD-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-MPD-MIB'
 	name = 'SNMP-MPD-MIB'
 	language = 2
 	description = 'The MIB for Message Processing and Dispatching\n\nCopyright (C) The Internet Society (2002). This\nversion of this MIB module is part of RFC 3412;\nsee the RFC itself for full legal notices.'

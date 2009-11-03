@@ -16,7 +16,7 @@ from SNMP_TARGET_MIB import SnmpTagValue, snmpTargetAddrEntry
 from SNMP_FRAMEWORK_MIB import SnmpAdminString, SnmpEngineID
 
 class SNMP_COMMUNITY_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-COMMUNITY-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-COMMUNITY-MIB'
 	name = 'SNMP-COMMUNITY-MIB'
 	language = 2
 	description = 'This MIB module defines objects to help support coexistence\nbetween SNMPv1, SNMPv2c, and SNMPv3.'

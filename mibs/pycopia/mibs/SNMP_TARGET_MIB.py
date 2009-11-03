@@ -15,7 +15,7 @@ from SNMPv2_TC import TEXTUAL_CONVENTION, TDomain, TAddress, TimeInterval, RowSt
 from SNMP_FRAMEWORK_MIB import SnmpSecurityModel, SnmpMessageProcessingModel, SnmpSecurityLevel, SnmpAdminString
 
 class SNMP_TARGET_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-TARGET-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-TARGET-MIB'
 	conformance = 5
 	name = 'SNMP-TARGET-MIB'
 	language = 2

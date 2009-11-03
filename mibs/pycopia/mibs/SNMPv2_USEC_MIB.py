@@ -14,7 +14,7 @@ from SNMPv2_CONF import MODULE_COMPLIANCE, OBJECT_GROUP
 from SNMPv2_TC import TEXTUAL_CONVENTION
 
 class SNMPv2_USEC_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMPv2-USEC-MIB'
+	path = '/usr/share/mibs/ietf/SNMPv2-USEC-MIB'
 	conformance = 3
 	name = 'SNMPv2-USEC-MIB'
 	language = 2

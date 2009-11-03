@@ -13,7 +13,7 @@ from SNMPv2_SMI import MODULE_IDENTITY, OBJECT_IDENTITY, snmpModules
 from SNMP_FRAMEWORK_MIB import snmpPrivProtocols
 
 class SNMP_USM_AES_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-USM-AES-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-USM-AES-MIB'
 	name = 'SNMP-USM-AES-MIB'
 	language = 2
 	description = "Definitions of Object Identities needed for\nthe use of AES by SNMP's User-based Security\nModel.\n\nCopyright (C) The Internet Society (2004).\n\nThis version of this MIB module is part of RFC 3826;\nsee the RFC itself for full legal notices.\nSupplementary information may be available on\nhttp://www.ietf.org/copyrights/ianamib.html."

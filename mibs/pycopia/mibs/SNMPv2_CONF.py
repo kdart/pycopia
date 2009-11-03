@@ -12,7 +12,7 @@ from pycopia.SMI.Objects import ColumnObject, MacroObject, NotificationObject, R
 from SNMPv2_SMI import ObjectName, NotificationName, ObjectSyntax
 
 class SNMPv2_CONF(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMPv2-CONF'
+	path = '/usr/share/mibs/ietf/SNMPv2-CONF'
 	conformance = 2
 	name = 'SNMPv2-CONF'
 	language = 2

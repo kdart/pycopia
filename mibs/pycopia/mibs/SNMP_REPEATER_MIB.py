@@ -15,7 +15,7 @@ from SNMPv2_TC import TimeStamp, DisplayString, MacAddress, TEXTUAL_CONVENTION, 
 from IF_MIB import OwnerString
 
 class SNMP_REPEATER_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-REPEATER-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-REPEATER-MIB'
 	conformance = 3
 	name = 'SNMP-REPEATER-MIB'
 	language = 2

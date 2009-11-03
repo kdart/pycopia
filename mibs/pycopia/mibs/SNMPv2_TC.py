@@ -12,7 +12,7 @@ from pycopia.SMI.Objects import ColumnObject, MacroObject, NotificationObject, R
 from SNMPv2_SMI import TimeTicks
 
 class SNMPv2_TC(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMPv2-TC'
+	path = '/usr/share/mibs/ietf/SNMPv2-TC'
 	conformance = 5
 	name = 'SNMPv2-TC'
 	language = 2

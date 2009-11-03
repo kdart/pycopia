@@ -11,7 +11,7 @@ from pycopia.SMI.Objects import ColumnObject, MacroObject, NotificationObject, R
 # imports 
 
 class SNMPv2_SMI(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMPv2-SMI'
+	path = '/usr/share/mibs/ietf/SNMPv2-SMI'
 	conformance = 2
 	name = 'SNMPv2-SMI'
 	language = 2

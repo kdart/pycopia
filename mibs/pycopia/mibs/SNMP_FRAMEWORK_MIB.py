@@ -14,7 +14,7 @@ from SNMPv2_CONF import MODULE_COMPLIANCE, OBJECT_GROUP
 from SNMPv2_TC import TEXTUAL_CONVENTION
 
 class SNMP_FRAMEWORK_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-FRAMEWORK-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-FRAMEWORK-MIB'
 	conformance = 5
 	name = 'SNMP-FRAMEWORK-MIB'
 	language = 2

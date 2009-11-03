@@ -16,7 +16,7 @@ from SNMP_TARGET_MIB import SnmpTagValue, snmpTargetBasicGroup, snmpTargetRespon
 from SNMP_FRAMEWORK_MIB import SnmpEngineID, SnmpAdminString
 
 class SNMP_PROXY_MIB(ModuleObject):
-	path = '/usr/share/snmp/mibs/ietf/SNMP-PROXY-MIB'
+	path = '/usr/share/mibs/ietf/SNMP-PROXY-MIB'
 	name = 'SNMP-PROXY-MIB'
 	language = 2
 	description = 'This MIB module defines MIB objects which provide\nmechanisms to remotely configure the parameters\nused by a proxy forwarding application.\n\nCopyright (C) The Internet Society (2002). This\nversion of this MIB module is part of RFC 3413;\nsee the RFC itself for full legal notices.'
