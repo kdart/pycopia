@@ -19,19 +19,22 @@
 
 import sys
 import keyword
+import warnings
+
 from pycopia.SMI import Objects
 from pycopia.SMI import Basetypes
 from pycopia.SNMP import SNMP
 
+
 def default_name_mangler(name):
+    # Objects with suffix Entry are table rows, but look like whole tables.
+    # So make the name "friendlier".
     if name.endswith("Entry"):
         name = name[:-5]
     # make sure name doesn't match Python keyword, or there will be errors
-    # later. Simply converting to uppercase should suffice.
+    # later. Simply capitalizing the name should suffice.
     if keyword.iskeyword(name):
         name = name.capitalize()
-        if __debug__:
-            print >>sys.stderr, "warning: identifier matches keyword: converting to %r" % (name,)
     return name
 
 
@@ -44,7 +47,7 @@ class InterfaceEntry(object):
         self.address = str(address)
         self.speed = long(speed)
         self.iftype = int(iftype)
-    
+
     def __str__(self):
         return "%s (%s)" % (self.name, self.ifindex)
 
@@ -124,11 +127,11 @@ device = Manager( snmp_session )
             else:
                 obj = getattr(mibmodule, objname)
             if type(obj) is type:
-                if issubclass(obj, Objects.ScalarObject):
+                if issubclass(obj, Objects.ScalarObject) and obj is not Objects.ScalarObject:
                     self.scalars[name] = obj
-                elif issubclass(obj, Objects.RowObject):
+                elif issubclass(obj, Objects.RowObject) and obj is not Objects.RowObject:
                     self.rows[name] = obj
-                elif issubclass(obj, Objects.NotificationObject):
+                elif issubclass(obj, Objects.NotificationObject) and obj is not Objects.NotificationObject:
                     self.notifications[name] = obj
 
     def __str__(self):
@@ -139,6 +142,7 @@ device = Manager( snmp_session )
         l = self.rows.keys()
         l.sort()
         return l
+    # alias methods
     get_table_names = get_row_names
     get_tables = get_row_names
 
@@ -183,9 +187,8 @@ device = Manager( snmp_session )
             for oid, val in t.items():
                 if OIDtype(oid) == indexoid:
                     rt[oid] = val
-        else:
-            rt = t
-        return rt
+            return rt
+        return t
 
     def get_iterator(self, name, indexoid=None, count=0):
         return Objects.RowIterator(self, self.rows[name], indexoid, count)
@@ -207,7 +210,7 @@ device = Manager( snmp_session )
             obj.set(self.session, value)
         except KeyError:
             if __debug__:
-                print "Warning: setting local object in manager named", key
+                warnings.warn("Setting local object in manager named: %r" % (key,))
             self.__dict__[key] = value
 
     def create(self, rowname, *indexargs, **kwargs):
@@ -229,13 +232,12 @@ device = Manager( snmp_session )
         row.set_session(self.session)
         return row
 
-    def _get_interfaces(self):
-        t = self.getall('If')
+    def get_interface_table(self):
+        t = self.getall("If")
         rt = InterfaceTable(self.hostname)
         for If in t.values():
             rt.add_entry(If)
         return rt
-    InterfaceTable = property(_get_interfaces)
 
     def get_interface(self, index):
         return self.get("If", int(index))
