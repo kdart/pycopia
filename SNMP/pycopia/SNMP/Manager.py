@@ -249,6 +249,8 @@ def get_manager(device, community, manager_class=Manager, mibs=None):
     sess = SNMP.new_session(sd)
     dev = manager_class(sess)
     if mibs:
+        if type(mibs[0]) is str:
+            mibs = map(lambda n: __import__("pycopia.mibs.%s" % n, globals(), locals(), ["*"]), mibs)
         dev.add_mibs(mibs)
     return dev
 

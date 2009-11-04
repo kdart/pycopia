@@ -22,6 +22,7 @@ import os
 from pycopia import getopt
 from pycopia import CLI
 from pycopia import aid
+
 from pycopia.SNMP import SNMP
 from pycopia.SNMP import Manager
 from pycopia.mibs import SNMPv2_MIB, IF_MIB
@@ -45,11 +46,11 @@ class SNMPManagerCommands(CLI.GenericCLI):
     If not arguments given then display basic system information.
     Otherwise show information about the specified item."""
         if len(argv) < 2:
-            self._print(self._obj.sysDescr)
-            self._print(self._obj.sysName)
-            self._print(get_oidname(self._obj.sysObjectID))
-            self._print(self._obj.sysLocation)
-            self._print(self._obj.sysContact)
+            self._print("       Name:", self._obj.sysName)
+            self._print("   ObjectID:", get_oidname(self._obj.sysObjectID))
+            self._print("   Location:", self._obj.sysLocation)
+            self._print("    Contact:", self._obj.sysContact)
+            self._print("Description:", self._obj.sysDescr)
         else:
             item = argv[1]
             if item.startswith("scal"):
@@ -93,25 +94,19 @@ def get_oidname(soid):
     else:
         return obj.__name__
 
-def get_manager(device, community):
-    sd = SNMP.sessionData(device, version=1)
-    sd.add_community(community, SNMP.RW)
-    sess = SNMP.new_session(sd)
-    dev = Manager.Manager(sess)
-    dev.add_mibs([SNMPv2_MIB, IF_MIB])
-    return dev
 
 
 def snmpcli(argv):
-    """snmpcli [-h] [-p <port>] [-s <scriptname>] host community
+    """snmpcli [-h] [-p <port>] [-s <scriptname>] [-m <module>] host community
 
 Provides an interactive session to an SNMP agent.
     """
     port = 161
     sourcefile = None
     logfile = None
+    modname = None
     try:
-        optlist, longopts, args = getopt.getopt(argv[1:], "hl:p:s:")
+        optlist, longopts, args = getopt.getopt(argv[1:], "hl:p:s:m:")
     except getopt.GetoptError:
             print snmpcli.__doc__
             return
@@ -129,6 +124,8 @@ Provides an interactive session to an SNMP agent.
             except ValueError:
                 print snmpcli.__doc__
                 return
+        elif opt == "-m":
+            modname = val
 
     if not args:
         print snmpcli.__doc__
@@ -140,7 +137,11 @@ Provides an interactive session to an SNMP agent.
     else:
         community = "public"
 
-    manager = get_manager(host, community)
+    if modname:
+        module = __import__(modname, globals(), locals(), ["*"])
+        manager = module.get_manager(host, community)
+    else:
+        manager = Manager.get_manager(host, community, mibs=[SNMPv2_MIB, IF_MIB])
 
     parser = CLI.get_generic_cli(manager, SNMPManagerCommands, logfile=logfile, 
             historyfile=os.path.expandvars("$HOME/.hist_snmpcli"))
