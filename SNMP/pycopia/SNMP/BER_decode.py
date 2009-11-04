@@ -193,6 +193,10 @@ def _decode_a_varbindlist(vbl_tuple):
         obj = _find_object(oid)
         if obj is not None:
             if value is not None:
+                if (isinstance(value, Basetypes.noSuchInstance) or 
+                            isinstance(value, Basetypes.noSuchObject)):
+                    vbl.append(Basetypes.VarBind(oid, value))
+                    continue
                 if obj.syntaxobject:
                     value = obj.syntaxobject(value)
                 if obj.enumerations:
