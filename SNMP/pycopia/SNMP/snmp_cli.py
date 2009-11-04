@@ -23,7 +23,7 @@ from pycopia import getopt
 from pycopia import CLI
 from pycopia import aid
 
-from pycopia.SNMP import SNMP
+#from pycopia.SNMP import SNMP
 from pycopia.SNMP import Manager
 from pycopia.mibs import SNMPv2_MIB, IF_MIB
 
@@ -77,6 +77,17 @@ class SNMPManagerCommands(CLI.GenericCLI):
         tname = argv[1]
         for row in self._obj.getall(tname):
             self._print(row)
+
+    def traps(self, argv):
+        """traps
+    Enable receiving and display of traps."""
+        from pycopia import asyncio
+        from pycopia.SNMP import traps
+        traps.get_dispatcher(self._trap_handler)
+        asyncio.start_sigio()
+
+    def _trap_handler(self, traprecord):
+        self._print(str(traprecord))
 
 
 def get_mib(name):

@@ -77,9 +77,8 @@ def _translate2v2(ip, community, pdu):
 
 
 # all trap callbacks should match this signature.
-def _default_trap_handler(timestamp, ip, community, pdu):
-    tr = TrapRecord(timestamp, ip, community, pdu)
-    print tr
+def _default_trap_handler(traprecord):
+    print traprecord
 
 
 class TrapRecord(object):
@@ -126,10 +125,13 @@ class TrapDispatcher(socket.AsyncSocket):
 
     def _get_debug(self):
         return self._debug
+
     def _set_debug(self, val):
         self._debug = bool(val)
+
     def _del_debug(self):
         self._debug = False
+
     debug = property(_get_debug, _set_debug, _del_debug)
 
     def register_handler(self, handler):
@@ -157,11 +159,11 @@ class TrapDispatcher(socket.AsyncSocket):
         version, community, pdu = tlv.decode()
         if version == 0:
             pdu = _translate2v2(ip, community, pdu)
-        arglist = (now(), src, community, pdu)
+        tr = TrapRecord(now(), src, community, pdu)
         for handler in self._handlers:
-            # handler returns False/None if other handlers may run,
-            # returns True if handled, and no further processing required.
-            if handler(*arglist):
+            # handler returns False/None.  If other handlers may run
+            # return False. Return True if handled, and no further processing required.
+            if handler(tr):
                 break
 
     def handle_connect(self):

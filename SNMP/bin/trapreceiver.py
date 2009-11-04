@@ -20,20 +20,18 @@ Simple trap reciever that prints traps to stdout.
 
 import sys
 
-from pycopia import scheduler
 from pycopia import asyncio
-from pycopia import interactive
+from pycopia import interactive # sets up nicer CLI
 
 from pycopia.SNMP import traps
 
 trap = None
 
 
-def _handler(timestamp, ip, community, pdu):
+def _handler(traprecord):
     global trap
-    tr = traps.TrapRecord(timestamp, ip, community, pdu)
-    trap = tr
-    print tr
+    trap = traprecord
+    print trap
     print
 
 def load(mibname):
@@ -46,10 +44,7 @@ def load(mibname):
 def main(argv):
     for mibname in argv[1:]:
         load(mibname)
-    traps.start_straps()
-    scheduler.sleep(2)
-    trapreceiver = traps.TrapDispatcher(_handler)
-    asyncio.register(trapreceiver)
+    traps.get_dispatcher(_handler)
     asyncio.start_sigio()
 
 main(sys.argv)
