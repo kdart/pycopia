@@ -295,7 +295,7 @@ def build_test_case_add(form, modelclass):
 
     for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
                     'procedure', 'reference', 'testimplementation',
-                    'functionalarea', 'suite', 'prerequisite', 'automated', 'interactive'):
+                    'functionalarea', 'suites', 'prerequisite', 'automated', 'interactive'):
 
         metadata = metamap[colname]
         ctor = _CREATORS.get(metadata.coltype)
