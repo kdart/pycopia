@@ -322,7 +322,7 @@ def build_testcase_edit_form(form, modelclass, row, error=None):
 
     for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
                     'procedure', 'reference', 'testimplementation',
-                    'functionalarea', 'suite', 'prerequisite', 'automated', 'interactive'):
+                    'functionalarea', 'suites', 'prerequisite', 'automated', 'interactive'):
         metadata = metamap[colname]
         ctor = _CONSTRUCTORS.get(metadata.coltype)
         node = ctor(fs, modelclass, metadata, row)
