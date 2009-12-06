@@ -147,6 +147,8 @@ def robots(config):
     user = passwd.getpwnam(config.SITEOWNER)
     for vhost, scripts in config.VHOSTS.items():
         rname = os.path.join(config.SITEROOT, vhost, "htdocs", "robots.txt")
+        if os.path.exists(rname):
+            continue
         fo = open(rname, "w")
         fo.write(_get_robots_txt(scripts))
         fo.close()

@@ -759,7 +759,10 @@ class JSONRequestHandler(RequestHandler):
 
 
 def get_acceptable_document(request):
-    accept = request.headers["accept"]
+    try:
+        accept = request.headers["accept"]
+    except IndexError:
+        return Plaintext.new_document() # default to plaintext if no Accept header.
     preferred = accept.select(SUPPORTED)
     if preferred:
         if preferred == "text/plain":
