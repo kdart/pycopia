@@ -922,7 +922,7 @@ class TestResult(object):
              setattr(self, name, value)
 
     def __str__(self):
-        #"TestSuite", "Test"
+                            #"TestSuite", "Test"
         if self.objecttype in (1, 2):
             if self.testcase is None:
                 return "%s(%s): %s" % (self.testimplementation, self.objecttype, self.result)
@@ -934,10 +934,6 @@ class TestResult(object):
     def __repr__(self):
         return "TestResult(testimplementation=%r, objecttype=%r, result=%r)" % (
                 self.testimplementation, self.objecttype, self.result)
-
-    #testresult = property(lambda self: TESTRESULTS.find(self.result))
-
-    #objecttype = property(lambda self: OBJECTTYPES.find(self.objecttype_c))
 
     @classmethod
     def get_latest_results(cls, session):
@@ -954,6 +950,7 @@ mapper(TestResult, tables.test_results,
         "data": relation(TestResultData, backref="testresult"),
         "environment": relation(Environment, order_by=tables.environments.c.name),
         "testcase": relation(TestCase),
+        "build": relation(ProjectVersion),
         "subresults": relation(TestResult, backref=backref("parent",
                                 remote_side=[tables.test_results.c.id])),
     }

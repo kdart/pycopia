@@ -130,16 +130,17 @@ class Test(object):
     dependencies (defined by the database).
 
     May send any of the following messages to the report object:
-        TESTARGUMENTS : string representation of supplied arguments.
+        TESTARGUMENTS     : string representation of supplied arguments.
         STARTTIME         : timestamp indicating when test was started.
-        ENDTIME             : timestamp indicating when test ended.
-        add_heading     : Section heading.
-        passed                : When test passed.
-        failed                : When test failed.
+        ENDTIME           : timestamp indicating when test ended.
+        BUILD             : string indicating a build that was tested against
+        add_heading       : Section heading.
+        passed            : When test passed.
+        failed            : When test failed.
         incomplete        : When test was not able to complete.
         diagnostic        : Add useful diagnostic information when a test fails.
-        abort                 : Abort suite, provides the reason.
-        info                    : Informational and progress messages.
+        abort             : Abort suite, provides the reason.
+        info              : Informational and progress messages.
     """
     # class level attributes that may be overridden in subclasses, or reset by test
     # runner from external information (database).
