@@ -39,7 +39,7 @@ class Index(list):
         new = Basetypes.ObjectIdentifier()
         self[-1].implied = self.implied
         for obj in self:
-            new.extend(oid(obj))
+            new.extend(Basetypes.oid(obj))
         return new
 
 # SMI module uses this to create index object reference list
@@ -123,11 +123,11 @@ class RowObject(object):
         indexoid = Basetypes.ObjectIdentifier()
         i = 0
         for idx in indexargs[:-1]:
-            indexoid.extend(oid(self.index[i].syntaxobject(idx)))
+            indexoid.extend(Basetypes.oid(self.index[i].syntaxobject(idx)))
             i += 1
         end = self.index[i].syntaxobject(indexargs[-1])
         end.implied = self.index.implied
-        indexoid.extend(oid(end))
+        indexoid.extend(Basetypes.oid(end))
         return indexoid
 
     def __cmp__(self, other):
@@ -431,10 +431,9 @@ class RawTable(GenericTable):
 The SNMPTable class is a convenience class to make it easier to use MIB tables.
     """
     def __init__(self, rowobj, tabletitle=''):
-        GenericTable.__init__(self)
+        super(RawTable, self).__init__(title=tabletitle or str(rowobj), width=130)
         self.rowobj = rowobj
         self.prefixlen = len(rowobj.OID)
-        self.tabletitle = tabletitle
 
     def _add_vb(self, vb):
         prefixlen = self.prefixlen
@@ -448,22 +447,24 @@ The SNMPTable class is a convenience class to make it easier to use MIB tables.
 
 class PlainTable(RawTable):
     def _add_vb(self, vb):
-        prefixlen = len(self.OID)
+        prefixlen = self.prefixlen
         col = Basetypes.OID(vb.oid[prefixlen:prefixlen+1])
         row = Basetypes.OID(vb.oid[prefixlen+1:])
-        self.add_by_name(col, row, vb.value)
+        #self.add_by_name(col, row, vb.value)
+        self.set(str(col), str(row), vb.value) # XXX
 
 
 class ObjectTable(dict):
     def __init__(self, rowclass):
         super(ObjectTable, self).__init__()
         self.rowclass = rowclass
+        self.prefixlen = len(rowclass.OID)
 
     def fetch(self, session):
         session.get_table(self.rowclass, self._insert_varbind)
 
     def _insert_varbind(self, vb):
-        rowindex = vb.name[len(self.rowclass.OID)+1:]
+        rowindex = vb.name[self.prefixlen+1:]
         indexstr = str(rowindex)
         colobj = vb.Object(vb.value, vb.name[len(vb.Object.OID):])
         rowobj = self.get(indexstr, None)

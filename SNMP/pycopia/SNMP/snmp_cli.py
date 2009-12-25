@@ -42,7 +42,7 @@ class SNMPManagerCommands(CLI.GenericCLI):
         self._obj.add_mibs(mibs)
 
     def show(self, argv):
-        """show [scalars | tables | notifications | all <tablename>]
+        """show [scalars | tables | interfaces | notifications | all <tablename>]
     If not arguments given then display basic system information.
     Otherwise show information about the specified item."""
         if len(argv) < 2:
@@ -67,9 +67,12 @@ class SNMPManagerCommands(CLI.GenericCLI):
                     except AttributeError:
                         pass # XXX I think this is a bug workaround
                     self._print("\n")
+            elif item.startswith("int"):
+                tbl = self._obj.get_interface_table()
+                self._print(tbl)
             elif item.startswith("all"):
-                for row in self._obj.getall(argv[2]):
-                    self._print(row)
+                tbl = self._obj.get_table(argv[2])
+                self._print(tbl)
 
     def getall(self, argv):
         """getall <tablename>

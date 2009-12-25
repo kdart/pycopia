@@ -49,7 +49,7 @@ class InterfaceEntry(object):
         self.iftype = int(iftype)
 
     def __str__(self):
-        return "%s (%s)" % (self.name, self.ifindex)
+        return "  %-20.20s (%s)" % (self.name, self.ifindex)
 
 
 class InterfaceTable(object):
@@ -59,7 +59,7 @@ class InterfaceTable(object):
         self._byindex = {}
     
     def __str__(self):
-        s = ["Interfaces for %s\nName (ifindex)" % (self.hostname,)]
+        s = ["Interfaces for %s:\n  Name                 (ifindex)" % (self.hostname,)]
         names = self._entries.keys()
         names.sort()
         for name in names:
@@ -188,6 +188,12 @@ device = Manager( snmp_session )
                 if OIDtype(oid) == indexoid:
                     rt[oid] = val
             return rt
+        return t
+
+    def get_table(self, mangledname):
+        rowclass = self.rows[mangledname]
+        t = Objects.PlainTable(rowclass, str(rowclass))
+        t.fetch(self.session)
         return t
 
     def get_iterator(self, name, indexoid=None, count=0):
