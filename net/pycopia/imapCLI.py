@@ -57,35 +57,51 @@ class ImapCLI(CLI.BaseCommands):
             self._environ["PS1"] = PROMPT
 
     def connect(self, argv):
-        """connect [-s <bindto>] <host> [<port>]
-    Where <host> is the IMAP server to connect to, <port> is the TCP port to use
-    (defaults to 143), and <bindto> is the local IP address to source from."""
-        bindto = None
-        port = 143
+        """connect [-S] <host> [<port>]
+    Where <host> is the IMAP server to connect to, <port> is the TCP port to use.
+    If the "-S" option is specified, SSL is used and the default port is 993. Otherwise,
+    SSL will not be used and the default port will be 143."""
+        port = None
+        host = None
+        ssl = False
 
-        optlist, longopts, args = self.getopt(argv, "s:hp:")
+        optlist, longopts, args = self.getopt(argv, "S")
         for opt, val in optlist:
-            if opt == "-s":
-                bindto = val
-            elif opt == "-h":
-                self._print(self.connect.__doc__)
-                return
-            elif opt == "-p":
-                try:
-                    port = int(val)
-                except ValueError:
-                    self._print(self.connect.__doc__)
-                    return
-        if len(args) < 1:
+            if opt == "-S":
+                ssl = True
+
+        # Allow the host/port are passed directly, not using getopt
+        if len(args) < 1 and host == None:
             host = "localhost"
         else:
             host = args[0]
-        if len(args) > 1:
-            port = int(args[1])
+
+        if len(args) > 1 and port == None:
+            try:
+                port = int(args[1])
+            except ValueError:
+                self._print(self.connect.__doc__)
+                return
+
+        # The port would have been read by now, if it was specified.
+        # If it wasn't, use the default non-SSL or SSL port, depending
+        # on what the user specified.
+        if port == None:
+            if ssl == True:
+                port = 993
+            else:
+                port = 143
+
         if self._client:
             self._print("warning: closing existing connection.")
             self.logout()
-        self._client = imaplib.IMAP4(host, port)
+
+        if ssl == False:
+            self._client = imaplib.IMAP4(host, port)
+        else:
+            # XXX have a way to specify custom private key/certificates?
+            self._client = imaplib.IMAP4_SSL(host, port)
+
         self._setprompt(host)
 
     def logout(self, argv=None):
@@ -295,16 +311,18 @@ class ImapCLI(CLI.BaseCommands):
 
 
 def imapcli(argv):
-    """imapcli [-h|--help] [host] [port]
+    """imapcli [-h|--help] [-S] [host] [port]
 
 Provides an interactive session at a protocol level to an IMAP server. 
+If the "-S" argument is provided, will connect using SSL.
     """
     from pycopia import getopt
     port = imaplib.IMAP4_PORT
     sourcefile = None
     paged = False
+    ssl = True
     try:
-        optlist, longopts, args = getopt.getopt(argv[1:], "hp:s:g")
+        optlist, longopts, args = getopt.getopt(argv[1:], "hp:s:gS")
     except getopt.GetoptError:
             print imapcli.__doc__
             return
@@ -316,6 +334,8 @@ Provides an interactive session at a protocol level to an IMAP server.
             return
         elif opt == "-g":
             paged = True
+        elif opt == "-S":
+            ssl = True
         elif opt == "-p":
             try:
                 port = int(val)
@@ -326,13 +346,7 @@ Provides an interactive session at a protocol level to an IMAP server.
     theme = UI.DefaultTheme(PROMPT)
     parser = CLI.get_cli(ImapCLI, paged=paged, theme=theme)
     if len(args) > 0:
-        if len(args) > 1:
-            port = int(args[1])
-        host = args[0]
-    else:
-        host = ""
-    if host:
-        parser.commands.connect(["connect", host, port])
+        parser.commands.connect(["connect"] + ((ssl == True) and ["-S"] or []) + args)
     else:
         parser.commands._print("Be sure to run 'connect' before anything else.\n")
     if sourcefile:
