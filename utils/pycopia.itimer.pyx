@@ -45,6 +45,9 @@ cdef extern from "time.h":
     int clock_nanosleep(int clock_id, int flags, timespec *rqtp, timespec *rmtp)
 
 
+cdef extern from "string.h":
+    char *strerror(int errnum)
+
 cdef extern from "errno.h":
     int errno
 
@@ -123,7 +126,8 @@ the original value of the timer.
 
 
 def nanosleep(double delay):
-    """Sleep for <delay> seconds, with nanosecond precision."""
+    """Sleep for <delay> seconds, with nanosecond precision. Unlike
+    time.sleep(), signal handlers are run during this sleep."""
     cdef timespec ts_delay
 
     _set_timespec(&ts_delay, delay)
@@ -136,7 +140,8 @@ def nanosleep(double delay):
 
 
 def absolutesleep(double delay):
-    """Sleep for <delay> seconds, with nanosecond precision."""
+    """Sleep for <delay> seconds, with nanosecond precision. Signal
+    handlers are run while sleeping."""
     cdef timespec ts_delay
     cdef double expire
     cdef int rv
