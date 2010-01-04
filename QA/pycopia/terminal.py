@@ -581,7 +581,7 @@ class Terminal(TerminalBase):
 
 class AsyncTerminal(asyncinterface.AsyncInterface, Terminal):
     def __init__(self, pty, screen, keyboard, printer=None):
-        import asyncio
+        from pycopia import asyncio
         Terminal.__init__(self, pty, screen, keyboard, printer)
         asyncinterface.AsyncInterface.__init__(self)
         asyncio.register(self)
