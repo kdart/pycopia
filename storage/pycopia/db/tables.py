@@ -81,9 +81,9 @@ config =  Table('config', metadata,
     UniqueConstraint("name", "parent_id"),
     schema='public')
 Index('index_config_testcase_id', config.c.testcase_id, unique=False)
-Index('config_name_key', config.c.name, config.c.parent_id, unique=True)
+Index('index_config_name_key', config.c.name, config.c.parent_id, unique=True)
 Index('index_config_parent_id', config.c.parent_id, unique=False)
-Index('config_user_id', config.c.user_id, unique=False)
+Index('index_config_user_id', config.c.user_id, unique=False)
 Index('index_config_testsuite_id', config.c.testsuite_id, unique=False)
 
 
@@ -111,7 +111,7 @@ contacts =  Table('contacts', metadata,
                     onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_contacts_address_id', contacts.c.address_id, unique=False)
-Index('contacts_lastname', contacts.c.lastname, unique=False)
+Index('index_contacts_lastname', contacts.c.lastname, unique=False)
 Index('index_contacts_user_id', contacts.c.user_id, unique=False)
 
 
@@ -133,7 +133,7 @@ corp_attributes =  Table('corp_attributes', metadata,
             ForeignKeyConstraint([u'type_id'], [u'public.corp_attribute_type.id'], name=u'corp_attributes_type_id_fkey'),
     schema='public')
 Index('index_corp_attributes_type_id', corp_attributes.c.type_id, unique=False)
-Index('corp_attributes_corporation_id', corp_attributes.c.corporation_id, unique=False)
+Index('index_corp_attributes_corporation_id', corp_attributes.c.corporation_id, unique=False)
 
 
 account_ids =  Table('account_ids', metadata,
@@ -143,7 +143,7 @@ account_ids =  Table('account_ids', metadata,
             Column(u'password', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False),
             Column(u'note', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
     schema='public')
-Index('account_ids_identifier', account_ids.c.identifier, unique=False)
+Index('index_account_ids_identifier', account_ids.c.identifier, unique=False)
 
 
 addresses =  Table('addresses', metadata,
@@ -175,7 +175,7 @@ capability_type =  Table('capability_type', metadata,
     ForeignKeyConstraint([u'group_id'], [u'public.capability_group.id'], name=u'capability_type_group_id_fkey'),
     schema='public')
 Index('index_capability_type_name_key', capability_type.c.name, unique=True)
-Index('capability_type_group_id', capability_type.c.group_id, unique=False)
+Index('index_capability_type_group_id', capability_type.c.group_id, unique=False)
 
 
 capability =  Table('capability', metadata,
@@ -188,7 +188,7 @@ capability =  Table('capability', metadata,
             ForeignKeyConstraint([u'type_id'], [u'public.capability_type.id'], name=u'capability_type_id_fkey'),
     schema='public')
 Index('index_capability_equipment_id', capability.c.equipment_id, unique=False)
-Index('capability_type_id', capability.c.type_id, unique=False)
+Index('index_capability_type_id', capability.c.type_id, unique=False)
 
 
 location =  Table('location', metadata,
@@ -201,7 +201,7 @@ location =  Table('location', metadata,
                     onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_location_address_id', location.c.address_id, unique=False)
-Index('location_contact_id', location.c.contact_id, unique=False)
+Index('index_location_contact_id', location.c.contact_id, unique=False)
 
 
 attribute_type =  Table('attribute_type', metadata,
@@ -222,7 +222,7 @@ software_attributes =  Table('software_attributes', metadata,
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'software_attributes_type_id_fkey'),
     schema='public')
 Index('index_software_attributes_software_id', software_attributes.c.software_id, unique=False)
-Index('software_attributes_type_id', software_attributes.c.type_id, unique=False)
+Index('index_software_attributes_type_id', software_attributes.c.type_id, unique=False)
 
 
 environmentattribute_type =  Table('environmentattribute_type', metadata,
@@ -243,7 +243,7 @@ environment_attributes =  Table('environment_attributes', metadata,
             ForeignKeyConstraint([u'type_id'], [u'public.environmentattribute_type.id'], name=u'environment_attributes_type_id_fkey'),
     schema='public')
 Index('index_environment_attributes_environment_id', environment_attributes.c.environment_id, unique=False)
-Index('environment_attributes_type_id', environment_attributes.c.type_id, unique=False)
+Index('index_environment_attributes_type_id', environment_attributes.c.type_id, unique=False)
 
 
 test_jobs =  Table('test_jobs', metadata,
@@ -264,11 +264,11 @@ test_jobs =  Table('test_jobs', metadata,
                     onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_test_jobs_user_id', test_jobs.c.user_id, unique=False)
-Index('test_jobs_testsuite_id', test_jobs.c.testsuite_id, unique=False)
+Index('index_test_jobs_testsuite_id', test_jobs.c.testsuite_id, unique=False)
 Index('index_test_jobs_name', test_jobs.c.name, unique=False)
-Index('test_jobs_schedule_id', test_jobs.c.schedule_id, unique=False)
+Index('index_test_jobs_schedule_id', test_jobs.c.schedule_id, unique=False)
 Index('index_test_jobs_environment_id', test_jobs.c.environment_id, unique=False)
-Index('test_jobs_name_key', test_jobs.c.name, test_jobs.c.user_id, unique=True)
+Index('index_test_jobs_name_key', test_jobs.c.name, test_jobs.c.user_id, unique=True)
 
 
 schedule =  Table('schedule', metadata,
@@ -323,11 +323,11 @@ test_results =  Table('test_results', metadata,
             ForeignKeyConstraint([u'testresultdata_id'], [u'public.test_results_data.id'], name=u'test_results_testresultdata_id_fkey'),
     schema='public')
 Index('index_test_results_testcase_id', test_results.c.testcase_id, unique=False)
-Index('test_results_testresultdata_id', test_results.c.testresultdata_id, unique=False)
+Index('index_test_results_testresultdata_id', test_results.c.testresultdata_id, unique=False)
 Index('index_test_results_build_id', test_results.c.build_id, unique=False)
-Index('test_results_parent_id', test_results.c.parent_id, unique=False)
+Index('index_test_results_parent_id', test_results.c.parent_id, unique=False)
 Index('index_test_results_tester_id', test_results.c.tester_id, unique=False)
-Index('test_results_testimplementation', test_results.c.testimplementation, unique=False)
+Index('index_test_results_testimplementation', test_results.c.testimplementation, unique=False)
 Index('index_test_results_environment_id', test_results.c.environment_id, unique=False)
 
 
@@ -450,7 +450,7 @@ projects =  Table('projects', metadata,
                     onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_projects_name_key', projects.c.name, unique=True)
-Index('projects_leader_id', projects.c.leader_id, unique=False)
+Index('index_projects_leader_id', projects.c.leader_id, unique=False)
 Index('index_projects_category_id', projects.c.category_id, unique=False)
 
 
@@ -519,11 +519,11 @@ test_cases =  Table('test_cases', metadata,
             ForeignKeyConstraint([u'prerequisite_id'], [u'public.test_cases.id'], name=u'test_cases_prerequisite_id_fkey'),
     schema='public')
 Index('index_test_cases_lastchangeauthor_id', test_cases.c.lastchangeauthor_id, unique=False)
-Index('test_cases_reviewer_id', test_cases.c.reviewer_id, unique=False)
+Index('index_test_cases_reviewer_id', test_cases.c.reviewer_id, unique=False)
 Index('index_test_cases_testimplementation', test_cases.c.testimplementation, unique=False)
-Index('test_cases_author_id', test_cases.c.author_id, unique=False)
+Index('index_test_cases_author_id', test_cases.c.author_id, unique=False)
 Index('index_test_cases_name_key', test_cases.c.name, unique=True)
-Index('test_cases_tester_id', test_cases.c.tester_id, unique=False)
+Index('index_test_cases_tester_id', test_cases.c.tester_id, unique=False)
 
 
 test_suites =  Table('test_suites', metadata,
@@ -540,7 +540,7 @@ test_suites =  Table('test_suites', metadata,
             ForeignKeyConstraint([u'projectversion_id'], [u'public.project_versions.id'], name=u'test_suites_projectversion_id_fkey'),
     schema='public')
 Index('index_test_suites_lastchangeauthor_id', test_suites.c.lastchangeauthor_id, unique=False)
-Index('test_suites_name_key', test_suites.c.name, unique=True)
+Index('index_test_suites_name_key', test_suites.c.name, unique=True)
 Index('index_test_suites_projectversion_id', test_suites.c.projectversion_id, unique=False)
 
 
@@ -645,7 +645,7 @@ software_variant =  Table('software_variant', metadata,
             ForeignKeyConstraint([u'language_id'], [u'public.language_codes.id'], name=u'software_variant_language_id_fkey'),
     schema='public')
 Index('index_software_variant_name_key', software_variant.c.name, unique=True)
-Index('software_variant_language_id', software_variant.c.language_id, unique=False)
+Index('index_software_variant_language_id', software_variant.c.language_id, unique=False)
 Index('index_software_variant_country_id', software_variant.c.country_id, unique=False)
 
 
@@ -655,7 +655,7 @@ language_codes =  Table('language_codes', metadata,
             Column(u'isocode', PGString(length=6, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
     schema='public')
 Index('index_language_codes_isocode_key', language_codes.c.isocode, unique=True)
-Index('language_codes_name_key', language_codes.c.name, unique=True)
+Index('index_language_codes_name_key', language_codes.c.name, unique=True)
 
 
 networks = Table('networks', metadata,
