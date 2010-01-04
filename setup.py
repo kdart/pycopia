@@ -157,7 +157,11 @@ def do_egg_info(name):
     return _do_commands(name, ['egg_info'], False)
 
 def do_install(name):
-    return _do_commands(name, ["install -O2", "--install-scripts",  SCRIPT_DIR], True)
+    rv1 = _do_commands(name, ["install -O2", "--install-scripts",  SCRIPT_DIR], True)
+    # Don't use the setuptools script wrapper for Pycopia scripts. This
+    # command seems to bypass that.
+    rv2 = _do_commands(name, ["install_scripts", "--force", "--install-dir",  SCRIPT_DIR], True)
+    return rv1 and rv2
 
 def do_clean(name):
     return _do_commands(name, ["clean"], False)
