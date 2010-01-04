@@ -35,7 +35,7 @@ Commands:
  develophome  -- Developer mode, installing .pth and script files in user directory.
  clean        -- Run setuptools clean phase.
  squash       -- Squash (flatten) all named sub-packages into single tree
-                 in $SQUASHDIR, or user site-directory if no $SQUASHDIR defined.
+                 in $PYCOPIA_SQUASH, or user site-directory if no $PYCOPIA_SQUASH defined.
                  This also removes the setuptools runtime dependency.
 
 Most regular setuptools commands also work. They are passed through by
@@ -55,8 +55,10 @@ except AttributeError: # running on Windows
         return arg
     os.environ["HOME"] = os.environ["USERPROFILE"]
     RSYNCCHECK = "rsync --version >nul"
+    SCRIPT_DIR = os.path.join(sys.prefix, "Scripts")
 else:
     RSYNCCHECK = "rsync --version >/dev/null"
+    SCRIPT_DIR = "/usr/local/bin"
 
 PACKAGES = [
 "aid",
@@ -78,9 +80,14 @@ PACKAGES = [
 "fepy",
 ]
 
-HOMESITE = os.path.expandvars("$HOME/.local/lib/python%s/site-packages" % (sys.version[:3],))
-SQUASHDIR = os.environ.get("SQUASHDIR", HOMESITE)
-SCRIPTDIR = os.environ.get("SCRIPTDIR", os.path.expandvars("$HOME/bin"))
+# newer Pythons also search this location in user's directory.  We can use
+# this for storing the .pth files in develop mode. Should we also support
+# older Python?
+
+HOMESITE = os.path.join(os.path.expandvars("$HOME"), ".local", "lib",
+                        "python%s" % (sys.version[:3],), "site-packages")
+PYCOPIA_SQUASH = os.environ.get("PYCOPIA_SQUASH", HOMESITE)
+PYCOPIA_BIN = os.environ.get("PYCOPIA_BIN", os.path.join(os.path.expandvars("$HOME"), "bin"))
 
 
 def _do_commands(name, cmds, root):
@@ -121,22 +128,27 @@ def do_wininst(name):
 def _do_scripts(name, scriptdir):
     os.chdir(name)
     try:
-        cmd = "%s setup.py install_scripts --install-dir %s" % (sys.executable, scriptdir)
+        cmd = "%s setup.py install_scripts --force --install-dir %s" % (sys.executable, scriptdir)
+        print "======== SCRIPTS", name, "==", cmd
         rv = WEXITSTATUS(os.system(cmd)) == 0
     finally:
         os.chdir("..")
     if not rv:
         print "Warning: scripts for %r may not have installed." % (name,)
+    print "====================== END SCRIPTS", name
+    return rv
 
 def do_develophome(name):
     if not os.path.isdir(HOMESITE):
         os.makedirs(HOMESITE)
-    _do_scripts(name, SCRIPTDIR)
-    return _do_commands(name, ["develop -x -l -N",  "--install-dir", HOMESITE], False)
+    rv = _do_commands(name, ["develop", "--install-dir", HOMESITE, "--script-dir", PYCOPIA_BIN, "-l -N"], False)
+    rvs = _do_scripts(name, PYCOPIA_BIN)
+    return rv and rvs
 
 def do_develop(name):
-    _do_scripts(name, SCRIPTDIR)
-    return _do_commands(name, ["develop -x -l -N"], False)
+    rv = _do_commands(name, ["develop", "--script-dir", PYCOPIA_BIN, "-l -N"], False)
+    rvs = _do_scripts(name, PYCOPIA_BIN)
+    return rv and rvs
 
 def do_publish(name):
     return _do_commands(name, ['egg_info -RDb ""', "sdist", "register", "upload"], False)
@@ -145,7 +157,7 @@ def do_egg_info(name):
     return _do_commands(name, ['egg_info'], False)
 
 def do_install(name):
-    return _do_commands(name, ["install --install-scripts /usr/local/bin -O2"], True)
+    return _do_commands(name, ["install -O2", "--install-scripts",  SCRIPT_DIR], True)
 
 def do_clean(name):
     return _do_commands(name, ["clean"], False)
@@ -160,25 +172,25 @@ def do_squash(name):
     if not _check_rsync():
         print "Squash requires rsync tool to be installed."
         return False
-    if not os.path.isdir(SQUASHDIR):
-        os.makedirs(SQUASHDIR)
+    if not os.path.isdir(PYCOPIA_SQUASH):
+        os.makedirs(PYCOPIA_SQUASH)
     os.chdir(name)
     uname = os.uname()
     bin_dir = os.path.join("build", "lib.%s-%s-%s" % (uname[0].lower(), uname[4], sys.version[:3]))
     # e.g: build/lib.linux-x86_64-2.5/pycopia
-    print "======== SQUASH", name, "to", SQUASHDIR
+    print "======== SQUASH", name, "to", PYCOPIA_SQUASH
     try:
         if WEXITSTATUS(os.system("%s setup.py build" % (sys.executable,))) != 0:
             return False
         for pydir in ("build/lib", bin_dir):
             if os.path.isdir(pydir):
-                cmd = "rsync -azvu %s/ %s" % (pydir, SQUASHDIR)
+                cmd = "rsync -azvu %s/ %s" % (pydir, PYCOPIA_SQUASH)
                 if WEXITSTATUS(os.system(cmd)) != 0:
                     return False
     finally:
         os.chdir("..")
-    _null_init(SQUASHDIR)
-    print "====================== END", name, "squashed into", SQUASHDIR
+    _null_init(PYCOPIA_SQUASH)
+    print "====================== END", name, "squashed into", PYCOPIA_SQUASH
     print
     return True
 
