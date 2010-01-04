@@ -47,6 +47,7 @@ NOTE: The install operation requires that the sudo command be configured for you
 
 import sys
 import os
+from distutils import dir_util
 
 try:
     WEXITSTATUS = os.WEXITSTATUS
@@ -122,21 +123,30 @@ def do_wininst(name):
     return _do_commands(name, ["bdist_wininst"], False)
 
 # "scripts", those files in bin/, may require some special interpreter
-# flags, such as -S, that the setuptools developer mode mangles. Therefore,
-# there is this special script installer that does a regular install for
-# developer mode.
-def _do_scripts(name, scriptdir):
+# flags, such as -S, This prevents setuptools from functioning.
+# Since Pycopia scripts are written generically there is not reason not to
+# install them as-is.
+
+# only works on Linux for now.
+def _do_scripts(name, scriptdir, root=False):
+    if root and sys.platform not in ("win32", "cli"):
+        sudo = "sudo "
+    else:
+        sudo = ""
     os.chdir(name)
+    rv = True
     try:
-        cmd = "%s setup.py install_scripts --force --install-dir %s" % (sys.executable, scriptdir)
-        print "======== SCRIPTS", name, "==", cmd
-        rv = WEXITSTATUS(os.system(cmd)) == 0
+        if os.path.isdir("bin"):
+            cmd = "%scp -dR --preserve=mode  bin/* %s" % (sudo, scriptdir)
+            print "======== SCRIPTS", name, "==", cmd
+            rv = WEXITSTATUS(os.system(cmd)) == 0
     finally:
         os.chdir("..")
-    if not rv:
-        print "Warning: scripts for %r may not have installed." % (name,)
     print "====================== END SCRIPTS", name
     return rv
+
+def do_install_scripts(name):
+    pass
 
 def do_develophome(name):
     if not os.path.isdir(HOMESITE):
@@ -159,8 +169,8 @@ def do_egg_info(name):
 def do_install(name):
     rv1 = _do_commands(name, ["install -O2", "--install-scripts",  SCRIPT_DIR], True)
     # Don't use the setuptools script wrapper for Pycopia scripts. This
-    # command seems to bypass that.
-    rv2 = _do_commands(name, ["install_scripts", "--force", "--install-dir",  SCRIPT_DIR], True)
+    # will overwrite the installed scripts with a direct copy.
+    rv2 = _do_scripts(name, SCRIPT_DIR, True)
     return rv1 and rv2
 
 def do_clean(name):
