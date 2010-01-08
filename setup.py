@@ -47,7 +47,6 @@ NOTE: The install operation requires that the sudo command be configured for you
 
 import sys
 import os
-from distutils import dir_util
 
 try:
     WEXITSTATUS = os.WEXITSTATUS

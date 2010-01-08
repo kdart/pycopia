@@ -635,7 +635,7 @@ argument must match a name of a method.
 
     def _get_ns(self):
         try:
-            name = self._obj.__class__.__name__.lower()
+            name = self._obj.__class__.__name__.split(".")[-1].lower()
         except:
             name = "object"
         return {name:self._obj, "environ":self._environ}

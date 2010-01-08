@@ -1,22 +1,23 @@
 #!/usr/bin/env python
 
-import sys, webbrowser
+import sys, os
 
-def main():
-    args = sys.argv[1:]
+def main(argv):
+    args = argv[1:]
     if not args:
-        print "Usage: %s querystring" % sys.argv[0]
+        print "Usage: %s querystring" % argv[0]
         return
-    list = []
+    newarg = []
     for arg in args:
         if '+' in arg:
             arg = arg.replace('+', '%2B')
         if ' ' in arg:
             arg = '"%s"' % arg
         arg = arg.replace(' ', '+')
-        list.append(arg)
-    s = '+'.join(list)
+        newarg.append(arg)
+    s = '+'.join(newarg)
     url = "http://google.com/search?q=%s" % s
-    webbrowser.open(url, 1)
+    os.execvp("xdg-open", ["xdg-open", url])
+    #webbrowser.open(url, 1)
 
-main()
+main(sys.argv)

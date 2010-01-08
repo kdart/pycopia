@@ -241,11 +241,11 @@ class UserInterface(object):
         self._format(obj, 0, 0, {}, 0)
         self._io.write("\n")
         self._io.flush()
-    
+
     def printf(self, text):
         "Print text run through the prompt formatter."
         self.Print(self.format(text))
-    
+
     def print_obj(self, obj, nl=1):
         if nl:
             self._io.write("%s\n" % (obj,))
@@ -345,7 +345,7 @@ class UserInterface(object):
                     defidx, 
                     self._get_prompt("PS3", prompt), 
                     input=self._io.raw_input, error=self.error)
-    
+
     def get_text(self, msg=None):
         return cliutils.get_text(self._get_prompt("PS4"), msg, input=self._io.raw_input)
 
@@ -358,6 +358,9 @@ class UserInterface(object):
 
     def get_key(self, prompt=""):
         return tty.get_key(prompt)
+
+    def get_password(self, prompt="Password: "):
+        return tty.getpass(prompt)
 
     # docstring/help formatters
     def _format_doc(self, s, color):
