@@ -66,3 +66,10 @@ def remote_copy(agent, remfile, dst):
     agent.fclose(h)
 
 
+def get_controller(equipment, logfile=None):
+    client = get_remote(equipment["hostname"])
+    if logfile:
+        logfile.write("Got remote.Client %s\n" % (client,))
+    return client
+
+

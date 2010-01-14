@@ -292,6 +292,10 @@ class QueryCommands(CLI.BaseCommands):
 
 class CreateCommands(CLI.BaseCommands):
 
+    def _setup(self, obj, prompt):
+        super(CreateCommands, self)._setup(obj, prompt)
+        self._metadata = sorted(models.get_metadata(obj.__class__))
+
     def set(self, argv):
         """set <name>=<value> ...
     Set the column <name> to <value>."""
@@ -312,8 +316,8 @@ class CreateCommands(CLI.BaseCommands):
         if args:
             for arg in args:
                 self._print(getattr(self._obj, arg))
-        else:
-            self._print(str(self._obj))
+        for metadata in self._metadata:
+            self._print("%20.20s: %s" % (metadata.colname, getattr(self._obj, metadata.colname)))
 
     def commit(self, argv):
         """commit
@@ -349,6 +353,13 @@ class ConfigCommands(CLI.BaseCommands):
             self._print("%s: not a container." % (name,))
 
     cd = chdir
+
+    def mkdir(self, argv):
+        """mkdir <name>
+    Make a new container here."""
+        name = argv[1]
+        container = config.Container(_session, self._obj)
+        container.add_container(name)
 
     def set(self, argv):
         """set [-t <type>] <name> <value>

@@ -21,12 +21,13 @@ Controller that wraps an SSH session.
 
 """
 
-from pycopia.QA import controller
 from pycopia import proctools
 from pycopia import sshlib
 
+from pycopia.QA import controller
 
-class ShellController(Controller):
+
+class ShellController(controller.Controller):
     """A Controller for a POSIX shell."""
     def initialize(self):
         self._iamroot = False
@@ -183,16 +184,17 @@ class ShellController(Controller):
 
 
 
-def get_controller(dut, logfile=None):
-    props = dut.properties # XXX
+def get_controller(equipment, logfile=None):
     try:
         del os.environ["TERM"]
     except KeyError:
         pass
-    ssh = sshlib.get_ssh(dut, dut.user, dut.password, prompt=dut.prompt, logfile=logfile)
+    ssh = sshlib.get_ssh(equipment["hostname"], equipment["user"], 
+            equipment["password"], prompt=equipment["prompt"], 
+            logfile=logfile)
     ctor = ShellController(ssh)
-    ctor.host = str(dut)
-    ctor.user = dut.user
-    ctor.password = dut.password
+    ctor.host = equipment["hostname"]
+    ctor.user = equipment["user"]
+    ctor.password = equipment["password"]
     return ctor
 

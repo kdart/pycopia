@@ -474,6 +474,7 @@ this.  """
     if type(initdict) is dict:
         cf.evalupdate(initdict)
     cf.update(kwargs)
+    controller.initialize(cf)
     return cf
 
 

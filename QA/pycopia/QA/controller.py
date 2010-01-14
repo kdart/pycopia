@@ -9,7 +9,9 @@ Abstract interfaces for object controllers.
 
 """
 
-import warnings
+from pycopia import module
+
+_CONTROLLERMAP = {}
 
 
 class ControllerError(AssertionError):
@@ -18,8 +20,7 @@ class ControllerError(AssertionError):
 
 # base class for all types of Controllers. This is the basic interface.
 class Controller(object):
-    def __init__(self, equipment, interface, logfile=None):
-        self.hostname = equipment["hostname"]
+    def __init__(self, interface, logfile=None):
         self._intf = interface # the low-level device interface, whatever it is.
         if logfile:
             self.set_logfile(logfile)
@@ -27,6 +28,7 @@ class Controller(object):
 
     def __del__(self):
         self.finalize()
+        self.close()
 
     def set_logfile(self, lf):
         self._logfile = lf
@@ -35,14 +37,7 @@ class Controller(object):
         return getattr(self._intf, name)
 
     def __str__(self):
-        return "%s for %r." % (self.__class__.__name__, self.hostname)
-
-    def reachable(self):
-        from pycopia import ping
-        pinger = ping.get_pinger()
-        res = pinger.reachable(self.hostname)
-        pinger.close()
-        return res[0][1]
+        return "<%s: %r>" % (self.__class__.__name__, self._intf)
 
     def initialize(self):
         pass
@@ -50,64 +45,40 @@ class Controller(object):
     def finalize(self):
         pass
 
+    def close(self):
+        pass
 
 
-class HypervisorController(Controller):
 
-    def get_release(self):
-        exitstatus, text = self._intf.run("cat /etc/vmware-release")
-        if exitstatus:
-            return text.strip()
-        else:
-            return None
-
-
-class VIXClientController(Controller):
-    pass
+def reachable(target):
+    from pycopia import ping
+    pinger = ping.get_pinger()
+    res = pinger.reachable(target)
+    pinger.close()
+    return res[0][1]
 
 
-ROLEMAP = {
-    "hypervisor": HypervisorController,
-    "vixclient": VIXClientController,
-}
-
-def register_role(name, klass):
-    if issubclass(klass, Controller):
-        ROLEMAP[name] = klass
-    else:
-        raise ValueError("Controller class must be subclass of Controller.")
+def register_controller(accessmethod, classpath):
+    _CONTROLLERMAP[accessmethod] = classpath
 
 
 # Factory for figuring out the correct Controller to use, determined by
 # the "accessmethod" attribute, and returning it.
 def get_controller(equipment, accessmethod, logfile=None):
     """Return controller instance that is based on the equipment role."""
-    role = equipment["role"]
-    if role == "DUT":
-        role = equipment["default_role"]
-    roleclass = ROLEMAP.get(role, Controller)
+    path = _CONTROLLERMAP[accessmethod]
+    constructor = module.get_object(path)
+    return constructor(equipment, logfile)
 
-    if accessmethod == "ssh":
-        #from pycopia.QA import ssh_controller
-        #return ssh_controller.get_controller(equipment, logfile)
-        return NotImplemented
-    elif accessmethod == "remote":
-        from pycopia.remote import Client
-        client = Client.get_remote(equipment["hostname"])
-        return roleclass(equipment, client, logfile=logfile)
-    elif accessmethod == "serial":
-        return NotImplemented
-    elif accessmethod == "telnet":
-        return NotImplemented
-    elif accessmethod == "http":
-        return NotImplemented
-    elif accessmethod == "https":
-        return NotImplemented
-    elif accessmethod == "console":
-        return NotImplemented
-    elif accessmethod == "snmp":
-        return NotImplemented
-    else:
-        raise ValueError("invalid accessmethod: %r." % accessmethod)
+
+def initialize(cf):
+    # Built-in accessmethods controllers. More are added at runtime from
+    # entries in the "controllers" section of the configuration database.
+    register_controller("ssh", "pycopia.QA.ssh_controller.get_controller")
+    register_controller("remote", "pycopia.remote.Client.get_controller")
+    cont = cf.get_container("controllers")
+    for name, value in cont.iteritems():
+        register_controller(name, value)
+
 
 

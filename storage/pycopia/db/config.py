@@ -155,12 +155,15 @@ class Container(object):
 
     def get_container(self, name):
         me = self.node
-        c = session.query(Config).filter(and_(
+        c = self.session.query(Config).filter(and_(
                 Config.name==name, 
-                Config.value==NULL, 
-                Config.parent_id==me.id, 
+                #Config.value==NULL, # XXX this does not work
+                Config.container==me, 
                 Config.user==me.user)).one()
-        return Container(self.session, c)
+        if c.value is NULL:
+            return Container(self.session, c)
+        else:
+            raise ConfigError("Container %r not found." % (name,))
 
     def __contains__(self, key):
         return self.has_key(key)
@@ -177,10 +180,7 @@ class Container(object):
     def next(self):
         try:
             item = self.__dict__["_set"].next()
-            if item.value is NULL:
-                return Container(self.session, item)
-            else:
-                return item.value
+            return item.name
         except StopIteration:
             del self.__dict__["_set"]
             raise

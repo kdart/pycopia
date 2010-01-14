@@ -88,7 +88,7 @@ class Permission(object):
     ROW_DISPLAY = ("name", "description")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __repr__(self):
         return "Permission(%r, %r)" % (self.name, self.description)
@@ -100,7 +100,7 @@ class Group(object):
     ROW_DISPLAY = ("name", "permissions")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __repr__(self):
         return "Group(%r)" % (self.name,)
@@ -282,7 +282,7 @@ class LoginAccount(object):
     ROW_DISPLAY = ("identifier", "login")
 
     def __str__(self):
-        return self.identifier
+        return str(self.identifier)
 
 mapper(LoginAccount, tables.account_ids)
 
@@ -303,7 +303,7 @@ class LanguageSet(object):
     ROW_DISPLAY = ("name", )
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 mapper(LanguageSet, tables.language_sets, 
     properties={
@@ -368,7 +368,7 @@ class Location(object):
     ROW_DISPLAY = ("locationcode",)
 
     def __str__(self):
-        return self.locationcode
+        return str(self.locationcode)
 
 mapper(Location, tables.location,
     properties={
@@ -405,7 +405,7 @@ class FunctionalArea(object):
     ROW_DISPLAY = ("name",)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __repr__(self):
         return "FunctionalArea(%r)" % self.name
@@ -427,7 +427,7 @@ class Project(object):
     ROW_DISPLAY = ("name", "category", "description")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 mapper(Project, tables.projects,
     properties={
@@ -468,7 +468,7 @@ class Corporation(object):
     ROW_DISPLAY = ("name",)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def add_service(self, session, service):
         svc = session.query(FunctionalArea).filter(FunctionArea.name == service).one()
@@ -523,7 +523,7 @@ class SoftwareCategory(object):
     ROW_DISPLAY = ("name", "description")
 
     def __repr__(self):
-        return self.name
+        return str(self.name)
 
 mapper(SoftwareCategory, tables.software_category)
 
@@ -608,7 +608,7 @@ class Network(object):
         if self.ipnetwork is not None:
             return "%s (%s)" % (self.name, self.ipnetwork)
         else:
-            return self.name
+            return str(self.name)
 
     def __repr__(self):
         return "Network(%r, %r)" % (self.name, self.ipnetwork)
@@ -621,7 +621,7 @@ class EquipmentModel(object):
     ROW_DISPLAY = ("manufacturer", "name", "category")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 mapper(EquipmentModel, tables.equipment_model,
     properties={
@@ -655,7 +655,7 @@ class Equipment(object):
     ROW_DISPLAY = ("name", "model", "serno")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def add_attribute(self, session, attrtype, value):
         if not isinstance(attrtype, AttributeType):
@@ -852,7 +852,7 @@ class TestCase(object):
     ROW_DISPLAY = ("name", "purpose", "testimplementation")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __repr__(self):
         return "TestCase(%r)" % (self.name,)
@@ -870,7 +870,7 @@ class TestSuite(object):
     ROW_DISPLAY = ("name", "suiteimplementation")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __repr__(self):
         return "TestSuite(%r)" % (self.name,)
@@ -892,7 +892,7 @@ class TestJob(object):
     ROW_DISPLAY = ("name", "schedule")
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def __repr__(self):
         return "TestJob(%r)" % (self.name,)
@@ -963,7 +963,7 @@ class CapabilityGroup(object):
     ROW_DISPLAY = ("name",)
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 mapper(CapabilityGroup, tables.capability_group)
 
