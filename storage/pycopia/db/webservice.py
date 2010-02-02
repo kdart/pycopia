@@ -602,6 +602,8 @@ _CONSTRUCTORS = {
 def update_row(request, klass, dbrow):
     for metadata in models.get_metadata(klass):
         value = request.POST.get(metadata.colname)
+        if not value and metadata.nullable:
+            value = None
         if metadata.coltype == "RelationProperty":
             relmodel = getattr(klass, metadata.colname).property.mapper.class_
             if isinstance(value, list) and value:
@@ -633,46 +635,38 @@ def update_row(request, klass, dbrow):
                     request.log_error("warning: %r did not evaluate: %s.\n" % (value, exval))
                 setattr(dbrow, metadata.colname, value)
         elif metadata.coltype == "PGText":
-            if not value and metadata.nullable:
-                value = None
             setattr(dbrow, metadata.colname, value)
         else:
             validator = _VALIDATORS.get(metadata.coltype)
-            if validator is not None:
+            if validator is not None and value is not None:
                 value = validator(value)
             setattr(dbrow, metadata.colname, value)
 
 
-
 def validate_float(value):
-    if value is None:
-        return None
-    return float(value)
+    if value:
+        return float(value)
 
 def validate_int(value):
-    if value is None:
-        return None
-    return int(value)
+    if value:
+        return int(value)
 
 def validate_bigint(value):
-    if value is None:
-        return None
-    return long(value)
+    if value:
+        return long(value)
 
 def validate_datetime(value):
-    if not value:
-        return None
-    else:
-        return value
+    return value
 
 def validate_bool(value):
-    if value is None:
-        return False
     if value.lower() in ("on", "1", "true", "t"):
         return True
     else:
         return False
 
+def validate_cidr(value):
+    if value.count(".") == 3:
+        return value
 
 _VALIDATORS = {
     "PGArray": None,
@@ -681,7 +675,7 @@ _VALIDATORS = {
     "PGBit": None,
     "PGBoolean": validate_bool,
     "PGChar": None,
-    "PGCidr": None,
+    "PGCidr": validate_cidr,
     "PGDate": validate_datetime,
     "PGDateTime": validate_datetime,
     "PGFloat": validate_float,

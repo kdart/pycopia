@@ -101,6 +101,13 @@ class SessionCommands(CLI.BaseCommands):
         cmd._setup(root, "%%YConfig%%N:%s> " % (root.name,))
         raise CLI.NewCommand(cmd)
 
+    def network(self, argv):
+        """network
+    Enter network configuration mode."""
+        cmd = self.clone(NetworkCommands)
+        cmd._setup(None, "%BNetwork%N> ")
+        raise CLI.NewCommand(cmd)
+
 
 class RowCommands(CLI.GenericCLI):
 
@@ -181,6 +188,10 @@ class TableCommands(CLI.BaseCommands):
         for metadata in sorted(models.get_metadata(self._obj)):
             self._print("%20.20s: %s" % (metadata.colname, getattr(dbrow, metadata.colname)))
 
+
+class NetworkCommands(CLI.BaseCommands):
+    pass
+# TODO network connections
 
 class UserCommands(TableCommands):
 

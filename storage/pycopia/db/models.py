@@ -602,19 +602,25 @@ mapper(InterfaceType, tables.interface_type)
 
 
 class Network(object):
-    ROW_DISPLAY = ("name", "ipnetwork", "notes")
+    ROW_DISPLAY = ("name", "layer", "vlanid", "ipnetwork", "notes")
 
     def __str__(self):
-        if self.ipnetwork is not None:
+        if self.layer == 2 and self.vlanid is not None:
+            return "%s {%s}" % (self.name, self.vlanid)
+        elif self.layer == 3 and self.ipnetwork is not None:
             return "%s (%s)" % (self.name, self.ipnetwork)
         else:
-            return str(self.name)
+            return "%s[%d]" % (self.name, self.layer)
 
     def __repr__(self):
-        return "Network(%r, %r)" % (self.name, self.ipnetwork)
+        return "Network(%r, %r, %r, %r)" % (self.name, self.layer, self.vlanid, self.ipnetwork)
 
-
-mapper(Network, tables.networks)
+mapper(Network, tables.networks,
+    properties={
+        "upperlayers": relation(Network, backref=backref("lowerlayer",
+                remote_side=[tables.networks.c.id])),
+    },
+)
 
 
 class EquipmentModel(object):

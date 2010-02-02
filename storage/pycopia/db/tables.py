@@ -661,9 +661,15 @@ Index('index_language_codes_name_key', language_codes.c.name, unique=True)
 networks = Table('networks', metadata,
     Column(u'id', PGInteger(), primary_key=True, nullable=False),
             Column(u'name', PGString(length=64, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'bridgeid', PGString(length=20), primary_key=False),
+            Column(u'layer', PGInteger(), primary_key=False, nullable=False, server_default="1"),
+            Column(u'vlanid', PGInteger(), primary_key=False),
             Column(u'ipnetwork', PGCidr(), primary_key=False),
+            Column(u'lower_id', PGInteger(), primary_key=False),
             Column(u'notes', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+    ForeignKeyConstraint([u'lower_id'], [u'public.networks.id'], name=u'lower_id_refs_networks_id',
+                    ondelete="SET NULL"),
+    CheckConstraint('layer > 0 AND  layer < 8', name='osilayers'),
+            CheckConstraint('vlanid > 0 AND  vlanid < 4094', name='vlanrange'),
     schema='public')
 
 
@@ -689,7 +695,7 @@ equipment = Table('equipment', metadata,
                     onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'location_id'], [u'public.location.id'], name=u'equipment_location_id_fkey'),
             ForeignKeyConstraint([u'account_id'], [u'public.account_ids.id'], name=u'equipment_account_id_fkey'),
-            ForeignKeyConstraint([u'parent_id'], [u'public.equipment.id'], name=u'parent_id_refs_corporations_id'),
+            ForeignKeyConstraint([u'parent_id'], [u'public.equipment.id'], name=u'parent_id_refs_equipment_id'),
     schema='public')
 
 Index('index_equipment_model_id', equipment.c.model_id, unique=False)
