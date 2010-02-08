@@ -103,6 +103,16 @@ fieldset select {
     margin-bottom: 5px;
 }
 
+fieldset.radioset label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+}
+
+input[type="radio"] {
+    display: inline;
+    margin-right: 20px;
+}
 
 input.PGArray {
 }

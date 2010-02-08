@@ -36,10 +36,13 @@ class Current(object):
 class Range(object):
     pass
 
+class Buffer(bytearray):
+    pass
+
 def command(s):
     print "vim command:", s
 
-buffers = [bytearray()]
+buffers = [Buffer()]
 buffers[0].name = "<unknown>"
 windows = [Window()]
 
