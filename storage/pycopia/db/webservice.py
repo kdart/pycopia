@@ -135,12 +135,50 @@ dispatcher = auth.need_authentication(dispatcher)
 
 ##### for server-side markup requests that provide a basic database editor. ####
 
+#def doc_constructor(request, **kwargs):
+#    doc = framework.get_acceptable_document(request)
+#    doc.stylesheet = request.get_url("css", name="tableedit.css")
+#    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
+#    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
+#    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
+#    for name, val in kwargs.items():
+#        setattr(doc, name, val)
+#    nav = doc.add_section("navigation")
+#    NM = doc.nodemaker
+#    nav.append(NM("P", None,
+#         NM("A", {"href":"/"}, "Home"), NM("ASIS", None, "&nbsp;"),
+#         NM("A", {"href": request.get_url(listall)}, "Top"), NM("ASIS", None, "&nbsp;"),
+#         IF(request.path.count("/") > 2, NM("A", {"href":".."}, "Up")), NM("ASIS", None, "&nbsp;"),
+#    ))
+#    nav.append(NM("P", {"class_": "title"}, "Storage Editor"))
+#    nav.append(NM("P", None, 
+#            NM("A", {"href": "/auth/logout"}, "logout")))
+#    doc.add_section("messages", id="messages")
+#    return doc
+
+
+TINY_MCE_EDIT_INIT="""
+    tinyMCE.init({ 
+        mode : "textareas", 
+        theme : "advanced", 
+        editor_selector : "PGText",
+    theme_advanced_buttons1 : "bold,italic,underline,separator,strikethrough,justifyleft,justifycenter,justifyright,justifyfull,bullist,numlist,undo,redo,|,formatselect,fontselect,fontsizeselect",
+        theme_advanced_buttons2 : "",
+        theme_advanced_buttons3 : "",
+        theme_advanced_toolbar_location : "top",
+        theme_advanced_toolbar_align : "left",
+        theme_advanced_statusbar_location : "none"
+        });
+"""
+
 def doc_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
     doc.stylesheet = request.get_url("css", name="tableedit.css")
     doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
     doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
     doc.add_javascript2head(url=request.get_url("js", name="db.js"))
+    doc.add_javascript2head(url=request.get_url("js", name="tiny_mce/tiny_mce.js"))
+    doc.add_javascript2head(text=TINY_MCE_EDIT_INIT)
     for name, val in kwargs.items():
         setattr(doc, name, val)
     nav = doc.add_section("navigation")
@@ -155,6 +193,7 @@ def doc_constructor(request, **kwargs):
             NM("A", {"href": "/auth/logout"}, "logout")))
     doc.add_section("messages", id="messages")
     return doc
+
 
 
 @auth.need_login
@@ -602,6 +641,8 @@ _CONSTRUCTORS = {
 def update_row(request, klass, dbrow):
     for metadata in models.get_metadata(klass):
         value = request.POST.get(metadata.colname)
+        if value is None:
+            continue
         if not value and metadata.nullable:
             value = None
         if metadata.coltype == "RelationProperty":
