@@ -257,6 +257,10 @@ class TestRunner(object):
         comment = cf.get("comment")
         if comment:
             rpt.add_message("COMMENT", comment)
+        # Report build here, if given.
+        build = cf.get("build")
+        if build:
+            rpt.add_message("BUILD", build)
         rpt.add_message("RUNNERSTARTTIME", starttime, 0)
 
     def finalize(self):

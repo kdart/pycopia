@@ -17,16 +17,20 @@ model object.
 
 import sys
 import os
+import re
 
 from datetime import datetime
 from pycopia import passwd
 from pycopia import reports
 
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy import and_
 
 from pycopia.db import models
 from pycopia.db import types
 
+
+PROJECT_RE = re.compile(r"(\w+)[ .:](\d+)\.(\d+)\.(\d+)\.(\d+)")
 
 _COLUMNS = {
     "testcase": None,           # test case record
@@ -35,7 +39,7 @@ _COLUMNS = {
     "tester": None,             # user running the test
     "testversion": None,        # Version of test implementation
     "parent": None,             # container object
-    "objecttype": None,       # Object type enumeration
+    "objecttype": None,         # Object type enumeration
     "starttime": None,          # STARTTIME (Test, Suite),    RUNNERSTART (module)
     "endtime": None,            # ENDTIME (Test, Suite), RUNNEREND (module)
     "arguments": None,          # TESTARGUMENTS (Test), RUNNERARGUMENTS (module)
@@ -91,6 +95,7 @@ class ResultHolder(object):
     def commit(self, dbsession, parentrecord=None):
         self._data["parent"] = parentrecord
         self.resolve_testcase(dbsession)
+        self.resolve_build(dbsession)
         tr = models.create(models.TestResult, **self._data)
         dbsession.add(tr)
         for child in self._children:
@@ -113,6 +118,42 @@ class ResultHolder(object):
                 pass
             else:
                 self._data["testcase"] = tc
+
+    def resolve_build(self, dbsession):
+        buildstring = self._data.get("build")
+        if buildstring is None:
+            return
+        mo = PROJECT_RE.search(buildstring)
+        if mo:
+            try:
+                pname, major, minor, sub, build = mo.groups()
+                major = int(major); minor = int(minor); sub = int(sub); build = int(build)
+            except ValueError:
+                self._data["build"] = None
+                return
+            try:
+                proj = dbsession.query(models.Project).filter(models.Project.name==pname).one()
+            except NoResultFound:
+                self._data["build"] = None
+                return
+            try:
+                projectversion = dbsession.query(models.ProjectVersion).filter(and_(
+                        models.ProjectVersion.project==proj,
+                        models.ProjectVersion.valid==True,
+                        models.ProjectVersion.major==major,
+                        models.ProjectVersion.minor==minor,
+                        models.ProjectVersion.subminor==sub,
+                        models.ProjectVersion.build==build)
+                        ).one()
+            except NoResultFound:
+                projectversion = models.create(
+                        models.ProjectVersion, project=proj, valid=True,
+                        major=major, minor=minor, subminor=sub, build=build)
+                dbsession.add(projectversion)
+            self._data["build"] = projectversion
+        else:
+            self._data["build"] = None
+
 
 
 def get_user(conf):
@@ -262,6 +303,8 @@ class DatabaseReport(reports.NullReport):
                 self.pop_result()             # test -> runner
             self._currentresult.set("endtime", datetime.fromtimestamp(msg))
             self._currentresult.set("result", NA)
+        elif msgtype == "BUILD":
+            self._currentresult.set("build", msg)
 
     def passed(self, msg, level=1):
         self._currentresult.set("result", PASSED)

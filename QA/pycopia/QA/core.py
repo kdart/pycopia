@@ -1095,6 +1095,14 @@ class TestSuite(object):
         """
         self.report.info(msg, 1)
 
+    def report_build(self, buildstring):
+        """Report any build information. Usually a version or build
+        number.
+        The buildstring parameter must match the following pattern:
+            <projectname>[ .:]<major>.<minor>.<subminor>.<build>
+        """
+        self.report.add_message("BUILD", buildstring, 1)
+
     def _get_prerequisites(self):
         """Get the list of prerequisites.
 
