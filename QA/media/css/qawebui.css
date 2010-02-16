@@ -25,6 +25,9 @@ p.title {
   font-weight: bold;
 }
 
+div.testcasebody {
+  margin-left: 0.5in;
+}
 
 img { 
   border:none; 
@@ -76,8 +79,26 @@ p.error {
   color: #FF0000;
 }
 
+tr td:first-child, tr th:first-child { width: 100px; }
 
-tr td:first-child, tr th:first-child { width: 80px; }
+h1, h2, h3, h4, h5, h6 {
+    background: transparent;
+    text-decoration: none;
+    color: #003163;
+}
+
+h1 {
+    font-size: 135%;
+}
+
+h2 {
+    margin-top: 1em;
+    font-size: 115%;
+}
+
+h3 {
+    margin-top: 1em;
+}
 
 fieldset {
   background-color: #FFFAD9;
@@ -103,6 +124,10 @@ fieldset select {
     margin-bottom: 5px;
 }
 
+input[type="radio"] {
+    display: inline;
+    margin-right: 20px;
+}
 
 input.PGArray {
 }
@@ -182,25 +207,58 @@ input.PGUuid {
 }
 
 fieldset.ValueType label {
-  font-weight:normal;
-  margin-left:1em;
-  width:auto;
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+}
+
+fieldset.TestCaseStatus label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+}
+
+fieldset.TestCaseType label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+}
+
+fieldset.TestPriorityType label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
 }
 
 fieldset.radioset label {
-  font-weight:normal;
-  margin-left:1em;
-  width:auto;
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
 }
 
 fieldset.radioset input {
-  width:auto;
+    width:auto;
 }
 
+fieldset.radioset input {
+    width:auto;
+}
+
+fieldset.yes_no label, fieldset.yes_no input {
+    display: inline;
+    font-weight: bold;
+    width: auto;
+    margin-left:2em;
+}
 
 input:focus {
-  border-width: 2px;
-  border-color: black;
+    border-width: 2px;
+    border-color: black;
 }
 
 input[type="submit"] {

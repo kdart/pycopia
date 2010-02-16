@@ -13,16 +13,26 @@ DATABASE_URL = 'postgres://pycopia@localhost/pycopia'
 USERNAME = "tester"
 
 ADMINS = [
-    ('keith@hytrust.com', 'Keith Dart'),
+    ('keith@dartworks.biz', 'Keith Dart'),
 ]
 
 # Map pattern to handler functions. 
 LOCATIONMAP = (
 #  (r"^/api/(?P<methodname>\w+)$", "pycopia.db.webservice.dispatcher"),
   (r"^/?$", "pycopia.QA.webui.main"),
-  (r"^/testresults/?$", "pycopia.QA.webui.testresults"),
-#  (r"^/table/(?P<tablename>\w+)/delete/(?P<rowid>\d+)/?$", "pycopia.db.webservice.delete_row"),
-    # aliases don't have a dot in the name.
+  # test cases
+  (r"^/testcase/$", "pycopia.QA.webui.testcase_list"),
+  (r"^/testcase/view/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_view"),
+  (r"^/testcase/view/?$", "pycopia.WWW.framework.redirectup"),
+  (r"^/testcase/edit/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_edit"),
+  (r"^/testcase/edit/?$", "pycopia.WWW.framework.redirectup"),
+#  (r"^/testcase/delete/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_delete"),
+  (r"^/testcase/run/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_run"),
+  (r"^/testcase/run/?$", "pycopia.WWW.framework.redirectup"),
+  (r"^/testcase/new/?$", "pycopia.QA.webui.testcase_create"),
+  # test results
+  (r"^/testresults/?$", "pycopia.QA.webui.testresults_list"),
+    # media locations. aliases don't have a dot in the name.
   (r'/media/css/(?P<name>\S+)', "css"),
   (r'/media/js/(?P<name>\S+)', "js"),
   (r'/media/images/(?P<name>\S+)', "images"),
@@ -34,6 +44,7 @@ ICONMAP = {
 #"xxx": ("icon_xxx_active.png", "icon_xxx_inactive.png"),
   "default": (None, "icon_default_inactive.png"),
   "add": ("icon_add_active.png", "icon_add_inactive.png"),
+  "go": (None, "gobutton_large.png"),
   "edit": ("icon_edit_active.png", "icon_edit_inactive.png"),
   "delete": ("icon_delete_active.png", "icon_delete_inactive.png"),
   "activate": ("icon_activate_active.png", "icon_activate_inactive.png"),
@@ -53,6 +64,7 @@ ICONMAP_SMALL = {
   "edit": "icon_changelink.png",
   "delete": "icon_deletelink.png",
   "add": "icon_addlink.png",
+  "go": ("gobutton_small.png"),
   "unknown": "icon-unknown.png",
   "yes": "icon-yes.png",
   "no": "icon-no.png",
