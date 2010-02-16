@@ -45,6 +45,18 @@ class ProcessManager(object):
         self._procmanager.submethod(func, pwent=self._pwent)
 
 
+
+# TODO something better
+def ErrorHandler(exc_info, stream):
+    import cgitb
+    stream.write('Status: 500 fcgi error\r\n')
+    stream.write('Content-Type: text/html\r\n')
+    stream.write('\r\n')
+    stream.write(cgitb.html(exc_info))
+    stream.flush()
+
+
+
 # Factory function creats a server instance with our interface
 # handlers.
 def get_server(config):
@@ -59,11 +71,12 @@ def get_server(config):
 
     if "MIDDLEWARE" in config:
         for mws in config["MIDDLEWARE"]:
-            pass #XXX
+            pass # TODO wrap in wsgi middleware
 
     return FCGIServer(app,
             procmanager=pm,
             bindAddress=config.SOCKETPATH,
+            errorhandler=None,
             umask=config.get("SOCKET_UMASK", 0),
             debug=config.DEBUG)
 

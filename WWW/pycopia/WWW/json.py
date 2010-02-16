@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # -*- coding: us-ascii -*-
 # vim:ts=2:sw=2:softtabstop=0:tw=74:smarttab:expandtab
 
@@ -80,6 +80,26 @@ class JSONEncoder(simplejson.JSONEncoder):
       pass
 
 
+# manage a global request reference for those JSON handlers that want access to the
+# original request.
+
+current_request = None
+
+class GlobalRequest(object):
+
+  def __init__(self, request):
+    global current_request
+    current_request = request
+
+  def __enter__(self):
+    global current_request
+    return current_request
+
+  def __exit__(self, type, value, traceback):
+    global current_request
+    current_request = None
+
+
 class JSONDispatcher(object):
   """Pair with PythonProxy javascript object.
 
@@ -150,7 +170,8 @@ class JSONDispatcher(object):
       else:
         args = ()
         kwargs = {}
-      rv = handler(*args, **kwargs)
+      with GlobalRequest(request):
+        rv = handler(*args, **kwargs)
       json = self._encoder.encode(rv)
       return HttpResponse(json, "application/json")
     except: # all exceptions are sent back to client.

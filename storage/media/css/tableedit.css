@@ -103,12 +103,6 @@ fieldset select {
     margin-bottom: 5px;
 }
 
-fieldset.radioset label {
-    display: inline;
-    font-weight: normal;
-    width: auto;
-}
-
 input[type="radio"] {
     display: inline;
     margin-right: 20px;
@@ -192,25 +186,53 @@ input.PGUuid {
 }
 
 fieldset.ValueType label {
-  font-weight:normal;
-  margin-left:1em;
-  width:auto;
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+    width:auto;
+}
+
+fieldset.TestCaseStatus label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+    width:auto;
+}
+
+fieldset.TestCaseType label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+    width:auto;
+}
+
+fieldset.TestPriorityType label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+    width:auto;
 }
 
 fieldset.radioset label {
-  font-weight:normal;
-  margin-left:1em;
-  width:auto;
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+    width:auto;
 }
 
 fieldset.radioset input {
-  width:auto;
+    width:auto;
 }
 
 
 input:focus {
-  border-width: 2px;
-  border-color: black;
+    border-width: 2px;
+    border-color: black;
 }
 
 input[type="submit"] {

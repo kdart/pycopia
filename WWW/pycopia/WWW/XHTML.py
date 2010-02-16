@@ -1225,11 +1225,11 @@ class FormMixin(ContainerMixin):
         somelist.insert(defidx, (orig, True))
         return self.add_select(somelist, id=ID)
 
-    def yes_no(self, prompt, default=True):
+    def yes_no(self, prompt, name="yes_no", default=True):
         fs = self.add_fieldset(prompt)
         fs.set_attribute("class_", "yes_no")
         for i, item in enumerate(["Yes", "No"]):
-            inp = self.dtd.Input(type="radio", name="yes_no", value=i)
+            inp = self.dtd.Input(type="radio", name=name, value=i)
             if i == 0 and default:
                 inp.checked = "checked"
             if i == 1 and not default:

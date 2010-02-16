@@ -64,7 +64,6 @@ import struct
 import select
 import errno
 import traceback
-import cgitb
 
 from pycopia import socket
 from pycopia.aid import systemcall, NULL
@@ -767,9 +766,9 @@ class ProcessManager(object):
 
 def DefaultErrorHandler(exc_info, stream):
     stream.write('Status: 500 fcgi error\r\n')
-    stream.write('Content-Type: text/html\r\n')
+    stream.write('Content-Type: text/plain\r\n')
     stream.write('\r\n')
-    stream.write(cgitb.html(exc_info))
+    traceback.print_exception(*exc_info, file=stream)
     stream.flush()
 
 

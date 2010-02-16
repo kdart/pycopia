@@ -589,6 +589,22 @@ class URLResolver(object):
         return urlmap.get_url(**kwargs)
 
 
+class DatabaseContext(object):
+
+    def __init__(self, request):
+        assert request.dbsessionclass is not None, "Application does not define a database in DATABASE_URL."
+        self._dbsessionclass = request.dbsessionclass
+
+    def __enter__(self):
+        self.dbsession = self._dbsessionclass()
+        return self.dbsession
+
+    def __exit__(self, type, value, traceback):
+        if type is not None:
+            self.dbsession.rollback()
+        self.dbsession.close()
+
+
 class WebApplication(object):
     """Adapt a WSGI server to a framework style request handler. 
     """
@@ -598,9 +614,9 @@ class WebApplication(object):
                 config.get("BASEPATH", "/%s" % (config.SERVERNAME,)))
         if config.get("DATABASE_URL"):
             from pycopia.db import models
-            self.dbsession = models.create_session(config.DATABASE_URL)
+            self.dbsessionclass = models.create_session(config.DATABASE_URL)
         else:
-            self.dbsession = None
+            self.dbsessionclass = None
 
     def __call__(self, environ, start_response):
         request = HTTPRequest(environ)
@@ -608,24 +624,19 @@ class WebApplication(object):
         request.get_url = self._resolver.get_url
         request.path = self._resolver._urlbase + environ['PATH_INFO']
         request.get_alias = self._resolver.get_alias
-        if self.dbsession is not None:
-            request.dbsession = self.dbsession()
+        request.dbsessionclass = self.dbsessionclass
         try:
-            try:
-                response = self._resolver.dispatch(request)
-            except:
-                ex, val, tb = sys.exc_info()
-                if issubclass(ex, HTTPError):
-                    start_response(str(val), [("Content-Type", "text/plain")], (ex, val, tb))
-                    return [val.message]
-                else:
-                    raise ex, val, tb
+            response = self._resolver.dispatch(request)
+        except:
+            ex, val, tb = sys.exc_info()
+            if issubclass(ex, HTTPError):
+                start_response(str(val), [("Content-Type", "text/plain")], (ex, val, tb))
+                return [val.message]
             else:
-                start_response(response.get_status(), response.get_response_headers())
-                return response
-        finally:
-            if self.dbsession is not None:
-                request.dbsession.close()
+                raise ex, val, tb
+        else:
+            start_response(response.get_status(), response.get_response_headers())
+            return response
 
 
 # You can subclass this and set and instance to be called by URL mapping.

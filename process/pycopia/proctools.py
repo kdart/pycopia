@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -846,7 +846,6 @@ times the process will be respawned if the previous invocation dies.  """
 
     def coprocess(self, method, args=(), logfile=None, env=None, callback=None, async=False):
         signal(SIGCHLD, SIG_DFL) # critical area
-        #proc = CoProcessPty(method, logfile=logfile, env=env, callback=callback, async=async)
         proc = CoProcessPipe(method, logfile=logfile, env=env, callback=callback, async=async)
         if proc.childpid == 0:
             sys.excepthook = sys.__excepthook__
@@ -860,10 +859,12 @@ times the process will be respawned if the previous invocation dies.  """
                 rv = int(val)
             except:
                 ex, val, tb = sys.exc_info()
-                tb = None
-                errfile = open("/tmp/proctools_coprocess.log", "w")
-                print >>errfile, "Coprocess exception: %s (%s)." % (ex, val)
-                errfile.close()
+                try:
+                    import traceback
+                    with open("/tmp/proctools_coprocess.log", "w+") as errfile:
+                        traceback.print_exception(ex, val, tb, None, errfile)
+                finally:
+                    ex = val = tb = None
                 rv = 127
             if rv is None:
                 rv = 0
@@ -897,10 +898,12 @@ times the process will be respawned if the previous invocation dies.  """
                 rv = int(val)
             except:
                 ex, val, tb = sys.exc_info()
-                tb = None
-                errfile = open("/tmp/proctools_submethod.log", "w")
-                print >>errfile, "Submethod exception: %s (%s)." % (ex, val)
-                errfile.close()
+                try:
+                    import traceback
+                    with open("/tmp/proctools_submethod.log", "w+") as errfile:
+                        traceback.print_exception(ex, val, tb, None, errfile)
+                finally:
+                    ex = val = tb = None
                 rv = 127
             if rv is None:
                 rv = 0

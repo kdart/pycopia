@@ -1,0 +1,88 @@
+#!/usr/bin/python
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+"""
+Add a new user to this system.
+
+newuser --first_name=First --last_name=Last --password=newpass flast
+
+"""
+
+
+import sys
+
+from pycopia import getopt
+from pycopia import tty
+from pycopia import passwd
+from pycopia import proctools
+from pycopia import basicconfig
+from pycopia.db import models
+
+
+USERADD = 'useradd -c "%s %s" -g users -G cron,audio,cdrom,video,games,postgres,usb,portage,plugdev,wireshark,tester -m %s'
+
+
+def newuser(argv):
+    try:
+        opts, longopts, args = getopt.getopt(argv[1:], "h?")
+    except getopt.GetoptError:
+        print __doc__
+        return
+    for opt, optarg in opts:
+        if opt in ("-?", "-h"):
+            print __doc__
+            return
+
+    try:
+        username = args[0]
+    except IndexError:
+        username = raw_input("Account name? ")
+
+    cf = basicconfig.get_config("storage.conf")
+    database = cf.database
+    del cf
+
+    try:
+        pwent = passwd.getpwnam(username)
+    except KeyError:
+        first_name = longopts.get("first_name")
+        if not first_name:
+            first_name = raw_input("First Name? ")
+        last_name = longopts.get("last_name")
+        if not last_name:
+            last_name = raw_input("Last Name? ")
+        password = longopts.get("password")
+        if not password:
+            password = tty.getpass("Password? ")
+
+        proc = proctools.spawnpipe(USERADD % (first_name, last_name, username))
+        es = proc.wait()
+        if es:
+            proc = proctools.spawnpty("passwd %s" % (username,))
+            proc.read(8)
+            proc.write(password)
+            proc.write("\r")
+            proc.read(8)
+            proc.write(password)
+            proc.write("\r")
+            proc.read()
+            pwes = proc.wait()
+            if not pwes:
+                print "Failed to change password!"
+                return
+        else:
+            print "Failed to add user!"
+            return
+
+    pwent = passwd.getpwnam(username)
+
+    dbsession = models.get_session(database)
+    user = models.create_user(dbsession, pwent)
+    user.password = password
+    dbsession.commit()
+
+
+
+newuser(sys.argv)
+

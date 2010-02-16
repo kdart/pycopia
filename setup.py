@@ -71,11 +71,11 @@ PACKAGES = [
 "mibs",
 "SNMP",
 "storage",
-"QA",
 "net",
 "audio",
 "XML",
 "WWW",
+"QA",
 "vim",
 "fepy",
 ]
