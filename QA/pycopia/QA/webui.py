@@ -416,7 +416,7 @@ class TestcaseLister(framework.RequestHandler):
         cycler = itertools.cycle(["row1", "row2"])
         tbl = resp.doc.add_table(width="100%")
         tbl.caption("Test Cases")
-        colnames = models.get_rowdisplay(models.TestCase)
+        colnames = ("name", "testimplementation")
         tbl.new_headings("", *colnames)
         for dbrow in webhelpers.table_get(tableclass, {}):
             row = tbl.new_row(id="rowid_%s" % dbrow.id, class_=cycler.next())
