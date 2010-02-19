@@ -946,7 +946,14 @@ class TestSuite(object):
         Also adds any prerequisites, if not already present, recursively.
         """
         for prereq in entry.inst.OPTIONS.prerequisites:
-            pretestclass = module.get_object(prereq.implementation)
+            impl = prereq.implementation
+            # if a plain class name is given, assume it refers to a class
+            # in the same module and convert to full path with that
+            # module.
+            if "." not in impl:
+                impl = sys.modules[entry.inst.__class__.__module__].__name__ + "." + impl
+                prereq.implementation = impl
+            pretestclass = module.get_object(impl)
             preentry = TestEntry(pretestclass(self.config), prereq.args, prereq.kwargs, True)
             presig, argsig = preentry.get_signature()
             if presig not in self._multitestset:
