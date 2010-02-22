@@ -675,7 +675,6 @@ def new_valuetypeinput(ui, modelclass, metadata):
     return ui.choose(types.ValueType.get_choices(), 0, "%%I%s%%N" % metadata.colname)[0]
 
 def new_relation_input(ui, modelclass, metadata):
-    print "XXX", modelclass, metadata
     choices = models.get_choices(_session, modelclass, metadata.colname, None)
     if not choices:
         ui.Print("%s has no choices." % metadata.colname)
@@ -688,12 +687,6 @@ def new_relation_input(ui, modelclass, metadata):
         if not chosen and metadata.nullable:
             chosen = None
         return chosen
-#        while True:
-#            last = ui.choose(choices, 0, "%%I%s%%N" % metadata.colname)[0]
-#            if last is None:
-#                return rv
-#            else:
-#                rv.append(last)
     else:
         if metadata.nullable:
             choices.insert(0, (None, "Nothing"))
