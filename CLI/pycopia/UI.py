@@ -346,11 +346,20 @@ class UserInterface(object):
                     self._get_prompt("PS3", prompt), 
                     input=self._io.raw_input, error=self.error)
 
+    def choose_multiple(self, somelist, chosen=None, prompt=None):
+        return cliutils.choose_multiple(somelist, 
+                    chosen, 
+                    self._get_prompt("PS3", prompt), 
+                    input=self._io.raw_input, error=self.error)
+
     def get_text(self, msg=None):
         return cliutils.get_text(self._get_prompt("PS4"), msg, input=self._io.raw_input)
 
     def get_value(self, prompt, default=None):
         return cliutils.get_input(self.format(prompt), default, self._io.raw_input)
+
+    def edit_text(self, text, prompt=None):
+        return cliutils.edit_text(text, self._get_prompt("PS4", prompt))
 
     def yes_no(self, prompt, default=True):
         yesno = cliutils.get_input(self.format(prompt), IF(default, "Y", "N"), self._io.raw_input)
@@ -375,7 +384,7 @@ class UserInterface(object):
 
     def help_inherited(self, text):
         self.Print(self._format_doc(text, self._theme.help_inherited))
-    
+
     def help_created(self, text):
         self.Print(self._format_doc(text, self._theme.help_created))
 

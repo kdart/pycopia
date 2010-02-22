@@ -2,7 +2,7 @@
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 # 
-#    Copyright (C) 2009 Keith Dart <keith@kdart.com>
+#    Copyright (C) 2010 Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -21,16 +21,18 @@ CLI interface to Pycopia database storage.
 """
 
 import os
+from decimal import Decimal
 
 from pycopia import CLI
 from pycopia import tty
 from pycopia import passwd
 from pycopia.aid import NULL
 
+from pycopia.db import types
 from pycopia.db import models
 from pycopia.db import config
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm.exc import NoResultFound
 
 _session = None
@@ -122,13 +124,45 @@ class RowCommands(CLI.GenericCLI):
         for metadata in RowCommands._metadata:
             self._print("%20.20s: %s" % (metadata.colname, getattr(self._obj, metadata.colname)))
 
+    def edit(self, argv):
+        """edit [<fieldname>]
+    Edit this row object."""
+        if len(argv) > 1:
+            for fname in argv[1:]:
+                for metadata  in models.get_metadata(self._obj.__class__):
+                    if metadata.colname == fname:
+                        editor = _EDITORS.get(metadata.coltype)
+                        if editor:
+                            editor(self._ui, self._obj.__class__, metadata, self._obj)
+                        else:
+                            self._ui.error("No user interface for %r." % (metadata.colname,))
+        else:
+            edit(self._obj.__class__, self._obj, self._ui)
+
+    def commit(self, argv):
+        """commit
+    Commit the changes."""
+        try:
+            _session.commit()
+        except:
+            _session.rollback()
+            ex, val, tb = sys.exc_info()
+            self._ui.error("%s: %s" % (ex, val))
+        else:
+            raise CLI.CommandQuit
+
+    def abort(self, argv):
+        """abort
+    Abort this edit, don't commit changes."""
+        _session.rollback()
+        raise CLI.CommandQuit
 
 
 class TableCommands(CLI.BaseCommands):
 
     @classmethod
     def get_prompt(cls, table):
-        return "%%B%s%%N> " % table.__name__
+        return "%%M%s%%N> " % table.__name__
 
     def query(self, argv):
         """query
@@ -149,17 +183,69 @@ class TableCommands(CLI.BaseCommands):
     def create(self, argv):
         """create
     Start an interactive row creator."""
-        cmd = self.clone(CreateCommands)
-        cmd._setup(self._obj(), "Create:%s> " % (self._obj.__name__,))
-        raise CLI.NewCommand(cmd)
+        rowobj = create(self._obj, self._ui)
+        _session.add(rowobj)
+        _session.commit()
+
+    def delete(self, argv):
+        """delete ...
+    Delete the selected row."""
+        dbrow = self._select(argv)
+        if self._ui.yes_no("Delete %s, are you sure?" % (dbrow,)):
+            _session.delete(dbrow)
+            _session.commit()
+
+    def select(self, argv):
+        """select <query>
+    Select one row by query parameters. 
+
+    If the query is an integer, return that ID.
+    Otherwise arguments are treated as a WHERE clause. If you use a clause
+    with a colon parameters then provide the parameters as long options.
+    If there are not regular arguments, treat the long options as the WHERE clause.
+    """
+        dbrow = self._select(argv)
+        self._print(dbrow)
+
+    def _select(self, argv):
+        args, kwargs = CLI.breakout_args(argv[1:], self._environ)
+        try:
+            q = _session.query(self._obj)
+            if args:
+                try:
+                    rowid = int(args[0])
+                except ValueError:
+                    pass
+                else:
+                    return q.get(rowid)
+                q = q.filter(" ".join(args))
+                if kwargs:
+                    q = q.params(**kwargs)
+                return q.one()
+            else:
+                for k, v in kwargs.iteritems():
+                    q = q.filter(getattr(self._obj, k) == v)
+                return q.one()
+        except:
+            _session.rollback()
+            raise
 
     def ls(self, argv):
         """ls [--<attribute>=<criteria>...]
     List all current entries."""
-        opts, longopts, args = self.getopt(argv, "")
-        q = _session.query(self._obj)
-        for k, v in longopts.iteritems():
-            q = q.filter(getattr(self._obj, k) == v)
+        args, kwargs = CLI.breakout_args(argv[1:], self._environ)
+        try:
+            q = _session.query(self._obj)
+            if args:
+                q = q.filter(" ".join(args))
+                if kwargs:
+                    q = q.params(**kwargs)
+            else:
+                for k, v in kwargs.iteritems():
+                    q = q.filter(getattr(self._obj, k) == v)
+        except:
+            _session.rollback()
+            raise
         for item in q.all():
             self._print(item.id, ":", item)
 
@@ -170,23 +256,41 @@ class TableCommands(CLI.BaseCommands):
             self._print("%20.20s: %s (%s)" % (
                     metadata.colname, metadata.coltype, metadata.default))
 
-    def edit(self, argv):
-        """edit <id>
-    Edit a row object from the table."""
-        rowid = int(argv[1])
-        dbrow = _session.query(self._obj).get(rowid)
+    def inspect(self, argv):
+        """inspect ...
+    Inspect a row."""
+        dbrow = self._select(argv)
         cls = RowCommands
         cmd = self.clone(cls)
         cmd._setup(dbrow, cls.get_prompt(dbrow))
         raise CLI.NewCommand(cmd)
 
     def show(self, argv):
-        """show <id>
-    show the row with the given id."""
-        rowid = int(argv[1])
-        dbrow = _session.query(self._obj).get(rowid)
+        """show ...
+    Show the selected row."""
+        dbrow = self._select(argv)
         for metadata in sorted(models.get_metadata(self._obj)):
             self._print("%20.20s: %s" % (metadata.colname, getattr(dbrow, metadata.colname)))
+
+    def edit(self, argv):
+        """edit ...
+    Edit a row object from the table."""
+        dbrow = self._select(argv)
+        edit(self._obj, dbrow, self._ui)
+
+    def commit(self, argv):
+        """commit
+    Commit any table changes."""
+        try:
+            _session.commit()
+        except:
+            _session.rollback()
+            raise
+
+    def rollback(self, argv):
+        """rollback
+    Roll back any table changes."""
+        _session.rollback()
 
 
 class NetworkCommands(CLI.BaseCommands):
@@ -271,6 +375,8 @@ class UserCommands(TableCommands):
 
 
 class QueryCommands(CLI.BaseCommands):
+    """Interactively build up a complex query.
+    """
 
     def all(self, argv):
         """all
@@ -292,7 +398,11 @@ class QueryCommands(CLI.BaseCommands):
         """filter
     Apply filters by keyword arguments."""
         args, kwargs = CLI.breakout_args(argv[1:], vars(self._obj))
-        self._obj = self._obj.filter(**kwargs)
+        if args:
+            self._obj = self._obj.filter(" ".join(args))
+        if kwargs:
+            for k, v in kwargs.iteritems():
+                self._obj = self._obj.filter(getattr(self._obj, k) == v)
 
     def count(self, argv):
         """count
@@ -336,6 +446,7 @@ class CreateCommands(CLI.BaseCommands):
         _session.add(self._obj)
         _session.commit()
         raise CLI.CommandQuit
+
 
 
 class ConfigCommands(CLI.BaseCommands):
@@ -405,6 +516,8 @@ class ConfigCommands(CLI.BaseCommands):
         _session.commit()
 
     def delete(self, argv):
+        """delete <name>
+    Delete the named configuration item."""
         name = argv[1]
         row = self._get(name)
         if row is not None:
@@ -442,6 +555,362 @@ class ConfigCommands(CLI.BaseCommands):
 _EDITOR_MAP = {
     "User": UserCommands,
 }
+
+
+def create(modelclass, ui):
+    data = {}
+    for metadata in sorted(models.get_metadata(modelclass)):
+        ctor = _CREATORS.get(metadata.coltype)
+        if ctor:
+            data[metadata.colname] = ctor(ui, modelclass, metadata)
+        else:
+            ui.error("No user interface for %r." % (metadata.colname,))
+    dbrow =  models.create(modelclass)
+    return update_row(modelclass, dbrow, data)
+
+
+def update_row(modelclass, dbrow, data):
+    for metadata in models.get_metadata(modelclass):
+        value = data.get(metadata.colname)
+        if not value and metadata.nullable:
+            value = None
+        if metadata.coltype == "RelationProperty":
+            relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
+            if isinstance(value, list):
+                t = _session.query(relmodel).filter(
+                                relmodel.id.in_([int(i[0]) for i in value])).all()
+                setattr(dbrow, metadata.colname, t)
+            elif value is None:
+                if metadata.uselist:
+                    value = []
+                setattr(dbrow, metadata.colname, value)
+            else:
+                if value:
+                    t = _session.query(relmodel).get(value)
+                    if metadata.uselist:
+                        t = [t]
+                    setattr(dbrow, metadata.colname, t)
+        elif metadata.coltype == "PickleText":
+            if value is None:
+                if metadata.nullable:
+                    setattr(dbrow, metadata.colname, value)
+                else:
+                    setattr(dbrow, metadata.colname, "")
+            else:
+                try:
+                    value = eval(value, {}, {})
+                except: # allows use of unquoted strings.
+                    pass
+                setattr(dbrow, metadata.colname, value)
+        else:
+            setattr(dbrow, metadata.colname, value)
+    return dbrow
+
+
+def new_textarea(ui, modelclass, metadata):
+    ui.printf("%%nEnter %%I%s%%N:" % metadata.colname)
+    return ui.get_text()
+
+def new_key(ui, modelclass, metadata):
+    return ui.get_key("Press a key for %r: " % (metadata.colname,))
+
+def _new_pytype(ui, modelclass, metadata, pytype):
+    while 1:
+        raw = ui.get_value("%s? (%s) " % (metadata.colname, pytype.__name__), default=metadata.default)
+        raw = raw.strip()
+        if not raw and metadata.nullable:
+            return None
+        try:
+            return pytype(raw)
+        except ValueError:
+            ui.error("Need a %s." % pytype.__name__)
+
+def new_float(ui, modelclass, metadata):
+    return _new_pytype(ui, modelclass, metadata, float)
+
+def new_number(ui, modelclass, metadata):
+    return _new_pytype(ui, modelclass, metadata, Decimal)
+
+def new_integer(ui, modelclass, metadata):
+    return _new_pytype(ui, modelclass, metadata, int)
+
+def new_textinput(ui, modelclass, metadata):
+    return ui.user_input(metadata.colname + "? ")
+
+def new_boolean_input(ui, modelclass, metadata):
+    return ui.yes_no(metadata.colname + "? ", bool(metadata.default))
+
+def new_cidr(ui, modelclass, metadata):
+    return ui.user_input("IP network for %r: " % (metadata.colname,))
+
+def new_inet(ui, modelclass, metadata):
+    return ui.user_input("IP address for %r: " % (metadata.colname,))
+
+def new_datetime(ui, modelclass, metadata):
+    return ui.get_value("Date and time for %r: " % (metadata.colname,), metadata.default)
+
+def new_macaddr(ui, modelclass, metadata):
+    return ui.get_value("MAC address for %r: " % (metadata.colname,), metadata.default)
+
+def new_time(ui, modelclass, metadata):
+    return ui.get_value("Time for %r: " % (metadata.colname,), metadata.default)
+
+def new_date(ui, modelclass, metadata):
+    return ui.get_value("Date for %r: " % (metadata.colname,), metadata.default)
+
+def new_interval(ui, modelclass, metadata):
+    return ui.user_input("Interval for %r: " % (metadata.colname,))
+
+def new_pickleinput(ui, modelclass, metadata):
+    if metadata.default is None:
+        default = ""
+    else:
+        default = repr(metadata.default)
+    return ui.get_value("Object for %r: " % (metadata.colname,), metadata.default)
+
+def new_uuid(ui, modelclass, metadata):
+    return ui.user_input("UUID for %r: " % (metadata.colname,))
+
+def new_valuetypeinput(ui, modelclass, metadata):
+    return ui.choose(types.ValueType.get_choices(), 0, "%%I%s%%N" % metadata.colname)[0]
+
+def new_relation_input(ui, modelclass, metadata):
+    print "XXX", modelclass, metadata
+    choices = models.get_choices(_session, modelclass, metadata.colname, None)
+    if not choices:
+        ui.Print("%s has no choices." % metadata.colname)
+        if metadata.uselist:
+            return []
+        else:
+            return None
+    if metadata.uselist:
+        chosen = ui.choose_multiple(choices, None, "%%I%s%%N" % metadata.colname)
+        if not chosen and metadata.nullable:
+            chosen = None
+        return chosen
+#        while True:
+#            last = ui.choose(choices, 0, "%%I%s%%N" % metadata.colname)[0]
+#            if last is None:
+#                return rv
+#            else:
+#                rv.append(last)
+    else:
+        if metadata.nullable:
+            choices.insert(0, (None, "Nothing"))
+        return ui.choose(choices, 0, "%%I%s%%N" % metadata.colname)[0]
+
+def new_testcasestatus(ui, modelclass, metadata):
+    return ui.choose(types.TestCaseStatus.get_choices(), 
+            types.TestCaseStatus.get_default(), "%%I%s%%N" % metadata.colname)[0]
+
+def new_testcasetype(ui, modelclass, metadata):
+    return ui.choose(types.TestCaseType.get_choices(), 
+            types.TestCaseType.get_default(), "%%I%s%%N" % metadata.colname)[0]
+
+def new_testpriority(ui, modelclass, metadata):
+    return ui.choose(types.TestPriorityType.get_choices(), 
+            types.TestPriorityType.get_default(), "%%I%s%%N" % metadata.colname)[0]
+
+
+_CREATORS = {
+    "PGArray": None,
+    "PGBigInteger": new_integer,
+    "PGBinary": None,
+    "PGBit": None,
+    "PGBoolean": new_boolean_input,
+    "PGChar": new_key,
+    "PGCidr": new_cidr,
+    "PGDate": new_date,
+    "PGDateTime": new_datetime,
+    "PGFloat": new_float,
+    "PGInet": new_inet,
+    "PGInteger": new_integer,
+    "PGInterval": new_interval,
+    "PGMacAddr": new_macaddr,
+    "PGNumeric": new_number,
+    "PGSmallInteger": new_integer,
+    "PGString": new_textinput,
+    "PGText": new_textarea,
+    "PGTime": new_time,
+    "PGUuid": new_uuid,
+    "PickleText": new_pickleinput,
+    "ValueType": new_valuetypeinput,
+    "RelationProperty": new_relation_input,
+    "TestCaseStatus": new_testcasestatus,
+    "TestCaseType": new_testcasetype,
+    "TestPriorityType": new_testpriority,
+}
+
+
+### modify/editing  ####
+
+def edit(modelclass, dbrow, ui):
+    for metadata in sorted(models.get_metadata(modelclass)):
+        editor = _EDITORS.get(metadata.coltype)
+        if editor:
+            editor(ui, modelclass, metadata, dbrow)
+        else:
+            ui.error("No user interface for %r." % (metadata.colname,))
+
+def edit_float(ui, modelclass, metadata, dbrow):
+    return _edit_pytype(ui, modelclass, metadata, dbrow, float)
+
+def edit_integer(ui, modelclass, metadata, dbrow):
+    return _edit_pytype(ui, modelclass, metadata, dbrow, int)
+
+def edit_number(ui, modelclass, metadata, dbrow):
+    return _edit_pytype(ui, modelclass, metadata, dbrow, Decimal)
+
+def _edit_pytype(ui, modelclass, metadata, dbrow, pytype):
+    while 1:
+        inp = ui.get_value("%s? (%s) " % (metadata.colname, pytype.__name__), getattr(dbrow, metadata.colname))
+        if not inp and metadata.nullable:
+            setattr(dbrow, metadata.colname, None)
+        try:
+            inp = pytype(inp)
+        except ValueError:
+            ui.error("Need a %s." % pytype.__name__)
+        else:
+            setattr(dbrow, metadata.colname, inp)
+            return
+
+def edit_text(ui, modelclass, metadata, dbrow):
+    text = getattr(dbrow, metadata.colname)
+    if text is None:
+        text = ""
+    text = ui.edit_text(text, metadata.colname)
+    if not text and metadata.nullable:
+        text = None
+    setattr(dbrow, metadata.colname, text)
+
+def edit_bool(ui, modelclass, metadata, dbrow):
+    val = getattr(dbrow, metadata.colname)
+    new = ui.yes_no(metadata.colname + "? ", default=val)
+    setattr(dbrow, metadata.colname, new)
+
+def edit_key(ui, modelclass, metadata, dbrow):
+    key = ui.get_key("Press a key for %r: " % (metadata.colname,))
+    setattr(dbrow, metadata.colname, key)
+
+def edit_field(ui, modelclass, metadata, dbrow):
+    new = ui.get_value(metadata.colname + "? ", getattr(dbrow, metadata.colname))
+    setattr(dbrow, metadata.colname, new)
+
+def edit_relation_input(ui, modelclass, metadata, dbrow):
+    choices = models.get_choices(_session, modelclass, metadata.colname, None)
+    if not choices:
+        ui.Print("%s has no choices." % metadata.colname)
+        if metadata.uselist:
+            setattr(dbrow, metadata.colname, [])
+        else:
+            setattr(dbrow, metadata.colname, None)
+        return
+
+    current = getattr(dbrow, metadata.colname)
+    relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
+    if metadata.uselist:
+        chosen = [(crow.id, str(crow)) for crow in current]
+        for chosenone in chosen:
+            choices.remove(chosenone)
+        chosen = ui.choose_multiple(choices, chosen, "%%I%s%%N" % metadata.colname)
+        t = _session.query(relmodel).filter(
+                        relmodel.id.in_([s[0] for s in chosen])).all()
+        if not t and metadata.nullable:
+            t = None
+        setattr(dbrow, metadata.colname, t)
+    else:
+        if metadata.nullable:
+            choices.insert(0, (None, "Nothing"))
+        idx = 0
+        if current is not None:
+            for choice_id, choice_str in choices:
+                if choice_id == current.id:
+                    break
+                idx += 1
+        chosen_id = ui.choose(choices, idx, "%%I%s%%N" % metadata.colname)[0]
+        if chosen_id is None: # can only be if nullable
+            setattr(dbrow, metadata.colname, chosen_id)
+        else:
+            related = _session.query(relmodel).get(chosen_id)
+            setattr(dbrow, metadata.colname, related)
+
+def edit_valuetype(ui, modelclass, metadata, dbrow):
+    vt = ui.choose(types.ValueType.get_choices(), int(getattr(dbrow, metadata.colname)), 
+            "%%I%s%%N" % metadata.colname)
+    setattr(dbrow, metadata.colname, types.ValueType.validate(vt[0]))
+
+def edit_testcasestatus(ui, modelclass, metadata, dbrow):
+    current = int(getattr(dbrow, metadata.colname))
+    choices = types.TestCaseStatus.get_choices()
+    idx = 0
+    for choice_id, choice_str in choices:
+        if choice_id == current:
+            break
+        idx += 1
+    chosen_id = ui.choose(choices, idx, "%%I%s%%N" % metadata.colname)[0]
+    setattr(dbrow, metadata.colname, types.TestCaseStatus.validate(chosen_id))
+
+def edit_testcasetype(ui, modelclass, metadata, dbrow):
+    current = getattr(dbrow, metadata.colname)
+    choices = types.TestCaseType.get_choices()
+    idx = 0
+    for choice_id, choice_str in choices:
+        if choice_id == int(current):
+            break
+        idx += 1
+    chosen_id = ui.choose(choices, idx, "%%I%s%%N" % metadata.colname)[0]
+    setattr(dbrow, metadata.colname, types.TestCaseType.validate(chosen_id))
+
+def edit_testpriority(ui, modelclass, metadata, dbrow):
+    current = getattr(dbrow, metadata.colname)
+    choices = types.TestPriorityType.get_choices()
+    idx = 0
+    for choice_id, choice_str in choices:
+        if choice_id == int(current):
+            break
+        idx += 1
+    chosen_id = ui.choose(choices, idx, "%%I%s%%N" % metadata.colname)[0]
+    setattr(dbrow, metadata.colname, types.TestPriorityType.validate(chosen_id))
+
+def edit_pickleinput(ui, modelclass, metadata, dbrow):
+    current = getattr(dbrow, metadata.colname)
+    value = ui.get_value(metadata.colname + ":\n", default=repr(current))
+    try:
+        value = eval(value, {}, {})
+    except: # allows use of unquoted strings.
+        pass
+    setattr(dbrow, metadata.colname, value)
+
+
+_EDITORS = {
+    "PGArray": None,
+    "PGBigInteger": edit_integer,
+    "PGBinary": None,
+    "PGBit": None,
+    "PGBoolean": edit_bool,
+    "PGChar": edit_key,
+    "PGCidr": edit_field,
+    "PGDate": edit_field,
+    "PGDateTime": edit_field,
+    "PGFloat": edit_float,
+    "PGInet": edit_field,
+    "PGInteger": edit_integer,
+    "PGInterval": edit_field,
+    "PGMacAddr": edit_field,
+    "PGNumeric": edit_number,
+    "PGSmallInteger": edit_integer,
+    "PGString": edit_text,
+    "PGText": edit_text,
+    "PGTime": edit_field,
+    "PGUuid": edit_text,
+    "PickleText": edit_pickleinput,
+    "ValueType": edit_valuetype,
+    "RelationProperty": edit_relation_input,
+    "TestCaseStatus": edit_testcasestatus,
+    "TestCaseType": edit_testcasetype,
+    "TestPriorityType": edit_testpriority,
+}
+
 
 
 # main program

@@ -82,9 +82,85 @@ def choose(somelist, defidx=0, prompt="choose", input=raw_input, error=default_e
                 error("Bad selection. Selection out of range.")
                 continue
 
+def choose_multiple(somelist, chosen=None, prompt="choose multiple", input=raw_input, error=default_error):
+    somelist = somelist[:]
+    if chosen is None:
+        chosen = []
+    while 1:
+        print "Choose from list. Enter to end, negative index removes from chosen."
+        print_menu_list(somelist)
+        if chosen:
+            print "You have: "
+            print_menu_list(chosen)
+        try:
+            ri = get_input(prompt, None, input) # menu list starts at one
+        except EOFError:
+            return chosen
+        if not ri:
+            return chosen
+        try:
+            idx = int(ri)
+        except ValueError:
+            error("Bad selection. Type in the number.")
+            continue
+        else:
+            if idx < 0:
+                idx = -idx - 1
+                try:
+                    somelist.append(chosen[idx])
+                    del chosen[idx]
+                except IndexError:
+                    error("Selection out of range.")
+            elif idx == 0:
+                error("No zero.")
+            else:
+                try:
+                    chosen.append(somelist[idx-1])
+                    del somelist[idx-1]
+                except IndexError:
+                    error("Selection out of range.")
+
+
+def print_list(clist, indent=0, width=74):
+    indent = min(max(indent,0),width-1)
+    if indent:
+        print " " * indent,
+    col = indent + 2
+    for c in clist[:-1]:
+        ps = str(c) + ","
+        col = col + len(ps) + 1
+        if col > width:
+            print
+            col = indent + len(ps) + 1
+            if indent:
+                print " " * indent,
+        print ps,
+    if col + len(clist[-1]) > width:
+        print
+        if indent:
+            print " " * indent,
+    print str(clist[-1])
+
+
 def yes_no(prompt, default=True, input=raw_input):
     yesno = get_input(prompt, IF(default, "Y", "N"), input)
     return yesno.upper().startswith("Y")
+
+def edit_text(text, prompt="Edit text"):
+    """Run $EDITOR on text."""
+    fname = os.tempnam(os.environ["HOME"], prompt[:5])
+    fo = open(fname, "w")
+    fo.write(prompt + ":\n")
+    fo.write(text)
+    fo.close()
+    os.system('%s "%s"' % (os.environ["EDITOR"], fname))
+    fo = open(fname, "r")
+    try:
+        text = fo.read()
+    finally:
+        fo.close()
+        os.unlink(fname)
+    return text[text.find("\n")+1:]
 
 def print_menu_list(clist, lines=20):
     """Print a list with leading numeric menu choices. Use two columns in necessary."""
@@ -123,8 +199,11 @@ def _test(argv):
     l = list(string.ascii_letters)
     c = choose(l)
     print c
-    print find_source_file("cliutils")
-    print yes_no("testing")
+    #l1 = choose_multiple(l)
+    #print l1
+    #print yes_no("testing")
+    #print "Edit"
+    print edit_text(__doc__)
 
 if __name__ == "__main__":
     import sys

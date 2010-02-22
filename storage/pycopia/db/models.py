@@ -485,8 +485,9 @@ mapper(Corporation, tables.corporations,
         "address": relation(Address),
         "contact": relation(Contact),
         "country": relation(Country),
-        "parent": relation(Corporation,  backref=backref("subsidiaries",
-                                remote_side=[tables.corporations.c.id])),
+#        "parent": relation(Corporation,  backref="subsidiaries"),
+#        "parent": relation(Corporation,  backref=backref("subsidiaries",
+#                                remote_side=[tables.corporations.c.id])),
     }
 )
 
@@ -1104,6 +1105,7 @@ def get_metadata(class_):
             else:
                 if default is not None:
                     default = default.arg(None)
+            nullable = prop.columns[0].nullable
         elif proptype is RelationProperty:
             coltype = RelationProperty.__name__
             m2m = prop.secondary is not None
