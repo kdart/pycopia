@@ -1,9 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2010  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -18,18 +16,22 @@
 """
 Device manager for a Linux (or other Unix) machine running the net-snmp agent.
 
-
 """
 
 
-import sys
-
-from pycopia.SNMP import SNMP
 from pycopia.SNMP import Manager
 
-from pycopia.mibs import SNMPv2_MIB 
-from pycopia.mibs import UCD_SNMP_MIB
-from pycopia.mibs import HOST_RESOURCES_MIB
+
+
+MIBNAMES = [
+    "NET_SNMP_TC",
+    "NET_SNMP_EXAMPLES_MIB",
+    "NET_SNMP_MIB",
+    "NET_SNMP_EXTEND_MIB",
+    "NET_SNMP_AGENT_MIB",
+    "HOST_RESOURCES_MIB",
+    "IF_MIB",
+]
 
 
 class LinuxManager(Manager.Manager):
@@ -37,11 +39,7 @@ class LinuxManager(Manager.Manager):
         return self.getall("prEntry")
 
 
-def get_manager(sessiondata):
-    sess = SNMP.new_session(sessiondata)
-    dev = LinuxManager(sess)
-    dev.add_mibs([SNMPv2_MIB, HOST_RESOURCES_MIB])
-    dev.add_mib(UCD_SNMP_MIB, subclassmodule=sys.modules[__name__])
-    return dev
+def get_manager(device, community):
+    return Manager.get_manager(device, community, LinuxManager, MIBNAMES)
 
 
