@@ -39,7 +39,7 @@ table, so use this at your own risk!
 """
 
 import re
-import umath
+from numpy.core import umath
 
 from pycopia.physics import numberdict
 
@@ -679,7 +679,7 @@ _addPrefixed('B')
 # to have this available.
 
 if __name__ == '__main__':
-  from umath import *
+  from numpy.core.umath import *
   l = PhysicalQuantity(10., 'm')
   big_l = PhysicalQuantity(10., 'km')
   print big_l + l

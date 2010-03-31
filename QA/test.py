@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -25,7 +25,6 @@ import unittest
 from pycopia import QA
 from pycopia.QA import core
 from pycopia.QA import testrunner
-from pycopia.QA import labmodel
 
 from pycopia import ANSIterm
 from pycopia import terminal
@@ -33,6 +32,8 @@ from pycopia import getdocs
 from pycopia import NPS
 from pycopia import PsuedoFile
 from pycopia import ScriptManager
+from pycopia import datafile
+from pycopia import dataset
 
 from pycopia import reports
 from pycopia import remote
@@ -82,6 +83,23 @@ class QATests(unittest.TestCase):
         rpt.diagnostic("diagnostic message")
         rpt.passed("passed message")
         rpt.finalize()
+
+
+    def test_datafile(self):
+        metadata = datafile.DataFileData()
+        metadata.name = "test_datafile"
+        metadata.set_timestamp()
+        metadata["state"] = datafile.ON
+        metadata["voltage"] = 2.5
+        fname = metadata.get_filename("/tmp")
+        fo = open(fname, "w")
+        fo.write("some data.\n")
+        fo.close()
+        newmeta = datafile.decode_filename(fname)
+        with open(fname) as fo:
+            fo.read()
+        assert metadata.voltage == newmeta.voltage
+        assert newmeta.state == datafile.ON
 
 if __name__ == '__main__':
     unittest.main()

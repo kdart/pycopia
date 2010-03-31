@@ -25,6 +25,9 @@ class TimespecParser(object):
     Convert strings such as "1day 3min" to seconds.
     The attribute "seconds" holds the updated value, after parsing.
     """
+
+    _MULTIPLIERS = {"d": 86400.0, "h": 3600.0, "m": 60.0, "s": 1.0}
+
     def __init__(self):
         self._seconds = 0.0
         f = FSM(0)
@@ -54,7 +57,7 @@ class TimespecParser(object):
         fsm.arg = c
 
     def _multiplier(self, c, fsm):
-        m = {"d": 86400.0, "h": 3600.0, "m": 60.0, "s": 1.0}[c]
+        m = TimespecParser._MULTIPLIERS[c]
         v = float(fsm.arg)
         fsm.arg = ""
         self._seconds += (v*m)
@@ -70,8 +73,64 @@ class TimespecParser(object):
 
 
 def parse_timespan(string):
-  p = TimespecParser()
-  p.parse(string)
-  return p.seconds
+    p = TimespecParser()
+    p.parse(string)
+    return p.seconds
+
+
+def TimeMarksGenerator(timespecs):
+    """A generator function for generating periods of time.
+
+      Args:
+        timespecs (string) a string specifying a sequence of relative time
+        values, separated by commas. Relative time values are of the form "1d"
+        (for one day), "30s" (for thirty seconds), etc. 
+        If a substring "..." is present (it should be last) then make
+        the last two times a delta time and repeat indefinitly, incrementing
+        the time value by that delta time.
+
+      Returns:
+        An iterator that yields each time mark given, as seconds (float).
+    """
+    last = 0.0
+    lastlast = 0.0
+    p = TimespecParser()
+    for mark in [s.strip() for s in timespecs.split(",")]:
+        if mark == "...":
+            delta = last - lastlast
+            tmi = TimeRepeater(last, delta)
+            while 1:
+                yield tmi.next()
+        else:
+            p.parse(mark)
+            secs = p.seconds
+            lastlast = last
+            last = secs
+            yield secs
+
+
+class TimeRepeater(object):
+    def __init__(self, start, step):
+        self._current = start
+        self._step = step
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        self._current += self._step
+        return self._current
+
+
+def getHMSString(secs):
+    minutes, seconds = divmod(secs, 60.0)
+    hours, minutes = divmod(minutes, 60.0)
+    return "%02.0f:%02.0f:%2.1f" % (hours, minutes, seconds)
+
+
+if __name__ == "__main__":
+    tmg = TimeMarksGenerator("30s,1m,1h,3h,4h,...")
+    for tm in tmg:
+        print tm
 
 
