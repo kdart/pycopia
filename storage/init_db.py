@@ -76,6 +76,7 @@ def do_software_category(session):
             ("proxy", "A type of network protocol proxy."),
             ("browser", "Can render web content."),
             ("webserver", "Serves web pages and content."),
+            ("selenium", "A Selenium server."),
             ("mua", "A mail user agent (e.g. pine, thunderbird, or claws-mail)."),
             ("mta", "A Mail transfer agent or SMTP server (e.g. sendmail, courier)."),
             ("dnsserver", "Responds to DNS queries."),
@@ -512,6 +513,7 @@ def do_config(session):
     reports.database = ('pycopia.reports.database.DatabaseReport',)
     reports.default = ('StandardReport', '-', 'text/ansi')
     reports.email = ('pycopia.reports.Email.EmailReport', 'text/html', None)
+    controllers = root.add_container("controllers")
     session.commit()
 
 

@@ -19,6 +19,7 @@
 
 import sys
 import os
+import warnings
 
 from pycopia import getopt
 from pycopia import module
@@ -34,7 +35,11 @@ def get_module_list():
         A complete list of module names found in the "testcases" package, as
         strings. This includes sub-packages.
     """
-    import testcases
+    try:
+        import testcases
+    except ImportError:
+        warnings.warn("Cannot find 'testcases' base package.")
+        return []
     # callback for testdir walker
     def filternames(flist, dirname, names):
         for name in names:

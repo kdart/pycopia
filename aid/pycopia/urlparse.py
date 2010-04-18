@@ -636,20 +636,21 @@ if __name__ == "__main__":
     url = UniversalResourceLocator(URL)
     uurl = UniversalResourceLocator(uURL)
     assert str(url) == str(uurl)
-    print url.scheme
-    print url.user
-    print url.password
-    print url.host
-    print url.port
-    print url.path
-    print url.params
-    print url.query
-    print url.fragment
+    assert url.scheme == "http"
+    assert url.user == "name"
+    assert url.password == "pass"
+    assert url.host == "www.host.com"
+    assert url.port == 8080
+    assert url.path == "/cgi"
+    assert url.params == []
+    assert url.fragment is None
     assert str(url) == URL
     url.scheme = "https"
     url.query["arg4"] = "val4"
-    print url
+    assert str(url) == "https://name:pass@www.host.com:8080/cgi?arg4=val4&qr=arg1&qr=arg2&arg3=val3"
     url2 = UniversalResourceLocator(url)
-    print url2
+    del url.query
+    del url2.query
+    assert str(url2) == str(url)
 
 

@@ -60,6 +60,9 @@ class Poll(object):
     def __nonzero__(self):
         return bool(self.smap)
 
+    def __iter__(self):
+        return iter(self.smap.values())
+
     def register(self, obj):
         flags = self._getflags(obj)
         if flags:

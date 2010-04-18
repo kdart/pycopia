@@ -587,6 +587,8 @@ class Test(object):
         if not arg:
             raise TestFailError, msg or "%s not true." % (arg,)
 
+    failUnless = assertTrue
+
     def assertFalse(self, arg, msg=None):
         """Asserts that the argument evaluates to False by Python.
 
@@ -1258,18 +1260,19 @@ class TestSuite(object):
             if self._nested:
                 raise TestSuiteAbort, \
                         "subordinate suite '%s' failed to finalize." % (self.test_name,)
-        self._summary_report()
+        self._summarize()
+        self._report_summary()
         return self.result
 
-    def _summary_report(self):
+    def _summarize(self):
         """Summarize the results.
 
-        Place a summary in the report that list all the test results.
+        If any test failed, suite is also failed.
+        If no failures, but any incomplete, suite is incomplete.
+        If nothing passed (empty suite?) then suite is incomplete.
+        If all tests passed, then suite is also passed.
+
         """
-        self.report.add_heading("Summarized results for %s." % self.__class__.__name__, 3)
-        entries = filter(lambda te: te.result is not None, self._tests)
-        self.report.add_summary(entries)
-        # check and report suite level result
         resultset = {
             constants.FAILED: 0,
             constants.PASSED: 0,
@@ -1284,10 +1287,6 @@ class TestSuite(object):
                 resultset[constants.INCOMPLETE] += 1
             elif entry.result.is_passed():
                 resultset[constants.PASSED] += 1
-        # If any failed, suite is failed.
-        # If no failures, but incomplete, suite is incomplete.
-        # If nothing passed (empty suite?) then suite is incomplete.
-        # If all passed, then suite is passed.
         if resultset[constants.FAILED] > 0:
             result = constants.FAILED
         elif resultset[constants.INCOMPLETE] > 0:
@@ -1297,7 +1296,14 @@ class TestSuite(object):
         else:
             result = constants.PASSED
         self.result = TestResult(result)
+
+    def _report_summary(self):
+        """Sends the summarized result to the report."""
+        self.report.add_heading("Summarized results for %s." % self.__class__.__name__, 3)
+        entries = filter(lambda te: te.result is not None, self._tests)
+        self.report.add_summary(entries)
         resultmsg = "Aggregate result for %r." % (self.test_name,)
+        result = int(self.result)
         if not self._nested:
             if result == constants.PASSED:
                 self.report.passed(resultmsg)

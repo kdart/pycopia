@@ -137,7 +137,7 @@ def status(config):
         pid = int(open(config.PIDFILE).read().strip())
         s = procfs.ProcStat(pid)
         if s and s.command.find(config.SERVERNAME) >= 0:
-            print "Process manager running (pid %s)." % (pid,)
+            print "Process manager running: pid %s: %s." % (pid, s.cmdline)
             return 0
     print "Process manager not running."
     return 1
