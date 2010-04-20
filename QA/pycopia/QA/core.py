@@ -212,7 +212,7 @@ class Test(object):
             if self._debug:
                 debugger.post_mortem(tb, ex, val)
                 tb = None
-            rv = self.incomplete("%s: Exception occured! (%s: %s)" % \
+            rv = self.incomplete("%s: Exception: (%s: %s)" % \
                     (self.test_name, ex, val))
         endtime = timelib.now()
 

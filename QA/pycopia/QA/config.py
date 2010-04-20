@@ -404,18 +404,19 @@ class EquipmentRuntime(object):
             d["password"] = equipmentrow.account.password
         self._attributes = d
 
-    def get_url(self, scheme=None, port=None, path=None):
+    def get_url(self, scheme=None, port=None, path=None, with_account=False):
         attribs = self._attributes
         s = [scheme or attribs.get("serviceprotocol", "http")]
         s.append("://")
-        login = attribs.get("login")
-        if login:
-          pwd = attribs.get("password")
-          if pwd:
-            s.append("%s:%s" % (login, pwd))
-          else:
-            s.append(login)
-          s.append("@")
+        if with_account:
+            login = attribs.get("login")
+            if login:
+              pwd = attribs.get("password")
+              if pwd:
+                s.append("%s:%s" % (login, pwd))
+              else:
+                s.append(login)
+              s.append("@")
         s.append(attribs["hostname"])
         port = attribs.get("serviceport", port)
         if port:
