@@ -121,6 +121,7 @@ def do_attribute_types(session):
             ("url",1, "base URL to access device, if required."),
             ("serviceport", 1, "TCP/UDP/IP service port in the form 'tcp/80'."),
             ("servicepath", 1, "Path part of a URL pointing to service location."),
+            ("serviceprotocol", 1, "Protocol part of a URL pointing to service location."),
             ("protocol", 1, "Internet protocol a software implements."),
             ("hostname", 1, "Name to use as host name. Overrides base name."),
             ):
@@ -514,6 +515,10 @@ def do_config(session):
     reports.default = ('StandardReport', '-', 'text/ansi')
     reports.email = ('pycopia.reports.Email.EmailReport', 'text/html', None)
     controllers = root.add_container("controllers")
+    selenium = root.add_container("selenium")
+    selenium.host = "localhost"
+    selenium.port = 4444
+    selenium.browser = "firefox"
     session.commit()
 
 
