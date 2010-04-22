@@ -845,8 +845,7 @@ class TestEntrySeries(TestEntry):
                     pass
                 else:
                     arglist.append(val)
-        self._counter = combinatorics.ListCounter(
-                                                                combinatorics.prune(N, arglist, chooser))
+        self._counter = combinatorics.ListCounter( combinatorics.prune(N, arglist, chooser))
         if filter:
             assert callable(filter)
             self._filter = filter

@@ -24,11 +24,12 @@ Web server using FCGI interface of lighttpd, adapted to WSGI.
 import sys
 import os
 import getopt
-import warnings
+import logging
 
 from pycopia.OS import procfs
 from pycopia import passwd
 from pycopia import basicconfig
+from pycopia import module
 from pycopia.WWW import framework
 
 from pycopia.inet.fcgi import FCGIServer
@@ -70,8 +71,15 @@ def get_server(config):
     app = framework.WebApplication(config)
 
     if "MIDDLEWARE" in config:
-        for mws in config["MIDDLEWARE"]:
-            pass # TODO wrap in wsgi middleware
+        for mwtuple in config["MIDDLEWARE"]:
+            mwobj = module.get_object(mwtuple[0])
+            args = mwtuple[1:]
+            app = mwobj(app, *args)
+
+    if config.DEBUG:
+        logging.getLogger().setLevel(logging.DEBUG)
+    else:
+        logging.getLogger().setLevel(logging.INFO)
 
     return FCGIServer(app,
             procmanager=pm,
@@ -153,7 +161,7 @@ def run_server(argv):
                     SERVERNAME=servername)
     except:
         ex, val, tb = sys.exc_info()
-        warnings.warn("Could not get server config: %s (%s)" % (ex, val))
+        logging.warn("Could not get server config: %s (%s)" % (ex, val))
         return 1
 
     if username:
@@ -164,7 +172,7 @@ def run_server(argv):
         return 0
 
     if check4server(config):
-        warnings.warn("Server %r already running on socket %r." % (servername, socketpath))
+        logging.warn("Server %r already running on socket %r." % (servername, socketpath))
         return 1
 
     if do_daemon and not debug:

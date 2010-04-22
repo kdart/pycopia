@@ -24,7 +24,7 @@ extra methods for constructing active controllers.
 
 
 import sys, os, re
-import warnings
+import logging
 
 from sqlalchemy import and_
 
@@ -250,7 +250,7 @@ class RootContainer(config.Container):
                     print "Logging to:", logfilename
             except:
                 ex, val, tb = sys.exc_info()
-                warnings.warn("get_logfile: Could not open log file: %s: %s" % (ex, val))
+                logging.warn("get_logfile: Could not open log file: %s: %s" % (ex, val))
                 self._cache._logfile = None
                 return None
             else:

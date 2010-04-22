@@ -19,7 +19,7 @@
 
 import sys
 import os
-import warnings
+import logging
 
 from pycopia import getopt
 from pycopia import module
@@ -38,7 +38,7 @@ def get_module_list():
     try:
         import testcases
     except ImportError:
-        warnings.warn("Cannot find 'testcases' base package.")
+        logging.warn("Cannot find 'testcases' base package.")
         return []
     # callback for testdir walker
     def filternames(flist, dirname, names):

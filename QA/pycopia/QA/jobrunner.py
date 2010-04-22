@@ -22,6 +22,7 @@ An interface for running test cases as unattended jobs.
 
 import sys
 import os
+import logging
 
 from pycopia import aid
 from pycopia import shparser
@@ -59,7 +60,7 @@ def get_test_jobs(args):
             else:
                 testjob = dbsession.query(TJ).filter(TJ.name==jobid).one()
         except models.NoResultFound:
-            warnings.warn("No TestJob with id %r" % jobid)
+            logging.warn("No TestJob with id %r" % jobid)
             continue
         else:
             yield testjob

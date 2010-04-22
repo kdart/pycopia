@@ -19,7 +19,7 @@ Defines database ORM objects.
 
 """
 
-import warnings
+import logging
 import collections
 from datetime import timedelta
 from hashlib import sha1
@@ -76,7 +76,7 @@ def _get_secret():
         cf = basicconfig.get_config("auth.conf")
         SECRET_KEY = cf.SECRET_KEY
     except basicconfig.ConfigReadError:
-        warnings.warn("User encryption key not found for auth app, using default.")
+        logging.warn("User encryption key not found for auth app, using default.")
         SECRET_KEY = "Testkey"
 
 

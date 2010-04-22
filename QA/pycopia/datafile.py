@@ -19,7 +19,7 @@ metadata values.
 
 import os
 import re
-import warnings
+import logging
 
 from pycopia import aid
 from pycopia import dictlib
@@ -109,7 +109,7 @@ def decode_filename(pathname):
                     value = valuestring
                 data[mo.group(1)] = value
             else:
-                warnings.warn("name component not matched: %r" % (part,))
+                logging.warn("name component not matched: %r" % (part,))
     return data
 
 
