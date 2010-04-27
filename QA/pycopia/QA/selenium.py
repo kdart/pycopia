@@ -27,7 +27,7 @@ configuration. You can add this with the dbcli tool:
     Config:root> cd selenium
     Config:root.selenium> set host "localhost"
     Config:root.selenium> set port 4444
-    Config:root.selenium> set browser "firefox"
+    Config:root.selenium> set browser "*firefox"
 
 """
 

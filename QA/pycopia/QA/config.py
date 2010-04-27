@@ -333,8 +333,9 @@ class RootContainer(config.Container):
 
 ##### end of RootContainer ######
 
-## Runtime objects that bind sessions and database rows and provide helper
-## methods and properties.
+# Runtime objects that bind sessions and database rows and provide helper
+# methods and properties. Attributes table is made available using the
+# mapping interface (getitem).
 
 class EnvironmentRuntime(object):
     def __init__(self, session, environmentrow, logfile):
@@ -342,6 +343,13 @@ class EnvironmentRuntime(object):
         self._environment = environmentrow
         self._eqcache = {}
         self.logfile = logfile
+        d = {}
+        for prop in environmentrow.attributes:
+            d[prop.type.name] = prop.value
+        self._attributes = d
+
+    def __getitem__(self, name):
+        return self._attributes[name]
 
     def __str__(self):
         s = []
