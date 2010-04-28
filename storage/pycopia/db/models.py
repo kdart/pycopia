@@ -867,8 +867,8 @@ class TestCase(object):
 mapper(TestCase, tables.test_cases,
     properties={
         "functionalarea": relation(FunctionalArea, secondary=tables.test_cases_areas),
-        "prerequisite": relation(TestCase, 
-                primaryjoin=tables.test_cases.c.prerequisite_id==tables.test_cases.c.id),
+        "dependents": relation(TestCase, backref=backref("prerequisite",
+                                remote_side=[tables.test_cases.c.id])),
     },
 )
 

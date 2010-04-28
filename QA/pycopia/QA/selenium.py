@@ -46,6 +46,7 @@ class SeleniumSuite(core.TestSuite):
     def initialize(self):
         cf = self.config
         target_url = cf.environment.DUT.get_url(cf.get("serviceprotocol"), cf.get("servicepath"))
+        self.info("Target URL is: %s" % (target_url,))
         selenium_server = cf.environment.selenium["hostname"]
         cf.selenium = selenium(
                 selenium_server,

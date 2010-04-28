@@ -184,9 +184,10 @@ class TestRunner(object):
         return self.run_object(suite)
 
     def run_test(self, testclass, *args, **kwargs):
-        """Run a test class with arguments.
+        """Run a test single test class with arguments.
 
-        Runs a single test class with the provided arguments.
+        Runs a single test class with the provided arguments. Test class
+        is placed in a temporary TestSuite.
 
         Arguments:
             testclass:
@@ -210,9 +211,7 @@ class TestRunner(object):
             if error[0] == EEXIST:
                 pass
             else:
-                raise # raise original execption since we don't know what else it
-                            # could be. This will be an OSError, which is not specific
-                            # to the domain of this module.
+                raise
 
     def _set_report_url(self):
         """Construct a URL for finding the report and test produced data.
@@ -244,7 +243,7 @@ class TestRunner(object):
         except reports.ReportFindError, err:
             cf.UI.error("No report with the name %r. Use of of the following." % (cf.reportname,))
             cf.UI.print_list(err.args[0])
-            raise TestRunnerError, "No such report name: %r" % (cf.reportname,)
+            raise TestRunnerError("No such report name: %r" % (cf.reportname,))
         # Report file's names. save for future use.
         rpt.initialize(cf)
         cf.reportfilenames = rpt.filenames 
@@ -288,6 +287,7 @@ class TestRunner(object):
                 if os.path.isfile(fname) and os.path.getsize(fname) > 0:
                     shutil.move(fname, cf.resultsdir)
             # If resultsdir ends up empty, remove it.
-            if not os.listdir(cf.resultsdir): # TODO(dart), stat this instead
+            if not os.listdir(cf.resultsdir): # TODO, stat this instead
                 os.rmdir(cf.resultsdir)
+
 

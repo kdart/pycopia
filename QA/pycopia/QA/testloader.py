@@ -111,3 +111,13 @@ def get_module_file(mod):
     return None
 
 
+def get_TestSuite_from_module(module, config):
+    """Get an existing suite from a module."""
+    for methname in ("get_suite", "GetSuite"):
+        try:
+            meth = getattr(module, methname)
+            return meth(config)
+        except AttributeError:
+            continue
+    raise module.ObjectImportError("Module %r does not have a get_suite() function." % (module,))
+

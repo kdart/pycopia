@@ -721,7 +721,7 @@ class TestEntry(object):
         self.inst = inst
         self.args = args or ()
         self.kwargs = kwargs or {}
-        self._result = constants.INCOMPLETE
+        self._result = TestResult(constants.INCOMPLETE)
         self.autoadded = autoadded # True if automatically added as a prerequisite.
 
     def run(self, config=None):
@@ -732,7 +732,7 @@ class TestEntry(object):
         try:
             self._result = self.inst(*self.args, **self.kwargs)
         except KeyboardInterrupt:
-            self._result = constants.ABORT
+            self._result = TestResult(constants.ABORT)
             raise
         return self._result
 
