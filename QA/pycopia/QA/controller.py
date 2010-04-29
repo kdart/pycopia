@@ -76,9 +76,13 @@ def initialize(cf):
     # entries in the "controllers" section of the configuration database.
     register_controller("ssh", "pycopia.QA.ssh_controller.get_controller")
     register_controller("remote", "pycopia.remote.Client.get_controller")
-    cont = cf.get_container("controllers")
-    for name, value in cont.iteritems():
-        register_controller(name, value)
+    try:
+        cont = cf.get_container("controllers")
+    except:
+        pass
+    else:
+        for name, value in cont.iteritems():
+            register_controller(name, value)
 
 
 

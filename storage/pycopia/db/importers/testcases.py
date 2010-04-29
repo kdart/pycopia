@@ -83,9 +83,9 @@ class TestCaseData(object):
         data["reviewer"]          = None             # mandatory
         data["tester"]            = None             # mandatory
         data["reference"]         = None
-        data["purpose"]           = "Change me."     # mandatory
-        data["passcriteria"]      = "See code."      # mandatory
-        data["startcondition"]    = "Unknown."       # mandatory
+        data["purpose"]           = "TODO"     # mandatory
+        data["passcriteria"]      = "TODO"      # mandatory
+        data["startcondition"]    = None       # mandatory
         data["endcondition"]      = None
         data["procedure"]         = "See code."      # mandatory
         data["comments"]          = None
@@ -193,7 +193,7 @@ class TestCaseData(object):
                 continue
             node.emit(body)
         body.write("\n")
-        self.__setitem__(name, body.getvalue())
+        self.__setitem__(name, body.getvalue().strip())
 
     def resolve_prerequisite(self, testinstance):
         prereq = self._data["prerequisite"]
@@ -262,18 +262,18 @@ def get_TestEntry_instance(string, config):
     return core.TestEntry(testinstance, args, kwargs, False)
 
 
-def do_module(module, config):
+def do_module(mod, config):
     """Import objects in the given module."""
     try:
-        suite = testloader.get_TestSuite_from_module(module, config)
+        suite = testloader.get_TestSuite_from_module(mod, config)
     except module.ObjectImportError, err:
         pass
     else:
         return do_TestSuite(suite)
 
     # No suite factory function, so just import objects from module.
-    for name in dir(module):
-        obj = getattr(module, name)
+    for name in dir(mod):
+        obj = getattr(mod, name)
         if not callable(obj) or type(obj) is not type:
             continue
         if issubclass(obj, core.TestSuite):
@@ -484,6 +484,8 @@ class TestCaseImporter(object):
                     self.import_module(modname)
 
     def import_module(self, modname):
+        if _DEBUG:
+            logging.info("Doing module: %s" % modname)
         try:
             mod = module.get_module(modname)
             do_module(mod, self.config)
