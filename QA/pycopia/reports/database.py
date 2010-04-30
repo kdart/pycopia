@@ -30,7 +30,7 @@ from pycopia.db import models
 from pycopia.db import types
 
 
-PROJECT_RE = re.compile(r"(\w+)[ .:](\d+)\.(\d+)\.(\d+)\.(\d+)")
+PROJECT_RE = re.compile(r"(\w+)[ \-.:](\d+)\.(\d+)\.(\d+)[\.\-](\d+)")
 
 _COLUMNS = {
     "testcase": None,           # test case record

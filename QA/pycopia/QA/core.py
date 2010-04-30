@@ -500,6 +500,7 @@ class Test(object):
     def manual(self):
         """Perform a purely manual test according to the instructions in the document string."""
         UI = self.config.UI
+        UI.Print(self.test_name)
         UI.write(self.__class__.__doc__)
         UI.Print("\nPlease perform this test according to the instructions above.")
         completed = UI.yes_no("%IWas it completed%N?")
