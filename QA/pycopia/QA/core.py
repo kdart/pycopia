@@ -956,6 +956,7 @@ class TestSuite(object):
                 impl = sys.modules[entry.inst.__class__.__module__].__name__ + "." + impl
                 prereq.implementation = impl
             pretestclass = module.get_object(impl)
+            pretestclass.set_test_options()
             preentry = TestEntry(pretestclass(self.config), prereq.args, prereq.kwargs, True)
             presig, argsig = preentry.get_signature()
             if presig not in self._multitestset:
