@@ -160,9 +160,9 @@ DBModelInstance.prototype.get_id = function() {
 /**
  * Delete the instance in the database.
  */
-DBModelInstance.prototype.delete = function() {
+DBModelInstance.prototype.deleterow = function() {
   if (!this.isdeleted) {
-    var d = db.delete(this.model.name, this.data.id);
+    var d = db.deleterow(this.model.name, this.data.id);
     d.addCallback(bind(this._delete_db, this));
   };
 };
@@ -479,7 +479,7 @@ function notifyResult(rowid, result) {
 
 function doDeleteRow(tablename, rowid) {
   if (window.confirm("Delete instance of " + tablename +"?")) {
-    var d = window.db.delete(tablename, rowid);
+    var d = window.db.deleterow(tablename, rowid);
     d.addCallback(partial(notifyResult, rowid));
   }
 }

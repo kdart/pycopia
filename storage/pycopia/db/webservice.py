@@ -75,7 +75,7 @@ def get_choices(modelname, attribute, order_by=None):
     return models.get_choices(webhelpers.dbsession, modelclass, attribute, order_by)
 
 
-def delete(modelname, entry_id):
+def deleterow(modelname, entry_id):
     klass = get_model(modelname)
     try:
         obj = webhelpers.dbsession.query(klass).get(entry_id)
@@ -106,7 +106,7 @@ def _modelchecker(obj):
         return False
 
 
-_exported = [get_tables, get_table_metadata, table_get, get_choices, update, delete]
+_exported = [get_tables, get_table_metadata, table_get, get_choices, update, deleterow]
 
 
 dispatcher = json.JSONDispatcher(_exported)
