@@ -1,0 +1,30 @@
+#!/usr/bin/python2
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+"""nmapimport <fname>
+
+Usage:
+    nmapimport nmap_ouput.xml
+
+Imports the interfaces found in the XML file generated with a command such
+as:
+
+   nmap -sP -oX netmap.xml 10.10.10.0/24 
+
+"""
+
+import sys
+from pycopia.db.importers import nmap
+
+
+def main(argv):
+    try:
+        fname = argv[1]
+    except IndexError:
+        print __doc__
+        return
+    nmap.import_nmap(fname)
+
+
+main(sys.argv)
