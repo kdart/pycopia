@@ -735,7 +735,7 @@ class Interface(object):
         return "%s (%s)" % (self.name, self.ipaddr)
 
     def __repr__(self):
-        return "Interface(%r, idaddr=%r)" % (self.name, self.ipaddr)
+        return "Interface(%r, ipaddr=%r)" % (self.name, self.ipaddr)
 
 mapper(Interface, tables.interfaces,
     properties = {
