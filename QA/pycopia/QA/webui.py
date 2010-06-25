@@ -478,13 +478,14 @@ class TestResultHandler(framework.RequestHandler):
         cycler = itertools.cycle(["row1", "row2"])
         tbl = resp.doc.add_table(width="100%")
         tbl.caption("Test Runs")
-        tbl.new_headings("Runner", "Result", "Results Location")
+        tbl.new_headings("Runner", "Result", "Start time", "Results Location")
 
         for res in TR.get_latest_results(webhelpers.dbsession):
             row = tbl.new_row()
             setattr(row, "class_", cycler.next())
             row.new_column(str(res))
             row.new_column(res.result)
+            row.new_column(res.starttime)
             row.new_column(resp.nodemaker("A", 
                     {"href": res.resultslocation},  "Results location"))
         return resp.finalize()
