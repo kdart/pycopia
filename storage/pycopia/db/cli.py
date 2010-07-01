@@ -38,7 +38,7 @@ from sqlalchemy.orm.exc import NoResultFound
 _session = None
 
 
-class SessionCommands(CLI.BaseCommands):
+class DBSessionCommands(CLI.BaseCommands):
 
 #'add', 'add_all', 'begin', 'begin_nested', 'clear', 'close', 'commit',
 #'delete', 'execute', 'expire', 'expire_all', 'expunge', 'expunge_all',
@@ -231,9 +231,11 @@ class TableCommands(CLI.BaseCommands):
             raise
 
     def ls(self, argv):
-        """ls [--<attribute>=<criteria>...]
+        """ls [<attribute>=<criteria>...]
     List all current entries."""
         args, kwargs = CLI.breakout_args(argv[1:], self._environ)
+        mapper = models.class_mapper(self._obj)
+        pkname = str(mapper.primary_key[0].name)
         try:
             q = _session.query(self._obj)
             if args:
@@ -247,7 +249,8 @@ class TableCommands(CLI.BaseCommands):
             _session.rollback()
             raise
         for item in q.all():
-            self._print(item.id, ":", item)
+            self._print(getattr(item, pkname), ":", item)
+
 
     def describe(self, argv):
         """describe
@@ -296,6 +299,11 @@ class TableCommands(CLI.BaseCommands):
 class NetworkCommands(CLI.BaseCommands):
     pass
 # TODO network connections
+
+
+class SessionCommands(TableCommands):
+    pass
+
 
 class UserCommands(TableCommands):
 
@@ -554,6 +562,7 @@ class ConfigCommands(CLI.BaseCommands):
 # Maps table names to editor classes
 _EDITOR_MAP = {
     "User": UserCommands,
+    "Session": SessionCommands,
 }
 
 
@@ -941,7 +950,7 @@ Options:
 
     io = CLI.ConsoleIO()
     ui = CLI.UserInterface(io)
-    cmd = SessionCommands(ui)
+    cmd = DBSessionCommands(ui)
     _session = models.get_session(database)
     cmd._setup(_session, "db> ")
     parser = CLI.CommandParser(cmd, 
