@@ -211,7 +211,7 @@ class LoginHandler(framework.RequestHandler):
             request.log_error("Authenticated: %s\n" % (name,))
             user.set_last_login()
             resp = framework.HttpResponseRedirect(redir)
-            session = _set_session(resp, user, request.get_domain())
+            session = _set_session(resp, user, request.get_domain(), "/")
             dbsession.add(session)
             dbsession.commit()
             return resp
@@ -221,11 +221,10 @@ class LoginHandler(framework.RequestHandler):
                     message="Failed to authenticate.")
 
 
-def _set_session(response, user, domain):
-    sess = models.Session(user, lifetime=24)
-    exp = timelib.mktime(sess.expire_date.timetuple())
+def _set_session(response, user, domain, path, lifetime=24):
+    sess = models.Session(user, lifetime=lifetime)
     response.set_cookie(SESSION_KEY_NAME, sess.session_key, domain=domain,
-        expires=exp)
+            path=path, max_age=lifetime * 3600)
     return sess
 
 

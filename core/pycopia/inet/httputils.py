@@ -285,9 +285,50 @@ class HTTPHeader(object):
     def __ge__(self, other):
         return self._name.upper() >=  self._normalize(other)
 
+
+class HTTPHeaderWithParameters(HTTPHeader):
+    def parse_value(self, text):
+        parts = text.split(";")
+        value = parts.pop(0).strip()
+        params = {}
+        for part in map(str.strip, parts):
+            n, v = part.split("=", 1)
+            if v.startswith('"'):
+                params[n] = v[1:-1]
+            else:
+                params[n] = v
+        self.parameters = params
+        return value
+
+    def initialize(self, **kwargs):
+        if kwargs:
+            self.parameters = kwargs
+
+    def __str__(self):
+        if self.parameters:
+            parms = "; ".join(['%s="%s"' % self._param_to_str(t) for t in self.parameters.iteritems()])
+            if self.value:
+                return "%s: %s; %s" % (self._name, self.value, parms)
+            else:
+                return "%s: %s" % (self._name, parms)
+        else:
+            return "%s: %s" % (self._name, self.value)
+
+    def _param_to_str(self, paramset):
+        return (paramset[0].replace("_", "-").capitalize(), paramset[1])
+
+    def __repr__(self):
+        if self.parameters:
+            return "%s(%r, %s)" % (
+                self.__class__.__name__, self.value, 
+                ", ".join(["%s=%r" % t for t in self.parameters.iteritems()]))
+        else:
+            return "%s(%r)" % (self.__class__.__name__, self.value)
+
+
 ### General headers
 
-class CacheControl(HTTPHeader):
+class CacheControl(HTTPHeaderWithParameters):
     HEADER="Cache-Control"
 
 class Connection(HTTPHeader):
@@ -335,77 +376,11 @@ class ContentMD5(HTTPHeader):
 class ContentRange(HTTPHeader):
     HEADER="Content-Range"
 
-class ContentDisposition(HTTPHeader):
+class ContentDisposition(HTTPHeaderWithParameters):
     HEADER="Content-Disposition"
 
-    def parse_value(self, text):
-        parts = text.split(";")
-        value = parts.pop(0).strip()
-        params = {}
-        for part in map(str.strip, parts):
-            n, v = part.split("=", 1)
-            if v.startswith('"'):
-                params[n] = v[1:-1]
-            else:
-                params[n] = v
-        self.parameters = params
-        return value
-
-    def initialize(self, **kwargs):
-        if kwargs:
-            self.parameters = kwargs
-
-    def __str__(self):
-        if self.parameters:
-            return "%s: %s; %s" % (self._name, self.value, 
-                "; ".join(['%s="%s"' % t for t in self.parameters.iteritems()]))
-        else:
-            return "%s: %s" % (self._name, self.value)
-
-    def __repr__(self):
-        if self.parameters:
-            return "%s(%r, %s)" % (
-                self.__class__.__name__, self.value, 
-                ", ".join(["%s=%r" % t for t in self.parameters.iteritems()]))
-        else:
-            return "%s(%r)" % (self.__class__.__name__, self.value)
-
-
-class ContentType(HTTPHeader):
+class ContentType(HTTPHeaderWithParameters):
     HEADER="Content-Type"
-
-    def parse_value(self, text):
-        parts = text.split(";")
-        value = parts.pop(0).strip()
-        params = {}
-        for part in map(str.strip, parts):
-            n, v = part.split("=", 1)
-            if v.startswith('"'):
-                params[n] = v[1:-1]
-            else:
-                params[n] = v
-        self.parameters = params
-        return value
-
-    def initialize(self, **kwargs):
-        if kwargs:
-            self.parameters = kwargs
-
-    def __str__(self):
-        if self.parameters:
-            return "%s: %s; %s" % (self._name, self.value, 
-                "; ".join(['%s="%s"' % t for t in self.parameters.iteritems()]))
-        else:
-            return "%s: %s" % (self._name, self.value)
-
-    def __repr__(self):
-        if self.parameters:
-            return "%s(%r, %s)" % (
-                self.__class__.__name__, self.value, 
-                ", ".join(["%s=%r" % t for t in self.parameters.iteritems()]))
-        else:
-            return "%s(%r)" % (self.__class__.__name__, self.value)
-
 
 class ETag(HTTPHeader):
     HEADER="ETag"
@@ -585,8 +560,21 @@ class WWWAuthenticate(HTTPHeader):
 
 # cookies!  Slightly different impementation from the stock Cookie module.
 
-class SetCookie(HTTPHeader):
+class SetCookie(HTTPHeaderWithParameters):
     HEADER = "Set-Cookie"
+
+    def parse_value(self, text):
+        return parse_setcookie(text)
+
+    def __str__(self):
+        return "%s: %s" % (self._name, self.value.get_setstring())
+
+    def asWSGI(self):
+        return (self._name, self.value.get_setstring())
+
+
+class SetCookie2(HTTPHeaderWithParameters):
+    HEADER = "Set-Cookie2"
 
     def parse_value(self, text):
         return parse_setcookie(text)
@@ -633,7 +621,7 @@ class CookieJar(object):
             self.parse_mozilla_line(line)
 
     def add_cookie(self, name, value, comment=None, domain=None, 
-            max_age=0, path=None, secure=0, version=0, expires=0.0):
+            max_age=None, path=None, secure=0, version=1, expires=None):
         if value:
             new = RawCookie(name, value, comment=comment, domain=domain, 
                   max_age=max_age, path=path, secure=secure, version=version, 
@@ -650,7 +638,6 @@ class CookieJar(object):
             pass
         else:
             del self._cookies[(name, path, dom)]
-            c.expires = 0.0
             c.max_age = 0
             self._deleted.append(c)
 
@@ -700,13 +687,14 @@ class CookieJar(object):
             return None
 
     def get_setcookies(self, headers=None):
-        rv = headers or Headers()
+        if headers is None:
+            headers = Headers()
         for c in self._cookies.values():
-            rv.append(SetCookie(c))
+            headers.append(SetCookie(c))
         while self._deleted:
             c = self._deleted.pop()
-            rv.append(SetCookie(c))
-        return rv
+            headers.append(SetCookie(c))
+        return headers
 
     # libcurl likes this format.
     def get_mozilla_list(self, url):
@@ -741,7 +729,7 @@ class RawCookie(object):
     """
 
     def __init__(self, name, value, comment=None, domain=None, 
-            max_age=0, path=None, secure=0, version=0, expires=0.0):
+            max_age=None, path=None, secure=0, version=1, expires=None):
         self.comment = self.domain = self.path = None
         self.name = name
         self.value = value
@@ -751,7 +739,7 @@ class RawCookie(object):
         self.set_path(path)
         self.set_version(version)
         self.set_secure(secure)
-        self.expires = float(expires)
+        self.set_expires(expires)
 
     def __repr__(self):
         s = []
@@ -769,7 +757,7 @@ class RawCookie(object):
             s.append("secure=%r" % self.secure)
         if self.version:
             s.append("version=%r" % self.version)
-        if self.expires:
+        if self.expires is not None:
             s.append("expires=%r" % self.expires)
         return "%s(%s)" % (self.__class__.__name__, ", ".join(s))
 
@@ -786,21 +774,21 @@ class RawCookie(object):
         s = []
         s.append("%s=%s" % (self.name, self.value))
         if self.comment:
-            s.append("comment=%s" % httpquote(self.comment))
+            s.append("Comment=%s" % httpquote(self.comment))
         if self.domain:
-            s.append("domain=%s" % httpquote(self.domain))
-        if self.max_age:
-            s.append("max_age=%s" % self.max_age)
+            s.append("Domain=%s" % httpquote(self.domain))
+        if self.max_age is not None:
+            s.append("Max-Age=%s" % self.max_age)
         if self.path:
-            s.append("path=%s" % httpquote(self.path))
+            s.append("Path=%s" % self.path) # webkit can't deal with quoted path
         if self.secure:
-            s.append("secure")
+            s.append("Secure")
         if self.version:
-            s.append("version=%s" % httpquote(str(self.version)))
-        if self.expires:
-            s.append("expires=%s" % timelib.strftime(
+            s.append("Version=%s" % httpquote(str(self.version)))
+        if self.expires is not None:
+            s.append("Expires=%s" % timelib.strftime(
                  "%a, %d-%b-%Y %H:%M:%S GMT", timelib.gmtime(self.expires)))
-        return "; ".join(s)
+        return ";".join(s)
 
     def as_mozilla_line(self):
         domain_specified = IF(self.domain.startswith("."), "TRUE", "FALSE")
@@ -813,10 +801,8 @@ class RawCookie(object):
         """Optional. The Secure attribute (with no value) directs the user
         agent to use only (unspecified) secure means to contact the origin
         server whenever it sends back this cookie."""
-        if int(val):
-            self.secure = True
-        else:
-            self.secure = False
+
+        self.secure = bool(val)
 
     def set_comment(self, comment):
         """Optional. Because cookies can contain private information about a user,
@@ -843,7 +829,10 @@ class RawCookie(object):
         After delta-seconds seconds elapse, the client should discard the
         cookie. A value of zero means the cookie should be discarded
         immediately."""
-        self.max_age = int(ma) # assert maxage is an integer
+        try:
+            self.max_age = int(ma) # assert maxage is an integer
+        except (TypeError, ValueError):
+            self.max_age = None
 
     def set_path(self, path):
         """Optional. The Path attribute specifies the subset of URLs to which
@@ -856,8 +845,11 @@ class RawCookie(object):
         conforms. For this specification, Version=1 applies."""
         self.version = ver
 
-    def set_expires(self, offset):
-        self.expires = float(val)
+    def set_expires(self, expires):
+        try:
+            self.expires = float(expires)
+        except (TypeError, ValueError):
+            self.expires = None
 
     def set_byname(self, cname, val):
         f = _SETFUNCS.get(cname.lower(), None)
@@ -1024,11 +1016,10 @@ class Headers(list):
 #       _LegalChars       is the list of chars which don't require "'s
 #       _Translator       hash-table for fast quoting
 
-_LegalChars = \
-  'abcdefghijklmnopqrstuvwxyz' + \
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + \
-  '0123456789' + \
-  "!#$%&'*+-.^_`|~"
+_LegalChars = (
+  'abcdefghijklmnopqrstuvwxyz'
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  '0123456789' "!#$%&'*+-.^_`|~")
 
 _Translator       = {
     '\000' : '\\000',  '\001' : '\\001',  '\002' : '\\002',
@@ -1092,7 +1083,7 @@ _Translator       = {
 _OctalPatt = re.compile(r"\\[0-3][0-7][0-7]")
 _QuotePatt = re.compile(r"[\\].")
 
-IDMAP = str('').join(map(chr, xrange(256)))
+IDMAP = ''.join(map(chr, xrange(256)))
 
 def httpquote(s, LegalChars=_LegalChars, idmap=IDMAP):
     #
@@ -1234,6 +1225,7 @@ def get_headers_and_body(text):
 
 # self test
 if __name__ == "__main__":
+    from pycopia import autodebug
     print "cookies:"
     cookie = RawCookie(name="somename", value='somevalue&this+plus"quotes"')
     print cookie
@@ -1242,10 +1234,14 @@ if __name__ == "__main__":
     print auth
     a = Accept('Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5')
     print a.value
-    print "========================"
-    part = part = '\r\nContent-Disposition: form-data; name="name"\r\n\r\nsomename\r\n'
-    headers, body = parse_header_text(part)
-    print repr(headers)
-    print repr(body)
+    print "----------"
+    setcookie = SetCookie('pycopia="somevalue&this+plus%22quotes"; path="/"')
+    print setcookie.asWSGI()
+    print setcookie.asWSGI()[1]
+    print CacheControl(no_cache="set-cookie2")
 
+    cj = CookieJar()
+    cj.add_cookie("pycopia", "AESFKAJS", max_age=24, path="/")
+    print httpquote("/")
+    print cj.get_setcookies()
 

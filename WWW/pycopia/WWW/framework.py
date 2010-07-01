@@ -156,7 +156,7 @@ class HttpResponse(object):
     def add_header(self, header, value=None):
         self.headers.add_header(header, value)
 
-    def set_cookie(self, key, value='', max_age=0, expires=2119102976.0, path='/', 
+    def set_cookie(self, key, value='', max_age=None, path='/', expires=None,
             domain=None, secure=False):
         self.cookies.add_cookie(key, value, domain=domain, 
             max_age=max_age, path=path, secure=secure, expires=expires)

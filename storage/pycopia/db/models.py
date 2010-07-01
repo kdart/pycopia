@@ -24,7 +24,7 @@ import collections
 from datetime import timedelta
 from hashlib import sha1
 
-from sqlalchemy import create_engine, and_, select
+from sqlalchemy import create_engine, and_, or_, func
 from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
         backref, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
@@ -237,6 +237,9 @@ class Session(object):
         d = self.data
         del d[key]
         self.data = d
+
+    def __str__(self):
+        return "key: %s: Expires: %s" % (self.session_key, self.expire_date)
 
     def is_expired(self):
         return tables.time_now() >= self.expire_date
@@ -864,6 +867,15 @@ class TestCase(object):
     def __repr__(self):
         return "TestCase(%r)" % (self.name,)
 
+    def get_latest_result(self, session):
+        sq = session.query(func.max(TestResult.starttime)).filter(and_(
+                TestResult.testcase==self, 
+                TestResult.valid==True)).subquery()
+        return session.query(TestResult).filter(and_(
+                TestResult.starttime==sq,
+                TestResult.testcase==self,
+                    )).scalar()
+
 mapper(TestCase, tables.test_cases,
     properties={
         "functionalarea": relation(FunctionalArea, secondary=tables.test_cases_areas),
@@ -923,7 +935,7 @@ mapper(TestResultData, tables.test_results_data)
 
 
 class TestResult(object):
-    ROW_DISPLAY = ("testcase", "testimplementation", "tester", "result", "resultslocation")
+    ROW_DISPLAY = ("testcase", "testimplementation", "tester", "result", "starttime")
     def __init__(self, **kwargs):
         for name, value in kwargs.items():
              setattr(self, name, value)
