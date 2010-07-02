@@ -23,6 +23,8 @@ import re
 import unicodedata
 
 from pycopia import socket
+from pycopia import asyncio
+
 from pycopia.iscsi import headers
 from pycopia.iscsi import constants
 from pycopia.iscsi import exceptions
@@ -57,22 +59,82 @@ class Task(object):
         self.id = id
 
 
-class Connection(object):
+class Connection(socket.AsyncSocket):
     """Connection contains associated transactions.
     Assures connection allegiance.
     """
-    def __init__(self, sock, targetid):
+
+    def __init__(self, debug=False):
+        super(Connection, self).__init__(socket.AF_INET, socket.SOCK_STREAM)
+
+
+    def __init__(self, sock, session_context):
         self._sock = sock
-        self._targetid = targetid
+        self._context = session_context
+        self.cid = 0 # connection ID
+
+    def fileno(self):
+        return self._sock.fileno()
 
     def close(self):
         sock = self._sock
         self._sock = None
         sock.close()
 
-    def login(self, target):
-        pass
-# TODO; login sequence
+    def login(self):
+        pdu = headers.LoginPDU()
+        pdu.current_stage = SECURITY_NEGOTIATION_STAGE
+        pdu.next_stage = OP_PARMS_NEGOTIATION_STAGE
+        pdu.ISID = self._context["isid"]
+        # add data part
+        pdu["SessionType"] = "Normal"
+        pdu["AuthMethod"] = "Chap,None"
+        pdu["InitiatorName"] = self._context["initiator"]
+        pdu["TargetName"] = self._context["target"]
+        self._sock.send(pdu.encode())
+
+
+
+#     I-> Login (CSG,NSG=0,1 T=0)
+#         InitiatorName=iqn.1999-07.com.os:hostid.77
+#         TargetName=iqn.1999-07.com.example:diskarray.sn.88
+#         AuthMethod=KRB5,CHAP,None
+#
+#     T-> Login-PR (CSG,NSG=0,0 T=0)
+#         AuthMethod=CHAP
+#
+#     I-> Login (CSG,NSG=0,0 T=0)
+#         CHAP_A=<A1,A2>
+#
+#     T-> Login (CSG,NSG=0,0 T=0)
+#         CHAP_A=<A1>
+#         CHAP_I=<I>
+#         CHAP_C=<C>
+#
+#     I-> Login (CSG,NSG=0,1 T=1)
+#         CHAP_N=<N>
+#         CHAP_R=<R>
+#
+#     If the initiator authentication is successful, the target
+#       proceeds:
+#
+#     T-> Login (CSG,NSG=0,1 T=1)
+#
+#     I-> Login (CSG,NSG=1,0 T=0)
+#         ... iSCSI parameters
+#
+#     T-> Login (CSG,NSG=1,0 T=0)
+#         ... iSCSI parameters
+#
+#     And at the end:
+#
+#     I-> Login (CSG,NSG=1,3 T=1)
+#         optional iSCSI parameters
+#
+#     T-> Login (CSG,NSG=1,3 T=1) "login accept"
+#
+
+
 
 
 class Session(object):
@@ -80,13 +142,15 @@ class Session(object):
 
     def __init__(self, host, target):
         self.host = host
-        self.target = target
         self._connections = []
-        self.sessionid = (None, None)
+        #self.sessionid = (None, None)
+        self._context = dict(host=host, target=target, tsih=0,
+                isid=headers.ISID(0, 0x023d, 3, 0))
 
     def add_connection(self, port=constants.LISTEN_PORT):
-        conn = socket.connect_tcp(self.host, port)
-        self._connections.append(Connection(conn, self.target))
+        sock = Connection(self._context)
+        h = asyncio.register(sock)
+        self._connections.append(sock)
 
     def remove_connection(self):
         try:
@@ -99,11 +163,12 @@ class Session(object):
     def login(self):
         if not self._connections:
             self.add_connection()
-        conn = self._connections[0]
-        conn.login()
+        conn = self._connections[0] # TODO multi-connection
+        self.tsih = conn.login()
 
     def logout(self):
-        pass
+        conn = self._connections[0] # TODO multi-connection
+        self.tsih = conn.logout()
 
     def command(self):
         pass
