@@ -1,11 +1,13 @@
 
 function loadCountrySetApp() {
   loadApp(CountrySetApp);
+  forEach(document.images, setIconMouseover);
 };
 
 /**
  * CountrySetApp object. Encapsulates the mini-application that allows one
- * to manage the CountrySet table in the database. 
+ * to manage the CountrySet table in the database. This is a relatively simple
+ * example of the Pycopia web APIs.
  *
  * The editor uses a drag-and-drop interface to add countries to the set
  * (or remove them). All operations are committed in the database
@@ -100,20 +102,20 @@ CountrySetApp.prototype.updateCountrySetList = function() {
     var waiter = wait(0.5); // need some time for model metadata to load.
     waiter.addCallback(bind(this.updateCountrySetList, this));
   } else {
-    this.model.get_choices("countries"); // preload countries choice list.
-    var d = this.model.objects.all();
+    var d = this.model.all();
     d.addCallback(bind(this._fillCountrySetList, this));
   };
 };
+
 CountrySetApp.prototype._fillCountrySetList = function(thelist) {
   this._destroyDraggables();
   this._destroyCSDraggables();
   this._disconnect();
-  var ul_cs = UL({id: "countrysets_list", "class": "selectlist"});
+  var ul_cs = UL({"id": "countrysets_list", "class": "selectlist"});
   for (var i = 0; i < thelist.length; i++) {
     var obj = thelist[i];
-    var clkable = SPAN({class: "clickable"}, obj.toString());
-    var li = LI({class: "countryset_item"}, clkable);
+    var clkable = SPAN({"class": "clickable"}, obj.toString());
+    var li = LI({"class": "countryset_item"}, clkable);
     li.setAttribute("id", obj.get_id());
     connect(clkable, "onclick", bind(this._loadCountrySetHandler, this));
     // Make the item draggable to the trash.
@@ -142,8 +144,8 @@ CountrySetApp.prototype._destroyDraggables = function() {
   var draggables = this._draggables;
   this._draggables = [];
   while (draggables.length > 0) {
-    var db = draggables.pop();
-    db.destroy();
+    var dbl = draggables.pop();
+    dbl.destroy();
   };
 };
 
@@ -151,8 +153,8 @@ CountrySetApp.prototype._destroyCSDraggables = function() {
   var draggables = this._csdraggables;
   this._csdraggables = [];
   while (draggables.length > 0) {
-    var db = draggables.pop();
-    db.destroy();
+    var dbl = draggables.pop();
+    dbl.destroy();
   };
 };
 
@@ -193,7 +195,7 @@ CountrySetApp.prototype._loadCountrySetHandler = function(ev) {
  */
 CountrySetApp.prototype.loadCountrySet = function(csid) {
   this._destroyDraggables();
-  var d = this.model.objects.get({id:csid});
+  var d = this.model.get(csid);
   d.addCallback(bind(this._fillCountrySet, this));
 };
 
@@ -203,11 +205,11 @@ CountrySetApp.prototype._fillCountrySet = function(cs) {
   this.hascountries = {};
   var countries = cs.data.countries;
   for (var i = 0; i < countries.length; i++) {
-    this.hascountries[countries[i].data.id] = true;
+    this.hascountries[countries[i]] = true;
   };
   replaceChildNodes(this.cscontent, cs);
-  var namenode = this.cscontent.getElementsByTagName("td")[3];
-  setEditable(namenode, bind(this._changeName, this));
+  // var namenode = this.cscontent.getElementsByTagName("td")[1];
+  // setEditable(namenode, bind(this._changeName, this));
   var ul = this.cscontent.getElementsByTagName("ul")[0];
   setElementClass(ul, "draglist");
   ul.setAttribute("id", "cs_countries");
@@ -223,11 +225,12 @@ CountrySetApp.prototype._fillCountrySet = function(cs) {
                              draggable.targetid = "cslist_list";
                          }, this)
          );
-  this._fillChoices();
+  var cd = this.model.get_choices("countries");
+  cd.addCallback(bind(this._fillChoices, this));
 };
 
 CountrySetApp.prototype._changeName = function(editable, text) {
-  var d = db.update(this.model.name, this.currentset.data.id, {name: text});
+  var d = window.db.updaterow(this.model.name, this.currentset.data.id, {name: text});
   d.addCallback(bind(this._nameUpdated, this, editable, text));
 };
 
@@ -243,8 +246,8 @@ CountrySetApp.prototype._nameUpdated = function(editable, newtext, rv) {
   };
 };
 
-CountrySetApp.prototype._fillChoices = function() {
-  var choices = this.model.get_choices("countries");
+CountrySetApp.prototype._fillChoices = function(choices) {
+  // var choices = this.model.get_choices("countries");
   var choicesnode = UL({"class": "draglist", id: "cslist_list"});
   var drp = new Droppable(choicesnode, {
       accept: ["setcountry"],
@@ -264,7 +267,7 @@ CountrySetApp.prototype._fillChoices = function() {
 CountrySetApp.prototype._dropOnSet = function(dragelement, dropelement, ev) {
   this._dorevert = false;
   var cid = parseInt(dragelement.id.split("_")[1]);
-  var d = db.related_add(this.model.name, this.currentset.data.id, 
+  var d = window.db.related_add(this.model.name, this.currentset.data.id, 
                               "countries", "Country", cid);
   d.addCallback(bind(this._updateItemNode, this, dragelement, dropelement));
 };
@@ -272,8 +275,8 @@ CountrySetApp.prototype._dropOnSet = function(dragelement, dropelement, ev) {
 CountrySetApp.prototype._dropOnChoices = function(dragelement, dropelement, ev) {
   this._dorevert = false;
   var cid = parseInt(dragelement.id.split("_")[1]);
-  var d = db.related_remove(this.model.name, this.currentset.data.id, 
-                                            "countries", "Country", [cid]);
+  var d = window.db.related_remove(this.model.name, this.currentset.data.id, 
+                                            "countries", "Country", cid);
   d.addCallback(bind(this._updateItemNode, this, dragelement, dropelement));
 };
 
@@ -330,15 +333,15 @@ CountrySetApp.prototype._draggableLI = function(id, text) {
  */
 CountrySetApp.prototype.createCountrySet = function() {
   var newname = window.prompt("Name for new CountrySet?", "new_countryset");
-  var d = db.create(this.model.name, {name: newname});
+  var d = window.db.create(this.model.name, {name: newname});
   d.addCallback(bind(this._createHandler, this, newname));
 };
 
 CountrySetApp.prototype._createHandler = function(newname, csid) {
   // Update set selection list.
   var clkable = SPAN({class: "clickable"}, newname);
-  var li = LI({class: "countryset_item"}, clkable);
-  li.setAttribute("id", this.model.name + "_" + csid);
+  var li = LI({"class": "countryset_item"}, clkable);
+  li.setAttribute("id", this.model.name + "_" + csid[0]);
   connect(clkable, "onclick", bind(this._loadCountrySetHandler, this));
   var dbl = new Draggable(li, {
     starteffect: noop,
@@ -348,7 +351,7 @@ CountrySetApp.prototype._createHandler = function(newname, csid) {
     });
   $("countrysets_list").appendChild(li);
   this._csdraggables.push(dbl);
-  this.loadCountrySet(csid); // now, user can edit it.
+  this.loadCountrySet(csid[0]); // now, user can edit it.
 };
 
 CountrySetApp.prototype._dropOnDelete = function(draggable, droppable, ev) {
@@ -360,7 +363,7 @@ CountrySetApp.prototype._dropOnDelete = function(draggable, droppable, ev) {
       this.dragged.destroy();
       delete this.dragged;
       var csid = parseInt(draggable.id.split("_")[1]);
-      var d = db.delete(this.model.name, csid);
+      var d = window.db.deleterow(this.model.name, csid);
       d.addCallback(bind(this._delete_cb, this, csid));
     };
   };
@@ -384,6 +387,18 @@ CountrySetApp.prototype._delete_cb = function(csid, disp) {
   };
 };
 
+
+function countrysetInit() {
+  if (!window.db.initialized) { 
+    var waiter = wait(0.5); 
+    waiter.addCallback(countrysetInit);
+  } else {
+    loadCountrySetApp();
+  };
+};
+
+
+connect(window, "onload", countrysetInit);
 
 ///////////////  End CountrySet editor applet ////////////
 
