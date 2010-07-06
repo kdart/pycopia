@@ -7,65 +7,8 @@
  * Depends on:
  *   MochiKit.js
  *   proxy.js
+ *   ui.js
  */
-
-
-
-/**
- * Places object as sole object in some content div.
- *
- * @param {String} id ID of element to place object into.
- * @param {Node} obj The DOM node to be placed. If you pass a null value
- * it is the same as removing content from the content object.
- */
-function placeContent(id, obj) {
-  var content = document.getElementById(id);
-  if (content.hasChildNodes()) {
-    if (obj) {
-      content.replaceChild(obj, content.lastChild);
-    } else {
-      content.removeChild(content.lastChild);
-    };
-  } else {
-    if (obj) {
-      content.appendChild(obj);
-    };
-  };
-};
-
-/**
- * Append an Node object to the element, given the ID.
- * @param {String} id The ID of the node to append to.
- * @param {Element} obj The Element to append.
- */
-function appendContent(id, obj) {
-  var content = document.getElementById(id);
-  content.appendChild(obj);
-};
-
-function insertContent(id, obj, /* optional */ pos) {
-  pos = pos || 0;
-  var content = document.getElementById(id);
-  var refnode = content.childNodes[pos];
-  content.insertBefore(obj, refnode);
-};
-
-
-
-
-/**
- * General purpose table row constructor.
- * @param {Array} row List of objects to place into row cells.
- * @return {Element} tr a TR node filled with TD.
- */
-function rowDisplay(row) {
-  return TR(null, map(partial(TD, null), row));
-};
-
-function headDisplay(row) {
-  return TR(null, map(partial(TH, null), row));
-};
-
 
 /////////////// DB objects. ////////////////////
 
@@ -76,34 +19,32 @@ function DBModel(modelname) {
   this.initialized = false;
   this.name = modelname;
   this._meta = {};
-  this._meta.fields = [];
-  this._meta.fieldmap = {}; // For faster access to fields by name.
-  this.objects = new DBManager(this);
-  var d = db.get_table(modelname);
+  var d = window.db.get_table_metadata_map(modelname);
   d.addCallback(bind(this._fillModelMetadata, this));
 };
 
-DBModel.prototype._fillModelMetadata = function(info) {
-  for (var i = 1; i < info.length; i++) { 
-    // skip first header line (i = 1) since it contains only column names.
-    var fieldinfo = info[i];
-    // ["name", "coltype", "Default"]
-    var internaltype = fieldinfo[1];
-    var field = new window[internaltype](fieldinfo[0], fieldinfo[2]);
-    this._meta.fields.push(field);
-    this._meta.fieldmap[field.attname] = field;
-  };
+DBModel.prototype._fillModelMetadata = function(metamap) {
+  this._meta = metamap;
   this.initialized = true;
 };
 
-DBModel.prototype.getField = function(fieldname) {
-  return this._meta.fieldmap[fieldname];
+DBModel.prototype.get_column = function(fieldname) {
+  return this._meta[fieldname];
 };
 
 DBModel.prototype.get_choices = function(fieldname) {
-  var field = this._meta.fieldmap[fieldname];
-  return field.get_choices(this.name);
+  return window.db.get_choices(this.name, fieldname)
 };
+
+DBModel.prototype.all = function() {
+  return window.db.query(this.name, {})
+};
+
+DBModel.prototype.get = function(entry_id) {
+  return window.db.get_row(this.name, entry_id);
+};
+
+
 
 /**
  * Getter for DBModel object. This object is cached, for
@@ -141,17 +82,29 @@ DBModelInstance.prototype.__dom__ = function(node) {
                   TH(null, "Field"), TH(null, "Value"))));
   var body = TBODY(null);
   tbl.appendChild(body);
-  var fields = this._model._meta.fields;
-  for (var i = 0; i < fields.length; i++) {
-    var field = fields[i];
-    var tr = TR(null,
-                  TD(null, field.attname),
-                  TD(null, this.data[field.attname].toString()));
+  var fields = this._model._meta;
+  for (var colname in fields) {
+    var field = fields[colname];
+    if (field[0] == "RelationProperty") {
+      var tr = TR(null,
+                    TD(null, colname),
+                    TD(null, 
+                      UL(null, map(function (obj) {
+                                return LI({id: obj.get_id()}, obj.toString());
+                              },
+                            this.data[colname])
+                      )
+                    )
+               );
+    } else {
+      var tr = TR(null,
+                    TD(null, colname),
+                    TD(null, this.data[colname].toString()));
+    }
     body.appendChild(tr);
   };
   return tbl;
 };
-
 
 DBModelInstance.prototype.get_id = function() {
     return this._model.name + "_" + this.data.id
@@ -162,7 +115,7 @@ DBModelInstance.prototype.get_id = function() {
  */
 DBModelInstance.prototype.deleterow = function() {
   if (!this.isdeleted) {
-    var d = db.deleterow(this.model.name, this.data.id);
+    var d = window.db.deleterow(this.model.name, this.data.id);
     d.addCallback(bind(this._delete_db, this));
   };
 };
@@ -176,8 +129,7 @@ DBModelInstance.prototype._delete_cb = function(deleted) {
  */
 DBModelInstance.prototype.save = function() {
   if (!this.isdeleted) {
-    // TODO filter out m2m data.
-    var d = db.update(this.model.name, this.data.id, this.data);
+    var d = window.db.update(this.model.name, this.data.id, this.data);
     d.addCallback(bind(this._save_cb, this));
   };
 };
@@ -186,152 +138,6 @@ DBModelInstance.prototype._save_cb = function(disp) {
   this._savedok = disp;
 };
 
-
-/**
- * DBManager object proxies a DB Manager.
- *
- */
-
-function DBManager(dbmodel) {
-  this._modelname = dbmodel.name;
-  this._meta = dbmodel._meta;
-};
-
-/**
- * Instantiate row data. Bind model metadata.
- */
-
-DBManager.prototype.all = function() {
-  return db.get_all(this._modelname);
-};
-
-DBManager.prototype.filter = function(kwargs) {
-  return db.get_filter(this._modelname, kwargs);
-};
-
-DBManager.prototype.get = function(kwargs) {
-   var d =  db.table_get(this._modelname, kwargs);
-   return d;
-};
-
-DBManager.prototype.exclude = function(kwargs) {
-  // TODO implement
-};
-
-DBManager.prototype.order_by = function(fields) {
-  // TODO implement
-};
-
-DBManager.prototype.distinct = function(fields) {
-  // TODO implement
-};
-
-DBManager.prototype.sql = function(query) {
-  // TODO implement
-};
-
-// query-set-methods-that-do-not-return-queries
-DBManager.prototype.create = function(kwargs) {
-  // TODO implement
-};
-
-DBManager.prototype.get_or_create = function(kwargs) {
-  // TODO implement
-};
-
-DBManager.prototype.count = function() {
-  // TODO implement
-};
-
-DBManager.prototype.in_bulk = function(id_list) {
-  // TODO implement
-};
-
-
-//////////////////////////////////////////////////////////////////////////////
-// These objects below map to db field classes.
-
-
-function BaseField() {
-  this.choices = null;
-};
-BaseField.prototype.get_choices = function(modelname) {
-  if (!this.choices) {
-    var d = db.get_choices(modelname, this.attname);
-    d.addCallback(partial(_recieveChoices, this));
-  };
-  return this.choices; // may be null
-};
-
-_FieldPrototype = new BaseField();
-
-function AutoField(name, def, help) {
-  this.attname = name;
-  this.default_value = def;
-  this.help_text = help;
-};
-AutoField.prototype = _FieldPrototype;
-
-function BooleanField(name, def, help) {
-  this.attname = name;
-  this.default_value = def;
-  this.help_text = help;
-};
-BooleanField.prototype = _FieldPrototype;
-
-function CharField(name, def, help) {
-  this.attname = name;
-  this.default_value = def;
-  this.help_text = help;
-};
-CharField.prototype = _FieldPrototype;
-
-function IntegerField(name, def, help) {
-  this.attname = name;
-  this.default_value = def;
-  this.help_text = help;
-};
-IntegerField.prototype = _FieldPrototype;
-
-function NullBooleanField(name, def, help) {
-  this.attname = name;
-  this.default_value = def;
-  this.help_text = help;
-};
-NullBooleanField.prototype = _FieldPrototype;
-
-function TextField(name, def, help) {
-  this.attname = name;
-  this.default_value = def;
-  this.help_text = help;
-};
-TextField.prototype = _FieldPrototype;
-
-function ForeignKey(name, def, help) {
-  this.attname = name;
-  this.default_value = def;
-  this.help_text = help;
-};
-ForeignKey.prototype = _FieldPrototype;
-
-
-function RelationProperty(name, help) {
-  this.attname = name;
-  this.help_text = help;
-  this.choices = null;
-};
-
-RelationProperty.prototype.get_choices = function(modelname) {
-  if (!this.choices) {
-    var d = db.get_choices(modelname, this.attname);
-    d.addCallback(partial(_recieveChoices, this));
-  };
-  return this.choices; // may be null
-};
-
-_recieveChoices = function(obj, cl) {
-  obj.choices = cl;
-};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -343,19 +149,21 @@ _recieveChoices = function(obj, cl) {
 ///// Deserialization handlers
 
 function jsonConvertRow(obj) {
-  var modelname =  obj._class_
+  var modelname =  obj._class_;
   var model = getDBModel(modelname);
-  var inst =  new DBModelInstance(model, obj._str_, obj.value);
-  var m2mfs = model._meta.many_to_many;
-  for (var i = 0; i < m2mfs.length; i++) {
-    var field = m2mfs[i];
-    obj.value[field.attname] = map(jsonConvertRow, obj.value[field.attname]);
+  if (model.initialized) {
+    for (var colname in model._meta) {
+      if (model._meta[colname][0] == "RelationProperty") {
+        obj.value[colname] = map(jsonConvertRow, obj.value[colname]);
+      }
+    }
   };
+  var inst =  new DBModelInstance(model, obj._str_, obj.value);
   return inst;
 };
 
 function jsonDBCheck(obj) {
-  return obj._class_.indexOf("DM_") == 0; // XXX
+  return obj._class_ != undefined;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -377,15 +185,16 @@ function loadModelMetaApp() {
  */
 function ModelMetaApp() {
   this.reload();
+  this.root = DIV({id: "modelmetaapp", "class": "applet"});
 };
 
 ModelMetaApp.prototype.reload = function() {
-  var d = db.get_tables();
+  var d = window.db.get_tables();
   d.addCallback(bind(this.dbFillExtra, this));
 };
 
 ModelMetaApp.prototype.destroy = function() {
-  placeContent("extra", null);
+  placeContent("messages", null);
 };
 
 /**
@@ -398,9 +207,9 @@ ModelMetaApp.prototype.dbFillExtra = function(modelnames) {
   var tbl = TABLE(null, 
     createDOM("caption", null, "Table Names"),
     THEAD(null, TR(null, TH(null, "Name"))),
-    TBODY(null, map(_dbTableNameDisplay, modelnames))
+    TBODY(null, map(_dbTableNameDisplay, keys(modelnames)))
     );
-  placeContent("extra", tbl);
+  placeContent("messages", tbl);
 };
 
 /**
@@ -424,7 +233,7 @@ function _dbTableNameDisplay(modelname) {
  *
  */
 function dbTableInfo(modelname) {
-  var d = db.get_table(modelname);
+  var d = window.db.get_table_metadata(modelname);
   d.addCallback(partial(showTableInfo, modelname));
 };
 
@@ -437,35 +246,12 @@ function dbTableInfo(modelname) {
 function showTableInfo(modelname, info) {
   var tbl = TABLE(null,
     createDOM("caption", null, modelname),
-    THEAD(null, headDisplay(info[0])),
-    TBODY(null, map(rowDisplay, info.slice(1))));
+    THEAD(null, headDisplay(
+        ["Type", "Name", "Default", "Many2Many", "Nullable", "Uselist"])),
+    TBODY(null, map(rowDisplay, info)));
   placeContent("content", tbl);
 };
 
-
-// Places object into content area (content div).
-function showContent(obj) {
-  var content = document.getElementById("content");
-  if (content.hasChildNodes()) {
-    content.replaceChild(obj, content.lastChild);
-  } else {
-    content.appendChild(obj);
-  }
-}
-
-
-function showMessage(obj) {
-  if (obj) {
-    log(obj);
-    var text = document.createTextNode(obj.toString());
-    var msgarea = document.getElementById("messages");
-    if (msgarea.hasChildNodes()) {
-      msgarea.replaceChild(text, msgarea.lastChild);
-    } else {
-      msgarea.appendChild(text);
-    }
-  }
-}
 
 
 function notifyResult(rowid, result) {
@@ -484,18 +270,24 @@ function doDeleteRow(tablename, rowid) {
   }
 }
 
+function getUIData() {
+  var d = window.db.get_uidata();
+  d.addCallback(function (uidata) {window.uiData = uidata;});
+};
+
 /**
  * Initializer adds the "db" object that has methods that map the the
  * exported methods on the server side.
  */
 
 function dbInit() {
-  window.db = new PythonProxy("/storage/api/");
+  window.db = new PythonProxy("/storage/api/", getUIData);
   window.modelcache = {};
   jsonEvalRegistry.register("dbmodel", jsonDBCheck, jsonConvertRow);
 };
 
 function dbCleanup() {
+  delete window.uiData;
   delete window.db;
   delete window.modelcache;
   jsonEvalRegistry.unregister("dbmodel");

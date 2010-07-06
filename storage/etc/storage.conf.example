@@ -6,13 +6,13 @@
 
 # for Durus based storage
 # location shared storage server.
-host = "localhost"
+#host = "localhost"
 
 # TCP port server is listening on. Default will be used if not specified.
 #port = 2972
 
-dbfile = "/var/cache/pycopia/nmsstore.dfs"
-dblog =  "/var/cache/pycopia/storage.log"
+#dbfile = "/var/cache/pycopia/nmsstore.dfs"
+#dblog =  "/var/cache/pycopia/storage.log"
 
 ### For postgres database backend
 
@@ -21,17 +21,19 @@ DATABASE_URL = database = 'postgres://pycopia@localhost/pycopia'
 
 ### web interface
 
-# User to run handler as. Main server must be run as root for this to have
-# any effect.
-USERNAME = "tester"
+USERNAME = "lighttpd"
 
 ADMINS = [
-    ('admin@mycompany.com', 'Sys Admin'),
+    ('keith@dartworks.biz', 'Keith Dart'),
 ]
+
+#MIDDLEWARE = [("firepython.middleware.FirePythonWSGI",)]
+MIDDLEWARE = []
 
 # Map pattern to handler functions. 
 LOCATIONMAP = (
   (r"^/api/(?P<methodname>\w+)$", "pycopia.db.webservice.dispatcher"),
+  (r"^/db/?$", "pycopia.db.webservice.main"), # XXX main entry point may change
 # Basic, generic table editor
   (r"^/?$", "pycopia.db.webservice.listall"),
   (r"^/table/$", "pycopia.db.webservice.listall"),
@@ -41,7 +43,11 @@ LOCATIONMAP = (
   (r"^/table/(?P<tablename>\w+)/view/(?P<rowid>\d+)/?$", "pycopia.db.webservice.view"),
   (r"^/table/(?P<tablename>\w+)/edit/$", "pycopia.WWW.framework.redirectup"),
   (r"^/table/(?P<tablename>\w+)/edit/(?P<rowid>\d+)/$", "pycopia.db.webservice.edit"),
-#  (r"^/table/(?P<tablename>\w+)/delete/(?P<rowid>\d+)/?$", "pycopia.db.webservice.delete_row"),
+# user config editor
+  (r"^/config/?$", "pycopia.db.webui.confedit.config_main"),
+  (r"^/config/update/?$", "pycopia.db.webui.confedit.config_update"),
+# countryset editor
+  (r"^/countryset/?$", "pycopia.db.webui.countryset.main"),
     # aliases don't have a dot in the name.
   (r'/media/css/(?P<name>\S+)', "css"),
   (r'/media/js/(?P<name>\S+)', "js"),
@@ -56,6 +62,7 @@ ICONMAP = {
   "add": ("icon_add_active.png", "icon_add_inactive.png"),
   "edit": ("icon_edit_active.png", "icon_edit_inactive.png"),
   "delete": ("icon_delete_active.png", "icon_delete_inactive.png"),
+  "trash": ("icon_trash_active.png", "icon_trash_inactive.png"),
   "activate": ("icon_activate_active.png", "icon_activate_inactive.png"),
   "isactive": ("icon_isactive_active.png", "icon_isactive_inactive.png"),
   "isinactive": ("icon_isinactive_active.png", "icon_isinactive_inactive.png"),
@@ -63,6 +70,20 @@ ICONMAP = {
   "plus": ("icon_plus_active.png", "icon_plus_inactive.png"),
   "minus": ("icon_minus_active.png", "icon_minus_inactive.png"),
   "alert": (None, "icon_alert_inactive.png"),
+}
+
+# these should all be 16x16 icons
+ICONMAP_MEDIUM = {
+# simplename     active         inactive (base state)
+#"xxx": "icon_xxx.png",
+  "default": "icon_alert.png",
+  "search": "icon_searchbox.png",
+  "success": "icon_success.png",
+  "failure": "icon_error.png",
+  "incomplete": "icon_alert.png",
+  "unknown": "icon_alert.png",
+  "calendar": "icon_calendar.png",
+  "clock": "icon_clock.png",
 }
 
 # these should all be 10x10 icons

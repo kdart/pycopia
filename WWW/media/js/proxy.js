@@ -19,13 +19,17 @@
  * callback gets whatever the server side function returns, as native
  * objects.
  */
-function PythonProxy(basepath) {
+function PythonProxy(basepath /* optional callables */) {
+  this.initialized = false;
   this.basepath = basepath;
   // Fetch the dispatchers registered names, add them to this object.
   // You may then use the same names as methods on this PythonProxy
   // instance.
   var req = this._call("_methods");
   req.addCallback(partial(_fillMethods, this));
+  for (var i = 1; i < arguments.length; i++) {
+      req.addCallback(arguments[i]);
+  };
 };
 
 /**
@@ -73,6 +77,7 @@ function _fillMethods(obj, methodlist) {
     name = methodlist[i];
     obj[name] = partial(obj._call, name);
   };
+  obj.initialized = true;
 };
 
 

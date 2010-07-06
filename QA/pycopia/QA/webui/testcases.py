@@ -213,7 +213,7 @@ class TestcaseEditor(framework.RequestHandler):
     def post(self, request, tcid):
         dbrow = get_testcase(tcid)
         try:
-            webhelpers.update_row(request, models.TestCase, dbrow)
+            webhelpers.update_row(request.POST, models.TestCase, dbrow)
         except types.ValidationError, err:
             webhelpers.dbsession.rollback()
             resp = self.get_page(request, dbrow, err)
@@ -252,14 +252,6 @@ class TestcaseEditor(framework.RequestHandler):
         return resp
 
 
-
-
-#class TestcaseDeleter(framework.RequestHandler):
-#
-#    def get(self, request, tcid=None):
-#        resp = framework.ResponseDocument(request, testcase_delete_constructor)
-#
-#        return resp.finalize()
 
 
 class TestcaseRunner(framework.RequestHandler):
@@ -303,7 +295,8 @@ class TestcaseRunner(framework.RequestHandler):
         else:
             result = webhelpers.INCOMPLETE
 
-        tester=webhelpers.resolve_user(request)
+        username = request.session["username"]
+        tester = models.User.get_by_username(webhelpers.dbsession, username)
         build=webhelpers.resolve_build(data.get("build"))
 
         rr = models.create(models.TestResult, 
@@ -384,7 +377,7 @@ class TestcaseCreator(framework.RequestHandler):
     def post(self, request):
         dbrow = models.TestCase()
         try:
-            webhelpers.update_row(request, models.TestCase, dbrow)
+            webhelpers.update_row(request.POST, models.TestCase, dbrow)
         except types.ValidationError, err:
             webhelpers.dbsession.rollback()
             request.log_error("TC create ValidationError: %s\n" % (err,))
@@ -418,7 +411,7 @@ class TestcaseLister(framework.RequestHandler):
         tbl.caption("Test Cases")
         colnames = ("name", "testimplementation")
         tbl.new_headings("", *colnames)
-        for dbrow in webhelpers.table_get(tableclass, {}):
+        for dbrow in webhelpers.query(tableclass, {}):
             row = tbl.new_row(id="rowid_%s" % dbrow.id, class_=cycler.next())
             col = row.new_column(
                 NM("Fragments", {}, 
@@ -452,48 +445,6 @@ def get_testcase(rowid):
 
 
 
-
-
-########################
-### test result reports 
-
-def testresult_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="qawebui.css")
-#    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-#    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-#    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
-    for name, val in kwargs.items():
-        setattr(doc, name, val)
-    build_framing(request, doc, "Test Results")
-    return doc
-
-
-class TestResultHandler(framework.RequestHandler):
-
-    def get(self, request):
-        resp = framework.ResponseDocument(request, testresult_constructor)
-
-        TR = models.TestResult
-        cycler = itertools.cycle(["row1", "row2"])
-        tbl = resp.doc.add_table(width="100%")
-        tbl.caption("Test Runs")
-        tbl.new_headings("Runner", "Result", "Start time", "Results Location")
-
-        for res in TR.get_latest_results(webhelpers.dbsession):
-            row = tbl.new_row()
-            setattr(row, "class_", cycler.next())
-            row.new_column(str(res))
-            row.new_column(res.result)
-            row.new_column(res.starttime)
-            row.new_column(resp.nodemaker("A", 
-                    {"href": res.resultslocation},  "Results location"))
-        return resp.finalize()
-
-#    def post(self, request, rowid=None):
-#        pass
-
-
 def main_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
     doc.stylesheet = request.get_url("css", name="qawebui.css")
@@ -517,9 +468,9 @@ class MainHandler(framework.RequestHandler):
             NM("LI", None, 
                     NM("A", {"href": request.get_url(testcase_list)}, "Test cases."),
             ),
-            NM("LI", None, 
-                    NM("A", {"href": request.get_url(testresults_list)}, "Latest test results."),
-            ),
+#            NM("LI", None, 
+#                    NM("A", {"href": request.get_url(testresults_list)}, "Latest test results."),
+#            ),
           )
         )
         return resp.finalize()
@@ -530,11 +481,9 @@ class MainHandler(framework.RequestHandler):
 testcase_list = webhelpers.setup_dbsession(auth.need_login(TestcaseLister()))
 testcase_view = webhelpers.setup_dbsession(auth.need_login(TestcaseViewer()))
 testcase_edit = webhelpers.setup_dbsession(auth.need_login(TestcaseEditor()))
-#testcase_delete = webhelpers.setup_dbsession(auth.need_login(TestcaseDeleter()))
 testcase_create = webhelpers.setup_dbsession(auth.need_login(TestcaseCreator()))
 testcase_run = webhelpers.setup_dbsession(auth.need_login(TestcaseRunner()))
 
-testresults_list = webhelpers.setup_dbsession(auth.need_login(TestResultHandler()))
 main = auth.need_login(MainHandler())
 
 

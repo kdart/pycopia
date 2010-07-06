@@ -13,7 +13,7 @@ function setupConfigIcons(img) {
  * form itself. This prevents the browser from updating its page.
  */
 function configFormAction() {
-  var d = doXHR("/plinth/config/update/", {
+  var d = doXHR("/storage/config/update/", {
                   method: "POST",
                   headers: {
                             "Content-Type": "application/x-www-form-urlencoded"
@@ -93,7 +93,7 @@ function configMakeEditable(span) {
                 );
   frm.elements[0].checked = "checked";
   swapDOM(span, frm);
-  frm.onsubmit = configFormAction; // using MochiKit connect doesn't work right.
+  frm.onsubmit = configFormAction; // using MochiKit connect doesn't work right here.
   inp.focus();
 }
 

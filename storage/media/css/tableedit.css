@@ -70,6 +70,12 @@ table tr td {
   font-size:12px; 
 }
 
+span.editable {
+  color: #0F4C00;
+  background-color: #F4DBFF;
+  padding: 2px 5px 2px 5px;
+}
+
 
 p.error {
   padding: 1em;
@@ -87,7 +93,7 @@ fieldset>legend {
     font-weight:bold;
 }
 
-fieldset input {
+fieldset input[type="text"] {
     width: 70%;
     margin-bottom: 5px;
 }
@@ -250,7 +256,7 @@ input:hover[type="submit"] {
 hr {color: silver; width: 80%;}
 
 
-select.draglist { 
+ul.draglist { 
   width:100%; 
   float:right; 
   cursor: move;
@@ -263,10 +269,101 @@ select.dragtarget {
   border: 2px dotted  #AA8888;
 }
 
-select.draglist option { 
+ul.draglist li { 
   list-style-type: none; 
   padding: 2px 2px 2px 2px;
   border: thin solid silver;
   margin: 2px 2px 2px 2px;
+}
+
+ul.selectlist { 
+  float:left; 
+  padding: 10px 10px 10px 20px;
+  margin: 5px;
+}
+ul.selectlist li { 
+  list-style-type: disc; 
+  font-size:11px; 
+  line-height:16px;
+}
+
+ul.selectlist li:hover { 
+  list-style-image: url(/media/images/icon_deletelink.png); /* 10x10 */
+}
+
+span.clickable {
+  cursor: pointer;
+  color: #2222AA;
+}
+
+span.clickable:hover {
+  color: #3333FF;
+}
+
+div.buttonbar {
+  background:#CADBFF; 
+  text-align:left;
+  padding: 5px 8px 5px 8px;
+}
+
+#container { position:relative; width:100%; min-width:760px; padding:0; }
+
+.applet { 
+  width:100%; min-width:760px; 
+  padding:0; 
+  border-width:0;
+  margin: 0 0 0 0;
+  float: none;
+}
+
+#content { 
+  border: medium outset;
+}
+
+#content table {
+  width: 80%;
+  margin: 10px;
+}
+
+#content table caption {
+  padding: 2px 5px 2px 5px;
+  background-color: #3D6994;
+  color: #D6B358;
+  text-align: center;
+}
+
+div#extra {
+  background:#FF8539; 
+  clear:left; 
+  float:left; 
+  width:150px;
+}
+
+div#extra table {
+  clear: both;
+}
+
+div#extra td, div#extra th { 
+  font-family: sans-serif;
+  padding: 0px 2px 0px 2px;
+  border: hidden;
+  line-height: normal;
+}
+
+div#extra th { 
+  font-weight: bold;
+  text-align: center;
+}
+
+
+#messages {
+  clear:both;
+  padding:10px; 
+  background: #EEEE88; 
+  background:#AF9D89; 
+}
+
+div#messages p {
+  color:#EEEEEE; 
 }
 

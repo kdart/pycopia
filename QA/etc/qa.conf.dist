@@ -21,17 +21,17 @@ LOCATIONMAP = (
 #  (r"^/api/(?P<methodname>\w+)$", "pycopia.db.webservice.dispatcher"),
   (r"^/?$", "pycopia.QA.webui.main"),
   # test cases
-  (r"^/testcase/$", "pycopia.QA.webui.testcase_list"),
-  (r"^/testcase/view/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_view"),
+  (r"^/testcase/$", "pycopia.QA.webui.testcases.testcase_list"),
+  (r"^/testcase/view/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcases.testcase_view"),
   (r"^/testcase/view/?$", "pycopia.WWW.framework.redirectup"),
-  (r"^/testcase/edit/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_edit"),
+  (r"^/testcase/edit/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcases.testcase_edit"),
   (r"^/testcase/edit/?$", "pycopia.WWW.framework.redirectup"),
 #  (r"^/testcase/delete/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_delete"),
-  (r"^/testcase/run/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_run"),
+  (r"^/testcase/run/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcases.testcase_run"),
   (r"^/testcase/run/?$", "pycopia.WWW.framework.redirectup"),
-  (r"^/testcase/new/?$", "pycopia.QA.webui.testcase_create"),
+  (r"^/testcase/new/?$", "pycopia.QA.webui.testcases.testcase_create"),
   # test results
-  (r"^/testresults/?$", "pycopia.QA.webui.testresults_list"),
+  (r"^/testresults/?$", "pycopia.QA.webui.testresults.testresults_list"),
     # media locations. aliases don't have a dot in the name.
   (r'/media/css/(?P<name>\S+)', "css"),
   (r'/media/js/(?P<name>\S+)', "js"),

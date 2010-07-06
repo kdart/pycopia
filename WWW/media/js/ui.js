@@ -1,18 +1,6 @@
 
-/**
- * Get the exported UI config data from the server. Since the data is
- * needed by the other functions the request is made synchronously at load
- * time. This is only known to work in Firefox.
- */
-function getUIData() {
-  var req = new XMLHttpRequest();
-  req.open("GET", "/ui/iconmap", false, "", "");
-  req.send(null);
-  if (req.status == 200) {
-    return eval("(" + req.responseText + ")");
-  } else {
-    return null;
-  };
+function setUIData(data) {
+  window.uiData = data;
 };
 
 /**
@@ -218,7 +206,7 @@ function Editable(text, callback) {
   connect(this.element, "onclick", bind(this._editableHandler, this));
 };
 
-Editable.prototype.__dom__ = function() {
+Editable.prototype.__dom__ = function(node) {
   return this.element;
 };
 
@@ -325,13 +313,5 @@ function showMessage(obj) {
 }
 
 
-
-function mainUIInit() {
-  window.ui = new PythonProxy("/ui/");
-};
-
-// Initialize after page load.
-connect(window, "onload", mainUIInit);
-
-var uiData = getUIData();
+// var uiData = getUIData("/ui");
 
