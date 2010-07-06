@@ -953,6 +953,7 @@ Options:
     cmd = DBSessionCommands(ui)
     _session = models.get_session(database)
     cmd._setup(_session, "db> ")
+    cmd._environ["session"] = _session
     parser = CLI.CommandParser(cmd, 
             historyfile=os.path.expandvars("$HOME/.hist_dbcli"))
     if args:

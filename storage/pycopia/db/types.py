@@ -181,6 +181,7 @@ class TestResultType(types.TypeDecorator):
 
 
 OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
+OBJ_MODULE, OBJ_TESTSUITE, OBJ_TEST, OBJ_TESTRUNNER, OBJ_UNKNOWN = OBJECTTYPES
 
 class TestObjectType(types.TypeDecorator):
     """Possible test runner objects that produce results."""

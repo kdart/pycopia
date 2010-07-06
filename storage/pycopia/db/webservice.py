@@ -32,6 +32,7 @@ from pycopia.db import types
 from pycopia.db import models
 from pycopia.db import webhelpers
 
+#from pycopia.dictlib import AttrDict
 from pycopia.WWW import json
 from pycopia.WWW import framework
 from pycopia.WWW.middleware import auth
@@ -54,20 +55,42 @@ def get_model(modelname):
         raise framework.HHttpErrorNotFound("No model %r found." % modelname)
 
 
-def update(modelname, entry_id, data):
-    klass = get_model(modelname)
-    dbrow = webhelpers.get_row(klass, entry_id)
-    pass # XXX
-
-
-def table_get(modelname, filt, order_by=None, start=None, end=None):
-    klass = get_model(modelname)
-    return webhelpers.table_get(klass, filt, order_by, start, end)
+def get_uidata():
+    cf = json.current_request.config
+    return {"ICONMAP": cf.ICONMAP, 
+            "ICONMAP_SMALL": cf.ICONMAP_SMALL}
 
 
 def get_table_metadata(modelname):
     klass = get_model(modelname)
     return models.get_metadata(klass)
+
+
+def get_table_metadata_map(modelname):
+    klass = get_model(modelname)
+    return models.get_metadata_map(klass)
+
+
+def updaterow(modelname, entry_id, data):
+    klass = get_model(modelname)
+    dbrow = webhelpers.get_row(klass, entry_id)
+    webhelpers.update_row(data, klass, dbrow)
+    return True
+
+
+def get_row(modelname, entry_id):
+    klass = get_model(modelname)
+    return webhelpers.get_row(klass, entry_id)
+
+
+def get_ids(modelname, idlist):
+    klass = get_model(modelname)
+    return webhelpers.get_ids(klass, idlist)
+
+
+def query(modelname, filt, order_by=None, start=None, end=None):
+    klass = get_model(modelname)
+    return webhelpers.query(klass, filt, order_by, start, end)
 
 
 def get_choices(modelname, attribute, order_by=None):
@@ -88,12 +111,88 @@ def deleterow(modelname, entry_id):
     return (True, name)
 
 
-# DB model serializer and checker
+def create(modelname, data):
+    """Create a new row in a table.
+
+    Returns the new items primary key values.
+    """
+    klass = get_model(modelname)
+    dbrow = klass()
+    try:
+        webhelpers.update_row(data, klass, dbrow)
+    except types.ValidationError, err:
+        webhelpers.dbsession.rollback()
+        raise
+    webhelpers.dbsession.add(dbrow)
+    try:
+        webhelpers.dbsession.commit()
+    except (DataError, IntegrityError), err:
+        webhelpers.dbsession.rollback()
+        raise
+    mapper = models.class_mapper(klass)
+    return [getattr(dbrow, col.name) for col in mapper.primary_key]
+
+
+def related_add(modelname, entry_id, colname, relmodelname, rel_id):
+    klass = get_model(modelname)
+    relklass = get_model(relmodelname)
+    metadata = models.get_column_metadata(klass, colname)
+    # fetch parent and related objects
+    dbrow = webhelpers.get_row(klass, entry_id)
+    reldbrow = webhelpers.get_row(relklass, rel_id)
+    # now add using appropriate semantics
+    if metadata.uselist:
+        col = getattr(dbrow, colname)
+        col.append(reldbrow)
+    else:
+        setattr(dbrow, colname, reldbrow)
+    try:
+        webhelpers.dbsession.commit()
+    except (DataError, IntegrityError), err:
+        webhelpers.dbsession.rollback()
+        raise
+    return True
+
+
+def related_remove(modelname, entry_id, colname, relmodelname, rel_id):
+    klass = get_model(modelname)
+    relklass = get_model(relmodelname)
+    metadata = models.get_column_metadata(klass, colname)
+    # fetch parent and related objects
+    dbrow = webhelpers.get_row(klass, entry_id)
+    if metadata.uselist:
+        reldbrow = webhelpers.get_row(relklass, rel_id)
+        col = getattr(dbrow, colname)
+        col.remove(reldbrow)
+    else:
+        if metadata.nullable:
+            setattr(dbrow, colname, None)
+        else:
+            raise DataError("Removing non-nullable relation")
+    try:
+        webhelpers.dbsession.commit()
+    except (DataError, IntegrityError), err:
+        webhelpers.dbsession.rollback()
+        raise
+    return True
+
+
+# DB model serializer and checker - returns a structure representing a
+# model row instance.  Relation objects will also be recursivly encoded.
 def _convert_instance(obj):
-    values = {}
-    for field in obj._sa_class_manager.keys():
-        value = getattr(obj, field)
-        values[field] = value
+    values = {"id": obj.id}
+    for metadata in models.get_metadata_iterator(obj.__class__):
+        if metadata.coltype == "RelationProperty":
+            value = getattr(obj, metadata.colname)
+            if value is not None:
+                if metadata.uselist:
+                    values[metadata.colname] = [_convert_instance(o) for o in value]
+                else:
+                    values[metadata.colname] = _convert_instance(value)
+            else:
+                values[metadata.colname] = value
+        else:
+            values[metadata.colname] = getattr(obj, metadata.colname)
     return {"_class_": obj.__class__.__name__,
             "_str_": str(obj),
             "value":values}
@@ -105,8 +204,10 @@ def _modelchecker(obj):
     except AttributeError:
         return False
 
-
-_exported = [get_tables, get_table_metadata, table_get, get_choices, update, deleterow]
+# Functions exported to javascript via proxy.
+_exported = [get_tables, get_table_metadata, get_table_metadata_map, get_choices, get_uidata,
+        query, create, updaterow, deleterow, get_row, get_ids,
+        related_add, related_remove]
 
 
 dispatcher = json.JSONDispatcher(_exported)
@@ -114,10 +215,57 @@ dispatcher.register_encoder("models", _modelchecker, _convert_instance)
 dispatcher = auth.need_authentication(webhelpers.setup_dbsession(dispatcher))
 
 
+#def consolidate_runner_results(testresult):
+#    """Flatten the tree of result data into an attribute-accessible
+#    dictionary.
+#    """
+#    assert testresult.objecttype = OBJ_TESTRUNNER 
+#    rv = AttrDict()
+#    rv.testresults = []
+#    rv.resultslocation = testresult.resultslocation
+#    rv.arguments = testresult.arguments
+#    rv.environment = testresult.environment.name
+#    rv.startime = testresult.startime
+#    rv.endtime = testresult.endtime
+
+
+
+##### Restful interface document constructor
+
+def main_constructor(request, **kwargs):
+    doc = framework.get_acceptable_document(request)
+    doc.stylesheet = request.get_url("css", name="tableedit.css")
+    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
+    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
+    doc.add_javascript2head(url=request.get_url("js", name="ui.js"))
+    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
+    for name, val in kwargs.items():
+        setattr(doc, name, val)
+    nav = doc.add_section("navigation")
+    NM = doc.nodemaker
+    NBSP = NM("ASIS", None, "&nbsp;")
+    nav.append(NM("P", None,
+         NM("A", {"href":"/"}, "Home"), NBSP,
+         IF(request.path.count("/") > 2, NM("A", {"href":".."}, "Up")), NBSP,
+    ))
+    nav.append(NM("P", {"class_": "title"}, "Storage Editor"))
+    nav.append(NM("P", None, 
+            NM("A", {"href": "/auth/logout"}, "logout")))
+    container = doc.add_section("container")
+    content = container.add_section("container", id="content")
+    messages = container.add_section("container", id="messages")
+    extra = container.add_section("container", id="extra")
+    return doc
+
+
+@auth.need_login
+@webhelpers.setup_dbsession
+def main(request):
+    resp = framework.ResponseDocument(request, main_constructor, title="Database")
+    return resp.finalize()
+
 
 ##### for server-side markup requests that provide a basic database editor. ####
-####  Almost everything below this line will disappear once I get the
-####  client/javascript version written.
 
 def doc_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
@@ -156,7 +304,7 @@ def listtable(request, tablename=None):
     tbl.caption(tablename)
     colnames = models.get_rowdisplay(klass)
     tbl.new_headings("", *colnames)
-    for dbrow in table_get(tablename, {}):
+    for dbrow in query(tablename, {}):
         row = tbl.new_row(id="rowid_%s" % dbrow.id, class_=cycler.next())
         col = row.new_column(
             NM("Fragments", {}, 
@@ -238,7 +386,7 @@ class CreateRequestHandler(framework.RequestHandler):
         klass = get_model(tablename)
         dbrow = klass()
         try:
-            webhelpers.update_row(request, klass, dbrow)
+            webhelpers.update_row(request.POST, klass, dbrow)
         except types.ValidationError, err:
             webhelpers.dbsession.rollback()
             request.log_error("create ValidationError: %s: %s\n" % (tablename, err))
@@ -286,7 +434,7 @@ class EditRequestHandler(framework.RequestHandler):
         klass = get_model(tablename)
         dbrow = webhelpers.get_row(klass, rowid)
         try:
-            webhelpers.update_row(request, klass, dbrow)
+            webhelpers.update_row(request.POST, klass, dbrow)
         except types.ValidationError, err:
             webhelpers.dbsession.rollback()
             title = "Re-edit %s %s" % (tablename, dbrow)
@@ -314,5 +462,15 @@ edit = auth.need_login(webhelpers.setup_dbsession(EditRequestHandler(doc_constru
 
 
 if __name__ == "__main__":
-    pass
+    # test db instance serialization
+    from pycopia import autodebug
+    disp = json.JSONDispatcher([query])
+    disp.register_encoder("models", _modelchecker, _convert_instance)
+    sess = models.get_session()
+    with webhelpers.GlobalDatabaseContext(sess):
+        rowobj = query("Equipment", {"id": 2})[0]
+        jse = disp._encoder.encode(rowobj)
+        print jse
+    sess.close()
+
 

@@ -68,7 +68,13 @@ def get_row(modelclass, rowid):
     return dbrow
 
 
-def table_get(modelclass, filt, order_by=None, start=None, end=None):
+def get_ids(modelclass, idlist):
+    assert type(idlist) is list
+    idlist = [int(i) for i in idlist]
+    return dbsession.query(modelclass).filter(modelclass.id.in_(idlist)).all()
+
+
+def query(modelclass, filt, order_by=None, start=None, end=None):
     try:
         order_by = order_by or modelclass.ROW_DISPLAY[0]
     except AttributeError:
@@ -79,17 +85,20 @@ def table_get(modelclass, filt, order_by=None, start=None, end=None):
         q = q.filter(attrib==value)
     if order_by:
         q = q.order_by(getattr(modelclass, order_by))
-    if start is not None:
-        return list(q[start:end])
-    else:
-        return list(q)
+
+    if end is not None:
+        if start is not None:
+            q = q.slice(start, end)
+        else:
+            q = q.limit(end)
+    return list(q.all())
 
 
 ### update a row ###
 
-def update_row(request, klass, dbrow):
-    for metadata in models.get_metadata(klass):
-        value = request.POST.get(metadata.colname)
+def update_row(data, klass, dbrow):
+    for metadata in models.get_metadata_iterator(klass):
+        value = data.get(metadata.colname)
         if not value and metadata.nullable:
             value = None
         if metadata.coltype == "RelationProperty":
@@ -119,8 +128,7 @@ def update_row(request, klass, dbrow):
                 try:
                     value = eval(value, {}, {})
                 except: # allows use of unquoted strings.
-                    ex, exval, tb = sys.exc_info()
-                    request.log_error("warning: %r did not evaluate: %s.\n" % (value, exval))
+                    pass
                 setattr(dbrow, metadata.colname, value)
         elif metadata.coltype == "PGText":
             setattr(dbrow, metadata.colname, value)
@@ -488,11 +496,6 @@ def resolve_build(buildstring):
         return projectversion
     else:
         return None
-
-
-def resolve_user(request):
-    name = request.session["username"]
-    return dbsession.query(models.User).filter(models.User.username==name).one()
 
 
 def create_pick_list(node, modelclass, filtermap=None):

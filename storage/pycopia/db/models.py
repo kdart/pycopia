@@ -34,7 +34,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from pycopia.aid import hexdigest, unhexdigest, Enums, removedups, NULL
 
 from pycopia.db import tables
-from pycopia.db.types import validate_value_type
+from pycopia.db.types import validate_value_type, OBJ_TESTRUNNER
 
 
 
@@ -144,6 +144,10 @@ class User(object):
         h.update(self.username)
         h.update(str(self.last_login))
         return h.hexdigest()
+
+    @classmethod
+    def get_by_username(cls, dbsession, username):
+        return dbsession.query(cls).filter(cls.username==username).one()
 
 
 def get_key():
@@ -955,12 +959,27 @@ class TestResult(object):
                 self.testimplementation, self.objecttype, self.result)
 
     @classmethod
-    def get_latest_results(cls, session):
-        q = session.query(cls).filter(and_(
-                cls.objecttype==3,
-                cls.valid==True,
-                )).order_by(cls.starttime).all()
-        return q
+    def get_latest_results(cls, session, user=None):
+        """Returns last 10 TestRunner (top-level) results.
+        Optionally filtered by user.
+        """
+        if user is None:
+            filt = and_(cls.objecttype==OBJ_TESTRUNNER, cls.valid==True)
+        else:
+            filt = and_(cls.objecttype==OBJ_TESTRUNNER, cls.tester==user, cls.valid==True)
+        return session.query(cls).filter(filt).order_by(cls.starttime).limit(10).all()
+
+    @classmethod
+    def get_latest_run(cls, session, user):
+        """Return the last Runner (top-level) TestResult for the User."""
+        sq = session.query(func.max(cls.starttime)).filter(and_(
+                cls.tester==user, 
+                cls.objecttype==OBJ_TESTRUNNER, 
+                cls.valid==True)).subquery()
+        return session.query(cls).filter(and_(
+                cls.starttime==sq,
+                cls.tester==user, 
+                cls.objecttype==OBJ_TESTRUNNER)).scalar()
 
 
 mapper(TestResult, tables.test_results,
@@ -974,6 +993,8 @@ mapper(TestResult, tables.test_results,
                                 remote_side=[tables.test_results.c.id])),
     }
 )
+
+
 
 #######################################
 # capabilities for hardware
@@ -1095,10 +1116,8 @@ def get_choices(session, modelclass, colname, order_by=None):
 MetaDataTuple = collections.namedtuple("MetaDataTuple", 
         "coltype, colname, default, m2m, nullable, uselist")
 
-def get_metadata(class_):
-    """Returns a list of MetaDataTuple structures.
-    """
-    rv = []
+
+def get_metadata_iterator(class_):
     for prop in class_mapper(class_).iterate_properties:
         name = prop.key
         if name.startswith("_") or name == "id" or name.endswith("_id"):
@@ -1107,7 +1126,7 @@ def get_metadata(class_):
         m2m = False
         default = None
         nullable = None
-        uselist = None
+        uselist = False
         if proptype is ColumnProperty:
             coltype = type(prop.columns[0].type).__name__
             try:
@@ -1125,7 +1144,48 @@ def get_metadata(class_):
             uselist = prop.uselist
         else:
             continue
-        rv.append(MetaDataTuple(coltype, str(name), default, m2m, nullable, uselist))
+        yield MetaDataTuple(coltype, str(name), default, m2m, nullable, uselist)
+
+
+def get_column_metadata(class_, colname):
+    prop = class_mapper(class_).get_property(colname)
+    name = prop.key
+    proptype = type(prop)
+    m2m = False
+    default = None
+    nullable = None
+    uselist = False
+    if proptype is ColumnProperty:
+        coltype = type(prop.columns[0].type).__name__
+        try:
+            default = prop.columns[0].default
+        except AttributeError:
+            default = None
+        else:
+            if default is not None:
+                default = default.arg(None)
+        nullable = prop.columns[0].nullable
+    elif proptype is RelationProperty:
+        coltype = RelationProperty.__name__
+        m2m = prop.secondary is not None
+        nullable = prop.local_side[0].nullable
+        uselist = prop.uselist
+    else:
+        raise ValueError("Not a column name: %r." % (colname,))
+    return MetaDataTuple(coltype, str(name), default, m2m, nullable, uselist)
+
+# TODO: refactor above two implementations
+
+def get_metadata(class_):
+    """Returns a list of MetaDataTuple structures.
+    """
+    return list(get_metadata_iterator(class_))
+
+
+def get_metadata_map(class_):
+    rv = {}
+    for metadata in get_metadata_iterator(class_):
+        rv[metadata.colname] = metadata
     return rv
 
 
@@ -1151,6 +1211,13 @@ if __name__ == "__main__":
     for res in  TestResult.get_latest_results(sess):
         print res
 
-
+    print "\nlatest run:"
+    user = User.get_by_username(sess, "keith")
+    lr = TestResult.get_latest_run(sess, user)
+    print lr
+    print
+    #print dir(class_mapper(Equipment))
+    #print
+    print class_mapper(Equipment).get_property("name")
 
 

@@ -888,3 +888,29 @@ def _get_module(name):
 
 
 
+if __name__ == "__main__":
+
+    DATA = """------WebKitFormBoundaryLHph2NIrIQTpfNKw\r
+Content-Disposition: form-data; name="name"\r
+\r
+myenvattr\r
+------WebKitFormBoundaryLHph2NIrIQTpfNKw\r
+Content-Disposition: form-data; name="description"\r
+\r
+Some attr test.\r
+------WebKitFormBoundaryLHph2NIrIQTpfNKw\r
+Content-Disposition: form-data; name="value_type"\r
+\r
+1\r
+------WebKitFormBoundaryLHph2NIrIQTpfNKw\r
+Content-Disposition: form-data; name="submit"\r
+\r
+submit\r
+------WebKitFormBoundaryLHph2NIrIQTpfNKw--\r
+"""
+
+    content_type = "multipart/form-data; boundary=----WebKitFormBoundaryLHph2NIrIQTpfNKw"
+    post, files = parse_formdata(httputils.ContentType(content_type), DATA)
+
+    print post.items()
+
