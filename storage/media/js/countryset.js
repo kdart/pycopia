@@ -33,7 +33,7 @@ function CountrySetApp() {
   this.root = DIV({id: "countrysetapp", "class": "applet"});
   var buttonbar = DIV({id: "buttonbar", class: "buttonbar"});
   // add/create icon and trash icon
-  var addicon = getIcon("plus");
+  var addicon = getIcon("add");
   connect(addicon, "onclick", bind(this.createCountrySet, this));
   buttonbar.appendChild(addicon);
   var trash = getIcon("trash");
@@ -46,8 +46,8 @@ function CountrySetApp() {
   buttonbar.appendChild(trash);
   // major sections.
   this.countrysets = DIV({id: "countrysets"});
-  this.cscontent = DIV({id: "countryset_content"});
-  this.country_list = DIV({id: "country_list"});
+  this.cscontent = DIV({id: "dbmodelinstance"});
+  this.country_list = DIV({id: "choicelist"});
   this.root.appendChild(buttonbar);
   this.root.appendChild(this.countrysets);
   this.root.appendChild(this.cscontent);
@@ -63,8 +63,8 @@ function CountrySetApp() {
 CountrySetApp.prototype.reload = function() {
   this._disconnect();
   placeContent("countrysets", null);
-  placeContent("countryset_content", null);
-  placeContent("country_list", null);
+  placeContent("dbmodelinstance", null);
+  placeContent("choicelist", null);
   this.updateCountrySetList();
 };
 
@@ -82,8 +82,8 @@ CountrySetApp.prototype.destroy = function() {
   this._destroyCSDraggables();
   forEach($("buttonbar").childNodes, function(el) {disconnectAll(el);});
   placeContent("countrysets", null);
-  placeContent("countryset_content", null);
-  placeContent("country_list", null);
+  placeContent("dbmodelinstance", null);
+  placeContent("choicelist", null);
   placeContent("buttonbar", null);
 };
 
@@ -205,11 +205,17 @@ CountrySetApp.prototype._fillCountrySet = function(cs) {
   this.hascountries = {};
   var countries = cs.data.countries;
   for (var i = 0; i < countries.length; i++) {
-    this.hascountries[countries[i]] = true;
+    this.hascountries[countries[i].data.id] = true;
   };
   replaceChildNodes(this.cscontent, cs);
-  // var namenode = this.cscontent.getElementsByTagName("td")[1];
-  // setEditable(namenode, bind(this._changeName, this));
+  try {
+    var namerow = getFirstElementByTagAndClassName("tr", "PGString", this.cscontent);
+    var namedata = namerow.getElementsByTagName("td")[1];
+    setEditable(namedata, bind(this._changeName, this));
+  }
+  catch (e) { 
+    logError(e);
+  };
   var ul = this.cscontent.getElementsByTagName("ul")[0];
   setElementClass(ul, "draglist");
   ul.setAttribute("id", "cs_countries");
@@ -261,7 +267,7 @@ CountrySetApp.prototype._fillChoices = function(choices) {
       choicesnode.appendChild(li);
     };
   };
-  placeContent("country_list", choicesnode);
+  placeContent("choicelist", choicesnode);
 };
 
 CountrySetApp.prototype._dropOnSet = function(dragelement, dropelement, ev) {
@@ -374,8 +380,8 @@ CountrySetApp.prototype._delete_cb = function(csid, disp) {
     // If deleted CS is currently displayed, reset the whole list.
     if (this.currentset && this.currentset.data.id == csid) {
       this.updateCountrySetList();
-      placeContent("countryset_content", null);
-      placeContent("country_list", null);
+      placeContent("dbmodelinstance", null);
+      placeContent("choicelist", null);
     } else { // else, just remove the entry from the countrysets_list.
       var li = $(this.model.name + "_" + csid);
       disconnectAll(li.childNode);

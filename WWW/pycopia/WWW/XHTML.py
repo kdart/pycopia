@@ -660,11 +660,11 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
 
     def add_javascript2head(self, text=None, url=None):
         if text:
-            sc = self.head.add(self.dtd.Script, type="text/javascript;version=1.7")
+            sc = self.head.add(self.dtd.Script, type="text/javascript;version=1.8")
             sc.add_cdata(text)
         elif url:
             sc = self.head.add(self.dtd.Script, 
-                           type="text/javascript;version=1.7", src=url)
+                           type="text/javascript;version=1.8", src=url)
 
     def _get_javascript(self):
         try:

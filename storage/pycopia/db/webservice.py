@@ -26,6 +26,7 @@ Usually mapped to /storage/ URL. See storage.conf.example for details.
 
 import sys
 import itertools
+import logging
 
 from pycopia.aid import IF
 from pycopia.db import types
@@ -74,7 +75,18 @@ def get_table_metadata_map(modelname):
 def updaterow(modelname, entry_id, data):
     klass = get_model(modelname)
     dbrow = webhelpers.get_row(klass, entry_id)
-    webhelpers.update_row(data, klass, dbrow)
+    try:
+        webhelpers.update_row(data, klass, dbrow)
+    except types.ValidationError, err:
+        webhelpers.dbsession.rollback()
+        logging.error(err)
+        return False
+    try:
+        webhelpers.dbsession.commit()
+    except (DataError, IntegrityError), err:
+        webhelpers.dbsession.rollback()
+        logging.error(err)
+        return False
     return True
 
 
@@ -179,16 +191,22 @@ def related_remove(modelname, entry_id, colname, relmodelname, rel_id):
 
 # DB model serializer and checker - returns a structure representing a
 # model row instance.  Relation objects will also be recursivly encoded.
-def _convert_instance(obj):
+def _convert_instance(obj, depth=0):
     values = {"id": obj.id}
     for metadata in models.get_metadata_iterator(obj.__class__):
         if metadata.coltype == "RelationProperty":
             value = getattr(obj, metadata.colname)
             if value is not None:
-                if metadata.uselist:
-                    values[metadata.colname] = [_convert_instance(o) for o in value]
+                if depth < 3:
+                    if metadata.uselist:
+                        values[metadata.colname] = [_convert_instance(o, depth+1) for o in value]
+                    else:
+                        values[metadata.colname] = _convert_instance(value, depth+1)
                 else:
-                    values[metadata.colname] = _convert_instance(value)
+                    if metadata.uselist:
+                        values[metadata.colname] = [str(o) for o in value]
+                    else:
+                        values[metadata.colname] = str(value)
             else:
                 values[metadata.colname] = value
         else:
@@ -215,26 +233,14 @@ dispatcher.register_encoder("models", _modelchecker, _convert_instance)
 dispatcher = auth.need_authentication(webhelpers.setup_dbsession(dispatcher))
 
 
-#def consolidate_runner_results(testresult):
-#    """Flatten the tree of result data into an attribute-accessible
-#    dictionary.
-#    """
-#    assert testresult.objecttype = OBJ_TESTRUNNER 
-#    rv = AttrDict()
-#    rv.testresults = []
-#    rv.resultslocation = testresult.resultslocation
-#    rv.arguments = testresult.arguments
-#    rv.environment = testresult.environment.name
-#    rv.startime = testresult.startime
-#    rv.endtime = testresult.endtime
-
-
 
 ##### Restful interface document constructor
 
 def main_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="tableedit.css")
+    doc.stylesheet = request.get_url("css", name="common.css")
+    doc.stylesheet = request.get_url("css", name="ui.css")
+    doc.stylesheet = request.get_url("css", name="db.css")
     doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
     doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
     doc.add_javascript2head(url=request.get_url("js", name="ui.js"))
@@ -269,9 +275,12 @@ def main(request):
 
 def doc_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="tableedit.css")
+    doc.stylesheet = request.get_url("css", name="common.css")
+    doc.stylesheet = request.get_url("css", name="ui.css")
+    doc.stylesheet = request.get_url("css", name="db.css")
     doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
     doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
+    doc.add_javascript2head(url=request.get_url("js", name="ui.js"))
     doc.add_javascript2head(url=request.get_url("js", name="db.js"))
     for name, val in kwargs.items():
         setattr(doc, name, val)

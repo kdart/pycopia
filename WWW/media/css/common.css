@@ -1,0 +1,131 @@
+
+body {font-family: Helvetica, sans-serif;}
+
+a {
+  text-decoration: none;
+}
+
+div.navigation {
+    border-style:outset;
+    background: lightBlue;
+    border-color: darkBlue;
+    padding: 3px;
+    border-width:5px;
+    margin-bottom: 10px;
+}
+
+div.navigation p {
+  width: 33%;
+  display: inline-block;
+  text-align: center;
+}
+
+p.title {
+  font-weight: bold;
+}
+
+
+img { 
+  border:none; 
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+table {
+  width: 100%;
+  border:outset ;
+  border-color:#CCC; 
+}
+
+table caption {
+  font-weight: bold;
+  text-align:left; 
+  font-size:110%; 
+  margin:5px; 
+}
+
+
+table tr th {
+  background-color: #FFE65C;
+  text-align:left; 
+  font-size:12px; 
+  font-weight:bold; 
+}
+
+table tr td {
+  font-size:12px; 
+}
+
+tr td:first-child, tr th:first-child { width: 80px; }
+
+p.error {
+  padding: 1em;
+  color: #FF0000;
+}
+
+hr {color: silver; width: 80%;}
+
+div.buttonbar {
+  background:#CADBFF; 
+  text-align:left;
+  padding: 5px 8px 5px 8px;
+}
+
+#container { }
+
+.applet { 
+  min-width:760px; 
+  padding:0; 
+  border-width:0;
+  margin: 0 0 0 0;
+}
+
+#content { 
+  border: medium outset;
+}
+
+#content table {
+  margin: 10px;
+}
+
+#content table caption {
+  padding: 2px 5px 2px 5px;
+  background-color: #3D6994;
+  color: #D6B358;
+  text-align: center;
+}
+
+div#extra {
+  background:#FF8539; 
+  clear:left; 
+  float:left; 
+  width:150px;
+}
+
+div#extra table {
+  clear: both;
+}
+
+div#extra td, div#extra th { 
+  font-family: sans-serif;
+  padding: 0px 2px 0px 2px;
+  border: hidden;
+  line-height: normal;
+}
+
+div#extra th { 
+  font-weight: bold;
+  text-align: center;
+}
+
+
+#messages {
+  clear: both;
+  padding: 10px; 
+  background: #A3CCD9;
+}
+
+div#messages p {
+  color:#EEEEEE; 
+}
+

@@ -13,20 +13,25 @@ DATABASE_URL = 'postgres://pycopia@localhost/pycopia'
 USERNAME = "tester"
 
 ADMINS = [
-    ('keith@dartworks.biz', 'Keith Dart'),
+    'Keith Dart <keith@dartworks.biz>',
 ]
+
+#MIDDLEWARE = [("firepython.middleware.FirePythonWSGI",)]
+MIDDLEWARE = []
 
 # Map pattern to handler functions. 
 LOCATIONMAP = (
 #  (r"^/api/(?P<methodname>\w+)$", "pycopia.db.webservice.dispatcher"),
-  (r"^/?$", "pycopia.QA.webui.main"),
+  (r"^/?$", "pycopia.QA.webui.testcases.main"),
   # test cases
+  (r"^/dashboard/$", "pycopia.QA.webui.dashboard.main"),
+  (r"^/dashframe/$", "pycopia.QA.webui.dashboard.dashframe"),
+# basic testcase editor
   (r"^/testcase/$", "pycopia.QA.webui.testcases.testcase_list"),
   (r"^/testcase/view/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcases.testcase_view"),
   (r"^/testcase/view/?$", "pycopia.WWW.framework.redirectup"),
   (r"^/testcase/edit/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcases.testcase_edit"),
   (r"^/testcase/edit/?$", "pycopia.WWW.framework.redirectup"),
-#  (r"^/testcase/delete/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcase_delete"),
   (r"^/testcase/run/(?P<tcid>\S+)/?$", "pycopia.QA.webui.testcases.testcase_run"),
   (r"^/testcase/run/?$", "pycopia.WWW.framework.redirectup"),
   (r"^/testcase/new/?$", "pycopia.QA.webui.testcases.testcase_create"),
@@ -36,6 +41,8 @@ LOCATIONMAP = (
   (r'/media/css/(?P<name>\S+)', "css"),
   (r'/media/js/(?P<name>\S+)', "js"),
   (r'/media/images/(?P<name>\S+)', "images"),
+  (r'/auth/login', "login"),
+  (r'/auth/logout', "logout"),
 )
 
 # These should all be 24x24 icons
@@ -56,6 +63,19 @@ ICONMAP = {
   "alert": (None, "icon_alert_inactive.png"),
 }
 
+# these should all be 16x16 icons
+ICONMAP_MEDIUM = {
+# simplename     active         inactive (base state)
+#"xxx": "icon_xxx.png",
+  "default": "icon_alert.png",
+  "search": "icon_searchbox.png",
+  "success": "icon_success.png",
+  "failure": "icon_error.png",
+  "incomplete": "icon_alert.png",
+  "calendar": "icon_calendar.png",
+  "clock": "icon_clock.png",
+}
+
 # these should all be 10x10 icons
 ICONMAP_SMALL = {
 # simplename     active         inactive (base state)
@@ -64,7 +84,7 @@ ICONMAP_SMALL = {
   "edit": "icon_changelink.png",
   "delete": "icon_deletelink.png",
   "add": "icon_addlink.png",
-  "go": ("gobutton_small.png"),
+  "go": "gobutton_small.png",
   "unknown": "icon-unknown.png",
   "yes": "icon-yes.png",
   "no": "icon-no.png",

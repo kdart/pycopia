@@ -13,7 +13,10 @@
 /////////////// DB objects. ////////////////////
 
 /**
- * DBModel holds table metadata as defined in a pycopia.db.models.py file.
+ * DBModel holds table metadata as defined in a .../pycopia/db/models.py file.
+ * dbmodel.name is modelname
+ * dbmodel._Meta is a list of metadata tuples:
+        coltype, colname, default, m2m, nullable, uselist
  */
 function DBModel(modelname) {
   this.initialized = false;
@@ -82,10 +85,10 @@ DBModelInstance.prototype.__dom__ = function(node) {
                   TH(null, "Field"), TH(null, "Value"))));
   var body = TBODY(null);
   tbl.appendChild(body);
-  var fields = this._model._meta;
-  for (var colname in fields) {
-    var field = fields[colname];
-    if (field[0] == "RelationProperty") {
+  var metadata = this._model._meta;
+  for (var colname in metadata) {
+    var coldata = metadata[colname];
+    if (coldata[0] == "RelationProperty") {
       var tr = TR(null,
                     TD(null, colname),
                     TD(null, 
@@ -97,7 +100,7 @@ DBModelInstance.prototype.__dom__ = function(node) {
                     )
                );
     } else {
-      var tr = TR(null,
+      var tr = TR({"class": coldata[0]},
                     TD(null, colname),
                     TD(null, this.data[colname].toString()));
     }
@@ -106,6 +109,9 @@ DBModelInstance.prototype.__dom__ = function(node) {
   return tbl;
 };
 
+/**
+ * Return a useful Node id. 
+ */
 DBModelInstance.prototype.get_id = function() {
     return this._model.name + "_" + this.data.id
 };
@@ -124,12 +130,16 @@ DBModelInstance.prototype._delete_cb = function(deleted) {
   this.isdeleted = deleted;
 };
 
+DBModelInstance.prototype.set = function(colname, value) {
+  this.data[colname] = value;
+};
+
 /**
  * Save any changed data.
  */
 DBModelInstance.prototype.save = function() {
   if (!this.isdeleted) {
-    var d = window.db.update(this.model.name, this.data.id, this.data);
+    var d = window.db.updaterow(this.model.name, this.data.id, this.data);
     d.addCallback(bind(this._save_cb, this));
   };
 };

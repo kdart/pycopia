@@ -219,9 +219,8 @@ Editable.prototype.makeEditable = function () {
   var text = scrapeText(this.element);
   var inp = INPUT({name: "currentedit", 
                    maxlength: "255", 
-                   size: "80", 
                    value: text});
-  var frm = FORM({method: "post", action: "."},  // bogus values, but required.
+  var frm = FORM({method: "post", action: "."},  // values not used, but required.
                 inp);
   swapDOM(this.element, frm);
   connect(frm, "onsubmit", bind(this._editableSubmitHandler, this));
@@ -301,7 +300,6 @@ function showContent(obj) {
 
 function showMessage(obj) {
   if (obj) {
-    log(obj);
     var text = document.createTextNode(obj.toString());
     var msgarea = document.getElementById("messages");
     if (msgarea.hasChildNodes()) {

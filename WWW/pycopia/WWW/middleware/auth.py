@@ -156,7 +156,7 @@ version="-//W3C//DTD XHTML 1.1//EN">
   <head>
     <title>Login</title>
     <link href="/media/css/login.css" type="text/css" rel="stylesheet" />
-    <script src="/media/js/login.js" type="text/javascript;version=1.7"></script>
+    <script src="/media/js/login.js" type="text/javascript;version=1.8"></script>
   </head>
   <body>
     <h1>Login</h1>
