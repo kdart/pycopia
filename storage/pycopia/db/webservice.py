@@ -197,23 +197,18 @@ def _convert_instance(obj, depth=0):
         if metadata.coltype == "RelationProperty":
             value = getattr(obj, metadata.colname)
             if value is not None:
-                if depth < 3:
+                if depth < 2:
                     if metadata.uselist:
                         values[metadata.colname] = [_convert_instance(o, depth+1) for o in value]
                     else:
                         values[metadata.colname] = _convert_instance(value, depth+1)
-                else:
-                    if metadata.uselist:
-                        values[metadata.colname] = [str(o) for o in value]
-                    else:
-                        values[metadata.colname] = str(value)
             else:
-                values[metadata.colname] = value
+                values[metadata.colname] = value # None/null
         else:
             values[metadata.colname] = getattr(obj, metadata.colname)
     return {"_class_": obj.__class__.__name__,
             "_str_": str(obj),
-            "value":values}
+            "value": values}
 
 
 def _modelchecker(obj):

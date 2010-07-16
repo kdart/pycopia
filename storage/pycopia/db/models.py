@@ -513,8 +513,8 @@ class CorporateAttribute(object):
 mapper(CorporateAttribute, tables.corp_attributes,
     properties={
         "type": relation(CorporateAttributeType),
-#        "corporation": relation(Corporation, backref=backref("attributes", 
-#                    cascade="all, delete, delete-orphan")),
+        "corporation": relation(Corporation, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
     }
 )
 
@@ -581,8 +581,8 @@ class SoftwareAttribute(object):
 
 mapper(SoftwareAttribute, tables.software_attributes,
     properties={
-#            "software": relation(Software, backref=backref("attributes", 
-#                    cascade="all, delete, delete-orphan")),
+            "software": relation(Software, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
             "type": relation(AttributeType),
     },
 )
@@ -658,8 +658,8 @@ class EquipmentModelAttribute(object):
 
 mapper(EquipmentModelAttribute, tables.equipment_model_attributes,
     properties={
-#            "equipmentmodel": relation(EquipmentModel, backref=backref("attributes", 
-#                    cascade="all, delete, delete-orphan")),
+            "equipmentmodel": relation(EquipmentModel, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
             "type": relation(AttributeType),
     },
 )
@@ -728,8 +728,8 @@ class EquipmentAttribute(object):
 
 mapper(EquipmentAttribute, tables.equipment_attributes,
     properties={
-#            "equipment": relation(Equipment, backref=backref("attributes", 
-#                    cascade="all, delete, delete-orphan")),
+            "equipment": relation(Equipment, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
             "type": relation(AttributeType),
     },
 )
@@ -834,8 +834,8 @@ class EnvironmentAttribute(object):
 
 mapper(EnvironmentAttribute, tables.environment_attributes,
     properties={
-#            "environment": relation(Environment, backref=backref("attributes", 
-#                    cascade="all, delete, delete-orphan")),
+            "environment": relation(Environment, backref=backref("attributes", 
+                    cascade="all, delete, delete-orphan")),
             "type": relation(EnvironmentAttributeType),
     },
 )
