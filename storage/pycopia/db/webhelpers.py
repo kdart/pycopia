@@ -35,6 +35,10 @@ from sqlalchemy import and_, or_
 dbsession = None
 
 
+# nothing marker
+class NULL(object):
+    pass
+
 class GlobalDatabaseContext(object):
 
     def __init__(self, _dbsession):
@@ -98,7 +102,9 @@ def query(modelclass, filt, order_by=None, start=None, end=None):
 
 def update_row(data, klass, dbrow):
     for metadata in models.get_metadata_iterator(klass):
-        value = data.get(metadata.colname)
+        value = data.get(metadata.colname, NULL)
+        if value is NULL: # can't use None since its a valid value
+            continue
         if not value and metadata.nullable:
             value = None
         if metadata.coltype == "RelationProperty":

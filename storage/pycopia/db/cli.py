@@ -73,6 +73,16 @@ class DBSessionCommands(CLI.BaseCommands):
     Commit edits to the database."""
         self._obj.commit()
 
+    def flush(self, argv):
+        """flush
+    Commits and uncommitted data."""
+        self._obj.flush()
+
+    def expire(self, argv):
+        """expire
+    Expire local caches."""
+        self._obj.expire_all()
+
     def rollback(self, argv):
         """rollback
     Roll back edits to the database."""
@@ -294,6 +304,11 @@ class TableCommands(CLI.BaseCommands):
         """rollback
     Roll back any table changes."""
         _session.rollback()
+
+    def expire(self, argv):
+        """expire
+    Expire local caches."""
+        _session.expire_all()
 
 
 class NetworkCommands(CLI.BaseCommands):
