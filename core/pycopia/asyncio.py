@@ -269,9 +269,14 @@ class DirectoryNotifier(object):
     def fileno(self):
         return self.fd
 
+    def close(self):
+        if self.fd is not None:
+            fcntl.fcntl(self.fd, fcntl.F_SETSIG, self.oldsig)
+            os.close(self.fd)
+            self.fd = None
+
     def __del__(self):
-#       fcntl.fcntl(self.fd, fcntl.F_SETSIG, self.oldsig)
-        os.close(self.fd)
+        self.close()
 
     def __str__(self):
         return "%s watching %s" % (self.__class__.__name__, self.dirname)

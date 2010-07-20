@@ -26,6 +26,7 @@ import logging
 
 from pycopia import aid
 from pycopia import shparser
+from pycopia import getopt
 from pycopia.QA import testloader
 from pycopia.db import models
 
@@ -66,9 +67,38 @@ def get_test_jobs(args):
             yield testjob
 
 
+
+JobRunnerInterfaceDoc = r"""
+Invoke a test job (TestJob object) from a shell. 
+
+Test jobs encapsulate a test suite, environment, parameters, user, and
+report. Therefore these things are not supplied to this interface.
+However, some shared configuration parameters may be supplied as long
+options to this job runner.
+
+A job is selected by its ID number, or its unique name.
+
+Only automated, non-interactive tests should be added to suite run by
+a test job.
+
+Often run from cron.
+
+Usage:
+
+    %s [-h?] arg...
+
+    Where the arguments are job names or job id.
+
+    Options:
+        -h -- Print help text and return.
+
+    Long-style options are passed into the test suite configuration.
+"""
+
+
+
 class JobRunnerInterface(object):
-    """
-    """
+
     def __init__(self, testrunner):
         self.runner = testrunner
         cf = self.runner.config
@@ -82,7 +112,17 @@ class JobRunnerInterface(object):
         """
         cf = self.runner.config
 
-        for testjob in get_test_jobs(argv[1:]):
+
+        optlist, extraopts, args = getopt.getopt(argv[1:], "h?")
+        for opt, optarg in optlist:
+            if opt in ("-h", "-?"):
+                print JobRunnerInterfaceDoc % (os.path.basename(argv[0]),)
+                return
+
+        cf.evalupdate(extraopts)
+        self.runner.set_options(extraopts)
+
+        for testjob in get_test_jobs(args):
             if testjob is None:
                 continue
 
@@ -95,6 +135,7 @@ class JobRunnerInterface(object):
             cf.comment = "Automated test job %s(%s)." % (testjob.name, testjob.id)
             cf.environmentname = testjob.environment.name
             cf.reportname = testjob.reportname
+            cf.evalupdate(params)
             self.runner.set_options(params)
 
             suite = get_suite(testjob.suite, cf)
