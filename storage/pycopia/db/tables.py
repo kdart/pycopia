@@ -534,15 +534,16 @@ test_suites =  Table('test_suites', metadata,
                     onupdate=time_now, default=time_now),
             Column(u'lastchangeauthor_id', PGInteger(), primary_key=False),
             Column(u'suiteimplementation', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'projectversion_id', PGInteger(), primary_key=False),
+            Column(u'project_id', PGInteger(), primary_key=False),
             Column(u'purpose', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
     ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_suites_lastchangeauthor_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
-            ForeignKeyConstraint([u'projectversion_id'], [u'public.project_versions.id'], name=u'test_suites_projectversion_id_fkey'),
+            ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], name=u'test_suites_projects_id_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_test_suites_lastchangeauthor_id', test_suites.c.lastchangeauthor_id, unique=False)
 Index('index_test_suites_name_key', test_suites.c.name, unique=True)
-Index('index_test_suites_projectversion_id', test_suites.c.projectversion_id, unique=False)
+Index('index_test_suites_project_id', test_suites.c.project_id, unique=False)
 
 
 test_suites_testcases =  Table('test_suites_testcases', metadata,

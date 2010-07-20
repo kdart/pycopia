@@ -900,7 +900,7 @@ class TestSuite(object):
 
 mapper(TestSuite, tables.test_suites,
     properties={
-        "project": relation(ProjectVersion),
+        "project": relation(Project),
         "components": relation(Component, secondary=tables.components_suites, backref="suites"),
         "testcases": relation(TestCase, secondary=tables.test_suites_testcases, backref="suites"),
         "subsuites": relation(TestSuite, secondary=tables.test_suites_suites, 
