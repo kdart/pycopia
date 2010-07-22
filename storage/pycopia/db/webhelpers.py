@@ -139,10 +139,13 @@ def update_row(data, klass, dbrow):
         elif metadata.coltype == "PGText":
             setattr(dbrow, metadata.colname, value)
         else:
-            validator = _VALIDATORS.get(metadata.coltype)
-            if validator is not None:
-                value = validator(value)
-            setattr(dbrow, metadata.colname, value)
+            if value is None and metadata.nullable:
+                setattr(dbrow, metadata.colname, None)
+            else:
+                validator = _VALIDATORS.get(metadata.coltype)
+                if validator is not None:
+                    value = validator(value)
+                setattr(dbrow, metadata.colname, value)
 
 
 def validate_float(value):
