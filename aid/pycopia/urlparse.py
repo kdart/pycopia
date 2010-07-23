@@ -448,7 +448,7 @@ class UniversalResourceLocator(object):
         if port is not None:
             self._port = int(port)
         else:
-            self._port = SERVICES[self._scheme]
+            self._port = SERVICES.get(self._scheme, 0)
 
     def _set_from_instance(self, other):
         self.__dict__.update(other.__dict__)
@@ -474,7 +474,7 @@ class UniversalResourceLocator(object):
                 else:
                     s.insert(2, self._user)
                 s.insert(3, "@")
-            if SERVICES_REVERSE.get(self._port, "") != self._scheme:
+            if self._port and SERVICES_REVERSE.get(self._port, "") != self._scheme:
                 s.append(":")
                 s.append(str(self._port))
         if self._path:
@@ -555,7 +555,7 @@ class UniversalResourceLocator(object):
     def del_port(self):
         if self._port:
             self._badurl = True
-            self._port = SERVICES[self._scheme] # set to default
+            self._port = SERVICES.get(self._scheme, 0) # set to default
 
     def set_path(self, name):
         self._badurl = True
