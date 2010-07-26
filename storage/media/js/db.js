@@ -62,6 +62,19 @@ function getDBModel(modelname) {
   return model;
 };
 
+
+/**
+ * Represents a NULL value.
+ */
+
+function NULL() {
+};
+
+NULL.prototype.toString = function() {
+  return NBSP;
+};
+
+
 /**
  * DBModelInstance represents an instance of a DBModel, which is a
  * table row.
@@ -87,22 +100,33 @@ DBModelInstance.prototype.__dom__ = function(node) {
   tbl.appendChild(body);
   var metadata = this._model._meta;
   for (var colname in metadata) {
-    var coldata = metadata[colname];
-    if (coldata[0] == "RelationProperty") {
-      var tr = TR(null,
-                    TD(null, colname),
-                    TD(null, 
-                      UL(null, map(function (obj) {
-                                return LI({id: obj.get_id()}, obj.toString());
-                              },
-                            this.data[colname])
+    var colmetadata = metadata[colname];
+    var coldata = this.data[colname];
+    if (coldata === null) {
+      coldata = new NULL();
+    };
+    if (colmetadata[0] == "RelationProperty") {
+      if (colmetadata[5] == true) { // uselist
+        var tr = TR(null,
+                      TD(null, colname),
+                      TD(null, 
+                        UL(null, map(function (obj) {
+                                  return LI({id: obj.get_id()}, obj.toString());
+                                }, coldata)
+                        )
                       )
-                    )
-               );
+                 );
+      } else {
+        var tr = TR(null,
+                      TD(null, colname),
+                      TD(null, coldata.toString())
+                 );
+
+      };
     } else {
-      var tr = TR({"class": coldata[0]},
+      var tr = TR({"class": colmetadata[0]},
                     TD(null, colname),
-                    TD(null, this.data[colname].toString()));
+                    TD(null, coldata.toString()));
     }
     body.appendChild(tr);
   };
