@@ -159,13 +159,24 @@ DBModelInstance.prototype._save_cb = function(disp) {
 ///// Deserialization handlers
 
 function jsonConvertRow(obj) {
+  if (obj == null) {
+    return obj;
+  }
   var modelname =  obj._class_;
   var model = getDBModel(modelname);
   if (model.initialized) {
     for (var colname in model._meta) {
-      if (model._meta[colname][0] == "RelationProperty") {
-        obj.value[colname] = map(jsonConvertRow, obj.value[colname]);
-      }
+      // coltype, colname, default, m2m, nullable, uselist
+      var value = obj.value[colname];
+      if (typeof(value) != "undefined") {
+        if (model._meta[colname][0] == "RelationProperty") {
+          if (model._meta[colname][5] == true) { // uselist
+            obj.value[colname] = map(jsonConvertRow, value);
+          } else {
+            obj.value[colname] = jsonConvertRow(value);
+          };
+        };
+      };
     }
   };
   var inst =  new DBModelInstance(model, obj._str_, obj.value);
@@ -173,7 +184,7 @@ function jsonConvertRow(obj) {
 };
 
 function jsonDBCheck(obj) {
-  return obj._class_ != undefined;
+  return obj._dbmodel_ == true;
 };
 
 //////////////////////////////////////////////////////////////////////////////

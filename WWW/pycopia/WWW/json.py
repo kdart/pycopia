@@ -10,7 +10,7 @@ encoding.
 import sys
 import time
 import traceback
-from datetime import datetime
+from datetime import datetime, date
 
 import simplejson
 from pycopia.WWW.framework import (HttpResponse, HttpResponseNotFound,
@@ -34,16 +34,28 @@ class JSONServerError(HttpResponseServerError):
     HttpResponseServerError.__init__(self, json, "application/json")
 
 
-### functions for handling datetime <=> Date conversion.
+### functions for handling datetime/date <=> Date conversion.
 def _DtChecker(obj):
-  return isinstance(obj, datetime)
+  return type(obj) is datetime
 
 def _DtSimplifier(dt):
-  return {"_class_": "date",
+  return {"_class_": "datetime",
       "value": long(time.mktime(dt.timetuple())*1000)}
 
 def _DtDecoder(timestamp):
   return datetime.fromtimestamp(float(timestamp)/1000.0)
+
+
+def _DateChecker(obj):
+  return type(obj) is date
+
+def _DateSimplifier(dt):
+  return {"_class_": "date",
+      "value": long(time.mktime(dt.timetuple())*1000)}
+
+def _DateDecoder(timestamp):
+  return date.fromtimestamp(float(timestamp)/1000.0)
+
 ### End datetime conversions ###
 
 ### set encoding
@@ -229,7 +241,8 @@ def GetJSONDecoder():
   global _DECODER
   if _DECODER is None:
     decoder = JSONObjectDecoder()
-    decoder.register("date", _DtDecoder) # pre-register date objects
+    decoder.register("datetime", _DtDecoder) # pre-register datetime objects
+    decoder.register("date", _DateDecoder) # pre-register date objects
     decoder.register("set", _set_decoder) # pre-register set objects
     _DECODER =  simplejson.JSONDecoder(object_hook=decoder)
   return _DECODER
@@ -239,7 +252,8 @@ def GetJSONEncoder():
   global _ENCODER
   if _ENCODER is None:
     _ENCODER = JSONEncoder()
-    _ENCODER.register("date", _DtChecker, _DtSimplifier)
+    _ENCODER.register("datetime", _DtChecker, _DtSimplifier)
+    _ENCODER.register("date", _DateChecker, _DateSimplifier)
     _ENCODER.register("set", _set_checker, _set_simplifier)
   return _ENCODER
 

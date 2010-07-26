@@ -24,8 +24,6 @@ Pycopia framework.
 """
 
 
-from pycopia.db import webhelpers
-
 from pycopia.WWW import framework
 from pycopia.WWW.middleware import auth
 

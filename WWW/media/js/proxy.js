@@ -90,11 +90,8 @@ function _fillMethods(obj, methodlist) {
  */
 function evalProxyJSONRequest(req) {
   var obj = evalJSON(req.responseText);
-  try {
-    var newobj = convertClasses(obj);
-  } catch (e) {
-    console.error(e);
-  };
+  var newobj = null;
+  newobj = convertClasses(obj);
   return newobj;
 };
 
@@ -140,16 +137,34 @@ function convertClasses(o) {
  */
 
 // For Date -> JSON
+function jsonCheckDatetime(obj) {
+  return (obj instanceof Date);
+};
+
+function simplifyDatetime(dt) {
+  return {_class_: "datetime", value: dt.getTime()};
+};
+
+
+// For JSON -> datetime object
+function jsonDecodeCheckDatetime(obj) {
+  return obj._class_ == "datetime";
+};
+
+function jsonConvertDatetime(obj) {
+  return new Date(obj.value);
+};
+
+
+/// date objects
 function jsonCheckDate(obj) {
-  return (typeof(obj) == "date");
+  return (obj instanceof Date) && (obj.getUTCHours() == 0);
 };
 
 function simplifyDate(dt) {
   return {_class_: "date", value: dt.getTime()};
 };
 
-
-// For JSON -> Date object
 function jsonDecodeCheckDate(obj) {
   return obj._class_ == "date";
 };
@@ -158,8 +173,7 @@ function jsonConvertDate(obj) {
   var newdate = new Date(obj.value);
   return newdate;
 };
-
-
+/// end date objects
 
 // Mimic Python set type
 function Set(arr) {
@@ -198,11 +212,13 @@ function jsonConvertSet(obj) {
 
 
 function proxyInit() {
+  registerJSON("datetime", jsonCheckDatetime, simplifyDatetime);
   registerJSON("date", jsonCheckDate, simplifyDate);
   registerJSON("set", jsonCheckSet, simplifySet);
   // Create a new registry for special JSON deserialization handlers.
   window.jsonEvalRegistry = new AdapterRegistry();
   // and add first handler, a Date handler.
+  jsonEvalRegistry.register("datetime", jsonDecodeCheckDatetime, jsonConvertDatetime);
   jsonEvalRegistry.register("date", jsonDecodeCheckDate, jsonConvertDate);
   jsonEvalRegistry.register("set", jsonDecodeCheckSet, jsonConvertSet);
 };

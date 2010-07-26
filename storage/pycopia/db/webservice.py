@@ -53,7 +53,7 @@ def get_model(modelname):
     try:
         return getattr(models, modelname)
     except AttributeError:
-        raise framework.HHttpErrorNotFound("No model %r found." % modelname)
+        raise framework.HttpErrorNotFound("No model %r found." % modelname)
 
 
 def get_uidata():
@@ -191,25 +191,27 @@ def related_remove(modelname, entry_id, colname, relmodelname, rel_id):
 
 # DB model serializer and checker - returns a structure representing a
 # model row instance.  Relation objects will also be recursivly encoded.
-def _convert_instance(obj, depth=0):
+def _convert_instance(obj):
     values = {"id": obj.id}
     for metadata in models.get_metadata_iterator(obj.__class__):
         if metadata.coltype == "RelationProperty":
             value = getattr(obj, metadata.colname)
             if value is not None:
-                if depth < 2:
-                    if metadata.uselist:
-                        values[metadata.colname] = [_convert_instance(o, depth+1) for o in value]
-                    else:
-                        values[metadata.colname] = _convert_instance(value, depth+1)
+                if metadata.uselist:
+                    values[metadata.colname] = [_obj_representation(o, {"id": o.id}) for o in value]
+                else:
+                    values[metadata.colname] = _obj_representation(value, {"id": value.id})
             else:
                 values[metadata.colname] = value # None/null
         else:
             values[metadata.colname] = getattr(obj, metadata.colname)
+    return _obj_representation(obj, values)
+
+def _obj_representation(obj, values):
     return {"_class_": obj.__class__.__name__,
+            "_dbmodel_": True,
             "_str_": str(obj),
             "value": values}
-
 
 def _modelchecker(obj):
     try:
