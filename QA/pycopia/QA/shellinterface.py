@@ -63,7 +63,7 @@ Usage:
     %s [-hdviIcf] [-n <string>] arg...
 
     Where the arguments are test suite or test case names. If none are
-    supplied a menu is prese/home/kdart/bin/runtestnted.
+    supplied a menu is presented.
 
     Options:
         Tells the runner what test modules to run, and sets the flags in the
@@ -81,7 +81,7 @@ Usage:
 
 class TestRunnerInterface(object):
     """A Basic CLI interface to a TestRunner object.
-/home/kdart/bin/runtest
+
     Instantiate with an instance of a TestRunner.
 
     Call the instance of this with an argv list to instantiate and run the
