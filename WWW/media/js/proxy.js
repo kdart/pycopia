@@ -181,8 +181,8 @@ function Set(arr) {
     this[arr[i]] = null;
   };
 }
-Set.prototype = new Object()
-Set.prototype.constructor = Set
+Set.prototype = new Object();
+Set.prototype.constructor = Set;
 
 Set.prototype.contains = function(v) {
   return this.hasOwnProperty(v);

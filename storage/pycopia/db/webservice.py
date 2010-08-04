@@ -76,7 +76,7 @@ def updaterow(modelname, entry_id, data):
     klass = get_model(modelname)
     dbrow = webhelpers.get_row(klass, entry_id)
     try:
-        webhelpers.update_row(data, klass, dbrow)
+        webhelpers.update_row_from_data(data, klass, dbrow)
     except types.ValidationError, err:
         webhelpers.dbsession.rollback()
         logging.error(err)
@@ -131,7 +131,7 @@ def create(modelname, data):
     klass = get_model(modelname)
     dbrow = klass()
     try:
-        webhelpers.update_row(data, klass, dbrow)
+        webhelpers.update_row_from_data(data, klass, dbrow)
     except types.ValidationError, err:
         webhelpers.dbsession.rollback()
         raise

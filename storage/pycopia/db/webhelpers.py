@@ -100,52 +100,64 @@ def query(modelclass, filt, order_by=None, start=None, end=None):
 
 ### update a row ###
 
-def update_row(data, klass, dbrow):
+# updates a row from javascript/json object
+def update_row_from_data(data, klass, dbrow):
     for metadata in models.get_metadata_iterator(klass):
         value = data.get(metadata.colname, NULL)
         if value is NULL: # can't use None since its a valid value
             continue
-        if not value and metadata.nullable:
-            value = None
-        if metadata.coltype == "RelationProperty":
-            relmodel = getattr(klass, metadata.colname).property.mapper.class_
-            if isinstance(value, list) and value:
-                t = dbsession.query(relmodel).filter(
-                                relmodel.id.in_([int(i) for i in value])).all()
-                setattr(dbrow, metadata.colname, t)
-            elif value is None:
-                if metadata.uselist:
-                    value = []
-                setattr(dbrow, metadata.colname, value)
-            else:
-                value = int(value)
-                if value:
-                    t = dbsession.query(relmodel).get(value)
-                    if metadata.uselist:
-                        t = [t]
-                    setattr(dbrow, metadata.colname, t)
-        elif metadata.coltype == "PickleText":
-            if value is None:
-                if metadata.nullable:
-                    setattr(dbrow, metadata.colname, value)
-                else:
-                    setattr(dbrow, metadata.colname, "")
-            else:
-                try:
-                    value = eval(value, {}, {})
-                except: # allows use of unquoted strings.
-                    pass
-                setattr(dbrow, metadata.colname, value)
-        elif metadata.coltype == "PGText":
+        _update_row(data, klass, dbrow, metadata, value)
+
+
+# updates a row from form data
+def update_row(data, klass, dbrow):
+    for metadata in models.get_metadata_iterator(klass):
+        value = data.get(metadata.colname)
+        _update_row(data, klass, dbrow, metadata, value)
+
+
+def _update_row(data, klass, dbrow, metadata, value):
+    if not value and metadata.nullable:
+        value = None
+    if metadata.coltype == "RelationProperty":
+        relmodel = getattr(klass, metadata.colname).property.mapper.class_
+        if isinstance(value, list) and value:
+            t = dbsession.query(relmodel).filter(
+                            relmodel.id.in_([int(i) for i in value])).all()
+            setattr(dbrow, metadata.colname, t)
+        elif value is None:
+            if metadata.uselist:
+                value = []
             setattr(dbrow, metadata.colname, value)
         else:
-            if value is None and metadata.nullable:
-                setattr(dbrow, metadata.colname, None)
-            else:
-                validator = _VALIDATORS.get(metadata.coltype)
-                if validator is not None:
-                    value = validator(value)
+            value = int(value)
+            if value:
+                t = dbsession.query(relmodel).get(value)
+                if metadata.uselist:
+                    t = [t]
+                setattr(dbrow, metadata.colname, t)
+    elif metadata.coltype == "PickleText":
+        if value is None:
+            if metadata.nullable:
                 setattr(dbrow, metadata.colname, value)
+            else:
+                setattr(dbrow, metadata.colname, "")
+        else:
+            try:
+                value = eval(value, {}, {})
+            except: # allows use of unquoted strings.
+                pass
+            setattr(dbrow, metadata.colname, value)
+    elif metadata.coltype == "PGText":
+        setattr(dbrow, metadata.colname, value)
+    else:
+        if value is None and metadata.nullable:
+            setattr(dbrow, metadata.colname, None)
+        else:
+            validator = _VALIDATORS.get(metadata.coltype)
+            if validator is not None:
+                value = validator(value)
+            setattr(dbrow, metadata.colname, value)
 
 
 def validate_float(value):
