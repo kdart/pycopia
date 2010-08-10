@@ -1,3 +1,6 @@
+Overview
+========
+
 The Pycopia package is a collection of Python (and some C) modules for use in
 Python  applications. There is support for network management, "Web" frontends,
 XML processing, process control, and more.
@@ -26,4 +29,37 @@ WWW.framework -- A web framework supporting virtual domains.
 This library is mostly governed by the Lesser GNU Public License (LGPL). If a
 module comes from another source then it may have another, more liberal,
 license. Parts here may be Other Peoples Code under the BSD or MIT license.
+
+
+INSTALL
+=======
+
+The top-level setup script helps with dealing with all sub-packages at
+once. It also provides an installer for a nicer developer mode. 
+
+Invoke it like a standard setup.py script. However, Any names after the
+operation name are taken as sub-package names that are operated on. If no
+names are given then all packages are operated on.
+
+Commands:
+ list         -- List available subpackages. These are the names you may optionally supply.
+ publish      -- Put source distribution on pypi.
+ build        -- Run setuptools build phase on named sub-packages (or all of them).
+ install      -- Run setuptools install phase.
+ eggs         -- Build distributable egg package.
+ rpms         -- Build RPMs on platforms that support building RPMs.
+ msis         -- Build Microsoft .msi on Windows.
+ wininst      -- Build .exe installer on Windows.
+ develop      -- Developer mode, as defined by setuptools.
+ develophome  -- Developer mode, installing .pth and script files in user directory.
+ clean        -- Run setuptools clean phase.
+ squash       -- Squash (flatten) all named sub-packages into single tree
+                 in $PYCOPIA_SQUASH, or user site-directory if no $PYCOPIA_SQUASH defined.
+                 This also removes the setuptools runtime dependency.
+
+Most regular setuptools commands also work. They are passed through by
+default.
+
+NOTE: The install operation requires that the sudo command be configured for you.
+
 
