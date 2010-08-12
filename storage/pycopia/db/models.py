@@ -178,14 +178,20 @@ def create_user(session, pwent):
     """
     now = tables.time_now()
     fullname = pwent.gecos
-    if fullname.find(",") > 0:
-        [last, first] = fullname.split(",", 1)
-    else:
-        fnparts = fullname.split(None, 1)
-        if len(fnparts) == 2:
-            [first, last] = fnparts
+    if fullname:
+        if "," in fullname:
+            [last, first] = fullname.split(",", 1)
         else:
-            first, last = pwent.name, fnparts[0]
+            fnparts = fullname.split(None, 1)
+            if len(fnparts) == 2:
+                [first, last] = fnparts
+            else:
+                first, last = pwent.name, fnparts[0]
+    else: # some places have empty gecos
+        if "." in pwent.name:
+            [first, last] = map(str.capitalize, pwent.name.split(".", 1))
+        else:
+            first, last = pwent.name, "" # Punt, first name is login name.  User can edit later.
     grp = session.query(Group).filter(Group.name=="testing").one() # should already exist
     user = create(User, username=pwent.name, first_name=first, last_name=last, authservice="system",
             is_staff=True, is_active=True, is_superuser=False, last_login=now, date_joined=now)
