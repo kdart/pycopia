@@ -24,7 +24,7 @@ import collections
 from datetime import timedelta
 from hashlib import sha1
 
-from sqlalchemy import create_engine, and_, or_, func
+from sqlalchemy import create_engine, and_, or_, not_, func, exists
 from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
         backref, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
@@ -36,6 +36,9 @@ from pycopia.aid import hexdigest, unhexdigest, Enums, removedups, NULL
 from pycopia.db import tables
 from pycopia.db.types import validate_value_type, OBJ_TESTRUNNER
 
+
+class ModelError(Exception):
+    pass
 
 
 def create_session(url=None):
@@ -254,6 +257,18 @@ class Session(object):
     def is_expired(self):
         return tables.time_now() >= self.expire_date
 
+    @classmethod
+    def get_expired(cls, session):
+        return session.query(cls).filter(cls.expire_date < "now").order_by(cls.expire_date).all()
+
+    @classmethod
+    def clean(cls, session):
+        for sess in session.query(cls).filter(cls.expire_date < "now").all():
+            session.delete(sess)
+        session.commit()
+
+
+
 
 mapper(Session, tables.client_session)
 
@@ -398,6 +413,18 @@ class AttributeType(object):
     def __str__(self):
         return "%s(%s)" % (self.name, self.value_type)
 
+    @classmethod
+    def get_by_name(cls, session, name):
+        try:
+            attrtype = session.query(cls).filter(cls.name==str(name)).one()
+        except NoResultFound:
+            raise ModelError("No attribute type %r defined." % (name,))
+        return attrtype
+
+    @classmethod
+    def get_attribute_list(cls, session):
+        return session.query(cls.name, cls.value_type).all()
+
 mapper(AttributeType, tables.attribute_type)
 
 
@@ -470,6 +497,18 @@ mapper(ProjectVersion, tables.project_versions,
 class CorporateAttributeType(object):
     ROW_DISPLAY = ("name", "value_type", "description")
 
+    @classmethod
+    def get_by_name(cls, session, name):
+        try:
+            attrtype = session.query(cls).filter(cls.name==str(name)).one()
+        except NoResultFound:
+            raise ModelError("No attribute type %r defined." % (name,))
+        return attrtype
+
+    @classmethod
+    def get_attribute_list(cls, session):
+        return session.query(cls.name, cls.value_type).all()
+
     def __str__(self):
         return "%s(%s)" % (self.name, self.value_type)
 
@@ -482,6 +521,39 @@ class Corporation(object):
 
     def __str__(self):
         return str(self.name)
+
+    def set_attribute(self, session, attrname, value):
+        attrtype = CorporateAttributeType.get_by_name(session, str(attrname))
+        existing = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self, 
+                            CorporateAttribute.type==attrtype)).scalar()
+        if existing is not None:
+            existing.value = value
+        else:
+            attrib = create(CorporateAttribute, corporation=self, type=attrtype, value=value)
+            session.add(attrib)
+            self.attributes.append(attrib)
+        session.commit()
+
+    def get_attribute(self, session, attrname):
+        attrtype = CorporateAttributeType.get_by_name(session, str(attrname))
+        try:
+            ea = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self, 
+                            CorporateAttribute.type==attrtype)).one()
+        except NoResultFound:
+            raise ModelError("No attribute %r set." % (attrname,))
+        return ea.value
+
+    def del_attribute(self, session, attrtype):
+        attrtype = CorporateAttributeType.get_by_name(session, str(attrtype))
+        attrib = session.query(CorporateAttribute).filter(and_(
+                CorporateAttribute.corporation==self, CorporateAttribute.type==attrtype)).scalar()
+        if attrib:
+            self.attributes.remove(attrib)
+        session.commit()
+
+    @staticmethod
+    def get_attribute_list(session):
+        return CorporateAttributeType.get_attribute_list(session)
 
     def add_service(self, session, service):
         svc = session.query(FunctionalArea).filter(FunctionArea.name == service).one()
@@ -564,6 +636,40 @@ class Software(object):
     def __repr__(self):
         return self.name
 
+    def set_attribute(self, session, attrname, value):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        existing = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self, 
+                            SoftwareAttribute.type==attrtype)).scalar()
+        if existing is not None:
+            existing.value = value
+        else:
+            attrib = create(SoftwareAttribute, software=self, type=attrtype, value=value)
+            session.add(attrib)
+            self.attributes.append(attrib)
+        session.commit()
+
+    def get_attribute(self, session, attrname):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        try:
+            ea = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self, 
+                            SoftwareAttribute.type==attrtype)).one()
+        except NoResultFound:
+            raise ModelError("No attribute %r set." % (attrname,))
+        return ea.value
+
+    def del_attribute(self, session, attrtype):
+        attrtype = AttributeType.get_by_name(session, str(attrtype))
+        attrib = session.query(SoftwareAttribute).filter(and_(
+                SoftwareAttribute.software==self, SoftwareAttribute.type==attrtype)).scalar()
+        if attrib:
+            self.attributes.remove(attrib)
+        session.commit()
+
+    @staticmethod
+    def get_attribute_list(session):
+        return AttributeType.get_attribute_list(session)
+
+
 mapper (Software, tables.software,
     properties={
         "variants": relation(SoftwareVariant, lazy=True, secondary=tables.software_variants),
@@ -643,6 +749,40 @@ class EquipmentModel(object):
     def __str__(self):
         return str(self.name)
 
+    def set_attribute(self, session, attrname, value):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        existing = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self, 
+                            EquipmentModelAttribute.type==attrtype)).scalar()
+        if existing is not None:
+            existing.value = value
+        else:
+            attrib = create(EquipmentModelAttribute, equipmentmodel=self, type=attrtype, value=value)
+            session.add(attrib)
+            self.attributes.append(attrib)
+        session.commit()
+
+    def get_attribute(self, session, attrname):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        try:
+            ea = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self, 
+                            EquipmentModelAttribute.type==attrtype)).one()
+        except NoResultFound:
+            raise ModelError("No attribute %r set." % (attrname,))
+        return ea.value
+
+    def del_attribute(self, session, attrtype):
+        attrtype = AttributeType.get_by_name(session, str(attrtype))
+        attrib = session.query(EquipmentModelAttribute).filter(and_(
+                EquipmentModelAttribute.equipmentmodel==self, EquipmentModelAttribute.type==attrtype)).scalar()
+        if attrib:
+            self.attributes.remove(attrib)
+        session.commit()
+
+    @staticmethod
+    def get_attribute_list(session):
+        return AttributeType.get_attribute_list(session)
+
+
 mapper(EquipmentModel, tables.equipment_model,
     properties={
         "embeddedsoftware": relation(Software, secondary=tables.equipment_model_embeddedsoftware),
@@ -677,31 +817,39 @@ class Equipment(object):
     def __str__(self):
         return str(self.name)
 
-    def add_attribute(self, session, attrtype, value):
-        if not isinstance(attrtype, AttributeType):
-            attrtype = session.query(AttributeType).filter(AttributeType.name==str(attrtype)).one()
-        attrib = create(EquipmentAttribute, type=attrtype, value=value)
-        self.attributes.append(attrib)
+    def set_attribute(self, session, attrname, value):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        existing = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self, 
+                            EquipmentAttribute.type==attrtype)).scalar()
+        if existing is not None:
+            existing.value = value
+        else:
+            attrib = create(EquipmentAttribute, equipment=self, type=attrtype, value=value)
+            session.add(attrib)
+            self.attributes.append(attrib)
+        session.commit()
 
-    def del_attribute(self, session, attrtype):
-        if not isinstance(attrtype, AttributeType):
-            attrtype = session.query(AttributeType).filter(AttributeType.name==str(attrtype)).one()
-        attrib = session.query(EquipmentAttribute).filter(EquipmentAttribute.equipment==self).one()
+    def get_attribute(self, session, attrname):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        try:
+            ea = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self, 
+                            EquipmentAttribute.type==attrtype)).one()
+        except NoResultFound:
+            raise ModelError("No attribute %r set." % (attrname,))
+        return ea.value
+
+    def del_attribute(self, session, attrname):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        attrib = session.query(EquipmentAttribute).filter(and_(
+                EquipmentAttribute.equipment==self, EquipmentAttribute.type==attrtype)).scalar()
         if attrib:
             self.attributes.remove(attrib)
+        session.commit()
 
-    def add_capability(self, session, captype, value):
-        if not isinstance(captype, CapabilityType):
-            captype = session.query(CapabilityType).filter(CapabilityType.name==str(captype)).one()
-        cap = create(Capability, type=captype, value=value)
-        self.capabilities.append(cap)
+    @staticmethod
+    def get_attribute_list(session):
+        return AttributeType.get_attribute_list(session)
 
-    def del_capability(self, session, captype):
-        if not isinstance(captype, CapabilityType):
-            captype = session.query(CapabilityType).filter(CapabilityType.name==str(captype)).one()
-        cap = session.query(Capability).filter(Capability.equipment==self).one()
-        if cap:
-            self.attributes.remove(cap)
 
 # properties provided elsewhere:
 #    attributes
@@ -769,6 +917,19 @@ class EnvironmentAttributeType(object):
     def __str__(self):
         return "%s(%s)" % (self.name, self.value_type)
 
+    @classmethod
+    def get_by_name(cls, session, name):
+        try:
+            attrtype = session.query(cls).filter(cls.name==str(name)).one()
+        except NoResultFound:
+            raise ModelError("No attribute type %r defined." % (name,))
+        return attrtype
+
+    @classmethod
+    def get_attribute_list(cls, session):
+        return session.query(cls.name, cls.value_type).all()
+
+
 mapper(EnvironmentAttributeType, tables.environmentattribute_type,
 )
 
@@ -778,6 +939,39 @@ class Environment(object):
 
     def __repr__(self):
         return self.name
+
+    def set_attribute(self, session, attrname, value):
+        attrtype = EnvironmentAttributeType.get_by_name(session, str(attrname))
+        existing = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self, 
+                            EnvironmentAttribute.type==attrtype)).scalar()
+        if existing is not None:
+            existing.value = value
+        else:
+            attrib = create(EnvironmentAttribute, environment=self, type=attrtype, value=value)
+            session.add(attrib)
+            self.attributes.append(attrib)
+        session.commit()
+
+    def get_attribute(self, session, attrname):
+        attrtype = EnvironmentAttributeType.get_by_name(session, str(attrname))
+        try:
+            ea = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self, 
+                            EnvironmentAttribute.type==attrtype)).one()
+        except NoResultFound:
+            raise ModelError("No attribute %r set." % (attrname,))
+        return ea.value
+
+    def del_attribute(self, session, attrtype):
+        attrtype = EnvironmentAttributeType.get_by_name(session, str(attrtype))
+        attrib = session.query(EnvironmentAttribute).filter(and_(
+                EnvironmentAttribute.environment==self, EnvironmentAttribute.type==attrtype)).scalar()
+        if attrib:
+            self.attributes.remove(attrib)
+        session.commit()
+
+    @staticmethod
+    def get_attribute_list(session):
+        return EnvironmentAttributeType.get_attribute_list(session)
 
     equipment = association_proxy('testequipment', 'equipment')
 

@@ -201,8 +201,8 @@ argument must match a name of a method.
             rv = meth(argv) # call the method
         except (NewCommand, CommandQuit, CommandExit, KeyboardInterrupt):
             raise # pass these through to parser
-        except CLISyntaxError:
-            self._print("Syntax error.")
+        except CLISyntaxError, err:
+            self._print("Syntax error: %s" % (err,))
             self._print(meth.__doc__)
         except IndexError: # may have tried to get non-existent argv value.
             ex, val, tb = sys.exc_info()

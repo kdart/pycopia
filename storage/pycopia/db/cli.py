@@ -93,7 +93,7 @@ class DBSessionCommands(CLI.BaseCommands):
     Use the given table. Name is class name of mapped table."""
         name = argv[1] 
         t = getattr(models, name)
-        cls = _EDITOR_MAP.get(name, TableCommands)
+        cls = _TABLE_EDITOR_MAP.get(name, TableCommands)
         cmd = self.clone(cls)
         cmd._setup(t, cls.get_prompt(t))
         raise CLI.NewCommand(cmd)
@@ -104,6 +104,13 @@ class DBSessionCommands(CLI.BaseCommands):
         """ls
     List persistent objects."""
         self._print_list(list(models.class_names()))
+
+    def users(self, argv):
+        """users
+    Enter User editor mode."""
+        cmd = self.clone(UserCommands)
+        cmd._setup(models.User, "%YUsers%N> ")
+        raise CLI.NewCommand(cmd)
 
     def config(self, argv):
         """config
@@ -117,7 +124,7 @@ class DBSessionCommands(CLI.BaseCommands):
         """network
     Enter network configuration mode."""
         cmd = self.clone(NetworkCommands)
-        cmd._setup(None, "%BNetwork%N> ")
+        cmd._setup(models.Network, "%BNetwork%N> ")
         raise CLI.NewCommand(cmd)
 
 
@@ -131,8 +138,12 @@ class RowCommands(CLI.GenericCLI):
     def show(self, argv):
         """show
     show the selected rows data."""
-        for metadata in RowCommands._metadata:
-            self._print("%20.20s: %s" % (metadata.colname, getattr(self._obj, metadata.colname)))
+        if len(argv) > 1:
+            colname = argv[1]
+            self._print("%20.20s: %s" % (colname, getattr(self._obj, colname)))
+        else:
+            for metadata in self._metadata:
+                self._print("%20.20s: %s" % (metadata.colname, getattr(self._obj, metadata.colname)))
 
     def edit(self, argv):
         """edit [<fieldname>]
@@ -166,6 +177,31 @@ class RowCommands(CLI.GenericCLI):
     Abort this edit, don't commit changes."""
         _session.rollback()
         raise CLI.CommandQuit
+
+
+class RowWithAttributesCommands(RowCommands):
+
+    def attrib(self, argv):
+        """attrib get|set|del|list name [value]
+    Get, set, delete an attribute. You can also list available attributes."""
+        cmd = argv[1]
+        if cmd.startswith("get"):
+            name = argv[2]
+            v = self._obj.get_attribute(_session, name)
+            self._print(v)
+        elif cmd.startswith("set"):
+            name = argv[2]
+            value = CLI.clieval(argv[3])
+            self._obj.set_attribute(_session, name, value)
+        elif cmd.startswith("del"):
+            name = argv[2]
+            self._obj.del_attribute(_session, name)
+        elif cmd.startswith("lis"):
+            self._print("Possible attributes:")
+            for name, basetype in self._obj.__class__.get_attribute_list(_session):
+                self._print("   %s (%s)" % (name, basetype))
+        else:
+            raise CLI.CLISyntaxError("Invalid subcommand.")
 
 
 class TableCommands(CLI.BaseCommands):
@@ -273,7 +309,7 @@ class TableCommands(CLI.BaseCommands):
         """inspect ...
     Inspect a row."""
         dbrow = self._select(argv)
-        cls = RowCommands
+        cls = _ROW_EDITOR_MAP.get(self._obj.__name__, RowCommands)
         cmd = self.clone(cls)
         cmd._setup(dbrow, cls.get_prompt(dbrow))
         raise CLI.NewCommand(cmd)
@@ -316,8 +352,32 @@ class NetworkCommands(CLI.BaseCommands):
 # TODO network connections
 
 
+class TableWithAttributesCommands(TableCommands):
+
+    def attrib(self, argv):
+        """attrib list
+    List available attributes."""
+        cmd = argv[1]
+        if cmd.startswith("lis"):
+            self._print("Possible attributes:")
+            for name, basetype in self._obj.get_attribute_list(_session):
+                self._print("   %s (%s)" % (name, basetype))
+        else:
+            raise CLI.CLISyntaxError("Invalid subcommand.")
+
+
 class SessionCommands(TableCommands):
-    pass
+
+    def expired(self, argv):
+        """expired
+    Show expired sessions."""
+        for sess in self._obj.get_expired(_session):
+            self._print(sess)
+
+    def clean(self, argv):
+        """clean
+    Clean out all expired sessions."""
+        self._obj.clean(_session)
 
 
 class UserCommands(TableCommands):
@@ -575,9 +635,22 @@ class ConfigCommands(CLI.BaseCommands):
 
 
 # Maps table names to editor classes
-_EDITOR_MAP = {
+_TABLE_EDITOR_MAP = {
     "User": UserCommands,
     "Session": SessionCommands,
+    "Equipment": TableWithAttributesCommands,
+    "EquipmentModel": TableWithAttributesCommands,
+    "Environment": TableWithAttributesCommands,
+    "Software": TableWithAttributesCommands,
+    "Corporation": TableWithAttributesCommands,
+}
+
+_ROW_EDITOR_MAP = {
+    "Equipment": RowWithAttributesCommands,
+    "EquipmentModel": RowWithAttributesCommands,
+    "Environment": RowWithAttributesCommands,
+    "Software": RowWithAttributesCommands,
+    "Corporation": RowWithAttributesCommands,
 }
 
 
