@@ -60,7 +60,7 @@ def genClass(klassname, parents, attribs=None, doc=None, methods=None):
         s.append('\t"""%s"""' % doc)
     if attribs:
         for key, val in attribs.items():
-            s.append( "\t%s = %r" % (key, val) )
+            s.append("\t%s = %s" % (key, pformat(val, indent=10, width=132)) )
     if methods is not None:
         s.extend(map(str, list(methods)))
     if len(s) == 1:
