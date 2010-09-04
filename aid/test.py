@@ -43,7 +43,7 @@ class AidTests(unittest.TestCase):
 
     def test_mapstr(self):
         TEST = aid.mapstr("some%(one)s one\nsome%(two)s three\nsome%(three)s four")
-        print TEST.attributes()
+        print TEST.attributes
         try:
             print TEST
         except ValueError:
@@ -55,6 +55,12 @@ class AidTests(unittest.TestCase):
         s = str(TEST) # makes new, substituted, string
         assert s == "someone one\nsomething three\nsomewhere four"
         print TEST.three
+
+    def test_formatstr(self):
+        src = "one {one} {{notaone}} two {two}"
+        fmt = aid.formatstr(src)
+        assert src.format(one="ONE", two="TWO") == fmt(one="ONE", two="TWO")
+        assert fmt.attributes == ["two", "one"]
 
     def test_newclass(self):
         New = aid.newclass("New", MyBaseClass)

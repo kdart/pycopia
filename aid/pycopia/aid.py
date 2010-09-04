@@ -341,12 +341,49 @@ class mapstr(str):
         return self % self._attribs
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, str.__repr__(self))
+    @property
     def attributes(self):
         return self._attribs.keys()
 
 import re
 _findkeys = re.compile(r"%\((\w+)\)").findall
+_findfkeys = re.compile(r"[^{]{(\w+)}").findall
 del re
+
+# a string with format-style substitutions (limited to the form {name})
+# with attribute style setters, and inspection of defined substitutions
+# (attributes)
+class formatstr(str):
+    def __new__(cls, initstr, **kwargs):
+        s = str.__new__(cls, initstr)
+        return s
+    def __init__(self, initstr, **kwargs):
+        d = {}
+        for name in _findfkeys(self):
+            d[name] = kwargs.get(name, None)
+        self.__dict__["_attribs"] = d
+    def __setattr__(self, name, val):
+        if name not in self.__dict__["_attribs"].keys():
+            raise AttributeError, "invalid attribute name %r" % (name,)
+        self.__dict__["_attribs"][name] = val
+    def __getattr__(self, name):
+        try:
+            return self.__dict__["_attribs"][name]
+        except KeyError:
+            raise AttributeError, "Invalid attribute %r" % (name,)
+    def __str__(self):
+        if None in self._attribs.values():
+            raise ValueError, "one of the attributes %r is not set" % (self._attribs.keys(),)
+        return self.format(**self._attribs)
+    def __call__(self, **kwargs):
+        for name, value in kwargs.items():
+            self.__setattr__(name, value)
+        return self.format(**self._attribs)
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, str.__repr__(self))
+    @property
+    def attributes(self):
+        return self._attribs.keys()
 
 # metaclasses... returns a new class with given bases and class attributes
 def newclass(name, *bases, **attribs):
