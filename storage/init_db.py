@@ -1,4 +1,4 @@
-#!/usr/bin/python2.5
+#!/usr/bin/python
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
@@ -126,6 +126,14 @@ def do_attribute_types(session):
             ("hostname", 1, "Name to use as host name. Overrides base name."),
             ):
         session.add(models.create(models.AttributeType, name=name, value_type=vtype, 
+                description=desc))
+        session.commit()
+
+def do_env_attribute_types(session):
+    for name, vtype, desc in (
+            ("state", 1, "The current state of the environment. Test defined string."),
+            ):
+        session.add(models.create(models.EnvironmentAttributeType, name=name, value_type=vtype, 
                 description=desc))
         session.commit()
 
@@ -534,6 +542,7 @@ def init_database(argv):
         do_schedules(dbsession)
         do_functional_areas(dbsession)
         do_attribute_types(dbsession)
+        do_env_attribute_types(dbsession)
         do_language(dbsession)
         do_country(dbsession)
         do_equipment_category(dbsession)

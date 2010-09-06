@@ -367,6 +367,8 @@ class EnvironmentRuntime(object):
 
     environment = property(lambda s: s._environment)
 
+    owner = property(lambda s: s._environment.owner)
+
     def get_role(self, rolename):
         try:
             return self._eqcache[rolename]
@@ -389,6 +391,15 @@ class EnvironmentRuntime(object):
             ex, val, tb = sys.exc_info()
             raise AttributeError("%s: %s" % (ex, val))
 
+    # Allow persistent storage of environment state in the state attribute.
+    def get_state(self):
+        return self._environment.get_attribute(self._session, "state")
+
+    def set_state(self, newstate):
+        return self._environment.set_attribute(self._session, "state", str(newstate))
+
+    state = property(get_state, set_state)
+
 
 class EquipmentRuntime(object):
 
@@ -400,6 +411,7 @@ class EquipmentRuntime(object):
         self._init_controller = None
         d = {}
         d["hostname"] = equipmentrow.name
+        d["modelname"] = equipmentrow.model.name
         d["role"] = rolename
         if equipmentrow.software:
             d["default_role"] = equipmentrow.software[0].category.name
@@ -471,7 +483,6 @@ class EquipmentRuntime(object):
     controller = property(get_controller)
 
     initial_controller = property(get_initial_controller)
-
 
 
 def get_config(_extrafiles=None, initdict=None, **kwargs):
