@@ -412,6 +412,7 @@ class EquipmentRuntime(object):
         d = {}
         d["hostname"] = equipmentrow.name
         d["modelname"] = equipmentrow.model.name
+        d["manufacturer"] = equipmentrow.model.manufacturer.name
         d["role"] = rolename
         if equipmentrow.software:
             d["default_role"] = equipmentrow.software[0].category.name

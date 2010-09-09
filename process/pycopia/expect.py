@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -297,8 +297,8 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
         if solist is None:
             solist = []
         ptype = type(patt)
-        if ptype is str:
-            solist.append(self._get_re(patt, mtype, callback))
+        if isinstance(patt, basestring):
+            solist.append(self._get_re(patt.encode(), mtype, callback))
         elif ptype is tuple:
             solist.append(apply(self._get_re, patt))
         elif ptype is list:
@@ -317,11 +317,13 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
 
     def expect(self, patt, mtype=EXACT, callback=None, timeout=None):
         solist = self._get_search_list(patt, mtype, callback)
-        buf = ""
+        if not solist:
+            raise ExpectError("Empty expect search.")
+        buf = bytes()
         while 1:
             c = self.read(1, timeout)
             if not c:
-                raise ExpectError, "EOF during expect."
+                raise ExpectError("EOF during expect.")
             buf += c
             self.expectindex = i = -1
             for so, cb in solist:
@@ -547,10 +549,9 @@ through a filter function.  """
             return True
         return False
 
-    def run(self):
-        """run() runs this Expect's engine until EOF on file object."""
-        if self._engine:
-            eng = self._engine
+    def run(self, engine=None):
+        eng = engine or self._engine
+        if eng:
             eng.reset()
             while 1:
                 next = self.read_until(self.prompt)
@@ -673,6 +674,15 @@ class StateMachine(object):
             self.current_state = next
             if action:
                 action(ANY.search(symbol))
+
+    def run(self, exp):
+        self.reset()
+        while 1:
+            nexttok = exp.read_until(exp.prompt)
+            if nexttok:
+                self.step(nexttok)
+            else:
+                break
 
 
 def is_exact(pattern):
