@@ -28,6 +28,7 @@ from sqlalchemy import create_engine, and_, or_, not_, func, exists
 from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
         backref, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
+from sqlalchemy.orm.collections import column_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -904,7 +905,8 @@ mapper(Interface, tables.interfaces,
         "parent": relation(Interface, backref=backref("subinterface",
                                 remote_side=[tables.interfaces.c.id])),
         "network": relation(Network, backref="interfaces", order_by=tables.networks.c.name),
-        "equipment": relation(Equipment, backref="interfaces"),
+        "equipment": relation(Equipment, 
+                backref=backref("interfaces", collection_class=column_mapped_collection(tables.interfaces.c.name))),
     }
 )
 

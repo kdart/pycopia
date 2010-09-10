@@ -300,6 +300,6 @@ def repeat(interval, method, *args):
 
 if __name__ == "__main__":
     import os
-    os.system("qaunittest test_scheduler")
+    os.system("runtest unittests.core.scheduler")
 
 

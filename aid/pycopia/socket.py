@@ -153,6 +153,8 @@ class _socketobject(object):
         self.recv = self._sock.recv
         self.sendto = self._sock.sendto
         self.recvfrom = self._sock.recvfrom
+        self.write = self._sock.send # make it look more file-like
+        self.read = self._sock.recv
 
     def close(self):
         self._sock = _closedsocket()

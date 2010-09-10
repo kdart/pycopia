@@ -276,25 +276,32 @@ Returns a 3-tuple of address, mask, and broadcast address as dotted-quad string.
     def __hash__(self):
         return int(self._address % maxint)
 
-    def __cmp__(self, other):
-        return cmp(self._address, other._address)
+#    def __cmp__(self, other):
+#        other = self.__class__(other)
+#        return cmp(self._address, other._address)
 
     def __eq__(self, other):
-        return self._address == other._address
+        other = self.__class__(other)
+        return self._address == other._address and self._mask == other._mask
 
     def __ne__(self, other):
+        other = self.__class__(other)
         return self._address != other._address
 
     def __lt__(self, other):
+        other = self.__class__(other)
         return self._address < other._address
 
     def __gt__(self, other):
+        other = self.__class__(other)
         return self._address > other._address
 
     def __ge__(self, other):
+        other = self.__class__(other)
         return self._address >= other._address
 
     def __le__(self, other):
+        other = self.__class__(other)
         return self._address <= other._address
 
     # contains if networks are equal.

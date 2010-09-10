@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -62,6 +62,10 @@ class StringMatchObject(object):
         self.lastindex = None
         self.re = re # not really an RE.
 
+    def __repr__(self):
+        return "{0}(start={1!r}, end={2!r}, string={3!r}, pos={4!r}, endpos={5!r}, re={6!r})".format(self.__class__.__name__, 
+                self._start, self._end, self.string, self.pos, self.endpos, self.re)
+
     def expand(self, template):
         raise NotImplementedError
 
@@ -106,6 +110,10 @@ class StringExpression(object):
         # bogus attributes to simulate compiled REs from re module.
         self.flags = flags
         self.groupindex = {}
+
+    def __repr__(self):
+        return "{0}(patt={1!r}, flags={2!r})".format(self.__class__.__name__, 
+                self.pattern, self.flags)
 
     def search(self, text, pos=0, endpos=2147483647):
         n = text.find(self.pattern, pos, endpos)
@@ -208,7 +216,7 @@ file-like object as well)."""
         self.default_timeout = timeout
         self._log = logfile
         self.cmd_interp = None
-        self.prompt = prompt
+        self._prompt = prompt.encode()
         self._patt_cache = {}
         self._buf = ''
         self.eof = 0
@@ -274,10 +282,12 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
     sleep = delay
 
     def wait_for_prompt(self, timeout=None):
-        return self.read_until(self.prompt, timeout=timeout)
+        return self.read_until(self._prompt, timeout=timeout)
 
     def set_prompt(self, prompt):
-        self.prompt = prompt
+        self._prompt = prompt.encode()
+
+    prompt = property(lambda s: s._prompt, set_prompt)
 
     def _get_re(self, patt, mtype=EXACT, callback=None):
         try:
@@ -297,8 +307,8 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
         if solist is None:
             solist = []
         ptype = type(patt)
-        if ptype is str:
-            solist.append(self._get_re(patt, mtype, callback))
+        if isinstance(patt, basestring):
+            solist.append(self._get_re(patt.encode(), mtype, callback))
         elif ptype is tuple:
             solist.append(apply(self._get_re, patt))
         elif ptype is list:
@@ -317,11 +327,13 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
 
     def expect(self, patt, mtype=EXACT, callback=None, timeout=None):
         solist = self._get_search_list(patt, mtype, callback)
-        buf = ""
+        if not solist:
+            raise ExpectError("Empty expect search.")
+        buf = bytes()
         while 1:
             c = self.read(1, timeout)
             if not c:
-                raise ExpectError, "EOF during expect."
+                raise ExpectError("EOF during expect.")
             buf += c
             self.expectindex = i = -1
             for so, cb in solist:
@@ -373,7 +385,7 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
 
     def read_until(self, patt=None, timeout=None):
         if patt is None:
-            patt = self.prompt
+            patt = self._prompt
         buf = ""
         while 1:
             c = self.read(1, timeout)
@@ -518,7 +530,7 @@ through a filter function.  """
     sendline = writeln
 
     def writeeol(self, text):
-        self.write(text+self.prompt) # prompt is used as EOL when used as state machine
+        self.write(text+self._prompt) # prompt is used as EOL when used as state machine
 
     def sendfile(self, filename, wait_for_prompt=0):
         fp = open(filename, "r")
@@ -541,19 +553,18 @@ through a filter function.  """
         self._engine = engine
 
     def step(self):
-        next = self.read_until(self.prompt)
+        next = self.read_until(self._prompt)
         if next:
             self._engine.step(next)
             return True
         return False
 
-    def run(self):
-        """run() runs this Expect's engine until EOF on file object."""
-        if self._engine:
-            eng = self._engine
+    def run(self, engine=None):
+        eng = engine or self._engine
+        if eng:
             eng.reset()
             while 1:
-                next = self.read_until(self.prompt)
+                next = self.read_until(self._prompt)
                 if next:
                     eng.step(next)
                 else:
@@ -673,6 +684,15 @@ class StateMachine(object):
             self.current_state = next
             if action:
                 action(ANY.search(symbol))
+
+    def run(self, exp):
+        self.reset()
+        while 1:
+            nexttok = exp.read_until(exp._prompt)
+            if nexttok:
+                self.step(nexttok)
+            else:
+                break
 
 
 def is_exact(pattern):

@@ -179,6 +179,48 @@ class RowCommands(CLI.GenericCLI):
         raise CLI.CommandQuit
 
 
+class InterfaceRowCommands(RowCommands):
+
+    def maskbits(self, argv):
+        """maskbits [newbits]
+    Show the number of mask bits in the ipaddr."""
+        addr = self._obj.ipaddr
+        if addr is not None:
+            self._print("Mask bits:", addr.maskbits)
+            try:
+                newbits = argv[1]
+            except IndexError:
+                pass
+            else:
+                addr.maskbits = int(newbits)
+                self._obj.ipaddr = addr
+                _session.commit()
+                self._print("New mask bits:", addr.maskbits)
+        else:
+            self._print("No ipaddr set.")
+
+
+
+class NetworkRowCommands(RowCommands):
+
+    def fixinterfaces(self, argv):
+        """fixinterfaces
+    Fix all attached interfaces to have the same mask bits as this network."""
+        maskbits = self._obj.ipnetwork.maskbits
+        for intf in self._obj.interfaces:
+            addr = intf.ipaddr
+            if addr is not None:
+                addr.maskbits = maskbits
+                intf.ipaddr = addr
+        _session.commit()
+
+    def interfaces(self, argv):
+        """interfaces
+    Show list of attached interfaces."""
+        for intf in self._obj.interfaces:
+            self._print(repr(intf))
+
+
 class RowWithAttributesCommands(RowCommands):
 
     def attrib(self, argv):
@@ -349,6 +391,7 @@ class TableCommands(CLI.BaseCommands):
 
 class NetworkCommands(CLI.BaseCommands):
     pass
+
 # TODO network connections
 
 
@@ -651,6 +694,8 @@ _ROW_EDITOR_MAP = {
     "Environment": RowWithAttributesCommands,
     "Software": RowWithAttributesCommands,
     "Corporation": RowWithAttributesCommands,
+    "Network": NetworkRowCommands,
+    "Interface": InterfaceRowCommands,
 }
 
 
@@ -738,10 +783,10 @@ def new_boolean_input(ui, modelclass, metadata):
     return ui.yes_no(metadata.colname + "? ", bool(metadata.default))
 
 def new_cidr(ui, modelclass, metadata):
-    return ui.user_input("IP network for %r: " % (metadata.colname,))
+    return ui.user_input("IP network for %r (e.g. 192.168.1.0/24): " % (metadata.colname,))
 
 def new_inet(ui, modelclass, metadata):
-    return ui.user_input("IP address for %r: " % (metadata.colname,))
+    return ui.user_input("IP address for %r (e.g. 192.168.1.1/24): " % (metadata.colname,))
 
 def new_datetime(ui, modelclass, metadata):
     return ui.get_value("Date and time for %r: " % (metadata.colname,), metadata.default)
@@ -809,11 +854,11 @@ _CREATORS = {
     "PGBit": None,
     "PGBoolean": new_boolean_input,
     "PGChar": new_key,
-    "PGCidr": new_cidr,
+    "Cidr": new_cidr,
     "PGDate": new_date,
     "PGDateTime": new_datetime,
     "PGFloat": new_float,
-    "PGInet": new_inet,
+    "Inet": new_inet,
     "PGInteger": new_integer,
     "PGInterval": new_interval,
     "PGMacAddr": new_macaddr,
@@ -979,11 +1024,11 @@ _EDITORS = {
     "PGBit": None,
     "PGBoolean": edit_bool,
     "PGChar": edit_key,
-    "PGCidr": edit_field,
+    "Cidr": edit_field,
+    "Inet": edit_field,
     "PGDate": edit_field,
     "PGDateTime": edit_field,
     "PGFloat": edit_float,
-    "PGInet": edit_field,
     "PGInteger": edit_integer,
     "PGInterval": edit_field,
     "PGMacAddr": edit_field,

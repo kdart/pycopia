@@ -1,9 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2010  Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -55,10 +53,19 @@ Alternatively, you can just 'import interactive' at the original Python prompt.
 
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
+
 import sys, os, types
-import rlcompleter
 import atexit
 from pprint import pprint
+try:
+    import rlcompleter2
+except ImportError:
+    import rlcompleter
 
 from pycopia.cliutils import *
 from pycopia.aid import add2builtin, IF
@@ -132,12 +139,12 @@ try:
     execfile(RCFILE, env, env) 
 except:
     ex, val, tb = sys.exc_info()
-    print >>sys.stderr, "warning: could not read config file:", RCFILE
-    print >>sys.stderr, val
+    print ("warning: could not read config file:", RCFILE, file=sys.stderr)
+    print (val, file=sys.stderr)
 else:
     for name, val in env.items():
-        if type(val) is str:
-            os.environ[name] = val
+        if isinstance(val, basestring):
+            os.environ[str(name)] = str(val)
 del env
 
 PYTHON = os.environ.get("PYTHONBIN", "python") # set PYTHONBIN for alternate interpreter
@@ -149,10 +156,10 @@ def info(obj=None):
     """Print some helpful information about the given object. Usually the
     docstring.  If no parameter given then provide some info on Python itself."""
     if obj is None:
-        print "Python keywords:"
+        print ("Python keywords:")
         import keyword
-        print pprint(keyword.kwlist)
-        print
+        print (pprint(keyword.kwlist))
+        print()
         plist = [] ; clist = []
         for bi_object in __builtins__.values():
             if callable(bi_object):
@@ -161,15 +168,15 @@ def info(obj=None):
                 elif type(bi_object) is types.FunctionType:
                     plist.append(bi_object.func_code.co_name)
         plist.sort() ; clist.sort()
-        print "Python built-in functions:"
+        print ("Python built-in functions:")
         pprint(plist)
-        print
-        print "Python built-in exceptions:"
+        print()
+        print ("Python built-in exceptions:")
         pprint(clist)
-        print
+        print()
     elif hasattr(obj, "__doc__") and obj.__doc__ is not None:
-            print "Documentation for %s :\n" % (obj.__name__)
-            print obj.__doc__
+            print ("Documentation for %s :\n" % (obj.__name__))
+            print (obj.__doc__)
     elif type(obj) is types.ModuleType:
         pprint(dir(obj))
     elif type(obj) is types.ClassType:
@@ -181,7 +188,7 @@ def info(obj=None):
 
 def run_config(cfstring, param):
     if not cfstring:
-        print >>sys.stderr, "No command string defined to run %s." % (param)
+        print ("No command string defined to run {0}.".format(param), file=sys.stderr)
         return
     try:
         cmd = cfstring % param
@@ -211,7 +218,7 @@ Opens the $XEDITOR with the given module source file (if found).
         ed = get_editor()
         return run_config(ed, filename)
     else:
-        print >>sys.stderr, "Could not find source to %s." % modname
+        print ("Could not find source to {0}.".format(modname), file=sys.stderr)
 
 def view(modname):
     """
@@ -222,7 +229,7 @@ Opens the $[X]VIEWER with the given module source file (if found).
         ed = get_viewer()
         return run_config(ed, filename)
     else:
-        print >>sys.stderr, "Could not find source to %s." % modname
+        print ("Could not find source to %s." % modname, file=sys.stderr)
 
 def get_editor():
     if os.environ.has_key("DISPLAY"):
@@ -267,7 +274,7 @@ def get_pydocindex():
         try:
             execfile(PYDOCINDEXFILE, globals())
         except IOError:
-            print >>sys.stdout, "no file pydocindex.py. Run mkpydocindex to generate it."
+            print ("no file pydocindex.py. Run mkpydocindex to generate it.", file=sys.stdout)
             return None
 
 def get_doc_urls(keyword):
@@ -294,7 +301,7 @@ Choose from a list if more than one document is found."""
     elif objtype is types.ModuleType or objtype is types.BuiltinFunctionType:
         name = object.__name__
     else:
-        print >>sys.stderr, "showdoc: can't determine object name"
+        print ("showdoc: can't determine object name", file=sys.stderr)
         return
     docuri = get_doc_urls(name)
     if docuri:
@@ -306,7 +313,7 @@ Choose from a list if more than one document is found."""
             if uri:
                 open_url("file:///%s/%s" % (os.environ.get("PYTHONDOCS"), uri))
     else:
-        print >>sys.stderr, "showdoc: No documentation found."
+        print ("showdoc: No documentation found.", file=sys.stderr)
 
 
 

@@ -21,7 +21,7 @@ Extra database types.
 
 __all__ = [
     "PGArray", "PGBigInteger", "PGBinary", 
-    "PGBit", "PGBoolean", "PGChar", "PGCidr", "PGDate", "PGDateTime", "PGFloat", "PGInet",
+    "PGBit", "PGBoolean", "PGChar", "Cidr", "PGDate", "PGDateTime", "PGFloat", "Inet",
     "PGInteger", "PGInterval", "PGMacAddr", "PGNumeric", "PGSmallInteger",
     "PGString", "PGText", "PGTime", "PGUuid",
     "PickleText", "TestCaseStatus", "TestCaseType", "TestPriorityType", "ValueType",
@@ -32,6 +32,7 @@ __all__ = [
 import cPickle as pickle
 
 from pycopia.aid import Enums
+from pycopia.ipv4 import IPv4
 
 from sqlalchemy.databases.postgres import (PGArray, PGBigInteger, PGBinary, 
             PGBit, PGBoolean, PGChar, PGCidr, PGDate, PGDateTime, PGFloat, PGInet,
@@ -46,6 +47,48 @@ class ValidationError(AssertionError):
 
 
 # custom column types.
+
+class Cidr(types.MutableType, types.TypeDecorator):
+    """Cidr reprsents networks without host part."""
+
+    impl = PGCidr
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return IPv4(value).network.CIDR
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        return IPv4(value)
+
+    def copy_value(self, value):
+        return IPv4(value)
+
+class Inet(types.MutableType, types.TypeDecorator):
+    """An IPv4 address type. Columns with this type take and receive IPv4
+    objects from the database.
+    """
+
+    impl = PGInet
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return IPv4(value).CIDR
+
+    def copy_value(self, value):
+        return IPv4(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        if "/" in value:
+            return IPv4(value)
+        else:
+            return IPv4(value, "255.255.255.255")
+
 
 class PickleText(types.TypeDecorator):
     """For columns that store Python objects in a TEXT column.
