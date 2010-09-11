@@ -38,11 +38,12 @@ class EmailReport(reports.NullReport):
         )
 
     """
-    def __init__(self, formatter="text/plain", recipients=None, From=None):
+    def __init__(self, formatter="text/plain", recipients=None, From=None, attach_logfile=False):
         self._logfile = None
         self._message = ezmail.MultipartMessage()
         self._message.From(From)
         self._message.To(recipients)
+        self._attach_logfile = attach_logfile
         self._formatter, ext = reports.get_formatter(formatter)
 
     filename = property(lambda s: None)
@@ -70,7 +71,7 @@ class EmailReport(reports.NullReport):
                         self._formatter.MIMETYPE.split("/")[1])
         report["Content-Disposition"] = "inline"
         self._message.attach(report)
-        if self._logfile:
+        if self._attach_logfile and self._logfile:
             try:
                 lfd = open(self._logfile).read()
             except:

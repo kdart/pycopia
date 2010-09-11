@@ -131,7 +131,7 @@ class AutoMessageMixin(object):
             for name in addr:
                 self._add_recipient(header, name, None)
             return
-        elif type(addr) is not str:
+        elif not isinstance(addr, basestring):
             raise TypeError, "recipients need to be a list or string"
         self.rcpt_to.append(addr)
         long_addr = get_address(addr, name)
@@ -252,9 +252,12 @@ def ezmail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
         else:
             outer = AutoMessage(str(obj).encode("us-ascii"))
 
-    outer.To(To)
-    outer.From(From)
-    outer.Subject(subject)
+    if To:
+        outer.To(To)
+    if From:
+        outer.From(From)
+    if subject:
+        outer.Subject(subject)
     if cc:
         outer.Cc(cc)
     if bcc:
