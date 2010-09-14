@@ -33,7 +33,6 @@ __author__ = 'keith@kdart.com (Keith Dart)'
 import sys
 import os
 
-from pycopia import aid
 from pycopia import combinatorics
 from pycopia import scheduler
 from pycopia import timelib
@@ -506,7 +505,7 @@ class Test(object):
         completed = UI.yes_no("%IWas it completed%N?")
         if completed:
             passed = UI.yes_no("Did it pass?")
-            msg = UI.user_input(aid.IF(passed, "%gComments%N? ", "%rReason%N? "))
+            msg = UI.user_input("%gComments%N? " if passed else "%rReason%N? ")
             if passed:
                 return self.passed(msg)
             else:
@@ -890,9 +889,7 @@ def repr_args(args, kwargs):
     Returns:
         String as you would write it in a script.
     """
-    args_s = aid.IF(args, 
-                        aid.IF(kwargs, "%s, ", "%s") % ", ".join(map(repr, args)), 
-                        "")
+    args_s = (("%s, " if kwargs else "%s") % ", ".join(map(repr, args))) if args else ""
     kws = ", ".join(map(lambda it: "%s=%r" % (it[0], it[1]), kwargs.items()))
     return "%s%s" % (args_s, kws)
 

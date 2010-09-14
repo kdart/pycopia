@@ -28,9 +28,10 @@ An ANSI/VT102 terminal. Thanks to Noah Spurrier for code from which to start.
 # 
 
 import sys
-import string
+import os
 
-from terminal import *
+from pycopia import ascii
+from pycopia.terminal import *
 
 # character attributes - bitfield values for screen.attr
 BOLD = 0x1
@@ -488,7 +489,7 @@ class ANSITerminal(Terminal):
         fsm.add_transition ('\x1b', 'ESC', None, 'ESC')
         fsm.add_transition ('=', 'ESC', None, 'INIT') # Selects application keypad.
         fsm.add_transition ('#', 'ESC', None, 'GRAPHICS_POUND')
-        fsm.add_transition_list (string.digits, 'GRAPHICS_POUND', self.DoPoundAttribute, 'INIT')
+        fsm.add_transition_list (ascii.digits, 'GRAPHICS_POUND', self.DoPoundAttribute, 'INIT')
         fsm.add_transition ('[', 'ESC', None, 'CSI')
         # CSI means Escape Left Bracket. That is ^[[
         fsm.add_transition ('H', 'CSI', self.DoHomeOrigin, 'INIT')
@@ -506,8 +507,8 @@ class ANSITerminal(Terminal):
         fsm.add_transition ('?', 'CSI', None, 'MODECRAP')
         fsm.add_transition (';', 'CSI', self.no_digit, 'SEMICOLON')
         fsm.add_transition_list ('\0\r\n\t\b\x0b\x0c\x0e\x0f\x07', 'CSI', self.DoBasic, 'CSI')
-        fsm.add_transition_list (string.digits, 'CSI', self.StartNumber, 'NUMBER_1')
-        fsm.add_transition_list (string.digits, 'NUMBER_1', self.BuildNumber, 'NUMBER_1')
+        fsm.add_transition_list (ascii.digits, 'CSI', self.StartNumber, 'NUMBER_1')
+        fsm.add_transition_list (ascii.digits, 'NUMBER_1', self.BuildNumber, 'NUMBER_1')
         fsm.add_transition ('D', 'NUMBER_1', self.DoBack, 'INIT')
         fsm.add_transition ('B', 'NUMBER_1', self.DoDown, 'INIT')
         fsm.add_transition ('C', 'NUMBER_1', self.DoForward, 'INIT')
@@ -523,15 +524,15 @@ class ANSITerminal(Terminal):
         fsm.add_transition ('n', 'NUMBER_1', self.Reports, 'INIT')
         fsm.add_transition ('q', 'NUMBER_1', None, 'INIT') 
         fsm.add_transition_list ('\0\r\n\t\b\x0b\x0c\x0e\x0f\x07', 'NUMBER_1', self.DoBasic, 'NUMBER_1')
-        fsm.add_transition_list (string.digits, 'MODECRAP', self.StartNumber, 'MODECRAP_NUM')
-        fsm.add_transition_list (string.digits, 'MODECRAP_NUM', self.BuildNumber, 'MODECRAP_NUM')
+        fsm.add_transition_list (ascii.digits, 'MODECRAP', self.StartNumber, 'MODECRAP_NUM')
+        fsm.add_transition_list (ascii.digits, 'MODECRAP_NUM', self.BuildNumber, 'MODECRAP_NUM')
         
         fsm.add_transition ('l', 'MODECRAP_NUM', self.DoMode, 'INIT')
         fsm.add_transition ('h', 'MODECRAP_NUM', self.DoMode, 'INIT')
 
         fsm.add_transition (';', 'NUMBER_1', None, 'SEMICOLON')
-        fsm.add_transition_list (string.digits, 'SEMICOLON', self.StartNumber, 'NUMBER_2')
-        fsm.add_transition_list (string.digits, 'NUMBER_2', self.BuildNumber, 'NUMBER_2')
+        fsm.add_transition_list (ascii.digits, 'SEMICOLON', self.StartNumber, 'NUMBER_2')
+        fsm.add_transition_list (ascii.digits, 'NUMBER_2', self.BuildNumber, 'NUMBER_2')
         fsm.add_transition (self.ANY, 'SEMICOLON', self.log, 'INIT')
         fsm.add_transition (';', 'NUMBER_2', None, 'SEMICOLON')
         fsm.add_transition ('H', 'NUMBER_2', self.DoCursorPosition, 'INIT')
@@ -547,7 +548,7 @@ class ANSITerminal(Terminal):
 
 class SelfTest(object):
     def __init__(self):
-        import proctools
+        from pycopia import proctools
         pm  = proctools.get_procmanager()
         proc = pm.spawnpty("vttest")
         self.term = get_ansiterm(proc, 24, 80, ReprPrinter(sys.stdout))
@@ -558,9 +559,9 @@ class SelfTest(object):
         self.logfile.close()
 
     def __call__(self):
-        import termtools, UserFile
+        from pycopia import tty
         fd = sys.stdin.fileno()
-        mode = termtools.tcgetattr(fd)
+        mode = tty.tcgetattr(fd)
         try:
             while 1:
                 print self.term
@@ -570,14 +571,15 @@ class SelfTest(object):
                 except EOFError:
                     break
         finally:
-            termtools.tcsetattr(fd, termtools.TCSANOW, mode)
+            tty.tcsetattr(fd, tty.TCSANOW, mode)
 
 def get_ansiterm(fo, rows=24, cols=80, printer=None):
-    import termtools
     screen = ANSIScreen(rows, cols)
     kb = ANSIKeyboard()
     t = ANSITerminal(fo, screen=screen, printer=printer, keyboard=kb)
-    termtools.set_winsize(fo.fileno(), rows, cols)
+    if os.isatty(fo.fileno()):
+        from pycopia import tty
+        tty.set_winsize(fo.fileno(), rows, cols)
     return t
 
 

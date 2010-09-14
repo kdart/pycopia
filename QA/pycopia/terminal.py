@@ -555,7 +555,7 @@ class Terminal(TerminalBase):
     def _read(self, N=100):
         while 1:
             try:
-                raw = self._pty._read(N)
+                raw = self._pty.read(N)
             except OSError, why:
                 if why[0] == EAGAIN:
                     continue
@@ -592,7 +592,7 @@ class AsyncTerminal(asyncinterface.AsyncInterface, Terminal):
     def _read(self, N=100):
         while 1:
             try:
-                raw = self._pty._read(N)
+                raw = self._pty.read(N)
             except OSError, why:
                 if why[0] == EAGAIN:
                     continue
