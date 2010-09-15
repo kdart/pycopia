@@ -239,11 +239,12 @@ class TestRunner(object):
         os.chdir(cf.logfiledir) # Make sure runner CWD is a writable place.
         cf.runnerstarttime = starttime = timelib.now()
         try:
-            rpt = cf.report
+            rpt = cf.get_report()
         except reports.ReportFindError, err:
-            cf.UI.error("No report with the name %r. Use of of the following." % (cf.reportname,))
-            cf.UI.print_list(err.args[0])
-            raise TestRunnerError("No such report name: %r" % (cf.reportname,))
+            cf.UI.error(str(err))
+            cf.UI.Print("Use one of the following:")
+            cf.UI.print_list(cf.reports.keys())
+            raise TestRunnerError("Cannot continue without report.")
         # Report file's names. save for future use.
         rpt.initialize(cf)
         cf.reportfilenames = rpt.filenames 

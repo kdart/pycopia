@@ -344,8 +344,13 @@ class TableCommands(CLI.BaseCommands):
         """describe
     Desribe the table columns."""
         for metadata in sorted(models.get_metadata(self._obj)):
-            self._print("%20.20s: %s (%s)" % (
-                    metadata.colname, metadata.coltype, metadata.default))
+            if metadata.coltype == "RelationProperty":
+                self._print("%20.20s: %s (%s) m2m=%s, nullable=%s, uselist=%s" % (
+                        metadata.colname, metadata.coltype, metadata.default, 
+                        metadata.m2m, metadata.nullable, metadata.uselist))
+            else:
+                self._print("%20.20s: %s (%s)" % (
+                        metadata.colname, metadata.coltype, metadata.default))
 
     def inspect(self, argv):
         """inspect ...
@@ -663,17 +668,25 @@ class ConfigCommands(CLI.BaseCommands):
             self._ui.error("No such item.")
 
     def _get(self, name):
-        try:
-            return _session.query(models.Config).filter(and_(
+        return _session.query(models.Config).filter(and_(
                     models.Config.name==name,
                     models.Config.container==self._obj,
                     models.Config.user==self._obj.user,
                     models.Config.testcase==self._obj.testcase,
                     models.Config.testsuite==self._obj.testsuite,
-                    )).one()
-        except NoResultFound:
-            return None
+                    )).scalar()
 
+    def rename(self, argv):
+        """rename <key> <newkey>
+    Rename a key name to another name."""
+        oldname = argv[1]
+        newname = argv[2]
+        row = self._get(oldname)
+        if row is not None:
+            row.name = newname
+            _session.commit()
+        else:
+            self._ui.error("No such item.")
 
 
 
@@ -1097,6 +1110,48 @@ Options:
                 break
     else:
         parser.interact()
+
+def dbconfig(argv):
+    """dbconfig [-?] [<database_url>]
+
+Provides an interactive session to the database configuration table.
+The argument may be a database URL. If not provide the URL specified on
+"storage.conf" is used.
+
+Options:
+   -?        = This help text.
+
+    """
+    global _session
+    from pycopia import getopt
+
+    try:
+        optlist, longopts, args = getopt.getopt(argv[1:], "?")
+    except getopt.GetoptError:
+            print dbconfig.__doc__
+            return
+    for opt, val in optlist:
+        if opt == "-?":
+            print dbconfig.__doc__
+            return
+
+    if args:
+        database = args[0]
+    else:
+        from pycopia import basicconfig
+        cf = basicconfig.get_config("storage.conf")
+        database = cf.database
+        del basicconfig, cf
+
+    io = CLI.ConsoleIO()
+    ui = CLI.UserInterface(io)
+    cmd = ConfigCommands(ui)
+    _session = models.get_session(database)
+    root = config.get_root(_session)
+    cmd._setup(root, "%%Ydbconfig%%N:%s> " % (root.name,))
+    cmd._environ["session"] = _session
+    parser = CLI.CommandParser(cmd, historyfile=os.path.expandvars("$HOME/.hist_dbconfig"))
+    parser.interact()
 
 
 if __name__ == "__main__":

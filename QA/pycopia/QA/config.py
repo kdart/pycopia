@@ -211,7 +211,9 @@ class RootContainer(config.Container):
         from pycopia import reports # XXX pycopia-QA circular dependency.
         if name is None:
             name = self.get("reportname", "default")
-        params = self.reports.get(name, (None,))
+        params = self.reports.get(name, None)
+        if params is None:
+            raise reports.ReportFindError("Reportname %r not found." % (name,))
         if type(params) is list:
             params = map(self._param_expand, params)
         else:
@@ -222,7 +224,7 @@ class RootContainer(config.Container):
     def _param_expand(self, tup):
         rv = []
         for arg in tup:
-            if type(arg) is str:
+            if isinstance(arg, basestring):
                 rv.append(self.expand(arg))
             else:
                 rv.append(arg)
