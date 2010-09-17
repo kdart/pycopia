@@ -851,10 +851,53 @@ class Equipment(object):
     def get_attribute_list(session):
         return AttributeType.get_attribute_list(session)
 
+    def add_interface(self, session, name, 
+                ifindex=None, interface_type=None, macaddr=None, ipaddr=None, network=None):
+        if interface_type is not None and isinstance(interface_type, basestring):
+            interface_type = session.query(InterfaceType).filter(InterfaceType.name==interface_type).one()
+        if network is not None and isinstance(network, basestring):
+            network = session.query(Network).filter(Network.name==network).one()
+        intf = create(Interface, name=name, equipment=self, ifindex=ifindex,
+                interface_type=interface_type, macaddr=macaddr, ipaddr=ipaddr,
+                network=network)
+        session.add(intf)
+        self.interfaces[name] = intf
+        session.commit()
 
-# properties provided elsewhere:
-#    attributes
-#    capabilities
+    def del_interface(self, session, name):
+        del self.interfaces[name]
+        session.commit()
+
+    def connect(self, session, intf, network, force=False):
+        """Connect this equipments named interface to a network.
+
+        If "force" is True then alter network part of address to match
+        network.
+        """
+        intf = self.interfaces[intf]
+        if isinstance(network, basestring):
+            network = session.query(Network).filter(Network.name==network).one()
+        # alter the IP mask to match the network
+        addr = intf.ipaddr
+        if addr is not None and network.ipnetwork is not None:
+            addr.maskbits = network.ipnetwork.maskbits
+            if addr.network != network.ipnetwork.network:
+                if force:
+                    addr.network = network.ipnetwork.network
+                else:
+                    raise ModelError("Can't add interface to network with different network numbers.")
+            intf.ipaddr = addr
+        intf.network = network
+        session.commit()
+
+    def disconnect(self, session, intf):
+        intf = self.interfaces[intf]
+        intf.network = None
+        session.commit()
+
+    # properties provided elsewhere:
+    #    attributes
+    #    capabilities
 
 mapper(Equipment, tables.equipment,
     properties={
@@ -1316,7 +1359,7 @@ def get_choices(session, modelclass, colname, order_by=None):
 
 # structure returned by get_metadata function.
 MetaDataTuple = collections.namedtuple("MetaDataTuple", 
-        "coltype, colname, default, m2m, nullable, uselist")
+        "coltype, colname, default, m2m, nullable, uselist, collection")
 
 
 def get_metadata_iterator(class_):
@@ -1324,39 +1367,28 @@ def get_metadata_iterator(class_):
         name = prop.key
         if name.startswith("_") or name == "id" or name.endswith("_id"):
             continue
-        proptype = type(prop)
-        m2m = False
-        default = None
-        nullable = None
-        uselist = False
-        if proptype is ColumnProperty:
-            coltype = type(prop.columns[0].type).__name__
-            try:
-                default = prop.columns[0].default
-            except AttributeError:
-                default = None
-            else:
-                if default is not None:
-                    default = default.arg(None)
-            nullable = prop.columns[0].nullable
-        elif proptype is RelationProperty:
-            coltype = RelationProperty.__name__
-            m2m = prop.secondary is not None
-            nullable = prop.local_side[0].nullable
-            uselist = prop.uselist
-        else:
+        md = _get_column_metadata(prop)
+        if md is None:
             continue
-        yield MetaDataTuple(coltype, str(name), default, m2m, nullable, uselist)
+        yield md
 
 
 def get_column_metadata(class_, colname):
     prop = class_mapper(class_).get_property(colname)
+    md = _get_column_metadata(prop)
+    if md is None:
+        raise ValueError("Not a column name: %r." % (colname,))
+    return md
+
+
+def _get_column_metadata(prop):
     name = prop.key
-    proptype = type(prop)
     m2m = False
     default = None
     nullable = None
     uselist = False
+    collection = None
+    proptype = type(prop)
     if proptype is ColumnProperty:
         coltype = type(prop.columns[0].type).__name__
         try:
@@ -1372,11 +1404,14 @@ def get_column_metadata(class_, colname):
         m2m = prop.secondary is not None
         nullable = prop.local_side[0].nullable
         uselist = prop.uselist
+        if prop.collection_class is not None:
+            collection = type(prop.collection_class()).__name__
+        else:
+            collection = "list"
     else:
-        raise ValueError("Not a column name: %r." % (colname,))
-    return MetaDataTuple(coltype, str(name), default, m2m, nullable, uselist)
+        return None
+    return MetaDataTuple(coltype, str(name), default, m2m, nullable, uselist, collection)
 
-# TODO: refactor above two implementations
 
 def get_metadata(class_):
     """Returns a list of MetaDataTuple structures.
@@ -1397,29 +1432,37 @@ def get_rowdisplay(class_):
 
 if __name__ == "__main__":
     import sys
+    import os
     from pycopia import autodebug
     if sys.flags.interactive:
         from pycopia import interactive
+    prop = class_mapper(Equipment).get_property("interfaces")
+    print prop
     print get_metadata(Equipment)
-    #props = list(class_mapper(Equipment).iterate_properties)
+    print get_column_metadata(Equipment, "interfaces")
+    print get_column_metadata(Network, "interfaces")
     sess = get_session()
-#    eq = sess.query(Equipment).get(2)
-#    print "eq = ", eq
-#    print "Attributes:"
-#    print eq.attributes
+    # assumes your host name is in the db for testing.
+    eq = sess.query(Equipment).filter(Equipment.name.like(os.uname()[1] + "%")).one()
+    print "eq = ", eq
+    print "Atributes:"
+    print eq.attributes
+    print "Interfaces:"
+    print eq.interfaces
+    #eq.add_interface(sess, "eth1", interface_type="ethernetCsmacd", ipaddr="172.17.101.2/24")
 #    print "Capabilities:"
 #    print eq.capabilities
 
-    for res in  TestResult.get_latest_results(sess):
-        print res
+#    for res in  TestResult.get_latest_results(sess):
+#        print res
 
-    print "\nlatest run:"
-    user = User.get_by_username(sess, "keith")
-    lr = TestResult.get_latest_run(sess, user)
-    print lr
-    print
+#    print "\nlatest run:"
+#    user = User.get_by_username(sess, "keith")
+#    lr = TestResult.get_latest_run(sess, user)
+#    print lr
+#    print
     #print dir(class_mapper(Equipment))
     #print
-    print class_mapper(Equipment).get_property("name")
+    #print class_mapper(Equipment).get_property("name")
 
 

@@ -246,6 +246,64 @@ class RowWithAttributesCommands(RowCommands):
             raise CLI.CLISyntaxError("Invalid subcommand.")
 
 
+class EquipmentRowCommands(RowWithAttributesCommands):
+
+    def interface(self, argv):
+        """interface [add-options] <add|del|list|edit> name 
+    Addd a new interface to this equipment. When adding, specify interface
+    parameters with long options:
+        --ipaddr=<ipaddr> 
+        --macaddr=<macaddr>
+        --iftype=<iftype>
+        --network=<netname>
+        --ifindex=<ifindex>
+    when deleting simply specify the name.
+    """
+        opts, longopts, args = self.getopt(argv, "")
+        for opt, arg in opts:
+            pass
+        cmd = args[0]
+        if cmd.startswith("add"):
+            name = args[1]
+            self._obj.add_interface(_session, name, 
+                ifindex=int(longopts.get("ifindex", 1)), 
+                interface_type=longopts.get("iftype", "ethernetCsmacd"), 
+                macaddr=longopts.get("macaddr"), 
+                ipaddr=longopts.get("ipaddr"), 
+                network=longopts.get("network"))
+        elif cmd.startswith("del"):
+            name = args[1]
+            if self._ui.yes_no("Delete interface %s, are you sure?" % (name,)):
+                self._obj.del_interface(_session, name)
+        elif cmd.startswith("lis"):
+            for intf in self._obj.interfaces.values():
+                self._print(intf)
+        elif cmd.startswith("edi"):
+            name = args[1]
+            intf = self._obj.interfaces[name]
+            cmd = self.clone(InterfaceRowCommands)
+            cmd._setup(intf, InterfaceRowCommands.get_prompt(intf))
+            raise CLI.NewCommand(cmd)
+
+    def connect(self, argv):
+        """connect [-f] <ifname> <networkname>
+    Connect an interface to a network."""
+        force = False
+        opts, longopts, args = self.getopt(argv, "f")
+        for opt, arg in opts:
+            if opt == "-f":
+                force = True
+        ifname = args[0]
+        network = args[1]
+        self._obj.connect(_session, ifname, network, force)
+
+    def disconnect(self, argv):
+        """disconnect <ifname>
+    Disconnect an interface from its network."""
+        ifname = argv[1]
+        self._obj.disconnect(_session, ifname)
+
+
 class TableCommands(CLI.BaseCommands):
 
     @classmethod
@@ -345,9 +403,9 @@ class TableCommands(CLI.BaseCommands):
     Desribe the table columns."""
         for metadata in sorted(models.get_metadata(self._obj)):
             if metadata.coltype == "RelationProperty":
-                self._print("%20.20s: %s (%s) m2m=%s, nullable=%s, uselist=%s" % (
+                self._print("%20.20s: %s (%s) m2m=%s, nullable=%s, uselist=%s, collection=%s" % (
                         metadata.colname, metadata.coltype, metadata.default, 
-                        metadata.m2m, metadata.nullable, metadata.uselist))
+                        metadata.m2m, metadata.nullable, metadata.uselist, metadata.collection))
             else:
                 self._print("%20.20s: %s (%s)" % (
                         metadata.colname, metadata.coltype, metadata.default))
@@ -702,7 +760,7 @@ _TABLE_EDITOR_MAP = {
 }
 
 _ROW_EDITOR_MAP = {
-    "Equipment": RowWithAttributesCommands,
+    "Equipment": EquipmentRowCommands,
     "EquipmentModel": RowWithAttributesCommands,
     "Environment": RowWithAttributesCommands,
     "Software": RowWithAttributesCommands,
@@ -735,15 +793,27 @@ def update_row(modelclass, dbrow, data):
                 t = _session.query(relmodel).filter(
                                 relmodel.id.in_([int(i[0]) for i in value])).all()
                 setattr(dbrow, metadata.colname, t)
+            elif isinstance(value, dict):
+                t = _session.query(relmodel).filter(
+                                relmodel.id.in_([int(i[0]) for i in value.values()])).all()
+                col = getattr(dbrow, metadata.colname)
+                for o in t:
+                    col.set(o)
             elif value is None:
                 if metadata.uselist:
-                    value = []
+                    if metadata.collection == "MappedCollection":
+                        value = {}
+                    else:
+                        value = []
                 setattr(dbrow, metadata.colname, value)
             else:
                 if value:
                     t = _session.query(relmodel).get(value)
                     if metadata.uselist:
-                        t = [t]
+                        if metadata.collection == "MappedCollection":
+                            t = {str(t): t}
+                        else:
+                            t = [t]
                     setattr(dbrow, metadata.colname, t)
         elif metadata.coltype == "PickleText":
             if value is None:
@@ -834,14 +904,20 @@ def new_relation_input(ui, modelclass, metadata):
     if not choices:
         ui.Print("%s has no choices." % metadata.colname)
         if metadata.uselist:
-            return []
+            if metadata.collection == "MappedCollection":
+                return {}
+            else:
+                return []
         else:
             return None
     if metadata.uselist:
         chosen = ui.choose_multiple(choices, None, "%%I%s%%N" % metadata.colname)
         if not chosen and metadata.nullable:
-            chosen = None
-        return chosen
+            return None
+        if metadata.collection == "MappedCollection":
+            return dict((str(it), it) for it in chosen)
+        else:
+            return chosen
     else:
         if metadata.nullable:
             choices.insert(0, (None, "Nothing"))
@@ -949,15 +1025,20 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
     if not choices:
         ui.Print("%s has no choices." % metadata.colname)
         if metadata.uselist:
-            setattr(dbrow, metadata.colname, [])
+            if metadata.collection == "MappedCollection":
+                setattr(dbrow, metadata.colname, {})
+            else:
+                setattr(dbrow, metadata.colname, [])
         else:
             setattr(dbrow, metadata.colname, None)
         return
-
     current = getattr(dbrow, metadata.colname)
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
     if metadata.uselist:
-        chosen = [(crow.id, str(crow)) for crow in current]
+        if metadata.collection == "MappedCollection":
+            chosen = [(crow.id, str(crow)) for crow in current.values()]
+        else:
+            chosen = [(crow.id, str(crow)) for crow in current]
         for chosenone in chosen:
             choices.remove(chosenone)
         chosen = ui.choose_multiple(choices, chosen, "%%I%s%%N" % metadata.colname)
@@ -965,7 +1046,12 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
                         relmodel.id.in_([s[0] for s in chosen])).all()
         if not t and metadata.nullable:
             t = None
-        setattr(dbrow, metadata.colname, t)
+        if metadata.collection == "MappedCollection" and t is not None:
+            col = getattr(dbrow, metadata.colname)
+            for val in t:
+                col.set(val)
+        else:
+            setattr(dbrow, metadata.colname, t)
     else:
         if metadata.nullable:
             choices.insert(0, (None, "Nothing"))
