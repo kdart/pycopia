@@ -22,7 +22,10 @@ Objects for running strip charts for IF-MIB variables.
 """
 
 import sys
+from math import log
+
 import gtk
+
 
 try:
     import rtgraph
@@ -47,7 +50,10 @@ class SNMPChannel(rtgraph.Channel):
             self.rater.update(self._t)
         except SNMPNoResponse:
             return None
-        return self.rater.EWRA
+        try:
+            return log(self.rater.EWRA)
+        except (TypeError, ValueError):
+            return 0.0
 
     def hasChanged(self, graph):
         self._t = graph.lastUpdateTime
@@ -85,7 +91,7 @@ def unicast_packets(argv, community="public"):
                           SNMPChannel(sess, IF_MIB.ifOutUcastPkts, ifindex, color=(0,1,0))],
             bgColor    = (0, 0, 0.3),
             gridColor  = (0, 0, 0.5),
-            range      = (0, 3500),
+            range      = (0, 19),
             )
         graph.show()
 
