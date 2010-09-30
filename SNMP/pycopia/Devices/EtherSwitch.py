@@ -25,14 +25,12 @@ from pycopia.SNMP import Manager
 
 MIBNAMES = [
  "BRIDGE_MIB",
- "CONFIG_MIB",
  "ENTITY_MIB",
  "EtherLike_MIB",
  "IANA_RTPROTO_MIB",
  "IANAifType_MIB",
  "IF_MIB",
  "MAU_MIB",
- "NETSWITCH_MIB",
  "P_BRIDGE_MIB",
  "Q_BRIDGE_MIB",
  "RFC1213_MIB",
@@ -40,8 +38,6 @@ MIBNAMES = [
  "RMON2_MIB",
  "SNMP_NOTIFICATION_MIB",
  "SNMP_TARGET_MIB",
- "SNMP_USER_BASED_SM_MIB",
- "SNMP_VIEW_BASED_ACM_MIB",
 ]
 MIBS = map(lambda n: __import__("pycopia.mibs.%s" % n, globals(), locals(), ["*"]), MIBNAMES)
 
