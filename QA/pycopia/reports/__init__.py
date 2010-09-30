@@ -270,7 +270,7 @@ the filename specified is "-" then use stdout.  """
         self.write(self._formatter.analysis(text))
 
     def add_data(self, data, note=None):
-        self.write(self._formatter.text("  DATA note: %s\n" % note))
+        self.write(self._formatter.text("  DATA %r note: %s\n" % (data, note)))
 
     def add_url(self, text, url):
         self.write(self._formatter.url(text, url))

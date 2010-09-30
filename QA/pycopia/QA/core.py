@@ -670,7 +670,7 @@ class Test(object):
                     os.path.dirname(sys.modules[cls.__module__].__file__), fname)
         return UserFile.UserFile(fullname)
 
-    def save_data(self, obj, note=None):
+    def save_data(self, data, note=None):
         """Send an add_data message to the report. The object is serialized (pickled).
 
         Arguments:
