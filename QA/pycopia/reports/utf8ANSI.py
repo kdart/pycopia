@@ -99,7 +99,7 @@ class UTF8Formatter(reports.NullFormatter):
         lt = len(text)
         bl = _BOXCHARS[level]
         s = [u"\n" + bl[0] + (bl[1] * lt) + bl[3]]
-        s.append(bl[2] + unicode(text, "ascii") + bl[2])
+        s.append(bl[2] + unicode(text.encode("ascii"), "ascii") + bl[2])
         s.append(bl[4] + (bl[1] * lt) + bl[5])
         s.append(u"\n")
         return u"\n".join(s).encode("utf8")
@@ -117,7 +117,7 @@ class UTF8Formatter(reports.NullFormatter):
         return "\n"
 
     def paragraph(self, text, level=1):
-        return (unicode(text, "ascii")+unichr(0xB6)).encode("utf8")
+        return (unicode(text.encode("ascii"), "ascii")+unichr(0xB6)).encode("utf8")
 
 
 def cut_string(s, maxlen=66):

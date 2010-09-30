@@ -482,10 +482,7 @@ class Referer(HTTPHeader):
 class Authorization(HTTPHeader):
     HEADER = "Authorization"
     def __str__(self):
-        if self.authtype == "basic":
-            val = "Basic " + base64.encodestring("%s:%s" % (self.username, self.password))[:-1] # and chop the added newline
-        else:
-            raise ValueError, "unkwown authtype: %s" % (self.authtype,)
+        val = self.encode()
         return "%s: %s" % (self._name, val)
 
     def __repr__(self):
@@ -496,12 +493,21 @@ class Authorization(HTTPHeader):
         self.authtype = authtype
         self.username = username
         self.password = password
+        if username and password:
+            self.value = self.encode()
 
     def parse_value(self, s):
         self.value = s.lstrip()
         authtype, b64part = tuple(s.split(None, 2))
         self.authtype = authtype.lower()
         self.username, self.password = tuple(base64.decodestring(b64part).split(":"))
+
+    def encode(self):
+        if self.authtype == "basic":
+            value = "Basic " + base64.encodestring("%s:%s" % (self.username, self.password))[:-1] # and chop the added newline
+        else:
+            raise ValueError("unknown authtype: %s" % (self.authtype,))
+        return value
 
 
 # see: <http://www.mozilla.org/build/revised-user-agent-strings.html>

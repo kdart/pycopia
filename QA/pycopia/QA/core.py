@@ -162,7 +162,7 @@ class Test(object):
         opts = cls.OPTIONS
         pl = []
         for prereq in cls.PREREQUISITES:
-            if type(prereq) is str:
+            if isinstance(prereq, basestring):
                 pl.append(PreReq(prereq))
             elif type(prereq) is tuple:
                 pl.append(PreReq(*prereq))
@@ -697,7 +697,7 @@ class PreReq(object):
     No arguments means ANY arguments.
     """
     def __init__(self, implementation, args=None, kwargs=None):
-        self.implementation = implementation
+        self.implementation = str(implementation)
         self.args = args or ()
         self.kwargs = kwargs or {}
 

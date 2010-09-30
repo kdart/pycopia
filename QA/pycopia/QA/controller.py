@@ -20,8 +20,8 @@ class ControllerError(AssertionError):
 
 # base class for all types of Controllers. This is the basic interface.
 class Controller(object):
-    def __init__(self, interface, logfile=None):
-        self._intf = interface # the low-level device interface, whatever it is.
+    def __init__(self, equipment, logfile=None):
+        self._equipment = equipment
         if logfile:
             self.set_logfile(logfile)
         self.initialize()
