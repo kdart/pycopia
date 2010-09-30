@@ -675,11 +675,8 @@ class Test(object):
 
         Arguments:
             obj: any python object.
-                documentation. Only used for the `packed` datatype.
             note: A text note describing the data for future users (optional).
         """
-        import cPickle as pickle
-        data = pickle.dumps(obj)
         self._report.add_data(data, note)
 
     def add_datapoint(self, value):
