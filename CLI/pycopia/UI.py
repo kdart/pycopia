@@ -30,18 +30,17 @@ from pycopia import cliutils
 from pycopia import tty
 
 from pycopia.fsm import FSM, ANY
-from pycopia.aid import IF
 
 # set the PROMPT ignore depending on whether or not readline module is
 # available.
-#try:
-#    import readline
-#    PROMPT_START_IGNORE = '\001'
-#    PROMPT_END_IGNORE = '\002'
-#except ImportError:
-#    readline = None
-#    PROMPT_START_IGNORE = ''
-#    PROMPT_END_IGNORE = ''
+try:
+    import readline
+    PROMPT_START_IGNORE = '\001'
+    PROMPT_END_IGNORE = '\002'
+except ImportError:
+    readline = None
+    PROMPT_START_IGNORE = ''
+    PROMPT_END_IGNORE = ''
 
 from types import MethodType
 
@@ -362,7 +361,7 @@ class UserInterface(object):
         return cliutils.edit_text(text, self._get_prompt("PS4", prompt))
 
     def yes_no(self, prompt, default=True):
-        yesno = cliutils.get_input(self.format(prompt), IF(default, "Y", "N"), self._io.raw_input)
+        yesno = cliutils.get_input(self.format(prompt), "Y" if default else "N", self._io.raw_input)
         return yesno.upper().startswith("Y")
 
     def get_key(self, prompt=""):
@@ -406,24 +405,25 @@ class UserInterface(object):
     # FSM for prompt expansion
     def _initfsm(self):
         # maps percent-expansion items to some value.
+        theme = self._theme
         self._EXPANSIONS = {
-                    "I":self._theme.BRIGHT, 
-                    "N":self._theme.NORMAL, 
-                    "D":self._theme.DEFAULT,
-                    "R":self._theme.BRIGHTRED, 
-                    "G":self._theme.BRIGHTGREEN, 
-                    "Y":self._theme.BRIGHTYELLOW,
-                    "B":self._theme.BRIGHTBLUE, 
-                    "M":self._theme.BRIGHTMAGENTA, 
-                    "C":self._theme.BRIGHTCYAN, 
-                    "W":self._theme.BRIGHTWHITE, 
-                    "r":self._theme.RED, 
-                    "g":self._theme.GREEN, 
-                    "y":self._theme.YELLOW,
-                    "b":self._theme.BLUE, 
-                    "m":self._theme.MAGENTA, 
-                    "c":self._theme.CYAN, 
-                    "w":self._theme.WHITE, 
+                    "I":PROMPT_START_IGNORE + theme.BRIGHT + PROMPT_END_IGNORE, 
+                    "N":PROMPT_START_IGNORE + theme.NORMAL + PROMPT_END_IGNORE, 
+                    "D":PROMPT_START_IGNORE + theme.DEFAULT + PROMPT_END_IGNORE,
+                    "R":PROMPT_START_IGNORE + theme.BRIGHTRED + PROMPT_END_IGNORE, 
+                    "G":PROMPT_START_IGNORE + theme.BRIGHTGREEN + PROMPT_END_IGNORE, 
+                    "Y":PROMPT_START_IGNORE + theme.BRIGHTYELLOW + PROMPT_END_IGNORE,
+                    "B":PROMPT_START_IGNORE + theme.BRIGHTBLUE + PROMPT_END_IGNORE, 
+                    "M":PROMPT_START_IGNORE + theme.BRIGHTMAGENTA + PROMPT_END_IGNORE, 
+                    "C":PROMPT_START_IGNORE + theme.BRIGHTCYAN + PROMPT_END_IGNORE, 
+                    "W":PROMPT_START_IGNORE + theme.BRIGHTWHITE + PROMPT_END_IGNORE, 
+                    "r":PROMPT_START_IGNORE + theme.RED + PROMPT_END_IGNORE, 
+                    "g":PROMPT_START_IGNORE + theme.GREEN + PROMPT_END_IGNORE, 
+                    "y":PROMPT_START_IGNORE + theme.YELLOW + PROMPT_END_IGNORE,
+                    "b":PROMPT_START_IGNORE + theme.BLUE + PROMPT_END_IGNORE, 
+                    "m":PROMPT_START_IGNORE + theme.MAGENTA + PROMPT_END_IGNORE, 
+                    "c":PROMPT_START_IGNORE + theme.CYAN + PROMPT_END_IGNORE, 
+                    "w":PROMPT_START_IGNORE + theme.WHITE + PROMPT_END_IGNORE, 
                     "n":"\n", "l":self._tty, "h":self._hostname, "u":self._username, 
                     "$": self._priv, "d":self._cwd, "L": self._shlvl, "t":self._time, 
                     "T":self._date}

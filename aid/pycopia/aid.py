@@ -264,7 +264,7 @@ def Printerr(*args):
     seflush()
 
 def IF(test, tv, fv=None):
-    """Functional 'if' test. """
+    """Functional 'if' test. Deprecated, use new Python conditional instead."""
     if test:
         return tv
     else:
