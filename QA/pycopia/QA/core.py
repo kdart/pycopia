@@ -513,6 +513,14 @@ class Test(object):
         else:
             return self.incomplete("Could not perform test.")
 
+    def report_build(self, buildstring):
+        """Report any build information. Usually a version or build
+        number.
+        The buildstring parameter must match the following pattern:
+            <projectname>[ .:]<major>.<minor>.<subminor>.<build>
+        """
+        self._report.add_message("BUILD", buildstring, 1)
+
     # assertion methods make it convenient to check conditions. These names
     # match those in the standard `unittest` module for the benefit of those
     # people using that module.

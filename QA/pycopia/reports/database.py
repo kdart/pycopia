@@ -45,7 +45,7 @@ _COLUMNS = {
     "arguments": None,          # TESTARGUMENTS (Test), RUNNERARGUMENTS (module)
     "result": None,             # PASSED, FAILED, EXPECTED_FAIL, INCOMPLETE, ABORT
     "diagnostic": None,         # The diagnostic message before failure.
-    "testresultdata": None,     # optional serialized data (reference)
+    "data": None,               # optional serialized data (reference)
     "resultslocation": None,    # url
     "testimplementation": None, # implementation 
     "reportfilename": None,
@@ -342,7 +342,7 @@ class DatabaseReport(reports.NullReport):
         testdata = models.create(models.TestResultData, data=data, note=note)
         if not self._debug:
             self._dbsession.add(testdata)
-        self._currentresult.set("testresultdata", testdata)
+        self._currentresult.set("data", testdata)
 
     def add_url(self, text, url): 
         self._rootresult.set("resultslocation", url)

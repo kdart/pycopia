@@ -1176,9 +1176,13 @@ mapper(TestJob, tables.test_jobs,
 
 
 class TestResultData(object):
-    def __init__(self, data, note=None):
-        self.data = data
-        self.note = note
+    ROW_DISPLAY = ("note",)
+
+    def __str__(self):
+        return "TestResultData: note: %r" % (self.note,)
+
+    def __repr__(self):
+        return "TestResultData(%r, %r)" % (self.data, self.note)
 
 mapper(TestResultData, tables.test_results_data)
 
@@ -1230,7 +1234,7 @@ class TestResult(object):
 mapper(TestResult, tables.test_results,
     properties = {
         "tester": relation(User),
-        "data": relation(TestResultData, backref="testresult"),
+        "data": relation(TestResultData),
         "environment": relation(Environment, order_by=tables.environments.c.name),
         "testcase": relation(TestCase),
         "build": relation(ProjectVersion),
