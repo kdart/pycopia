@@ -124,17 +124,19 @@ def _update_row(data, klass, dbrow, metadata, value):
         if isinstance(value, list) and value:
             t = dbsession.query(relmodel).filter(
                             relmodel.id.in_([int(i) for i in value])).all()
+            if metadata.collection == "MappedCollection":
+                t = dict((r.name, r) for r in t)
             setattr(dbrow, metadata.colname, t)
         elif value is None:
             if metadata.uselist:
-                value = []
+                value = {} if metadata.collection == "MappedCollection" else []
             setattr(dbrow, metadata.colname, value)
         else:
             value = int(value)
             if value:
                 t = dbsession.query(relmodel).get(value)
                 if metadata.uselist:
-                    t = [t]
+                    t = {t.name: t} if metadata.collection == "MappedCollection" else [t]
                 setattr(dbrow, metadata.colname, t)
     elif metadata.coltype == "PickleText":
         if value is None:
@@ -265,6 +267,8 @@ def create_valuetypeinput(node, modelclass, metadata, row):
 def create_relation_input(node, modelclass, metadata, row):
     vlist = []
     current = getattr(row, metadata.colname)
+    if metadata.collection == "MappedCollection":
+        current = current.values()
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
     q = dbsession.query(relmodel)
     try:

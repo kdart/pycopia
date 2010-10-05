@@ -34,10 +34,10 @@ class Controller(object):
         self._logfile = lf
 
     def __getattr__(self, name):
-        return getattr(self._intf, name)
+        return getattr(self._equipment, name)
 
     def __str__(self):
-        return "<%s: %r>" % (self.__class__.__name__, self._intf)
+        return "<%s: %r>" % (self.__class__.__name__, self._equipment)
 
     def initialize(self):
         pass
