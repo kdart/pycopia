@@ -487,6 +487,26 @@ class EquipmentRuntime(object):
 
     initial_controller = property(get_initial_controller)
 
+    def get_software(self):
+        return SoftwareRuntime(self._equipment.software[0])
+
+    software = property(get_software)
+
+
+class SoftwareRuntime(object):
+
+    def __init__(self, software):
+        self.name = software.name
+        d = {}
+        d["category"] = software.category.name
+        d["manufacturer"] = software.manufacturer.name
+        for prop in software.attributes: # These may override the attributes above.
+            d[prop.type.name] = prop.value
+        self._attributes = d
+
+    def __getitem__(self, name):
+        return self._attributes[name]
+
 
 def get_config(_extrafiles=None, initdict=None, **kwargs):
     """get_config([extrafiles], [initdict=], [**kwargs])

@@ -125,24 +125,44 @@ class JobRunnerInterface(object):
         for testjob in get_test_jobs(args):
             if testjob is None:
                 continue
-
-            if testjob.parameters:
-                params = _parse_parameters(testjob.parameters)
-                cf.arguments = testjob.parameters.split()
-            else:
-                params = {}
-            cf.argv = [testjob.suite.name]
-            cf.comment = "Automated test job %s(%s)." % (testjob.name, testjob.id)
             cf.environmentname = testjob.environment.name
-            cf.reportname = testjob.reportname
-            cf.evalupdate(params)
-            self.runner.set_options(params)
+            if self.is_job_running(testjob.id):
+                continue
+            self.create_job_lock(testjob.id)
+            try:
+                if testjob.parameters:
+                    params = _parse_parameters(testjob.parameters)
+                    cf.arguments = testjob.parameters.split()
+                else:
+                    params = {}
+                cf.argv = [testjob.suite.name]
+                cf.comment = "Automated test job %s(%s)." % (testjob.name, testjob.id)
+                cf.reportname = testjob.reportname
+                cf.evalupdate(params)
+                self.runner.set_options(params)
 
-            suite = get_suite(testjob.suite, cf)
+                suite = get_suite(testjob.suite, cf)
+                self.runner.initialize()
+                self.runner.run_object(suite)
+                self.runner.finalize()
+            finally:
+                self.remove_job_lock(testjob.id)
 
-            self.runner.initialize()
-            self.runner.run_object(suite)
-            self.runner.finalize()
+    def create_job_lock(self, jobid):
+        lf = self._get_job_lockfile(jobid)
+        open(lf, "w").close()
+
+    def remove_job_lock(self, jobid):
+        lf = self._get_job_lockfile(jobid)
+        os.unlink(lf)
+
+    def is_job_running(self, jobid):
+        lf = self._get_job_lockfile(jobid)
+        return os.path.exists(lf)
+
+    def _get_job_lockfile(self, jobid):
+        envname = self.runner.config.environmentname
+        return "/var/tmp/testjob_{0}_{0}.lock".format(envname, jobid)
 
 
 def get_suite(dbsuite, config):
