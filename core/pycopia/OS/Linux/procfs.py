@@ -138,6 +138,14 @@ class ProcStat(object):
             self.stats = None
         return self
 
+    def load(self, statstring):
+        self.stats = tuple(map(self._toint, statstring.split()))
+        self.pid = None
+        self.cmdline = None
+        self.ttyname = None
+        self.uid = None
+        self.gid = None
+
     def statestr(self):
         try:
             return self._STATSTR[self.stats[self._STATINDEX["state"]]]
@@ -240,6 +248,31 @@ class ProcStat(object):
             return getattr(self, name)
         except AttributeError, err:
             raise KeyError, err
+
+
+class CPUMeasurer(object):
+    """Helper to measure CPU utilization of a process."""
+    def __init__(self, pid=None):
+        self._ps = ProcStat(pid)
+
+    def start(self, timestamp, statstring=None):
+        ps = self._ps
+        self._starttime = timestamp
+        if statstring:
+            ps.load(statstring)
+        else:
+            ps.reread()
+        self._start_tics = ps.tms_stime + ps.tms_utime
+
+    def end(self, timestamp, statstring=None):
+        ps = self._ps
+        if statstring:
+            ps.load(statstring)
+        else:
+            ps.reread()
+        end_tics = ps.tms_stime + ps.tms_utime
+        return float(end_tics - self._start_tics) / (timestamp - self._starttime)
+
 
 
 class ProcStatTable(object):
@@ -347,10 +380,16 @@ def killall(procname, sig=SIGTERM):
         os.kill(pid, sig)
 
 def _test(argv):
-    ps()
+    #ps()
+    import time
+    measurer = CPUMeasurer(os.getpid())
+    measurer.start(time.time())
+    for x in range(10000000):
+        x = x*2
+    time.sleep(1)
+    print measurer.end(time.time())
 
 if __name__ == "__main__":
     import sys
     _test(sys.argv)
-
 

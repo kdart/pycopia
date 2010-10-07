@@ -458,7 +458,7 @@ class EquipmentRuntime(object):
     def __getitem__(self, name):
         return self._attributes[name]
 
-    def __del__(self):
+    def close(self):
         if self._controller is not None:
             try:
                 self._controller.close()

@@ -256,6 +256,16 @@ file-like object as well)."""
     def is_open(self):
         return bool(self._fo)
 
+    def clone(self, klass=None):
+        try:
+            newfo = self._fo.dup()
+        except AttributeError:
+            fd = os.dup(self._fo.fileno())
+            newfo = os.fdopen(fd, "w")
+        if klass is None:
+            klass = self.__class__
+        return klass(newfo, prompt=self._prompt, timeout=self.default_timeout, logfile=self._log)
+
     def interrupt(self):
         """interrupt() sends the INTR character to the stream. Actually,
 delegates this to the wrapped Process object. Otherwise, does nothing."""
