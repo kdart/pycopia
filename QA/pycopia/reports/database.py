@@ -166,6 +166,10 @@ def get_user(conf):
         user = models.create_user(sess, pwent)
     return user
 
+def get_environment(conf):
+    sess = conf.session
+    name = conf.get("environmentname", "default")
+    return sess.query(models.Environment).filter(models.Environment.name==name).one()
 
 # When constructing a report from report messages:
 # transition table:
@@ -177,13 +181,16 @@ def get_user(conf):
 
 class DatabaseReport(reports.NullReport):
 
+    MIMETYPE = property(lambda self: self._MIMETYPE)
+
     def initialize(self, cf):
         # here is where information from the global configuration that is
         # needed in the database record is kept until the records are written
         # in the finalize method.
+        self._dbsession = cf.session
         self._debug = cf.flags.DEBUG
-        self._environment = cf.environment.environment
         self._testid = None
+        self._environment = get_environment(cf)
         self._rootresult = ResultHolder()
         self._rootresult.set("environment", self._environment)
         self._rootresult.set("result", NA)
@@ -195,9 +202,7 @@ class DatabaseReport(reports.NullReport):
             user = get_user(cf)
         self._user = user
         self._rootresult.set("tester", self._user)
-        self._dbsession = cf.session
 
-    MIMETYPE = property(lambda self: self._MIMETYPE)
 
     def finalize(self):
         self._currentresult = None
