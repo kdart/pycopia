@@ -213,7 +213,7 @@ device = Manager( snmp_session )
     def __setattr__(self, key, value):
         try:
             obj = self.scalars[key]()
-            obj.set(self.session, value)
+            obj.set(value, self.session)
         except KeyError:
             if __debug__:
                 warnings.warn("Setting local object in manager named: %r" % (key,))
