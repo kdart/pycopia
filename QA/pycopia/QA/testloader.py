@@ -77,20 +77,20 @@ def get_suite(dbsuite, config):
     Return the implementation class of a TestSuite, or a generic Suite
     instance if not defined.
     """
+    name = dbsuite.name
+    if " " in name:
+        name = identifier(name)
     impl = dbsuite.suiteimplementation
     if impl:
         try:
             obj = module.get_object(impl)
         except module.ObjectImportError:
-            logging.warn("Did not fine suite implementation %r." % (impl,))
+            logging.warn("Did not find suite implementation %r." % (impl,))
         else:
             if type(obj) is type and issubclass(obj, core.TestSuite):
-                return obj(config)
+                return obj(config, name=name)
             else:
                 raise InvalidObjectError("%r is not a TestSuite class object." % (obj,))
-    name = dbsuite.name
-    if " " in name:
-        name = identifier(name)
     return core.TestSuite(config, name=name)
 
 

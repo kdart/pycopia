@@ -77,7 +77,6 @@ class TestRunner(object):
         cf = self.config
         basename = "_".join(obj.test_name.split("."))
         cf.reportfilename = basename
-        cf.logbasename = "%s.log" % (basename,)
         # resultsdir is where you would place any resulting data files. This
         # is also where any report object or log files are placed.
         cf.resultsdir = os.path.join(

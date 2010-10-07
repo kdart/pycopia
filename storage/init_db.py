@@ -505,7 +505,7 @@ def do_config(session):
     flags.VERBOSE = 0 # levels of verbosity
     flags.DEBUG = 0 # levels of debugging
     flags.INTERACTIVE = False # Don't run interactive tests also, by default
-    root["logbasename"] = "pycopia.log"
+    root["logbasename"] = "testrun.log"
     root["logfiledir"] = "/var/tmp"
     root["reportbasename"] = "-"
     root["resultsdirbase"] = '/var/www/localhost/htdocs/testresults'

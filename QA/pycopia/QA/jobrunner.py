@@ -162,7 +162,7 @@ class JobRunnerInterface(object):
 
     def _get_job_lockfile(self, jobid):
         envname = self.runner.config.environmentname
-        return "/var/tmp/testjob_{0}_{0}.lock".format(envname, jobid)
+        return "/var/tmp/testjob_{0}_{1}.lock".format(envname, jobid)
 
 
 def get_suite(dbsuite, config):
