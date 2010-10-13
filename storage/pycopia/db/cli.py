@@ -145,6 +145,8 @@ class RowCommands(CLI.GenericCLI):
             for metadata in self._metadata:
                 self._print("%20.20s: %s" % (metadata.colname, getattr(self._obj, metadata.colname)))
 
+    ls = show
+
     def edit(self, argv):
         """edit [<fieldname>]
     Edit this row object."""
@@ -238,6 +240,9 @@ class RowWithAttributesCommands(RowCommands):
         elif cmd.startswith("del"):
             name = argv[2]
             self._obj.del_attribute(_session, name)
+        elif cmd.startswith("show"):
+            for attr in self._obj.attributes:
+                self._print(attr)
         elif cmd.startswith("lis"):
             self._print("Possible attributes:")
             for name, basetype in self._obj.__class__.get_attribute_list(_session):
@@ -249,7 +254,7 @@ class RowWithAttributesCommands(RowCommands):
 class EquipmentRowCommands(RowWithAttributesCommands):
 
     def interface(self, argv):
-        """interface [add-options] <add|del|list|edit> name 
+        """interface [add-options] <add|del|show|edit> name 
     Addd a new interface to this equipment. When adding, specify interface
     parameters with long options:
         --ipaddr=<ipaddr> 
@@ -275,7 +280,7 @@ class EquipmentRowCommands(RowWithAttributesCommands):
             name = args[1]
             if self._ui.yes_no("Delete interface %s, are you sure?" % (name,)):
                 self._obj.del_interface(_session, name)
-        elif cmd.startswith("lis"):
+        elif cmd.startswith("sho"):
             for intf in self._obj.interfaces.values():
                 self._print(intf)
         elif cmd.startswith("edi"):
@@ -336,67 +341,35 @@ class TableCommands(CLI.BaseCommands):
     def delete(self, argv):
         """delete ...
     Delete the selected row."""
-        dbrow = self._select(argv)
-        if self._ui.yes_no("Delete %s, are you sure?" % (dbrow,)):
-            _session.delete(dbrow)
-            _session.commit()
+        dbrow = self._select_one(argv)
+        if dbrow is not None:
+            if self._ui.yes_no("Delete %s, are you sure?" % (dbrow,)):
+                _session.delete(dbrow)
+                _session.commit()
 
     def select(self, argv):
         """select <query>
-    Select one row by query parameters. 
-
-    If the query is an integer, return that ID.
-    Otherwise arguments are treated as a WHERE clause. If you use a clause
-    with a colon parameters then provide the parameters as long options.
-    If there are not regular arguments, treat the long options as the WHERE clause.
+    Display rows matching query parameters.
     """
-        dbrow = self._select(argv)
-        self._print(dbrow)
-
-    def _select(self, argv):
-        args, kwargs = CLI.breakout_args(argv[1:], self._environ)
-        try:
-            q = _session.query(self._obj)
-            if args:
-                try:
-                    rowid = int(args[0])
-                except ValueError:
-                    pass
-                else:
-                    return q.get(rowid)
-                q = q.filter(" ".join(args))
-                if kwargs:
-                    q = q.params(**kwargs)
-                return q.one()
-            else:
-                for k, v in kwargs.iteritems():
-                    q = q.filter(getattr(self._obj, k) == v)
-                return q.one()
-        except:
-            _session.rollback()
-            raise
+        q = self._get_query(argv)
+        for dbrow in q.all():
+            self._print(dbrow)
 
     def ls(self, argv):
-        """ls [<attribute>=<criteria>...]
-    List all current entries."""
-        args, kwargs = CLI.breakout_args(argv[1:], self._environ)
+        """ls [<criteria>]
+    List all current entries, or entries filtered by criteria.
+    Criteria can be a simple expression of groups of name, operator, and
+    value. a name prefixed by "=" means order by that name.
+    """
         mapper = models.class_mapper(self._obj)
         pkname = str(mapper.primary_key[0].name)
-        try:
-            q = _session.query(self._obj)
-            if args:
-                q = q.filter(" ".join(args))
-                if kwargs:
-                    q = q.params(**kwargs)
-            else:
-                for k, v in kwargs.iteritems():
-                    q = q.filter(getattr(self._obj, k) == v)
-        except:
-            _session.rollback()
-            raise
+        q = self._get_query(argv)
+        if not q._statement:
+            q = q.order_by(pkname)
+        heading = models.get_rowdisplay(self._obj)
+        self._print("\t\t", "\t".join(heading))
         for item in q.all():
-            self._print(getattr(item, pkname), ":", item)
-
+            self._print(getattr(item, pkname), "\t:", "\t".join([str(getattr(item, hn)) for hn in heading]))
 
     def describe(self, argv):
         """describe
@@ -413,24 +386,27 @@ class TableCommands(CLI.BaseCommands):
     def inspect(self, argv):
         """inspect ...
     Inspect a row."""
-        dbrow = self._select(argv)
-        cls = _ROW_EDITOR_MAP.get(self._obj.__name__, RowCommands)
-        cmd = self.clone(cls)
-        cmd._setup(dbrow, cls.get_prompt(dbrow))
-        raise CLI.NewCommand(cmd)
+        dbrow = self._select_one(argv)
+        if dbrow is not None:
+            cls = _ROW_EDITOR_MAP.get(self._obj.__name__, RowCommands)
+            cmd = self.clone(cls)
+            cmd._setup(dbrow, cls.get_prompt(dbrow))
+            raise CLI.NewCommand(cmd)
 
     def show(self, argv):
         """show ...
     Show the selected row."""
-        dbrow = self._select(argv)
-        for metadata in sorted(models.get_metadata(self._obj)):
-            self._print("%20.20s: %s" % (metadata.colname, getattr(dbrow, metadata.colname)))
+        dbrow = self._select_one(argv)
+        if dbrow is not None:
+            for metadata in sorted(models.get_metadata(self._obj)):
+                self._print("%20.20s: %s" % (metadata.colname, getattr(dbrow, metadata.colname)))
 
     def edit(self, argv):
         """edit ...
     Edit a row object from the table."""
-        dbrow = self._select(argv)
-        edit(self._obj, dbrow, self._ui)
+        dbrow = self._select_one(argv)
+        if dbrow is not None:
+            edit(self._obj, dbrow, self._ui)
 
     def commit(self, argv):
         """commit
@@ -450,6 +426,61 @@ class TableCommands(CLI.BaseCommands):
         """expire
     Expire local caches."""
         _session.expire_all()
+
+    def _select_one(self, argv):
+        if len(argv) == 2:
+            try:
+                rowid = int(argv[1]) # for integer PKs
+            except ValueError:
+                pass
+            else:
+                q = _session.query(self._obj)
+                return q.get(rowid)
+        q = self._get_query(argv)
+        try:
+            return q.first()
+        except:
+            _session.rollback()
+            raise
+
+    def _get_query(self, argv):
+        mapper = models.class_mapper(self._obj)
+        args, kwargs = _query_args(argv[1:], self._environ)
+        q = _session.query(self._obj)
+        if args:
+            grps, left = divmod(len(args), 3)
+            if grps:
+                for name, op, val in _by_three(args[:grps*3]):
+                    col = getattr(self._obj, name)
+                    opm = {"=": col.__eq__, ">": col.__gt__, "<": col.__lt__, "like":col.like}.get(op)
+                    if opm:
+                        q = q.filter(opm(val))
+            for name in args[grps*3:]:
+                if name.startswith("="):
+                    q = q.order_by(name[1:])
+        elif kwargs:
+            p = ["%s=:%s" % (n, n) for n in kwargs.keys()]
+            q = q.from_statement("SELECT * FROM %s WHERE %s" % (mapper.mapped_table, " and ".join(p)))
+            q = q.params(**kwargs)
+        return q
+
+
+def _query_args(argv, env):
+    args = []
+    kwargs = {}
+    for argv_arg in argv:
+        if argv_arg.find("=") > 0:
+            [kw, kwarg] = argv_arg.split("=")
+            kwargs[kw.strip()] = env.expand(kwarg)
+        else:
+            args.append(env.expand(argv_arg))
+    return args, kwargs
+
+
+def _by_three(arglist):
+    one, two, three = arglist[:3]
+    del arglist[:3]
+    yield one, two, three
 
 
 class NetworkCommands(CLI.BaseCommands):
