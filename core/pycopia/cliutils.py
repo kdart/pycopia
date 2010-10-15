@@ -82,6 +82,7 @@ def choose(somelist, defidx=0, prompt="choose", input=raw_input, error=default_e
                 error("Bad selection. Selection out of range.")
                 continue
 
+
 def choose_multiple(somelist, chosen=None, prompt="choose multiple", input=raw_input, error=default_error):
     somelist = somelist[:]
     if chosen is None:
@@ -117,6 +118,71 @@ def choose_multiple(somelist, chosen=None, prompt="choose multiple", input=raw_i
                 try:
                     chosen.append(somelist[idx-1])
                     del somelist[idx-1]
+                except IndexError:
+                    error("Selection out of range.")
+
+
+def choose_from(somemap, default=None, prompt="choose", input=raw_input, error=default_error):
+    """Select an item from a mapping. Keys are indexes that are selected.
+    Returns the value of the mapping key selected.
+    """
+    first = print_menu_map(somemap)
+    while 1:
+        try:
+            ri = get_input(prompt, default, input)
+        except EOFError:
+            return default
+        if not ri:
+            return default
+        try:
+            idx = type(first)(ri)
+        except ValueError:
+            error("Not a valid entry. Please try again.")
+            continue
+
+        if idx not in somemap:
+            error("Not a valid selection. Please try again.")
+            continue
+        return somemap[idx]
+
+
+def choose_multiple_from(somemap, chosen=None, prompt="choose multiple", 
+            input=raw_input, error=default_error):
+    """Choose multiple items from a mapping. 
+    Returns a mapping of items chosen. Type in the key to select the values.
+    """
+    somemap = somemap.copy()
+    if chosen is None:
+        chosen = {}
+    while 1:
+        print "Choose from list. Enter to end, negative index removes from chosen."
+        first = print_menu_map(somemap)
+        if chosen:
+            print "You have: "
+            print_menu_map(chosen)
+        try:
+            ri = get_input(prompt, None, input) # menu list starts at one
+        except EOFError:
+            return chosen
+        if not ri:
+            return chosen
+        try:
+            idx = type(first)(ri)
+        except ValueError:
+            error("Bad selection. Please try again.")
+            continue
+        else:
+            if idx < 0: # FIXME assumes numeric keys
+                idx = -idx
+                try:
+                    somemap[idx] = chosen[idx]
+                    del chosen[idx]
+                except IndexError:
+                    error("Selection out of range.")
+            else:
+                try:
+                    chosen[idx] = somemap[idx]
+                    del somemap[idx]
                 except IndexError:
                     error("Selection out of range.")
 
@@ -173,6 +239,18 @@ def print_menu_list(clist, lines=20):
             print "%2d: %-74.74s" % ( i1, c1)
         i1 += 1
         i2 += 1
+
+def print_menu_map(mapping, lines=20):
+    """Print a list with leading numeric menu choices. Use two columns in necessary."""
+    h = max((len(mapping)/2)+1, lines)
+    keys = sorted(mapping.keys())
+    first = keys[0]
+    for k1, k2 in map(None, keys[:h], keys[h:]):
+        if k2 is not None:
+            print "%4.4s: %-33.33s | %4.4s: %-33.33s" % (k1, mapping[k1], k2, mapping[k2])
+        else:
+            print "%4.4s: %-74.74s" % (k1, mapping[k1])
+    return first
 
 def find_source_file(modname):
     """Find the source file for a module. Give the module, or a name of one."""
