@@ -64,6 +64,8 @@ class Cidr(types.MutableType, types.TypeDecorator):
         return IPv4(value)
 
     def copy_value(self, value):
+        if value is None:
+            return None
         return IPv4(value)
 
 class Inet(types.MutableType, types.TypeDecorator):
@@ -79,6 +81,8 @@ class Inet(types.MutableType, types.TypeDecorator):
         return IPv4(value).CIDR
 
     def copy_value(self, value):
+        if value is None:
+            return None
         return IPv4(value)
 
     def process_result_value(self, value, dialect):

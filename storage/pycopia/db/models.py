@@ -1342,23 +1342,41 @@ def get_choices(session, modelclass, colname, order_by=None):
 
     Returns a list of tuples, (id/value, name/label) of available choices.
     """
+
+    # first check for column type with get_choices method.
     mapper = class_mapper(modelclass)
     try:
         return mapper.columns[colname].type.get_choices()
     except (AttributeError, KeyError):
         pass
+    mycol = getattr(modelclass, colname)
     try:
-        relmodel = getattr(modelclass, colname).property.mapper.class_
+        relmodel = mycol.property.mapper.class_
     except AttributeError:
         return []
+
+    # no choices in type, but has a related model table...
+    mymeta = get_column_metadata(modelclass, colname)
+    if mymeta.uselist:
+        if mymeta.m2m:
+            q = session.query(relmodel)
+        else:
+            # only those that are currently unassigned
+            rs = mycol.property.remote_side[0]
+            q = session.query(relmodel).filter(rs == None)
+    else:
+        q = session.query(relmodel)
+
+    # add optional order_by, default to ordering by first ROW_DISPLAY column.
     try:
         order_by = order_by or relmodel.ROW_DISPLAY[0]
     except (AttributeError, IndexError):
         pass
-    q = session.query(relmodel)
     if order_by:
         q = q.order_by(getattr(relmodel, order_by))
-    return [(relrow.id, str(relrow)) for relrow in q.all()]
+    # Return the list of (id, stringrep) tuples.
+    # This structure is usable by the XHTML form generator...
+    return [(relrow.id, relrow) for relrow in q]
 
 
 # structure returned by get_metadata function.
@@ -1446,13 +1464,19 @@ if __name__ == "__main__":
     print get_column_metadata(Equipment, "interfaces")
     print get_column_metadata(Network, "interfaces")
     sess = get_session()
+
+    #choices = get_choices(sess, Equipment, "interfaces", order_by=None)
+    #print choices
+    choices = get_choices(sess, TestCase, "priority", order_by=None)
+    print choices
+
     # assumes your host name is in the db for testing.
     eq = sess.query(Equipment).filter(Equipment.name.like(os.uname()[1] + "%")).one()
-    print "eq = ", eq
-    print "Atributes:"
-    print eq.attributes
-    print "Interfaces:"
-    print eq.interfaces
+    #print "eq = ", eq
+    #print "Atributes:"
+    #print eq.attributes
+    #print "Interfaces:"
+    #print eq.interfaces
     #eq.add_interface(sess, "eth1", interface_type="ethernetCsmacd", ipaddr="172.17.101.2/24")
 #    print "Capabilities:"
 #    print eq.capabilities

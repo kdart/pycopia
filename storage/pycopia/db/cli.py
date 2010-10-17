@@ -100,6 +100,16 @@ class DBSessionCommands(CLI.BaseCommands):
 
     edit = use # alias
 
+    def sql(self, argv):
+        """sql <query>
+    Pass raw SQL to table. display results.
+    """
+        self._ui.printf("%IEnter SQL%N:")
+        sql = self._ui.get_text()
+        res = self._obj.execute(sql)
+        for row in res:
+            self._print(row)
+
     def ls(self, argv):
         """ls
     List persistent objects."""
@@ -254,7 +264,7 @@ class RowWithAttributesCommands(RowCommands):
 class EquipmentRowCommands(RowWithAttributesCommands):
 
     def interface(self, argv):
-        """interface [add-options] <add|del|show|edit> name 
+        """interface [add-options] <add|del|show|edit|create> name 
     Addd a new interface to this equipment. When adding, specify interface
     parameters with long options:
         --ipaddr=<ipaddr> 
@@ -281,14 +291,24 @@ class EquipmentRowCommands(RowWithAttributesCommands):
             if self._ui.yes_no("Delete interface %s, are you sure?" % (name,)):
                 self._obj.del_interface(_session, name)
         elif cmd.startswith("sho"):
-            for intf in self._obj.interfaces.values():
-                self._print(intf)
+            try:
+                name = args[1]
+            except IndexError:
+                for intf in self._obj.interfaces.values():
+                    self._print(intf)
+            else:
+                self._print(self._obj.interfaces[name])
         elif cmd.startswith("edi"):
             name = args[1]
             intf = self._obj.interfaces[name]
             cmd = self.clone(InterfaceRowCommands)
             cmd._setup(intf, InterfaceRowCommands.get_prompt(intf))
             raise CLI.NewCommand(cmd)
+        elif cmd.startswith("crea"):
+            intf = create(models.Interface, self._ui)
+            intf.equipment = self._obj
+            _session.add(intf)
+            _session.commit()
 
     def connect(self, argv):
         """connect [-f] <ifname> <networkname>
@@ -334,9 +354,14 @@ class TableCommands(CLI.BaseCommands):
     def create(self, argv):
         """create
     Start an interactive row creator."""
-        rowobj = create(self._obj, self._ui)
-        _session.add(rowobj)
-        _session.commit()
+        try:
+            rowobj = create(self._obj, self._ui)
+        except KeyboardInterrupt:
+            _session.rollback()
+            self._print("")
+        else:
+            _session.add(rowobj)
+            _session.commit()
 
     def delete(self, argv):
         """delete ...
@@ -352,7 +377,7 @@ class TableCommands(CLI.BaseCommands):
     Display rows matching query parameters.
     """
         q = self._get_query(argv)
-        for dbrow in q.all():
+        for dbrow in q:
             self._print(dbrow)
 
     def ls(self, argv):
@@ -406,7 +431,13 @@ class TableCommands(CLI.BaseCommands):
     Edit a row object from the table."""
         dbrow = self._select_one(argv)
         if dbrow is not None:
-            edit(self._obj, dbrow, self._ui)
+            try:
+                edit(self._obj, dbrow, self._ui)
+            except KeyboardInterrupt:
+                _session.rollback()
+                self._print("")
+            else:
+                _session.commit()
 
     def commit(self, argv):
         """commit
@@ -452,7 +483,12 @@ class TableCommands(CLI.BaseCommands):
             if grps:
                 for name, op, val in _by_three(args[:grps*3]):
                     col = getattr(self._obj, name)
-                    opm = {"=": col.__eq__, ">": col.__gt__, "<": col.__lt__, "like":col.like}.get(op)
+                    opm = {"=": col.__eq__, 
+                            ">": col.__gt__, 
+                            "<": col.__lt__, 
+                            "match": col.match, 
+                            #"contains": col.contains, 
+                            "like": col.like}.get(op)
                     if opm:
                         q = q.filter(opm(val))
             for name in args[grps*3:]:
@@ -822,14 +858,11 @@ def update_row(modelclass, dbrow, data):
             relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
             if isinstance(value, list):
                 t = _session.query(relmodel).filter(
-                                relmodel.id.in_([int(i[0]) for i in value])).all()
-                setattr(dbrow, metadata.colname, t)
-            elif isinstance(value, dict):
-                t = _session.query(relmodel).filter(
-                                relmodel.id.in_([int(i[0]) for i in value.values()])).all()
-                col = getattr(dbrow, metadata.colname)
-                for o in t:
-                    col.set(o)
+                                relmodel.id.in_(value)).all()
+                if metadata.collection == "MappedCollection":
+                    setattr(dbrow, metadata.colname, dict((o.name, o) for o in t))
+                else:
+                    setattr(dbrow, metadata.colname, t)
             elif value is None:
                 if metadata.uselist:
                     if metadata.collection == "MappedCollection":
@@ -838,14 +871,9 @@ def update_row(modelclass, dbrow, data):
                         value = []
                 setattr(dbrow, metadata.colname, value)
             else:
-                if value:
-                    t = _session.query(relmodel).get(value)
-                    if metadata.uselist:
-                        if metadata.collection == "MappedCollection":
-                            t = {str(t): t}
-                        else:
-                            t = [t]
-                    setattr(dbrow, metadata.colname, t)
+                related = _session.query(relmodel).get(value)
+                setattr(dbrow, metadata.colname, related)
+
         elif metadata.coltype == "PickleText":
             if value is None:
                 if metadata.nullable:
@@ -865,7 +893,7 @@ def update_row(modelclass, dbrow, data):
 
 def new_textarea(ui, modelclass, metadata):
     ui.printf("%%nEnter %%I%s%%N:" % metadata.colname)
-    return ui.get_text()
+    return ui.get_text().strip()
 
 def new_key(ui, modelclass, metadata):
     return ui.get_key("Press a key for %r: " % (metadata.colname,))
@@ -928,43 +956,37 @@ def new_uuid(ui, modelclass, metadata):
     return ui.user_input("UUID for %r: " % (metadata.colname,))
 
 def new_valuetypeinput(ui, modelclass, metadata):
-    return ui.choose(types.ValueType.get_choices(), 0, "%%I%s%%N" % metadata.colname)[0]
+    return ui.choose_key(dict(types.ValueType.get_choices()), 0, "%%I%s%%N" % metadata.colname)
 
 def new_relation_input(ui, modelclass, metadata):
     choices = models.get_choices(_session, modelclass, metadata.colname, None)
     if not choices:
         ui.Print("%s has no choices." % metadata.colname)
         if metadata.uselist:
-            if metadata.collection == "MappedCollection":
-                return {}
-            else:
-                return []
+            return []
         else:
             return None
     if metadata.uselist:
-        chosen = ui.choose_multiple(choices, None, "%%I%s%%N" % metadata.colname)
-        if not chosen and metadata.nullable:
-            return None
-        if metadata.collection == "MappedCollection":
-            return dict((str(it), it) for it in chosen)
-        else:
-            return chosen
+        return ui.choose_multiple_from_map(dict(choices), None, "%%I%s%%N" % metadata.colname).keys()
     else:
         if metadata.nullable:
-            choices.insert(0, (None, "Nothing"))
-        return ui.choose(choices, 0, "%%I%s%%N" % metadata.colname)[0]
+            choices.insert(0, (0, "Nothing"))
+            default = 0
+        else:
+            default = choices[0][0]
+        return ui.choose_key(dict(choices), default, "%%I%s%%N" % metadata.colname)
 
 def new_testcasestatus(ui, modelclass, metadata):
-    return ui.choose(types.TestCaseStatus.get_choices(), 
-            types.TestCaseStatus.get_default(), "%%I%s%%N" % metadata.colname)[0]
+    return ui.choose_key(dict(types.TestCaseStatus.get_choices()), 
+            types.TestCaseStatus.get_default(), "%%I%s%%N" % metadata.colname)
 
 def new_testcasetype(ui, modelclass, metadata):
-    return ui.choose(types.TestCaseType.get_choices(), 
-            types.TestCaseType.get_default(), "%%I%s%%N" % metadata.colname)[0]
+    return ui.choose_key(dict(types.TestCaseType.get_choices()), 
+            types.TestCaseType.get_default(), "%%I%s%%N" % metadata.colname)
 
 def new_testpriority(ui, modelclass, metadata):
-    return ui.choose(types.TestPriorityType.get_choices(), 
-            types.TestPriorityType.get_default(), "%%I%s%%N" % metadata.colname)[0]
+    return ui.choose_key(dict(types.TestPriorityType.get_choices()), 
+            types.TestPriorityType.get_default(), "%%I%s%%N" % metadata.colname)
 
 
 _CREATORS = {
@@ -1033,7 +1055,7 @@ def edit_text(ui, modelclass, metadata, dbrow):
     text = getattr(dbrow, metadata.colname)
     if text is None:
         text = ""
-    text = ui.edit_text(text, metadata.colname)
+    text = ui.edit_text(text, metadata.colname).strip()
     if not text and metadata.nullable:
         text = None
     setattr(dbrow, metadata.colname, text)
@@ -1067,14 +1089,13 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
     if metadata.uselist:
         if metadata.collection == "MappedCollection":
-            chosen = [(crow.id, str(crow)) for crow in current.values()]
+            chosen = dict((crow.id, str(crow)) for crow in current.values())
         else:
-            chosen = [(crow.id, str(crow)) for crow in current]
+            chosen = dict((crow.id, str(crow)) for crow in current)
         for chosenone in chosen:
-            choices.remove(chosenone)
-        chosen = ui.choose_multiple(choices, chosen, "%%I%s%%N" % metadata.colname)
-        t = _session.query(relmodel).filter(
-                        relmodel.id.in_([s[0] for s in chosen])).all()
+            del choices[chosenone]
+        chosen = ui.choose_multiple_from_map(dict(choices), chosen, "%%I%s%%N" % metadata.colname)
+        t = _session.query(relmodel).filter( relmodel.id.in_(chosen.keys())).all()
         if not t and metadata.nullable:
             t = None
         if metadata.collection == "MappedCollection" and t is not None:
@@ -1085,56 +1106,36 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
             setattr(dbrow, metadata.colname, t)
     else:
         if metadata.nullable:
-            choices.insert(0, (None, "Nothing"))
-        idx = 0
-        if current is not None:
-            for choice_id, choice_str in choices:
-                if choice_id == current.id:
-                    break
-                idx += 1
-        chosen_id = ui.choose(choices, idx, "%%I%s%%N" % metadata.colname)[0]
-        if chosen_id is None: # can only be if nullable
-            setattr(dbrow, metadata.colname, chosen_id)
+            choices.insert(0, (0, "Nothing"))
+        chosen_id = ui.choose_key(dict(choices), current.id if current is not None else 0, 
+                "%%I%s%%N" % metadata.colname)
+        if chosen_id == 0: # indicates nullable
+            setattr(dbrow, metadata.colname, None)
         else:
             related = _session.query(relmodel).get(chosen_id)
             setattr(dbrow, metadata.colname, related)
 
 def edit_valuetype(ui, modelclass, metadata, dbrow):
-    vt = ui.choose(types.ValueType.get_choices(), int(getattr(dbrow, metadata.colname)), 
+    vt = ui.choose_key(dict(types.ValueType.get_choices()), getattr(dbrow, metadata.colname), 
             "%%I%s%%N" % metadata.colname)
-    setattr(dbrow, metadata.colname, types.ValueType.validate(vt[0]))
+    setattr(dbrow, metadata.colname, types.ValueType.validate(vt))
 
 def edit_testcasestatus(ui, modelclass, metadata, dbrow):
     current = int(getattr(dbrow, metadata.colname))
-    choices = types.TestCaseStatus.get_choices()
-    idx = 0
-    for choice_id, choice_str in choices:
-        if choice_id == current:
-            break
-        idx += 1
-    chosen_id = ui.choose(choices, idx, "%%I%s%%N" % metadata.colname)[0]
+    choices = dict(types.TestCaseStatus.get_choices())
+    chosen_id = ui.choose_key(choices, current, "%%I%s%%N" % metadata.colname)
     setattr(dbrow, metadata.colname, types.TestCaseStatus.validate(chosen_id))
 
 def edit_testcasetype(ui, modelclass, metadata, dbrow):
     current = getattr(dbrow, metadata.colname)
-    choices = types.TestCaseType.get_choices()
-    idx = 0
-    for choice_id, choice_str in choices:
-        if choice_id == int(current):
-            break
-        idx += 1
-    chosen_id = ui.choose(choices, idx, "%%I%s%%N" % metadata.colname)[0]
+    choices = dict(types.TestCaseType.get_choices())
+    chosen_id = ui.choose_key(choices, current, "%%I%s%%N" % metadata.colname)
     setattr(dbrow, metadata.colname, types.TestCaseType.validate(chosen_id))
 
 def edit_testpriority(ui, modelclass, metadata, dbrow):
     current = getattr(dbrow, metadata.colname)
-    choices = types.TestPriorityType.get_choices()
-    idx = 0
-    for choice_id, choice_str in choices:
-        if choice_id == int(current):
-            break
-        idx += 1
-    chosen_id = ui.choose(choices, idx, "%%I%s%%N" % metadata.colname)[0]
+    choices = dict(types.TestPriorityType.get_choices())
+    chosen_id = ui.choose_key(choices, current, "%%I%s%%N" % metadata.colname)[0]
     setattr(dbrow, metadata.colname, types.TestPriorityType.validate(chosen_id))
 
 def edit_pickleinput(ui, modelclass, metadata, dbrow):

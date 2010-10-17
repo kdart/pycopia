@@ -122,7 +122,7 @@ def choose_multiple(somelist, chosen=None, prompt="choose multiple", input=raw_i
                     error("Selection out of range.")
 
 
-def choose_from(somemap, default=None, prompt="choose", input=raw_input, error=default_error):
+def choose_value(somemap, default=None, prompt="choose", input=raw_input, error=default_error):
     """Select an item from a mapping. Keys are indexes that are selected.
     Returns the value of the mapping key selected.
     """
@@ -146,7 +146,30 @@ def choose_from(somemap, default=None, prompt="choose", input=raw_input, error=d
         return somemap[idx]
 
 
-def choose_multiple_from(somemap, chosen=None, prompt="choose multiple", 
+def choose_key(somemap, default=0, prompt="choose", input=raw_input, error=default_error):
+    """Select a key from a mapping. 
+    Returns the key selected.
+    """
+    keytype = type(print_menu_map(somemap))
+    while 1:
+        try:
+            userinput = get_input(prompt, default, input)
+        except EOFError:
+            return default
+        if not userinput:
+            return default
+        try:
+            idx = keytype(userinput)
+        except ValueError:
+            error("Not a valid entry. Please try again.")
+            continue
+        if idx not in somemap:
+            error("Not a valid selection. Please try again.")
+            continue
+        return idx
+
+
+def choose_multiple_from_map(somemap, chosen=None, prompt="choose multiple", 
             input=raw_input, error=default_error):
     """Choose multiple items from a mapping. 
     Returns a mapping of items chosen. Type in the key to select the values.
@@ -177,13 +200,13 @@ def choose_multiple_from(somemap, chosen=None, prompt="choose multiple",
                 try:
                     somemap[idx] = chosen[idx]
                     del chosen[idx]
-                except IndexError:
+                except KeyError:
                     error("Selection out of range.")
             else:
                 try:
                     chosen[idx] = somemap[idx]
                     del somemap[idx]
-                except IndexError:
+                except KeyError:
                     error("Selection out of range.")
 
 

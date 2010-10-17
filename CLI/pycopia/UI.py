@@ -345,9 +345,15 @@ class UserInterface(object):
                     self._get_prompt("PS3", prompt), 
                     input=self._io.raw_input, error=self.error)
 
-    def choose_from(self, somemap, defkey=None, prompt=None):
-        return cliutils.choose_from(somemap, 
-                    defkey,
+    def choose_value(self, somemap, default=None, prompt=None):
+        return cliutils.choose_value(somemap, 
+                    default,
+                    self._get_prompt("PS3", prompt), 
+                    input=self._io.raw_input, error=self.error)
+
+    def choose_key(self, somemap, default=None, prompt=None):
+        return cliutils.choose_key(somemap, 
+                    default,
                     self._get_prompt("PS3", prompt), 
                     input=self._io.raw_input, error=self.error)
 
@@ -357,8 +363,8 @@ class UserInterface(object):
                     self._get_prompt("PS3", prompt), 
                     input=self._io.raw_input, error=self.error)
 
-    def choose_multiple_from(self, somemap, chosen=None, prompt=None):
-        return cliutils.choose_multiple_from(somemap, 
+    def choose_multiple_from_map(self, somemap, chosen=None, prompt=None):
+        return cliutils.choose_multiple_from_map(somemap, 
                     chosen, 
                     self._get_prompt("PS3", prompt), 
                     input=self._io.raw_input, error=self.error)
