@@ -102,17 +102,29 @@ def to_hex(l):
 
 
 def pcap_report(argv):
+    """pcapinfo [-h?] [-m] [-c] <pcap file>...
+    
+    Report information about pcap files.
+    Where:
+        -h (?)  -- Print this help.
+        -m      -- Report the set of unique MAC addresses contained in the
+                   files.
+        -c         Print Cisco style MAC addesses. Otherwise, hex strings.
+    """
     reportmacs = False
     ciscostyle = False
     try:
-        optlist, args = getopt.getopt(argv[1:], "mc")
+        optlist, args = getopt.getopt(argv[1:], "h?mc")
     except getopt.GetoptError:
             print smtpcli.__doc__
             return
     for opt, val in optlist:
-        if opt == "-m":
+        if opt in ("-?", "-h"):
+            print pcap_report.__doc__
+            return
+        elif opt == "-m":
             reportmacs = True
-        if opt == "-c":
+        elif opt == "-c":
             ciscostyle = True
 
     if reportmacs:
