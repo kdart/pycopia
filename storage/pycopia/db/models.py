@@ -851,6 +851,7 @@ class Equipment(object):
     def get_attribute_list(session):
         return AttributeType.get_attribute_list(session)
 
+    # interface management
     def add_interface(self, session, name, 
                 ifindex=None, interface_type=None, macaddr=None, ipaddr=None, network=None):
         if interface_type is not None and isinstance(interface_type, basestring):
@@ -867,6 +868,14 @@ class Equipment(object):
     def del_interface(self, session, name):
         del self.interfaces[name]
         session.commit()
+
+    @property
+    def any_interface(self):
+        keys = self.interfaces.keys()
+        if keys:
+            return self.interfaces[keys[0]]
+        else:
+            return None
 
     def connect(self, session, intf, network, force=False):
         """Connect this equipments named interface to a network.

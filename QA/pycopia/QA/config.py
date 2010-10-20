@@ -353,6 +353,9 @@ class EnvironmentRuntime(object):
     def __getitem__(self, name):
         return self._attributes[name]
 
+    def get(self, name, default=None):
+        return self._attributes.get(name, default)
+
     def __str__(self):
         s = []
         for teq in self._environment.testequipment:
@@ -458,12 +461,13 @@ class EquipmentRuntime(object):
     def __getitem__(self, name):
         return self._attributes[name]
 
-    def close(self):
-        if self._controller is not None:
-            try:
-                self._controller.close()
-            except:
-                pass
+    def get(self, name, default=None):
+        return self._attributes.get(name, default)
+
+    def get_primary_interface(self):
+        return self._equipment.interfaces[self._attributes.get("admin_interface", "eth0")]
+
+    primary_interface = property(get_primary_interface)
 
     def get_controller(self):
         if self._init_controller is not None:
@@ -484,6 +488,13 @@ class EquipmentRuntime(object):
         return self._init_controller
 
     controller = property(get_controller)
+
+    def close(self):
+        if self._controller is not None:
+            try:
+                self._controller.close()
+            except:
+                pass
 
     initial_controller = property(get_initial_controller)
 

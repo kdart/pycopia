@@ -327,13 +327,14 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
             return self._patt_cache.values()
         return solist
 
-    # the expect method supports a very flexible calling signature. thus, the
-    # convoluted type checking, etc.  You may call with a string (defaults to
-    # exact string match), or you may supply the match type as a second
-    # parameter. Or supply the pattern as a tuple, with string and match type.
-    # Or, a list of tuples or strings as just described. An optional callback
-    # method and timeout value may also be supplied. The callback will be
-    # called when a match is found, with a match-object as a parameter.
+    # the expect method supports a very flexible calling signature. thus,
+    # the convoluted type checking, etc.  You may call with a string
+    # (defaults to exact string match), or you may supply the match type
+    # as a second parameter. Or supply the pattern as a tuple, with
+    # string, match type, and callback.  Or, a list of tuples or strings
+    # as just described. An optional callback method and timeout value may
+    # also be supplied. The callback will be called when a match is found,
+    # with a match-object as a parameter.
 
     def expect(self, patt, mtype=EXACT, callback=None, timeout=None):
         solist = self._get_search_list(patt, mtype, callback)
