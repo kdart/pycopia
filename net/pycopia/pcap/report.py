@@ -19,44 +19,33 @@ Report on pcap files.
 
 """
 
-import getopt
 import struct
+import getopt
 
-# scapy is a bit weird. You have to import this stuff just for their side
-# effects. Otherwise, this script won't work.
-from scapy import config
-from scapy import packet
-from scapy import layers
-from scapy.layers import l2
+import pcap
+import dpkt
 
-from scapy.utils import PcapReader
 
 
 def get_macs(fname):
-    """Yield src and dst MAC addresses."""
-    rdr = PcapReader(fname)
-    try:
-        for pkt in rdr:
-            l2 = pkt.firstlayer()
-            yield l2.src, l2.dst
-    finally:
-        rdr.close()
+    pc = pcap.pcap(fname)
+    for ts, pkt in pc:
+        pkt = dpkt.ethernet.Ethernet(pkt)
+        yield ts, struct.unpack("!Q", "\0\0"+pkt.src)[0], struct.unpack("!Q", "\0\0"+pkt.dst)[0]
 
 
 def get_unique_macs(namelist, dstset=None, srcset=None):
     dstset = set() if dstset is None else dstset
     srcset = set() if srcset is None else srcset
     for fname in namelist:
-        for src, dst in get_macs(fname):
+        for ts, src, dst in get_macs(fname):
             srcset.add(MACaddress(src))
-            if dst != 'ff:ff:ff:ff:ff:ff':
+            if dst != 0xffffffffffffL:
                 dstset.add(MACaddress(dst))
     return dstset, srcset
 
 
 class MACaddress(long):
-    def __new__(cls, macstr):
-        return long.__new__(cls, long(macstr.replace(":", ""), 16))
 
     def to_cisco(self):
         return to_cisco(self)
@@ -100,21 +89,30 @@ def to_hex(l):
     return ":".join(s)
 
 
+CISCO_CF_TEMPLATE = "mac-address-table static {mac} vlan {vlan} interface {interface}"
+
 
 def pcap_report(argv):
     """pcapinfo [-h?] [-m] [-c] <pcap file>...
-    
+
     Report information about pcap files.
     Where:
         -h (?)  -- Print this help.
         -m      -- Report the set of unique MAC addresses contained in the
                    files.
         -c         Print Cisco style MAC addesses. Otherwise, hex strings.
+        -C <fname> Write Cisco config file for static mac entries.
+        -v <id>    Supply VLAN ID for destination MAC when writing Cisco config.
+        -i <intf>  Supply Cisco destination interface when writing Cisco config.
     """
+    writecisco = False
     reportmacs = False
     ciscostyle = False
+    fname = None
+    vlan = None
+    intf = None
     try:
-        optlist, args = getopt.getopt(argv[1:], "h?mc")
+        optlist, args = getopt.getopt(argv[1:], "h?mcC:v:i:")
     except getopt.GetoptError:
             print smtpcli.__doc__
             return
@@ -122,21 +120,43 @@ def pcap_report(argv):
         if opt in ("-?", "-h"):
             print pcap_report.__doc__
             return
+        elif opt == "-C":
+            fname = val
+            writecisco = True
         elif opt == "-m":
             reportmacs = True
+        elif opt == "-v":
+            vlan = int(val)
+        elif opt == "-i":
+            intf = val
         elif opt == "-c":
             ciscostyle = True
 
+    if not args:
+        print pcap_report.__doc__
+        return
+
     if reportmacs:
         dst, src = get_unique_macs(args)
-        for h, s in (("Destination Macs:", dst), ("Source macs:", src)):
-            print h
-            while s:
-                mac = s.pop()
-                if ciscostyle:
-                    print "  ", mac.to_cisco()
-                else:
-                    print "  ", mac.to_hex()
+        if writecisco:
+            if vlan is None or intf is None:
+                print "You need to supply vlan and interface options."
+                return
+            with open(fname, "w") as fo:
+                while dst:
+                    mac = dst.pop()
+                    fo.write(CISCO_CF_TEMPLATE.format(mac=mac.to_cisco(), vlan=vlan, interface=intf))
+                    fo.write("\n")
+                fo.write("end\n")
+        else:
+            for h, s in (("Destination Macs:", dst), ("Source macs:", src)):
+                print h
+                while s:
+                    mac = s.pop()
+                    if ciscostyle:
+                        print "  ", mac.to_cisco()
+                    else:
+                        print "  ", mac.to_hex()
 
 
 
