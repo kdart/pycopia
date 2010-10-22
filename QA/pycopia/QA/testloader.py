@@ -111,11 +111,11 @@ def get_module_file(mod):
     return None
 
 
-def get_TestSuite_from_module(module, config):
+def get_TestSuite_from_module(mod, config):
     """Get an existing suite from a module."""
     for methname in ("get_suite", "GetSuite"):
         try:
-            meth = getattr(module, methname)
+            meth = getattr(mod, methname)
             return meth(config)
         except AttributeError:
             continue

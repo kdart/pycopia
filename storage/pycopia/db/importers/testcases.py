@@ -8,6 +8,7 @@ from __future__ import absolute_import
 # python imports
 import sys
 import os
+import re
 import textwrap
 import logging
 from pytz import timezone
@@ -232,13 +233,17 @@ class TestCaseData(object):
         _dbsession.commit()
 
 
+_MODNAME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9\.]+$")
+
 def _valid_prereq(pathname):
     pathname = pathname.strip()
     if not pathname:
         return False
     if pathname.lower().startswith("none"):
         return False
-    return True
+    if _MODNAME_RE.match(pathname):
+        return True
+    return False
 
 
 def get_TestEntry_instance(string, config):
