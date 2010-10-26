@@ -19,25 +19,23 @@ Extra database types.
 
 """
 
-__all__ = [
-    "PGArray", "PGBigInteger", "PGBinary", 
-    "PGBit", "PGBoolean", "PGChar", "Cidr", "PGDate", "PGDateTime", "PGFloat", "Inet",
-    "PGInteger", "PGInterval", "PGMacAddr", "PGNumeric", "PGSmallInteger",
-    "PGString", "PGText", "PGTime", "PGUuid",
-    "PickleText", "TestCaseStatus", "TestCaseType", "TestPriorityType", "ValueType",
-    "TestResultType", "TestObjectType", 
-    "validate_value_type",
-]
+__all__ = ["INTEGER", "BIGINT", "SMALLINT", "VARCHAR", "CHAR", "TEXT", 
+    "NUMERIC", "FLOAT", "REAL", "INET", "CIDR", "UUID", "BIT", "MACADDR",
+    "DOUBLE_PRECISION", "TIMESTAMP", "TIME", "DATE", "BYTEA", "BOOLEAN",
+    "INTERVAL", "ARRAY", "ENUM", 
+    "Cidr", "Inet", "PickleText", "TestCaseStatus", "TestCaseType", "TestPriorityType",
+    "ValueType", "TestResultType", "TestObjectType", "validate_value_type"]
 
 import cPickle as pickle
 
 from pycopia.aid import Enums
 from pycopia.ipv4 import IPv4
 
-from sqlalchemy.databases.postgres import (PGArray, PGBigInteger, PGBinary, 
-            PGBit, PGBoolean, PGChar, PGCidr, PGDate, PGDateTime, PGFloat, PGInet,
-            PGInteger, PGInterval, PGMacAddr, PGNumeric, PGSmallInteger,
-            PGString, PGText, PGTime, PGUuid)
+
+from sqlalchemy.dialects.postgresql import (INTEGER, BIGINT, SMALLINT, 
+        VARCHAR, CHAR, TEXT, NUMERIC, FLOAT, REAL, INET,
+        CIDR, UUID, BIT, MACADDR, DOUBLE_PRECISION, TIMESTAMP, TIME,
+        DATE, BYTEA, BOOLEAN, INTERVAL, ARRAY, ENUM)
 
 from sqlalchemy import types
 
@@ -51,7 +49,7 @@ class ValidationError(AssertionError):
 class Cidr(types.MutableType, types.TypeDecorator):
     """Cidr reprsents networks without host part."""
 
-    impl = PGCidr
+    impl = CIDR
 
     def process_bind_param(self, value, dialect):
         if value is None:
@@ -73,7 +71,7 @@ class Inet(types.MutableType, types.TypeDecorator):
     objects from the database.
     """
 
-    impl = PGInet
+    impl = INET
 
     def process_bind_param(self, value, dialect):
         if value is None:
@@ -104,7 +102,7 @@ class PickleText(types.TypeDecorator):
     the column NOT NULL whenever possible.
     """
 
-    impl = PGText
+    impl = TEXT
 
     def process_bind_param(self, value, dialect):
         if value is None:
@@ -114,7 +112,7 @@ class PickleText(types.TypeDecorator):
     def process_result_value(self, value, dialect):
         if value is None:
             return None
-        return pickle.loads(value)
+        return pickle.loads(value.encode("ascii"))
 
 
 # special enumeration types
@@ -122,7 +120,7 @@ class PickleText(types.TypeDecorator):
 class TestCaseStatus(types.TypeDecorator):
     """TestCase status indicates test case lifecycle state."""
 
-    impl = PGInteger
+    impl = INTEGER
     enumerations = Enums("new", "reviewed", "deprecated")
 
     def process_bind_param(self, value, dialect):
@@ -148,7 +146,7 @@ class TestCaseStatus(types.TypeDecorator):
 class TestCaseType(types.TypeDecorator):
     """TestCase test type. Where in the cycle this test is applied."""
 
-    impl = PGInteger
+    impl = INTEGER
     enumerations = Enums("unit", "system", "integration", "regression", "performance")
 
     def process_bind_param(self, value, dialect):
@@ -175,7 +173,7 @@ class TestCaseType(types.TypeDecorator):
 class TestPriorityType(types.TypeDecorator):
     """TestCase priority type."""
 
-    impl = PGInteger
+    impl = INTEGER
     enumerations = Enums("P_UNKNOWN", "P1", "P2", "P3", "P4", "P5")
 
     def process_bind_param(self, value, dialect):
@@ -204,7 +202,7 @@ TESTRESULTS.sort()
 class TestResultType(types.TypeDecorator):
     """Possible status of test case or test runner objects."""
 
-    impl = PGInteger
+    impl = INTEGER
     enumerations = TESTRESULTS
 
     def process_bind_param(self, value, dialect):
@@ -233,7 +231,7 @@ OBJ_MODULE, OBJ_TESTSUITE, OBJ_TEST, OBJ_TESTRUNNER, OBJ_UNKNOWN = OBJECTTYPES
 class TestObjectType(types.TypeDecorator):
     """Possible test runner objects that produce results."""
 
-    impl = PGInteger
+    impl = INTEGER
     enumerations = OBJECTTYPES
 
     def process_bind_param(self, value, dialect):
@@ -262,7 +260,7 @@ class ValueType(types.TypeDecorator):
     name.
     """
 
-    impl = PGInteger
+    impl = INTEGER
     enumerations = Enums("object", "string", "unicode", 
                     "integer", "float", "boolean")
 

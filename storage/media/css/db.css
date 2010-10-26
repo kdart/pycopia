@@ -40,81 +40,81 @@ input[type="radio"] {
     margin-right: 20px;
 }
 
-input.PGArray {
+input.ARRAY {
 }
 
-input.PGBigInteger {
+input.BIGINT {
   background-color: #EEFFB3;
 }
 
-input.PGBinary {
+input.BINARY {
 }
 
-input.PGBit {
+input.BIT {
 }
 
-input.PGBoolean {
+input.BOOLEAN {
   background-color: #F2F345;
   width: auto;
 }
 
-input.PGChar {
+input.CHAR {
   background-color: #EEBBBB;
 }
 
-input.PGCidr {
+input.Cidr {
   background-color: #F2E345;
 }
 
-input.PGDate {
+input.DATE {
     background-color: #A0DFF1;
 }
 
-input.PGDateTime {
+input.TIMESTAMP {
     background-color: #A0DFF1;
 }
 
-input.PGFloat {
+input.FLOAT {
   background-color: #EEFFB3;
 }
 
-input.PGInet {
+input.Inet {
   background-color: #F2E345;
 }
 
-input.PGInteger {
+input.INTEGER {
   background-color: #EEFFB3;
 }
 
-input.PGInterval {
+input.INTERVAL {
     background-color: #A0DFF1;
 }
 
-input.PGMacAddr {
+input.MACADDR {
     background-color: #C9B912;
 }
 
-input.PGNumeric {
+input.NUMERIC {
   background-color: #EEFFB3;
 }
 
-input.PGSmallInteger {
+input.SMALLINT {
   background-color: #EEFFB3;
 }
 
-input.PGString {
+input.VARCHAR {
   background-color: #DDBBBB;
 }
 
-textarea.PGText {
+textarea.TEXT {
     width: 100%;
 }
 
-input.PGTime {
+input.TIME {
     background-color: #A0DFF1;
 }
 
-input.PGUuid {
+input.UUID {
 }
 
 fieldset.ValueType label {

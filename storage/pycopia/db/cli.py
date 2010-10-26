@@ -168,7 +168,7 @@ class RowCommands(CLI.GenericCLI):
                         if editor:
                             editor(self._ui, self._obj.__class__, metadata, self._obj)
                         else:
-                            self._ui.error("No user interface for %r." % (metadata.colname,))
+                            self._ui.error("No user interface for %r of type %r." % (metadata.colname, metadata.coltype))
         else:
             edit(self._obj.__class__, self._obj, self._ui)
 
@@ -400,7 +400,7 @@ class TableCommands(CLI.BaseCommands):
         """describe
     Desribe the table columns."""
         for metadata in sorted(models.get_metadata(self._obj)):
-            if metadata.coltype == "RelationProperty":
+            if metadata.coltype == "RelationshipProperty":
                 self._print("%20.20s: %s (%s) m2m=%s, nullable=%s, uselist=%s, collection=%s" % (
                         metadata.colname, metadata.coltype, metadata.default, 
                         metadata.m2m, metadata.nullable, metadata.uselist, metadata.collection))
@@ -844,7 +844,7 @@ def create(modelclass, ui):
         if ctor:
             data[metadata.colname] = ctor(ui, modelclass, metadata)
         else:
-            ui.error("No user interface for %r." % (metadata.colname,))
+            ui.error("No user interface for %r of type %r." % (metadata.colname, metadata.coltype))
     dbrow =  models.create(modelclass)
     return update_row(modelclass, dbrow, data)
 
@@ -854,11 +854,12 @@ def update_row(modelclass, dbrow, data):
         value = data.get(metadata.colname)
         if not value and metadata.nullable:
             value = None
-        if metadata.coltype == "RelationProperty":
+        if metadata.coltype == "RelationshipProperty":
             relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
             if isinstance(value, list):
-                t = _session.query(relmodel).filter(
-                                relmodel.id.in_(value)).all()
+				if not value:
+					continue
+                t = _session.query(relmodel).filter(relmodel.id.in_(value)).all()
                 if metadata.collection == "MappedCollection":
                     setattr(dbrow, metadata.colname, dict((o.name, o) for o in t))
                 else:
@@ -990,29 +991,29 @@ def new_testpriority(ui, modelclass, metadata):
 
 
 _CREATORS = {
-    "PGArray": None,
-    "PGBigInteger": new_integer,
-    "PGBinary": None,
-    "PGBit": None,
-    "PGBoolean": new_boolean_input,
-    "PGChar": new_key,
+    "ARRAY": None,
+    "BIGINT": new_integer,
+    "BYTEA": None,
+    "BIT": None,
+    "BOOLEAN": new_boolean_input,
+    "CHAR": new_key,
     "Cidr": new_cidr,
-    "PGDate": new_date,
-    "PGDateTime": new_datetime,
-    "PGFloat": new_float,
+    "DATE": new_date,
+    "TIMESTAMP": new_datetime,
+    "FLOAT": new_float,
     "Inet": new_inet,
-    "PGInteger": new_integer,
-    "PGInterval": new_interval,
-    "PGMacAddr": new_macaddr,
-    "PGNumeric": new_number,
-    "PGSmallInteger": new_integer,
-    "PGString": new_textinput,
-    "PGText": new_textarea,
-    "PGTime": new_time,
-    "PGUuid": new_uuid,
+    "INTEGER": new_integer,
+    "INTERVAL": new_interval,
+    "MACADDR": new_macaddr,
+    "NUMERIC": new_number,
+    "SMALLINT": new_integer,
+    "VARCHAR": new_textinput,
+    "TEXT": new_textarea,
+    "TIME": new_time,
+    "UUID": new_uuid,
     "PickleText": new_pickleinput,
     "ValueType": new_valuetypeinput,
-    "RelationProperty": new_relation_input,
+    "RelationshipProperty": new_relation_input,
     "TestCaseStatus": new_testcasestatus,
     "TestCaseType": new_testcasetype,
     "TestPriorityType": new_testpriority,
@@ -1027,7 +1028,7 @@ def edit(modelclass, dbrow, ui):
         if editor:
             editor(ui, modelclass, metadata, dbrow)
         else:
-            ui.error("No user interface for %r." % (metadata.colname,))
+            ui.error("No user interface for %r of type %r." % (metadata.colname, metadata.coltype))
 
 def edit_float(ui, modelclass, metadata, dbrow):
     return _edit_pytype(ui, modelclass, metadata, dbrow, float)
@@ -1085,6 +1086,7 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
         else:
             setattr(dbrow, metadata.colname, None)
         return
+	choices = dict(choices)
     current = getattr(dbrow, metadata.colname)
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
     if metadata.uselist:
@@ -1094,8 +1096,11 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
             chosen = dict((crow.id, str(crow)) for crow in current)
         for chosenone in chosen:
             del choices[chosenone]
-        chosen = ui.choose_multiple_from_map(dict(choices), chosen, "%%I%s%%N" % metadata.colname)
-        t = _session.query(relmodel).filter( relmodel.id.in_(chosen.keys())).all()
+        chosen = ui.choose_multiple_from_map(choices, chosen, "%%I%s%%N" % metadata.colname)
+		if chosen:
+        	t = _session.query(relmodel).filter( relmodel.id.in_(chosen.keys())).all()
+		else:
+			t = []
         if not t and metadata.nullable:
             t = None
         if metadata.collection == "MappedCollection" and t is not None:
@@ -1106,8 +1111,8 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
             setattr(dbrow, metadata.colname, t)
     else:
         if metadata.nullable:
-            choices.insert(0, (0, "Nothing"))
-        chosen_id = ui.choose_key(dict(choices), current.id if current is not None else 0, 
+            choices[0] = "Nothing"
+        chosen_id = ui.choose_key(choices, current.id if current is not None else 0, 
                 "%%I%s%%N" % metadata.colname)
         if chosen_id == 0: # indicates nullable
             setattr(dbrow, metadata.colname, None)
@@ -1115,10 +1120,12 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
             related = _session.query(relmodel).get(chosen_id)
             setattr(dbrow, metadata.colname, related)
 
+
 def edit_valuetype(ui, modelclass, metadata, dbrow):
     vt = ui.choose_key(dict(types.ValueType.get_choices()), getattr(dbrow, metadata.colname), 
             "%%I%s%%N" % metadata.colname)
     setattr(dbrow, metadata.colname, types.ValueType.validate(vt))
+
 
 def edit_testcasestatus(ui, modelclass, metadata, dbrow):
     current = int(getattr(dbrow, metadata.colname))
@@ -1149,29 +1156,29 @@ def edit_pickleinput(ui, modelclass, metadata, dbrow):
 
 
 _EDITORS = {
-    "PGArray": None,
-    "PGBigInteger": edit_integer,
-    "PGBinary": None,
-    "PGBit": None,
-    "PGBoolean": edit_bool,
-    "PGChar": edit_key,
+    "ARRAY": None,
+    "BIGINT": edit_integer,
+    "BYTEA": None,
+    "BIT": None,
+    "BOOLEAN": edit_bool,
+    "CHAR": edit_key,
     "Cidr": edit_field,
     "Inet": edit_field,
-    "PGDate": edit_field,
-    "PGDateTime": edit_field,
-    "PGFloat": edit_float,
-    "PGInteger": edit_integer,
-    "PGInterval": edit_field,
-    "PGMacAddr": edit_field,
-    "PGNumeric": edit_number,
-    "PGSmallInteger": edit_integer,
-    "PGString": edit_text,
-    "PGText": edit_text,
-    "PGTime": edit_field,
-    "PGUuid": edit_text,
+    "DATE": edit_field,
+    "TIMESTAMP": edit_field,
+    "FLOAT": edit_float,
+    "INTEGER": edit_integer,
+    "INTERVAL": edit_field,
+    "MACADDR": edit_field,
+    "NUMERIC": edit_number,
+    "SMALLINT": edit_integer,
+    "VARCHAR": edit_text,
+    "TEXT": edit_text,
+    "TIME": edit_field,
+    "UUID": edit_text,
     "PickleText": edit_pickleinput,
     "ValueType": edit_valuetype,
-    "RelationProperty": edit_relation_input,
+    "RelationshipProperty": edit_relation_input,
     "TestCaseStatus": edit_testcasestatus,
     "TestCaseType": edit_testcasetype,
     "TestPriorityType": edit_testpriority,

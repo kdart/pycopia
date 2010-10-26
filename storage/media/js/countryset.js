@@ -209,7 +209,7 @@ CountrySetApp.prototype._fillCountrySet = function(cs) {
   };
   replaceChildNodes(this.cscontent, cs);
   try {
-    var namerow = getFirstElementByTagAndClassName("tr", "PGString", this.cscontent);
+    var namerow = getFirstElementByTagAndClassName("tr", "VARCHAR", this.cscontent);
     var namedata = namerow.getElementsByTagName("td")[1];
     setEditable(namedata, bind(this._changeName, this));
   }

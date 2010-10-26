@@ -4,7 +4,7 @@
 # Keith Dart <kdart@kdart.com>
 
 
-DATABASE_URL = 'postgres://pycopia@localhost/pycopia'
+DATABASE_URL = 'postgresql://pycopia@localhost/pycopia'
 
 ### web interface
 

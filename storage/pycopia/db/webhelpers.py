@@ -74,6 +74,8 @@ def get_row(modelclass, rowid):
 
 def get_ids(modelclass, idlist):
     assert type(idlist) is list
+    if not idlist:
+        return []
     idlist = [int(i) for i in idlist]
     return dbsession.query(modelclass).filter(modelclass.id.in_(idlist)).all()
 
@@ -119,7 +121,7 @@ def update_row(data, klass, dbrow):
 def _update_row(data, klass, dbrow, metadata, value):
     if not value and metadata.nullable:
         value = None
-    if metadata.coltype == "RelationProperty":
+    if metadata.coltype == "RelationshipProperty":
         relmodel = getattr(klass, metadata.colname).property.mapper.class_
         if isinstance(value, list) and value:
             t = dbsession.query(relmodel).filter(
@@ -150,7 +152,7 @@ def _update_row(data, klass, dbrow, metadata, value):
             except: # allows use of unquoted strings.
                 pass
             setattr(dbrow, metadata.colname, value)
-    elif metadata.coltype == "PGText":
+    elif metadata.coltype == "TEXT":
         setattr(dbrow, metadata.colname, value)
     else:
         if value is None and metadata.nullable:
@@ -187,28 +189,28 @@ def validate_cidr(value):
         return value
 
 _VALIDATORS = {
-    "PGArray": None,
-    "PGBigInteger": validate_bigint,
-    "PGBinary": None,
-    "PGBit": None,
-    "PGBoolean": validate_bool,
-    "PGChar": None,
+    "ARRAY": None,
+    "BIGINT": validate_bigint,
+    "BYTEA": None,
+    "BIT": None,
+    "BOOLEAN": validate_bool,
+    "CHAR": None,
     "Cidr": validate_cidr,
     "Inet": None,
-    "PGDate": None,
-    "PGDateTime": None,
-    "PGFloat": validate_float,
-    "PGInteger": validate_int,
-    "PGInterval": None,
-    "PGMacAddr": None,
-    "PGNumeric": validate_bigint,
-    "PGSmallInteger": validate_int,
-    "PGString": None,
-    "PGText": None,
-    "PGTime": None,
-    "PGUuid": None,
+    "DATE": None,
+    "TIMESTAMP": None,
+    "FLOAT": validate_float,
+    "INTEGER": validate_int,
+    "INTERVAL": None,
+    "MACADDR": None,
+    "NUMERIC": validate_bigint,
+    "SMALLINT": validate_int,
+    "VARCHAR": None,
+    "TEXT": None,
+    "TIME": None,
+    "UUID": None,
     "PickleText": None,
-    "RelationProperty": None,
+    "RelationshipProperty": None,
     "ValueType": types.ValueType.validate,
     "TestCaseStatus": types.TestCaseStatus.validate,
     "TestCaseType": types.TestCaseType.validate,
@@ -313,29 +315,29 @@ def create_testpriority(node, modelclass, metadata, row):
 
 
 _CONSTRUCTORS = {
-    "PGArray": None,
-    "PGBigInteger": create_textinput,
-    "PGBinary": None,
-    "PGBit": None,
-    "PGBoolean": create_boolean_input,
-    "PGChar": create_textinput,
+    "ARRAY": None,
+    "BIGINT": create_textinput,
+    "BYTEA": None,
+    "BIT": None,
+    "BOOLEAN": create_boolean_input,
+    "CHAR": create_textinput,
     "Cidr": create_textinput,
     "Inet": create_textinput,
-    "PGDate": create_textinput,
-    "PGDateTime": create_textinput,
-    "PGFloat": create_textinput,
-    "PGInteger": create_textinput,
-    "PGInterval": create_textinput,
-    "PGMacAddr": create_textinput,
-    "PGNumeric": create_textinput,
-    "PGSmallInteger": create_textinput,
-    "PGString": create_textinput,
-    "PGText": create_textarea,
-    "PGTime": create_textinput,
-    "PGUuid": create_textinput,
+    "DATE": create_textinput,
+    "TIMESTAMP": create_textinput,
+    "FLOAT": create_textinput,
+    "INTEGER": create_textinput,
+    "INTERVAL": create_textinput,
+    "MACADDR": create_textinput,
+    "NUMERIC": create_textinput,
+    "SMALLINT": create_textinput,
+    "VARCHAR": create_textinput,
+    "TEXT": create_textarea,
+    "TIME": create_textinput,
+    "UUID": create_textinput,
     "PickleText": create_pickleinput,
     "ValueType": create_valuetypeinput,
-    "RelationProperty": create_relation_input,
+    "RelationshipProperty": create_relation_input,
     "TestCaseStatus": create_testcasestatus,
     "TestCaseType": create_testcasetype,
     "TestPriorityType": create_testpriority,
@@ -412,29 +414,29 @@ def new_testpriority(node, modelclass, metadata):
             class_="radioset")
 
 _CREATORS = {
-    "PGArray": None,
-    "PGBigInteger": new_textinput,
-    "PGBinary": None,
-    "PGBit": None,
-    "PGBoolean": new_boolean_input,
-    "PGChar": new_textinput,
+    "ARRAY": None,
+    "BIGINT": new_textinput,
+    "BYTEA": None,
+    "BIT": None,
+    "BOOLEAN": new_boolean_input,
+    "CHAR": new_textinput,
     "Cidr": new_textinput,
     "Inet": new_textinput,
-    "PGDate": new_textinput,
-    "PGDateTime": new_textinput,
-    "PGFloat": new_textinput,
-    "PGInteger": new_textinput,
-    "PGInterval": new_textinput,
-    "PGMacAddr": new_textinput,
-    "PGNumeric": new_textinput,
-    "PGSmallInteger": new_textinput,
-    "PGString": new_textinput,
-    "PGText": new_textarea,
-    "PGTime": new_textinput,
-    "PGUuid": new_textinput,
+    "DATE": new_textinput,
+    "TIMESTAMP": new_textinput,
+    "FLOAT": new_textinput,
+    "INTEGER": new_textinput,
+    "INTERVAL": new_textinput,
+    "MACADDR": new_textinput,
+    "NUMERIC": new_textinput,
+    "SMALLINT": new_textinput,
+    "VARCHAR": new_textinput,
+    "TEXT": new_textarea,
+    "TIME": new_textinput,
+    "UUID": new_textinput,
     "PickleText": new_pickleinput,
     "ValueType": new_valuetypeinput,
-    "RelationProperty": new_relation_input,
+    "RelationshipProperty": new_relation_input,
     "TestCaseStatus": new_testcasestatus,
     "TestCaseType": new_testcasetype,
     "TestPriorityType": new_testpriority,

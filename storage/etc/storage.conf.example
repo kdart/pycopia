@@ -16,7 +16,7 @@
 
 ### For postgres database backend
 
-DATABASE_URL = database = 'postgres://pycopia@localhost/pycopia'
+DATABASE_URL = database = 'postgresql://pycopia@localhost/pycopia'
 
 
 ### web interface

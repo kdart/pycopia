@@ -47,7 +47,7 @@ TINY_MCE_EDIT_INIT="""
     tinyMCE.init({ 
         mode : "textareas", 
         theme : "advanced", 
-        editor_selector : "PGText",
+        editor_selector : "TEXT",
         theme_advanced_buttons1 : "bold,italic,underline,separator,strikethrough,justifyleft,justifycenter,justifyright,justifyfull,bullist,numlist,undo,redo,|,formatselect,fontselect,fontsizeselect",
         theme_advanced_buttons2 : "",
         theme_advanced_buttons3 : "",

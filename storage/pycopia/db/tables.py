@@ -40,9 +40,9 @@ metadata = MetaData()
 
 
 auth_message =  Table('auth_message', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'user_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'message', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'user_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'message', TEXT(length=None, convert_unicode=False), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_message_user_id_fkey',
                     onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
@@ -50,29 +50,29 @@ Index('index_auth_message_user_id', auth_message.c.user_id, unique=False)
 
 
 client_session =  Table('client_session', metadata,
-    Column(u'session_key', PGString(length=40, convert_unicode=False, assert_unicode=None), primary_key=True, nullable=False),
+    Column(u'session_key', VARCHAR(length=40, convert_unicode=False), primary_key=True, nullable=False),
             Column(u'data', PickleText(), primary_key=False, nullable=False, default=default_obj({})),
-            Column(u'expire_date', PGDateTime(timezone=True), primary_key=False, nullable=False),
+            Column(u'expire_date', TIMESTAMP(timezone=True), primary_key=False, nullable=False),
     schema='public')
 Index('index_client_session_pkey', client_session.c.session_key, unique=True)
 
 
 project_category =  Table('project_category', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 Index('index_project_category_name_key', project_category.c.name, unique=True)
 
 
 config =  Table('config', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
             Column(u'value', PickleText(), primary_key=False, nullable=True, default=default_obj(None)),
-            Column(u'comment', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'parent_id', PGInteger(), primary_key=False),
-            Column(u'user_id', PGInteger(), primary_key=False),
-            Column(u'testcase_id', PGInteger(), primary_key=False),
-            Column(u'testsuite_id', PGInteger(), primary_key=False),
+            Column(u'comment', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'parent_id', INTEGER(), primary_key=False),
+            Column(u'user_id', INTEGER(), primary_key=False),
+            Column(u'testcase_id', INTEGER(), primary_key=False),
+            Column(u'testsuite_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'config_testcase_id_fkey'),
             ForeignKeyConstraint([u'testsuite_id'], [u'public.test_suites.id'], name=u'config_testsuite_id_fkey'),
             ForeignKeyConstraint([u'parent_id'], [u'public.config.id'], name=u'parent_id_refs_config_id'),
@@ -88,24 +88,24 @@ Index('index_config_testsuite_id', config.c.testsuite_id, unique=False)
 
 
 contacts =  Table('contacts', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'prefix', PGString(length=15, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'firstname', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'middlename', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'lastname', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'title', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'position', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'phonehome', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'phoneoffice', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'phoneother', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'phonework', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'phonemobile', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'pager', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'fax', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'email', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'note', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'address_id', PGInteger(), primary_key=False),
-            Column(u'user_id', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'prefix', VARCHAR(length=15, convert_unicode=False), primary_key=False),
+            Column(u'firstname', VARCHAR(length=50, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'middlename', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'lastname', VARCHAR(length=50, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'title', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'position', VARCHAR(length=100, convert_unicode=False), primary_key=False),
+            Column(u'phonehome', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'phoneoffice', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'phoneother', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'phonework', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'phonemobile', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'pager', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'fax', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'email', VARCHAR(length=80, convert_unicode=False), primary_key=False),
+            Column(u'note', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'address_id', INTEGER(), primary_key=False),
+            Column(u'user_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'address_id'], [u'public.addresses.id'], name=u'contacts_address_id_fkey'),
             ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'contacts_user_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
@@ -116,19 +116,19 @@ Index('index_contacts_user_id', contacts.c.user_id, unique=False)
 
 
 corp_attribute_type =  Table('corp_attribute_type', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'description', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=ValueType.get_default),
     schema='public')
 Index('index_corp_attribute_type_name_key', corp_attribute_type.c.name, unique=True)
 
 
 corp_attributes =  Table('corp_attributes', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'type_id', INTEGER(), primary_key=False, nullable=False),
             Column(u'value', PickleText(), primary_key=False, nullable=False),
-            Column(u'corporation_id', PGInteger(), primary_key=False, nullable=False),
+            Column(u'corporation_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'corporation_id'], [u'public.corporations.id'], name=u'corp_attributes_corporation_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.corp_attribute_type.id'], name=u'corp_attributes_type_id_fkey'),
     schema='public')
@@ -137,40 +137,40 @@ Index('index_corp_attributes_corporation_id', corp_attributes.c.corporation_id, 
 
 
 account_ids =  Table('account_ids', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'identifier', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'login', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'password', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'note', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'identifier', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'login', VARCHAR(length=80, convert_unicode=False), primary_key=False),
+            Column(u'password', VARCHAR(length=80, convert_unicode=False), primary_key=False),
+            Column(u'note', TEXT(length=None, convert_unicode=False), primary_key=False),
     schema='public')
 Index('index_account_ids_identifier', account_ids.c.identifier, unique=False)
 
 
 addresses =  Table('addresses', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'address', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'address2', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=True),
-            Column(u'city', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=True),
-            Column(u'stateprov', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=True),
-            Column(u'postalcode', PGString(length=15, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=True),
-            Column(u'country_id', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'address', TEXT(length=None, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'address2', TEXT(length=None, convert_unicode=False), primary_key=False, nullable=True),
+            Column(u'city', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=True),
+            Column(u'stateprov', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=True),
+            Column(u'postalcode', VARCHAR(length=15, convert_unicode=False), primary_key=False, nullable=True),
+            Column(u'country_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'country_id'], [u'public.country_codes.id'], name=u'addresses_country_id_fkey'),
     schema='public')
 Index('index_addresses_country_id', addresses.c.country_id, unique=False)
 
 
 capability_group =  Table('capability_group', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 Index('index_capability_group_name_key', capability_group.c.name, unique=True)
 
 
 capability_type =  Table('capability_type', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'group_id', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'description', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'group_id', INTEGER(), primary_key=False),
             Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=ValueType.get_default),
     ForeignKeyConstraint([u'group_id'], [u'public.capability_group.id'], name=u'capability_type_group_id_fkey'),
     schema='public')
@@ -179,10 +179,10 @@ Index('index_capability_type_group_id', capability_type.c.group_id, unique=False
 
 
 capability =  Table('capability', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'type_id', INTEGER(), primary_key=False, nullable=False),
             Column(u'value', PickleText(), primary_key=False, nullable=False),
-            Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
+            Column(u'equipment_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'capability_equipment_id_fkey',
                     onupdate="CASCADE", ondelete="CASCADE"),
             ForeignKeyConstraint([u'type_id'], [u'public.capability_type.id'], name=u'capability_type_id_fkey'),
@@ -192,10 +192,10 @@ Index('index_capability_type_id', capability.c.type_id, unique=False)
 
 
 location =  Table('location', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'locationcode', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'address_id', PGInteger(), primary_key=False),
-            Column(u'contact_id', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'locationcode', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'address_id', INTEGER(), primary_key=False),
+            Column(u'contact_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'address_id'], [u'public.addresses.id'], name=u'location_address_id_fkey'),
             ForeignKeyConstraint([u'contact_id'], [u'public.contacts.id'], name=u'location_contact_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
@@ -205,19 +205,19 @@ Index('index_location_contact_id', location.c.contact_id, unique=False)
 
 
 attribute_type =  Table('attribute_type', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'description', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=ValueType.get_default),
     schema='public')
 Index('index_attribute_type_name_key', attribute_type.c.name, unique=True)
 
 
 software_attributes =  Table('software_attributes', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'type_id', INTEGER(), primary_key=False, nullable=False),
             Column(u'value', PickleText(), primary_key=False, nullable=False),
-            Column(u'software_id', PGInteger(), primary_key=False, nullable=False),
+            Column(u'software_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'software_id'], [u'public.software.id'], name=u'software_attributes_software_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'software_attributes_type_id_fkey'),
     schema='public')
@@ -226,19 +226,19 @@ Index('index_software_attributes_type_id', software_attributes.c.type_id, unique
 
 
 environmentattribute_type =  Table('environmentattribute_type', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'description', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'value_type', ValueType(), primary_key=False, nullable=False, default=ValueType.get_default),
     schema='public')
 Index('index_environmentattribute_type_name_key', environmentattribute_type.c.name, unique=True)
 
 
 environment_attributes =  Table('environment_attributes', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'type_id', INTEGER(), primary_key=False, nullable=False),
             Column(u'value', PickleText(), primary_key=False, nullable=False),
-            Column(u'environment_id', PGInteger(), primary_key=False, nullable=False),
+            Column(u'environment_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'environment_attributes_environment_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.environmentattribute_type.id'], name=u'environment_attributes_type_id_fkey'),
     schema='public')
@@ -247,16 +247,16 @@ Index('index_environment_attributes_type_id', environment_attributes.c.type_id, 
 
 
 test_jobs =  Table('test_jobs', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'user_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'environment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'testsuite_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'reportname', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, 
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'user_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'environment_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'testsuite_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'reportname', VARCHAR(length=80, convert_unicode=False), primary_key=False, 
                     nullable=False, default=default_obj("email")),
-            Column(u'parameters', PGText(assert_unicode='warn'), primary_key=False),
-            Column(u'isscheduled', PGBoolean(), primary_key=False, nullable=False, default=default_inactive),
-            Column(u'schedule_id', PGInteger(), primary_key=False),
+            Column(u'parameters', TEXT(), primary_key=False),
+            Column(u'isscheduled', BOOLEAN(), primary_key=False, nullable=False, default=default_inactive),
+            Column(u'schedule_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'test_jobs_environment_id_fkey'),
             ForeignKeyConstraint([u'schedule_id'], [u'public.schedule.id'], name=u'test_jobs_schedule_id_fkey'),
             ForeignKeyConstraint([u'testsuite_id'], [u'public.test_suites.id'], name=u'test_jobs_testsuite_id_fkey'),
@@ -272,14 +272,14 @@ Index('index_test_jobs_name_key', test_jobs.c.name, test_jobs.c.user_id, unique=
 
 
 schedule =  Table('schedule', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'user_id', PGInteger(), primary_key=False),
-            Column(u'minute', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'hour', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'day_of_month', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'month', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'day_of_week', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'user_id', INTEGER(), primary_key=False),
+            Column(u'minute', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'hour', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'day_of_month', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'month', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'day_of_week', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'schedule_user_id_fkey',
                     onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
@@ -287,33 +287,33 @@ Index('index_schedule_user_id', schedule.c.user_id, unique=False)
 
 
 test_results_data =  Table('test_results_data', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
             Column(u'data', PickleText(), primary_key=False, nullable=False),
-            Column(u'note', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'note', VARCHAR(length=255, convert_unicode=False), primary_key=False),
     schema='public')
 Index('index_test_results_data_pkey', test_results_data.c.id, unique=True)
 
 
 test_results =  Table('test_results', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'testcase_id', PGInteger(), primary_key=False),
-            Column(u'testimplementation', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'testversion', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'tester_id', PGInteger(), primary_key=False),
-            Column(u'environment_id', PGInteger(), primary_key=False),
-            Column(u'build_id', PGInteger(), primary_key=False),
-            Column(u'parent_id', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'testcase_id', INTEGER(), primary_key=False),
+            Column(u'testimplementation', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'testversion', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'tester_id', INTEGER(), primary_key=False),
+            Column(u'environment_id', INTEGER(), primary_key=False),
+            Column(u'build_id', INTEGER(), primary_key=False),
+            Column(u'parent_id', INTEGER(), primary_key=False),
             Column(u'objecttype', TestObjectType(), primary_key=False, nullable=False),
-            Column(u'starttime', PGDateTime(timezone=True), primary_key=False),
-            Column(u'endtime', PGDateTime(timezone=True), primary_key=False),
-            Column(u'arguments', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'starttime', TIMESTAMP(timezone=True), primary_key=False),
+            Column(u'endtime', TIMESTAMP(timezone=True), primary_key=False),
+            Column(u'arguments', VARCHAR(length=255, convert_unicode=False), primary_key=False),
             Column(u'result', TestResultType(), primary_key=False, nullable=False),
-            Column(u'diagnostic', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'testresultdata_id', PGInteger(), primary_key=False),
-            Column(u'resultslocation', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'reportfilename', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'note', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'valid', PGBoolean(), primary_key=False, nullable=False, default=default_active),
+            Column(u'diagnostic', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'testresultdata_id', INTEGER(), primary_key=False),
+            Column(u'resultslocation', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'reportfilename', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'note', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'valid', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
     ForeignKeyConstraint([u'tester_id'], [u'public.auth_user.id'], name=u'test_results_tester_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'parent_id'], [u'public.test_results.id'], name=u'parent_id_refs_test_results_id'),
@@ -332,8 +332,8 @@ Index('index_test_results_environment_id', test_results.c.environment_id, unique
 
 
 traps =  Table('traps', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'timestamp', PGDateTime(timezone=True), primary_key=False, nullable=False,
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'timestamp', TIMESTAMP(timezone=True), primary_key=False, nullable=False,
                     default=time_now),
             Column(u'trap', PickleText(), primary_key=False, nullable=False),
     schema='public')
@@ -341,20 +341,20 @@ Index('index_traps_pkey', traps.c.id, unique=True)
 
 
 cookies =  Table('cookies', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'value', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'comment', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'domain', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'max_age', PGInteger(), primary_key=False),
-            Column(u'path', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'version', PGInteger(), primary_key=False, nullable=False),
-            Column(u'secure', PGBoolean(), primary_key=False),
-            Column(u'expires', PGDateTime(timezone=True), primary_key=False),
-            Column(u'discard', PGBoolean(), primary_key=False),
-            Column(u'comment_url', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'port', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'user_id', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'value', TEXT(length=None, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'comment', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'domain', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'max_age', INTEGER(), primary_key=False),
+            Column(u'path', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'version', INTEGER(), primary_key=False, nullable=False),
+            Column(u'secure', BOOLEAN(), primary_key=False),
+            Column(u'expires', TIMESTAMP(timezone=True), primary_key=False),
+            Column(u'discard', BOOLEAN(), primary_key=False),
+            Column(u'comment_url', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'port', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'user_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'cookies_user_id_fkey',
                     onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
@@ -362,9 +362,9 @@ Index('index_cookies_user_id', cookies.c.user_id, unique=False)
 
 
 auth_group_permissions =  Table('auth_group_permissions', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'group_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'permission_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'group_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'permission_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'group_id'], [u'public.auth_group.id'], name=u'auth_group_permissions_group_id_fkey'),
             ForeignKeyConstraint([u'permission_id'], [u'public.auth_permission.id'], name=u'auth_group_permissions_permission_id_fkey'),
     schema='public')
@@ -372,9 +372,9 @@ Index('index_auth_group_permissions_group_id_key', auth_group_permissions.c.grou
 
 
 auth_user_groups =  Table('auth_user_groups', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'user_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'group_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'user_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'group_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'group_id'], [u'public.auth_group.id'], name=u'auth_user_groups_group_id_fkey'),
             ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_user_groups_user_id_fkey',
                     onupdate="CASCADE", ondelete="CASCADE"),
@@ -383,23 +383,23 @@ Index('index_auth_user_groups_user_id_key', auth_user_groups.c.user_id, auth_use
 
 
 auth_group =  Table('auth_group', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 Index('index_auth_group_name_key', auth_group.c.name, unique=True)
 
 
 auth_permission =  Table('auth_permission', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'description', PGText(convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=50, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'description', TEXT(convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 
 
 auth_user_user_permissions =  Table('auth_user_user_permissions', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'user_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'permission_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'user_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'permission_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'permission_id'], [u'public.auth_permission.id'], name=u'auth_user_user_permissions_permission_id_fkey'),
             ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'auth_user_user_permissions_user_id_fkey',
                     onupdate="CASCADE", ondelete="CASCADE"),
@@ -408,30 +408,30 @@ Index('index_auth_user_user_permissions_user_id_key', auth_user_user_permissions
 
 
 auth_user =  Table('auth_user', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'username', PGString(length=30, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'first_name', PGString(length=30, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'middle_name', PGString(length=30, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'last_name', PGString(length=30, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'email', PGString(length=75, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'is_staff', PGBoolean(), primary_key=False, nullable=False, default=default_active),
-            Column(u'is_active', PGBoolean(), primary_key=False, nullable=False, default=default_active),
-            Column(u'is_superuser', PGBoolean(), primary_key=False, nullable=False, default=default_inactive),
-            Column(u'last_login', PGDateTime(timezone=True), primary_key=False, nullable=False, 
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'username', VARCHAR(length=30, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'first_name', VARCHAR(length=30, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'middle_name', VARCHAR(length=30, convert_unicode=False), primary_key=False),
+            Column(u'last_name', VARCHAR(length=30, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'email', VARCHAR(length=75, convert_unicode=False), primary_key=False),
+            Column(u'is_staff', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
+            Column(u'is_active', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
+            Column(u'is_superuser', BOOLEAN(), primary_key=False, nullable=False, default=default_inactive),
+            Column(u'last_login', TIMESTAMP(timezone=True), primary_key=False, nullable=False, 
                     onupdate=time_now, default=time_now),
-            Column(u'date_joined', PGDateTime(timezone=True), primary_key=False, nullable=False, default=time_now),
-            Column(u'password', PGString(length=40, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'authservice', PGString(length=20, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'address_id', PGInteger(), primary_key=False),
+            Column(u'date_joined', TIMESTAMP(timezone=True), primary_key=False, nullable=False, default=time_now),
+            Column(u'password', VARCHAR(length=40, convert_unicode=False), primary_key=False),
+            Column(u'authservice', VARCHAR(length=20, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'address_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'address_id'], [u'public.addresses.id'], name=u'auth_user_address_id_fkey'),
     schema='public')
 Index('index_auth_user_username_key', auth_user.c.username, unique=True)
 
 
 components_suites =  Table('components_suites', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'component_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'testsuite_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'component_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'testsuite_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'component_id'], [u'public.components.id'], name=u'components_suites_component_id_fkey'),
             ForeignKeyConstraint([u'testsuite_id'], [u'public.test_suites.id'], name=u'components_suites_testsuite_id_fkey'),
     schema='public')
@@ -439,12 +439,12 @@ Index('index_components_suites_component_id_key', components_suites.c.component_
 
 
 projects =  Table('projects', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'category_id', PGInteger(), primary_key=False),
-            Column(u'leader_id', PGInteger(), primary_key=False),
-            Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'created', PGDateTime(timezone=True), primary_key=False, nullable=False, default=time_now),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'category_id', INTEGER(), primary_key=False),
+            Column(u'leader_id', INTEGER(), primary_key=False),
+            Column(u'description', TEXT(length=None, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'created', TIMESTAMP(timezone=True), primary_key=False, nullable=False, default=time_now),
     ForeignKeyConstraint([u'category_id'], [u'public.project_category.id'], name=u'projects_category_id_fkey'),
             ForeignKeyConstraint([u'leader_id'], [u'public.contacts.id'], name=u'projects_leader_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
@@ -455,9 +455,9 @@ Index('index_projects_category_id', projects.c.category_id, unique=False)
 
 
 projects_components =  Table('projects_components', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'project_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'component_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'project_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'component_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'component_id'], [u'public.components.id'], name=u'projects_components_component_id_fkey'),
             ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], name=u'projects_components_project_id_fkey'),
     schema='public')
@@ -465,18 +465,18 @@ Index('index_projects_components_project_id_key', projects_components.c.project_
 
 
 components =  Table('components', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'created', PGDateTime(timezone=True), primary_key=False, nullable=False, default=time_now),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'description', TEXT(length=None, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'created', TIMESTAMP(timezone=True), primary_key=False, nullable=False, default=time_now),
     schema='public')
 Index('index_components_name_key', components.c.name, unique=True)
 
 
 test_cases_areas =  Table('test_cases_areas', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'testcase_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'functionalarea_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'testcase_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'functionalarea_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'functionalarea_id'], [u'public.functional_area.id'], name=u'test_cases_areas_functionalarea_id_fkey'),
             ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'test_cases_areas_testcase_id_fkey'),
     schema='public')
@@ -484,30 +484,30 @@ Index('index_test_cases_areas_testcase_id_key', test_cases_areas.c.testcase_id, 
 
 
 test_cases =  Table('test_cases', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'lastchange', PGDateTime(timezone=True), primary_key=False, nullable=False, 
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'lastchange', TIMESTAMP(timezone=True), primary_key=False, nullable=False, 
                     onupdate=time_now, default=time_now),
-            Column(u'lastchangeauthor_id', PGInteger(), primary_key=False),
-            Column(u'author_id', PGInteger(), primary_key=False),
-            Column(u'reviewer_id', PGInteger(), primary_key=False),
-            Column(u'tester_id', PGInteger(), primary_key=False),
-            Column(u'reference', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'purpose', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'passcriteria', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'startcondition', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'endcondition', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'procedure', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'comments', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'lastchangeauthor_id', INTEGER(), primary_key=False),
+            Column(u'author_id', INTEGER(), primary_key=False),
+            Column(u'reviewer_id', INTEGER(), primary_key=False),
+            Column(u'tester_id', INTEGER(), primary_key=False),
+            Column(u'reference', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'purpose', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'passcriteria', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'startcondition', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'endcondition', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'procedure', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'comments', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'priority', TestPriorityType(), primary_key=False, nullable=False, default=TestPriorityType.get_default),
             Column(u'cycle', TestCaseType(), primary_key=False, nullable=False, default=TestCaseType.get_default),
             Column(u'status', TestCaseStatus(), primary_key=False, nullable=False, default=TestCaseStatus.get_default),
-            Column(u'automated', PGBoolean(), primary_key=False, nullable=False, default=default_active),
-            Column(u'interactive', PGBoolean(), primary_key=False, nullable=False, default=default_inactive),
-            Column(u'valid', PGBoolean(), primary_key=False, nullable=False, default=default_active),
-            Column(u'testimplementation', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'bugid', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'prerequisite_id', PGInteger(), primary_key=False),
+            Column(u'automated', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
+            Column(u'interactive', BOOLEAN(), primary_key=False, nullable=False, default=default_inactive),
+            Column(u'valid', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
+            Column(u'testimplementation', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'bugid', VARCHAR(length=80, convert_unicode=False), primary_key=False),
+            Column(u'prerequisite_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'author_id'], [u'public.auth_user.id'], name=u'test_cases_author_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'reviewer_id'], [u'public.auth_user.id'], name=u'test_cases_reviewer_id_fkey',
@@ -527,15 +527,15 @@ Index('index_test_cases_tester_id', test_cases.c.tester_id, unique=False)
 
 
 test_suites =  Table('test_suites', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'valid', PGBoolean(), primary_key=False, nullable=False, default=default_active),
-            Column(u'lastchange', PGDateTime(timezone=True), primary_key=False, nullable=False, 
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'valid', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
+            Column(u'lastchange', TIMESTAMP(timezone=True), primary_key=False, nullable=False, 
                     onupdate=time_now, default=time_now),
-            Column(u'lastchangeauthor_id', PGInteger(), primary_key=False),
-            Column(u'suiteimplementation', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'project_id', PGInteger(), primary_key=False),
-            Column(u'purpose', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'lastchangeauthor_id', INTEGER(), primary_key=False),
+            Column(u'suiteimplementation', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'project_id', INTEGER(), primary_key=False),
+            Column(u'purpose', TEXT(length=None, convert_unicode=False), primary_key=False),
     ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_suites_lastchangeauthor_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], name=u'test_suites_projects_id_fkey',
@@ -547,9 +547,9 @@ Index('index_test_suites_project_id', test_suites.c.project_id, unique=False)
 
 
 test_suites_testcases =  Table('test_suites_testcases', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'testsuite_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'testcase_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'testsuite_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'testcase_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'test_suites_testcases_testcase_id_fkey'),
             ForeignKeyConstraint([u'testsuite_id'], [u'public.test_suites.id'], name=u'test_suites_testcases_testsuite_id_fkey'),
     schema='public')
@@ -557,17 +557,17 @@ Index('index_test_suites_testcases_testsuite_id_key', test_suites_testcases.c.te
 
 
 country_codes =  Table('country_codes', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'isocode', PGString(length=4, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'isocode', VARCHAR(length=4, convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 Index('index_country_codes_isocode_key', country_codes.c.isocode, unique=True)
 
 
 test_suites_suites =  Table('test_suites_suites', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'from_testsuite_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'to_testsuite_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'from_testsuite_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'to_testsuite_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'from_testsuite_id'], [u'public.test_suites.id'], name=u'test_suites_suites_from_testsuite_id_fkey'),
             ForeignKeyConstraint([u'to_testsuite_id'], [u'public.test_suites.id'], name=u'test_suites_suites_to_testsuite_id_fkey'),
     schema='public')
@@ -575,16 +575,16 @@ Index('index_test_suites_suites_from_testsuite_id_key', test_suites_suites.c.fro
 
 
 country_sets =  Table('country_sets', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 Index('index_country_sets_name_key', country_sets.c.name, unique=True)
 
 
 country_sets_countries =  Table('country_sets_countries', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'countryset_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'country_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'countryset_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'country_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'country_id'], [u'public.country_codes.id'], name=u'country_sets_countries_country_id_fkey'),
             ForeignKeyConstraint([u'countryset_id'], [u'public.country_sets.id'], name=u'country_sets_countries_countryset_id_fkey'),
     schema='public')
@@ -592,16 +592,16 @@ Index('index_country_sets_countries_countryset_id_key', country_sets_countries.c
 
 
 language_sets =  Table('language_sets', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 Index('index_language_sets_name_key', language_sets.c.name, unique=True)
 
 
 language_sets_languages =  Table('language_sets_languages', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'languageset_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'language_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'languageset_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'language_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'language_id'], [u'public.language_codes.id'], name=u'language_sets_languages_language_id_fkey'),
             ForeignKeyConstraint([u'languageset_id'], [u'public.language_sets.id'], name=u'language_sets_languages_languageset_id_fkey'),
     
@@ -610,9 +610,9 @@ Index('index_language_sets_languages_languageset_id_key', language_sets_language
 
 
 corporations_services =  Table('corporations_services', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'corporation_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'functionalarea_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'corporation_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'functionalarea_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'corporation_id'], [u'public.corporations.id'], name=u'corporations_services_corporation_id_fkey'),
             ForeignKeyConstraint([u'functionalarea_id'], [u'public.functional_area.id'], name=u'corporations_services_functionalarea_id_fkey'),
     schema='public')
@@ -620,17 +620,17 @@ Index('index_corporations_services_corporation_id_key', corporations_services.c.
 
 
 functional_area =  Table('functional_area', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'description', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'description', VARCHAR(length=255, convert_unicode=False), primary_key=False),
     schema='public')
 Index('index_functional_area_name_key', functional_area.c.name, unique=True)
 
 
 software_variants =  Table('software_variants', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'software_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'softwarevariant_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'software_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'softwarevariant_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'software_id'], [u'public.software.id'], name=u'software_variants_software_id_fkey'),
             ForeignKeyConstraint([u'softwarevariant_id'], [u'public.software_variant.id'], name=u'software_variants_softwarevariant_id_fkey'),
     schema='public')
@@ -638,11 +638,11 @@ Index('index_software_variants_software_id_key', software_variants.c.software_id
 
 
 software_variant =  Table('software_variant', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'language_id', PGInteger(), primary_key=False),
-            Column(u'country_id', PGInteger(), primary_key=False),
-            Column(u'encoding', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'language_id', INTEGER(), primary_key=False),
+            Column(u'country_id', INTEGER(), primary_key=False),
+            Column(u'encoding', VARCHAR(length=80, convert_unicode=False), primary_key=False),
     ForeignKeyConstraint([u'country_id'], [u'public.country_codes.id'], name=u'software_variant_country_id_fkey'),
             ForeignKeyConstraint([u'language_id'], [u'public.language_codes.id'], name=u'software_variant_language_id_fkey'),
     schema='public')
@@ -652,22 +652,22 @@ Index('index_software_variant_country_id', software_variant.c.country_id, unique
 
 
 language_codes =  Table('language_codes', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'isocode', PGString(length=6, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'isocode', VARCHAR(length=6, convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 Index('index_language_codes_isocode_key', language_codes.c.isocode, unique=True)
 Index('index_language_codes_name_key', language_codes.c.name, unique=True)
 
 
 networks = Table('networks', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=64, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'layer', PGInteger(), primary_key=False, nullable=False, server_default="1"),
-            Column(u'vlanid', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=64, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'layer', INTEGER(), primary_key=False, nullable=False, server_default="1"),
+            Column(u'vlanid', INTEGER(), primary_key=False),
             Column(u'ipnetwork', Cidr(), primary_key=False),
-            Column(u'lower_id', PGInteger(), primary_key=False),
-            Column(u'notes', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'lower_id', INTEGER(), primary_key=False),
+            Column(u'notes', TEXT(length=None, convert_unicode=False), primary_key=False),
     ForeignKeyConstraint([u'lower_id'], [u'public.networks.id'], name=u'lower_id_refs_networks_id',
                     ondelete="SET NULL"),
     CheckConstraint('layer > 0 AND  layer < 8', name='osilayers'),
@@ -676,20 +676,20 @@ networks = Table('networks', metadata,
 
 
 equipment = Table('equipment', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'model_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'serno', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'location_id', PGInteger(), primary_key=False),
-            Column(u'sublocation', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'addeddate', PGDateTime(timezone=True), primary_key=False, default=time_now),
-            Column(u'comments', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'language_id', PGInteger(), primary_key=False),
-            Column(u'owner_id', PGInteger(), primary_key=False),
-            Column(u'vendor_id', PGInteger(), primary_key=False),
-            Column(u'account_id', PGInteger(), primary_key=False),
-            Column(u'parent_id', PGInteger(), primary_key=False),
-            Column(u'active', PGBoolean(), primary_key=False, nullable=False, default=default_active),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'model_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'serno', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'location_id', INTEGER(), primary_key=False),
+            Column(u'sublocation', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'addeddate', TIMESTAMP(timezone=True), primary_key=False, default=time_now),
+            Column(u'comments', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'language_id', INTEGER(), primary_key=False),
+            Column(u'owner_id', INTEGER(), primary_key=False),
+            Column(u'vendor_id', INTEGER(), primary_key=False),
+            Column(u'account_id', INTEGER(), primary_key=False),
+            Column(u'parent_id', INTEGER(), primary_key=False),
+            Column(u'active', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
     ForeignKeyConstraint([u'language_id'], [u'public.language_codes.id'], name=u'equipment_language_id_fkey'),
             ForeignKeyConstraint([u'model_id'], [u'public.equipment_model.id'], name=u'equipment_model_id_fkey'),
             ForeignKeyConstraint([u'vendor_id'], [u'public.corporations.id'], name=u'equipment_vendor_id_fkey'),
@@ -710,27 +710,27 @@ Index('index_equipment_parent_id', equipment.c.parent_id, unique=False)
 
 # IANAifType
 interface_type =  Table('interface_type', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=40, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'enumeration', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=40, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'enumeration', INTEGER(), primary_key=False),
     schema='public')
 
 interfaces =  Table('interfaces', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=64, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'alias', PGString(length=64, convert_unicode=False, assert_unicode=None)),
-            Column(u'ifindex', PGInteger(), primary_key=False),
-            Column(u'description', PGText(convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'macaddr', PGMacAddr(), primary_key=False),
-            Column(u'vlan', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=64, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'alias', VARCHAR(length=64, convert_unicode=False)),
+            Column(u'ifindex', INTEGER(), primary_key=False),
+            Column(u'description', TEXT(convert_unicode=False), primary_key=False),
+            Column(u'macaddr', MACADDR(), primary_key=False),
+            Column(u'vlan', INTEGER(), primary_key=False),
             Column(u'ipaddr', Inet(), primary_key=False),
-            Column(u'mtu', PGInteger(), primary_key=False),
-            Column(u'speed', PGInteger(), primary_key=False),
-            Column(u'status', PGInteger(), primary_key=False),
-            Column(u'interface_type_id', PGInteger(), primary_key=False),
-            Column(u'parent_id', PGInteger(), primary_key=False),
-            Column(u'equipment_id', PGInteger(), primary_key=False),
-            Column(u'network_id', PGInteger(), primary_key=False),
+            Column(u'mtu', INTEGER(), primary_key=False),
+            Column(u'speed', INTEGER(), primary_key=False),
+            Column(u'status', INTEGER(), primary_key=False),
+            Column(u'interface_type_id', INTEGER(), primary_key=False),
+            Column(u'parent_id', INTEGER(), primary_key=False),
+            Column(u'equipment_id', INTEGER(), primary_key=False),
+            Column(u'network_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'interfaces_equipment_id_fkey'),
             ForeignKeyConstraint([u'parent_id'], [u'public.interfaces.id'], name=u'parent_id_refs_interfaces_id'),
             ForeignKeyConstraint([u'interface_type_id'], [u'public.interface_type.id'], name=u'interface_type_id_refs_interfaces_id'),
@@ -742,10 +742,10 @@ Index('index_interfaces_interface_type_id', interfaces.c.interface_type_id, uniq
 Index('index_interfaces_network_id', interfaces.c.network_id, unique=False)
 
 equipment_attributes =  Table('equipment_attributes', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'type_id', INTEGER(), primary_key=False, nullable=False),
             Column(u'value', PickleText(), primary_key=False, nullable=False),
-            Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
+            Column(u'equipment_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'equipment_attributes_equipment_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'equipment_attributes_type_id_fkey'),
     schema='public')
@@ -754,10 +754,10 @@ Index('index_equipment_attributes_equipment_id', equipment_attributes.c.equipmen
 
 
 equipment_model_attributes =  Table('equipment_model_attributes', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'type_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'type_id', INTEGER(), primary_key=False, nullable=False),
             Column(u'value', PickleText(), primary_key=False, nullable=False),
-            Column(u'equipmentmodel_id', PGInteger(), primary_key=False, nullable=False),
+            Column(u'equipmentmodel_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipmentmodel_id'], [u'public.equipment_model.id'], name=u'equipment_model_attributes_equipmentmodel_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'equipment_model_attributes_type_id_fkey'),
     schema='public')
@@ -766,9 +766,9 @@ Index('index_equipment_model_attributes_equipmentmodel_id', equipment_model_attr
 
 
 equipment_subcomponents =  Table('equipment_subcomponents', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'from_equipment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'to_equipment_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'from_equipment_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'to_equipment_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'from_equipment_id'], [u'public.equipment.id'], name=u'equipment_subcomponents_from_equipment_id_fkey'),
             ForeignKeyConstraint([u'to_equipment_id'], [u'public.equipment.id'], name=u'equipment_subcomponents_to_equipment_id_fkey'),
     schema='public')
@@ -776,9 +776,9 @@ Index('index_equipment_subcomponents_from_equipment_id_key', equipment_subcompon
 
 
 equipment_software =  Table('equipment_software', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'software_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'equipment_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'software_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'equipment_software_equipment_id_fkey'),
             ForeignKeyConstraint([u'software_id'], [u'public.software.id'], name=u'equipment_software_software_id_fkey'),
     schema='public')
@@ -786,20 +786,20 @@ Index('index_equipment_software_equipment_id_key', equipment_software.c.equipmen
 
 
 equipment_category =  Table('equipment_category', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
     schema='public')
 Index('index_equipment_category_name_key', equipment_category.c.name, unique=True)
 
 
 equipment_model =  Table('equipment_model', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'manufacturer_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'category_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'specs', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'picture', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'note', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'manufacturer_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'category_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'specs', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'picture', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'note', TEXT(length=None, convert_unicode=False), primary_key=False),
     ForeignKeyConstraint([u'category_id'], [u'public.equipment_category.id'], name=u'equipment_model_category_id_fkey'),
             ForeignKeyConstraint([u'manufacturer_id'], [u'public.corporations.id'], name=u'equipment_model_manufacturer_id_fkey'),
     schema='public')
@@ -809,9 +809,9 @@ Index('index_equipment_model_manufacturer_id_key', equipment_model.c.manufacture
 
 
 equipment_model_embeddedsoftware =  Table('equipment_model_embeddedsoftware', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'equipmentmodel_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'software_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'equipmentmodel_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'software_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipmentmodel_id'], [u'public.equipment_model.id'], name=u'equipment_model_embeddedsoftware_equipmentmodel_id_fkey'),
             ForeignKeyConstraint([u'software_id'], [u'public.software.id'], name=u'equipment_model_embeddedsoftware_software_id_fkey'),
     schema='public')
@@ -819,11 +819,11 @@ Index('index_equipment_model_embeddedsoftware_equipmentmodel_id_key', equipment_
 
 
 software =  Table('software', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'manufacturer_id', PGInteger(), primary_key=False),
-            Column(u'vendor_id', PGInteger(), primary_key=False),
-            Column(u'category_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'manufacturer_id', INTEGER(), primary_key=False),
+            Column(u'vendor_id', INTEGER(), primary_key=False),
+            Column(u'category_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'category_id'], [u'public.software_category.id'], name=u'software_category_id_fkey'),
             ForeignKeyConstraint([u'vendor_id'], [u'public.corporations.id'], name=u'software_vendor_id_fkey'),
             ForeignKeyConstraint([u'manufacturer_id'], [u'public.corporations.id'], name=u'software_manufacturer_id_fkey'),
@@ -835,26 +835,26 @@ Index('index_software_category_id', software.c.category_id, unique=False)
 
 
 project_versions =  Table('project_versions', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'project_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'major', PGInteger(), primary_key=False, nullable=False, default=default_obj(1)),
-            Column(u'minor', PGInteger(), primary_key=False, nullable=False, default=default_obj(0)),
-            Column(u'subminor', PGInteger(), primary_key=False, nullable=False, default=default_obj(0)),
-            Column(u'build', PGInteger(), primary_key=False),
-            Column(u'valid', PGBoolean(), primary_key=False, nullable=False, default=default_active),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'project_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'major', INTEGER(), primary_key=False, nullable=False, default=default_obj(1)),
+            Column(u'minor', INTEGER(), primary_key=False, nullable=False, default=default_obj(0)),
+            Column(u'subminor', INTEGER(), primary_key=False, nullable=False, default=default_obj(0)),
+            Column(u'build', INTEGER(), primary_key=False),
+            Column(u'valid', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
     ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], name=u'project_versions_project_id_fkey'),
     schema='public')
 Index('index_project_versions_project_id', project_versions.c.project_id, unique=False)
 
 
 corporations =  Table('corporations', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'parent_id', PGInteger(), primary_key=False),
-            Column(u'notes', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'address_id', PGInteger(), primary_key=False),
-            Column(u'contact_id', PGInteger(), primary_key=False),
-            Column(u'country_id', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'parent_id', INTEGER(), primary_key=False),
+            Column(u'notes', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'address_id', INTEGER(), primary_key=False),
+            Column(u'contact_id', INTEGER(), primary_key=False),
+            Column(u'country_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'contact_id'], [u'public.contacts.id'], name=u'contact_id_refs_contacts_id'),
             ForeignKeyConstraint([u'parent_id'], [u'public.corporations.id'], name=u'parent_id_refs_corporations_id'),
             ForeignKeyConstraint([u'country_id'], [u'public.country_codes.id'], name=u'corporations_country_id_fkey'),
@@ -869,9 +869,9 @@ Index('index_corporations_name_key', corporations.c.name, corporations.c.country
 
 
 environments =  Table('environments', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=255, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'owner_id', PGInteger(), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'owner_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'owner_id'], [u'public.auth_user.id'], name=u'environments_owner_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
@@ -880,10 +880,10 @@ Index('index_environments_owner_id', environments.c.owner_id, unique=False)
 
 
 testequipment =  Table('testequipment', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'equipment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'environment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'UUT', PGBoolean(), primary_key=False, nullable=False, default=default_inactive),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'equipment_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'environment_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'UUT', BOOLEAN(), primary_key=False, nullable=False, default=default_inactive),
     ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'testequipment_environment_id_fkey',
                     onupdate="CASCADE", ondelete="CASCADE"),
             ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'testequipment_equipment_id_fkey',
@@ -895,9 +895,9 @@ Index('index_testequipment_environment_id', testequipment.c.environment_id, uniq
 
 
 testequipment_roles =  Table('testequipment_roles', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'testequipment_id', PGInteger(), primary_key=False, nullable=False),
-            Column(u'softwarecategory_id', PGInteger(), primary_key=False, nullable=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'testequipment_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'softwarecategory_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'softwarecategory_id'], [u'public.software_category.id'], name=u'testequipment_roles_softwarecategory_id_fkey'),
             ForeignKeyConstraint([u'testequipment_id'], [u'public.testequipment.id'], name=u'testequipment_roles_testequipment_id_fkey'),
     schema='public')
@@ -905,9 +905,9 @@ Index('index_testequipment_roles_testequipment_id_key', testequipment_roles.c.te
 
 
 software_category =  Table('software_category', metadata,
-    Column(u'id', PGInteger(), primary_key=True, nullable=False),
-            Column(u'name', PGString(length=80, convert_unicode=False, assert_unicode=None), primary_key=False, nullable=False),
-            Column(u'description', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'name', VARCHAR(length=80, convert_unicode=False), primary_key=False, nullable=False),
+            Column(u'description', TEXT(length=None, convert_unicode=False), primary_key=False),
     schema='public')
 Index('index_software_category_name_key', software_category.c.name, unique=True)
 
@@ -915,37 +915,37 @@ Index('index_software_category_name_key', software_category.c.name, unique=True)
 # table. It's still useful as a general contacts list. It's here as an
 # "extra".
 addressbook =  Table('addressbook', metadata,
-            Column(u'PREFIX', PGString(length=15, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'FIRSTNAME', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'LASTNAME', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'TITLE', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'COMPANY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'DEPARTMENT', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ADDRESS', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'CITY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'STATEPROV', PGString(length=5, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'POSTALCODE', PGString(length=15, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'COUNTRY', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'POSITION', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'INITIALS', PGString(length=10, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'SALUTATION', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PHONEHOME', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PHONEOFFI', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PHONEOTHE', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PHONEWORK', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'MOBILE', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'PAGER', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'FAX', PGString(length=25, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'EMAIL', PGString(length=50, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'URL', PGString(length=128, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'NOTE', PGText(length=None, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ALTFIELD1', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ALTFIELD2', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ALTFIELD3', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ALTFIELD4', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'ID', PGInteger(), primary_key=True, nullable=False),
-            Column(u'CALENDAR', PGString(length=100, convert_unicode=False, assert_unicode=None), primary_key=False),
-            Column(u'INVITE', PGChar(length=1, convert_unicode=False, assert_unicode=None), primary_key=False),
+            Column(u'PREFIX', VARCHAR(length=15, convert_unicode=False), primary_key=False),
+            Column(u'FIRSTNAME', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'LASTNAME', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'TITLE', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'COMPANY', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'DEPARTMENT', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'ADDRESS', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'CITY', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'STATEPROV', VARCHAR(length=5, convert_unicode=False), primary_key=False),
+            Column(u'POSTALCODE', VARCHAR(length=15, convert_unicode=False), primary_key=False),
+            Column(u'COUNTRY', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'POSITION', VARCHAR(length=100, convert_unicode=False), primary_key=False),
+            Column(u'INITIALS', VARCHAR(length=10, convert_unicode=False), primary_key=False),
+            Column(u'SALUTATION', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'PHONEHOME', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'PHONEOFFI', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'PHONEOTHE', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'PHONEWORK', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'MOBILE', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'PAGER', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'FAX', VARCHAR(length=25, convert_unicode=False), primary_key=False),
+            Column(u'EMAIL', VARCHAR(length=50, convert_unicode=False), primary_key=False),
+            Column(u'URL', VARCHAR(length=128, convert_unicode=False), primary_key=False),
+            Column(u'NOTE', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column(u'ALTFIELD1', VARCHAR(length=100, convert_unicode=False), primary_key=False),
+            Column(u'ALTFIELD2', VARCHAR(length=100, convert_unicode=False), primary_key=False),
+            Column(u'ALTFIELD3', VARCHAR(length=100, convert_unicode=False), primary_key=False),
+            Column(u'ALTFIELD4', VARCHAR(length=100, convert_unicode=False), primary_key=False),
+            Column(u'ID', INTEGER(), primary_key=True, nullable=False),
+            Column(u'CALENDAR', VARCHAR(length=100, convert_unicode=False), primary_key=False),
+            Column(u'INVITE', VARCHAR(length=1, convert_unicode=False), primary_key=False),
     schema='public')
 Index('index_address_pkey', addressbook.c.ID, unique=True)
 
@@ -964,7 +964,7 @@ if __name__ == '__main__':
         url = args[0]
     except IndexError:
         print "Please supply a database URL."
-        print "e.g: postgres://pycopia@localhost/pycopia"
+        print "e.g: postgresql://pycopia@localhost/pycopia"
         print "Use -t <name> to select single table."
     else:
         for opt, optarg in opts:

@@ -194,7 +194,7 @@ def related_remove(modelname, entry_id, colname, relmodelname, rel_id):
 def _convert_instance(obj):
     values = {"id": obj.id}
     for metadata in models.get_metadata_iterator(obj.__class__):
-        if metadata.coltype == "RelationProperty":
+        if metadata.coltype == "RelationshipProperty":
             value = getattr(obj, metadata.colname)
             if value is not None:
                 if metadata.uselist:

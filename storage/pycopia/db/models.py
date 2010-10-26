@@ -27,7 +27,7 @@ from hashlib import sha1
 from sqlalchemy import create_engine, and_, or_, not_, func, exists
 from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
         backref, synonym, _mapper_registry, validates)
-from sqlalchemy.orm.properties import ColumnProperty, RelationProperty
+from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
 from sqlalchemy.orm.collections import column_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -1430,8 +1430,8 @@ def _get_column_metadata(prop):
             if default is not None:
                 default = default.arg(None)
         nullable = prop.columns[0].nullable
-    elif proptype is RelationProperty:
-        coltype = RelationProperty.__name__
+    elif proptype is RelationshipProperty:
+        coltype = RelationshipProperty.__name__
         m2m = prop.secondary is not None
         nullable = prop.local_side[0].nullable
         uselist = prop.uselist

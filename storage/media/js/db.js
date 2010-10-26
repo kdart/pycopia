@@ -105,7 +105,7 @@ DBModelInstance.prototype.__dom__ = function(node) {
     if (coldata === null) {
       coldata = new NULL();
     };
-    if (colmetadata[0] == "RelationProperty") {
+    if (colmetadata[0] == "RelationshipProperty") {
       if (colmetadata[5] == true) { // uselist
         var tr = TR(null,
                       TD(null, colname),
@@ -193,7 +193,7 @@ function jsonConvertRow(obj) {
       // coltype, colname, default, m2m, nullable, uselist
       var value = obj.value[colname];
       if (typeof(value) != "undefined") {
-        if (model._meta[colname][0] == "RelationProperty") {
+        if (model._meta[colname][0] == "RelationshipProperty") {
           if (model._meta[colname][5] == true) { // uselist
             obj.value[colname] = map(jsonConvertRow, value);
           } else {
