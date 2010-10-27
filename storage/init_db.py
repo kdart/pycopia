@@ -124,6 +124,7 @@ def do_attribute_types(session):
             ("serviceprotocol", 1, "Protocol part of a URL pointing to service location."),
             ("protocol", 1, "Internet protocol a software implements."),
             ("hostname", 1, "Name to use as host name. Overrides base name."),
+            ("state", 1, "The current state of the device. Arbitrary string used by test framework."),
             ):
         session.add(models.create(models.AttributeType, name=name, value_type=vtype, 
                 description=desc))

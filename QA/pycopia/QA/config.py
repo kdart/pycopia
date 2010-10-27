@@ -366,7 +366,8 @@ class EnvironmentRuntime(object):
         return EquipmentRuntime(
                 self._environment.get_DUT(self._session), 
                 "DUT",
-                self.logfile)
+                self.logfile, 
+                self._session)
 
     DUT = property(_get_DUT)
 
@@ -380,7 +381,7 @@ class EnvironmentRuntime(object):
         except KeyError:
             pass
         eq = self._environment.get_equipment_with_role(self._session, rolename)
-        eq = EquipmentRuntime(eq, rolename, self.logfile)
+        eq = EquipmentRuntime(eq, rolename, self.logfile, self._session)
         self._eqcache[rolename] = eq
         return eq
 
@@ -408,10 +409,11 @@ class EnvironmentRuntime(object):
 
 class EquipmentRuntime(object):
 
-    def __init__(self, equipmentrow, rolename, logfile):
+    def __init__(self, equipmentrow, rolename, logfile, session):
         self.logfile = logfile
         self.name = equipmentrow.name
         self._equipment = equipmentrow
+        self._session = session
         self._controller = None
         self._init_controller = None
         d = {}
@@ -503,6 +505,15 @@ class EquipmentRuntime(object):
 
     software = property(get_software)
 
+    # Easy persistent state of equipment state is kept in the state attribute.
+    def get_state(self):
+        return self._equipment.get_attribute(self._session, "state")
+
+    def set_state(self, newstate):
+        return self._equipment.set_attribute(self._session, "state", str(newstate))
+
+    state = property(get_state, set_state)
+
 
 class SoftwareRuntime(object):
 
@@ -561,6 +572,7 @@ if __name__ == "__main__":
     print cf
     print cf.flags
     print cf.flags.DEBUG
+    print cf.environment.DUT.state
     #cf.reportname = "default"
     #print cf.get("reportname")
     #print cf.report

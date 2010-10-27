@@ -411,6 +411,11 @@ class PosixAgent(Pyro.core.ObjBase, object):
     def plist(self):
         return self._status.keys()
 
+    def pstat(self, pid):
+        proc = self.poll(pid)
+        if int(proc) > 0:
+            return proc.stat()
+
     def python(self, snippet):
         try:
             code = compile(str(snippet) + '\n', '<PosixServer>', 'eval')

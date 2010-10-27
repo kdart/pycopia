@@ -42,7 +42,7 @@ class SNMPChannel(rtgraph.Channel):
     def __init__(self, session, klass, port, color):
         intf = klass(indexoid=[port])
         intf.set_session(session)
-        self.rater = intf.get_ratecounter()
+        self.rater = intf.get_ratecounter(3)
         super(SNMPChannel, self).__init__(name=klass.__name__, color=color)
 
     def getValue(self):
