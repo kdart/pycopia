@@ -130,9 +130,9 @@ class TestRunner(object):
         # make the module look like a test.
         mod.test_name = mod.__name__
         try:
-            ID = mod.__version__[1:-1]
-        except AttributeError: # should be there, but don't worry if its not.
-            ID = "undefined"
+            ID = mod.__version__[1:-1].split(":")[-1].strip()
+        except (AttributeError, IndexError): # Should be there, but don't worry if it's not.
+            ID = "unknown"
         cf.report.add_message("MODULEVERSION", ID)
         cf.report.add_message("MODULESTARTTIME", timelib.now())
         try:

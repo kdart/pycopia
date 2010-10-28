@@ -323,7 +323,7 @@ class RemoteCLI(CLI.BaseCommands):
             pidlist = self._obj.plist()
         for sPid in pidlist:
             stat = self._obj.pstat(int(sPid))
-            self._print(stat.cmdline)
+            self._print("{stat.pid!s}: {stat.cmdline}".format(stat=stat))
 
     def kill(self, argv):
         """kill <pid>...
