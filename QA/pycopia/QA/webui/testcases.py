@@ -261,7 +261,7 @@ class TestcaseRunner(framework.RequestHandler):
         title = "Run test case %r" % (dbrow.name,)
         resp = framework.ResponseDocument(request, testcase_run_constructor, title=title)
         render_testcase(resp.doc, dbrow)
-        if not dbrow.automated and not dbrow.testimplementation:
+        if not dbrow.automated:
             form = resp.doc.add_form(action=request.get_url(testcase_run, tcid=dbrow.id))
             BR = form.get_new_element("Br")
             outerfs = form.add_fieldset("Run the test.")

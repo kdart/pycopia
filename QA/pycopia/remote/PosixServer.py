@@ -412,9 +412,9 @@ class PosixAgent(Pyro.core.ObjBase, object):
         return self._status.keys()
 
     def pstat(self, pid):
-        proc = self.poll(pid)
-        if int(proc) > 0:
-            return proc.stat()
+        pm = proctools.get_procmanager()
+        proc = pm.getbypid(pid)
+        return proc.stat()
 
     def python(self, snippet):
         try:

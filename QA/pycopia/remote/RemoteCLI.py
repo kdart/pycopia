@@ -306,6 +306,25 @@ class RemoteCLI(CLI.BaseCommands):
     List available file object handles."""
         return self._generic_call(argv)
 
+    def pstat(self, argv):
+        """pstat
+    Show the stat info for the PID."""
+        pid = int(argv[1])
+        stat = self._obj.pstat(pid)
+        self._print(stat)
+        return stat
+
+    def ps(self, argv):
+        """ps [<pid>...]
+    Show info on current managed processes."""
+        if len(argv) > 1:
+            pidlist = argv[1:]
+        else:
+            pidlist = self._obj.plist()
+        for sPid in pidlist:
+            stat = self._obj.pstat(int(sPid))
+            self._print(stat.cmdline)
+
     def kill(self, argv):
         """kill <pid>...
     Kills the given asyncronous processes."""
