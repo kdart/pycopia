@@ -97,7 +97,7 @@ def query(modelclass, filt, order_by=None, start=None, end=None):
             q = q.slice(start, end)
         else:
             q = q.limit(end)
-    return list(q.all())
+    return q.all()
 
 
 ### update a row ###
@@ -278,7 +278,7 @@ def create_relation_input(node, modelclass, metadata, row):
         q = q.order_by(getattr(relmodel, order_by))
     except (AttributeError, IndexError):
         pass
-    for relrow in q.all():
+    for relrow in q:
         if metadata.uselist:
             if relrow in current:
                 vlist.append((relrow.id, str(relrow), True))
@@ -539,7 +539,7 @@ def create_pick_list(node, modelclass, filtermap=None):
             attrib = getattr(modelclass, name)
             q = q.filter(attrib==value)
 
-    for dbrow in q.all():
+    for dbrow in q:
         vlist.append((dbrow.id, str(dbrow), False))
     name = modelclass.__name__
     elid = "id_" + name

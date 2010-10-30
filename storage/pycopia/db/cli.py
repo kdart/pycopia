@@ -857,8 +857,8 @@ def update_row(modelclass, dbrow, data):
         if metadata.coltype == "RelationshipProperty":
             relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
             if isinstance(value, list):
-				if not value:
-					continue
+                if not value:
+                    continue
                 t = _session.query(relmodel).filter(relmodel.id.in_(value)).all()
                 if metadata.collection == "MappedCollection":
                     setattr(dbrow, metadata.colname, dict((o.name, o) for o in t))
@@ -1086,7 +1086,7 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
         else:
             setattr(dbrow, metadata.colname, None)
         return
-	choices = dict(choices)
+    choices = dict(choices)
     current = getattr(dbrow, metadata.colname)
     relmodel = getattr(modelclass, metadata.colname).property.mapper.class_
     if metadata.uselist:
@@ -1097,10 +1097,10 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
         for chosenone in chosen:
             del choices[chosenone]
         chosen = ui.choose_multiple_from_map(choices, chosen, "%%I%s%%N" % metadata.colname)
-		if chosen:
-        	t = _session.query(relmodel).filter( relmodel.id.in_(chosen.keys())).all()
-		else:
-			t = []
+        if chosen:
+            t = _session.query(relmodel).filter( relmodel.id.in_(chosen.keys())).all()
+        else:
+            t = []
         if not t and metadata.nullable:
             t = None
         if metadata.collection == "MappedCollection" and t is not None:

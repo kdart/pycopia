@@ -260,11 +260,11 @@ class Session(object):
 
     @classmethod
     def get_expired(cls, session):
-        return session.query(cls).filter(cls.expire_date < "now").order_by(cls.expire_date).all()
+        return session.query(cls).filter(cls.expire_date < "now").order_by(cls.expire_date)
 
     @classmethod
     def clean(cls, session):
-        for sess in session.query(cls).filter(cls.expire_date < "now").all():
+        for sess in session.query(cls).filter(cls.expire_date < "now"):
             session.delete(sess)
         session.commit()
 
@@ -424,7 +424,7 @@ class AttributeType(object):
 
     @classmethod
     def get_attribute_list(cls, session):
-        return session.query(cls.name, cls.value_type).all()
+        return session.query(cls.name, cls.value_type)
 
 mapper(AttributeType, tables.attribute_type)
 
@@ -508,7 +508,7 @@ class CorporateAttributeType(object):
 
     @classmethod
     def get_attribute_list(cls, session):
-        return session.query(cls.name, cls.value_type).all()
+        return session.query(cls.name, cls.value_type)
 
     def __str__(self):
         return "%s(%s)" % (self.name, self.value_type)
@@ -981,7 +981,7 @@ class EnvironmentAttributeType(object):
 
     @classmethod
     def get_attribute_list(cls, session):
-        return session.query(cls.name, cls.value_type).all()
+        return session.query(cls.name, cls.value_type)
 
 
 mapper(EnvironmentAttributeType, tables.environmentattribute_type,
@@ -1042,7 +1042,7 @@ class Environment(object):
 
     def get_supported_roles(self, session):
         rv = []
-        for te in session.query(TestEquipment).filter(TestEquipment.environment==self).all():
+        for te in session.query(TestEquipment).filter(TestEquipment.environment==self):
             for role in te.roles:
                 rv.append(role.name)
         rv = removedups(rv)
@@ -1225,7 +1225,7 @@ class TestResult(object):
             filt = and_(cls.objecttype==OBJ_TESTRUNNER, cls.valid==True)
         else:
             filt = and_(cls.objecttype==OBJ_TESTRUNNER, cls.tester==user, cls.valid==True)
-        return session.query(cls).filter(filt).order_by(cls.starttime).limit(10).all()
+        return session.query(cls).filter(filt).order_by(cls.starttime).limit(10)
 
     @classmethod
     def get_latest_run(cls, session, user):
@@ -1385,7 +1385,7 @@ def get_choices(session, modelclass, colname, order_by=None):
         q = q.order_by(getattr(relmodel, order_by))
     # Return the list of (id, stringrep) tuples.
     # This structure is usable by the XHTML form generator...
-    return [(relrow.id, relrow) for relrow in q]
+    return [(relrow.id, str(relrow)) for relrow in q]
 
 
 # structure returned by get_metadata function.
