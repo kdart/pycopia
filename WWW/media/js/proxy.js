@@ -118,8 +118,7 @@ function convertClasses(o) {
     } else if (o["_class_"] == null) { 
       var temp = items(o);
       for (var i = 0; i < temp.length; i++) {
-        var value = me(temp[i][1]);
-        o[temp[i][0]] = value;
+        o[temp[i][0]] = me(temp[i][1]);
       };
       return o;
     } else {

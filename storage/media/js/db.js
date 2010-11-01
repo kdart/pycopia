@@ -16,7 +16,7 @@
  * DBModel holds table metadata as defined in a .../pycopia/db/models.py file.
  * dbmodel.name is modelname
  * dbmodel._Meta is a list of metadata tuples:
-        coltype, colname, default, m2m, nullable, uselist
+        coltype, colname, default, m2m, nullable, uselist, collection
  */
 function DBModel(modelname) {
   this.initialized = false;
@@ -146,7 +146,7 @@ DBModelInstance.prototype.get_id = function() {
 DBModelInstance.prototype.deleterow = function() {
   if (!this.isdeleted) {
     var d = window.db.deleterow(this.model.name, this.data.id);
-    d.addCallback(bind(this._delete_db, this));
+    d.addCallback(bind(this._delete_cb, this));
   };
 };
 
@@ -190,7 +190,7 @@ function jsonConvertRow(obj) {
   var model = getDBModel(modelname);
   if (model.initialized) {
     for (var colname in model._meta) {
-      // coltype, colname, default, m2m, nullable, uselist
+      // coltype, colname, default, m2m, nullable, uselist, collection
       var value = obj.value[colname];
       if (typeof(value) != "undefined") {
         if (model._meta[colname][0] == "RelationshipProperty") {
@@ -199,6 +199,8 @@ function jsonConvertRow(obj) {
           } else {
             obj.value[colname] = jsonConvertRow(value);
           };
+        } else {
+            obj.value[colname] = convertClasses(value);
         };
       };
     }

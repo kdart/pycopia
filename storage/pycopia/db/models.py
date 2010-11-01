@@ -1134,6 +1134,18 @@ class TestCase(object):
                 TestResult.testcase==self,
                     )).scalar()
 
+    def get_all_results(self, session):
+        return session.query(TestResult).filter(and_(
+                TestResult.valid==True,
+                TestResult.testcase==self))
+
+    def get_data(self, session):
+        rv = []
+        for res in self.get_all_results():
+            rv.append(res.data.data)
+        return rv
+
+
 mapper(TestCase, tables.test_cases,
     properties={
         "functionalarea": relation(FunctionalArea, secondary=tables.test_cases_areas),
