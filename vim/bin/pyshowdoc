@@ -1,0 +1,49 @@
+#!/usr/bin/python2
+
+from __future__ import absolute_import
+from __future__ import print_function
+
+import sys
+import os
+
+
+PYDOCINDEXFILE="/var/tmp/pydocindex.py"
+BOOK=os.path.expandvars("$HOME/.local/share/devhelp/books/python266.chm")
+
+
+if os.environ.has_key("DISPLAY"):
+    try:
+        from pycopia import gtktools
+        chooser = gtktools.list_picker
+    except:
+        from pycopia.cliutils import choose as chooser
+else:
+    from pycopia.cliutils import choose as chooser
+
+try:
+    execfile(PYDOCINDEXFILE, globals())
+except IOError:
+    print ("no file pydocindex.py. Run mkpydocindex to generate it.", file=sys.stdout)
+    sys.exit(1)
+
+try:
+  name = sys.argv[1]
+except IndexError:
+    print ("Usage: pyshowdoc <name>.", file=sys.stdout)
+    sys.exit(1)
+
+
+indexlist = PYINDEX.get(name, None)
+
+if indexlist:
+    if len(indexlist) == 1:
+        index = indexlist[0]
+
+    else:
+        index = chooser(indexlist)
+
+    if index:
+        arg = BOOK + "::" + index
+        os.execlp("chmsee", "chmsee", arg)
+
+

@@ -27,12 +27,9 @@ OUTFILENAME = interactive.PYDOCINDEXFILE
 
 class HrefWriter(object):
     def __init__(self):
-        self.currentdir = None
         self.ident_re = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)")
         self.keywords = {}
 
-    def setdir(self, dirname):
-        self.currentdir = dirname
 
     def __call__(self, href, kw):
         kw = self._ident_stripper(kw)
@@ -41,7 +38,6 @@ class HrefWriter(object):
                 l = self.keywords[kw]
             except KeyError:
                 l = self.keywords[kw] = []
-            href = "%s/%s" % (self.currentdir, href)
             if href not in l:
                 l.append( href)
 
@@ -66,14 +62,12 @@ outfile = open(OUTFILENAME, "w")
 outfile.write("\nPYINDEX = ")
 writer = HrefWriter()
 hget = hrefgetter.HrefGetter(writer)
-for subdir in SUBDIRS:
-    if os.path.isdir(os.path.join(BASEDIR, subdir)):
-        writer.setdir(subdir)
-        infile = open("%s/%s/%s" % ( BASEDIR, subdir, INDEXNAME), "r")
-        for line in infile:
-            hget.feed(line)
-        hget.reset()
-        infile.close()
+
+fname = sys.argv[1]
+
+with open(fname) as infile:
+    for line in infile:
+        hget.feed(line)
 
 writer.write(outfile)
 outfile.close()

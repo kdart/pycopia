@@ -68,7 +68,7 @@ except ImportError:
     import rlcompleter
 
 from pycopia.cliutils import *
-from pycopia.aid import add2builtin, IF
+from pycopia.aid import add2builtin
 
 
 try:
@@ -194,10 +194,11 @@ def run_config(cfstring, param):
         cmd = cfstring % param
     except TypeError: # no %s in cfstring, so just stick the param on the end
         cmd = "%s %s" % (cfstring, param)
+    print("CMD:", repr(cmd))
     return os.system(cmd)
 
 def pyterm(filename="", interactive=1):
-    cmd = "%s %s %s " % (PYTHON, IF(interactive, "-i", ""), filename)
+    cmd = "%s %s %s " % (PYTHON, "-i" if interactive else "", filename)
     if os.environ.has_key("DISPLAY"):
         return run_config(os.environ.get("XTERM"), cmd)
     else:
@@ -265,6 +266,16 @@ def open_url(url):
     else:
         return run_config(os.environ.get("CBROWSER"), url)
 
+
+def open_chm(index):
+    """Opens the given index with a CHM viewer. """
+    if os.environ.has_key("DISPLAY"):
+        book = os.environ.get("CHMBOOK")
+        if not book:
+            book = os.path.expandvars("$HOME/.local/share/devhelp/books/python266.chm")
+        return run_config(os.environ.get("CHMVIEWER", 'chmsee "%s::%s"'), (book, index))
+
+
 def open_file(filename):
     return open_url("file://"+filename)
 
@@ -286,7 +297,7 @@ def get_doc_urls(keyword):
     else:
         return None
 
-def showdoc(object, chooser=None):
+def show_html_doc(object, chooser=None):
     """Opens your browser with the HTML documentation for the Python object.
 Choose from a list if more than one document is found."""
     if not chooser:
@@ -295,13 +306,8 @@ Choose from a list if more than one document is found."""
         else:
             chooser = choose
 
-    objtype = type(object)
-    if objtype is str:
-        name = object
-    elif objtype is types.ModuleType or objtype is types.BuiltinFunctionType:
-        name = object.__name__
-    else:
-        print ("showdoc: can't determine object name", file=sys.stderr)
+    name = get_object_name(object)
+    if name is None:
         return
     docuri = get_doc_urls(name)
     if docuri:
@@ -316,6 +322,39 @@ Choose from a list if more than one document is found."""
         print ("showdoc: No documentation found.", file=sys.stderr)
 
 
+def get_object_name(object):
+    objtype = type(object)
+    if objtype is str:
+        return object
+    elif objtype is types.ModuleType or objtype is types.BuiltinFunctionType:
+        return object.__name__
+    else:
+        print ("showdoc: can't determine object name", file=sys.stderr)
+        return None
+
+
+def show_chm_doc(object, chooser=None):
+    if not chooser:
+        if gtktools:
+            chooser = gtktools.list_picker
+        else:
+            chooser = choose
+    name = get_object_name(object)
+    if name is None:
+        return
+    docuri = get_doc_urls(name)
+    if docuri:
+        if len(docuri) == 1:
+            open_chm(docuri[0])
+
+        else:
+            uri = chooser(docuri)
+            if uri:
+                open_chm(uri)
+    else:
+        print ("showdoc: No documentation found.", file=sys.stderr)
+
+showdoc = show_chm_doc
 
 def mydisplayhook(obj):
     pprint(obj)
@@ -365,5 +404,3 @@ readline.parse_and_bind('"\M-?": possible-completions')
 #readline.parse_and_bind("set output-meta on")
 #readline.parse_and_bind("set convert-meta off")
 #
-
-

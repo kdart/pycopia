@@ -1,5 +1,5 @@
 " Mostly the .vimrc file for Keith Dart. 
-" You have to manually copy this to $VIM/vimfilesrc if you want to use it.
+" You have to manually copy this to $HOME/.vimrc if you want to use it.
 
 if has("python")
 	python import sys
@@ -21,6 +21,7 @@ set laststatus=2  " always a status line
 " following improves performance when using NFS. You might want to change
 " it to someplace more private.
 set dir=/var/tmp//
+" set undodir=~/.vim/tmp/undo//
 set hidden
 
 set incsearch
@@ -67,17 +68,21 @@ augroup END
 
 augroup pycopia
   autocmd FileType python :so $VIM/vimfiles/pydev.vim
+  autocmd FileType pyrex  :so $VIM/vimfiles/pydev.vim
   autocmd FileType html	:so $VIM/vimfiles/html.vim
+  autocmd FileType xhtml	:so $VIM/vimfiles/html.vim
   autocmd FileType dtd	:so $VIM/vimfiles/xml_dtd.vim
   autocmd FileType xml	:so $VIM/vimfiles/xml.vim
   autocmd FileType javascript  :so $VIM/vimfiles/jsdev.vim
+  autocmd FileType css  :so $VIM/vimfiles/cssdev.vim
 augroup END
 
 augroup newfile 
   au!
-  autocmd BufNewFile            *.html  0r      $VIM/vimfiles/html_template.html
-  autocmd BufNewFile            *.c     0r      $VIM/vimfiles/c_template.c
-  autocmd BufNewFile            *.py    0r      $VIM/vimfiles/py_template.py
+  autocmd BufNewFile            *.html  0r      ~/Templates/HTML4.html
+  autocmd BufNewFile            *.xhtml 0r      ~/Templates/XHTML.xhtml
+  autocmd BufNewFile            *.c     0r      ~/Templates/C.c
+  autocmd BufNewFile            *.py    0r      ~/Templates/Python.py
 augroup END
 
 
@@ -97,8 +102,8 @@ if v:progname == "mvim"
 	gui
 endif
 
-
-" Enable menus in screen vim, and switch buffers with control arrow.
+" Enable menus in screen vim (invoke vim as svim with symlink), and switch
+" buffers with control arrow.
 if v:progname == "svim"
 	source $VIMRUNTIME/menu.vim
 	set wildmenu
@@ -106,9 +111,13 @@ if v:progname == "svim"
 	set wcm=<C-Z>
 	map <F4> :emenu <C-Z>
 	set hidden
-        nmap <Esc>[5D :bp<CR>                                                                                                       
-        nmap <Esc>[5C :bn<CR>                                                                                                       
-        nmap <Esc>[3^ :bd<CR>                                                                                                       
-        nmap ZZ :bd<CR>                                                                                                             
+       nmap <Esc>[5D :bp<CR>
+       nmap <Esc>Od  :bp<CR>
+       nmap <Esc>OD  :bp<CR>
+       nmap <Esc>[5C :bn<CR>
+       nmap <Esc>Oc  :bn<CR>
+       nmap <Esc>OC  :bn<CR>
+       nmap <Esc>[3~ :bd<CR>
+       nmap ZZ :bd<CR>
 endif
 

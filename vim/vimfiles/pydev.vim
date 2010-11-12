@@ -11,8 +11,8 @@ endif
 " set Vim parameters that suite python best
 set tm=2000
 
-set formatoptions=croql ai smartindent nowrap comments=:# 
-set cinwords=if,elif,else,for,while,try,except,finally,def,class 
+set formatoptions=crql cino=(8#1 ai smartindent nowrap comments=:# 
+set cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 
 " The 'NonText' highlighting will be used for 'eol', 'extends' and
 " 'precedes'.  'SpecialKey' for 'tab' and 'trail'.
@@ -38,14 +38,14 @@ function GoogleSpaces()
 endfunction
 
 " by default, use spaces
-:call GoogleSpaces()
+:call PyUseSpaces()
 
 " for running PyUnit
 " setlocal efm=%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
 " setlocal makeprg=pyunittest
 
 :python import sys, os
-:python from pycopia.vimlib import *
+:python from pycopia.vimlib.pydev import *
 " put VIMSERVER in environment for child python processes to use.
 if has("gui_gtk") && has("gui_running")
 	:py os.environ["VIMSERVER"] = vim.eval("v:servername")

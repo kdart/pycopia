@@ -2,6 +2,10 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 
+"""
+GUI helpers for interactive use.
+"""
+
 import gobject
 import gtk
 
@@ -71,6 +75,34 @@ def list_picker(items):
 
 
 
+class _ColorSelector(gtk.ColorSelectionDialog):
+    def __init__(self, init):
+        gtk.ColorSelectionDialog.__init__(self, "Select Color")
+        self.connect("destroy", self.quit)
+        self.connect("delete_event", self.quit)
+        self.get_property("ok_button").connect("clicked", self.OK)
+        self.get_color_selection().set_current_color(gtk.gdk.Color(init))
+        self.ret = init
+
+    def quit(self, *args):
+        self.hide()
+        self.destroy()
+        gtk.main_quit()
+
+    def OK(self, *args):
+        col = self.get_color_selection().get_current_color()
+        self.ret = "#%02x%02x%02x" % ((col.red >> 8) & 0xFF, (col.green >> 8) & 0xFF, (col.blue >> 8) & 0xFF)
+        self.quit()
+
+
+def color_select(init="#888888"):
+    win = _ColorSelector(init)
+    win.show()
+    gtk.main()
+    return win.ret
+
+
 if __name__ == "__main__":
     print list_picker(dir())
+    print color_select("#80aa00")
 
