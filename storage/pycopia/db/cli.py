@@ -20,6 +20,7 @@ CLI interface to Pycopia database storage.
 
 """
 
+import sys
 import os
 from decimal import Decimal
 
@@ -1280,6 +1281,5 @@ Options:
 
 
 if __name__ == "__main__":
-    import sys
     dbcli(sys.argv)
 
