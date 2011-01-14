@@ -561,10 +561,13 @@ _MODEMAP = {
 
 
 class SerialPort(object):
+    """Interface to serial/tty ports. This class is not protected from
+    interrupted system calls.
+    """
     def __init__(self, fname, mode="w+", setup="9600 8N1"):
         st = os.stat(fname).st_mode
         if not stat.S_ISCHR(stat.S_IFMT(st)):
-            raise ValueError, "%s is not a character device." % fname
+            raise ValueError("{0} is not a character device.".format(fname))
         fd = os.open(fname, _MODEMAP[mode])
         tcflush(fd, TCIOFLUSH)
         setraw(fd)
@@ -601,6 +604,7 @@ class SerialPort(object):
             raise ValueError, "set_serial: bad serial string."
 
     def get_inqueue(self):
+        "Return number of bytes in input queue."""
         v = fcntl.ioctl(self._fo.fileno(), TIOCINQ, '\x00\x00\x00\x00')
         return struct.unpack("i", v)[0]
 
@@ -613,6 +617,26 @@ class SerialPort(object):
 
     def stty(self, *args):
         return stty(self._fo.fileno(), *args)
+
+    def read(self, amt=4096):
+        return self._fo.read(amt)
+
+    def write(self, data):
+        return self._fo.write(data)
+
+    def readline(self, hint=-1):
+        return self._fo.readline(hint)
+
+    def close(self):
+        if self._fo is not None:
+            fo = self._fo
+            self._fo = None
+            self.closed = True
+            return fo.close()
+
+
+class SafeSerialPort(SerialPort):
+    """A serial port interface protected from interrupted system calls."""
 
     @systemcall
     def read(self, amt=4096):
