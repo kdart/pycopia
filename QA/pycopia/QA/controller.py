@@ -24,6 +24,8 @@ class Controller(object):
         self._equipment = equipment
         if logfile:
             self.set_logfile(logfile)
+        else:
+            self._logfile = None
         self.initialize()
 
     def __del__(self):
@@ -31,7 +33,13 @@ class Controller(object):
         self.close()
 
     def set_logfile(self, lf):
+        if not hasattr(lf, "write"):
+            raise ValueError("Logfile object must have write method.")
         self._logfile = lf
+
+    def writelog(self, text):
+        if self._logfile is not None:
+            self._logfile.write(text)
 
     def __getattr__(self, name):
         return getattr(self._equipment, name)
