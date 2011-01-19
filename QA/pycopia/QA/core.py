@@ -49,19 +49,17 @@ class TestError(AssertionError):
     """TestError() Base class of testing errors. 
 
     This is based on AssertionError so the same assertion catcher can be
-    used for catching assertions and these kind of exceptions.
+    used to indicate test failure.
     """
-Error = TestError # alias for google conformance.
-
-class TestIncompleteError(TestError):
-    """Test case disposition could not be determined."""
 
 class TestFailError(TestError):
     """Test case failed to meet the pass criteria."""
 
+class TestIncompleteError(Exception):
+    """Test case disposition could not be determined."""
+
 class TestSuiteAbort(Exception):
     """Entire test suite must be aborted."""
-
 
 class TestPrerequisiteError(Exception):
     """Error in prerequisite calculation."""
@@ -331,7 +329,7 @@ class Test(object):
             self.config.report = nr
         inst = _testclass(self.config)
         try:
-            return apply(inst, args, kwargs)
+            return inst(*args, **kwargs)
         finally:
             self.config.report = orig
 
