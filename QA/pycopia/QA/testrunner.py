@@ -75,15 +75,14 @@ class TestRunner(object):
 
         """
         cf = self.config
-        runnerts = timelib.strftime("%Y%m%d%H%M%S", timelib.localtime(cf.runnerstarttime))
         basename = "_".join(obj.test_name.split("."))
         cf.reportfilename = basename
-        cf.logbasename = basename + "-" + runnerts + ".log"
+        cf.logbasename = basename + "-" + cf.runnertimestamp + ".log"
         # resultsdir is where you would place any resulting data files. This
         # is also where any report object or log files are placed.
         cf.resultsdir = os.path.join(
             os.path.expandvars(cf.get("resultsdirbase", "/var/tmp")),
-            "%s-%s-%s" % (cf.reportfilename, cf.username, runnerts))
+            "%s-%s-%s" % (cf.reportfilename, cf.username, cf.runnertimestamp))
         cf.evalupdate(cf.options_override)
         self._create_results_dir()
         self._set_report_url()
@@ -238,6 +237,8 @@ class TestRunner(object):
         cf.username = os.environ["USER"]
         os.chdir(cf.logfiledir) # Make sure runner CWD is a writable place.
         cf.runnerstarttime = starttime = timelib.now()
+        cf.runnertimestamp = timelib.strftime("%Y%m%d%H%M%S", 
+                timelib.localtime(cf.runnerstarttime))
         try:
             rpt = cf.get_report()
         except reports.ReportFindError, err:
@@ -285,8 +286,11 @@ class TestRunner(object):
                         shutil.move(fname, cf.resultsdir)
             for suffix in ("", ".1", ".2", ".3", ".4", ".5"): # log may have rotated
                 fname = cf.logfilename + suffix
-                if os.path.isfile(fname) and os.path.getsize(fname) > 0:
-                    shutil.move(fname, cf.resultsdir)
+                if os.path.isfile(fname):
+                    if os.path.getsize(fname) > 0:
+                        shutil.move(fname, cf.resultsdir)
+                    else:
+                        os.unlink(fname)
             # If resultsdir ends up empty, remove it.
             if not os.listdir(cf.resultsdir): # TODO, stat this instead
                 os.rmdir(cf.resultsdir)

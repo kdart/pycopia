@@ -519,10 +519,20 @@ def do_config(session):
     ui.console = ("UI.UserInterface", "IO.ConsoleIO", "UI.DefaultTheme")
 
     reports = root.add_container("reports")
-    reports.ansi = ('StandardReport', '-', 'text/ansi; charset=utf8')
-    reports.database = ('pycopia.reports.database.DatabaseReport',)
-    reports.default = ('StandardReport', '-', 'text/ansi')
-    reports.email = ('pycopia.reports.Email.EmailReport', 'text/html', None)
+    reports.default = ("StandardReport", "-", "text/ansi")
+    reports.ansi = ("StandardReport", "-", "text/ansi; charset=utf8")
+    reports.database = ("pycopia.reports.database.DatabaseReport",)
+    reports.email = ("pycopia.reports.Email.EmailReport", "text/html", None)
+    reports.html = ("StandardReport", "$username-$runnertimestamp", "text/html")
+    reports.full = [
+            ("StandardReport", "-", "text/ansi; charset=utf8"), 
+            ("StandardReport", "$username-$runnertimestamp", "text/html")
+            ]
+    reports.production = [
+            ("StandardReport", "-", "text/ansi; charset=utf8"), 
+            ("StandardReport", "$username-$runnertimestamp", "text/html"),
+            ("pycopia.reports.database.DatabaseReport",),
+            ]
     controllers = root.add_container("controllers")
     selenium = root.add_container("selenium")
     selenium.host = "localhost"
