@@ -75,14 +75,15 @@ class TestRunner(object):
 
         """
         cf = self.config
+        runnerts = timelib.strftime("%Y%m%d%H%M%S", timelib.localtime(cf.runnerstarttime))
         basename = "_".join(obj.test_name.split("."))
         cf.reportfilename = basename
+        cf.logbasename = basename + "-" + runnerts + ".log"
         # resultsdir is where you would place any resulting data files. This
         # is also where any report object or log files are placed.
         cf.resultsdir = os.path.join(
             os.path.expandvars(cf.get("resultsdirbase", "/var/tmp")),
-            "%s-%s-%s" % (cf.reportfilename, cf.username, timelib.strftime("%Y%m%d%H%M%S", 
-            timelib.localtime(cf.runnerstarttime))))
+            "%s-%s-%s" % (cf.reportfilename, cf.username, runnerts))
         cf.evalupdate(cf.options_override)
         self._create_results_dir()
         self._set_report_url()

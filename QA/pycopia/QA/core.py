@@ -868,7 +868,7 @@ class TestEntrySeries(TestEntry):
             if self._filter(**kwargs):
                 entry = TestEntry(self.inst, (), kwargs)
                 entryresult = entry.run()
-                resultset[entryresult] += 1
+                resultset[int(entryresult)] += 1
         if resultset[constants.FAILED] > 0:
             self.result = TestResult(constants.FAILED)
         elif resultset[constants.INCOMPLETE] > 0:

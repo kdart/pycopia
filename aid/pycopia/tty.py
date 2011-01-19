@@ -583,10 +583,10 @@ class SerialPort(object):
     def fileno(self):
         return self._fo.fileno()
 
-    def sendbreak(self, duration=10):
+    def sendbreak(self, duration=0):
         # must use non-posix ioctl here to work for some reason. At least
         # on USB serial.
-        fcntl.ioctl(self._fo.fileno(), TCSBRK, 0)
+        fcntl.ioctl(self._fo.fileno(), TCSBRK, duration)
 
     def set_baud(self, baud):
         set_baud(self._fo.fileno(), baud)

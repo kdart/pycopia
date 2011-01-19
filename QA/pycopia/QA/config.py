@@ -407,6 +407,27 @@ class EnvironmentRuntime(object):
     state = property(get_state, set_state)
 
 
+class EquipmentModelRuntime(object):
+    def __init__(self, equipmentmodel):
+        d = {}
+        d["name"] = equipmentmodel.name
+        d["manufacturer"] = equipmentmodel.manufacturer.name
+        for prop in equipmentmodel.attributes:
+            d[prop.type.name] = prop.value
+        self._attributes = d
+
+    def __getitem__(self, name):
+        return self._attributes[name]
+
+    def get(self, name, default=None):
+        return self._attributes.get(name, default)
+
+    @property
+    def name(self):
+        return self._attributes["name"]
+
+
+
 class EquipmentRuntime(object):
 
     def __init__(self, equipmentrow, rolename, logfile, session):
@@ -431,6 +452,7 @@ class EquipmentRuntime(object):
             d["login"] = equipmentrow.account.login
             d["password"] = equipmentrow.account.password
         self._attributes = d
+        self._equipmentmodel = EquipmentModelRuntime(equipmentrow.model)
 
     def get_url(self, scheme=None, port=None, path=None, with_account=False):
         attribs = self._attributes
@@ -505,7 +527,7 @@ class EquipmentRuntime(object):
 
     software = property(get_software)
 
-    # Easy persistent state of equipment state is kept in the state attribute.
+    # Easy persistent state of equipment. State is kept in the state attribute.
     def get_state(self):
         return self._equipment.get_attribute(self._session, "state")
 
@@ -513,6 +535,8 @@ class EquipmentRuntime(object):
         return self._equipment.set_attribute(self._session, "state", str(newstate))
 
     state = property(get_state, set_state)
+
+    model = property(lambda s: s._equipmentmodel)
 
 
 class SoftwareRuntime(object):

@@ -14,7 +14,7 @@ from pycopia import module
 _CONTROLLERMAP = {}
 
 
-class ControllerError(AssertionError):
+class ControllerError(Exception):
     pass
 
 
