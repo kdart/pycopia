@@ -527,7 +527,7 @@ class Test(object):
 
         Used when invoking test objects as a unit.
         """
-        if arg != constants.PASSED:
+        if int(arg) != constants.PASSED:
             raise TestFailError, msg or "Did not pass test."
 
     def assertFailed(self, arg, msg=None):
@@ -535,7 +535,7 @@ class Test(object):
 
         Useful for "negative" tests.
         """
-        if arg not in (constants.FAILED, constants.EXPECTED_FAIL):
+        if int(arg) not in (constants.FAILED, constants.EXPECTED_FAIL):
             raise TestFailError, msg or "Did not pass test."
 
     def assertEqual(self, arg1, arg2, msg=None):
