@@ -76,3 +76,65 @@ default.
 NOTE: The install operation requires that the sudo command be configured for you.
 
 
+Prerequisites
+-------------
+
+Installation requires haveing some additional build-time dependencies installed
+first.
+
+Many of these are 
+
+Required for building
++++++++++++++++++++++
+
+python-dev    -- Of course, Python and any development packages.
+setuptools    -- For its namespace package support and general building.
+pyrex         -- Some extension modules need to to generate C files.
+libsmi        -- For SMI parsing.
+
+Optional
+++++++++
+
+Packages required at run time. Many of these are automatically installed
+from pypi at installation time.
+
+======================================   ================================
+Package Name                             Version (minimum)
+======================================   ================================
+docutils                                 0.5
+simplejson                               2.1
+python-xml                               0.8.4
+pyro                                     3.9
+sqlalchemy                               0.6.5
+postgresql                               8.4
+======================================   ================================
+
+Ubuntu Package Names (use apt-get)
+++++++++++++++++++++++++++++++++++
+
+- python-dev
+- python-pyrex
+- python-setuptools
+- python-sqlalchemy
+- python-4suite-xml
+- python-simplejson
+- python-psycopg2
+- libsmi2
+- libsmi2-dev
+- postgresql
+
+
+Gentoo Package Names (use emerge)
++++++++++++++++++++++++++++++++++
+
+- dev-lang/python
+- dev-python/setuptools
+- dev-python/pyrex
+- dev-python/simplejson
+- dev-python/pyxml
+- dev-python/psycopg
+- net-libs/libsmi
+- dev-python/sqlalchemy
+- dev-db/postgresql-server
+
+
