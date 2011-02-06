@@ -238,6 +238,7 @@ class EventDevice(object):
         self.idbus = self.idvendor = self.idproduct = self.idversion = None
         if fname:
             self.open(fname)
+        self.initialize()
 
     def __str__(self):
         if self.idbus is None:
@@ -259,7 +260,7 @@ class EventDevice(object):
                     self._eventq.push(ev)
 
     def find(self, start=0, name=None):
-        name = name or self.DEVNAME.lower()
+        name = name or self.DEVNAME
         assert name is not None, "EventDevice: no name to find"
         for d in range(start, 16):
             filename = "/dev/input/event%d" % (d,)
@@ -269,7 +270,7 @@ class EventDevice(object):
                 except (OSError, IOError): # probably no permissions
                     pass
                 else:
-                    if name in self.name.lower():
+                    if name in self.name:
                         return
         self.close()
         raise IOError("Input device %r not found." % (name,))
@@ -336,6 +337,9 @@ class EventDevice(object):
         pass
 
     def hangup_handler(self):
+        pass
+
+    def initialize(self):
         pass
 
 
