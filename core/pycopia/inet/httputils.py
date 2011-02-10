@@ -24,7 +24,6 @@ import re
 import calendar
 
 from pycopia import timelib
-from pycopia.aid import IF
 
 
 # Some useful data!
@@ -134,7 +133,7 @@ class Product(object):
             self.vendor = vendor
             self.version = version
     def __str__(self):
-        return "%s%s" % (self.vendor, IF(self.version, "/%s" % (self.version), ""))
+        return "%s%s" % (self.vendor, ("/" + self.version if self.version else ""))
 
 
 class EntityTag(object):
@@ -146,7 +145,7 @@ class EntityTag(object):
         self.data = QuotedString(data)
         self.weak = not not weak # force to boolean
     def __str__(self):
-        return "%s%s" % (IF(self.weak, "W/", ""), self.data)
+        return "%s%s" % ("W/" if self.weak else "", self.data)
 
 class MediaRange(object):
     """MediaRange is an element in an Accept list. Here, a None values means
@@ -225,6 +224,7 @@ class HTTPHeader(object):
     """HTTPHeader. Abstract base class for all HTTP headers. """
     HEADER = None
     def __init__(self, _value=None, **kwargs):
+        self.initialize(**kwargs)
         self._name = self.HEADER
         if _value:
             if type(_value) is str:
@@ -233,7 +233,6 @@ class HTTPHeader(object):
                 self.value = _value # some object
         else:
             self.value = ""
-        self.initialize(**kwargs)
 
     def initialize(self, **kwargs):
         """Override this to set the value attribute based on the keyword
@@ -287,6 +286,7 @@ class HTTPHeader(object):
 
 
 class HTTPHeaderWithParameters(HTTPHeader):
+
     def parse_value(self, text):
         parts = text.split(";")
         value = parts.pop(0).strip()
@@ -297,12 +297,11 @@ class HTTPHeaderWithParameters(HTTPHeader):
                 params[n] = v[1:-1]
             else:
                 params[n] = v
-        self.parameters = params
+        self.parameters.update(params)
         return value
 
     def initialize(self, **kwargs):
-        if kwargs:
-            self.parameters = kwargs
+        self.parameters = kwargs
 
     def __str__(self):
         if self.parameters:
@@ -627,11 +626,11 @@ class CookieJar(object):
             self.parse_mozilla_line(line)
 
     def add_cookie(self, name, value, comment=None, domain=None, 
-            max_age=None, path=None, secure=0, version=1, expires=None):
+            max_age=None, path=None, secure=0, version=1, expires=None, httponly=False):
         if value:
             new = RawCookie(name, value, comment=comment, domain=domain, 
                   max_age=max_age, path=path, secure=secure, version=version, 
-                  expires=expires)
+                  expires=expires, httponly=httponly)
             self._cookies[(new.name, new.path, new.domain)] = new
         else:
             self.delete_cookie(name, path, domain)
@@ -656,8 +655,7 @@ class CookieJar(object):
         self._cookies[(c.name, c.path, c.domain)] = c
 
     def parse_mozilla_line(self, line):
-        domain, domain_specified, path, secure, expires, name, value = \
-                        line.split("\t")
+        domain, domain_specified, path, secure, expires, name, value = line.split("\t")
         domain_specified = (domain_specified == "TRUE")
         secure = (secure == "TRUE")
         value = value.rstrip()
@@ -735,7 +733,7 @@ class RawCookie(object):
     """
 
     def __init__(self, name, value, comment=None, domain=None, 
-            max_age=None, path=None, secure=0, version=1, expires=None):
+            max_age=None, path=None, secure=0, version=1, expires=None, httponly=False):
         self.comment = self.domain = self.path = None
         self.name = name
         self.value = value
@@ -745,6 +743,7 @@ class RawCookie(object):
         self.set_path(path)
         self.set_version(version)
         self.set_secure(secure)
+        self.set_httponly(httponly)
         self.set_expires(expires)
 
     def __repr__(self):
@@ -765,6 +764,8 @@ class RawCookie(object):
             s.append("version=%r" % self.version)
         if self.expires is not None:
             s.append("expires=%r" % self.expires)
+        if self.httponly:
+            s.append("httponly=True")
         return "%s(%s)" % (self.__class__.__name__, ", ".join(s))
 
     def __str__(self):
@@ -789,6 +790,8 @@ class RawCookie(object):
             s.append("Path=%s" % self.path) # webkit can't deal with quoted path
         if self.secure:
             s.append("Secure")
+        if self.httponly:
+            s.append("HttpOnly")
         if self.version:
             s.append("Version=%s" % httpquote(str(self.version)))
         if self.expires is not None:
@@ -797,8 +800,8 @@ class RawCookie(object):
         return ";".join(s)
 
     def as_mozilla_line(self):
-        domain_specified = IF(self.domain.startswith("."), "TRUE", "FALSE")
-        secure = IF(self.secure, "TRUE", "FALSE")
+        domain_specified = "TRUE" if self.domain.startswith(".") else "FALSE"
+        secure = "TRUE" if self.secure else "FALSE"
         return "\t".join(map(str, [self.domain, domain_specified, 
                       self.path, secure, self.expires, 
                       self.name, self.value]))
@@ -807,8 +810,11 @@ class RawCookie(object):
         """Optional. The Secure attribute (with no value) directs the user
         agent to use only (unspecified) secure means to contact the origin
         server whenever it sends back this cookie."""
-
         self.secure = bool(val)
+
+    def set_httponly(self, val):
+        """Optional. The HttpOnly attribute.  """
+        self.httponly = bool(val)
 
     def set_comment(self, comment):
         """Optional. Because cookies can contain private information about a user,
@@ -822,7 +828,7 @@ class RawCookie(object):
         cookie is valid. An explicitly specified domain must always start with
         a dot."""
         if dom:
-            if dom.count(".") >= 2:
+            if dom.count(".") >= 2 or dom == ".local":
                 self.domain = dom
                 return
             raise ValueError, "Cookie Domain must contain a dot"
@@ -871,6 +877,7 @@ _SETFUNCS = {  "expires" : RawCookie.set_expires,
                "domain"  : RawCookie.set_domain,
                "max-age" : RawCookie.set_max_age,
                "secure"  : RawCookie.set_secure,
+               "httponly": RawCookie.set_httponly,
                "version" : RawCookie.set_version,
                }
 
@@ -884,8 +891,10 @@ def parse_setcookie(rawstr):
         try:
             n, v = subparts
         except ValueError:
-            if subparts[0].startswith("sec"):
+            if subparts[0] == "secure":
                 kwargs["secure"] = True
+            elif subparts[0] == "HttpOnly":
+                kwargs["httponly"] = True
             else:
                 raise
         else:
