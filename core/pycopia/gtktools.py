@@ -78,11 +78,12 @@ def list_picker(items):
 class _ColorSelector(gtk.ColorSelectionDialog):
     def __init__(self, init):
         gtk.ColorSelectionDialog.__init__(self, "Select Color")
+        self.ret = init
         self.connect("destroy", self.quit)
         self.connect("delete_event", self.quit)
         self.get_property("ok_button").connect("clicked", self.OK)
+        self.get_property("cancel_button").connect("clicked", self.quit)
         self.get_color_selection().set_current_color(gtk.gdk.Color(init))
-        self.ret = init
 
     def quit(self, *args):
         self.hide()
