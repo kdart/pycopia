@@ -21,7 +21,7 @@ Module to help with web server configuration.
 
 In a lighttpd.conf file, add this:
 
-    include_shell "/usr/bin/config_lighttpd"
+    include_shell "/usr/libexec/pycopia/config_lighttpd"
 
 """
 

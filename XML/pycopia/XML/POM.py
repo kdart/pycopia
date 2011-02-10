@@ -432,7 +432,7 @@ class ElementNode(object):
         self._children = None
 
     def set_encoding(self, encoding):
-        POM.verify_encoding(encoding)
+        verify_encoding(encoding)
         self._encoding = encoding
 
     def index(self, obj):

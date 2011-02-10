@@ -70,7 +70,7 @@ def check_object(obj):
         return POM.Text(str(obj))
     if isinstance(obj, POM.ElementNode):
         return obj
-    raise ValidationError, "bad initializer object: should be string or ElementNode instance."
+    raise ValidationError("bad initializer object: should be string or ElementNode instance.")
 
 def create_POM(data, dtd):
     """Given a python object, produce reasonable markup from that. Return
@@ -167,7 +167,7 @@ class FlowMixin(object):
         try:
             return getattr(self.dtd, identifier(name))
         except AttributeError:
-            raise ValidationError, "No element: %s" % (name,)
+            raise ValidationError("No element: %s" % (name,))
 
     def make_node(self, name, attribs, *content):
         if name in ("Text", "ASIS", "Fragments"):
@@ -536,7 +536,7 @@ class ContainerMixin(FlowMixin):
             elif method == "post":
                 f.enctype="multipart/form-data"
             else:
-                raise ValidationError, "invalid form method: %r" % (method,)
+                raise ValidationError("invalid form method: %r" % (method,))
         return f
 
     def add_form(self, **kwargs):
@@ -639,9 +639,11 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
             ss.destroy()
     stylesheet = property(_get_stylesheet, add_stylesheet)
 
+    # embedded stylesheet
     def _set_style(self, text):
-        st = self.head.get_element("style")
-        if st is None:
+        try:
+            st = self.head.get_element("style")
+        except XMLPathError:
             st = self.head.add(self.dtd.Style, type="text/css")
         st.add_cdata(text)
 
@@ -652,8 +654,11 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
             return None
 
     def _del_style(self):
-        st = self.head.get_element("style")
-        if st:
+        try:
+            st = self.head.get_element("style")
+        except XMLPathError:
+            pass
+        else:
             st.destroy()
 
     style = property(_get_style, _set_style, _del_style)
@@ -713,7 +718,7 @@ class InlineMixin(FlowMixin):
         try:
             ilmc = getattr(self.dtd, _name)
         except AttributeError:
-            raise ValidationError, "%s: not valid for this DTD." % (_name,)
+            raise ValidationError("%s: not valid for this DTD." % (_name,))
         Inline = get_class(self.dtd, "Inline%s" % (_name,), (InlineMixin, ilmc))
         il = Inline(**attribs)
         il._init(self.dtd)
@@ -1378,7 +1383,7 @@ class _HTMLParser(HTMLParser.HTMLParser):
 
     def close(self):
         if self.stack:
-            raise ValidationError, "XHTML document has unmatched tags"
+            raise ValidationError("XHTML document has unmatched tags")
         HTMLParser.HTMLParser.close(self)
         self.doc.set_root(self.topelement)
         self.doc.comments = self.comments
@@ -1402,7 +1407,10 @@ class _HTMLParser(HTMLParser.HTMLParser):
         def fixatts(t):
             attrdict[str(t[0])] = t[1]
         map(fixatts, attrs)
-        cl = getattr(self.doc.dtd, identifier(tag))
+        try:
+            cl = getattr(self.doc.dtd, identifier(tag))
+        except AttributeError, err:
+            raise ValidationError("No tag in dtd: %s" % (err,))
         obj = apply(cl, (), attrdict)
         return obj
 
