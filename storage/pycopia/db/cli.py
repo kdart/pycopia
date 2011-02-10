@@ -144,7 +144,9 @@ class RowCommands(CLI.GenericCLI):
     @classmethod
     def get_prompt(cls, dbrow):
         cls._metadata = sorted(models.get_metadata(dbrow.__class__))
-        return "%%I%s%%N:%s> " % (dbrow.id, dbrow)
+        mapper = models.class_mapper(dbrow.__class__)
+        pkname = str(mapper.primary_key[0].name)
+        return "%%I%s%%N:%s> " % (getattr(dbrow, pkname), dbrow)
 
     def show(self, argv):
         """show
@@ -190,6 +192,14 @@ class RowCommands(CLI.GenericCLI):
     Abort this edit, don't commit changes."""
         _session.rollback()
         raise CLI.CommandQuit
+
+
+class SessionRowCommands(RowCommands):
+
+    @classmethod
+    def get_prompt(cls, dbrow):
+        cls._metadata = sorted(models.get_metadata(dbrow.__class__))
+        return "%%ISession%%N:%s> " % (dbrow.session_key,)
 
 
 class InterfaceRowCommands(RowCommands):
@@ -835,6 +845,7 @@ _ROW_EDITOR_MAP = {
     "Corporation": RowWithAttributesCommands,
     "Network": NetworkRowCommands,
     "Interface": InterfaceRowCommands,
+    "Session": SessionRowCommands,
 }
 
 
