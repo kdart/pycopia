@@ -41,7 +41,7 @@ class MIMEApplication(MIMENonMultipart):
         header.
         """
         if _subtype is None:
-            raise TypeError, 'Could not find application MIME subtype'
+            raise TypeError('Could not find application MIME subtype')
         MIMENonMultipart.__init__(self, 'application', _subtype, **_params)
         self.set_payload(_data)
         _encoder(self)

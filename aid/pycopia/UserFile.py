@@ -34,7 +34,7 @@ class UserFile(file):
         while 1:
             try:
                 next = super(UserFile, self).read(amt)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if why.errno == EINTR:
                     continue
                 else:
@@ -47,7 +47,7 @@ class UserFile(file):
         while 1:
             try:
                 next = super(UserFile, self).readline(amt)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if why.errno == EINTR:
                     continue
                 else:
@@ -200,7 +200,7 @@ Wraps a file-like object with safe read methods, and allows logged reads."""
         while 1:
             try:
                 text = self._fo.read(amt)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if self._restart and why.errno == EINTR:
                     continue
                 else:
@@ -215,7 +215,7 @@ Wraps a file-like object with safe read methods, and allows logged reads."""
         while 1:
             try:
                 line = self._fo.readline(amt)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if self._restart and why.errno == EINTR:
                     continue
                 else:
@@ -244,7 +244,7 @@ Wraps a file-like object with safe read methods, and allows logged reads."""
         while 1:
             try:
                 writ = self._fo.write(text)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if self._restart and why.errno == EINTR:
                     continue
                 else:

@@ -4,6 +4,8 @@
 # Author unknown. Found on snippets site
 # $Id$
 
+from __future__ import print_function
+
 import array, fcntl, struct
 
 from pycopia import socket
@@ -122,8 +124,9 @@ def get_myaddress(iface="eth0"):
 
 if __name__ == "__main__":
     ifc = IfConfig()
-    print "My IP:", ifc.getAddr("eth0")
+    print ("My IP:", ifc.getAddr("eth0"))
     ifaces = ifc.getInterfaceList()
     for name in ifaces:
-        print "%s is %s, addr %s, mask %s, bcast %s" % (name, ('DOWN', 'UP')[ifc.isUp(name)], 
-            ifc.getAddr(name), ifc.getMask(name), ifc.getBroadcast(name))
+        print ("%s is %s, addr %s, mask %s, bcast %s" % (name, ('DOWN', 'UP')[ifc.isUp(name)], 
+            ifc.getAddr(name), ifc.getMask(name), ifc.getBroadcast(name)))
+

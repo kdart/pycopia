@@ -35,7 +35,7 @@ def get_wordfile():
             pass
         else:
             return wordfile
-    raise ValueError, "cannot find file of words."
+    raise ValueError("cannot find file of words.")
 
 
 def get_random_word():

@@ -130,7 +130,7 @@ def getHMSString(secs):
 
 if __name__ == "__main__":
     tmg = TimeMarksGenerator("30s,1m,1h,3h,4h,...")
-    for tm in tmg:
-        print tm
+#    for tm in tmg:
+#        print (tm)
 
 

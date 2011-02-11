@@ -98,10 +98,10 @@ class GzipHeader(object):
         buf = gzf.read_raw(10) # optimize reads for fixed header part
         magic = buf[0:2]
         if magic != self.MAGIC:
-            raise GzipError, 'Not a gzipped file'
+            raise GzipError('Not a gzipped file')
         method = ord( buf[2] )
         if method != 8:
-            raise GzipError, 'Unknown compression method'
+            raise GzipError('Unknown compression method')
         self.method = method
         self.flags = ord( buf[3] )
         self.text = self.flags & FTEXT
@@ -182,7 +182,7 @@ class GzipFile(UserFile.FileWrapper):
             self._mode = READ
             self._init_read()
         else:
-            raise ValueError, "GzipFile: unknown file mode."
+            raise ValueError("GzipFile: unknown file mode.")
 
 
     def new_segment(self, header):
@@ -247,10 +247,10 @@ class GzipFile(UserFile.FileWrapper):
         self._rawq = left[8:]
         self._rawqsize = len(self._rawq)
         # verify crc check and size
-        if crc32 % 0x100000000L != self.crc % 0x100000000L:
-            raise GzipError, "CRC check failed"
+        if crc32 % 0x100000000 != self.crc % 0x100000000:
+            raise GzipError("CRC check failed")
         elif isize != self.segsize:
-            raise GzipError, "Incorrect length of data produced"
+            raise GzipError("Incorrect length of data produced")
         # if there is more raw data left, there must be another segment
         if self._rawq:
             self._init_read()
@@ -320,7 +320,7 @@ class GzipFile(UserFile.FileWrapper):
 
     def write32u(self, value):
         if value < 0:
-            value = value + 0x100000000L
+            value = value + 0x100000000
         self._write(struct.pack("<L", value))
 
     # writes data out compressed
@@ -331,14 +331,14 @@ class GzipFile(UserFile.FileWrapper):
             data = self.compress.compress(data)
             self._write(data)
         else:
-            raise GzipError, "trying to write to stream in READ mode."
+            raise GzipError("trying to write to stream in READ mode.")
 
     # writes data out uncompressed
     def write_raw(self, data):
         if self._mode == WRITE:
             self._write(data)
         else:
-            raise GzipError, "trying to write to stream in READ mode."
+            raise GzipError("trying to write to stream in READ mode.")
 
 
 ### open factory function

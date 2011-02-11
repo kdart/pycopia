@@ -182,7 +182,7 @@ class _socketobject(object):
     _s = ("def %s(self, *args): return self._sock.%s(*args)\n\n"
           "%s.__doc__ = _realsocket.%s.__doc__\n")
     for _m in _socketmethods:
-        exec _s % (_m, _m, _m, _m)
+        exec (_s % (_m, _m, _m, _m))
     del _m, _s
 
 socket = SocketType = _socketobject
@@ -497,23 +497,23 @@ class AsyncSocket(_realsocket):
             self._state = CONNECTED
             self.handle_connect()
         else:
-            raise SocketError, err
+            raise SocketError(err)
 
     def accept(self):
         try:
             sa = super(AsyncSocket, self).accept()
-        except SocketError, why:
+        except SocketError as why:
             if why[0] == EWOULDBLOCK:
                 pass
             else:
-                raise SocketError, why
+                raise SocketError(why)
         return sa
 
     def recv(self, amt, flags=0):
         while 1:
             try:
                 next = super(AsyncSocket, self).recv(amt, flags)
-            except SocketError, why:
+            except SocketError as why:
                 if why[0] == EINTR:
                     continue
                 else:
@@ -526,7 +526,7 @@ class AsyncSocket(_realsocket):
         while 1:
             try:
                 sent = super(AsyncSocket, self).send(self._buf[:4096], self._sendflags)
-            except SocketError, why:
+            except SocketError as why:
                 if why[0] == EINTR:
                     continue
                 else:
@@ -588,13 +588,13 @@ def opentcp(host, port, sobject=SafeSocket):
         try:
             sock = sobject(af, socktype, proto)
             sock.connect(sa)
-        except error, msg:
+        except error as msg:
             if sock:
                 sock.close()
             continue
         break
     if not sock:
-        raise error, msg
+        raise error(msg)
     return sock
 
 # client connections:
@@ -608,9 +608,7 @@ def connect_inet(host, port, socktype, sobject=SafeSocket):
             continue
         else:
             return s
-    ex, val, tb = sys.exc_info()
-    #raise GetAddressInfoError, "could not connect, no connections found."
-    raise ex, val, tb
+    raise
 
 def connect_tcp(host, port, sobject=SafeSocket):
     return connect_inet(host, port, SOCK_STREAM, sobject)
@@ -668,7 +666,7 @@ def check_port(host, port):
     connection is possible, false otherwise."""
     try:
         s = connect_tcp(host, port)
-    except error, err:
+    except error as err:
         return 0
     s.close()
     return 1
@@ -680,7 +678,7 @@ def islocal(host):
     s = socket(AF_INET, SOCK_STREAM)
     try:
         s.bind((ip, IPPORT_USERRESERVED+1))
-    except error, err:
+    except error as err:
         if err[0] == EADDRNOTAVAIL:
             return 0
         else:

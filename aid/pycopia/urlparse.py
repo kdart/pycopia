@@ -357,7 +357,7 @@ def urlencode(query, doseq=0):
             # preserved for consistency
         except TypeError:
             ty,va,tb = sys.exc_info()
-            raise TypeError, "not a valid non-string sequence or mapping object", tb
+            raise TypeError("not a valid non-string sequence or mapping object", tb)
 
     l = []
     if not doseq:
@@ -632,7 +632,7 @@ class UniversalResourceLocator(object):
 
 if __name__ == "__main__":
     URL = "http://name:pass@www.host.com:8080/cgi?qr=arg1&qr=arg2&arg3=val3"
-    uURL = u"http://name:pass@www.host.com:8080/cgi?qr=arg1&qr=arg2&arg3=val3"
+    uURL = "http://name:pass@www.host.com:8080/cgi?qr=arg1&qr=arg2&arg3=val3"
     url = UniversalResourceLocator(URL)
     uurl = UniversalResourceLocator(uURL)
     assert str(url) == str(uurl)

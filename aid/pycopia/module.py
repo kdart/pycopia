@@ -64,7 +64,7 @@ def get_module(name):
         pass
     try:
         mod = __import__(name)
-    except ImportError, err:
+    except ImportError as err:
         raise ModuleImportError("Error loading: %s (%s)." % (name, err))
     else:
         components = name.split('.')
@@ -132,7 +132,7 @@ def get_objects(namelist):
     for name in namelist:
         try:
             obj = get_object(name)
-        except ModuleImportError, err:
+        except ModuleImportError as err:
             errors.append(err)
         else:
             rv.append(obj)
