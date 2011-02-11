@@ -1,7 +1,8 @@
 #!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 1999-$Date$  Keith Dart <keith@kdart.com>
+#    Copyright (C) $Date$
+#    Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -20,19 +21,40 @@ builtins. ;-)
 
 """
 
+from __future__ import print_function
 
 
 import sys
 from math import ceil
 from errno import EINTR
-from collections import deque
+from collections import deque, Callable
 import functools
+
+# python 3 compatibility
+try:
+    long
+except NameError: # signals python3
+    #import builtins as __builtins__
+    long = int
+    _biname = "builtins"
+
+    def callable(f):
+        return isinstance(f, Callable)
+
+    def execfile(fn, glbl=None, loc=None):
+        glbl = glbl or globals()
+        loc = loc or locals()
+        exec(open(fn).read(), glbl, loc)
+else: # python 2
+    _biname = "__builtin__"
+    execfile = execfile
+    callable = callable
 
 
 # partial function returns callable with some parameters already setup to run. 
 partial = functools.partial
 
-# Works like None, but is callable and iterable.
+# Works like None, but is also a no-op callable and empty iterable.
 class NULLType(type):
     def __new__(cls, name, bases, dct):
         return type.__new__(cls, name, bases, dct)
@@ -71,7 +93,6 @@ except AttributeError:
     seflush = NULL
 
 class Enum(int):
-    __slots__ = ("_name")
     def __new__(cls, val, name=None): # name must be optional for unpickling to work
         v = int.__new__(cls, val)
         v._name = str(name)
@@ -128,7 +149,7 @@ class Enums(list):
         try:
             return d[string]
         except KeyError:
-            raise ValueError, "Enum string not found."
+            raise ValueError("Enum string not found.")
 
 # common enumerations
 NO = Enum(0, "NO")
@@ -138,15 +159,15 @@ UNKNOWN = Enum(3, "UNKNOWN")
 
 # emulate an unsigned 32 bit and 64 bit ints with a long
 class unsigned(long):
-    floor = 0L
-    ceiling = 4294967295L
+    floor = 0
+    ceiling = 4294967295
     bits = 32
-    _mask = 0xFFFFFFFFL
+    _mask = 0xFFFFFFFF
     def __new__(cls, val):
         return long.__new__(cls, val)
     def __init__(self, val):
         if val < self.floor or val > self.ceiling:
-            raise OverflowError, "value %s out of range for type %s" % (val, self.__class__.__name__)
+            raise OverflowError("value %s out of range for type %s" % (val, self.__class__.__name__))
     def __repr__(self):
         return "%s(%sL)" % (self.__class__.__name__, self)
     def __add__(self, other):
@@ -218,10 +239,10 @@ class unsigned(long):
 
 
 class unsigned64(unsigned):
-    floor = 0L
-    ceiling = 18446744073709551615L
+    floor = 0
+    ceiling = 18446744073709551615
     bits = 64
-    _mask = 0xFFFFFFFFFFFFFFFFL
+    _mask = 0xFFFFFFFFFFFFFFFF
 
 # a list that self-maintains a sorted order
 class sortedlist(list):
@@ -324,16 +345,16 @@ class mapstr(str):
         self.__dict__["_attribs"] = d
     def __setattr__(self, name, val):
         if name not in self.__dict__["_attribs"].keys():
-            raise AttributeError, "invalid attribute name %r" % (name,)
+            raise AttributeError("invalid attribute name %r" % (name,))
         self.__dict__["_attribs"][name] = val
     def __getattr__(self, name):
         try:
             return self.__dict__["_attribs"][name]
         except KeyError:
-            raise AttributeError, "Invalid attribute %r" % (name,)
+            raise AttributeError("Invalid attribute %r" % (name,))
     def __str__(self):
         if None in self._attribs.values():
-            raise ValueError, "one of the attributes %r is not set" % (self._attribs.keys(),)
+            raise ValueError("one of the attributes %r is not set" % (self._attribs.keys(),))
         return self % self._attribs
     def __call__(self, **kwargs):
         for name, value in kwargs.items():
@@ -357,33 +378,41 @@ class formatstr(str):
     def __new__(cls, initstr, **kwargs):
         s = str.__new__(cls, initstr)
         return s
+
     def __init__(self, initstr, **kwargs):
         d = {}
         for name in _findfkeys(self):
             d[name] = kwargs.get(name, None)
         self.__dict__["_attribs"] = d
+
     def __setattr__(self, name, val):
         if name not in self.__dict__["_attribs"].keys():
-            raise AttributeError, "invalid attribute name %r" % (name,)
+            raise AttributeError("invalid attribute name %r" % (name,))
         self.__dict__["_attribs"][name] = val
+
     def __getattr__(self, name):
         try:
             return self.__dict__["_attribs"][name]
         except KeyError:
-            raise AttributeError, "Invalid attribute %r" % (name,)
+            raise AttributeError("Invalid attribute %r" % (name,))
+
     def __str__(self):
         if None in self._attribs.values():
-            raise ValueError, "one of the attributes %r is not set" % (self._attribs.keys(),)
+            raise ValueError("one of the attributes %r is not set" % (self._attribs.keys(),))
         return self.format(**self._attribs)
+
     def __call__(self, **kwargs):
         for name, value in kwargs.items():
             self.__setattr__(name, value)
         return self.format(**self._attribs)
+
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, str.__repr__(self))
+
     @property
     def attributes(self):
         return self._attribs.keys()
+
 
 # metaclasses... returns a new class with given bases and class attributes
 def newclass(name, *bases, **attribs):
@@ -414,12 +443,12 @@ def systemcall(meth):
         while 1:
             try:
                 rv = meth(*args, **kwargs)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if why.args and why.args[0] == EINTR:
                     continue
                 else:
                     raise
-            except SocketError, why:
+            except SocketError as why:
                 if why.args and why.args[0] == EINTR:
                     continue
                 else:
@@ -478,23 +507,23 @@ per line.  Should not break an element across lines. Sort of like word
 wrap for lists."""
     indent = min(max(indent,0),width-1)
     if indent:
-        print " " * indent,
-    print "[",
+        print (" " * indent, end="")
+    print ("[", end="")
     col = indent + 2
     for c in clist[:-1]:
         ps = "%r," % (c)
         col = col + len(ps) + 1
         if col > width:
-            print
+            print()
             col = indent + len(ps) + 1
             if indent:
-                print " " * indent,
-        print ps,
+                print (" " * indent, end="")
+        print (ps, end="")
     if col + len(clist[-1]) > width:
-        print
+        print()
         if indent:
-            print " " * indent,
-    print "%r ]" % (clist[-1],)
+            print (" " * indent, end="")
+    print ("%r ]" % (clist[-1],))
 
 def reorder(datalist, indexlist):
     """reorder(datalist, indexlist)
@@ -551,13 +580,13 @@ def Import(modname):
     return mod
 
 def add2builtin(name, obj):
-    """Add an object to the __builtin__ namespace."""
-    setattr(sys.modules['__builtin__'], name, obj)
+    """Add an object to the builtins namespace."""
+    setattr(sys.modules[_biname], name, obj)
 
 def add_exception(excclass, name=None):
-    """Add an exception to the __builtin__ namespace."""
+    """Add an exception to the builtins namespace."""
     name = name or excclass.__name__
-    bimod = sys.modules['__builtin__']
+    bimod = sys.modules[_binname]
     if not hasattr(bimod, name):
         setattr(bimod, name, excclass)
 

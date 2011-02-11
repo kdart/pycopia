@@ -76,7 +76,7 @@ def set_baud(fd, baud):
     try:
         sym = getattr(mod, "B%s" % baud)
     except AttributeError:
-        raise ValueError, "bad baud value"
+        raise ValueError("bad baud value")
     [iflags, oflags, cflags, lflags, ispeed, ospeed, cc] = tcgetattr(fd)
     ispeed = ospeed = sym
     tcsetattr(fd, TCSANOW, [iflags, oflags, cflags, lflags, ispeed, ospeed, cc])
@@ -97,7 +97,7 @@ def _set_flag(mode, flagname):
     try:
         flagval = getattr(mod, flagname)
     except AttributeError:
-        raise ValueError, "no stty flag named %r" % (flagname,)
+        raise ValueError("no stty flag named %r" % (flagname,))
     if flagname in IFLAGS:
         if off:
             mode[IFLAG] &= ~flagval
@@ -345,7 +345,6 @@ automatically adjusts output according to screen size.  """
         self.set_pagerprompt(pagerprompt)
         # reading methods
         self.readlines = self.stdin.readlines
-        self.xreadlines = self.stdin.xreadlines
         # writing methods
         self.flush = self.stdout.flush
         self.writelines = self.stdout.writelines
@@ -371,7 +370,7 @@ automatically adjusts output according to screen size.  """
         self.stdout = None
         self.stdin = None
         self.closed = 1
-        del self.readline, self.readlines, self.xreadlines
+        del self.readline, self.readlines
         del self.flush, self.writelines, self.write
 
     # can't use __del__ because the signal module holds a reference to this
@@ -449,7 +448,7 @@ automatically adjusts output according to screen size.  """
                 try:
                     c = self.stdin.read(1)
                     break
-                except EnvironmentError, why:
+                except EnvironmentError as why:
                     if why.errno == EINTR:
                         continue
                     else:
@@ -480,7 +479,7 @@ def get_key(prompt=""):
             try:
                 c = si.read(1)
                 break
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if why.errno == EINTR:
                     continue
                 else:
@@ -502,7 +501,7 @@ def getpass(prompt="Password: "):
             try:
                 c = si.readline()
                 break
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if why.errno == EINTR:
                     continue
                 else:
@@ -603,7 +602,7 @@ class SerialPort(object):
         elif mode == "7E1":
             return set_7E1(fd)
         else:
-            raise ValueError, "set_serial: bad serial string."
+            raise ValueError("set_serial: bad serial string.")
 
     def get_inqueue(self):
         "Return number of bytes in input queue."""

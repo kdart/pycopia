@@ -278,7 +278,6 @@ Combines a write stream and a read stream into one read/write object."""
         self.read = inf.read
         self.readline = inf.readline
         self.readlines = inf.readlines
-        self.xreadlines = inf.xreadlines
         # writing methods
         self.write = outf.write
         self.flush = outf.flush

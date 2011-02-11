@@ -24,13 +24,16 @@ command interface by using the CLI module.
 import sys, os
 import linecache
 import bdb
-from repr import Repr
 import re
+
+try:
+    from repr import Repr
+except ImportError:
+    from reprlib import Repr
 
 from pycopia import IO
 from pycopia import UI
 from pycopia import CLI
-from pycopia.aid import IF
 
 # Create a custom safe Repr instance and increase its maxstring.
 # The default of 30 truncates error messages too easily.
@@ -131,8 +134,8 @@ def checkline(filename, lineno, ui):
     return lineno
 
 def run_editor(fname, lineno):
-    if os.environ.has_key("DISPLAY"):
-        if os.environ.has_key("XEDITOR"):
+    if "DISPLAY" in os.environ:
+        if "XEDITOR" in os.environ:
             ed = os.environ["XEDITOR"]
         else:
             ed = os.environ.get("EDITOR", "/bin/vi")
@@ -208,9 +211,10 @@ class Debugger(bdb.Bdb):
         self._ui.printf('%g--Return--%N')
         self.interaction(frame, None)
 
-    def user_exception(self, frame, (exc_type, exc_value, exc_traceback)):
+    def user_exception(self, frame, exc_tuple):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
+        exc_type, exc_value, exc_traceback = exc_tuple
         frame.f_locals['__exception__'] = exc_type, exc_value
         if type(exc_type) == type(''):
             exc_type_name = exc_type
@@ -241,7 +245,7 @@ class Debugger(bdb.Bdb):
             self._ui.printf('*** Could not compile: %%r%s%%N: %s' % (t, v))
         else:
             try:
-                exec code in globals, locals
+                exec(code, globals, locals)
             except:
                 t, v = sys.exc_info()[:2]
                 self._ui.printf('*** %%r%s%%N: %s' % (t, v))
@@ -465,14 +469,14 @@ class DebuggerCommands(CLI.BaseCommands):
             filename = arg[:colon].rstrip()
             f = lookupmodule(filename)
             if not f:
-                self._print('*** ', `filename`, 'not found from sys.path')
+                self._print('*** ', repr(filename), 'not found from sys.path')
                 return
             else:
                 filename = f
             arg = arg[colon+1:].lstrip()
             try:
                 lineno = int(arg)
-            except ValueError, msg:
+            except ValueError as msg:
                 self._print('*** Bad lineno:', arg)
                 return
         else:
@@ -496,7 +500,7 @@ class DebuggerCommands(CLI.BaseCommands):
                     # last thing to try
                     (ok, filename, ln) = self._dbg.lineinfo(arg)
                     if not ok:
-                        self._print('*** The specified object', `arg`)
+                        self._print('*** The specified object', repr(arg))
                         self._print('is not a function or was not found along sys.path.')
                         return
                     lineno = int(ln)
@@ -705,7 +709,7 @@ class DebuggerCommands(CLI.BaseCommands):
                 self._dbg.curframe.f_lineno = arg
                 self._dbg.stack[self._dbg.curindex] = self._dbg.stack[self._dbg.curindex][0], arg
                 self._dbg.print_stack_entry(self._dbg.stack[self._dbg.curindex])
-            except ValueError, e:
+            except ValueError as e:
                 self._print('*** Jump failed:', e)
             else:
                 self._reset_namespace()
@@ -847,7 +851,7 @@ class DebuggerCommands(CLI.BaseCommands):
             if type(t) == type(''):
                 exc_type_name = t
             else: exc_type_name = t.__name__
-            self._print('***', exc_type_name + ':', `v`)
+            self._print('***', exc_type_name + ':', repr(v))
             return
         # Is it a function?
         try: 
@@ -903,7 +907,7 @@ class DebuggerCommands(CLI.BaseCommands):
                     break
                 else:
                     s = []
-                    s.append("%5.5s%s" % (lineno, IF(lineno in breaklist, self._ui.format(" %RB%N"), "  ")))
+                    s.append("%5.5s%s" % (lineno, self._ui.format(" %RB%N") if (lineno in breaklist) else "  "))
                     if lineno == self._dbg.curframe.f_lineno:
                         s.append(self._ui.format("%I->%N "))
                     else:

@@ -44,13 +44,13 @@ def default_writer(href, data):
     print href, data
 
 if __name__ == "__main__":
-    import sys, xreadlines
+    import sys
     if len(sys.argv) < 2:
         print "%s <htmlfile>" % (sys.argv[0])
         print "emits the hyperlink reference and associated text found in an HTML file."
     hget = HrefGetter(default_writer)
     fo = open(sys.argv[1], "r")
-    for line in xreadlines.xreadlines(fo):
+    for line in fo:
         hget.feed(line)
     fo.close()
 

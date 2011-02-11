@@ -63,7 +63,7 @@ attributes cannot be added, but existing ones may be changed."""
         return "\n".join(s)
 
     def __setitem__(self, key, value):
-        if self._locked and not self.has_key(key):
+        if self._locked and not key in self:
             raise ConfigLockError, "setting attribute on locked config holder"
         return super(ConfigHolder, self).__setitem__(key, value)
 

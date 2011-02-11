@@ -21,6 +21,10 @@ variants live here.
 
 """
 
+class MultiValueDictKeyError(KeyError):
+    pass
+
+
 class AttrDictWrapper(object):
     """Wraps any mapping object with the ability to get to its contents using
     attribute access syntax (dot). Note that you cannot have any contained keys
@@ -42,11 +46,11 @@ class AttrDictWrapper(object):
                         return self.__class__(obj) # wrap the returned mapping object also
                     else:
                         return obj
-                except KeyError, err:
-                    raise AttributeError, "no attribute or key '%s' found (%s)." % (key, err)
+                except KeyError as err:
+                    raise AttributeError("no attribute or key '%s' found (%s)." % (key, err))
 
     def __setattr__(self, key, obj):
-        if self.__class__.__dict__.has_key(key): # property access
+        if key in self.__class__.__dict__: # property access
             object.__setattr__(self, key, obj)
         else:
             return self.__dict__["_mapping"].__setitem__(key, obj)
@@ -158,62 +162,6 @@ class ObjectCache(dict):
         return obj
 
 
-# The following MergeDict and others copied from django:
-
-# Copyright (c) 2005, the Lawrence Journal-World
-# All rights reserved.
-
-# Forked since these could be useful for non-web apps as well.
-
-class MultiValueDictKeyError(KeyError):
-    pass
-
-class MergeDict(object):
-    """
-    A simple class for creating new "virtual" dictionaries that actualy look
-    up values in more than one dictionary, passed in the constructor.
-    """
-    def __init__(self, *dicts):
-        self.dicts = dicts
-
-    def __getitem__(self, key):
-        for dict in self.dicts:
-            try:
-                return dict[key]
-            except KeyError:
-                pass
-        raise KeyError
-
-    def __contains__(self, key):
-        return self.has_key(key)
-
-    def get(self, key, default):
-        try:
-            return self[key]
-        except KeyError:
-            return default
-
-    def getlist(self, key):
-        for dict in self.dicts:
-            try:
-                return dict.getlist(key)
-            except KeyError:
-                pass
-        raise KeyError
-
-    def items(self):
-        item_list = []
-        for dict in self.dicts:
-            item_list.extend(dict.items())
-        return item_list
-
-    def has_key(self, key):
-        for dict in self.dicts:
-            if dict.has_key(key):
-                return True
-        return False
-
-
 class SortedDict(dict):
     "A dictionary that keeps its keys in the order in which they're inserted."
     def __init__(self, data=None):
@@ -300,7 +248,7 @@ class MultiValueDict(dict):
         try:
             list_ = dict.__getitem__(self, key)
         except KeyError:
-            raise MultiValueDictKeyError, "Key %r not found in %r" % (key, self)
+            raise MultiValueDictKeyError("Key %r not found in %r" % (key, self))
         try:
             return list_[-1]
         except IndexError:
@@ -378,7 +326,7 @@ class MultiValueDict(dict):
     def update(self, *args, **kwargs):
         "update() extends rather than replaces existing key lists. Also accepts keyword args."
         if len(args) > 1:
-            raise TypeError, "update expected at most 1 arguments, got %d", len(args)
+            raise TypeError("update expected at most 1 arguments, got %d", len(args))
         if args:
             other_dict = args[0]
             if isinstance(other_dict, MultiValueDict):
@@ -389,7 +337,7 @@ class MultiValueDict(dict):
                     for key, value in other_dict.items():
                         self.setlistdefault(key, []).append(value)
                 except TypeError:
-                    raise ValueError, "MultiValueDict.update() takes either a MultiValueDict or dictionary"
+                    raise ValueError("MultiValueDict.update() takes either a MultiValueDict or dictionary")
         for key, value in kwargs.iteritems():
             self.setlistdefault(key, []).append(value)
 

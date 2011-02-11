@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -15,10 +15,13 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+
 """
 Useful interactive functions for building simple user interfaces.
 
 """
+
+from __future__ import print_function
 
 
 __all__ = ['get_text', 'get_input', 'choose', 'yes_no', 'print_menu_list',
@@ -26,12 +29,17 @@ __all__ = ['get_text', 'get_input', 'choose', 'yes_no', 'print_menu_list',
 
 import sys, os
 
-from pycopia.aid import IF
+# python 3 compatibility
+try:
+    raw_input
+except NameError:
+    raw_input = input
+
 
 def get_text(prompt="", msg=None, input=raw_input):
     """Prompt user to enter multiple lines of text."""
 
-    print (msg or "Enter text.") + " End with ^D or a '.' as first character."
+    print ((msg or "Enter text.") + " End with ^D or a '.' as first character.")
     lines = []
     while True:
         try:
@@ -55,7 +63,7 @@ def get_input(prompt="", default=None, input=raw_input):
         return input("%s> " % (prompt, ))
 
 def default_error(text):
-    print >>sys.stderr, text
+    print(text, file=sys.stderr)
 
 def choose(somelist, defidx=0, prompt="choose", input=raw_input, error=default_error):
     """Select an item from a list. Returns the object selected from the
@@ -88,10 +96,10 @@ def choose_multiple(somelist, chosen=None, prompt="choose multiple", input=raw_i
     if chosen is None:
         chosen = []
     while 1:
-        print "Choose from list. Enter to end, negative index removes from chosen."
+        print( "Choose from list. Enter to end, negative index removes from chosen.")
         print_menu_list(somelist)
         if chosen:
-            print "You have: "
+            print ("You have: ")
             print_menu_list(chosen)
         try:
             ri = get_input(prompt, None, input) # menu list starts at one
@@ -178,10 +186,10 @@ def choose_multiple_from_map(somemap, chosen=None, prompt="choose multiple",
     if chosen is None:
         chosen = {}
     while 1:
-        print "Choose from list. Enter to end, negative index removes from chosen."
+        print("Choose from list. Enter to end, negative index removes from chosen.")
         first = print_menu_map(somemap)
         if chosen:
-            print "You have: "
+            print ("You have: ")
             print_menu_map(chosen)
         try:
             ri = get_input(prompt, None, input) # menu list starts at one
@@ -213,26 +221,26 @@ def choose_multiple_from_map(somemap, chosen=None, prompt="choose multiple",
 def print_list(clist, indent=0, width=74):
     indent = min(max(indent,0),width-1)
     if indent:
-        print " " * indent,
+        print(" " * indent, end="")
     col = indent + 2
     for c in clist[:-1]:
         ps = str(c) + ","
         col = col + len(ps) + 1
         if col > width:
-            print
+            print()
             col = indent + len(ps) + 1
             if indent:
-                print " " * indent,
-        print ps,
+                print (" " * indent, end="")
+        print (ps, end="")
     if col + len(clist[-1]) > width:
-        print
+        print()
         if indent:
-            print " " * indent,
-    print str(clist[-1])
+            print (" " * indent, end="")
+    print (clist[-1])
 
 
 def yes_no(prompt, default=True, input=raw_input):
-    yesno = get_input(prompt, IF(default, "Y", "N"), input)
+    yesno = get_input(prompt, "Y" if default else "N", input)
     return yesno.upper().startswith("Y")
 
 def edit_text(text, prompt="Edit text"):
@@ -257,9 +265,9 @@ def print_menu_list(clist, lines=20):
     i1, i2 = 1, h+1
     for c1, c2 in map(None, clist[:h], clist[h:]):
         if c2:
-            print "%2d: %-33.33s | %2d: %-33.33s" % (i1, c1, i2, c2)
+            print ("%2d: %-33.33s | %2d: %-33.33s" % (i1, c1, i2, c2))
         else:
-            print "%2d: %-74.74s" % ( i1, c1)
+            print ("%2d: %-74.74s" % ( i1, c1))
         i1 += 1
         i2 += 1
 
@@ -270,9 +278,9 @@ def print_menu_map(mapping, lines=20):
     first = keys[0]
     for k1, k2 in map(None, keys[:h], keys[h:]):
         if k2 is not None:
-            print "%4.4s: %-33.33s | %4.4s: %-33.33s" % (k1, mapping[k1], k2, mapping[k2])
+            print ("%4.4s: %-33.33s | %4.4s: %-33.33s" % (k1, mapping[k1], k2, mapping[k2]))
         else:
-            print "%4.4s: %-74.74s" % (k1, mapping[k1])
+            print ("%4.4s: %-74.74s" % (k1, mapping[k1]))
     return first
 
 def find_source_file(modname):
@@ -296,15 +304,13 @@ def find_source_file(modname):
 
 
 def _test(argv):
+    #from pycopia import autodebug
     import string
     l = list(string.ascii_letters)
     c = choose(l)
-    print c
+    print (c)
     #l1 = choose_multiple(l)
-    #print l1
-    #print yes_no("testing")
-    #print "Edit"
-    print edit_text(__doc__)
+    print (edit_text(__doc__))
 
 if __name__ == "__main__":
     import sys

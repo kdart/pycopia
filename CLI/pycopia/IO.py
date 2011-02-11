@@ -38,7 +38,6 @@ class ConsoleIO(object):
         self.read = self.stdin.read
         self.readline = self.stdin.readline
         self.readlines = self.stdin.readlines
-        self.xreadlines = self.stdin.xreadlines
         # writing methods
         self.write = self.stdout.write
         self.flush = self.stdout.flush
@@ -51,7 +50,7 @@ class ConsoleIO(object):
         self.stdout = None
         self.stdin = None
         self.closed = 1
-        del self.read, self.readlines, self.xreadlines, self.write
+        del self.read, self.readlines, self.write
         del self.flush, self.writelines
 
     def fileno(self): # ??? punt, since mostly used by readers
@@ -76,7 +75,6 @@ class ConsoleErrorIO(object):
         self.read = self.stdin.read
         self.readline = self.stdin.readline
         self.readlines = self.stdin.readlines
-        self.xreadlines = self.stdin.xreadlines
         # writing methods
         self.write = self.stderr.write
         self.flush = self.stderr.flush
@@ -89,7 +87,7 @@ class ConsoleErrorIO(object):
         self.stdout = None
         self.stdin = None
         self.closed = 1
-        del self.read, self.readlines, self.xreadlines, self.write
+        del self.read, self.readlines, self.write
         del self.flush, self.writelines
 
     def fileno(self): # ??? punt, since mostly used by readers

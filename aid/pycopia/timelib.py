@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -97,7 +97,7 @@ class MutableTime(object):
             try:
                 return self._tm[self.INDEXMAP[key]]
             except KeyError:
-                raise AttributeError, "no attribute '%s' found." % (key,)
+                raise AttributeError("no attribute '%s' found." % (key,))
 
     def __setattr__(self, name, val):
         idx = self.INDEXMAP.get(name, None)

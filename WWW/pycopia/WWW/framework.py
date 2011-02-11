@@ -198,7 +198,7 @@ class HttpResponse(object):
 
     def write(self, content):
         if not self._is_string:
-            raise Exception, "This %s instance is not writable" % self.__class__
+            raise NotImplementedError("This %s instance is not writable" % self.__class__)
         self._container.append(content)
 
     def flush(self):
@@ -206,7 +206,7 @@ class HttpResponse(object):
 
     def tell(self):
         if not self._is_string:
-            raise Exception, "This %s instance cannot tell its position" % self.__class__
+            raise NotImplementedError("This %s instance cannot tell its position" % self.__class__)
         return sum([len(chunk) for chunk in self._container])
 
 
@@ -364,10 +364,10 @@ class HTTPRequest(object):
                 return d[key]
             except KeyError:
                 pass
-        raise KeyError, "%s not found in either POST or GET" % key
+        raise KeyError("%s not found in either POST or GET" % key)
 
     def has_key(self, key):
-        return self.GET.has_key(key) or self.POST.has_key(key)
+        return key in self.GET or key in self.POST
 
     def _get_get(self):
         try:
@@ -633,7 +633,7 @@ class WebApplication(object):
                 start_response(str(val), [("Content-Type", "text/plain")], (ex, val, tb))
                 return [val.message]
             else:
-                raise ex, val, tb
+                raise
         else:
             start_response(response.get_status(), response.get_response_headers())
             return response
@@ -647,7 +647,7 @@ class RequestHandler(object):
         impl = []
         for name in self.METHODS:
             key = name.upper()
-            if self.__class__.__dict__.has_key(name):
+            if name in self.__class__.__dict__:
                 impl.append(key)
                 self._methods[key] = getattr(self, name)
             else:

@@ -21,7 +21,9 @@ General text functions. You may import this instead of the stock
 
 """
 
-import sys
+from __future__ import absolute_import
+from __future__ import print_function
+
 import re
 import binascii
 
@@ -202,7 +204,7 @@ Cut a section from the list of lines. arguments are tuples, except delim."""
                 wl.append(words[fn])
             rv.append(tuple(wl))
     else:
-        raise ValueError, "cut: you must specify either char range or fields"
+        raise ValueError("cut: you must specify either char range or fields")
     return rv
 
 def hexdump(*args):
@@ -257,9 +259,9 @@ def _combine(args):
 
 
 def _test(argv):
-    print grep("b", "abacdefg")
-    print grep("x", "abacdefg")
-    print cut(file("/etc/passwd"), fields=(0,), delim=":")
+    print (grep("b", "abacdefg"))
+    print (grep("x", "abacdefg"))
+    print (cut(file("/etc/passwd"), fields=(0,), delim=":"))
 
 if __name__ == "__main__":
     import sys

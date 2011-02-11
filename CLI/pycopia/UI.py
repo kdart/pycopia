@@ -23,13 +23,14 @@ User Interface base classes and themes.
 import sys
 import os
 import time
-from cStringIO import StringIO
+from io import BytesIO
 
 from pycopia import environ
 from pycopia import cliutils
 from pycopia import tty
 
 from pycopia.fsm import FSM, ANY
+from pycopia.aid import callable
 
 # set the PROMPT ignore depending on whether or not readline module is
 # available.
@@ -415,11 +416,11 @@ class UserInterface(object):
         function must take one argument, and return a string. The argument is
         the character expanded on."""
         key = str(key)[0]
-        if not self._EXPANSIONS.has_key(key):
+        if not key in self._EXPANSIONS:
             self._EXPANSIONS[key] = func
         else:
-            raise ValueError, "expansion key %r already exists." % (key, )
-    
+            raise ValueError("expansion key %r already exists." % (key, ))
+
     # FSM for prompt expansion
     def _initfsm(self):
         # maps percent-expansion items to some value.
@@ -606,13 +607,13 @@ def _safe_repr(obj, context, maxlevels, level):
             closure = "'"
             quotes = {"'": "\\'"}
         qget = quotes.get
-        sio = StringIO()
+        sio = BytesIO()
         write = sio.write
         for char in obj:
             if char.isalpha():
                 write(char)
             else:
-                write(qget(char, `char`[1:-1]))
+                write(qget(char, repr(char)[1:-1]))
         return ("%s%s%s" % (closure, sio.getvalue(), closure))
 
     if typ is dict:
@@ -698,16 +699,14 @@ def _get_object(name):
             except KeyError:
                 try:
                     mod = __import__(modname, globals(), locals(), ["*"])
-                except ImportError, err:
-                    raise UIFindError, \
-                        "Could not find UI module %s: %s" % (modname, err)
+                except ImportError as err:
+                    raise UIFindError("Could not find UI module %s: %s" % (modname, err))
             try:
                 return getattr(mod, name[i+1:])
             except AttributeError:
-                raise UIFindError, \
-                    "Could not find UI object %r in module %r." % (name, modname)
+                raise UIFindError("Could not find UI object %r in module %r." % (name, modname))
         else:
-            raise UIFindError, "%s is not a valid object path." % (name,)
+            raise UIFindError("%s is not a valid object path." % (name,))
 
 # construct a user interface from object names given as strings.
 def get_userinterface(uiname="UserInterface", 
@@ -719,15 +718,15 @@ def get_userinterface(uiname="UserInterface",
     else:
         raise ValueError("ioname not a valid type")
     if not hasattr(ioobj, "close"):
-        raise UIFindError, "not a valid IO object: %r" % (ioobj,)
+        raise UIFindError("not a valid IO object: %r" % (ioobj,))
 
     uiobj = _get_object(uiname)
     if not hasattr(uiobj, "Print"):
-        raise UIFindError, "not a valid UI object: %r" % (uiobj,)
+        raise UIFindError("not a valid UI object: %r" % (uiobj,))
     if themename is not None:
         themeobj = _get_object(themename)
         if not issubclass(themeobj, Theme):
-            raise UIFindError, "not a valid Theme object: %r." % (themeobj,)
+            raise UIFindError("not a valid Theme object: %r." % (themeobj,))
         return uiobj(ioobj(), theme=themeobj())
     else:
         return uiobj(ioobj())

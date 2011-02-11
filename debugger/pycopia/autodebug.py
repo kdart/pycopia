@@ -23,7 +23,9 @@ the default bahavior is kept.
 
 import sys
 
-if sys.platform == "win32":
+debugger_hook = sys.__excepthook__
+
+if sys.platform == "win32" or sys.version_info.major == 3:
     def debugger_hook(exc, value, tb):
         if (not hasattr(sys.stderr, "isatty") or
             not sys.stderr.isatty() or exc in (SyntaxError, IndentationError, KeyboardInterrupt)):

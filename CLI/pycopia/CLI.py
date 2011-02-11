@@ -21,6 +21,7 @@ Supports different command contexts, customizable user interface, generic
 object CLI's, and other neat stuff.
 
 """
+from __future__ import print_function
 
 __all__ = ['CLIException', 'CommandQuit', 'CommandExit', 'NewCommand',
 'BaseCommands', 'DictCLI', 'ListCLI', 'GenericCLI', 'FileCLI',
@@ -29,8 +30,9 @@ __all__ = ['CLIException', 'CommandQuit', 'CommandExit', 'NewCommand',
 'get_history_file', 'run_cli_wrapper', 'run_cli', 'run_generic_cli',
 'get_cli', 'get_terminal_ui', 'get_ui']
 
+
 import sys, os
-from cStringIO import StringIO
+from io import BytesIO
 
 try:
     import readline # readline is very, very important to us...
@@ -42,7 +44,7 @@ from types import MethodType
 from pycopia.IO import ConsoleIO
 from pycopia.UI import DefaultTheme, UserInterface, method_repr, safe_repr
 from pycopia.fsm import FSM, ANY
-from pycopia.aid import IF, Print, removedups
+from pycopia.aid import removedups, callable
 
 from pycopia import timelib
 from pycopia import environ
@@ -201,7 +203,7 @@ argument must match a name of a method.
             rv = meth(argv) # call the method
         except (NewCommand, CommandQuit, CommandExit, KeyboardInterrupt):
             raise # pass these through to parser
-        except CLISyntaxError, err:
+        except CLISyntaxError as err:
             self._print("Syntax error: %s" % (err,))
             self._print(meth.__doc__)
         except IndexError: # may have tried to get non-existent argv value.
@@ -220,7 +222,7 @@ argument must match a name of a method.
                     debugger.post_mortem(tb, ex, val)
                 else:
                     self.except_hook(ex, val, tb)
-        except getopt.GetoptError, err:
+        except getopt.GetoptError as err:
             self._print("option %r: %s" % (err.opt, err.msg))
         except:
             ex, val, tb = sys.exc_info()
@@ -315,7 +317,7 @@ argument must match a name of a method.
                 _DEBUG = False
         else:
             self._ui.printf(
-                 "Debugging is currently %%I%s%%N." % (IF(_DEBUG, "on", "off"),))
+                 "Debugging is currently %%I%s%%N." % ("on" if _DEBUG else "off",))
 
     def printf(self, argv):
         """printf [<format>] <args>....
@@ -424,7 +426,7 @@ argument must match a name of a method.
         proc = proctools.spawnpty(" ".join(argv))
         cmd = self.clone(FileCLI)
         cmd._setup(proc, "Process:%s> " % (proc.cmdline.split()[0],))
-        raise NewCommand, cmd
+        raise NewCommand(cmd)
 
     def help(self, argv):
         """help [-lLcia] [<commandname>]...
@@ -459,7 +461,7 @@ argument must match a name of a method.
                 continue
             if not doc:
                 self._print("No docs for %r." % (name,))
-            elif local and self.__class__.__dict__.has_key(name):
+            elif local and name in self.__class__.__dict__:
                 self._ui.help_local(doc)
             elif created and "*" in doc: # dynamic method from generic_cli
                 self._ui.help_created(doc)
@@ -570,8 +572,8 @@ argument must match a name of a method.
             return
         try:
             therange = self._parse_range(rangetoken)
-        except ValueError, err:
-            raise CLISyntaxError, err
+        except ValueError as err:
+            raise CLISyntaxError(err)
         for i in therange:
             newargs = argv[:]
             newargs[sloc] = newargs[sloc].replace("%", str(i))
@@ -659,7 +661,7 @@ argument must match a name of a method.
         ns = self._get_ns()
         try:
             code = compile(snippet, '<CLI>', 'exec')
-            exec code in globals(), ns
+            exec(code, globals(), ns)
         except:
             t, v, tb = sys.exc_info()
             self._print('*** %s (%s)' % (t, v))
@@ -784,13 +786,13 @@ class DictCLI(BaseCommands):
     Clears the mapping."""
         self._obj.clear()
         self._reset_scopes()
-    
+
     def has_key(self, argv):
         """has_key <key>
     Report whether or not the mapping has the given key."""
         args, kwargs = breakout_args(argv[1:])
         key = args[0]
-        if self._obj.has_key(key):
+        if key in self._obj:
             self._print("Mapping does contain the key %r." % (key,))
             return True
         else:
@@ -1079,13 +1081,13 @@ class FileCLI(GenericCLI):
         while 1:
             try:
                 rfd, wfd, xfd = select.select([fo_fd, stdin_fd], [], [])
-            except select.error, errno:
+            except select.error as errno:
                 if errno[0] == EINTR:
                     continue
             if fo_fd in rfd:
                 try:
                     text = self._obj.read(4096)
-                except (OSError, EOFError), err:
+                except (OSError, EOFError) as err:
                     tty.tcsetattr(stdin_fd, tty.TCSAFLUSH, ttystate)
                     self._print('*** EOF ***')
                     self._print(err)
@@ -1150,7 +1152,11 @@ class Completer(object):
             return None
 
     def get_globals():
-        import keyword, __builtin__
+        import keyword
+        try:
+            import __builtin__
+        except ImportError:
+            import builtins as __builtin__
         rv = keyword.kwlist + dir(__builtin__)
         rv = removedups(rv)
         return rv
@@ -1229,8 +1235,8 @@ class Shell(object):
         self.initkwargs = ikwargs
 
     def callme(self, *args, **kwargs):
-        Print("args:", args)
-        Print("kwargs:", kwargs)
+        print("args:", args)
+        print("kwargs:", kwargs)
 
 #######
 
@@ -1318,7 +1324,7 @@ class CommandParser(object):
             if returnval:
                 self._cmd.handle_subcommand(returnval)
         else:
-            raise CommandQuit, "last command object quit."
+            raise CommandQuit("last command object quit.")
 
     def command_setup(self, obj, prompt=None):
         if self._cmd:
@@ -1383,7 +1389,7 @@ class CommandParser(object):
             except CommandQuit:
                 val = sys.exc_info()[1]
                 self.pop_command(val.value)
-            except NewCommand, cmdex:
+            except NewCommand as cmdex:
                 self.push_command(cmdex.value)
         if self._fsm.current_state: # non-zero, stuff left
             self._buf = text[i:]
@@ -1495,7 +1501,7 @@ class CommandParser(object):
         if fsm.arg:
             self.arg_list.append(fsm.arg)
             fsm.arg = ''
-        io = StringIO()
+        io = BytesIO()
         sys.stdout.flush()
         sys.stdout = sys.stdin = io
         try:
@@ -1505,7 +1511,7 @@ class CommandParser(object):
                 subparser.feed(self.arg_list.pop()+"\n")
             except:
                 ex, val, tb = sys.exc_info()
-                print >>sys.stderr, "  *** %s (%s)" % (ex, val)
+                print("  *** %s (%s)" % (ex, val), file=sys.stderr)
         finally:
             sys.stdout = sys.__stdout__
             sys.stdin = sys.__stdin__
@@ -1519,11 +1525,11 @@ def run_cli_wrapper(argv, wrappedclass=Shell, cliclass=GenericCLI, theme=None):
     try:
         optlist, longopts, args = getopt.getopt(argv[1:], "?hgs:")
     except getopt.GetoptError:
-            print wrappedclass.__doc__
+            print (wrappedclass.__doc__)
             return
     for opt, val in optlist:
         if opt in ("-?", "-h", "--help"):
-            print run_cli_wrapper.__doc__
+            print (run_cli_wrapper.__doc__)
             return
         elif opt == "-s":
             sourcefile = val
@@ -1538,8 +1544,8 @@ def run_cli_wrapper(argv, wrappedclass=Shell, cliclass=GenericCLI, theme=None):
     try:
         obj = apply(wrappedclass, targs, kwargs)
     except (ValueError, TypeError):
-        print "Bad parameters."
-        print wrappedclass.__doc__
+        print ("Bad parameters.")
+        print (wrappedclass.__doc__)
         return
     if paged:
         io = tty.PagedIO()
@@ -1548,7 +1554,7 @@ def run_cli_wrapper(argv, wrappedclass=Shell, cliclass=GenericCLI, theme=None):
     ui = UserInterface(io, None, theme)
     cmd = get_generic_cmd(obj, ui, cliclass)
     cmd._export("PS1", "%%I%s%%N(%s%s%s)> " % (wrappedclass.__name__,
-                ", ".join(map(repr, targs)),  IF(kwargs, ", ", ""),
+                ", ".join(map(repr, targs)),  ", " if kwargs else "",
                 ", ".join(map(lambda t: "%s=%r" % t, kwargs.items()))) )
     cli = CommandParser(cmd, logfile)
     if sourcefile:
@@ -1610,9 +1616,9 @@ if __name__ == "__main__":
     env.inherit()
     io = ConsoleIO()
     #io = tty.PagedIO()
-    print "======================="
+    print ("=======================")
     run_cli(_CmdTest, io, env)
-    print "======================="
+    print ("=======================")
     env["PS1"] = "CLItest> "
     ui = UserInterface(io, env, DefaultTheme())
     cmd = BaseCommands(ui)
@@ -1623,32 +1629,32 @@ if __name__ == "__main__":
 
 
     f = UserInterface(ConsoleIO(), env, DefaultTheme())
-    print f.format("%T %t")
-    print f.format("%Ibright%N")
+    print (f.format("%T %t"))
+    print (f.format("%Ibright%N"))
 
-    print f.format("%rred%N")
-    print f.format("%ggreen%N")
-    print f.format("%yyellow%N")
-    print f.format("%bblue%N")
-    print f.format("%mmagenta%N")
-    print f.format("%ccyan%N")
-    print f.format("%wwhite%N")
+    print (f.format("%rred%N"))
+    print (f.format("%ggreen%N"))
+    print (f.format("%yyellow%N"))
+    print (f.format("%bblue%N"))
+    print (f.format("%mmagenta%N"))
+    print (f.format("%ccyan%N"))
+    print (f.format("%wwhite%N"))
 
-    print f.format("%Rred%N")
-    print f.format("%Ggreen%N")
-    print f.format("%Yyellow%N")
-    print f.format("%Bblue%N")
-    print f.format("%Mmagenta%N")
-    print f.format("%Ccyan%N")
-    print f.format("%Wwhite%N")
+    print (f.format("%Rred%N"))
+    print (f.format("%Ggreen%N"))
+    print (f.format("%Yyellow%N"))
+    print (f.format("%Bblue%N"))
+    print (f.format("%Mmagenta%N"))
+    print (f.format("%Ccyan%N"))
+    print (f.format("%Wwhite%N"))
 
-    print f.format("%Ddefault%N")
-    print f.format("wrapped%ntext")
-    print f.format("%l tty %l")
-    print f.format("%h hostname %h")
-    print f.format("%u username %u")
-    print f.format("%$ priv %$")
-    print f.format("%d cwd %d")
-    print f.format("%L SHLVL %L")
-    print f.format("%{PS4}")
+    print (f.format("%Ddefault%N"))
+    print (f.format("wrapped%ntext"))
+    print (f.format("%l tty %l"))
+    print (f.format("%h hostname %h"))
+    print (f.format("%u username %u"))
+    print (f.format("%$ priv %$"))
+    print (f.format("%d cwd %d"))
+    print (f.format("%L SHLVL %L"))
+    print (f.format("%{PS4}"))
 

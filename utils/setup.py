@@ -1,12 +1,13 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
+from __future__ import print_function
 
 import sys
 import os
 
-import ez_setup
-ez_setup.use_setuptools()
+#import ez_setup
+#ez_setup.use_setuptools()
 
 from setuptools import setup, Extension 
 from glob import glob
@@ -100,16 +101,16 @@ def unlink_old_modules():
 
 if sys.platform == "linux2":
     if os.getuid() == 0 and sys.argv[1] == "install":
-        print "Installing SUID helpers."
+        print ("Installing SUID helpers.")
         try:
             build_tools()
         except:
             ex, val, tb = sys.exc_info()
-            print >>sys.stderr, "Could not build helper programs:"
-            print >>sys.stderr, "%s (%s)" % (ex, val)
+            print ("Could not build helper programs:", file=sys.stderr)
+            print ("%s (%s)" % (ex, val), file=sys.stderr)
 
         if sys.version_info[:2] < (2, 5):
             unlink_old_modules()
     else:
-        print >>sys.stderr, "You must run 'setup.py install' as root to install helper programs."
+        print ("You must run 'setup.py install' as root to install helper programs.", file=sys.stderr)
 

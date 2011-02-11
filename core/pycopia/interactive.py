@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 #    Copyright (C) 2010  Keith Dart <keith@dartworks.biz>
@@ -62,13 +62,14 @@ from __future__ import division
 import sys, os, types
 import atexit
 from pprint import pprint
+
 try:
     import rlcompleter2
 except ImportError:
     import rlcompleter
 
 from pycopia.cliutils import *
-from pycopia.aid import add2builtin
+from pycopia.aid import add2builtin, callable, execfile
 
 
 try:
@@ -91,7 +92,7 @@ PYINDEX = None
 PYDOCINDEXFILE = os.path.join("/", "var", "tmp", "pydocindex.py")
 
 gtktools = None
-if os.environ.has_key("DISPLAY"):
+if "DISPLAY" in os.environ:
     try:
         from pycopia import gtktools
     except:
@@ -147,9 +148,9 @@ else:
             os.environ[str(name)] = str(val)
 del env
 
-PYTHON = os.environ.get("PYTHONBIN", "python") # set PYTHONBIN for alternate interpreter
-sys.ps1 = os.environ.get("PYPS1", "Python> ")
-sys.ps2 = os.environ.get("PYPS2", ".more.> ")
+PYTHON = os.environ.get("PYTHONBIN", sys.executable) # set PYTHONBIN for alternate interpreter
+sys.ps1 = os.environ.get("PYPS1", "Python{0}> ".format(sys.version_info.major)
+sys.ps2 = os.environ.get("PYPS2", "more...> ")
 
 
 def info(obj=None):
@@ -199,13 +200,13 @@ def run_config(cfstring, param):
 
 def pyterm(filename="", interactive=1):
     cmd = "%s %s %s " % (PYTHON, "-i" if interactive else "", filename)
-    if os.environ.has_key("DISPLAY"):
+    if DISPLAY in os.environ:
         return run_config(os.environ.get("XTERM"), cmd)
     else:
         return os.system(cmd)
 
 def xterm(cmd="/bin/sh"):
-    if os.environ.has_key("DISPLAY"):
+    if "DISPLAY" in os.environ:
         return run_config(os.environ.get("XTERM"), cmd)
     else:
         return os.system(cmd)
@@ -233,7 +234,7 @@ Opens the $[X]VIEWER with the given module source file (if found).
         print ("Could not find source to %s." % modname, file=sys.stderr)
 
 def get_editor():
-    if os.environ.has_key("DISPLAY"):
+    if "DISPLAY" in os.environ:
         ed = os.environ.get("XEDITOR", None)
     else:
         ed = os.environ.get("EDITOR", None)
@@ -242,7 +243,7 @@ def get_editor():
     return ed
 
 def get_viewer():
-    if os.environ.has_key("DISPLAY"):
+    if "DISPLAY" in os.environ:
         ed = os.environ.get("XVIEWER", None)
     else:
         ed = os.environ.get("VIEWER", None)
@@ -261,7 +262,7 @@ there is no return!"""
 
 def open_url(url):
     """Opens the given URL in an external viewer. """
-    if os.environ.has_key("DISPLAY"):
+    if "DISPLAY" in os.environ:
         return run_config(os.environ.get("BROWSER"), url)
     else:
         return run_config(os.environ.get("CBROWSER"), url)
@@ -269,7 +270,7 @@ def open_url(url):
 
 def open_chm(index):
     """Opens the given index with a CHM viewer. """
-    if os.environ.has_key("DISPLAY"):
+    if "DISPLAY" in os.environ:
         book = os.environ.get("CHMBOOK")
         if not book:
             book = os.path.expandvars("$HOME/.local/share/devhelp/books/python266.chm")

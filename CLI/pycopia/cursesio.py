@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2011  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -51,15 +49,14 @@ class BasicCursesIO(object):
         self.read = self.stdin.read
         self.readline = self.stdin.readline
         self.readlines = self.stdin.readlines
-        self.xreadlines = self.stdin.xreadlines
         # writing methods
         self.write = self.stdout.write
         self.flush = self.stdout.flush
         self.writelines = self.stdout.writelines
         self.set_size(inputsize)
-    
+
     def set_win(self, win, inputsize=6):
-        ass
+        pass
 
     def raw_input(self, prompt=""):
         return raw_input(prompt)
@@ -73,7 +70,7 @@ class BasicCursesIO(object):
             self.stdout = None
             self.stdin = None
             self.closed = 1
-            del self.read, self.readlines, self.xreadlines, self.write
+            del self.read, self.readlines, self.write
             del self.flush, self.writelines
 
     def fileno(self):
@@ -359,7 +356,6 @@ def get_text(io, prompt="", msg=None):
     text = tb.edit()
     win.erase()
     outwin.erase()
-    del tb, win, outwin
     return text
 
 
@@ -470,3 +466,25 @@ def get_curses_ui(ioc=CursesIO, uic=UserInterface, inputsize=7, env=None):
     return ui
 
 
+def _test(argv):
+    ui = get_userinterface()
+    ui.Print("Hello world!")
+    inp = ui.user_input("Type something> ")
+    ui.Print("You typed:", inp)
+
+def _test(argv):
+    import string
+    ui = get_curses_ui()
+    l = list(string.ascii_letters)
+    c = ui.choose(l)
+    print c
+    #l1 = choose_multiple(l)
+    #print l1
+    #print yes_no("testing")
+    #print "Edit"
+    #print edit_text(__doc__)
+    #print ui.get_text("Enter text")
+
+if __name__ == "__main__":
+    import sys
+    _test(sys.argv)

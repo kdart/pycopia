@@ -85,7 +85,7 @@ class FSM(object):
             if not hasattr(self, str(enum)):
                 setattr(self, str(enum), enum)
             else:
-                raise FSMError, "state or attribute already exists."
+                raise FSMError("state or attribute already exists.")
 
     def set_default_transition(self, action, next_state):
         '''This sets the default transition.
@@ -159,7 +159,7 @@ class FSM(object):
                     if self.default_transition is not None:
                         return self.default_transition
                     else:
-                        raise FSMError, 'Transition %r is undefined.' % (input_symbol,)
+                        raise FSMError('Transition %r is undefined.' % (input_symbol,))
 
     def process(self, input_symbol):
         """This causes the fsm to change state and call an action.

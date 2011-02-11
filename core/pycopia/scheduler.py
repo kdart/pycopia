@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -222,7 +222,7 @@ other events to run.  """
         itimer.absolutesleep(delay)
 
     def _timeout_cb(self):
-        raise TimeoutError, "timer expired"
+        raise TimeoutError("timer expired")
 
     # An abstraction of basic timeout patterns. Perform functions that may
     # block, but with a timeout as a failsafe method to return control to the
@@ -246,7 +246,7 @@ timeout feature."""
             while 1:
                 try:
                     rv = function(*args, **kwargs)
-                except EnvironmentError, val:
+                except EnvironmentError as val:
                     if val.errno == EINTR:
                         if self._timed_out:
                             raise TimeoutError

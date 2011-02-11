@@ -23,6 +23,8 @@ new values.
 
 """
 
+from __future__ import print_function
+
 import os
 
 import re
@@ -105,9 +107,9 @@ if __name__ == "__main__":
     d.export("PKGHOME=/opt/pkg")
     d.export("PATH=$HOME/bin")
     d.export("PATH=$PATH:${PKGHOME}/bin")
-    print d
-    print "-----"
+    print (d)
+    print ("-----")
     d["?"] = 0
-    print d.expand("Here is the PATH: $PATH")
-    print d.expand("$?")
+    print (d.expand("Here is the PATH: $PATH"))
+    print (d.expand("$?"))
 

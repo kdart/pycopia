@@ -13,6 +13,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+
 """
 Master builder (custom script).
 This top-level setup script helps with dealing with all sub-packages at
@@ -78,6 +80,7 @@ PACKAGES = [
 "WWW",
 "QA",
 "vim",
+"doc",
 "fepy",
 ]
 
@@ -99,15 +102,14 @@ def _do_commands(name, cmds, root):
     else:
         sudo = ""
     cmd = "%s%s setup.py %s" % (sudo, sys.executable, " ".join(cmds))
-    print "========", name, "==", cmd
+    print("========", name, "==", cmd)
     rv = False
     os.chdir(name)
     try:
         rv = WEXITSTATUS(os.system(cmd)) == 0
     finally:
         os.chdir("..")
-        print "====================== END", name
-        print
+        print("====================== END", name, "\n")
     return rv
 
 def do_eggs(name):
@@ -138,11 +140,11 @@ def _do_scripts(name, scriptdir, root=False):
     try:
         if os.path.isdir("bin"):
             cmd = "%scp -dR --preserve=mode  bin/* %s" % (sudo, scriptdir)
-            print "======== SCRIPTS", name, "==", cmd
+            print("======== SCRIPTS", name, "==", cmd)
             rv = WEXITSTATUS(os.system(cmd)) == 0
     finally:
         os.chdir("..")
-    print "====================== END SCRIPTS", name
+    print("====================== END SCRIPTS", name)
     return rv
 
 def do_install_scripts(name):
@@ -177,14 +179,14 @@ def do_clean(name):
     return _do_commands(name, ["clean"], False)
 
 def do_list(name):
-    print name,
+    print(name, end=" ")
     return True
 
 # "squash" selected sub packages to a single package. Also removes
 # setuptools dependency when tarballed.
 def do_squash(name):
     if not _check_rsync():
-        print "Squash requires rsync tool to be installed."
+        print("Squash requires rsync tool to be installed.")
         return False
     if not os.path.isdir(PYCOPIA_SQUASH):
         os.makedirs(PYCOPIA_SQUASH)
@@ -192,7 +194,7 @@ def do_squash(name):
     uname = os.uname()
     bin_dir = os.path.join("build", "lib.%s-%s-%s" % (uname[0].lower(), uname[4], sys.version[:3]))
     # e.g: build/lib.linux-x86_64-2.5/pycopia
-    print "======== SQUASH", name, "to", PYCOPIA_SQUASH
+    print("======== SQUASH", name, "to", PYCOPIA_SQUASH)
     try:
         if WEXITSTATUS(os.system("%s setup.py build" % (sys.executable,))) != 0:
             return False
@@ -204,8 +206,7 @@ def do_squash(name):
     finally:
         os.chdir("..")
     _null_init(PYCOPIA_SQUASH)
-    print "====================== END", name, "squashed into", PYCOPIA_SQUASH
-    print
+    print("====================== END", name, "squashed into", PYCOPIA_SQUASH, "\n")
     return True
 
 def _null_init(directory):
@@ -221,7 +222,7 @@ def main(argv):
     try:
         cmd = argv[1]
     except IndexError:
-        print __doc__
+        print(__doc__)
         return 1
     try:
         method = globals()["do_" + cmd]
@@ -231,7 +232,7 @@ def main(argv):
     for name in (argv[2:] or PACKAGES):
         if not method(name):
             break
-    print
+    print()
     return 0
 
 sys.exit(main(sys.argv))
