@@ -149,7 +149,7 @@ else:
 del env
 
 PYTHON = os.environ.get("PYTHONBIN", sys.executable) # set PYTHONBIN for alternate interpreter
-sys.ps1 = os.environ.get("PYPS1", "Python{0}> ".format(sys.version_info.major)
+sys.ps1 = os.environ.get("PYPS1", "Python{0}> ".format(sys.version_info.major))
 sys.ps2 = os.environ.get("PYPS2", "more...> ")
 
 

@@ -11,7 +11,7 @@ PYDOCINDEXFILE="/var/tmp/pydocindex.py"
 BOOK=os.path.expandvars("$HOME/.local/share/devhelp/books/python266.chm")
 
 
-if os.environ.has_key("DISPLAY"):
+if "DISPLAY" in os.environ:
     try:
         from pycopia import gtktools
         chooser = gtktools.list_picker

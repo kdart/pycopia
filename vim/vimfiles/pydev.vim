@@ -14,6 +14,8 @@ set tm=2000
 set formatoptions=crql cino=(8#1 ai smartindent nowrap comments=:# 
 set cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 
+set kp=pyshowdoc
+
 " The 'NonText' highlighting will be used for 'eol', 'extends' and
 " 'precedes'.  'SpecialKey' for 'tab' and 'trail'.
 function PyUseSpaces()
