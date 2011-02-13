@@ -19,6 +19,7 @@
 Interface definition that defines the interace to asycio module objects.
 
 """
+from __future__ import print_function
 
 import os, fcntl
 
@@ -26,7 +27,7 @@ from pycopia.aid import NULL
 
 
 def _default_error_handler(ex, val, tb):
-    print >>sys.stderr, "*** unhandled error: %s (%s)" % (ex, val)
+    print("*** unhandled error: %s (%s)" % (ex, val), file=sys.stderr)
 
 # there will be one HandlerMethods holder per file descriptor
 # This exists so that objects can have multiple file descriptors and handler
@@ -52,7 +53,7 @@ class HandlerMethods(object):
         self.pri_handler = pri_handler
         self.hangup_handler = hangup_handler
         self.error_handler = error_handler
-    
+
     def fileno(self):
         return self.fd
 

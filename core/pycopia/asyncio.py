@@ -13,6 +13,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+
 import sys, os
 import select, signal, fcntl
 # the only signal module function that is exposed here. The rest are wrapped by
@@ -33,11 +35,11 @@ class ExitNow(Exception):
     pass
 
 # fix up the os module to include more Linux/BSD constants.
-os.ACCMODE = 03
+os.ACCMODE = 0o3
 # flag for ASYNC I/O support. Note cygwin/win32 does not support it.
 O_ASYNC = os.O_ASYNC = {
-    "linux1":020000, # ?
-    "linux2":020000, 
+    "linux1":0o20000, # ?
+    "linux2":0o20000, 
     "freebsd4":0x0040, 
     "freebsd5":0x0040,  # ?
     "darwin":0x0040,
@@ -53,13 +55,13 @@ class Poll(object):
         self.pollster = select.poll()
 
     def __str__(self):
-        return "Polling descriptors: %r" % (self.smap.keys())
+        return "Polling descriptors: %r" % (list(self.smap.keys()))
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.smap)
 
     def __iter__(self):
-        return iter(self.smap.values())
+        return self.smap.values()
 
     def register(self, obj):
         flags = self._getflags(obj)
@@ -86,7 +88,7 @@ class Poll(object):
         while 1:
             try:
                 rl = self.pollster.poll(timeout)
-            except select.error, why:
+            except select.error as why:
                 if why[0] == EINTR:
                     continue
                 elif why[0] == EBADF:
@@ -184,7 +186,7 @@ class PollerInterface(object):
         pass
 
     def error_handler(self, ex, val, tb):
-        print >>sys.stderr, "Poller error: %s (%s)" % (ex, val)
+        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
 
 
 # Default setup is to poll our files when we get a SIGIO. This is done since
@@ -231,7 +233,7 @@ def set_asyncio(obj):
     elif hasattr(obj, "fileno"):
         fd = obj.fileno()
     else:
-        raise ValueError, "set_asyncio: needs integer file descriptor, or object with fileno() method."
+        raise ValueError("set_asyncio: needs integer file descriptor, or object with fileno() method.")
     flags = fcntl.fcntl(fd, fcntl.F_GETFL)
     flags |= O_ASYNC
     fcntl.fcntl(fd, fcntl.F_SETFL, flags)
@@ -255,7 +257,7 @@ register = register_asyncio
 class DirectoryNotifier(object):
     def __init__(self, dirname):
         if not os.path.isdir(dirname):
-            raise RuntimeError, "you can only watch a directory."
+            raise RuntimeError("you can only watch a directory.")
         self.dirname = dirname
         self.fd = os.open(dirname, 0)
         self.currentcontents = os.listdir(dirname)
@@ -282,10 +284,10 @@ class DirectoryNotifier(object):
     def __call__(self):
         newcontents = os.listdir(self.dirname)
         if len(newcontents) > len(self.currentcontents):
-            new = filter(lambda item: item not in self.currentcontents, newcontents)
+            new = [item for item in newcontents if item not in self.currentcontents]
             self.entry_added(new)
         elif len(newcontents) < len(self.currentcontents):
-            rem = filter(lambda item: item not in newcontents, self.currentcontents)
+            rem = [item for item in self.currentcontents if item not in newcontents]
             self.entry_removed(rem)
         else:
             self.no_change()
@@ -296,10 +298,10 @@ class DirectoryNotifier(object):
         pass
 
     def entry_added(self, added):
-        print added, "added to", self.dirname
+        print(added, "added to", self.dirname)
 
     def entry_removed(self, removed):
-        print removed, "removed from", self.dirname
+        print(removed, "removed from", self.dirname)
 
     def no_change(self):
         pass

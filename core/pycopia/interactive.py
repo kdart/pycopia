@@ -200,7 +200,7 @@ def run_config(cfstring, param):
 
 def pyterm(filename="", interactive=1):
     cmd = "%s %s %s " % (PYTHON, "-i" if interactive else "", filename)
-    if DISPLAY in os.environ:
+    if "DISPLAY" in os.environ:
         return run_config(os.environ.get("XTERM"), cmd)
     else:
         return os.system(cmd)

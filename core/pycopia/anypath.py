@@ -22,9 +22,10 @@ Using cygwin on Windows presents the small problem of translating NT paths to
 cygwin paths for some applications.
 
 """
+from __future__ import print_function
+
 import ntpath, posixpath
 
-from pycopia.aid import IF
 
 def unix2win(path):
     return path.replace("/", "\\")
@@ -35,9 +36,9 @@ def win2unix(path):
 def nt2cygwin(winpath):
     if winpath.find(":") > 0:
         [drive, path] = winpath.split(":", 1)
-        return "/cygdrive/%s%s%s" % (drive.lower(), IF(path.startswith("\\"), "", "/"), path.replace("\\", "/"))
+        return "/cygdrive/%s%s%s" % (drive.lower(), ("" if path.startswith("\\") else "/"), path.replace("\\", "/"))
     else:
-        return "/cygdrive/c%s%s" % (IF(winpath.startswith("\\"), "", "/"), winpath.replace("\\", "/")) # assume C: drive if not given
+        return "/cygdrive/c%s%s" % (("" if winpath.startswith("\\") else "/"), winpath.replace("\\", "/")) # assume C: drive if not given
 win2cygwin = nt2cygwin # alias
 
 
@@ -52,12 +53,12 @@ def cygwin2nt(path):
 
 
 def _test(argv):
-    print cygwin2nt("/cygdrive/c/tmp"), "C:\\tmp"
-    print cygwin2nt("/usr/bin"), "C:\\cygwin\\usr\\bin"
-    print cygwin2nt("usr/bin"), "usr\\bin"
-    print nt2cygwin("C:\\share\\dir1"), "/cygdrive/c/share/dir1"
-    print nt2cygwin("\\Program Files\\dir1"), "/cygdrive/c/Program Files/dir1"
-    print nt2cygwin("\\share\\dir1"), "/cygdrive/c/share/dir1"
+    print(cygwin2nt("/cygdrive/c/tmp"), "C:\\tmp")
+    print(cygwin2nt("/usr/bin"), "C:\\cygwin\\usr\\bin")
+    print(cygwin2nt("usr/bin"), "usr\\bin")
+    print(nt2cygwin("C:\\share\\dir1"), "/cygdrive/c/share/dir1")
+    print(nt2cygwin("\\Program Files\\dir1"), "/cygdrive/c/Program Files/dir1")
+    print(nt2cygwin("\\share\\dir1"), "/cygdrive/c/share/dir1")
 
 if __name__ == "__main__":
     import sys

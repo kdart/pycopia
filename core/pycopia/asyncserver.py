@@ -20,6 +20,8 @@ Basic async server using the asyncio and socket modules.
 
 """
 
+from __future__ import print_function
+
 import sys
 from errno import EINTR
 
@@ -84,32 +86,32 @@ class SocketWorker(object):
         return (self._state == socket.CONNECTED) and bool(self._pribuf)
 
     def read_handler(self):
-        print >>sys.stderr, "SocketWorker: unhandled read"
+        print("SocketWorker: unhandled read", file=sys.stderr)
 
     def hangup_handler(self):
         self._state = socket.CLOSED
         self.close()
 
     def pri_handler(self):
-        print >>sys.stderr, "SocketWorker: unhandled priority"
+        print("SocketWorker: unhandled priority", file=sys.stderr)
 
     def error_handler(self, ex, val, tb):
-        print >>sys.stderr, "SocketWorker: unhandled error: %s (%s)"  % (ex, val)
+        print("SocketWorker: unhandled error: %s (%s)"  % (ex, val), file=sys.stderr)
 
     def write_handler(self):
         self._send()
 
     def handle_accept(self):
-        print >>sys.stderr, "SocketWorker: unhandled accept"
+        print("SocketWorker: unhandled accept", file=sys.stderr)
 
     def handle_connect(self):
-        print >>sys.stderr, "SocketWorker: unhandled connect"
+        print("SocketWorker: unhandled connect", file=sys.stderr)
 
     def _send(self, flags=0):
         while 1:
             try:
                 sent = self._sock.send(self._buf[:4096], self._sendflags)
-            except socket.SocketError, why:
+            except socket.SocketError as why:
                 if why[0] == EINTR:
                     continue
                 else:
@@ -212,13 +214,13 @@ def _test(argv):
         elif "-c" in argv:
             class TestClient(TCPClient):
                 def read_handler(self, data):
-                    print data
+                    print(data)
 
             c = get_tcp_client("localhost", 8123, clientclass=TestClient, logfile=sys.stderr)
-            print "Send something to server."
+            print("Send something to server.")
             while 1:
                 try:
-                    t = raw_input("> ")
+                    t = input("> ")
                     c.send(t)
                     #resp = c.readline()
                     #print resp
