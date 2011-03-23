@@ -23,7 +23,10 @@ __all__ = ["get_remote", "remote_copy", "get_proxy"]
 
 import sys, os
 
+os.environ["PYRO_CONFIG_FILE"] = "/etc/pycopia/Pyro.conf"
+
 import Pyro.core
+
 
 
 # some platform specific stuff. Should be minimal

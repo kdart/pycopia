@@ -20,6 +20,8 @@ Command line interface to Remote QA agent servers.
 
 import sys, os, time, errno
 
+os.environ["PYRO_CONFIG_FILE"] = "/etc/pycopia/Pyro.conf"
+
 import Pyro.core
 import Pyro.naming
 import Pyro.errors
