@@ -21,11 +21,15 @@ Base class for webdriver test suites. Pre-instantiates a webdriver
 instance and fetches the DUT service target.
 """
 
-# TODO other target browser support
-from selenium.firefox.webdriver import WebDriver
+from selenium import webdriver
 
 from pycopia.QA import core
 
+CAPS = {
+    "firefox": webdriver.DesiredCapabilities.FIREFOX,
+    "chrome": webdriver.DesiredCapabilities.CHROME,
+    "ie": webdriver.DesiredCapabilities.INTERNETEXPLORER,
+}
 
 class WebdriverSuite(core.TestSuite):
     """Webdriver test suite. 
@@ -36,9 +40,14 @@ class WebdriverSuite(core.TestSuite):
 
     def initialize(self):
         cf = self.config
-        target_url = cf.environment.DUT.get_url(cf.get("serviceprotocol"), cf.get("servicepath"))
+        target_host = cf.environment.get_role("selenium")
+        target_url = cf.environment.DUT.get_url(cf.get("serviceprotocol"), 
+                cf.get("servicepath"))
+        remote_url = "http://{ip}:4444/wd/hub".format(ip=target_host["hostname"])
+        self.info("Remote URL is: %s" % (remote_url,))
         self.info("Target URL is: %s" % (target_url,))
-        cf.webdriver = WebDriver()
+        cf.webdriver = webdriver.Remote(remote_url,
+                CAPS[cf.get("browser", "firefox")])
         cf.webdriver.get(target_url)
 
     def finalize(self):
