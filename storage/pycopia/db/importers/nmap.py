@@ -42,6 +42,8 @@ from pycopia.db import models
 NOTINTERESTED = 0
 INTERESTED = 1
 
+INTERFACE_TYPE_ID = 6 # ethernetCsmacd
+INTERFACE_TYPE = None
 
 def get_network(session, ipnet):
     """Returns a Network model object. Creates one if necessary."""
@@ -90,30 +92,46 @@ def get_unknown_equipment_model(session):
     return model
 
 
+def get_interface_type(enumeration=INTERFACE_TYPE_ID):
+    global INTERFACE_TYPE
+    if INTERFACE_TYPE is None:
+        q = session.query(models.InterfaceType).filter(
+                models.InterfaceType.enumeration==enumeration,
+                )
+        INTERFACE_TYPE = q.one()
+    return INTERFACE_TYPE
+
+
 def add_interface(session, attribs):
     """Add new interface, don't duplicate existing one.
     Also try connecting to equipment if possible.
     """
     network = attribs.get("network")
     ipaddr = attribs["ipaddr"]
+    attribs["interface_type"] = get_interface_type()
     q = session.query(models.Interface).filter(models.and_(
                 models.Interface.network==network, 
                 models.Interface.ipaddr==ipaddr)
                 )
+    # try to find equipment by matching name.
+    hostname = attribs.get("description")
+    if hostname:
+        eq = get_equipment(session, hostname)
+        del attribs["description"]
+    else:
+        eq = None
+    attribs["equipment"] = eq
+
     try:
         intf = q.one()
     except models.NoResultFound:
-        hostname = attribs.get("description")
-        if hostname:
-            eq = get_equipment(session, hostname)
-            del attribs["description"]
-        else:
-            eq = None
-        attribs["equipment"] = eq
-
         intf = models.create(models.Interface, **attribs)
         session.add(intf)
         session.commit()
+    else:
+        models.update(intf, **attribs)
+        session.commit()
+
 
 
 
