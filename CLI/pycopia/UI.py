@@ -243,7 +243,7 @@ class UserInterface(object):
         self._io.flush()
 
     def printf(self, text):
-        "Print text run through the prompt formatter."
+        "Print text run through the expansion formatter."
         self.Print(self.format(text))
 
     def print_obj(self, obj, nl=1):
@@ -332,7 +332,7 @@ class UserInterface(object):
 
     # user input
     def _get_prompt(self, name, prompt=None):
-        return self.format(prompt or self._env[name])
+        return self.prompt_format(prompt or self._env[name])
 
     def user_input(self, prompt=None):
         return self._io.raw_input(self._get_prompt("PS1", prompt))
@@ -374,13 +374,13 @@ class UserInterface(object):
         return cliutils.get_text(self._get_prompt("PS4"), msg, input=self._io.raw_input)
 
     def get_value(self, prompt, default=None):
-        return cliutils.get_input(self.format(prompt), default, self._io.raw_input)
+        return cliutils.get_input(self.prompt_format(prompt), default, self._io.raw_input)
 
     def edit_text(self, text, prompt=None):
         return cliutils.edit_text(text, self._get_prompt("PS4", prompt))
 
     def yes_no(self, prompt, default=True):
-        yesno = cliutils.get_input(self.format(prompt), "Y" if default else "N", self._io.raw_input)
+        yesno = cliutils.get_input(self.prompt_format(prompt), "Y" if default else "N", self._io.raw_input)
         return yesno.upper().startswith("Y")
 
     def get_key(self, prompt=""):
@@ -406,18 +406,28 @@ class UserInterface(object):
     def help_created(self, text):
         self.Print(self._format_doc(text, self._theme.help_created))
 
-    def format(self, ps):
-        "Expand percent-exansions in a string and return the result."
+    def prompt_format(self, ps):
+        "Expand percent-exansions in a string for readline prompts."
         self._fsm.process_string(ps)
         return self._getarg()
+
+    def format(self, ps):
+        "Expand percent-exansions in a string and return the result."
+        self._ffsm.process_string(ps)
+        if self._ffsm.arg:
+            arg = self._ffsm.arg
+            self._ffsm.arg = ''
+            return arg
+        else:
+            return None
 
     def register_expansion(self, key, func):
         """Register a percent-expansion function for the format method. The
         function must take one argument, and return a string. The argument is
         the character expanded on."""
         key = str(key)[0]
-        if not key in self._EXPANSIONS:
-            self._EXPANSIONS[key] = func
+        if not key in self._PROMPT_EXPANSIONS:
+            self._PROMPT_EXPANSIONS[key] = func
         else:
             raise ValueError("expansion key %r already exists." % (key, ))
 
@@ -425,7 +435,7 @@ class UserInterface(object):
     def _initfsm(self):
         # maps percent-expansion items to some value.
         theme = self._theme
-        self._EXPANSIONS = {
+        self._PROMPT_EXPANSIONS = { # used in prompt strings given to readline library.
                     "I":PROMPT_START_IGNORE + theme.BRIGHT + PROMPT_END_IGNORE, 
                     "N":PROMPT_START_IGNORE + theme.NORMAL + PROMPT_END_IGNORE, 
                     "D":PROMPT_START_IGNORE + theme.DEFAULT + PROMPT_END_IGNORE,
@@ -446,20 +456,56 @@ class UserInterface(object):
                     "n":"\n", "l":self._tty, "h":self._hostname, "u":self._username, 
                     "$": self._priv, "d":self._cwd, "L": self._shlvl, "t":self._time, 
                     "T":self._date}
-        f = FSM(0)
-        f.add_default_transition(self._error, 0)
+        self._FORMAT_EXPANSIONS = {
+                    "I": theme.BRIGHT,
+                    "N": theme.NORMAL,
+                    "D": theme.DEFAULT,
+                    "R": theme.BRIGHTRED,
+                    "G": theme.BRIGHTGREEN,
+                    "Y": theme.BRIGHTYELLOW,
+                    "B": theme.BRIGHTBLUE,
+                    "M": theme.BRIGHTMAGENTA,
+                    "C": theme.BRIGHTCYAN,
+                    "W": theme.BRIGHTWHITE,
+                    "r": theme.RED,
+                    "g": theme.GREEN,
+                    "y": theme.YELLOW,
+                    "b": theme.BLUE,
+                    "m": theme.MAGENTA,
+                    "c": theme.CYAN,
+                    "w": theme.WHITE,
+                    "n":"\n", "l":self._tty, "h":self._hostname, "u":self._username, 
+                    "$": self._priv, "d":self._cwd, "L": self._shlvl, "t":self._time, 
+                    "T":self._date}
+
+        fp = FSM(0)
+        fp.add_default_transition(self._error, 0)
         # add text to args
-        f.add_transition(ANY, 0, self._addtext, 0)
+        fp.add_transition(ANY, 0, self._addtext, 0)
         # percent escapes
-        f.add_transition("%", 0, None, 1)
-        f.add_transition("%", 1, self._addtext, 0)
-        f.add_transition("{", 1, self._startvar, 2)
-        f.add_transition("}", 2, self._endvar, 0)
-        f.add_transition(ANY, 2, self._vartext, 2)
-        f.add_transition(ANY, 1, self._expand, 0)
-        f.arg = ''
-        self._fsm = f
-    
+        fp.add_transition("%", 0, None, 1)
+        fp.add_transition("%", 1, self._addtext, 0)
+        fp.add_transition("{", 1, self._startvar, 2)
+        fp.add_transition("}", 2, self._endvar, 0)
+        fp.add_transition(ANY, 2, self._vartext, 2)
+        fp.add_transition(ANY, 1, self._prompt_expand, 0)
+        fp.arg = ''
+        self._fsm = fp
+
+        ff = FSM(0)
+        ff.add_default_transition(self._error, 0)
+        # add text to args
+        ff.add_transition(ANY, 0, self._addtext, 0)
+        # percent escapes
+        ff.add_transition("%", 0, None, 1)
+        ff.add_transition("%", 1, self._addtext, 0)
+        ff.add_transition("{", 1, self._startvar, 2)
+        ff.add_transition("}", 2, self._endvar, 0)
+        ff.add_transition(ANY, 2, self._vartext, 2)
+        ff.add_transition(ANY, 1, self._format_expand, 0)
+        ff.arg = ''
+        self._ffsm = ff
+
     def _startvar(self, c, fsm):
         fsm.varname = ""
 
@@ -469,20 +515,23 @@ class UserInterface(object):
     def _endvar(self, c, fsm):
         fsm.arg += str(self._env.get(fsm.varname, fsm.varname))
 
-    def _expand(self, c, fsm):
+    def _prompt_expand(self, c, fsm):
+        return self._expand(c, fsm, self._PROMPT_EXPANSIONS)
+
+    def _format_expand(self, c, fsm):
+        return self._expand(c, fsm, self._FORMAT_EXPANSIONS)
+
+    def _expand(self, c, fsm, mapping):
         try:
             arg = self._cache[c]
         except KeyError:
             try:
-                arg = self._EXPANSIONS[c]
+                arg = mapping[c]
             except KeyError:
                 arg = c
             else:
                 if callable(arg):
                     arg = str(arg(c))
-                else:
-                    pass
-                    #arg = PROMPT_START_IGNORE + arg + PROMPT_END_IGNORE 
         fsm.arg += arg
 
     def _username(self, c):

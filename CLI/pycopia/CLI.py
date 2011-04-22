@@ -402,7 +402,7 @@ argument must match a name of a method.
     def echo(self, argv):
         """echo ...
     Echoes arguments back.  """
-        self._print(" ".join(argv[1:]))
+        self._ui.printf(" ".join(argv[1:]))
         return self._environ["_"]
 
     def pipe(self, argv):
