@@ -25,8 +25,8 @@ import re
 
 LINUX_RELEASE_FILES = [
     "/etc/vmware-release",
-    "/etc/redhat-release",
     "/etc/gentoo-release",
+    "/etc/redhat-release",
     "/etc/lsb-release", # Ubuntu, possibly others
 ]
 
