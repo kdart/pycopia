@@ -59,6 +59,12 @@ $HTTP["host"] == "%(hostname)s" {
 """
     VHOST_TEMPLATE_TAIL = "}\n"
 
+    REDIR_TEMPLATE = """
+$HTTP["host"] == "%(hostname)s" {
+    url.redirect = ( ".*" => "http://%(fqdn)s" )
+}
+"""
+
     def __init__(self):
         self._parts = []
 
@@ -80,6 +86,9 @@ $HTTP["host"] == "%(hostname)s" {
                         })
             self._parts.append(self.FCGI_TAIL)
         self._parts.append(self.VHOST_TEMPLATE_TAIL)
+        if "." in hostname:
+            hp = hostname.split(".")[0]
+            self._parts.append(self.REDIR_TEMPLATE % {"hostname":hp, "fqdn": hostname})
 
     def __str__(self):
         return "".join(self._parts)
