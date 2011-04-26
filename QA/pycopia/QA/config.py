@@ -371,11 +371,17 @@ class EnvironmentRuntime(object):
         return "%s:\n  %s" % (self._environment.name, "\n  ".join(s))
 
     def _get_DUT(self):
-        return EquipmentRuntime(
+        try:
+            return self._eqcache["DUT"]
+        except KeyError:
+            pass
+        eq = EquipmentRuntime(
                 self._environment.get_DUT(self._session), 
                 "DUT",
                 self.logfile, 
                 self._session)
+        self._eqcache["DUT"] = eq
+        return eq
 
     DUT = property(_get_DUT)
 
