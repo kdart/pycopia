@@ -79,7 +79,7 @@ class RootContainer(config.Container):
                     return config.Container(session, item)
                 else:
                     return item.value
-            except config.NoResultFound, err:
+            except config.NoResultFound as err:
                 raise AttributeError("RootContainer: No attribute or key '%s' found: %s" % (key, err))
 
     def __setattr__(self, key, obj):
@@ -287,7 +287,7 @@ class RootContainer(config.Container):
                 db = self.session
                 try:
                     env = db.query(models.Environment).filter(models.Environment.name==name).one()
-                except config.NoResultFound, err:
+                except config.NoResultFound as err:
                     raise config.ConfigError("Bad environmentname %r: %s" % (name, err))
                 env = EnvironmentRuntime(db, env, self.logfile)
                 self._cache["_environment"] = env
@@ -332,6 +332,14 @@ class RootContainer(config.Container):
     UI = property(get_userinterface, None, del_userinterface, 
                         "User interface object used for interactive tests.")
 
+    def get_account(self, identifier):
+        """Get account credentials by identifier."""
+        db = self.session
+        try:
+            acct = db.query(models.LoginAccount).filter(models.LoginAccount.identifier==identifier).one()
+        except config.NoResultFound as err:
+            raise config.ConfigError("Bad account identifier %r: %s" % (name, err))
+        return acct.login, acct.password
 
 ##### end of RootContainer ######
 

@@ -913,7 +913,7 @@ def new_key(ui, modelclass, metadata):
 
 def _new_pytype(ui, modelclass, metadata, pytype):
     while 1:
-        raw = ui.get_value("%s? (%s) " % (metadata.colname, pytype.__name__), default=metadata.default)
+        raw = ui.get_value("%s? (%s) " % (metadata.colname, pytype.__name__), default=str(metadata.default))
         raw = raw.strip()
         if not raw and metadata.nullable:
             return None
