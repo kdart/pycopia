@@ -187,7 +187,11 @@ def choose_multiple_from_map(somemap, chosen=None, prompt="choose multiple",
         chosen = {}
     while 1:
         print("Choose from list. Enter to end, negative index removes from chosen.")
-        first = print_menu_map(somemap)
+        if somemap:
+            first = print_menu_map(somemap)
+        else:
+            print("(You have selected all possible choices.)")
+            first = 0
         if chosen:
             print ("You have: ")
             print_menu_map(chosen)
@@ -204,7 +208,7 @@ def choose_multiple_from_map(somemap, chosen=None, prompt="choose multiple",
             continue
         else:
             if idx < 0: # FIXME assumes numeric keys
-                idx = -idx
+                idx = -idx # FIXME handle zero index
                 try:
                     somemap[idx] = chosen[idx]
                     del chosen[idx]
@@ -306,11 +310,13 @@ def find_source_file(modname):
 def _test(argv):
     #from pycopia import autodebug
     import string
-    l = list(string.ascii_letters)
-    c = choose(l)
-    print (c)
+    #l = list(string.ascii_letters)
+    #c = choose(l)
+    #print (c)
     #l1 = choose_multiple(l)
-    print (edit_text(__doc__))
+    #print (edit_text(__doc__))
+    sel = dict(enumerate("abcd"))
+    print (choose_multiple_from_map(sel))
 
 if __name__ == "__main__":
     import sys
