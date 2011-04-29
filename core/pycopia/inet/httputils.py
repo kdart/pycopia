@@ -19,6 +19,8 @@ headers according to the syntax rules. See RFC 2068.
 
 """
 
+from __future__ import print_function
+
 import base64
 import re
 import calendar
@@ -86,7 +88,7 @@ MSWINDOWSLIST = [ "WinNT3.51", "WinNT4.0", "Windows NT 5.0",
                     "Win95", "Win98", "Win3.11", "Win 9x 4.90", ]
 MSIEVERSIONS = ["MSIE 3.0", "MSIE 4.0", "MSIE 5.0", "MSIE 5.01", "MSIE 5.5", "MSIE 6.0",]
 # X11 is output of uname -sm
-LINUXLIST = ["Linux i686", "Linux i586", "Linux i486", "Linux i386", "Linux ppc"]
+LINUXLIST = ["Linux x86_64", "Linux i686", "Linux i586", "Linux i486", "Linux i386", "Linux ppc"]
 SOLARISLIST = ["SunOS sun4u", "SunOS sun4m"]
 OSORCPU = {"Windows": MSWINDOWSLIST,
         "Macintosh": ["68k", "PPC"],
@@ -303,18 +305,21 @@ class HTTPHeaderWithParameters(HTTPHeader):
     def initialize(self, **kwargs):
         self.parameters = kwargs
 
-    def __str__(self):
+    def asWSGI(self):
+        return self._name, self._val_string()
+
+    def _val_string(self):
         if self.parameters:
             parms = "; ".join(['%s="%s"' % self._param_to_str(t) for t in self.parameters.iteritems()])
-            if self.value:
-                return "%s: %s; %s" % (self._name, self.value, parms)
-            else:
-                return "%s: %s" % (self._name, parms)
+            return "%s; %s" % (self.value, parms)
         else:
-            return "%s: %s" % (self._name, self.value)
+            return str(self.value)
 
     def _param_to_str(self, paramset):
-        return (paramset[0].replace("_", "-").capitalize(), paramset[1])
+        return (paramset[0].replace("_", "-"), paramset[1])
+
+    def __str__(self):
+        return "%s: %s" % (self._name, self._val_string())
 
     def __repr__(self):
         if self.parameters:
@@ -828,10 +833,10 @@ class RawCookie(object):
         cookie is valid. An explicitly specified domain must always start with
         a dot."""
         if dom:
-            if dom.count(".") >= 2 or dom == ".local":
+            if dom.count(".") >= 1:
                 self.domain = dom
                 return
-            raise ValueError, "Cookie Domain must contain a dot"
+            raise ValueError("Cookie Domain %r must contain a dot" % (dom,))
         else:
             self.domain = "local"
 
@@ -866,7 +871,7 @@ class RawCookie(object):
     def set_byname(self, cname, val):
         f = _SETFUNCS.get(cname.lower(), None)
         if f is None:
-            raise ValueError, "No attribute named %s." % (cname)
+            raise ValueError("No attribute named %r." % (cname,))
         f(self, val)
 
 
@@ -978,7 +983,7 @@ class Headers(list):
             try:
                 i = self.index(index)
             except ValueError:
-                raise IndexError, "Header not found in list."
+                raise IndexError("Header %r not found in list." % (index,))
             else:
                 return list.__getitem__(self, i)
 
@@ -989,7 +994,7 @@ class Headers(list):
             try:
                 i = self.index(index)
             except ValueError:
-                raise IndexError, "Header not found in list."
+                raise IndexError("Header %r not found in list." % (index,))
             else:
                 return list.__delitem__(self, i)
 
@@ -1016,7 +1021,7 @@ class Headers(list):
         elif isinstance(obj, HTTPHeader):
             self.append(obj)
         else:
-            raise ValueError, "invalid header"
+            raise ValueError("Invalid header: %r" % (obj,))
 
 ##### Utility functions
 
@@ -1151,7 +1156,7 @@ def httpunquote(s):
             i = j+4
     return "".join(res)
 
-# end stolen code
+### end copied code
 
 # some convenient functions
 def mozilla_comment(platform=None, security=None, os=None, localization=None):
@@ -1195,7 +1200,7 @@ def get_header(line):
     elif isinstance(line, HTTPHeader):
         return line
     else:
-        raise ValueError("Need string or HTTPHeader instance.")
+        raise ValueError("Need string or HTTPHeader instance, not %r." % (type(line),))
 
 
 def make_header(name, _value=None, **kwargs):
@@ -1241,22 +1246,26 @@ def get_headers_and_body(text):
 # self test
 if __name__ == "__main__":
     from pycopia import autodebug
-    print "cookies:"
+    print ("cookies:")
     cookie = RawCookie(name="somename", value='somevalue&this+plus"quotes"')
-    print cookie
-    print "----------"
+    print (cookie)
+    print ("----------")
     auth = Authorization(username="myname", password="mypassword")
-    print auth
+    print (auth)
     a = Accept('Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5')
-    print a.value
-    print "----------"
+    print (a.value)
+    print ("---------- ContentType")
+    ct = ContentType("text/html", charset="UTF-8")
+    print (ct.asWSGI())
+
+    print ("----------")
     setcookie = SetCookie('pycopia="somevalue&this+plus%22quotes"; path="/"')
-    print setcookie.asWSGI()
-    print setcookie.asWSGI()[1]
-    print CacheControl(no_cache="set-cookie2")
+    print (setcookie.asWSGI())
+    print (setcookie.asWSGI()[1])
+    print (CacheControl(no_cache="set-cookie2"))
 
     cj = CookieJar()
     cj.add_cookie("pycopia", "AESFKAJS", max_age=24, path="/")
-    print httpquote("/")
-    print cj.get_setcookies()
+    print (httpquote("/"))
+    print (cj.get_setcookies())
 
