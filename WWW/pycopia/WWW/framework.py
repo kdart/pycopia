@@ -119,10 +119,10 @@ RESERVED_CHARS="!*'();:@&=+$,/?%#[]"
 class HttpResponse(object):
     "A basic HTTP response, with content and dictionary-accessed headers"
     status_code = 200
-    def __init__(self, content='', mimetype=None, encoding="utf-8"):
+    def __init__(self, content='', mimetype=None, charset="utf-8"):
         self.headers = httputils.Headers()
         self.cookies = httputils.CookieJar()
-        self._charset = encoding
+        self._charset = charset
         if mimetype:
             self.headers.add_header(httputils.ContentType(mimetype, charset=self._charset))
         if hasattr(content, '__iter__'):
@@ -157,9 +157,9 @@ class HttpResponse(object):
         self.headers.add_header(header, value)
 
     def set_cookie(self, key, value='', max_age=None, path='/', expires=None,
-            domain=None, secure=False):
+            domain=None, secure=False, httponly=False):
         self.cookies.add_cookie(key, value, domain=domain, 
-            max_age=max_age, path=path, secure=secure, expires=expires)
+            max_age=max_age, path=path, secure=secure, expires=expires, httponly=httponly)
 
     def delete_cookie(self, key, path='/', domain=None):
         self.cookies.delete_cookie(key, path, domain)
@@ -317,14 +317,18 @@ class HTTPRequest(object):
             (get, post, cookies, meta)
 
     def get_host(self):
-        host = self.environ.get('HTTP_X_FORWARDED_HOST', '')
+        host = self.environ.get('HTTP_X_FORWARDED_HOST', None)
         if not host:
-            host = self.environ.get('HTTP_HOST', '')
+            host = self.environ.get('HTTP_HOST', 'localhost')
         return host
 
     def get_domain(self):
         host = self.get_host()
-        return host[host.find("."):]
+        doti = host.find(".")
+        if dot1 > 0:
+            return host[doti:]
+        else:
+            return host
 
     def get_full_path(self):
         qs =self.environ.get('QUERY_STRING')

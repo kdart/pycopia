@@ -22,18 +22,20 @@ Authentication and authorization middleware.
 """
 
 
-import PAM
+import os
 from hashlib import sha1
 import struct
+
+import PAM
 
 from pycopia.urlparse import quote, unquote
 from pycopia.WWW import framework
 from pycopia.WWW.middleware import Middleware
 from pycopia.db import models
-from pycopia import timelib
 from pycopia import sysrandom as random
 
 
+HOSTNAME = os.uname()[1]
 SESSION_KEY_NAME = "PYCOPIA"
 
 class AuthenticationError(Exception):
@@ -182,7 +184,7 @@ class LoginHandler(framework.RequestHandler):
         # This key has to fit into a 32 bit int for the javascript side.
         key = quote(struct.pack("I", random.randint(0, 4294967295)))
         parms = {
-            "redirect": request.GET.get("redir", request.environ.get("referer", "/")),
+            "redirect": request.GET.get("redir", request.environ.get("HTTP_REFERER", "/")),
             "key": key,
         }
         msg = request.GET.get("message")
@@ -211,7 +213,7 @@ class LoginHandler(framework.RequestHandler):
             request.log_error("Authenticated: %s\n" % (name,))
             user.set_last_login()
             resp = framework.HttpResponseRedirect(redir)
-            session = _set_session(resp, user, request.get_domain(), "/")
+            session = _set_session(resp, user, request.get_host(), "/")
             dbsession.add(session)
             dbsession.commit()
             return resp
@@ -243,7 +245,7 @@ class LogoutHandler(framework.RequestHandler):
                 dbsession.commit()
         request.session = None
         resp = framework.HttpResponseRedirect("/")
-        resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+        resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
         return resp
 
 
@@ -262,17 +264,28 @@ def need_login(handler):
             session = dbsession.query(models.Session).filter_by(session_key=key).one()
         except models.NoResultFound:
             resp = framework.HttpResponseRedirect(redir)
-            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
             return resp
 
         if session.is_expired():
             dbsession.delete(session)
             dbsession.commit()
             resp = framework.HttpResponseRedirect(redir)
-            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
+            return resp
+        # A check to thwart cross site request forgery
+        referer = request.environ.get("HTTP_REFERER")
+        if referer is None:
+            request.log_error("No referer in authenticated request.\n")
+            resp = framework.HttpResponseRedirect("/")
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
+            return resp
+        if HOSTNAME not in referer:
+            request.log_error("Our host not in referer.\n")
+            resp = framework.HttpResponseRedirect("/")
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
             return resp
         request.session = session
-
         return handler(request, *args, **kwargs)
     return newhandler
 
@@ -287,14 +300,14 @@ def need_authentication(handler):
             session = dbsession.query(models.Session).filter_by(session_key=key).one()
         except models.NoResultFound:
             resp = framework.HttpResponseNotAuthenticated()
-            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
             return resp
 
         if session.is_expired():
             dbsession.delete(session)
             dbsession.commit()
             resp = framework.HttpResponseNotAuthenticated()
-            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_domain())
+            resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
             return resp
         request.session = session
 
