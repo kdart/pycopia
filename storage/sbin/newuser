@@ -3,9 +3,24 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 """
-Add a new user to this system.
+Add a new user to this system. Creates a system account and a web/QA framework
+account with the same name. Or sync passwords.
 
-newuser --first_name=First --last_name=Last --password=newpass flast
+This tool must be run as root.
+
+newuser --first_name=First --last_name=Last [--password=newpass] <acctname>
+    To add a single, new user.
+
+OR
+
+newuser [-S] -f newuserfile
+    see `man 8 newusers` for a description of the newusers file.
+    Use `-S` to skip adding a system account. Upate the database only.
+
+OR
+
+newuser -s
+  Sync system passwords with database passwords.
 
 """
 
@@ -16,16 +31,25 @@ from pycopia import getopt
 from pycopia import tty
 from pycopia import passwd
 from pycopia import proctools
+from pycopia import expect
 from pycopia import basicconfig
+
 from pycopia.db import models
 
+from sqlalchemy.exc import IntegrityError
 
-USERADD = 'useradd -c "%s %s" -g users -G cron,audio,cdrom,video,games,postgres,usb,portage,plugdev,wireshark,tester -m %s'
+GROUPS = "cron,audio,cdrom,video,games,postgres,usb,plugdev,testers"
 
+USERADD = 'useradd -c "%s %s" -g users -G %s -m %s'
+NEWUSERS = "newusers %s"
+USERMOD = "usermod -G %s %s"
 
 def newuser(argv):
+    newuserfile = None
+    skipsystem = False
+    dosync = False
     try:
-        opts, longopts, args = getopt.getopt(argv[1:], "h?")
+        opts, longopts, args = getopt.getopt(argv[1:], "h?f:Ss")
     except getopt.GetoptError:
         print __doc__
         return
@@ -33,16 +57,84 @@ def newuser(argv):
         if opt in ("-?", "-h"):
             print __doc__
             return
-
-    try:
-        username = args[0]
-    except IndexError:
-        username = raw_input("Account name? ")
+        elif opt in ("-f",):
+            newuserfile = optarg
+        elif opt in ("-S",):
+            skipsystem = True
+        elif opt in ("-s",):
+            dosync = True
 
     cf = basicconfig.get_config("storage.conf")
     database = cf.database
     del cf
 
+    if dosync:
+        do_sync(database)
+    elif newuserfile:
+        add_newusers(newuserfile, database, skipsystem)
+    else:
+        try:
+            username = args[0]
+        except IndexError:
+            username = raw_input("Account name? ")
+        add_user(username, database, longopts)
+
+def do_sync(database):
+    dbsession = models.get_session(database)
+    try:
+        for user in dbsession.query(models.User).filter(models.and_(models.User.authservice=="system",
+                models.User.is_staff==True, models.User.is_active==True)).all():
+            change_password(user.username, user.password)
+    finally:
+        dbsession.close()
+
+
+def change_password(username, password):
+    proc = proctools.spawnpty("passwd %s" % (username,))
+    exp = expect.Expect(proc)
+    exp.expect("password:")
+    exp.send(password + "\r")
+    exp.expect("password:")
+    exp.send(password + "\r")
+    pwes = proc.wait()
+    exp.close()
+    if not pwes:
+        print >>sys.stderr, "Failed to change password for %s!" % (username,)
+
+
+def add_newusers(newuserfile, database, skipsystem):
+    if not skipsystem:
+        proc = proctools.spawnpipe(NEWUSERS % (newuserfile,))
+        es = proc.wait()
+        if not es:
+            print es
+            return
+    nufo = open(newuserfile)
+    dbsession = models.get_session(database)
+    try:
+        for line in nufo:
+            try:
+                pw_name, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell = line.split(":")
+            except ValueError:
+                continue
+            # also add supplemental groups.
+            proctools.spawnpipe(USERMOD % (GROUPS, pw_name))
+            pwent = passwd.getpwnam(pw_name)
+            try:
+                user = models.create_user(dbsession, pwent)
+                user.password = pw_passwd
+                dbsession.commit()
+            except IntegrityError: # already exists
+                dbsession.rollback()
+                user = models.User.get_by_username(dbsession, pw_name)
+                user.password = pw_passwd
+                dbsession.commit()
+    finally:
+        dbsession.close()
+        nufo.close()
+
+
+def add_user(username, database, longopts):
     try:
         pwent = passwd.getpwnam(username)
     except KeyError:
@@ -56,21 +148,10 @@ def newuser(argv):
         if not password:
             password = tty.getpass("Password? ")
 
-        proc = proctools.spawnpipe(USERADD % (first_name, last_name, username))
+        proc = proctools.spawnpipe(USERADD % (first_name, last_name, GROUPS, username))
         es = proc.wait()
         if es:
-            proc = proctools.spawnpty("passwd %s" % (username,))
-            proc.read(8)
-            proc.write(password)
-            proc.write("\r")
-            proc.read(8)
-            proc.write(password)
-            proc.write("\r")
-            proc.read()
-            pwes = proc.wait()
-            if not pwes:
-                print "Failed to change password!"
-                return
+            change_password(username, password)
         else:
             print "Failed to add user!"
             return
