@@ -418,9 +418,9 @@ class formatstr(str):
 def newclass(name, *bases, **attribs):
     class _NewType(type):
         def __new__(cls):
-            return type.__new__(cls, name, bases, attribs)
+            return type.__new__(cls, str(name), bases, attribs)
         def __init__(self, *args, **kwargs):
-            pass # XXX quick fix for python 2.6, not sure if this is correct.
+            pass # XXX quick fix for python 2.6, not sure if this is correct. seems to work.
     return _NewType()
 
 

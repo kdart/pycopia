@@ -20,6 +20,7 @@
 Helpers for interfacing database storage to web framework.
 
 """
+from __future__ import print_function
 
 import sys
 import re
@@ -29,6 +30,7 @@ from pycopia.db import types
 from pycopia.db import models
 from pycopia.WWW import framework
 
+#from sqlalchemy.orm.properties import RelationshipProperty
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import and_, or_
 
@@ -80,15 +82,22 @@ def get_ids(modelclass, idlist):
     return dbsession.query(modelclass).filter(modelclass.id.in_(idlist)).all()
 
 
-def query(modelclass, filt, order_by=None, start=None, end=None):
+def query(modelclass, filt=None, columns=None, order_by=None, start=None, end=None):
     try:
         order_by = order_by or modelclass.ROW_DISPLAY[0]
     except AttributeError:
         pass
-    q = dbsession.query(modelclass)
-    for name, value in filt.items():
-        attrib = getattr(modelclass, name)
-        q = q.filter(attrib==value)
+    # select only columns if list of column names is provided.
+    if columns is None:
+        q = dbsession.query(modelclass)
+    else:
+        attrlist = [getattr(modelclass, n) for n in columns]
+        q = dbsession.query(*attrlist)
+    # build filter if one is provided as a dictionary
+    if filt is not None:
+        for name, value in filt.items():
+            attrib = getattr(modelclass, name)
+            q = q.filter(attrib==value)
     if order_by:
         q = q.order_by(getattr(modelclass, order_by))
 
@@ -450,28 +459,6 @@ PROJECT_RE = re.compile(r"(\w+)[ .:](\d+)\.(\d+)\.(\d+)\.(\d+)")
 
 [MODULE, SUITE, TEST, RUNNER, UNKNOWN] = types.OBJECTTYPES
 [EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = types.TESTRESULTS
-
-#_COLUMNS = {
-#    "testcase": None,           # test case record
-#    "environment": None,        # from config
-#    "build": None,              # BUILD
-#    "tester": None,             # user running the test
-#    "testversion": None,        # Version of test implementation
-#    "parent": None,             # container object
-#    "objecttype": None,         # Object type enumeration
-#    "starttime": None,          # STARTTIME (Test, Suite),    RUNNERSTART (module)
-#    "endtime": None,            # ENDTIME (Test, Suite), RUNNEREND (module)
-#    "arguments": None,          # TESTARGUMENTS (Test), RUNNERARGUMENTS (module)
-#    "result": None,             # PASSED, FAILED, EXPECTED_FAIL, INCOMPLETE, ABORT
-#    "diagnostic": None,         # The diagnostic message before failure.
-#    "testresultdata": None,     # optional serialized data (reference)
-#    "resultslocation": None,    # url
-#    "testimplementation": None, # implementation 
-#    "reportfilename": None,
-#    "note": None,               # COMMENT
-#    "valid": True,
-#}
-
 
 
 def resolve_environment(name):

@@ -1,9 +1,8 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+# -*- coding: utf8 -*-
 #
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2011  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -23,15 +22,17 @@ constructor objects. The major parts of the dtd2py command line tool are also
 here.
 
 """
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 
 import sys, os, re
 import codecs
 import unicodedata
-from htmlentitydefs import name2codepoint
 
-from pycopia.aid import IF
 from pycopia.textutils import identifier, keyword_identifier
-
 from pycopia import dtds
 from pycopia.XML import XMLVisitorContinue, ValidationError, XMLPathError
 
@@ -48,23 +49,16 @@ def set_default_encoding(newcodec):
 def verify_encoding(newcodec):
     try:
         codecs.lookup(newcodec)
-    except LookupError, err:
-        raise ValueError, err.args[0]
+    except LookupError as err:
+        raise ValueError(err.args[0])
 
 set_default_encoding("utf-8")
 
-
-class ContentModel(object):
-    """Represents and validates a content model.  """
-    def __init__(self, rawmodel=None):
-        self.model = rawmodel # TODO need actual content model...
-
-    def __repr__(self):
-        cl = self.__class__
-        return "%s.%s(%r)" % (cl.__module__, cl.__name__, self.model)
-
-    def is_empty(self):
-        return not self.model
+# attribute types
+REQUIRED = 11   # attribute is mandatory
+IMPLIED = 12    # inherited from environment if not specified
+DEFAULT = 13    # default value for enumerated types (added by parser)
+FIXED = 14      # always the same, fixed, value.
 
 
 #########################################################
@@ -190,7 +184,7 @@ class ASIS(object):
     def get_text(self):
         return self.data
     def insert(self, data, encoding=None):
-        raise NotImplementedError, "Cannot insert into ASIS"
+        raise NotImplementedError("Cannot insert into ASIS")
     def add_text(self,data, encoding=None):
         self.data += to_unicode(data, encoding or self.encoding)
     append = add_text
@@ -238,20 +232,6 @@ class ASIS(object):
         return 0
 
 
-class NameSpace(object):
-    def __init__(self, name, uri):
-        self.uri = uri
-        if ":" in name:
-            [xmlns, name] = name.split(":", 1)
-            self.name = "%s:" % name
-        else:
-            self.name = "" # default name space
-    def __str__(self):
-        return self.name
-    def __nonzero__(self):
-        return bool(self.name)
-
-
 # runtime attribute object
 class POMAttribute(object):
     __slots__ = ["name", "value", "namespace"]
@@ -271,7 +251,6 @@ class POMAttribute(object):
         name = self.name.encode(encoding)
         value = escape(self.value).encode(encoding)
         return '%s="%s"' % (name, value)
-# TODO namespace support
 
     def __repr__(self):
         return "%s(%r, %r, %r)" % (self.__class__.__name__, self.name, self.value, 
@@ -357,7 +336,7 @@ class ElementNode(object):
         defval = self.get_attribute(name)
         if defval is not None:
             return defval
-        raise AttributeError, "Element %r has no attribute %r." % (self._name, name)
+        raise AttributeError("Element %r has no attribute %r." % (self._name, name))
 
     def __setattr__(self, name, value):
         if not self.set_attribute(name, value, self.__dict__["_namespace"]):
@@ -400,7 +379,7 @@ class ElementNode(object):
 
     def replace(self, newtree):
         if not isinstance(newtree, (ElementNode, Text, Comment)):
-            raise ValueError, "Must replace with another ElementNode"
+            raise ValueError("Must replace with another ElementNode")
         if self._parent:
             p = self._parent
             i = self._parent.index(self)
@@ -442,7 +421,7 @@ class ElementNode(object):
             if id(o) == objid:
                 return i
             i += 1
-        raise ValueError, "ElementNode: Object not contained here."
+        raise ValueError("ElementNode: Object not contained here.")
 
     def append(self, obj):
         """Append an existing DTD object instance."""
@@ -529,7 +508,7 @@ class ElementNode(object):
             for i in xrange(len(self._children)):
                 if self._children[i].matchpath(index):
                     return i
-            raise IndexError, "no elements match"
+            raise IndexError("no elements match")
         else:
             return index
 
@@ -537,8 +516,8 @@ class ElementNode(object):
         if type(index) is str:
             try:
                 el =  self.get_element(index)
-            except XMLPathError, err:
-                raise KeyError, err
+            except XMLPathError as err:
+                raise KeyError(err)
             else:
                 return el
         else:
@@ -578,8 +557,9 @@ class ElementNode(object):
             else:
                 dtdattr.verify(aval.value)
 
-    def encode(self, encoding):
-        self._verify_attributes()
+    def encode(self, encoding, verify=False):
+        if verify:
+            self._verify_attributes()
         if not self.CONTENTMODEL or self.CONTENTMODEL.is_empty():
             return self._empty_str(encoding)
         else:
@@ -614,9 +594,10 @@ class ElementNode(object):
         attrs.insert(0, "") # for space before first attribute
         return " ".join(attrs)
 
-    def emit(self, fo, encoding=None):
+    def emit(self, fo, encoding=None, verify=False):
         enc = encoding or self._encoding
-        self._verify_attributes()
+        if verify:
+            self._verify_attributes()
         if not self.CONTENTMODEL or self.CONTENTMODEL.is_empty():
             fo.write(self._empty_str(enc))
         else:
@@ -632,8 +613,8 @@ class ElementNode(object):
         # Don't need full backtrace for this type of error.
         try:
             self.emit(ff, encoding)
-        except ValidationError, err:
-            raise ValidationError, err 
+        except ValidationError as err:
+            raise ValidationError(err)
 
     def walk(self, visitor):
         try:
@@ -684,7 +665,7 @@ class ElementNode(object):
                 else:
                     return True
             else:
-                raise ValueError, "Path element %r not found." % (pathelement,)
+                raise ValueError("Path element %r not found." % (pathelement,))
 
     def find_elements(self, pathelement):
         rv = []
@@ -706,12 +687,12 @@ class ElementNode(object):
                         return el
                     else:
                         idx += 1
-            raise XMLPathError, "%s not indexed in %r." % (elname, self)
+            raise XMLPathError("%s not indexed in %r." % (elname, self))
         else:
             for child in self._children:
                 if child.matchpath(pathelement):
                     return child
-        raise XMLPathError, "%s not found in %r." % (pathelement, self)
+        raise XMLPathError("%s not found in %r." % (pathelement, self))
 
     def elements(self, elclass):
         """Return iterator that iterates over list of elements matching elclass"""
@@ -764,41 +745,6 @@ class ElementNode(object):
 
     def node(self):
         return self.getall(ElementNode, sys.maxint)
-
-
-# Used to hold unknown nodes (not found it dtd module). Usually from some
-# foriegn namespace.
-class UnknownNode(ElementNode):
-    ATTRIBUTES = {}
-    KWATTRIBUTES = {}
-    CONTENTMODEL = ContentModel((True,))
-    _name = None
-    def __init__(self, **attribs):
-        self.__dict__["_attribs"] = attr = {}
-        self.__dict__["_badattribs"] = badattrs = {}
-        self.__dict__["_parent"] = None
-        self.__dict__["_children"] = []
-        self.__dict__["_namespace"] = u""
-        self.__dict__["_encoding"] = DEFAULT_ENCODING
-        ATT = self.__class__.KWATTRIBUTES
-        for key, value in attribs.items():
-            xmlattr = ATT.get(key)
-            if type(value) is tuple:
-                atns, value = value
-            else:
-                atns = u""
-            if xmlattr:
-                attr[xmlattr.name] = POMAttribute(xmlattr.name, value, atns)
-            else:
-                # for delayed attribute validation.
-                # XXX could be foriegn namespace attribute
-                badattrs[key] = POMAttribute(key, value, atns)
-
-    def _verify_attributes(self):
-        return True # XXX cannot verify foriegn attributes at this time.
-
-    def _get_ns(self, encoding):
-        return u"".encode(encoding)
 
 
 class NodeIterator(object):
@@ -928,7 +874,7 @@ class POMDocument(object):
             try:
                 root = self.dtd._Root()
             except AttributeError:
-                print >>sys.stderr, "Document warning: unknown root element."
+                print ("Document warning: unknown root element.", stream=sys.stderr)
             else:
                 self.set_root(root)
         self.set_encoding(encoding)
@@ -956,7 +902,7 @@ class POMDocument(object):
             rootclass = getattr(self.dtd, identifier(dt.name))
             self.set_root(rootclass())
         else:
-            raise ValidationError, "Invalid doctype: %s" % (doctype,)
+            raise ValidationError("Invalid doctype: %s" % (doctype,))
 
     def set_root(self, root):
         if isinstance(root, ElementNode):
@@ -968,7 +914,7 @@ class POMDocument(object):
             self.root = root
             self.dirty = 0
         else:
-            raise ValueError, "root document must be POM ElementNode."
+            raise ValueError("root document must be POM ElementNode.")
 
     def add_dtd(self, dtdmod):
         self.dtds.append(dtdmod)
@@ -1052,7 +998,7 @@ class POMDocument(object):
                 node = node.get_element(pathelement)
             return node
         else:
-            raise IndexError, "first path element not found"
+            raise IndexError( "first path element not found")
     getpath = get_path # alias
 
     def __getitem__(self, name):
@@ -1100,6 +1046,56 @@ class POMDocument(object):
             fileobject.close()
 
 
+class ContentModel(object):
+    """Represents and validates a content model.  """
+    def __init__(self, rawmodel=None):
+        self.model = rawmodel
+
+    def __repr__(self):
+        cl = self.__class__
+        return "%s.%s(%r)" % (cl.__module__, cl.__name__, self.model)
+
+    def is_empty(self):
+        return not self.model
+
+
+class Enumeration(tuple):
+
+    def __repr__(self):
+        cl = self.__class__
+        return "%s.%s(%s)" % (cl.__module__, cl.__name__, tuple.__repr__(self))
+
+    def __str__(self):
+        return "(%s)" % ", ".join(map(repr, self))
+
+    def verify(self, value):
+        return True
+
+
+class XMLAttribute(object):
+    """Holds information from the DTD, instantiated from compiled dtd
+    module.
+    """
+    __slots__ = ["name", "a_type", "a_decl", "default", "_is_enumeration"]
+    def __init__(self, name, a_type, a_decl, a_def=None):
+        self.name = name
+        self.a_type = a_type
+        self.a_decl = a_decl
+        self.default = a_def
+        self._is_enumeration = False
+
+        a_type_type = type(a_type)
+        if a_type_type is int: # from the generated file
+            self.a_type = object
+        elif issubclass(a_type_type, list):
+            self.a_type = Enumeration(a_type)
+            self._is_enumeration = True
+
+    def __nonzero__(self):
+        return True
+
+    def verify(self, value):
+        return True
 
 
 # Document constructors
@@ -1109,399 +1105,6 @@ def new_document(doctype, encoding=DEFAULT_ENCODING):
     doc = POMDocument(dtd=dtd)
     doc.set_encoding(encoding)
     return doc
-
-def write_error(msg):
-    sys.stderr.write(msg)
-    sys.stderr.write("\n")
-
-XML_HEADER_RE = re.compile(r'xml version="([0123456789.]+)" encoding="([A-Z0-9-]+)"', re.IGNORECASE)
-
-#### new sax2 parser ###
-class ContentHandler(object):
-
-    def __init__(self, doc=None, doc_factory=new_document, logfile=None):
-        self._locator = None
-        self.stack = []
-        self.msg = None
-        self.doc = doc # call set_root on this when document fully parsed.
-        self._doc_factory = doc_factory
-        self.encoding = DEFAULT_ENCODING # default to regenerate as
-        self.modules = []
-        self._prefixes = {}
-        self._classcache = {}
-        if logfile:
-            self._errormethod = logfile.write
-        else:
-            self._errormethod = write_error
-
-    def _get_class(self, name):
-        klass = None
-        name = identifier(name)
-        try:
-            return self._classcache[name]
-        except KeyError:
-            pass
-        for mod in self.doc.dtds:
-            try:
-                klass = getattr(mod, name)
-            except AttributeError:
-                continue
-            if klass:
-                self._classcache[name] = klass
-                return klass
-        raise AttributeError
-
-    def setDocumentLocator(self, locator):
-        self._locator = locator
-
-    def startDocument(self):
-        self.stack = []
-
-    def endDocument(self):
-        if self.stack: # stack should be empty now
-            raise ValidationError, "unbalanced document!"
-        if self.doc is None:
-            self.doc = self._doc_factory(encoding=self.encoding)
-        root = self.msg
-        self.msg = None
-        # Parser strips out namespaces, have to add them back in.
-        if self._prefixes:
-            for uri, prefix in self._prefixes.items():
-                root.set_attribute(u"xmlns:%s" % prefix, uri)
-        self.doc.set_root(root)
-
-    def startElement(self, name, atts):
-        "Handle an event for the beginning of an element."
-        try:
-            klass = self._get_class(name)
-        except AttributeError:
-            raise ValidationError, "Undefined element tag: " + name
-        attr = {}
-        for name, value in atts.items():
-            attr[keyword_identifier(normalize_unicode(name))] = unescape(value)
-        obj = klass(**attr)
-        self.stack.append(obj)
-
-    def endElement(self, name):
-        "Handle an event for the end of an element."
-        obj = self.stack.pop()
-        try:
-            self.stack[-1].append(obj)
-        except IndexError:
-            self.msg = obj
-
-    def characters(self, text):
-        if self.stack and text:
-            self.stack[-1].append(Text(text))
-
-    def processingInstruction(self, target, data):
-        'handle: xml version="1.0" encoding="ISO-8859-1"?'
-        # NOTE this seems to never be called by the parser.
-        mo = XML_HEADER_RE.match(data)
-        if mo:
-            version, encoding = mo.groups()
-            assert version == "1.0"
-            self.encoding = encoding
-            if self.doc:
-                self.doc.set_encoding(encoding)
-        else:
-            self._errormethod("!!! Unhandled pi: %r" % (data,))
-
-    def startPrefixMapping(self, prefix, uri):
-        self._prefixes[uri] = prefix
-
-    def endPrefixMapping(self, prefix):
-        pass
-
-    def skippedEntity(self, name):
-        if self.stack:
-            self.stack[-1].add_text(unichr(name2codepoint[name]))
-
-    def ignorableWhitespace(self, whitespace):
-        self._errormethod("unhandled ignorableWhitespace: %r" % (whitespace,))
-
-    # Namespace interface
-    def startElementNS(self, cooked_name, name, atts):
-        ns, basename = cooked_name
-        if ns:
-            attr = {}
-            obj = UnknownNode()
-            obj._name = name
-            obj.set_namespace(self._prefixes[ns])
-            for cooked_attname, value in atts.items():
-                atns, atname = cooked_attname
-                attr[atname] = POMAttribute(atname, unescape(value), atns)
-            obj._attribs = attr
-        else:
-            try:
-                klass = self._get_class(basename)
-            except AttributeError:
-                raise ValidationError, "Undefined element tag: " + name
-            attributes = {}
-            for cooked_attname, value in atts.items():
-                atns, atname = cooked_attname
-                kwname = keyword_identifier(normalize_unicode(atname))
-                if atns:
-                    attributes[kwname] = (self._prefixes[atns], unescape(value))
-                else:
-                    attributes[kwname] =  unescape(value)
-            obj = klass(**attributes)
-        self.stack.append(obj)
-
-    def endElementNS(self, name, rawname):
-        obj = self.stack.pop()
-        try:
-            self.stack[-1].append(obj)
-        except IndexError:
-            self.msg = obj
-
-    # DTDHandler interface
-    def notationDecl(self, name, publicId, systemId):
-        """Handle a notation declaration event."""
-        self._errormethod("unhandled notationDecl: %r %r %r" % (
-                                               name, publicId, systemId))
-
-    def unparsedEntityDecl(self, name, publicId, systemId, ndata):
-        """Handle an unparsed entity declaration event."""
-        self._errormethod("unhandled unparsedEntityDecl: %r %r %r %r" % (
-                    name, publicId, systemId, ndata))
-
-    # entity resolver interface
-    def resolveEntity(self, publicId, systemId):
-        for modname, doctype in dtds.DOCTYPES.items():
-            if doctype.public == publicId:
-                if self.doc is None:
-                    self.doc = self._doc_factory(doctype=modname, encoding=self.encoding)
-                else:
-                    self.doc.set_doctype(modname)
-                break
-        else:
-            raise ValidationError, "unknown DOCTYPE: %r" % (publicId,)
-        # Have to fake a file-like object for the XML parser to not
-        # actually get an external entity.
-        return FakeFile(systemId)
-
-
-class FakeFile(object):
-    def __init__(self, name):
-        self.name = name
-    def read(self, amt=None):
-        return ""
-    def write(self, data):
-        return len(data)
-
-
-class ErrorHandler(object):
-    def __init__(self, logfile=None):
-        self._lf = logfile
-
-    def error(self, exception):
-        "Handle a recoverable error."
-        raise exception
-
-    def fatalError(self, exception):
-        "Handle a non-recoverable error."
-        raise exception
-
-    def warning(self, exception):
-        "Handle a warning."
-        if self._lf:
-            self._lf.write("XML Warning: %s" % (exception,))
-
-
-def get_parser(document=None, namespaces=0, validate=0, external_ges=1, 
-        logfile=None, doc_factory=new_document):
-    import xml.sax.sax2exts
-    import xml.sax.handler
-    import new
-    handler = ContentHandler(document, doc_factory=doc_factory, logfile=logfile)
-    errorhandler = ErrorHandler(logfile)
-    # create parser 
-    parser = xml.sax.sax2exts.XMLParserFactory.make_parser()
-    parser.setFeature(xml.sax.handler.feature_namespaces, namespaces)
-    parser.setFeature(xml.sax.handler.feature_validation, validate)
-    parser.setFeature(xml.sax.handler.feature_external_ges, external_ges)
-    parser.setFeature(xml.sax.handler.feature_external_pes, 0)
-    parser.setFeature(xml.sax.handler.feature_string_interning, 1)
-    # set handlers 
-    parser.setContentHandler(handler)
-    parser.setDTDHandler(handler)
-    parser.setEntityResolver(handler)
-    parser.setErrorHandler(errorhandler)
-    # since the xml API provides some generic parser I can't just
-    # subclass I have to "patch" the object in-place with this trick.
-    # This is to a) make the API compatible with the HTMLParser, and b)
-    # allow specifing the encoding and other headers in the request.
-    parser.parse_orig = parser.parse
-    def parse(self, url, data=None, encoding=DEFAULT_ENCODING, 
-                                    useragent=None, accept=None):
-        from pycopia.WWW import urllibplus
-        fo = urllibplus.urlopen(url, data, encoding, useragent=useragent, accept=accept)
-        if logfile:
-            from pycopia import UserFile
-            fo = UserFile.FileWrapper(fo, logfile=logfile)
-        return self.parse_orig(fo)
-    parser.parse = new.instancemethod(parse, parser, parser.__class__)
-    return parser
-
-class Enumeration(tuple):
-    def __repr__(self):
-        cl = self.__class__
-        return "%s.%s(%s)" % (cl.__module__, cl.__name__, tuple.__repr__(self))
-    def __str__(self):
-        return "(%s)" % ", ".join(map(repr, self))
-
-class AttributeList(list):
-    def __repr__(self):
-        cl = self.__class__
-        s = ["%s.%s([" % (cl.__module__, cl.__name__)]
-        for item in self:
-            s.append("%r, " % (item,))
-        s.append("])")
-        return "\n         ".join(s)
-
-    def __str__(self):
-        return " ".join(map(str, self))
-
-class IDREFS(AttributeList):
-    def add_ref(self, value):
-        self.data.append(IDREF(value))
-
-class ENTITIES(AttributeList):
-    pass
-
-class NMTOKENS(AttributeList):
-    pass
-
-
-class _AttributeType(str):
-    def __repr__(self):
-        cl = self.__class__
-        return "%s.%s(%s)" % (cl.__module__, cl.__name__, self)
-
-class CDATA_ATT(_AttributeType):
-    pass
-
-class ID(_AttributeType):
-    pass
-
-class IDREF(_AttributeType):
-    pass
-
-class NMTOKEN(_AttributeType):
-    pass
-
-class ENTITY(_AttributeType):
-    pass
-
-
-PCDATA = Text
-ANY = True
-EMPTY = None
-
-# enumerations
-AT_CDATA = 1
-AT_ID = 2
-AT_IDREF = 3
-AT_IDREFS = 4
-AT_ENTITY = 5
-AT_ENTITIES = 6
-AT_NMTOKEN = 7
-AT_NMTOKENS = 8
-
-REQUIRED = 11   # attribute is mandatory
-IMPLIED = 12    # inherited from environment if not specified
-DEFAULT = 13    # default value for enumerated types (added by parser)
-FIXED = 14      # always the same, fixed, value.
-
-_ATTRTYPEMAP = {
-    u"CDATA": AT_CDATA,
-    u"ID": AT_ID,
-    u"IDREF": AT_IDREF,
-    u"IDREFS": AT_IDREFS,
-    u"ENTITY": AT_ENTITY,
-    u"ENTITIES": AT_ENTITIES,
-    u"NMTOKEN": AT_NMTOKEN,
-    u"NMTOKENS": AT_NMTOKENS
-}
-
-_ATTRCLASSMAP = {
-    AT_CDATA: CDATA_ATT,
-    AT_ID: ID,
-    AT_IDREF: IDREF,
-    AT_IDREFS: IDREFS,
-    AT_ENTITY: ENTITY,
-    AT_ENTITIES: ENTITIES,
-    AT_NMTOKEN: NMTOKEN,
-    AT_NMTOKENS: NMTOKENS
-}
-
-_DEFAULTMAP = {
-    u'#REQUIRED': REQUIRED,
-    u'#IMPLIED': IMPLIED,
-    u'#DEFAULT': DEFAULT,
-    u'#FIXED': FIXED,
-}
-
-class XMLAttribute(object):
-    """Holds information from the DTD, instantiated from compiled dtd
-    module.
-    """
-    __slots__ = ["name", "a_type", "a_decl", "default", "_is_enumeration"]
-    def __init__(self, name, a_type, a_decl, a_def=None):
-        self.name = name
-        self._is_enumeration = False
-        a_type_type = type(a_type)
-        if a_type_type is int: # from the generated file
-            self.a_type = _ATTRCLASSMAP.get(a_type, a_type)
-        elif a_type_type is unicode: # from the parser
-            self.a_type = _ATTRTYPEMAP.get(a_type, a_type)
-        elif issubclass(a_type_type, list):
-            self.a_type = Enumeration(a_type)
-            self._is_enumeration = True
-        else:
-            self.a_type = a_type
-        # declaration
-        # convert string to int value when generating, just use the int
-        # when imported from Python dtd format.
-        self.a_decl = _DEFAULTMAP.get(a_decl, a_decl)
-        self.default = a_def
-
-    def __repr__(self):
-        cl = self.__class__
-        return "%s.%s(%r, %r, %r, %r)" % (cl.__module__, cl.__name__, 
-                               self.name, self.a_type, self.a_decl, self.default)
-
-    def __hash__(self):
-        return hash((self.name, self.a_type, self.a_decl, self.default))
-
-    def __nonzero__(self):
-        return True
-
-    # Generate a unique identifier for internal use in dtd module.
-    # TODO verify the enumerations are unique enough.
-    def get_identifier(self):
-        h = self.__hash__()
-        h *= h # make non-negative
-        return "attrib%s_%s" % (identifier(normalize_unicode(self.name)), h)
-
-    def verify(self, value):
-        if self._is_enumeration:
-            if value not in self.a_type:
-                raise ValidationError(
-                        "Enumeration has wrong value for %r. %r is not one of %r." % (
-                        self.name, value, self.a_type))
-        elif self.a_decl == FIXED:
-            if value != self.default:
-                raise ValidationError(
-                        "Bad value for FIXED attrib for %r. %r must be %r." % (
-                        self.name, value, self.default))
-        return True
-
-
-class UnknownXMLAttribute(object):
-    def verify(self, value):
-        raise ValidationError("Can't validate unknown attribute: %r" % (self.name,))
 
 
 #########################################################
@@ -1530,7 +1133,7 @@ def _construct_node(name, modules):
     if "[" not in name:
         nc = _find_element(name, modules)
         if nc is None:
-            raise ValidationError, "no such element name %r in modules" % (name,)
+            raise ValidationError("no such element name %r in modules" % (name,))
         return nc() # node
     else:
         xpath_re = re.compile(r'(\w*)(\[.*])')
@@ -1540,7 +1143,7 @@ def _construct_node(name, modules):
             ename, attribs = mo.groups()
             nc = _find_element(ename, modules)
             if nc is None:
-                raise ValidationError, "no such element name in modules"
+                raise ValidationError("no such element name in modules")
             attribs = attribs[1:-1].split("and") # chop brackets and split on 'and'
             attribs = map("".strip, attribs) # strip whitespace
             for att in attribs:                  # dict elememnts are name and vaue

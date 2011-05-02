@@ -1,5 +1,6 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+# -*- coding: utf8 -*-
 # 
 # $Id$
 #
@@ -28,12 +29,7 @@ framework.
 
 """
 
-import sys
-import re
 import itertools
-import HTMLParser
-from PIL import Image  # from PIL package
-from htmlentitydefs import name2codepoint
 
 from pycopia.urlparse import quote_plus
 from pycopia.textutils import identifier
@@ -44,12 +40,11 @@ from pycopia.XML import POM, XMLVisitorContinue, ValidationError, XMLPathError
 
 get_class = dtds.get_class
 
-NBSP = POM.ASIS("&nbsp;")
+NBSP = POM.ASIS("&#160;")
 TRUE = True
 FALSE = False
 
 MIME_XHTML = "application/xhtml+xml"
-MIME_WAP = "text/vnd.wap.wml"
 MIME_HTML = "text/html"
 
 # tags defined to be inline - use for BeautifulWriter and other type checks
@@ -172,6 +167,8 @@ class FlowMixin(object):
     def make_node(self, name, attribs, *content):
         if name in ("Text", "ASIS", "Fragments"):
             elemclass = getattr(POM, name)
+        elif name == "_":
+            return NBSP
         elif name == "JS": # special javascript handler 
             Scr = self.get_dtd_element("Script")
             elem = Scr(type="text/javascript")
@@ -224,23 +221,23 @@ class FlowMixin(object):
         return get_container(self.dtd, name, kwargs)
     get = get_new_element
 
-    def new_image(self, _imagefile, _alt=None, **kwargs):
+    def new_image(self, _imagefile, _alt=None, autosize=False, **kwargs):
         check_flag(kwargs, "ismap")
-        try:
-            im = Image.open(_imagefile)
-        except IOError:
-            pass
-        else:
-            x, y = im.size
-            #im.format
-            #im.mode
-            kwargs["width"] = str(x)
-            kwargs["height"] = str(y)
+        if auto:
+            from PIL import Image  # from PIL package
             try:
-                im.close()
-            except:
+                im = Image.open(_imagefile)
+            except IOError:
                 pass
-            del im
+            else:
+                x, y = im.size
+                kwargs["width"] = str(x)
+                kwargs["height"] = str(y)
+                try:
+                    im.close()
+                except:
+                    pass
+                del im
         kwargs["src"] = _imagefile # XXX adjust for server alias?
         if _alt:
             kwargs["alt"] = _alt
@@ -639,6 +636,12 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
             ss.destroy()
     stylesheet = property(_get_stylesheet, add_stylesheet)
 
+    def add_stylesheets(self, namelist):
+        for url in namelist:
+            self.add_stylesheet(url)
+
+    stylesheets = property(None, add_stylesheets)
+
     # embedded stylesheet
     def _set_style(self, text):
         try:
@@ -671,6 +674,12 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
             sc = self.head.add(self.dtd.Script, 
                            type="text/javascript;version=1.8", src=url)
 
+    def _add_js_list(self, jslist):
+        for url in jslist:
+            self.head.add(self.dtd.Script, type="text/javascript;version=1.8", src=url)
+
+    scripts = property(None, _add_js_list, None, "Add a list of javascript file names.")
+
     def _get_javascript(self):
         try:
             return self.head.get_element("script")
@@ -685,6 +694,7 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
     javascript = property(_get_javascript, add_javascript2head, _del_javascript)
     javascriptlink = property(_get_javascript, 
                     lambda self, v: self.add_javascript2head(url=v))
+
 
     # general add methods
     def append(self, obj, **kwargs):
@@ -883,32 +893,30 @@ class TableMixin(ContainerMixin):
 
     def encode(self, encoding):
         self._verify_attributes()
-        ns = self._get_ns(encoding)
         name = self._name.encode(encoding)
         s = []
-        s.append("<%s%s%s>" % (ns, name, self._attr_str(encoding)))
+        s.append("<%s%s>" % (name, self._attr_str(encoding)))
         if self._t_caption:
             s.append(self._t_caption.encode(encoding))
         if self._headings:
             s.append(self._headings.encode(encoding))
         for row in self._t_rows:
             s.append(row.encode(encoding))
-        s.append(("</%s%s>" % (ns, name)))
+        s.append(("</%s>" % name))
         return "".join(s)
 
     def emit(self, fo, encoding=None):
         encoding = encoding or self.encoding
         self._verify_attributes()
-        ns = self._get_ns(encoding)
         name = self._name.encode(encoding)
-        fo.write("<%s%s%s>" % (ns, name, self._attr_str(encoding)))
+        fo.write("<%s%s>" % (name, self._attr_str(encoding)))
         if self._t_caption:
             self._t_caption.emit(fo, encoding)
         if self._headings:
             self._headings.emit(fo, encoding)
         for row in self._t_rows:
             row.emit(fo, encoding)
-        fo.write("</%s%s>" % (ns, name))
+        fo.write("</%s>" % name)
 
     def get_row(self, **kwargs):
         Row = get_class(self.dtd, "Row", (RowMixin, self.dtd.Tr))
@@ -1190,7 +1198,7 @@ class FormMixin(ContainerMixin):
                 fs.append(self.dtd.Br())
         return fs
 
-    def get_checkboxes(self, name, choices, vertical=False):
+    def get_checkboxes(self, name, choices, vertical=False, **kwargs):
         fs = self.get_fieldset(name, **kwargs)
         for value, valname in choices:
             ID = "id_%s%s" % (name, value)
@@ -1201,7 +1209,7 @@ class FormMixin(ContainerMixin):
                 fs.append(self.dtd.Br())
         return fs
 
-    def add_checkboxes(self, name, choices, vertical=False):
+    def add_checkboxes(self, name, choices, vertical=False, **kwargs):
         fs = self.add_fieldset(name, **kwargs)
         for value, valname in choices:
             ID = "id_%s%s" % (name, value)
@@ -1347,7 +1355,7 @@ class DynamicNode(object):
 #    def get_escape_length(self):
 #        return len(self.data)
     def insert(self, data, encoding=None):
-        raise NotImplementedError, "Cannot insert into DynamicNode"
+        raise NotImplementedError("Cannot insert into DynamicNode")
     def destroy(self):
         self._parent = None
     def detach(self):
@@ -1366,120 +1374,6 @@ class DynamicNode(object):
         return 0
     def has_attributes(self):
         return 0
-
-
-
-# HTML POM parser. This parser populates the POM with XHTML objects, so this
-# HTML parser essentially translates HTML to XHTML, hopefully with good
-# results. Note that you can't regenerate the original HTML.
-class _HTMLParser(HTMLParser.HTMLParser):
-    def __init__(self, doc=None):
-        self.reset()
-        self.topelement = None
-        self._encoding = POM.DEFAULT_ENCODING
-        self.doc = doc
-        self.stack = []
-        self.comments = []
-
-    def close(self):
-        if self.stack:
-            raise ValidationError("XHTML document has unmatched tags")
-        HTMLParser.HTMLParser.close(self)
-        self.doc.set_root(self.topelement)
-        self.doc.comments = self.comments
-
-    def parse(self, url, data=None, encoding=POM.DEFAULT_ENCODING, 
-                                    useragent=None, accept=None):
-        from pycopia.WWW import urllibplus
-        fo = urllibplus.urlopen(url, data, encoding, useragent=useragent, accept=accept)
-        self.parseFile(fo)
-        self.close()
-
-    def parseFile(self, fo):
-        data = fo.read(16384)
-        while data:
-            self.feed(data)
-            data = fo.read(16384)
-        self.close()
-
-    def _get_tag_obj(self, tag, attrs):
-        attrdict = {}
-        def fixatts(t):
-            attrdict[str(t[0])] = t[1]
-        map(fixatts, attrs)
-        try:
-            cl = getattr(self.doc.dtd, identifier(tag))
-        except AttributeError, err:
-            raise ValidationError("No tag in dtd: %s" % (err,))
-        obj = apply(cl, (), attrdict)
-        return obj
-
-    def handle_starttag(self, tag, attrs):
-        obj = self._get_tag_obj(tag, attrs)
-        if obj.CONTENTMODEL.is_empty():
-            self.stack[-1].append(obj)
-            return
-        self.stack.append(obj)
-
-    def getContentHandler(self):
-        return self # sax compatibility for our purposes...
-
-    def handle_endtag(self, tag):
-        "Handle an event for the end of a tag."
-        obj = self.stack.pop()
-        if self.stack:
-            self.stack[-1].append(obj)
-        else:
-            self.topelement = obj
-
-    def handle_startendtag(self, tag, attrs):
-        obj = self._get_tag_obj(tag, attrs)
-        self.stack[-1].append(obj)
-
-    def handle_data(self, data):
-        if self.stack:
-            self.stack[-1].add_text(data)
-        else:
-            pass
-
-    def handle_charref(self, val):
-           data = unichr(int(val))
-           self.stack[-1].add_text(data)
-
-    def handle_entityref(self, name):
-        if self.stack:
-            self.stack[-1].add_text(unichr(name2codepoint[name]))
-
-    def handle_comment(self, data):
-        cmt = POM.Comment(data)
-        try:
-            self.stack[-1].append(cmt)
-        except IndexError: # comment is outside of root node
-            self.comments.append(cmt)
-
-    def handle_decl(self, decl):
-        if decl.startswith("DOCTYPE"):
-            if decl.find("Strict") > 1:
-                self.doc = new_document(dtds.XHTML1_STRICT, encoding=self._encoding)
-            elif decl.find("Frameset") > 1:
-                self.doc = new_document(dtds.XHTML1_FRAMESET, encoding=self._encoding)
-            elif decl.find("Transitional") > 1:
-                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, encoding=self._encoding)
-            else:
-                self.doc = new_document(dtds.XHTML1_TRANSITIONAL, encoding=self._encoding)
-        else:
-            print >>sys.stderr, "!!! Unhandled decl: %r" % (decl,)
-
-    def handle_pi(self, data):
-        'xml version="1.0" encoding="ISO-8859-1"?'
-        mo = re.match('xml version="([0123456789.]+)" encoding="([A-Z0-9-]+)"', data, re.IGNORECASE)
-        if mo:
-            version, encoding = mo.groups()
-            assert version == "1.0"
-            self._encoding = encoding
-            self.doc.set_encoding(encoding)
-        else:
-            print >>sys.stderr, "!!! Unhandled pi: %r" % (data,)
 
 
 # This is here as a convenience, but could introduce non-conformance
@@ -1530,136 +1424,6 @@ class URL(dict):
         return get_url(self, self._base)
 
 
-### WML support... should be factored out.
-#### Very rough for now... not sure how to map XHTML to WML functionality.
-
-class WML13Mixin(ContainerMixin):
-    def get_section(self, _name, **kwargs):
-        Section = get_class(self.dtd, "WmlSection%s" % _name, (WML13Mixin, self.dtd.Card))
-        kwargs["class_"] = _name
-        sect = Section(**kwargs)
-        sect._init(self.dtd)
-        return sect
-
-    def add_section(self, _name, **kwargs):
-        sect = self.get_section(_name, **kwargs)
-        self.append(sect)
-        return sect
-
-    def new_section(self, _name, _data, **kwargs):
-        sect = self.get_section(_name, **kwargs)
-        _data = create_POM(_data, self.dtd) # XXX
-        sect.append(_data)
-        self.append(sect)
-        return sect
-
-    def get_anchor(self, **attribs):
-        return self.dtd.Go(**attribs)
-
-    def add_anchor(self, **attribs):
-        a = self.dtd.Go(**attribs)
-        self.append(a)
-        return a
-
-    def new_anchor(self, obj, **attribs):
-        a = self.dtd.Go(**attribs)
-        a.append(check_object(obj))
-        self.append(a)
-        return a
-
-    def get_header(self, level, text, **kwargs):
-        hobj = get_inlinecontainer(self.dtd, "Big", kwargs)
-        hobj.append(POM.Text(text))
-        return hobj
-
-    def add_header(self, level, text, **kwargs):
-        hobj = self.get_header(level, text, **kwargs)
-        self.append(hobj)
-        return hobj
-
-    def get_table(self, **kwargs):
-        WMLTable = get_class(self.dtd, "WMLTable", (WML13TableMixin, self.dtd.Table))
-        t= WMLTable(**kwargs)
-        t._init(self.dtd)
-        return t
-
-    def get_form(self, **kwargs):
-        WMLForm = get_class(self.dtd, "WMLForm", (CardMixin, self.dtd.Card))
-        f = WMLForm(**kwargs)
-        f._init(self.dtd)
-        return f
-
-
-class CardMixin(FormMixin):
-    def get_label(self, text, _for=None):
-        return POM.Text(text)
-
-
-class WML13TableMixin(TableMixin):
-
-    def _init(self, dtd):
-        super(WML13TableMixin, self)._init(dtd)
-        self.columns = 0 # XXX
-
-    def caption(self, content, **kwargs):
-        # enforce the rule that there is only one caption, and it is first
-        # element in the table.
-        cap = self.dtd.Tr(**kwargs)
-        td = self.dtd.Td()
-        td.append(check_object(content))
-        cap.append(td)
-        self._t_caption = cap
-
-    def get_headings(self):
-        return self._headings # a row (tr) object.
-
-    def set_heading(self, col, val, **kwargs):
-        val = check_object(val)
-        if not self._headings:
-            self._headings = self.dtd.Tr()
-        # auto-fill intermediate cells, if necessary.
-        for inter in range(col - len(self._headings)):
-            self._headings.append(self.dtd.Td(**kwargs))
-        th = self._headings[col-1]
-        th.append(val)
-        self.columns = str(len(self._headings)) # mandatory attribute
-        return th
-
-    def new_headings(self, *args, **kwargs):
-        self._headings = self.dtd.Tr()
-        for hv in args:
-            th = self.dtd.Td(**kwargs)
-            self._headings.append(th)
-            th.append(check_object(hv))
-        return self._headings
-
-
-class WML13Document(POM.POMDocument, WML13Mixin):
-    """WML13Document(doctype)
-    """
-    MIMETYPE="text/vnd.wap.wml"
-
-    def initialize(self):
-        root = self.dtd._Root()
-        self.set_root(root)
-
-    head = property(lambda self: self.get_path("/wml/head"))
-    template = property(lambda self: self.get_path("/wml/template"))
-    card = property(lambda self: self.get_path("/wml/card"))
-
-    def get_parser(self):
-        return get_parser(self)
-
-    def append(self, obj, **kwargs):
-        obj = check_object(obj)
-        self.root.append(obj)
-
-    def insert(self, ind, obj, **kwargs):
-        obj = check_object(obj)
-        self.root.insert(ind, obj)
-
-
-####
 
 class GenericDocument(POM.POMDocument, FlowMixin):
     """Generic markup document to be used as a default.
@@ -1674,10 +1438,7 @@ class GenericDocument(POM.POMDocument, FlowMixin):
 # TODO doctype registry.
 _DOCMAP = {
     "html": (XHTMLDocument, dtds.XHTML),
-    "wml": (WML13Document, dtds.WML13),
-    "wta-wml": (WML13Document, dtds.WTA_WML12),
     MIME_XHTML: (XHTMLDocument, dtds.XHTML),
-    MIME_WAP: (WML13Document, dtds.WML13),
     MIME_HTML: (XHTMLDocument, dtds.XHTML),
 }
 
@@ -1710,30 +1471,4 @@ def xhtml_factory(doctype=None, mimetype=None, encoding=POM.DEFAULT_ENCODING, la
         doctype = defdt
     doc = docclass(doctype=doctype, lang=lang, encoding=encoding)
     return doc
-
-def get_document(url, data=None, encoding=POM.DEFAULT_ENCODING,
-        mimetype=MIME_XHTML, useragent=None, validate=0,
-        logfile=None):
-    """Fetchs a document from the given source, including remote hosts."""
-    p = get_parser(validate=validate, mimetype=mimetype, logfile=logfile)
-    p.parse(url, data, encoding, useragent=useragent, accept=mimetype)
-    handler = p.getContentHandler()
-    return handler.doc
-
-def get_parser(document=None, namespaces=0, validate=0, mimetype=None,
-        logfile=None):
-    if mimetype == MIME_HTML:
-        if not document:
-            document = new_document(dtds.XHTML1_TRANSITIONAL, encoding=POM.DEFAULT_ENCODING)
-        return _HTMLParser(document)
-    else: # assume some kind of XML
-        return POM.get_parser(document, namespaces=namespaces, validate=validate, 
-            external_ges=1, logfile=logfile, doc_factory=xhtml_factory)
-
-
-def parseString(string):
-    p = get_parser()
-    p.feed(string)
-    p.close() 
-    return p.getContentHandler().doc
 

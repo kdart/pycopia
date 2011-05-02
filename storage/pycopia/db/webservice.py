@@ -28,7 +28,6 @@ import sys
 import itertools
 import logging
 
-from pycopia.aid import IF
 from pycopia.db import types
 from pycopia.db import models
 from pycopia.db import webhelpers
@@ -100,14 +99,19 @@ def get_ids(modelname, idlist):
     return webhelpers.get_ids(klass, idlist)
 
 
-def query(modelname, filt, order_by=None, start=None, end=None):
+def query(modelname, filt=None, columns=None, order_by=None, start=None, end=None):
     klass = get_model(modelname)
-    return webhelpers.query(klass, filt, order_by, start, end)
+    return webhelpers.query(klass, filt, columns, order_by, start, end)
 
 
 def get_choices(modelname, attribute, order_by=None):
     modelclass = get_model(modelname)
     return models.get_choices(webhelpers.dbsession, modelclass, attribute, order_by)
+
+
+def get_rowdisplay(modelname):
+    modelclass = get_model(modelname)
+    return models.get_rowdisplay(modelclass)
 
 
 def deleterow(modelname, entry_id):
@@ -198,6 +202,8 @@ def _convert_instance(obj):
             value = getattr(obj, metadata.colname)
             if value is not None:
                 if metadata.uselist:
+                    if metadata.collection == "MappedCollection":
+                        value = value.itervalues()
                     values[metadata.colname] = [_obj_representation(o, {"id": o.id}) for o in value]
                 else:
                     values[metadata.colname] = _obj_representation(value, {"id": value.id})
@@ -221,7 +227,7 @@ def _modelchecker(obj):
 
 # Functions exported to javascript via proxy.
 _exported = [get_tables, get_table_metadata, get_table_metadata_map, get_choices, get_uidata,
-        query, create, updaterow, deleterow, get_row, get_ids,
+        query, create, updaterow, deleterow, get_row, get_ids, get_rowdisplay,
         related_add, related_remove]
 
 
@@ -231,44 +237,8 @@ dispatcher = auth.need_authentication(webhelpers.setup_dbsession(dispatcher))
 
 
 
-##### Restful interface document constructor
-
-def main_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="common.css")
-    doc.stylesheet = request.get_url("css", name="ui.css")
-    doc.stylesheet = request.get_url("css", name="db.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="ui.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
-    for name, val in kwargs.items():
-        setattr(doc, name, val)
-    nav = doc.add_section("navigation")
-    NM = doc.nodemaker
-    NBSP = NM("ASIS", None, "&nbsp;")
-    nav.append(NM("P", None,
-         NM("A", {"href":"/"}, "Home"), NBSP,
-         IF(request.path.count("/") > 2, NM("A", {"href":".."}, "Up")), NBSP,
-    ))
-    nav.append(NM("P", {"class_": "title"}, "Storage Editor"))
-    nav.append(NM("P", None, 
-            NM("A", {"href": "/auth/logout"}, "logout")))
-    container = doc.add_section("container")
-    content = container.add_section("container", id="content")
-    messages = container.add_section("container", id="messages")
-    extra = container.add_section("container", id="extra")
-    return doc
-
-
-@auth.need_login
-@webhelpers.setup_dbsession
-def main(request):
-    resp = framework.ResponseDocument(request, main_constructor, title="Database")
-    return resp.finalize()
-
-
 ##### for server-side markup requests that provide a basic database editor. ####
+##### Code below here will eventually disappear.
 
 def doc_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
@@ -283,10 +253,11 @@ def doc_constructor(request, **kwargs):
         setattr(doc, name, val)
     nav = doc.add_section("navigation")
     NM = doc.nodemaker
+    NBSP = NM("_", None)
     nav.append(NM("P", None,
-         NM("A", {"href":"/"}, "Home"), NM("ASIS", None, "&nbsp;"),
-         NM("A", {"href": request.get_url(listall)}, "Top"), NM("ASIS", None, "&nbsp;"),
-         IF(request.path.count("/") > 2, NM("A", {"href":".."}, "Up")), NM("ASIS", None, "&nbsp;"),
+         NM("A", {"href":"/"}, "Home"), NBSP,
+         NM("A", {"href": request.get_url(listall)}, "Top"), NBSP,
+         NM("A", {"href":".."}, "Up") if request.path.count("/") > 2 else NBSP, NBSP,
     ))
     nav.append(NM("P", {"class_": "title"}, "Storage Editor"))
     nav.append(NM("P", None, 
@@ -474,9 +445,11 @@ if __name__ == "__main__":
     disp.register_encoder("models", _modelchecker, _convert_instance)
     sess = models.get_session()
     with webhelpers.GlobalDatabaseContext(sess):
-        rowobj = query("Equipment", {"id": 2})[0]
-        jse = disp._encoder.encode(rowobj)
-        print jse
+        rows = query("Equipment", {"active":True}, ["name", "model", "serno"], None, 0, 5)
+        for rowobj in rows:
+            print rowobj
+            #jse = disp._encoder.encode(rowobj)
+            #print jse
     sess.close()
 
 

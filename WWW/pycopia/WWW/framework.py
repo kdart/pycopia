@@ -46,10 +46,11 @@ import simplejson
 from pycopia import urlparse
 from pycopia.inet import httputils
 from pycopia.dictlib import ObjectCache
-from pycopia.WWW import XHTML
-from pycopia.XML import Plaintext
 from pycopia.WWW.middleware import POMadapter
 
+from pycopia.WWW import XHTML
+from pycopia.WWW import HTML5
+from pycopia.XML import Plaintext
 
 SESSION_KEY_NAME = "PYCOPIA"
 
@@ -110,10 +111,9 @@ class HttpErrorServerError(HTTPError):
 ELEMENTCACHE = ObjectCache()
 
 # supported mime types.
-SUPPORTED = [ "application/xhtml+xml", "text/vnd.wap.wml", "text/plain" ]
+SUPPORTED = [ "application/xhtml+xml", "text/html", "text/plain"]
 
 RESERVED_CHARS="!*'();:@&=+$,/?%#[]"
-
 
 
 class HttpResponse(object):
@@ -771,21 +771,8 @@ class JSONRequestHandler(RequestHandler):
     def get_url(self, function):
         return "../%s" % function.func_name # XXX assumes name is end of path.
 
-
-
 def get_acceptable_document(request):
-    try:
-        accept = request.headers["accept"]
-    except IndexError:
-        return Plaintext.new_document() # default to plaintext if no Accept header.
-    preferred = accept.select(SUPPORTED)
-    if preferred:
-        if preferred == "text/plain":
-            return Plaintext.new_document()
-        else:
-            return XHTML.new_document(doctype=None, mimetype=preferred)
-    else:
-        raise HttpErrorUnsupportedMedia(", ".join(SUPPORTED))
+    return HTML5.new_document()
 
 def default_doc_constructor(request, **kwargs):
     doc = get_acceptable_document(request)
