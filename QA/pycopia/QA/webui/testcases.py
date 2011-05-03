@@ -131,8 +131,8 @@ def build_framing(request, doc, title):
     nav = doc.add_section("navigation")
     NM = doc.nodemaker
     nav.append(NM("P", None,
-         NM("A", {"href":"/"}, "Home"), NM("ASIS", None, "&nbsp;"),
-         IF(request.path.count("/") > 2, NM("A", {"href":".."}, "Up")), NM("ASIS", None, "&nbsp;"),
+         NM("A", {"href":"/"}, "Home"), NM("_", None),
+         IF(request.path.count("/") > 2, NM("A", {"href":".."}, "Up")), NM("_", None),
     ))
     nav.append(NM("P", {"class_": "title"}, title))
     nav.append(NM("P", None, 
