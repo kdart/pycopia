@@ -865,6 +865,17 @@ class Equipment(object):
         self.interfaces[name] = intf
         session.commit()
 
+    def attach_interface(self, session, **selectkw):
+        """Attach an existing interface entry that is currently detached."""
+        q = session.query(Interface)
+        for attrname, value in selectkw.items():
+            q = q.filter(getattr(Interface, attrname) == value)
+        intf = q.one()
+        if intf.equipment is not None:
+            raise ModelError("Interface already attached to {0!r}".format(intf.equipment))
+        self.interfaces[intf.name] = intf
+        session.commit()
+
     def del_interface(self, session, name):
         del self.interfaces[name]
         session.commit()

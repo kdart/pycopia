@@ -275,7 +275,7 @@ class RowWithAttributesCommands(RowCommands):
 class EquipmentRowCommands(RowWithAttributesCommands):
 
     def interface(self, argv):
-        """interface [add-options] <add|del|show|edit|create> name 
+        """interface [add-options] <add|del|show|edit|create|attach> name 
     Addd a new interface to this equipment. When adding, specify interface
     parameters with long options:
         --ipaddr=<ipaddr> 
@@ -284,6 +284,8 @@ class EquipmentRowCommands(RowWithAttributesCommands):
         --network=<netname>
         --ifindex=<ifindex>
     when deleting simply specify the name.
+    The attach command will attach an already existing interface where the
+    parameters are the selector.
     """
         opts, longopts, args = self.getopt(argv, "")
         for opt, arg in opts:
@@ -320,6 +322,11 @@ class EquipmentRowCommands(RowWithAttributesCommands):
             intf.equipment = self._obj
             _session.add(intf)
             _session.commit()
+        elif cmd.startswith("att"):
+            if len(args) > 1:
+                longopts["name"] = args[1]
+            self._obj.attach_interface(_session, **longopts)
+
 
     def connect(self, argv):
         """connect [-f] <ifname> <networkname>
