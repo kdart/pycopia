@@ -400,7 +400,7 @@ class TableCommands(CLI.BaseCommands):
         mapper = models.class_mapper(self._obj)
         pkname = str(mapper.primary_key[0].name)
         q = self._get_query(argv)
-        if not q._statement:
+        if q._statement is None:
             q = q.order_by(pkname)
         heading = models.get_rowdisplay(self._obj)
         self._print("\t\t", "\t".join(heading))
@@ -501,14 +501,20 @@ class TableCommands(CLI.BaseCommands):
                             #"contains": col.contains, 
                             "like": col.like}.get(op)
                     if opm:
+                        if op == "like":
+                            val = val.replace("*", "%")
+                            val = val.replace(".", "_")
+                            if "%" not in val:
+                                val = "%" + val + "%"
                         q = q.filter(opm(val))
             for name in args[grps*3:]:
                 if name.startswith("="):
                     q = q.order_by(name[1:])
-        elif kwargs:
-            p = ["%s=:%s" % (n, n) for n in kwargs.keys()]
-            q = q.from_statement("SELECT * FROM %s WHERE %s" % (mapper.mapped_table, " and ".join(p)))
-            q = q.params(**kwargs)
+        if kwargs:
+            for name, value in kwargs.items():
+                col = getattr(self._obj, name)
+                value = CLI.clieval(value)
+                q = q.filter(col.__eq__(value))
         return q
 
 

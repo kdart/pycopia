@@ -738,7 +738,7 @@ class Network(object):
 
 mapper(Network, tables.networks,
     properties={
-        "upperlayers": relation(Network, backref=backref("lowerlayer",
+        "upperlayers": relation(Network, backref=backref("lower",
                 remote_side=[tables.networks.c.id])),
     },
 )
@@ -951,11 +951,17 @@ class Interface(object):
     def __repr__(self):
         return "Interface(%r, ipaddr=%r)" % (self.name, self.ipaddr)
 
+    def create_subinterface(self, session, subname):
+        intf = create(Interface, name=self.name+subname, ifindex=0,
+                interface_type=self.interface_type, parent=self)
+        session.add(intf)
+        session.commit()
+
 mapper(Interface, tables.interfaces,
     properties = {
         "interface_type": relation(InterfaceType, order_by=tables.interface_type.c.name),
-        "parent": relation(Interface, backref=backref("subinterface",
-                                remote_side=[tables.interfaces.c.id])),
+        "subinterfaces": relation(Interface, 
+                backref=backref('parent', remote_side=[tables.interfaces.c.id])),
         "network": relation(Network, backref="interfaces", order_by=tables.networks.c.name),
         "equipment": relation(Equipment, 
                 backref=backref("interfaces", collection_class=column_mapped_collection(tables.interfaces.c.name))),
