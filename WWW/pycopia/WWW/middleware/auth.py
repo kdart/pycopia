@@ -1,5 +1,5 @@
-#!/usr/bin/python2.5
-# -*- coding: us-ascii -*-
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # 
 # $Id$
@@ -16,11 +16,11 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-"""
-Authentication and authorization middleware.
 
-"""
-
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import os
 from hashlib import sha1
@@ -30,7 +30,6 @@ import PAM
 
 from pycopia.urlparse import quote, unquote
 from pycopia.WWW import framework
-from pycopia.WWW.middleware import Middleware
 from pycopia.db import models
 from pycopia import sysrandom as random
 
@@ -62,30 +61,17 @@ def sha1Hash(msg):
 
 def HMAC_SHA1(key, message):
   blocksize = 64
-  ipad = "6666666666666666666666666666666666666666666666666666666666666666"
-  opad = ("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + 
-      "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
+  ipad = b"6666666666666666666666666666666666666666666666666666666666666666"
+  opad = (b"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + 
+      b"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
   if (len(key) > blocksize):
     key = sha1Hash(key)
   key = key + chr(0) * (blocksize - len(key))
   return sha1Hash(_strxor(key, opad) +  sha1Hash(_strxor(key, ipad) + message))
 
 def _strxor(s1, s2):
-    return "".join(map(lambda x, y: chr(ord(x) ^ ord(y)), s1, s2))
+    return b"".join(map(lambda x, y: chr(ord(x) ^ ord(y)), s1, s2))
 
-
-#class AuthorizeRemoteUser(Middleware):
-#    """Middleware that assures REMOTE_USER is set."""
-#    def __init__(self, app, config):
-#        self.app = app
-#        self.accept_empty = config.get("accept_empty_user", False)
-#
-#    def __call__(self, environ, start_response):
-#        if 'REMOTE_USER' not in environ:
-#            raise framework.HttpErrorNotAuthenticated()
-#        elif environ['REMOTE_USER'] or self.accept_empty:
-#            return self.app(environ, start_response)
-#        raise framework.HttpErrorNotAuthorized("No user set.")
 
 
 class Authenticator(object):
@@ -120,7 +106,7 @@ class Authenticator(object):
         if authtoken != cram:
             raise AuthenticationError("Invalid local password.")
 
-        # at this point the password is known, further authentication may
+        # At this point the password is known, further authentication may
         # be specified in the user table via PAM.
         pamsvc = _SERVICEMAP.get(self.authservice)
         if pamsvc is not None:
@@ -144,19 +130,18 @@ class Authenticator(object):
         return authenticated
 
     def set_password(self):
-        pass
+        return NotImplemented
 
 
-# For logging in, the User object 
-
-# The old-fashoned way... just to verify the pain.
+# For logging in, the User object contains the session key.
+# This page is hand-written, to keep the client and server implementation in one place.
 LOGIN_PAGE = """<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.w3.org/1999/xhtml"
-version="-//W3C//DTD XHTML 1.1//EN">
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Login</title>
+    <meta charset="utf-8" />
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
     <link href="/media/css/login.css" type="text/css" rel="stylesheet" />
     <script src="/media/js/login.js" type="text/javascript;version=1.8"></script>
   </head>
@@ -164,7 +149,7 @@ version="-//W3C//DTD XHTML 1.1//EN">
     <h1>Login</h1>
     %(message)s
     <p>Please log in.</p>
-    <form name="loginform" action="/auth/login" method="post" onsubmit="return validateForm();" enctype="application/x-www-form-urlencoded">
+    <form name="loginform" action="/auth/login" method="post" onsubmit="return login.submitForm();" enctype="application/x-www-form-urlencoded">
       <label for="username">Name:</label><input type="text" name="username" id="id_username" />
       <label for="password">Password:</label><input type="password" name="password" id="id_password" />
       <input type="hidden" name="key" id="id_key" value="%(key)s" />
@@ -195,32 +180,42 @@ class LoginHandler(framework.RequestHandler):
         return framework.HttpResponse(LOGIN_PAGE % parms, "application/xhtml+xml")
 
     def post(self, request):
-        name = request.POST["username"]
-        cram = request.POST["password"]
-        key = request.POST["key"]
-        redir = request.POST["redir"]
-        dbsession = request.dbsessionclass()
         try:
-            user = dbsession.query(models.User).filter_by(username=name).one()
-        except models.NoResultFound:
-            return framework.HttpResponseRedirect(request.get_url(login), message="No such user.")
-        try:
-            good = Authenticator(user).authenticate(unquote(cram), unquote(key))
-        except AuthenticationError, err:
-            request.log_error("Did NOT authenticate: %r\n" % (name, ))
-            return framework.HttpResponseRedirect(request.get_url(login), message=str(err))
-        if good:
-            request.log_error("Authenticated: %s\n" % (name,))
-            user.set_last_login()
-            resp = framework.HttpResponseRedirect(redir)
-            session = _set_session(resp, user, request.get_host(), "/")
-            dbsession.add(session)
-            dbsession.commit()
-            return resp
-        else:
-            request.log_error("Invalid Authentication for %r\n" % (name, ))
-            return framework.HttpResponseRedirect(request.get_url(login), 
-                    message="Failed to authenticate.")
+            if request.headers["x-requested-with"].value == "XMLHttpRequest":
+                return handle_async_authentication(request)
+            else:
+                return framework.HttpResponseRedirect(request.get_url(login), message="Method not allowed.")
+        except IndexError:
+            return framework.HttpResponseRedirect(request.get_url(login), message="Method not allowed.")
+
+
+def handle_async_authentication(request):
+    name = request.POST["username"]
+    cram = request.POST["password"]
+    key = request.POST["key"]
+    redir = request.POST["redir"]
+    dbsession = request.dbsessionclass()
+    try:
+        user = dbsession.query(models.User).filter_by(username=name).one()
+    except models.NoResultFound:
+        return framework.JSONResponse((401, "No such user."))
+    try:
+        good = Authenticator(user).authenticate(cram, unquote(key))
+    except AuthenticationError, err:
+        request.log_error("Did NOT authenticate by async: %r\n" % (name, ))
+        return framework.JSONResponse((401, str(err)))
+    if good:
+        request.log_error("Authenticated by async: %s\n" % (name,))
+        user.set_last_login()
+        resp = framework.JSONResponse((200, redir))
+        session = _set_session(resp, user, request.get_host(), "/", 
+                    request.config.get("LOGIN_TIME", 24))
+        dbsession.add(session)
+        dbsession.commit()
+        return resp
+    else:
+        request.log_error("Invalid async authentication for %r\n" % (name, ))
+        return framework.JSONResponse((401, "Failed to authenticate."))
 
 
 def _set_session(response, user, domain, path, lifetime=24):
@@ -252,7 +247,7 @@ class LogoutHandler(framework.RequestHandler):
 login = LoginHandler()
 logout = LogoutHandler()
 
-# decorator that requires a handler to served on a valid session
+# Decorator that requires a handler to only serve on a valid session.
 def need_login(handler):
     def newhandler(request, *args, **kwargs):
         key = request.COOKIES.get(SESSION_KEY_NAME)

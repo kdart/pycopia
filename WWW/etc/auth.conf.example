@@ -25,6 +25,9 @@ LANGUAGE_CODE = 'en-us'
 # will have to change all your user's passwords.
 SECRET_KEY = 'pyPLINthsdk4auth=1s-xk@(b9%#39463flewrt*&(w23526^+'
 
+# Hours that a login is valid
+LOGIN_TIME = 24
+
 MIDDLEWARE_CLASSES = ()
 
 # Map pattern to handler functions. 

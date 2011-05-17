@@ -1,8 +1,10 @@
 
+login = {};
+login.NAME = "login";    // The name of this namespace
 
 // This function (c) 2002-2005 Chris Veness
 //
-function sha1Hash(msg)
+login.sha1Hash = function(msg)
 {
     // constants [§4.2.1]
     var K = [0x5a827999, 0x6ed9eba1, 0x8f1bbcdc, 0xca62c1d6];
@@ -43,7 +45,7 @@ function sha1Hash(msg)
 
         // 1 - prepare message schedule 'W'
         for (var t=0;  t<16; t++) W[t] = M[i][t];
-        for (var t=16; t<80; t++) W[t] = ROTL(W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16], 1);
+        for (var t=16; t<80; t++) W[t] = login.ROTL(W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16], 1);
 
         // 2 - initialise five working variables a, b, c, d, e with previous hash value
         a = H0; b = H1; c = H2; d = H3; e = H4;
@@ -51,10 +53,10 @@ function sha1Hash(msg)
         // 3 - main loop
         for (var t=0; t<80; t++) {
             var s = Math.floor(t/20); // seq for blocks of 'f' functions and 'K' constants
-            var T = (ROTL(a,5) + f(s,b,c,d) + e + K[s] + W[t]) & 0xffffffff;
+            var T = (login.ROTL(a,5) + login.f(s,b,c,d) + e + K[s] + W[t]) & 0xffffffff;
             e = d;
             d = c;
-            c = ROTL(b, 30);
+            c = login.ROTL(b, 30);
             b = a;
             a = T;
         }
@@ -74,7 +76,7 @@ function sha1Hash(msg)
 //
 // function 'f' [§4.1.1]
 //
-function f(s, x, y, z) 
+login.f = function(s, x, y, z) 
 {
     switch (s) {
     case 0: return (x & y) ^ (~x & z);           // Ch()
@@ -87,7 +89,7 @@ function f(s, x, y, z)
 //
 // rotate left (circular left shift) value x by n positions [§3.2.5]
 //
-function ROTL(x, n)
+login.ROTL = function(x, n)
 {
     return (x<<n) | (x>>>(32-n));
 }
@@ -109,55 +111,93 @@ Number.prototype.toHexStr = function()
 Number.prototype.toByteStr = function()
 {
     var s="", v;
-    for (var i=3; i>=0; i--) { v = (this>>>(i*8)) & 0xff; s += charCode(v); }
+    for (var i=3; i>=0; i--) { v = (this>>>(i*8)) & 0xff; s += login.charCode(v); }
     return s;
 }
 
-function charOrd(a) {return a.charCodeAt(0); };
-function charCode(x) {return String.fromCharCode(x); };
+login.charOrd = function(a) {return a.charCodeAt(0); };
+login.charCode = function(x) {return String.fromCharCode(x); };
 
-function strXor(s1, s2) {
+login.strXor = function(s1, s2) 
+{
   var r = [];
-  var a = Array.prototype.map.call(s1, charOrd);
-  var b = Array.prototype.map.call(s2, charOrd);
+  var a = Array.prototype.map.call(s1, login.charOrd);
+  var b = Array.prototype.map.call(s2, login.charOrd);
   for (var i=0; i < a.length; i++) {
     r.push((a[i] ^ b[i]) & 0xff);
     }
-  var c = Array.prototype.map.call(r, charCode);
+  var c = Array.prototype.map.call(r, login.charCode);
   return c.join("");
 }
 
-function str2hex(s) {
-  var r = [];
-  for (var i=0; i < s.length; i++) {
-    r[i] = s.charCodeAt(i).toString(16);
-  }
-  return "\\x" + r.join("\\x")
-}
-
-function HMAC_SHA1(key, message) {
+login.HMAC_SHA1 = function(key, message) 
+{
   var blocksize = 64;
   var ipad = "6666666666666666666666666666666666666666666666666666666666666666";
   var opad = "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + 
       "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\";
   if (key.length > blocksize) {
-    key = sha1Hash(key);
+    key = login.sha1Hash(key);
   }
-  var ka = Array.prototype.map.call(key, charOrd);
+  var ka = Array.prototype.map.call(key, login.charOrd);
   for (var i=key.length; i < blocksize; i++) {
     ka.push(0);
   }
-  key = ka.map(charCode).join("");
-  return sha1Hash(strXor(key, opad) +  sha1Hash(strXor(key, ipad) + message));
+  key = ka.map(login.charCode).join("");
+  return login.sha1Hash(login.strXor(key, opad) +  login.sha1Hash(login.strXor(key, ipad) + message));
 }
 
 
-function validateForm() {
-  if (document.getElementById("id_username").value.length == 0) {return false};
-  var pwe = document.getElementById("id_password");
-  if (pwe.value.length == 0) {return false};
-  pwe.value = escape(HMAC_SHA1(unescape(document.getElementById("id_key").value), pwe.value));
-  return true;
-}
+login.encodeFormData = function(data) {
+    var pairs = [];
+    var regexp = /%20/g;
+    for (var name in data) {
+        var value = data[name].toString();
+        var pair = escape(name).replace(regexp, "+") + "=" + 
+                    escape(value).replace(regexp, "+");
+        pairs.push(pair);
+    };
+    return pairs.join("&");
+};
 
+login.submitForm = function() {
+  var data = {};
+  var username_el = document.getElementById("id_username")
+  if (username_el.value.length == 0) {
+      return false};
+  data.redir = document.getElementById("id_redir").value
+  data.username = username_el.value
+  var key = document.getElementById("id_key").value
+  data.key = key // key is urlencoded, send it back that way.
+  var password_el = document.getElementById("id_password");
+  if (password_el.value.length == 0) {
+      return false};
+  data.password = login.HMAC_SHA1(unescape(key), password_el.value);
+  password_el.value = "";
+  // Now send the form using async request.
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+          if (req.readyState == 4) {
+              if (req.status == 200) {
+                  // response is JSON 2-tuple of (code, path_or_error)
+                  var arr = eval("(" + req.responseText + ")"); 
+                  if (arr[0] == 401) {
+                      alert(arr[1]);
+                  };
+                  if (arr[0] == 200) {
+                      // equivalent of a redirect
+                      window.location.pathname = arr[1];
+                  };
+              }
+              else {
+                  console.log("login failed:", req.status, req.statusText);
+              };
+          };
+     };
+  req.open("POST", "/auth/login");
+  req.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+  req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  req.send(login.encodeFormData(data));
+  return false;
+}
 
