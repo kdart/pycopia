@@ -265,7 +265,7 @@ class HTTPHeader(object):
         return "%s(%r)" % (self.__class__.__name__, self.value)
 
     def _normalize(self, other):
-        if type(other) is str:
+        if isinstance(other, basestring):
             return other.upper()
         else: # assume other HTTPHeader object.
             return other._name.upper()
@@ -1182,7 +1182,7 @@ _init()
 
 def get_header(line):
     """Factory for getting proper header object from text line."""
-    if isinstance(line, str):
+    if isinstance(line, basestring):
         parts = line.split(":", 1)
         name = parts[0].strip()
         try:
