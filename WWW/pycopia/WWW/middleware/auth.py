@@ -141,23 +141,29 @@ LOGIN_PAGE = """<?xml version="1.0" encoding="utf-8"?>
   <head>
     <title>Login</title>
     <meta charset="utf-8" />
-    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <link href="/media/css/login.css" type="text/css" rel="stylesheet" />
-    <script src="/media/js/login.js" type="text/javascript;version=1.8"></script>
+    <script src="/media/js/login.js" type="text/javascript" charset="utf-8"></script>
   </head>
   <body>
     <h1>Login</h1>
     %(message)s
     <p>Please log in.</p>
     <form name="loginform" action="/auth/login" method="post" onsubmit="return login.submitForm();" enctype="application/x-www-form-urlencoded">
-      <label for="username">Name:</label><input type="text" name="username" id="id_username" />
-      <label for="password">Password:</label><input type="password" name="password" id="id_password" />
+      <label for="username">Name:</label>
+            <input type="text" name="username" id="id_username" placeholder="account name" autofocus="autofocus" />
+      <label for="password">Password:</label>
+            <input type="password" name="password" id="id_password" placeholder="password" />
       <input type="hidden" name="key" id="id_key" value="%(key)s" />
       <input type="hidden" name="redir" id="id_redir" value="%(redirect)s" />
       <input type="submit" name="enter" value="Log In" id="id_submit" />
     </form>
+    <script><![CDATA[
+        if (!("autofocus" in document.createElement("input"))) {
+            document.getElementById('id_username').focus();
+        }
+    ]]></script>
     <hr />
-    <script><![CDATA[document.getElementById('id_username').focus()]]></script>
   </body>
 </html>
 """
