@@ -409,7 +409,7 @@ argument must match a name of a method.
         """pipe <command>
     Runs a shell command via a pipe, and prints its stdout and stderr. You may
     also prefix the command with "!" to run "pipe". """
-        import proctools
+        from pycopia import proctools
         argv = globargv(argv)
         proc = proctools.spawnpipe(" ".join(argv))
         text = proc.read()
@@ -421,7 +421,7 @@ argument must match a name of a method.
         """spawn <command>...
     Spawn another process (uses a pty). You may also prefix the command
     with "%" to run spawn."""
-        import proctools
+        from pycopia import proctools
         argv = globargv(argv)
         proc = proctools.spawnpty(" ".join(argv))
         cmd = self.clone(FileCLI)
@@ -432,14 +432,18 @@ argument must match a name of a method.
         """help [-lLcia] [<commandname>]...
     Print a list of available commands, or information about a command,
     if the name is given.  Options:
-        -l Shows only local (object specific) commands.
-        -c Shows only the dynamic commands.
-        -L shows only local and dynamic commands.
-        -i Shows only the inherited commands from the parent context.
-        -a Shows all commands (default)
+
+        -l  Shows only local (object specific) commands.
+        -c  Shows only the dynamic commands.
+        -L  Shows only local and dynamic commands.
+        -i  Shows only the inherited commands from the parent context.
+        -a  Shows all commands (default)
+        -f  <filename> Write help out in RST format to file.
+
         """
         local=True ; created=True ; inherited=True
-        opts, longs, args = self.getopt(argv, "lLcia")
+        helpout = None
+        opts, longs, args = self.getopt(argv, "lLciaf:")
         for opt, optarg in opts:
             if opt =="-i":
                 local=False ; created=False ; inherited=True
@@ -451,6 +455,8 @@ argument must match a name of a method.
                 local=True ; created=True ; inherited=True
             elif opt == "-L":
                 local=True ; created=True ; inherited=False
+            elif opt == "-f":
+                helpout = open(optarg, "w")
         if not args:
             args = self.get_commands()
         for name in args:
@@ -463,10 +469,18 @@ argument must match a name of a method.
                 self._print("No docs for %r." % (name,))
             elif local and name in self.__class__.__dict__:
                 self._ui.help_local(doc)
+                if helpout is not None:
+                    helpout.write(_rst_out(name, doc))
             elif created and "*" in doc: # dynamic method from generic_cli
                 self._ui.help_created(doc)
+                if helpout is not None:
+                    helpout.write(_rst_out(name, doc))
             elif inherited:
                 self._ui.help_inherited(doc)
+                if helpout is not None:
+                    helpout.write(_rst_out(name, doc))
+        if helpout is not None:
+            helpout.close()
 
     def unalias(self, argv):
         """unalias <alias>
@@ -684,6 +698,10 @@ argument must match a name of a method.
             readline.set_completer(oc)
         sys.ps1, sys.ps2 = saveps1, saveps2
         self._reset_scopes()
+
+
+def _rst_out(name, docstr):
+    return "\n{0}\n    {1}\n\n".format(name, docstr)
 
 
 # This is needed to reset PagedIO so background events don't cause the pager to activate.
@@ -1178,7 +1196,7 @@ def get_generic_cmd(obj, ui, cliclass=GenericCLI, aliases=None, gbl=None):
     object. The wrapped objects public methods have CLI command counterparts
     automatically created."""
     import new
-    from methodholder import MethodHolder
+    from pycopia.methodholder import MethodHolder
     cmd = cliclass(ui, aliases)
     if gbl is None:
         gbl = globals()
