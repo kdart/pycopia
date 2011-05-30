@@ -854,8 +854,8 @@ class TopLevelCLI(CLI.BaseCommands):
         ns = locator.getNS()
         for name, isobject in ns.list("Agents"):
             if isobject:
-                self._objs[name] = Client.get_remote(name)
-        agents = self._objs.keys()
+                self._objs[name] = True
+        agents = list(self._objs.keys())
         self.add_completion_scope("use", agents)
         self.add_completion_scope("ping", agents)
 
@@ -875,15 +875,18 @@ class TopLevelCLI(CLI.BaseCommands):
         """ls
     Print available clients."""
         self._print("Currently available agents:")
-        for name in self._objs.keys():
+        for name in self._objs:
             self._print("  %s" % (name,))
     dir = ls # alias
+
+    def get_remote(self, name):
+        return Client.get_remote(name)
 
     def use(self, argv):
         """use
     Use the specified agent. """
         name = argv[1]
-        clnt = self._objs[name]
+        clnt = self.get_remote(name)
         try:
             plat = clnt.platform()
         except Pyro.errors.ConnectionClosedError:
@@ -901,7 +904,7 @@ class TopLevelCLI(CLI.BaseCommands):
         """ping <name>
     Checks that the named server is alive."""
         host = argv[1]
-        clnt = self._objs[host]
+        clnt = self.get_remote(name)
         try:
             if clnt.alive():
                 self._print("%s is alive." % (host,))

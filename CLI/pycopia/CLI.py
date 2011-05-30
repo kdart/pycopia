@@ -1169,6 +1169,7 @@ class Completer(object):
         except IndexError:
             return None
 
+    @staticmethod
     def get_globals():
         import keyword
         try:
@@ -1178,8 +1179,8 @@ class Completer(object):
         rv = keyword.kwlist + dir(__builtin__)
         rv = removedups(rv)
         return rv
-    get_globals = staticmethod(get_globals)
 
+    @staticmethod
     def get_class_members(klass, rv=None):
         if rv is None:
             rv = dir(klass)
@@ -1189,7 +1190,6 @@ class Completer(object):
             for base in klass.__bases__:
                 Completer.get_class_members(base, rv)
         return rv
-    get_class_members = staticmethod(get_class_members)
 
 def get_generic_cmd(obj, ui, cliclass=GenericCLI, aliases=None, gbl=None):
     """get a GenericCLI (or other) command set wrapping any class instance
@@ -1263,6 +1263,7 @@ def _reset_readline():
         readline.parse_and_bind("tab: complete")
         readline.parse_and_bind("set horizontal-scroll-mode on")
         readline.parse_and_bind("set page-completions on")
+        readline.set_completer_delims(" ")
         readline.set_history_length(500)
 
 def get_history_file(obj):
