@@ -4,7 +4,8 @@
 :python from pycopia import vimlib
 :python from pycopia.vimlib import vimhtml
 
-:set mps+=<:>
+set mps+=<:>
+set omnifunc=htmlcomplete#CompleteTags
 
 vmap	;ta	:py vimhtml.text_to_table()<CR>
 nmap	;ht	:py vimhtml.htmlify()<CR>
@@ -140,12 +141,8 @@ imap	;h6	<h6>HEADING</h6><Esc>3bcw
 "	normal		creates selected format on previous line
 "	visual		creates selected format around visual selection
 "	insert		creates selected format at cursor position
-"
-" Address format
-nmap	;ad	O<address>TEXT</address><Esc>3bcw
-vmap	;ad	<Esc>`>a</address><Esc>`<i<address><Esc>l
-imap	;ad	<address>TEXT</address><Esc>3bcw
-"
+
+
 " Bold format
 nmap	;bo	O<b>TEXT</b><Esc>3bcw
 vmap	;bo	<Esc>`>a</b><Esc>`<i<b><Esc>l
@@ -164,22 +161,14 @@ imap	;bi	<big>TEXT</big><Esc>3bcw
 nmap	;bl	O<blockquote>TEXT</blockquote><Esc>3bcw
 vmap	;bl	<Esc>`>a</blockquote><Esc>`<i<blockquote><Esc>l
 imap	;bl	<blockquote>TEXT</blockquote><Esc>3bcw
-"
-" Center format
-nmenu HTML\ Tags.Formats.Center\ \ \ \ \ \ ;ce	O<center>TEXT</center><Esc>3bcw
-vmenu HTML\ Tags.Formats.Center\ \ \ \ \ \ ;ce	<Esc>`>a</center><Esc>`<i<center><Esc>l
-imenu HTML\ Tags.Formats.Center\ \ \ \ \ \ ;ce	<center>TEXT</center><Esc>3bcw
-nmap	;ce	O<center>TEXT</center><Esc>3bcw
-vmap	;ce	<Esc>`>a</center><Esc>`<i<center><Esc>l
-imap	;ce	<center>TEXT</center><Esc>3bcw
-"
+
 " Cite format
 nmenu HTML\ Tags.Formats.Cite\ \ \ \ \ \ \ \ ;ci	O<CITE>TEXT</CITE><Esc>3bcw
 vmenu HTML\ Tags.Formats.Cite\ \ \ \ \ \ \ \ ;ci	<Esc>`>a</CITE><Esc>`<i<CITE><Esc>l
 imenu HTML\ Tags.Formats.Cite\ \ \ \ \ \ \ \ ;ci	<CITE>TEXT</CITE><Esc>3bcw
-nmap	;ci	O<CITE>TEXT</CITE><Esc>3bcw
-vmap	;ci	<Esc>`>a</CITE><Esc>`<i<CITE><Esc>l
-imap	;ci	<CITE>TEXT</CITE><Esc>3bcw
+nmap	;ci	O<cite>TEXT</cite><Esc>3bcw
+vmap	;ci	<Esc>`>a</cite><Esc>`<i<cite><Esc>l
+imap	;ci	<cite>TEXT</cite><Esc>3bcw
 "
 " Code format
 nmenu HTML\ Tags.Formats.Code\ \ \ \ \ \ \ \ ;co	O<code>TEXT</code><Esc>3bcw
@@ -188,15 +177,8 @@ imenu HTML\ Tags.Formats.Code\ \ \ \ \ \ \ \ ;co	<code>TEXT</code><Esc>3bcw
 nmap	;co	O<code>TEXT</code><Esc>3bcw
 vmap	;co	<Esc>`>a</code><Esc>`<i<code><Esc>l
 imap	;co	<code>TEXT</code><Esc>3bcw
-"
-" Definition format
-nmenu HTML\ Tags.Formats.Definition\ \ ;df	O<dfn>TEXT</dfn><Esc>3bcw
-vmenu HTML\ Tags.Formats.Definition\ \ ;df	<Esc>`>a</dfn><Esc>`<i<dfn><Esc>l
-imenu HTML\ Tags.Formats.Definition\ \ ;df	<dfn>TEXT</dfn><Esc>3bcw
-nmap	;df	O<dfn>TEXT</dfn><Esc>3bcw
-vmap	;df	<Esc>`>a</dfn><Esc>`<i<dfn><Esc>l
-imap	;df	<dfn>TEXT</dfn><Esc>3bcw
-"
+
+
 " Emphasis format
 nmenu HTML\ Tags.Formats.Emphasis\ \ \ \ ;em	O<em>TEXT</em><Esc>3bcw
 vmenu HTML\ Tags.Formats.Emphasis\ \ \ \ ;em	<Esc>`>a</em><Esc>`<i<em><Esc>l
@@ -204,7 +186,7 @@ imenu HTML\ Tags.Formats.Emphasis\ \ \ \ ;em	<em>TEXT</em><Esc>3bcw
 nmap	;em	O<em>TEXT</em><Esc>3bcw
 vmap	;em	<Esc>`>a</em><Esc>`<i<em><Esc>l
 imap	;em	<em>TEXT</em><Esc>3bcw
-"
+
 " Italics format
 nmenu HTML\ Tags.Formats.Italics\ \ \ \ \ ;it	O<i>TEXT</i><Esc>3bcw
 vmenu HTML\ Tags.Formats.Italics\ \ \ \ \ ;it	<Esc>`>a</i><Esc>`<i<i><Esc>l
@@ -220,7 +202,7 @@ imenu HTML\ Tags.Formats.Keyboard\ \ \ \ ;kb	<kbd>TEXT</kbd><Esc>3bcw
 nmap	;kb	O<kbd>TEXT</kbd><Esc>3bcw
 vmap	;kb	<Esc>`>a</kbd><Esc>`<i<kbd><Esc>l
 imap	;kb	<kbd>TEXT</kbd><Esc>3bcw
-"
+
 " No break format
 nmenu HTML\ Tags.Formats.No\ Break\ \ \ \ ;nb	O<nobr>TEXT</nobr><Esc>3bcw
 vmenu HTML\ Tags.Formats.No\ Break\ \ \ \ ;nb	<Esc>`>a</nobr><Esc>`<i<nobr><Esc>l
@@ -228,7 +210,7 @@ imenu HTML\ Tags.Formats.No\ Break\ \ \ \ ;nb	<nobr>TEXT</nobr><Esc>3bcw
 nmap	;nb	O<nobr>TEXT</nobr><Esc>3bcw
 vmap	;nb	<Esc>`>a</nobr><Esc>`<i<nobr><Esc>l
 imap	;nb	<nobr>TEXT</nobr><Esc>3bcw
-"
+
 " Pre format
 nmenu HTML\ Tags.Formats.Preformat\ \ \ ;pr	O<pre>TEXT</pre><Esc>3bcw
 vmenu HTML\ Tags.Formats.Preformat\ \ \ ;pr	<Esc>`>a</pre><Esc>`<i<pre><Esc>l
@@ -236,15 +218,8 @@ imenu HTML\ Tags.Formats.Preformat\ \ \ ;pr	<pre>TEXT</pre><Esc>3bcw
 nmap	;pr	O<pre>TEXT</pre><Esc>3bcw
 vmap	;pr	<Esc>`>a</pre><Esc>`<i<pre><Esc>l
 imap	;pr	<pre>TEXT</pre><Esc>3bcw
-"
-" Strike format
-nmenu HTML\ Tags.Formats.Strike\ \ \ \ \ \ ;sk	O<strike>TEXT</strike><Esc>3bcw
-vmenu HTML\ Tags.Formats.Strike\ \ \ \ \ \ ;sk	<Esc>`>a</strike><Esc>`<i<strike><Esc>l
-imenu HTML\ Tags.Formats.Strike\ \ \ \ \ \ ;sk	<strike>TEXT</strike><Esc>3bcw
-nmap	;sk	O<strike>TEXT</strike><Esc>3bcw
-vmap	;sk	<Esc>`>a</strike><Esc>`<i<strike><Esc>l
-imap	;sk	<strike>TEXT</strike><Esc>3bcw
-"
+
+
 " Sample format
 nmenu HTML\ Tags.Formats.Sample\ \ \ \ \ \ ;sa	O<samp>TEXT</samp><Esc>3bcw
 vmenu HTML\ Tags.Formats.Sample\ \ \ \ \ \ ;sa	<Esc>`>a</samp><Esc>`<i<samp><Esc>l
@@ -330,16 +305,6 @@ vmap	;ol	:py vimhtml.ordered_list()<CR>
 imap	;ol	<CR><ol><CR>  <li>ITEM</li><CR><BS><BS></ol><Esc>6bcw
 "
 
-"""" Directory List
-nmap	;di	O<dir><CR>  <li>LIST ITEM<CR><BS><BS></dir><Esc>4b2cw
-vmap	;di	<Esc>`>a<CR></dir><Esc>:'<+1,'>+1s/^/    <li>/<CR>`<i<dir><CR>    <li><Esc>/<li><.dir><CR>4x4X
-imap	;di	<CR><dir><CR>  <li>LIST ITEM<CR><BS><BS></dir><Esc>4b2cw
-"
-"""" Menu List
-nmap	;mu	O<mu><CR>  <li>LIST ITEM<CR><BS><BS></mu><Esc>4b2cw
-vmap	;mu	<Esc>`>a<CR></mu><Esc>:'<+1,'>+1s/^/    <li>/<CR>`<i<mu><CR>    <li><Esc>/<li><.mu><CR>4x4X
-imap	;mu	<CR><mu><CR>  <li>LIST ITEM<CR><BS><BS></mu><Esc>4b2cw
-"
 """" Definition Item
 "	dt an dd are the same menu item - though dd can be called via the ;dd macro 
 "	below.  this assumes you will always want a dd with every dd.
@@ -416,8 +381,6 @@ map!	;sn <style notation=""><CR></style><Esc>k/"<CR>a
 map!	;ta <tab>
 " TITLE (head)
 map!	;ti <title></title><Esc>bhhi
-" WBR (word break) (Netscape)
-map!	;wb <wbr>
 " Special Characters
 map!	;& 	&amp;
 map!	;cp 	&copy;

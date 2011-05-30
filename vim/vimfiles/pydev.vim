@@ -6,7 +6,8 @@ endif
 if exists("g:Python_loaded")
   finish
 endif
-:let g:Python_loaded = 1
+let g:Python_loaded = 1
+let g:pyindent_nested_paren = '&sw' * 2
 
 " set Vim parameters that suite python best
 set tm=2000
@@ -14,7 +15,11 @@ set tm=2000
 set formatoptions=crql cino=(8#1 ai smartindent nowrap comments=:# 
 set cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 
-set kp=pyshowdoc
+" set omnifunc=pythoncomplete#Complete
+
+" set kp=pyshowdoc
+" set kp=chmsee 
+set kp=kchmviewer\ $HOME/.local/share/devhelp/books/python321rc1.chm\ --sindex 
 
 " The 'NonText' highlighting will be used for 'eol', 'extends' and
 " 'precedes'.  'SpecialKey' for 'tab' and 'trail'.
@@ -97,7 +102,6 @@ vmap ;et :python exec_vimrange_in_term(vim.current.range)<CR>
 nmap ;el :python vim.current.line = str(eval(vim.current.line))<CR>
 
 " convenient editing macros
-nmap ;id :python insert_def()<CR>
 nmap ;iv :python insert_viminfo()<CR>
 nmap ;ia :python insert__all__()<CR>
 nmap ;ed :python keyword_edit()<CR>
@@ -109,17 +113,6 @@ nmap ;sp :python keyword_split()<CR>
 nmap <F9> :python keyword_split()<CR>
 " nmap K :python keyword_help()<CR>
 nmap ;he :python keyword_help()<CR>
-nmap ;in :python print get_indent_level()<CR>
-
-" movement
-map ;nd :python next_def()<CR>
-map ;nc :python next_class()<CR>
-map ;pd :python previous_def()<CR>
-map ;pc :python previous_class()<CR>
-
-" selections
-map ;sc :python select_class()<CR>
-map ;sd :python select_def()<CR>
 
 " what shall it be? tabs or spaces?
 nmap ;us :call PyUseSpaces()<CR>

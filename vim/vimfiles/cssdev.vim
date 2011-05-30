@@ -13,6 +13,7 @@ set ts=4 sw=4 tw=100 expandtab softtabstop=4 smarttab
 set formatoptions=crql cino=(8 ai smartindent
 set comments=s1:/*,mb:*,ex:*/,b://
 set iskeyword=@,#,48-57,_,^;
+set omnifunc=csscomplete#CompleteCSS
 
 if has("gui_gtk") && has("gui_running")
 	:python from pycopia.vimlib.cssdev import *
