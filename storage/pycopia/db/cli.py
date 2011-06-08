@@ -1120,7 +1120,10 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
         else:
             chosen = dict((crow.id, str(crow)) for crow in current)
         for chosenone in chosen:
-            del choices[chosenone]
+            try:
+                del choices[chosenone]
+            except KeyError: # choice may have gone away.
+                pass
         chosen = ui.choose_multiple_from_map(choices, chosen, "%%I%s%%N" % metadata.colname)
         if chosen:
             t = _session.query(relmodel).filter( relmodel.id.in_(chosen.keys())).all()

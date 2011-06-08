@@ -478,8 +478,8 @@ class Test(object):
     def info(self, msg, level=0):
         """Informational messages for the report.
 
-        Record non-critical information in the report object. This message is
-        not effected by the VERBOSE flag.
+        Record non-critical information in the report object. 
+        The message is not recorded if the given level is greater than the current verbosity level.
         """
         if level <= self._verbose:
             self._report.info(msg, 2)
