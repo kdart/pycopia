@@ -314,6 +314,7 @@ test_results =  Table('test_results', metadata,
             Column(u'reportfilename', VARCHAR(length=255, convert_unicode=False), primary_key=False),
             Column(u'note', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'valid', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
+            Column(u'testsuite_id', INTEGER(), primary_key=False),
     ForeignKeyConstraint([u'tester_id'], [u'public.auth_user.id'], name=u'test_results_tester_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'parent_id'], [u'public.test_results.id'], name=u'parent_id_refs_test_results_id'),
@@ -321,6 +322,7 @@ test_results =  Table('test_results', metadata,
             ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'test_results_environment_id_fkey'),
             ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'test_results_testcase_id_fkey'),
             ForeignKeyConstraint([u'testresultdata_id'], [u'public.test_results_data.id'], name=u'test_results_testresultdata_id_fkey'),
+            ForeignKeyConstraint([u'testsuite_id'], [u'public.test_suites.id'], name=u'test_results_testsuite_id_fkey'),
     schema='public')
 Index('index_test_results_testcase_id', test_results.c.testcase_id, unique=False)
 Index('index_test_results_testresultdata_id', test_results.c.testresultdata_id, unique=False)
@@ -329,6 +331,7 @@ Index('index_test_results_parent_id', test_results.c.parent_id, unique=False)
 Index('index_test_results_tester_id', test_results.c.tester_id, unique=False)
 Index('index_test_results_testimplementation', test_results.c.testimplementation, unique=False)
 Index('index_test_results_environment_id', test_results.c.environment_id, unique=False)
+Index('index_test_results_testsuite_id', test_results.c.testsuite_id, unique=False)
 
 
 traps =  Table('traps', metadata,
@@ -544,6 +547,7 @@ test_suites =  Table('test_suites', metadata,
 Index('index_test_suites_lastchangeauthor_id', test_suites.c.lastchangeauthor_id, unique=False)
 Index('index_test_suites_name_key', test_suites.c.name, unique=True)
 Index('index_test_suites_project_id', test_suites.c.project_id, unique=False)
+Index('index_test_suites_suiteimplementation', test_suites.c.suiteimplementation, unique=False)
 
 
 test_suites_testcases =  Table('test_suites_testcases', metadata,

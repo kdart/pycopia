@@ -51,6 +51,7 @@ _COLUMNS = {
     "reportfilename": None,
     "note": None,               # COMMENT
     "valid": True,
+    "testsuite": None,          # an associated suite
 }
 
 [MODULE, SUITE, TEST, RUNNER, UNKNOWN] = types.OBJECTTYPES
@@ -94,7 +95,10 @@ class ResultHolder(object):
 
     def commit(self, dbsession, parentrecord=None):
         self._data["parent"] = parentrecord
-        self.resolve_testcase(dbsession)
+        if self._data["objecttype"] == TEST:
+            self.resolve_testcase(dbsession)
+        if self._data["objecttype"] == SUITE:
+            self.resolve_testsuite(dbsession)
         self.resolve_build(dbsession)
         tr = models.create(models.TestResult, **self._data)
         dbsession.add(tr)
@@ -118,6 +122,16 @@ class ResultHolder(object):
                 pass
             else:
                 self._data["testcase"] = tc
+
+    def resolve_testsuite(self, dbsession):
+        ti = self._data.get("testimplementation")
+        if ti:
+            try:
+                ts = dbsession.query(models.TestSuite).filter(models.TestSuite.suiteimplementation==ti).one()
+            except NoResultFound:
+                pass
+            else:
+                self._data["testsuite"] = ts
 
     def resolve_build(self, dbsession):
         buildstring = self._data.get("build")

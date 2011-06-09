@@ -35,7 +35,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from pycopia.aid import hexdigest, unhexdigest, Enums, removedups, NULL
 
 from pycopia.db import tables
-from pycopia.db.types import validate_value_type, OBJ_TESTRUNNER
+from pycopia.db.types import validate_value_type, OBJ_TESTRUNNER, OBJ_TESTSUITE
 
 
 class ModelError(Exception):
@@ -1181,6 +1181,22 @@ class TestSuite(object):
     def __repr__(self):
         return "TestSuite(%r)" % (self.name,)
 
+    def get_latest_result(self, session):
+        sq = session.query(func.max(TestResult.starttime)).filter(and_(
+                TestResult.objecttype==OBJ_TESTSUITE, 
+                TestResult.testsuite==self, 
+                TestResult.valid==True)).subquery()
+        return session.query(TestResult).filter(and_(
+                TestResult.starttime==sq,
+                TestResult.testsuite==self, 
+                    )).scalar()
+
+    @classmethod
+    def get_latest_results(cls, session):
+        filt = and_(TestResult.objecttype==OBJ_TESTSUITE, TestResult.valid==True)
+        return session.query(TestResult).filter(filt).order_by(TestResult.starttime).limit(10)
+
+
 mapper(TestSuite, tables.test_suites,
     properties={
         "project": relation(Project),
@@ -1226,7 +1242,7 @@ mapper(TestResultData, tables.test_results_data)
 
 
 class TestResult(object):
-    ROW_DISPLAY = ("testcase", "testimplementation", "tester", "result", "starttime")
+    ROW_DISPLAY = ("testsuite", "testcase", "testimplementation", "tester", "result", "starttime")
     def __init__(self, **kwargs):
         for name, value in kwargs.items():
              setattr(self, name, value)
@@ -1275,6 +1291,7 @@ mapper(TestResult, tables.test_results,
         "data": relation(TestResultData),
         "environment": relation(Environment, order_by=tables.environments.c.name),
         "testcase": relation(TestCase),
+        "testsuite": relation(TestSuite),
         "build": relation(ProjectVersion),
         "subresults": relation(TestResult, backref=backref("parent",
                                 remote_side=[tables.test_results.c.id])),
@@ -1496,20 +1513,21 @@ if __name__ == "__main__":
     from pycopia import autodebug
     if sys.flags.interactive:
         from pycopia import interactive
-    prop = class_mapper(Equipment).get_property("interfaces")
-    print prop
-    print get_metadata(Equipment)
-    print get_column_metadata(Equipment, "interfaces")
-    print get_column_metadata(Network, "interfaces")
+    #prop = class_mapper(Equipment).get_property("interfaces")
+    #print prop
+    #print get_metadata(Equipment)
+    #print get_column_metadata(Equipment, "interfaces")
+    #print get_column_metadata(Network, "interfaces")
+
     sess = get_session()
 
     #choices = get_choices(sess, Equipment, "interfaces", order_by=None)
     #print choices
-    choices = get_choices(sess, TestCase, "priority", order_by=None)
-    print choices
+    #choices = get_choices(sess, TestCase, "priority", order_by=None)
+    #print choices
 
     # assumes your host name is in the db for testing.
-    eq = sess.query(Equipment).filter(Equipment.name.like(os.uname()[1] + "%")).one()
+    #eq = sess.query(Equipment).filter(Equipment.name.like(os.uname()[1] + "%")).one()
     #print "eq = ", eq
     #print "Atributes:"
     #print eq.attributes
@@ -1530,5 +1548,7 @@ if __name__ == "__main__":
     #print dir(class_mapper(Equipment))
     #print
     #print class_mapper(Equipment).get_property("name")
-
+    for tr in TestSuite.get_latest_results(sess):
+        print tr
+    #sess.close()
 

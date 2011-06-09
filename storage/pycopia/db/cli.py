@@ -244,6 +244,19 @@ class NetworkRowCommands(RowCommands):
             self._print(repr(intf))
 
 
+class TestResultRowCommands(RowCommands):
+
+    def parent(self, argv):
+        """parent
+    Move to parent record."""
+        if self._obj.parent is not None:
+            cmd = self.clone(TestResultRowCommands)
+            cmd._setup(self._obj.parent, TestResultRowCommands.get_prompt(self._obj.parent))
+            raise CLI.NewCommand(cmd)
+        else:
+            self._print("No parent.")
+
+
 class RowWithAttributesCommands(RowCommands):
 
     def attrib(self, argv):
@@ -577,6 +590,20 @@ class SessionCommands(TableCommands):
         self._obj.clean(_session)
 
 
+class TestSuiteRowCommands(RowCommands):
+
+    def results(self, argv):
+        """results
+    Show latest test results for this test suite."""
+        tr = self._obj.get_latest_result(_session)
+        if tr is not None:
+            cmd = self.clone(TestResultRowCommands)
+            cmd._setup(tr, TestResultRowCommands.get_prompt(tr))
+            raise CLI.NewCommand(cmd)
+        else:
+            self._print("No results found.")
+
+
 class UserCommands(TableCommands):
 
     @classmethod
@@ -859,6 +886,8 @@ _ROW_EDITOR_MAP = {
     "Network": NetworkRowCommands,
     "Interface": InterfaceRowCommands,
     "Session": SessionRowCommands,
+    "TestResult": TestResultRowCommands,
+    "TestSuite": TestSuiteRowCommands,
 }
 
 
