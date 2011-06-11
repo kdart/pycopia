@@ -92,7 +92,7 @@ def get_unknown_equipment_model(session):
     return model
 
 
-def get_interface_type(enumeration=INTERFACE_TYPE_ID):
+def get_interface_type(session, enumeration=INTERFACE_TYPE_ID):
     global INTERFACE_TYPE
     if INTERFACE_TYPE is None:
         q = session.query(models.InterfaceType).filter(
@@ -108,7 +108,7 @@ def add_interface(session, attribs):
     """
     network = attribs.get("network")
     ipaddr = attribs["ipaddr"]
-    attribs["interface_type"] = get_interface_type()
+    attribs["interface_type"] = get_interface_type(session)
     q = session.query(models.Interface).filter(models.and_(
                 models.Interface.network==network, 
                 models.Interface.ipaddr==ipaddr)
