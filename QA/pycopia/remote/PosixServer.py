@@ -334,10 +334,11 @@ class PosixAgent(Pyro.core.ObjBase, object):
 
     def subprocess(self, _meth, *args, **kwargs):
         """Run a python method asynchronously as a subprocess."""
-        UserLog.msg("subprocess", str(meth))
+        UserLog.msg("subprocess", str(_meth))
         pm = proctools.get_procmanager()
         proc = pm.submethod(_meth, args, kwargs)
-        self._status[proc.childpid] = proc 
+        proc.callback = self._status_cb
+        self._status[proc.childpid] = None 
         return proc.childpid
 
     def _get_process(self, pid):
@@ -491,6 +492,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
         finally:
             os.unlink(name)
         return sts, out
+
 
 
 ###################################

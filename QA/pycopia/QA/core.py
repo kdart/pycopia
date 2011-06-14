@@ -445,7 +445,7 @@ class Test(object):
         your test implementation in the execute is positively sure that it
         does not meet the criteria. Other kinds of errors should return
         `incomplete()`. 
-        In the execute method, the pattern is: `return self.failed('message').
+        In the execute method, the pattern is: `return self.failed('message')`.
         """
         if self.OPTIONS.bugid:
             self._report.diagnostic(
