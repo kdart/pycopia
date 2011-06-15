@@ -358,8 +358,11 @@ class PosixAgent(Pyro.core.ObjBase, object):
             return proc.write(data)
 
     def poll(self, pid):
-        """Poll for async process. Returns exitstatus if done, ENOENT if no
-        such pid is managed, or EAGAIN if pid is still running.."""
+        """Poll for async process. 
+
+        Returns exitstatus if done, -ENOENT if no such pid is managed, or -EAGAIN
+        if pid is still running.
+        """
         try:
             sts  = self._status[pid]
         except KeyError:
@@ -367,6 +370,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
         if sts is None:
             return -errno.EAGAIN
         else: # finished
+            del self._status[pid]
             return sts
 
     def waitpid(self, pid):
@@ -391,7 +395,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
         try:
             sts = self._status.pop(pid)
         except KeyError:
-            return errno.ENOENT
+            return -errno.ENOENT
         else:
             if sts is None: # a running process
                 pm = proctools.get_procmanager()
@@ -415,7 +419,11 @@ class PosixAgent(Pyro.core.ObjBase, object):
     def pstat(self, pid):
         pm = proctools.get_procmanager()
         proc = pm.getbypid(pid)
-        return proc.stat()
+        if proc is not None:
+            return proc.stat()
+        else:
+            return -errno.ENOENT
+
 
     def python(self, snippet):
         try:

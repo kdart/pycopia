@@ -313,7 +313,10 @@ class RemoteCLI(CLI.BaseCommands):
     Show the stat info for the PID."""
         pid = int(argv[1])
         stat = self._obj.pstat(pid)
-        self._print(stat)
+        if stat == -errno.ENOENT:
+            self._print("Process not found.")
+        else:
+            self._print(stat)
         return stat
 
     def ps(self, argv):
@@ -325,6 +328,8 @@ class RemoteCLI(CLI.BaseCommands):
             pidlist = self._obj.plist()
         for sPid in pidlist:
             stat = self._obj.pstat(int(sPid))
+            if stat == -errno.ENOENT:
+                continue
             self._print("{stat.pid!s}: {stat.cmdline}".format(stat=stat))
 
     def kill(self, argv):
