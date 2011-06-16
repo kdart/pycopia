@@ -19,8 +19,6 @@ EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].spl
 if sys.platform not in ("win32", "cli"):
     DATA_FILES = [
         ('/etc/pycopia', glob("etc/*")),
-        (os.path.join(sys.prefix, 'share', 'pycopia', 'docs'), 
-             glob("doc/*.rst")),
     ]
 else:
     DATA_FILES = []
