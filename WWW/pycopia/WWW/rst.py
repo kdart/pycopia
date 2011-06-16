@@ -71,3 +71,14 @@ def get_renderer():
     r = Renderer()
     return r.render
 
+
+def RSTtoXHTML(rsttext):
+    from pycopia.WWW import XHTML
+    tempdoc = XHTML.new_document()
+    renderer = get_renderer()
+    parser = tempdoc.get_parser()
+    xhtml = renderer(rsttext)
+    parser.feed(xhtml)
+    parser.close()
+    return tempdoc.root
+

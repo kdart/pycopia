@@ -129,3 +129,7 @@ div#messages p {
   color:#EEEEEE; 
 }
 
+.invisible {
+    display: none;
+}
+

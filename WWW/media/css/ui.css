@@ -60,3 +60,9 @@ input[name="currentedit"] {
 }
 
 
+p.error {
+  padding: 1em;
+  color: #FF0000;
+}
+
+

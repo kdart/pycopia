@@ -18,18 +18,18 @@
  * that you add a callback to get the return value from the function. Your
  * callback gets whatever the server side function returns, as native
  * objects.
+ *
+ * Signals "proxyready" when methods are ready to use.
  */
-function PythonProxy(basepath /* optional callables */) {
+function PythonProxy(basepath) {
   this.initialized = false;
   this.basepath = basepath;
+  bindMethods(this);
   // Fetch the dispatchers registered names, add them to this object.
   // You may then use the same names as methods on this PythonProxy
   // instance.
   var req = this._call("_methods");
-  req.addCallback(partial(_fillMethods, this));
-  for (var i = 1; i < arguments.length; i++) {
-      req.addCallback(arguments[i]);
-  };
+  req.addCallback(this._fillMethods);
 };
 
 /**
@@ -63,7 +63,6 @@ PythonProxy.prototype._exception = function(pyerror) {
   // list of tuples (filename, line_number, function_name, text) 
   var tracebacklist = exclist[2];
   console.error(exc, val, tracebacklist); 
-  // Note: console object provided by firebug extension.
   throw new Error(exc + val); // TODO something nicer here?
 };
 
@@ -72,12 +71,13 @@ PythonProxy.prototype._exception = function(pyerror) {
  * dynamically, with proxy methods having the same names as the server
  * side json handlers.
  */
-function _fillMethods(obj, methodlist) {
+PythonProxy.prototype._fillMethods = function(methodlist) {
   for (var i = 0; i < methodlist.length; i++) {
     name = methodlist[i];
-    obj[name] = partial(obj._call, name);
+    this[name] = partial(this._call, name);
   };
-  obj.initialized = true;
+  this.initialized = true;
+  signal(this, "proxyready");
 };
 
 

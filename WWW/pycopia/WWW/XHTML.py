@@ -31,6 +31,8 @@ framework.
 
 import itertools
 
+from PIL import Image  # for automated image size
+
 from pycopia.urlparse import quote_plus
 from pycopia.textutils import identifier
 from pycopia.aid import partial, Enums, Enum
@@ -221,23 +223,21 @@ class FlowMixin(object):
         return get_container(self.dtd, name, kwargs)
     get = get_new_element
 
-    def new_image(self, _imagefile, _alt=None, autosize=False, **kwargs):
+    def new_image(self, _imagefile, _alt=None, **kwargs):
         check_flag(kwargs, "ismap")
-        if auto:
-            from PIL import Image  # from PIL package
+        try:
+            im = Image.open(_imagefile)
+        except IOError:
+            pass
+        else:
+            x, y = im.size
+            kwargs["width"] = str(x)
+            kwargs["height"] = str(y)
             try:
-                im = Image.open(_imagefile)
-            except IOError:
+                im.close()
+            except:
                 pass
-            else:
-                x, y = im.size
-                kwargs["width"] = str(x)
-                kwargs["height"] = str(y)
-                try:
-                    im.close()
-                except:
-                    pass
-                del im
+            del im
         kwargs["src"] = _imagefile # XXX adjust for server alias?
         if _alt:
             kwargs["alt"] = _alt
@@ -668,15 +668,17 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
 
     def add_javascript2head(self, text=None, url=None):
         if text:
-            sc = self.head.add(self.dtd.Script, type="text/javascript;version=1.8")
+            sc = self.head.add(self.dtd.Script, type="text/javascript")
             sc.add_cdata(text)
         elif url:
             sc = self.head.add(self.dtd.Script, 
-                           type="text/javascript;version=1.8", src=url)
+                           type="text/javascript", src=url)
 
     def _add_js_list(self, jslist):
         for url in jslist:
-            self.head.add(self.dtd.Script, type="text/javascript;version=1.8", src=url)
+            if "/" not in url:
+                url = "/media/js/" + url
+            self.head.add(self.dtd.Script, type="text/javascript", src=url)
 
     scripts = property(None, _add_js_list, None, "Add a list of javascript file names.")
 
@@ -1042,6 +1044,7 @@ class FormMixin(ContainerMixin):
         check_flag(kwargs, "readonly")
         check_flag(kwargs, "checked")
         check_flag(kwargs, "disabled")
+        check_flag(kwargs, "autofocus")
         inputclass = get_class(self.dtd, "InputWidget", (InputMixin, self.dtd.Input))
         inp = inputclass(**kwargs)
         inp._init(self.dtd)
@@ -1297,6 +1300,12 @@ class InputMixin(WidgetBase):
         else:
             del self.readonly
 
+    def set_autofocus(self, val=True):
+        if val:
+            self.autofocus = "autofocus"
+        else:
+            del self.autofocus
+
 
 class DefinitionListMixin(object):
     def _init(self, dtd):
@@ -1375,18 +1384,6 @@ class DynamicNode(object):
     def has_attributes(self):
         return 0
 
-
-# This is here as a convenience, but could introduce non-conformance
-# errors into the document.
-def parseRST(rsttext):
-    from pycopia.WWW import rst
-    tempdoc = new_document()
-    renderer = rst.get_renderer()
-    parser = tempdoc.get_parser()
-    xhtml = renderer(rsttext)
-    parser.feed(xhtml)
-    parser.close()
-    return tempdoc.root
 
 def check_flag(kwargs, name):
     """enforce XML rules for flags."""

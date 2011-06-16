@@ -66,6 +66,26 @@ function getIcon(simplename) {
   return img;
 };
 
+/**
+ * Construct a small icon image element.
+ * @param {String} simplename The name of the icon (index into ICONMAP_SMALL 
+ * table).
+ * @return {Element} img The image element.
+ */
+function getSmallIcon(simplename) {
+  var iconname = uiData["ICONMAP_SMALL"][simplename];
+  if (!iconname) {
+    iconname = uiData["ICONMAP_SMALL"]["default"];
+  }
+  var img = IMG({
+              src: getIconPath(iconname), 
+              alt: simplename, 
+              width: "10", 
+              height: "10"
+            });
+  return img;
+};
+
 
 /**
  * Places object as sole object in some content div.

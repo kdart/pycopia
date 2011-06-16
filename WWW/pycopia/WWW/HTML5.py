@@ -29,7 +29,7 @@ from __future__ import division
 from pycopia.XML import POM
 from pycopia.WWW import XHTML
 
-from pycopia.dtds import html5
+from pycopia.dtds import html5 as DTD
 
 
 DEFAULT_LANG, DEFAULT_ENCODING = "en", "UTF-8" # its the only one I know...
@@ -58,7 +58,7 @@ class HTML5Document(XHTML.XHTMLDocument):
 
     def set_doctype(self, doctype):
         self.DOCTYPE = doctype.encode("ascii") + "\n"
-        self.set_dtd(html5)
+        self.set_dtd(DTD)
 
     def initialize(self):
         dtd = self.dtd

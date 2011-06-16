@@ -798,7 +798,7 @@ class ResponseDocument(object):
     accessing configuration.
     """
     def __init__(self, _request, _constructor=default_doc_constructor, **kwargs):
-        self._doc = doc = _constructor(_request, **kwargs)
+        self._doc = _constructor(_request, **kwargs)
         self.nodemaker = self._doc.nodemaker # nodemaker shortcut
         self.creator = self._doc.creator
         # shortcuts

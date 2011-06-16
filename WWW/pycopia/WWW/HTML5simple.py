@@ -52,8 +52,8 @@ SIMPLE_TEMPLATE = """<?xml version="1.0" encoding="{charset}"?>
     <title>{title}</title>
     <link href="/media/css/{appname}.css" type="text/css" rel="stylesheet" />
     <!-- <script src="/media/js/modernizr-1.7.min.js" type="text/javascript"></script> -->
-    <script src="/media/js/packed.js" type="text/javascript;version=1.8"></script>
-    <script src="/media/js/{appname}.js" type="text/javascript;version=1.8"></script>
+    <script src="/media/js/packed.js" type="text/javascript"></script>
+    <script src="/media/js/{appname}.js" type="text/javascript"></script>
   </head>
   <body>
   {body}
