@@ -51,7 +51,7 @@ the setsockopt() and getsockopt() methods.
 from __future__ import print_function
 
 import os, sys
-from io import StringIO
+from io import BytesIO
 import _socket
 from _socket import *
 from errno import (EBADF, EALREADY, EINPROGRESS, EWOULDBLOCK, ECONNRESET,
@@ -225,11 +225,11 @@ class _fileobject(object):
         else:
             self._rbufsize = bufsize
         self._wbufsize = bufsize
-        # We use StringIO for the read buffer to avoid holding a list
+        # We use BytesIO for the read buffer to avoid holding a list
         # of variously sized string objects which have been known to
         # fragment the heap due to how they are malloc()ed and often
         # realloc()ed down much smaller than their original allocation.
-        self._rbuf = StringIO()
+        self._rbuf = BytesIO()
         self._wbuf = [] # A list of strings
         self._wbuf_len = 0
         self._close = close
@@ -303,14 +303,14 @@ class _fileobject(object):
         # We never leave read() with any leftover data from a new recv() call
         # in our internal buffer.
         rbufsize = max(self._rbufsize, self.default_bufsize)
-        # Our use of StringIO rather than lists of string objects returned by
+        # Our use of BytesIO rather than lists of string objects returned by
         # recv() minimizes memory usage and fragmentation that occurs when
         # rbufsize is large compared to the typical return value of recv().
         buf = self._rbuf
         buf.seek(0, 2)  # seek end
         if size < 0:
             # Read until EOF
-            self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
+            self._rbuf = BytesIO()  # reset _rbuf.  we consume it via buf.
             while True:
                 try:
                     data = self._sock.recv(rbufsize)
@@ -329,17 +329,17 @@ class _fileobject(object):
                 # Already have size bytes in our buffer?  Extract and return.
                 buf.seek(0)
                 rv = buf.read(size)
-                self._rbuf = StringIO()
+                self._rbuf = BytesIO()
                 self._rbuf.write(buf.read())
                 return rv
 
-            self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
+            self._rbuf = BytesIO()  # reset _rbuf.  we consume it via buf.
             while True:
                 left = size - buf_len
                 # recv() will malloc the amount of memory given as its
                 # parameter even though it often returns much less data
                 # than that.  The returned data string is short lived
-                # as we copy it into a StringIO and free it.  This avoids
+                # as we copy it into a BytesIO and free it.  This avoids
                 # fragmentation issues on many platforms.
                 try:
                     data = self._sock.recv(left)
@@ -376,7 +376,7 @@ class _fileobject(object):
             buf.seek(0)
             bline = buf.readline(size)
             if bline.endswith('\n') or len(bline) == size:
-                self._rbuf = StringIO()
+                self._rbuf = BytesIO()
                 self._rbuf.write(buf.read())
                 return bline
             del bline
@@ -386,7 +386,7 @@ class _fileobject(object):
                 # Speed up unbuffered case
                 buf.seek(0)
                 buffers = [buf.read()]
-                self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
+                self._rbuf = BytesIO()  # reset _rbuf.  we consume it via buf.
                 data = None
                 recv = self._sock.recv
                 while True:
@@ -406,7 +406,7 @@ class _fileobject(object):
                 return "".join(buffers)
 
             buf.seek(0, 2)  # seek end
-            self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
+            self._rbuf = BytesIO()  # reset _rbuf.  we consume it via buf.
             while True:
                 try:
                     data = self._sock.recv(self._rbufsize)
@@ -432,10 +432,10 @@ class _fileobject(object):
             if buf_len >= size:
                 buf.seek(0)
                 rv = buf.read(size)
-                self._rbuf = StringIO()
+                self._rbuf = BytesIO()
                 self._rbuf.write(buf.read())
                 return rv
-            self._rbuf = StringIO()  # reset _rbuf.  we consume it via buf.
+            self._rbuf = BytesIO()  # reset _rbuf.  we consume it via buf.
             while True:
                 try:
                     data = self._sock.recv(self._rbufsize)
