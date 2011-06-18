@@ -389,6 +389,10 @@ class UserInterface(object):
     def get_password(self, prompt="Password: "):
         return tty.getpass(prompt)
 
+    def get_winsize(self):
+        rows, cols, xpixel, ypixel = tty.get_winsize(self._io.fileno())
+        return rows, cols
+
     # docstring/help formatters
     def _format_doc(self, s, color):
         i = s.find("\n")

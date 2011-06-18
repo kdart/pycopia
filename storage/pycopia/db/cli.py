@@ -423,13 +423,32 @@ class TableCommands(CLI.BaseCommands):
         if q._statement is None:
             q = q.order_by(pkname)
         heading = models.get_rowdisplay(self._obj)
-        self._print("\t\t", "\t".join(heading))
+        fmtl = []
+        hfmtl = []
+        rows, cols = self._ui.get_winsize()
+        tw = 0
+        cols -= 8
+        for colname in heading:
+            md = models.get_column_metadata(self._obj, colname)
+            fmt, length = _FORMATS[md.coltype]
+            cols -= length
+            if cols <= 0:
+                break
+            fmtl.append(fmt)
+            side = ">" if ">" in fmt else "<"
+            hfmtl.append("{{:{side}{fw}.{fw}}}".format(side=side, fw=length))
+        fmt = "{!s:6.6s}: " + " ".join(fmtl)
+        hfmt = "{!s:6.6s}: " + " ".join(hfmtl)
+        ln = 0 ; rows -= 3
         for item in q.all():
-            self._print(getattr(item, pkname), "\t:", "\t".join([str(getattr(item, hn)) for hn in heading]))
+            if ln % rows == 0:
+                self._ui.printf("%B" + hfmt.format(pkname, *heading) + "%N")
+            self._print(fmt.format(getattr(item, pkname), *[getattr(item, hn) for hn in heading]))
+            ln += 1
 
     def describe(self, argv):
         """describe
-    Desribe the table columns."""
+    Describe the table columns."""
         for metadata in sorted(models.get_metadata(self._obj)):
             if metadata.coltype == "RelationshipProperty":
                 self._print("%20.20s: %s (%s) m2m=%s, nullable=%s, uselist=%s, collection=%s" % (
@@ -1071,6 +1090,33 @@ _CREATORS = {
     "TestCaseStatus": new_testcasestatus,
     "TestCaseType": new_testcasetype,
     "TestPriorityType": new_testpriority,
+}
+
+_FORMATS = { # some may be None values
+    "BIGINT": ("{!s:>20}", 20),
+    "BOOLEAN": ("{!s:5.5s}", 5),
+    "CHAR": ("{}", 1),
+    "Cidr": ("{!s:>15.15}", 15),
+    "DATE": ("{:%Y-%m-%d}", 10),
+    "TIMESTAMP": ("{:%Y-%m-%d %H:%M:%S}", 19),
+    "FLOAT": ("{:>16.3f}", 20),
+    "Inet": ("{!s:>15.15}", 15),
+    "INTEGER": ("{!s:>20}", 20),
+    "INTERVAL": ("{!s:10.10}", 10),
+    "MACADDR": ("{!s:<17.17}", 17),
+    "NUMERIC": ("{!s:10.10}", 10),
+    "SMALLINT": ("{!s:>10}", 10),
+    "VARCHAR": ("{:<30.30}", 30),
+    "TEXT": ("{:<30.30}", 30),
+    "TIME": ("{:%H:%M:%S}", 8),
+    "UUID": ("{:<20.20}", 20),
+    "PickleText": ("{!r:25.25}", 25),
+    "ValueType": ("{!s:10.10}", 10),
+    "RelationshipProperty": ("{!s:15.15}", 15),
+    "TestCaseStatus": ("{!s:10.10}", 10),
+    "TestCaseType": ("{!s:10.10}", 10),
+    "TestPriorityType": ("{!s:10.10}", 10),
+    "TestResultType": ("{!s:10.10}", 10),
 }
 
 
