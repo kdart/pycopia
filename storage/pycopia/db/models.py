@@ -1047,10 +1047,16 @@ class Environment(object):
     equipment = association_proxy('testequipment', 'equipment')
 
     def get_equipment_with_role(self, session, rolename):
+        TE = TestEquipment # shorthand
         role = session.query(SoftwareCategory).filter(SoftwareCategory.name == rolename).one()
-        qq = session.query(TestEquipment).filter(and_(TestEquipment.environment==self,
-                TestEquipment.roles.contains(role)))
-        return qq.scalar().equipment
+        qq = session.query(TE).filter(and_(
+                TE.environment==self, 
+                TE.UUT==False,  # UUT does not take on other roles.
+                TE.roles.contains(role)))
+        te = qq.scalar()
+        if te is None:
+            raise ModelError("No role '{0}' defined in environment '{1}'.".format(rolename, self.name))
+        return te.equipment
 
     def get_DUT(self, session):
         qq = session.query(TestEquipment).filter(and_(TestEquipment.environment==self,
@@ -1062,8 +1068,7 @@ class Environment(object):
         for te in session.query(TestEquipment).filter(TestEquipment.environment==self):
             for role in te.roles:
                 rv.append(role.name)
-        rv = removedups(rv)
-        return rv
+        return removedups(rv)
 
 
 mapper(Environment, tables.environments,
