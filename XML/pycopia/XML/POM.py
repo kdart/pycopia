@@ -958,19 +958,20 @@ class POMDocument(object):
         return None
 
     def get_parser(self, **kwargs):
-        return get_parser(self, **kwargs)
+        from pycopia.XML import POMparse
+        return POMparse.get_parser(self, **kwargs)
 
     def parse(self, url, data=None, encoding=DEFAULT_ENCODING, **kwargs):
-        parser = get_parser(self, **kwargs)
+        parser = self.get_parser(**kwargs)
         parser.parse(url, data=data, encoding=encoding)
         parser.close()
 
     def parseFile(self, fo, **kwargs):
-        parser = get_parser(self, **kwargs)
+        parser = self.get_parser(**kwargs)
         parser.parseFile(fo)
 
     def parseString(self, string, **kwargs):
-        parser = get_parser(self, **kwargs)
+        parser = self.get_parser(**kwargs)
         parser.feed(string)
         parser.close()
 

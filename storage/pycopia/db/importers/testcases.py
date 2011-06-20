@@ -3,6 +3,7 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 from __future__ import absolute_import
+from __future__ import print_function
 
 
 # python imports
@@ -164,10 +165,10 @@ class TestCaseData(object):
         parser.close()
         del parser
         if _DEBUG:
-            print "=== parse_docstring: Original text ===:"
-            print text
-            print "--- parse_docstring: document text ---:"
-            print doc
+            print ("=== parse_docstring: Original text ===:")
+            print (text)
+            print ("--- parse_docstring: document text ---:")
+            print (doc)
 
         if not doc.root.id:
             for div in doc.root.find_elements("div"):
@@ -449,7 +450,7 @@ class TestCaseImporter(object):
         opts, longopts, args = getopt.getopt(argv[1:], "h?dMf")
         for opt, arg in opts:
             if opt in ("-h", "-?"):
-                print _DOC
+                print (_DOC)
                 return
             elif opt == "-d":
                 from pycopia import debugger
@@ -460,7 +461,7 @@ class TestCaseImporter(object):
                 domodule = True
 
         if not args:
-            print _DOC
+            print (_DOC)
             return
 
         # Look like a test runner.
@@ -480,13 +481,13 @@ class TestCaseImporter(object):
             _dbsession = None
 
     def import_package(self, basepackage):
-        basepath = module.get_module(basepackage).__path__[0]
-        lenbasepath = len(basepath)-len(basepackage)
-        for dirpath, dirnames, filenames in os.walk(basepath):
-            for filename in filenames:
-                modname = self._convert_path(lenbasepath, dirpath, filename)
-                if modname:
-                    self.import_module(modname)
+        for basepath in module.get_module(basepackage).__path__:
+            lenbasepath = len(basepath)-len(basepackage)
+            for dirpath, dirnames, filenames in os.walk(basepath):
+                for filename in filenames:
+                    modname = self._convert_path(lenbasepath, dirpath, filename)
+                    if modname:
+                        self.import_module(modname)
 
     def import_module(self, modname):
         if _DEBUG:
