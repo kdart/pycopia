@@ -61,6 +61,10 @@ class PosixAgent(Pyro.core.ObjBase, object):
     def platform(self):
         return sys.platform
 
+    def whatami(self):
+        """Return agent implementation (class name)."""
+        return self.__class__.__name__
+
     # Since file objects are not pickle-able, a handle is returned. Use the
     # handle for subsequent file operations on f* methods.
     def fopen(self, fname, mode="r", bufsize=-1):

@@ -445,6 +445,7 @@ class Test(object):
         your test implementation in the execute is positively sure that it
         does not meet the criteria. Other kinds of errors should return
         `incomplete()`. 
+
         In the execute method, the pattern is: `return self.failed('message')`.
         """
         if self.OPTIONS.bugid:
@@ -455,6 +456,19 @@ class Test(object):
         else:
             self._report.failed(msg, 2)
             return TestResult(constants.FAILED)
+
+    def expectedfail(self, msg=constants.NO_MESSAGE):
+        """Call this and return if the execute() failed but that was expected.
+
+        This is used primarily for exploratory testing where you may have a
+        sequence of parameterized tests where some are expected to fail past a
+        certain threshold. In other words, the test fails because the
+        parameters are out of spec.
+
+        In the execute method, the pattern is: `return self.expectedfail('message')`.
+        """
+        self._report.expectedfail(msg, 2)
+        return TestResult(constants.EXPECTED_FAIL)
 
     def incomplete(self, msg=constants.NO_MESSAGE):
         """Test could not complete.

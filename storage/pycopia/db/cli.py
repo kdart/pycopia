@@ -440,11 +440,15 @@ class TableCommands(CLI.BaseCommands):
         fmt = "{!s:6.6s}: " + " ".join(fmtl)
         hfmt = "{!s:6.6s}: " + " ".join(hfmtl)
         ln = 0 ; rows -= 3
-        for item in q.all():
-            if ln % rows == 0:
-                self._ui.printf("%B" + hfmt.format(pkname, *heading) + "%N")
-            self._print(fmt.format(getattr(item, pkname), *[getattr(item, hn) for hn in heading]))
-            ln += 1
+        try:
+            for item in q.all():
+                if ln % rows == 0:
+                    self._ui.printf("%B" + hfmt.format(pkname, *heading) + "%N")
+                self._print(fmt.format(getattr(item, pkname), *[getattr(item, hn) for hn in heading]))
+                ln += 1
+        except:
+            _session.rollback()
+            raise
 
     def describe(self, argv):
         """describe
@@ -519,7 +523,7 @@ class TableCommands(CLI.BaseCommands):
                 return q.get(rowid)
         q = self._get_query(argv)
         try:
-            return q.first()
+            return q.one()
         except:
             _session.rollback()
             raise
@@ -537,7 +541,8 @@ class TableCommands(CLI.BaseCommands):
                             ">": col.__gt__, 
                             "<": col.__lt__, 
                             "match": col.match, 
-                            #"contains": col.contains, 
+                            "contains": col.contains, 
+                            "in": col.in_, 
                             "like": col.like}.get(op)
                     if opm:
                         if op == "like":
@@ -545,6 +550,8 @@ class TableCommands(CLI.BaseCommands):
                             val = val.replace(".", "_")
                             if "%" not in val:
                                 val = "%" + val + "%"
+                        if op == "in":
+                            val = val.split(",")
                         q = q.filter(opm(val))
             for name in args[grps*3:]:
                 if name.startswith("="):
