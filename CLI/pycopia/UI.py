@@ -273,62 +273,8 @@ class UserInterface(object):
     def error(self, text):
         self.printf("%%r%s%%N" % (text,))
 
-    # report-like methods for test framework
-    def write(self, text):
-        self._io.write(text)
-    def writeline(self, text=""):
-        self._io.writeline(text)
-    def writelines(self, lines):
-        self._io.writelines(lines)
-
-    def add_heading(self, text, level=1):
-        s = ["\n"]
-        s.append("%s%s" % ("  "*(level-1), text))
-        s.append("%s%s" % ("  "*(level-1), "-"*len(text)))
-        self.Print("\n".join(s))
-
-    def add_title(self, title):
-        self.add_heading(title, 0)
-
-    # called with the name of a logfile to report
-    def logfile(self, filename):
-        self._io.write("LOGFILE: <%s>\n" % (filename,))
-
-    def add_message(self, msgtype, msg, level=1):
-        self._io.write("%s%s: %s\n" % ("  "*(level-1), msgtype, msg))
-
-    def add_summary(self, text):
-        self._io.write(text)
-
-    def add_text(self, text):
-        self._io.write(text)
-
-    def add_url(self, text, url):
-        self._io.write("%s: <%s>\n" % (text, url))
-
-    def passed(self, msg="", level=1):
-        return self.add_message(self.format("%GPASSED%N"), msg, level)
-
-    def failed(self, msg="", level=1):
-        return self.add_message(self.format("%RFAILED%N"), msg, level)
-
-    def incomplete(self, msg="", level=1):
-        return self.add_message(self.format("%yINCOMPLETE%N"), msg, level)
-
-    def abort(self, msg="", level=1):
-        return self.add_message(self.format("%YABORT%N"), msg, level)
-
-    def info(self, msg, level=1):
-        return self.add_message("INFO", msg, level)
-
-    def diagnostic(self, msg, level=1):
-        return self.add_message(self.format("%yDIAGNOSTIC%N"), msg, level)
-
-    def newpage(self):
-        self._io.write("\x0c") # FF
-
-    def newsection(self):
-        self._io.write("\x0c") # FF
+    def warning(self, text):
+        self.printf("%%Y%s%%N" % (text,))
 
     # user input
     def _get_prompt(self, name, prompt=None):

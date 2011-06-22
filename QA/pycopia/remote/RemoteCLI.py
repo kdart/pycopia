@@ -227,9 +227,11 @@ class ProcCommand(CLI.BaseCommands):
 # main command class
 class RemoteCLI(CLI.BaseCommands):
 
-    def _setup(self, client, prompt):
+    PROMPTFORMAT = "Agent:%s> "
+
+    def _setup(self, client, name):
         self._obj = client
-        self._environ["PS1"] = prompt
+        self._environ["PS1"] = self.PROMPTFORMAT % name
         self._namespace = {"client":client, "environ":self._environ}
         self._reset_scopes()
 
@@ -863,6 +865,7 @@ class TopLevelCLI(CLI.BaseCommands):
         agents = list(self._objs.keys())
         self.add_completion_scope("use", agents)
         self.add_completion_scope("ping", agents)
+        self.add_completion_scope("whatis", agents)
 
     def finalize(self):
         self._objs = {}
@@ -888,22 +891,36 @@ class TopLevelCLI(CLI.BaseCommands):
         return Client.get_remote(name)
 
     def use(self, argv):
-        """use
+        """use <name>
     Use the specified agent. """
         name = argv[1]
         clnt = self.get_remote(name)
         try:
-            plat = clnt.platform()
+            clnt.alive()
         except Pyro.errors.ConnectionClosedError:
             del self._objs[name]
             self._print("Remote agent has disconnected.")
             return
-        if plat == "win32":
-            cmd = self.clone(WindowsRemoteCLI)
+        cliclass = CLIManager.get(clnt)
+        if cliclass is not None:
+            cmd = self.clone(cliclass)
+            cmd._setup(clnt, name)
+            raise CLI.NewCommand, cmd
         else:
-            cmd = self.clone(PosixRemoteCLI)
-        cmd._setup(clnt, "Agent.%s> " % (name,))
-        raise CLI.NewCommand, cmd
+            self._ui.error("No CLI found for that agent!")
+
+    def whatis(self, argv):
+        """whatis <name>
+    Tell what type of agent corresponds to the name."""
+        name = argv[1]
+        clnt = self.get_remote(name)
+        try:
+            clnt.alive()
+        except Pyro.errors.ConnectionClosedError:
+            del self._objs[name]
+            self._print("Remote agent has disconnected.")
+            return
+        self._print(clnt.whatami())
 
     def ping(self, argv):
         """ping <name>
@@ -919,6 +936,50 @@ class TopLevelCLI(CLI.BaseCommands):
             ex, val, tb = sys.exc_info()
             self._print("Problem with client!")
             self._print(ex, "\r", val)
+
+
+class CLIManager(object):
+    """Manage a collection of CLI wrappers. 
+
+    Maps agent implementation names to specific CLI wrappers.
+    """
+    _CLI = {}
+
+    @classmethod
+    def register(cls, agentname, cliclass):
+        assert issubclass(cliclass, CLI.BaseCommands)
+        cls._CLI[agentname] = cliclass
+
+    @classmethod
+    def remove(cls, agentname):
+        try:
+            del cls._CLI[agentname]
+        except KeyError:
+            pass
+
+    @classmethod
+    def get(cls, clnt):
+        try:
+            agenttype = clnt.whatami()
+        except AttributeError: # old agent, possibly
+            pass
+        else:
+            try:
+                return cls._CLI[agenttype]
+            except KeyError: # use defaults if no specific cli wrapper found.
+                pass 
+        # default to platform generic CLI
+        plat = clnt.platform()
+        if plat == "win32":
+            return WindowsRemoteCLI
+        elif plat in ("linux2", "cygwin"):
+            return PosixRemoteCLI
+        else:
+            return None
+
+
+CLIManager.register("PosixAgent", PosixRemoteCLI)
+CLIManager.register("Win32Agent", WindowsRemoteCLI)
 
 
 def remotecli(argv):

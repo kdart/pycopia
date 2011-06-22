@@ -282,7 +282,7 @@ class WindowsProcess(object):
 
 # A server that performs filer client operations. This mostly delegates to the
 # os module. But some special methods are provided for common functions.
-class RemoteAgent(Pyro.core.SynchronizedObjBase):
+class Win32Agent(Pyro.core.SynchronizedObjBase):
     def __init__(self):
         Pyro.core.SynchronizedObjBase.__init__(self)
         self._files = {}
@@ -887,7 +887,7 @@ class AgentThread(threading.Thread):
     """
     def __init__(self, stopcallback):
         threading.Thread.__init__(self)
-        Log.msg("RemoteAgent", "initializing")
+        Log.msg("Win32Agent", "initializing")
         self._stopcallback = stopcallback
 
     def run(self):
@@ -907,7 +907,7 @@ def run_server():
     daemon=Pyro.core.Daemon()
     daemon.useNameServer(ns)
 
-    uri=daemon.connectPersistent(RemoteAgent(), 
+    uri=daemon.connectPersistent(Win32Agent(), 
                 "Agents.%s" % (win32api.GetComputerName().lower(),))
     daemon.requestLoop(_checkexit)
     daemon.shutdown()
