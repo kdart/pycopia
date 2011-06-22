@@ -926,16 +926,15 @@ class TopLevelCLI(CLI.BaseCommands):
         """ping <name>
     Checks that the named server is alive."""
         host = argv[1]
-        clnt = self.get_remote(name)
         try:
+            clnt = self.get_remote(host)
             if clnt.alive():
                 self._print("%s is alive." % (host,))
             else:
                 self._print("%s is NOT alive!" % (host,))
         except:
             ex, val, tb = sys.exc_info()
-            self._print("Problem with client!")
-            self._print(ex, "\r", val)
+            self._print("Agent is not reachable:", val)
 
 
 class CLIManager(object):
