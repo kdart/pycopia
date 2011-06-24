@@ -430,7 +430,7 @@ class TableCommands(CLI.BaseCommands):
         cols -= 8
         for colname in heading:
             md = models.get_column_metadata(self._obj, colname)
-            fmt, length = _FORMATS[md.coltype]
+            fmt, length = _FORMATS.get(md.coltype, ("{!s:10.10}", 10)) # default width 10
             cols -= length
             if cols <= 0:
                 break
@@ -1057,17 +1057,10 @@ def new_relation_input(ui, modelclass, metadata):
             default = choices[0][0]
         return ui.choose_key(dict(choices), default, "%%I%s%%N" % metadata.colname)
 
-def new_testcasestatus(ui, modelclass, metadata):
-    return ui.choose_key(dict(types.TestCaseStatus.get_choices()), 
-            types.TestCaseStatus.get_default(), "%%I%s%%N" % metadata.colname)
-
-def new_testcasetype(ui, modelclass, metadata):
-    return ui.choose_key(dict(types.TestCaseType.get_choices()), 
-            types.TestCaseType.get_default(), "%%I%s%%N" % metadata.colname)
-
-def new_testpriority(ui, modelclass, metadata):
-    return ui.choose_key(dict(types.TestPriorityType.get_choices()), 
-            types.TestPriorityType.get_default(), "%%I%s%%N" % metadata.colname)
+def new_enumtype(ui, modelclass, metadata):
+    enumtype = getattr(types, metadata.coltype)
+    return ui.choose_key(dict(enumtype.get_choices()), 
+            enumtype.get_default(), "%%I%s%%N" % metadata.colname)
 
 
 _CREATORS = {
@@ -1094,9 +1087,11 @@ _CREATORS = {
     "PickleText": new_pickleinput,
     "ValueType": new_valuetypeinput,
     "RelationshipProperty": new_relation_input,
-    "TestCaseStatus": new_testcasestatus,
-    "TestCaseType": new_testcasetype,
-    "TestPriorityType": new_testpriority,
+    "TestCaseStatus": new_enumtype,
+    "TestCaseType": new_enumtype,
+    "PriorityType": new_enumtype,
+    "SeverityType": new_enumtype,
+    "LikelihoodType": new_enumtype,
 }
 
 _FORMATS = { # some may be None values
@@ -1109,21 +1104,14 @@ _FORMATS = { # some may be None values
     "FLOAT": ("{:>16.3f}", 20),
     "Inet": ("{!s:>15.15}", 15),
     "INTEGER": ("{!s:>20}", 20),
-    "INTERVAL": ("{!s:10.10}", 10),
     "MACADDR": ("{!s:<17.17}", 17),
-    "NUMERIC": ("{!s:10.10}", 10),
     "SMALLINT": ("{!s:>10}", 10),
     "VARCHAR": ("{:<30.30}", 30),
     "TEXT": ("{:<30.30}", 30),
     "TIME": ("{:%H:%M:%S}", 8),
     "UUID": ("{:<20.20}", 20),
     "PickleText": ("{!r:25.25}", 25),
-    "ValueType": ("{!s:10.10}", 10),
     "RelationshipProperty": ("{!s:15.15}", 15),
-    "TestCaseStatus": ("{!s:10.10}", 10),
-    "TestCaseType": ("{!s:10.10}", 10),
-    "TestPriorityType": ("{!s:10.10}", 10),
-    "TestResultType": ("{!s:10.10}", 10),
 }
 
 
@@ -1236,24 +1224,14 @@ def edit_valuetype(ui, modelclass, metadata, dbrow):
             "%%I%s%%N" % metadata.colname)
     setattr(dbrow, metadata.colname, types.ValueType.validate(vt))
 
-
-def edit_testcasestatus(ui, modelclass, metadata, dbrow):
-    current = int(getattr(dbrow, metadata.colname))
-    choices = dict(types.TestCaseStatus.get_choices())
-    chosen_id = ui.choose_key(choices, current, "%%I%s%%N" % metadata.colname)
-    setattr(dbrow, metadata.colname, types.TestCaseStatus.validate(chosen_id))
-
-def edit_testcasetype(ui, modelclass, metadata, dbrow):
+def edit_enumtype(ui, modelclass, metadata, dbrow):
+    enumtype = getattr(types, metadata.coltype)
     current = getattr(dbrow, metadata.colname)
-    choices = dict(types.TestCaseType.get_choices())
-    chosen_id = ui.choose_key(choices, current, "%%I%s%%N" % metadata.colname)
-    setattr(dbrow, metadata.colname, types.TestCaseType.validate(chosen_id))
-
-def edit_testpriority(ui, modelclass, metadata, dbrow):
-    current = getattr(dbrow, metadata.colname)
-    choices = dict(types.TestPriorityType.get_choices())
-    chosen_id = ui.choose_key(choices, current, "%%I%s%%N" % metadata.colname)[0]
-    setattr(dbrow, metadata.colname, types.TestPriorityType.validate(chosen_id))
+    chosen_id = ui.choose_key(
+            dict(enumtype.get_choices()), 
+            current, 
+            "%%I%s%%N" % metadata.colname)
+    setattr(dbrow, metadata.colname, enumtype.validate(chosen_id))
 
 def edit_pickleinput(ui, modelclass, metadata, dbrow):
     current = getattr(dbrow, metadata.colname)
@@ -1289,9 +1267,11 @@ _EDITORS = {
     "PickleText": edit_pickleinput,
     "ValueType": edit_valuetype,
     "RelationshipProperty": edit_relation_input,
-    "TestCaseStatus": edit_testcasestatus,
-    "TestCaseType": edit_testcasetype,
-    "TestPriorityType": edit_testpriority,
+    "TestCaseStatus": edit_enumtype,
+    "TestCaseType": edit_enumtype,
+    "PriorityType": edit_enumtype,
+    "SeverityType": edit_enumtype,
+    "LikelihoodType": edit_enumtype,
 }
 
 

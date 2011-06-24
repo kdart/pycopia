@@ -25,7 +25,7 @@ from datetime import timedelta
 from hashlib import sha1
 
 from sqlalchemy import create_engine, and_, or_, not_, func, exists
-from sqlalchemy.orm import (sessionmaker, mapper, relation, class_mapper,
+from sqlalchemy.orm import (sessionmaker, mapper, relationship, class_mapper,
         backref, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
 from sqlalchemy.orm.collections import column_mapped_collection
@@ -111,7 +111,7 @@ class Group(object):
 
 mapper(Group, tables.auth_group,
     properties={
-        "permissions": relation(Permission, lazy=True, secondary=tables.auth_group_permissions),
+        "permissions": relationship(Permission, lazy=True, secondary=tables.auth_group_permissions),
     }
 )
 
@@ -167,8 +167,8 @@ def get_key():
 
 mapper(User, tables.auth_user,
     properties={
-        "permissions": relation(Permission, lazy=True, secondary=tables.auth_user_user_permissions),
-        "groups": relation(Group, lazy=True, secondary=tables.auth_user_groups),
+        "permissions": relationship(Permission, lazy=True, secondary=tables.auth_user_user_permissions),
+        "groups": relationship(Group, lazy=True, secondary=tables.auth_user_groups),
         "password": synonym('_password', map_column=True),
 #        "full_name": column_property( (tables.auth_user.c.first_name + " " +
 #                tables.auth_user.c.last_name).label('full_name') ),
@@ -217,7 +217,7 @@ class UserMessage(object):
 
 mapper(UserMessage, tables.auth_message,
     properties={
-        "user": relation(User, backref=backref("messages",
+        "user": relationship(User, backref=backref("messages",
                     cascade="all, delete, delete-orphan")),
     }
 )
@@ -299,7 +299,7 @@ class CountrySet(object):
 
 mapper(CountrySet, tables.country_sets,
     properties={
-        "countries": relation(Country, lazy=True, secondary=tables.country_sets_countries),
+        "countries": relationship(Country, lazy=True, secondary=tables.country_sets_countries),
     }
 )
 
@@ -336,7 +336,7 @@ class LanguageSet(object):
 
 mapper(LanguageSet, tables.language_sets, 
     properties={
-        "languages": relation(Language, lazy=True, secondary=tables.language_sets_languages),
+        "languages": relationship(Language, lazy=True, secondary=tables.language_sets_languages),
     }
 )
 
@@ -353,7 +353,7 @@ class Address(object):
 
 mapper(Address, tables.addresses,
     properties={
-        "country": relation(Country),
+        "country": relationship(Country),
     }
 )
 
@@ -369,8 +369,8 @@ class Contact(object):
 
 mapper(Contact, tables.contacts,
     properties={
-        "address": relation(Address),
-        "user": relation(User),
+        "address": relationship(Address),
+        "user": relationship(User),
     }
 )
 
@@ -388,7 +388,7 @@ class Schedule(object):
 
 mapper(Schedule, tables.schedule,
     properties={
-        "user": relation(User),
+        "user": relationship(User),
     }
 )
 
@@ -401,8 +401,8 @@ class Location(object):
 
 mapper(Location, tables.location,
     properties={
-        "address": relation(Address),
-        "contact": relation(Contact),
+        "address": relationship(Address),
+        "contact": relationship(Contact),
     }
 )
 
@@ -472,9 +472,9 @@ class Project(object):
 
 mapper(Project, tables.projects,
     properties={
-        "components": relation(Component, lazy=True, secondary=tables.projects_components),
-        "category": relation(ProjectCategory, backref="projects"),
-        "leader": relation(Contact),
+        "components": relationship(Component, lazy=True, secondary=tables.projects_components),
+        "category": relationship(ProjectCategory, backref="projects"),
+        "leader": relationship(Contact),
     }
 )
 
@@ -487,7 +487,7 @@ class ProjectVersion(object):
 
 mapper(ProjectVersion, tables.project_versions, 
     properties={
-        "project": relation(Project),
+        "project": relationship(Project),
     }
 )
 
@@ -567,12 +567,12 @@ class Corporation(object):
 
 mapper(Corporation, tables.corporations,
     properties={
-        "services": relation(FunctionalArea, lazy=True, secondary=tables.corporations_services),
-        "address": relation(Address),
-        "contact": relation(Contact),
-        "country": relation(Country),
-#        "parent": relation(Corporation,  backref="subsidiaries"),
-#        "parent": relation(Corporation,  backref=backref("subsidiaries",
+        "services": relationship(FunctionalArea, lazy=True, secondary=tables.corporations_services),
+        "address": relationship(Address),
+        "contact": relationship(Contact),
+        "country": relationship(Country),
+#        "parent": relationship(Corporation,  backref="subsidiaries"),
+#        "parent": relationship(Corporation,  backref=backref("subsidiaries",
 #                                remote_side=[tables.corporations.c.id])),
     }
 )
@@ -591,8 +591,8 @@ class CorporateAttribute(object):
 
 mapper(CorporateAttribute, tables.corp_attributes,
     properties={
-        "type": relation(CorporateAttributeType),
-        "corporation": relation(Corporation, backref=backref("attributes", 
+        "type": relationship(CorporateAttributeType),
+        "corporation": relationship(Corporation, backref=backref("attributes", 
                     cascade="all, delete, delete-orphan")),
     }
 )
@@ -625,8 +625,8 @@ class SoftwareVariant(object):
 
 mapper(SoftwareVariant, tables.software_variant,
     properties={
-        "language": relation(Language),
-        "country": relation(Country),
+        "language": relationship(Language),
+        "country": relationship(Country),
     }
 )
 
@@ -673,11 +673,11 @@ class Software(object):
 
 mapper (Software, tables.software,
     properties={
-        "variants": relation(SoftwareVariant, lazy=True, secondary=tables.software_variants),
-        "category": relation(SoftwareCategory),
-        "vendor": relation(Corporation, 
+        "variants": relationship(SoftwareVariant, lazy=True, secondary=tables.software_variants),
+        "category": relationship(SoftwareCategory),
+        "vendor": relationship(Corporation, 
                 primaryjoin=tables.software.c.vendor_id==tables.corporations.c.id),
-        "manufacturer": relation(Corporation, 
+        "manufacturer": relationship(Corporation, 
                 primaryjoin=tables.software.c.manufacturer_id==tables.corporations.c.id),
     }
 )
@@ -694,9 +694,9 @@ class SoftwareAttribute(object):
 
 mapper(SoftwareAttribute, tables.software_attributes,
     properties={
-            "software": relation(Software, backref=backref("attributes", 
+            "software": relationship(Software, backref=backref("attributes", 
                     cascade="all, delete, delete-orphan")),
-            "type": relation(AttributeType),
+            "type": relationship(AttributeType),
     },
 )
 
@@ -738,7 +738,7 @@ class Network(object):
 
 mapper(Network, tables.networks,
     properties={
-        "upperlayers": relation(Network, backref=backref("lower",
+        "upperlayers": relationship(Network, backref=backref("lower",
                 remote_side=[tables.networks.c.id])),
     },
 )
@@ -786,9 +786,9 @@ class EquipmentModel(object):
 
 mapper(EquipmentModel, tables.equipment_model,
     properties={
-        "embeddedsoftware": relation(Software, secondary=tables.equipment_model_embeddedsoftware),
-        "category": relation(EquipmentCategory, order_by=tables.equipment_category.c.name),
-        "manufacturer": relation(Corporation, order_by=tables.corporations.c.name),
+        "embeddedsoftware": relationship(Software, secondary=tables.equipment_model_embeddedsoftware),
+        "category": relationship(EquipmentCategory, order_by=tables.equipment_category.c.name),
+        "manufacturer": relationship(Corporation, order_by=tables.corporations.c.name),
     }
 )
 
@@ -805,9 +805,9 @@ class EquipmentModelAttribute(object):
 
 mapper(EquipmentModelAttribute, tables.equipment_model_attributes,
     properties={
-            "equipmentmodel": relation(EquipmentModel, backref=backref("attributes", 
+            "equipmentmodel": relationship(EquipmentModel, backref=backref("attributes", 
                     cascade="all, delete, delete-orphan")),
-            "type": relation(AttributeType),
+            "type": relationship(AttributeType),
     },
 )
 
@@ -921,15 +921,15 @@ class Equipment(object):
 
 mapper(Equipment, tables.equipment,
     properties={
-        "model": relation(EquipmentModel),
-        "owner": relation(User),
-        "vendor": relation(Corporation),
-        "account": relation(LoginAccount),
-        "language": relation(Language),
-        "location": relation(Location),
-        "subcomponents": relation(Equipment, 
+        "model": relationship(EquipmentModel),
+        "owner": relationship(User),
+        "vendor": relationship(Corporation),
+        "account": relationship(LoginAccount),
+        "language": relationship(Language),
+        "location": relationship(Location),
+        "subcomponents": relationship(Equipment, 
                 backref=backref('parent', remote_side=[tables.equipment.c.id])),
-        "software": relation(Software, lazy=True, secondary=tables.equipment_software),
+        "software": relationship(Software, lazy=True, secondary=tables.equipment_software),
     },
 )
 
@@ -946,9 +946,9 @@ class EquipmentAttribute(object):
 
 mapper(EquipmentAttribute, tables.equipment_attributes,
     properties={
-            "equipment": relation(Equipment, backref=backref("attributes", 
+            "equipment": relationship(Equipment, backref=backref("attributes", 
                     cascade="all, delete, delete-orphan")),
-            "type": relation(AttributeType),
+            "type": relationship(AttributeType),
     },
 )
 
@@ -970,11 +970,11 @@ class Interface(object):
 
 mapper(Interface, tables.interfaces,
     properties = {
-        "interface_type": relation(InterfaceType, order_by=tables.interface_type.c.name),
-        "subinterfaces": relation(Interface, 
+        "interface_type": relationship(InterfaceType, order_by=tables.interface_type.c.name),
+        "subinterfaces": relationship(Interface, 
                 backref=backref('parent', remote_side=[tables.interfaces.c.id])),
-        "network": relation(Network, backref="interfaces", order_by=tables.networks.c.name),
-        "equipment": relation(Equipment, 
+        "network": relationship(Network, backref="interfaces", order_by=tables.networks.c.name),
+        "equipment": relationship(Equipment, 
                 backref=backref("interfaces", collection_class=column_mapped_collection(tables.interfaces.c.name))),
     }
 )
@@ -1073,7 +1073,7 @@ class Environment(object):
 
 mapper(Environment, tables.environments,
     properties={
-        "owner": relation(User),
+        "owner": relationship(User),
     },
 )
 
@@ -1091,9 +1091,9 @@ class TestEquipment(object):
 
 mapper(TestEquipment, tables.testequipment,
     properties={
-        "roles": relation(SoftwareCategory, secondary=tables.testequipment_roles),
-        "equipment": relation(Equipment),
-        "environment": relation(Environment, backref="testequipment"),
+        "roles": relationship(SoftwareCategory, secondary=tables.testequipment_roles),
+        "equipment": relationship(Equipment),
+        "environment": relationship(Environment, backref="testequipment"),
     },
 )
 
@@ -1110,9 +1110,9 @@ class EnvironmentAttribute(object):
 
 mapper(EnvironmentAttribute, tables.environment_attributes,
     properties={
-            "environment": relation(Environment, backref=backref("attributes", 
+            "environment": relationship(Environment, backref=backref("attributes", 
                     cascade="all, delete, delete-orphan")),
-            "type": relation(EnvironmentAttributeType),
+            "type": relationship(EnvironmentAttributeType),
     },
 )
 
@@ -1134,6 +1134,19 @@ mapper(Trap, tables.traps)
 
 
 #######################################
+
+class Requirement(object):
+    ROW_DISPLAY = ("uri",)
+
+    def __str__(self):
+        return str(self.uri)
+
+    def __repr__(self):
+        return "Requirement(%r)" % (self.uri,)
+
+mapper(Requirement, tables.requirement_ref,
+)
+
 
 #######################################
 # Test relations and results
@@ -1170,8 +1183,9 @@ class TestCase(object):
 
 mapper(TestCase, tables.test_cases,
     properties={
-        "functionalarea": relation(FunctionalArea, secondary=tables.test_cases_areas),
-        "dependents": relation(TestCase, backref=backref("prerequisite",
+        "functionalarea": relationship(FunctionalArea, secondary=tables.test_cases_areas),
+        "reference": relationship(Requirement),
+        "dependents": relationship(TestCase, backref=backref("prerequisite",
                                 remote_side=[tables.test_cases.c.id])),
     },
 )
@@ -1204,10 +1218,10 @@ class TestSuite(object):
 
 mapper(TestSuite, tables.test_suites,
     properties={
-        "project": relation(Project),
-        "components": relation(Component, secondary=tables.components_suites, backref="suites"),
-        "testcases": relation(TestCase, secondary=tables.test_suites_testcases, backref="suites"),
-        "subsuites": relation(TestSuite, secondary=tables.test_suites_suites, 
+        "project": relationship(Project),
+        "components": relationship(Component, secondary=tables.components_suites, backref="suites"),
+        "testcases": relationship(TestCase, secondary=tables.test_suites_testcases, backref="suites"),
+        "subsuites": relationship(TestSuite, secondary=tables.test_suites_suites, 
             primaryjoin=tables.test_suites.c.id==tables.test_suites_suites.c.from_testsuite_id,
             secondaryjoin=tables.test_suites_suites.c.to_testsuite_id==tables.test_suites.c.id,
             backref="suites"),
@@ -1226,10 +1240,10 @@ class TestJob(object):
 
 mapper(TestJob, tables.test_jobs,
     properties = {
-        "user": relation(User),
-        "environment": relation(Environment, order_by=tables.environments.c.name),
-        "suite": relation(TestSuite),
-        "schedule": relation(Schedule),
+        "user": relationship(User),
+        "environment": relationship(Environment, order_by=tables.environments.c.name),
+        "suite": relationship(TestSuite),
+        "schedule": relationship(Schedule),
     }
 )
 
@@ -1292,14 +1306,45 @@ class TestResult(object):
 
 mapper(TestResult, tables.test_results,
     properties = {
-        "tester": relation(User),
-        "data": relation(TestResultData),
-        "environment": relation(Environment, order_by=tables.environments.c.name),
-        "testcase": relation(TestCase),
-        "testsuite": relation(TestSuite),
-        "build": relation(ProjectVersion),
-        "subresults": relation(TestResult, backref=backref("parent",
+        "tester": relationship(User),
+        "data": relationship(TestResultData),
+        "environment": relationship(Environment, order_by=tables.environments.c.name),
+        "testcase": relationship(TestCase),
+        "testsuite": relationship(TestSuite),
+        "build": relationship(ProjectVersion),
+        "subresults": relationship(TestResult, backref=backref("parent",
                                 remote_side=[tables.test_results.c.id])),
+    }
+)
+
+################ risk assessment tables
+
+class RiskCategory(object):
+    ROW_DISPLAY = ("name", )
+
+    def __repr__(self):
+        return "RiskCategory(%r, %r)" % (self.name, self.description)
+
+    def __str__(self):
+        return str(self.name)
+
+mapper(RiskCategory, tables.risk_category)
+
+
+class RiskFactor(object):
+    ROW_DISPLAY = ("description", )
+
+    def __repr__(self):
+        return "RiskFactor(%s)" % (self.description,)
+
+    def __str__(self):
+        return str(self.description)
+
+mapper(RiskFactor, tables.risk_factors,
+    properties={
+        "requirement": relationship(Requirement),
+        "testcase": relationship(TestCase),
+        "risk_category": relationship(RiskCategory),
     }
 )
 
@@ -1325,7 +1370,7 @@ class CapabilityType(object):
 
 mapper(CapabilityType, tables.capability_type,
     properties={
-        "group": relation(CapabilityGroup),
+        "group": relationship(CapabilityGroup),
     }
 )
 
@@ -1342,8 +1387,8 @@ class Capability(object):
 
 mapper(Capability, tables.capability,
     properties={
-        "type": relation(CapabilityType),
-        "equipment": relation(Equipment, backref=backref("capabilities", 
+        "type": relationship(CapabilityType),
+        "equipment": relationship(Equipment, backref=backref("capabilities", 
                     cascade="all, delete, delete-orphan")),
     }
 )
@@ -1368,23 +1413,14 @@ class Config(object):
 
 mapper(Config, tables.config, 
     properties={
-        'children': relation(Config, cascade="all", 
+        'children': relationship(Config, cascade="all", 
             backref=backref("container", 
                     remote_side=[tables.config.c.id, tables.config.c.user_id])),
-        'testcase': relation(TestCase),
-        'testsuite': relation(TestSuite),
-        'user': relation(User),
+        'testcase': relationship(TestCase),
+        'testsuite': relationship(TestSuite),
+        'user': relationship(User),
     }
 )
-
-
-#######################################
-# Basic address book table. This table originally mapped to
-# StarOffice Addresses database and is here just for nostalgia. ;-)
-
-class AddressBookEntry(object):
-    pass
-mapper(AddressBookEntry, tables.addressbook)
 
 
 

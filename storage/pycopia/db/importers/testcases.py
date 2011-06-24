@@ -91,9 +91,9 @@ class TestCaseData(object):
         data["endcondition"]      = None
         data["procedure"]         = "See code."      # mandatory
         data["comments"]          = None
-        data["priority"]          = types.TestPriorityType.enumerations[0] # unknown
-        data["cycle"]             = types.TestCaseType.enumerations[1] # system
-        data["status"]            = types.TestCaseStatus.enumerations[0] # new
+        data["priority"]          = types.PriorityType.get_default()
+        data["cycle"]             = types.TestCaseType.get_default()
+        data["status"]            = types.TestCaseStatus.get_default()
         data["automated"]         = True             # mandatory
         data["interactive"]       = False            # mandatory
         data["valid"]             = True             # mandatory

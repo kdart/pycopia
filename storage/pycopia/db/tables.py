@@ -495,14 +495,13 @@ test_cases =  Table('test_cases', metadata,
             Column(u'author_id', INTEGER(), primary_key=False),
             Column(u'reviewer_id', INTEGER(), primary_key=False),
             Column(u'tester_id', INTEGER(), primary_key=False),
-            Column(u'reference', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'purpose', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'passcriteria', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'startcondition', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'endcondition', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'procedure', TEXT(length=None, convert_unicode=False), primary_key=False),
             Column(u'comments', TEXT(length=None, convert_unicode=False), primary_key=False),
-            Column(u'priority', TestPriorityType(), primary_key=False, nullable=False, default=TestPriorityType.get_default),
+            Column(u'priority', PriorityType(), primary_key=False, nullable=False, default=PriorityType.get_default),
             Column(u'cycle', TestCaseType(), primary_key=False, nullable=False, default=TestCaseType.get_default),
             Column(u'status', TestCaseStatus(), primary_key=False, nullable=False, default=TestCaseStatus.get_default),
             Column(u'automated', BOOLEAN(), primary_key=False, nullable=False, default=default_inactive),
@@ -511,6 +510,8 @@ test_cases =  Table('test_cases', metadata,
             Column(u'testimplementation', VARCHAR(length=255, convert_unicode=False), primary_key=False),
             Column(u'bugid', VARCHAR(length=80, convert_unicode=False), primary_key=False),
             Column(u'prerequisite_id', INTEGER(), primary_key=False),
+            Column(u'reference_id', INTEGER(), primary_key=False),
+            Column(u'time_estimate', INTERVAL(), primary_key=False), # for manual tests
     ForeignKeyConstraint([u'author_id'], [u'public.auth_user.id'], name=u'test_cases_author_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'reviewer_id'], [u'public.auth_user.id'], name=u'test_cases_reviewer_id_fkey',
@@ -520,6 +521,8 @@ test_cases =  Table('test_cases', metadata,
             ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_cases_lastchangeauthor_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'prerequisite_id'], [u'public.test_cases.id'], name=u'test_cases_prerequisite_id_fkey'),
+            ForeignKeyConstraint([u'reference_id'], [u'public.requirement_ref.id'], name=u'test_cases_requirement_ref_fkey',
+                    onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
 Index('index_test_cases_lastchangeauthor_id', test_cases.c.lastchangeauthor_id, unique=False)
 Index('index_test_cases_reviewer_id', test_cases.c.reviewer_id, unique=False)
@@ -527,6 +530,7 @@ Index('index_test_cases_testimplementation', test_cases.c.testimplementation, un
 Index('index_test_cases_author_id', test_cases.c.author_id, unique=False)
 Index('index_test_cases_name_key', test_cases.c.name, unique=True)
 Index('index_test_cases_tester_id', test_cases.c.tester_id, unique=False)
+Index('index_test_cases_requirement_ref_id', test_cases.c.reference_id, unique=False)
 
 
 test_suites =  Table('test_suites', metadata,
@@ -559,6 +563,39 @@ test_suites_testcases =  Table('test_suites_testcases', metadata,
     schema='public')
 Index('index_test_suites_testcases_testsuite_id_key', test_suites_testcases.c.testsuite_id, test_suites_testcases.c.testcase_id, unique=True)
 
+# risk managmnet schema
+risk_factors =  Table('risk_factors', metadata,
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'description', TEXT(convert_unicode=False), primary_key=False),
+            Column(u'priority', PriorityType(), primary_key=False, nullable=False, default=PriorityType.get_default),
+            Column(u'likelihood', LikelihoodType(), primary_key=False, nullable=False, default=LikelihoodType.get_default),
+            Column(u'severity', SeverityType(), primary_key=False, nullable=False, default=SeverityType.get_default),
+            Column(u'testcase_id', INTEGER(), primary_key=False),
+            Column(u'requirement_id', INTEGER(), primary_key=False),
+            Column(u'risk_category_id', INTEGER(), primary_key=False),
+    ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], 
+            name=u'risk_factors_testcase_id_fkey', ondelete="SET NULL"),
+    ForeignKeyConstraint([u'requirement_id'], [u'public.requirement_ref.id'], 
+            name=u'risk_factors_requirement_id_fkey', ondelete="SET NULL"),
+    ForeignKeyConstraint([u'risk_category_id'], [u'public.risk_category.id'], 
+            name=u'risk_factors_risk_category_id_fkey'),
+    schema='public')
+Index('index_risk_factors_testcase_id', risk_factors.c.testcase_id, unique=False)
+Index('index_risk_factors_requirement_ref_id', risk_factors.c.requirement_id, unique=False)
+Index('index_risk_factors_risk_category_id', risk_factors.c.risk_category_id, unique=False)
+
+risk_category =  Table('risk_category', metadata,
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+    Column(u'name', VARCHAR(length=80, convert_unicode=False), nullable=False),
+            Column(u'description', TEXT(convert_unicode=False), primary_key=False),
+    schema='public')
+Index('index_risk_category_name_key', risk_category.c.name, unique=True)
+
+requirement_ref =  Table('requirement_ref', metadata,
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'uri', VARCHAR(length=255), primary_key=False),
+            Column(u'description', TEXT(convert_unicode=False), primary_key=False),
+    schema='public')
 
 country_codes =  Table('country_codes', metadata,
     Column(u'id', INTEGER(), primary_key=True, nullable=False),
@@ -915,44 +952,6 @@ software_category =  Table('software_category', metadata,
     schema='public')
 Index('index_software_category_name_key', software_category.c.name, unique=True)
 
-# This table was made to work with the old StarOffice Addressbook
-# table. It's still useful as a general contacts list. It's here as an
-# "extra".
-addressbook =  Table('addressbook', metadata,
-            Column(u'PREFIX', VARCHAR(length=15, convert_unicode=False), primary_key=False),
-            Column(u'FIRSTNAME', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'LASTNAME', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'TITLE', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'COMPANY', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'DEPARTMENT', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'ADDRESS', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'CITY', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'STATEPROV', VARCHAR(length=5, convert_unicode=False), primary_key=False),
-            Column(u'POSTALCODE', VARCHAR(length=15, convert_unicode=False), primary_key=False),
-            Column(u'COUNTRY', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'POSITION', VARCHAR(length=100, convert_unicode=False), primary_key=False),
-            Column(u'INITIALS', VARCHAR(length=10, convert_unicode=False), primary_key=False),
-            Column(u'SALUTATION', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'PHONEHOME', VARCHAR(length=25, convert_unicode=False), primary_key=False),
-            Column(u'PHONEOFFI', VARCHAR(length=25, convert_unicode=False), primary_key=False),
-            Column(u'PHONEOTHE', VARCHAR(length=25, convert_unicode=False), primary_key=False),
-            Column(u'PHONEWORK', VARCHAR(length=25, convert_unicode=False), primary_key=False),
-            Column(u'MOBILE', VARCHAR(length=25, convert_unicode=False), primary_key=False),
-            Column(u'PAGER', VARCHAR(length=25, convert_unicode=False), primary_key=False),
-            Column(u'FAX', VARCHAR(length=25, convert_unicode=False), primary_key=False),
-            Column(u'EMAIL', VARCHAR(length=50, convert_unicode=False), primary_key=False),
-            Column(u'URL', VARCHAR(length=128, convert_unicode=False), primary_key=False),
-            Column(u'NOTE', TEXT(length=None, convert_unicode=False), primary_key=False),
-            Column(u'ALTFIELD1', VARCHAR(length=100, convert_unicode=False), primary_key=False),
-            Column(u'ALTFIELD2', VARCHAR(length=100, convert_unicode=False), primary_key=False),
-            Column(u'ALTFIELD3', VARCHAR(length=100, convert_unicode=False), primary_key=False),
-            Column(u'ALTFIELD4', VARCHAR(length=100, convert_unicode=False), primary_key=False),
-            Column(u'ID', INTEGER(), primary_key=True, nullable=False),
-            Column(u'CALENDAR', VARCHAR(length=100, convert_unicode=False), primary_key=False),
-            Column(u'INVITE', VARCHAR(length=1, convert_unicode=False), primary_key=False),
-    schema='public')
-Index('index_address_pkey', addressbook.c.ID, unique=True)
-
 
 # Run this module to create the tables. The user/role/database should
 # already be created.
@@ -963,24 +962,21 @@ if __name__ == '__main__':
     from sqlalchemy import create_engine
 
     tname = None
-    opts, longopts, args = getopt.getopt(sys.argv[1:], "t:")
+    opts, longopts, args = getopt.getopt(sys.argv[1:], "")
     try:
         url = args[0]
     except IndexError:
         print "Please supply a database URL."
         print "e.g: postgresql://pycopia@localhost/pycopia"
-        print "Use -t <name> to select single table."
     else:
-        for opt, optarg in opts:
-            if opt == "-t":
-                tname = optarg
         db = create_engine(unicode(url))
         metadata.bind = db
-        if tname:
-            tbl = getattr(sys.modules[__name__], tname)
-            print tbl
-            tbl.drop(checkfirst=True)
-            tbl.create()
+        if len(args) > 1:
+            for tname in args[1:]:
+                tbl = getattr(sys.modules[__name__], tname)
+                print tbl
+                tbl.drop(checkfirst=True)
+                tbl.create()
         else:
             print "creating tables in", url
             metadata.create_all()

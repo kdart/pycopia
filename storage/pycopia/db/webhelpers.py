@@ -223,7 +223,9 @@ _VALIDATORS = {
     "ValueType": types.ValueType.validate,
     "TestCaseStatus": types.TestCaseStatus.validate,
     "TestCaseType": types.TestCaseType.validate,
-    "TestPriorityType": types.TestPriorityType.validate,
+    "PriorityType": types.PriorityType.validate,
+    "SeverityType": types.SeverityType.validate,
+    "LikelihoodType": types.LikelihoodType.validate,
 }
 
 
@@ -304,24 +306,12 @@ def create_relation_input(node, modelclass, metadata, row):
     node.add_label(metadata.colname, elid)
     return node.add_select(vlist, name=metadata.colname, multiple=metadata.uselist, id=elid)
 
-def create_testcasestatus(node, modelclass, metadata, row):
+def create_enumtype(node, modelclass, metadata, row):
+    enumtype = getattr(types, metadata.coltype)
     value = int(getattr(row, metadata.colname))
     return node.add_radiobuttons(metadata.colname, 
-            types.TestCaseStatus.get_choices(), 
+            enumtype.get_choices(), 
             checked=value, class_="radioset")
-
-def create_testcasetype(node, modelclass, metadata, row):
-    value = int(getattr(row, metadata.colname))
-    return node.add_radiobuttons(metadata.colname, 
-            types.TestCaseType.get_choices(), 
-            checked=value, class_="radioset")
-
-def create_testpriority(node, modelclass, metadata, row):
-    value = int(getattr(row, metadata.colname))
-    return node.add_radiobuttons(metadata.colname, 
-            types.TestPriorityType.get_choices(), 
-            checked=value, class_="radioset")
-
 
 _CONSTRUCTORS = {
     "ARRAY": None,
@@ -347,9 +337,11 @@ _CONSTRUCTORS = {
     "PickleText": create_pickleinput,
     "ValueType": create_valuetypeinput,
     "RelationshipProperty": create_relation_input,
-    "TestCaseStatus": create_testcasestatus,
-    "TestCaseType": create_testcasetype,
-    "TestPriorityType": create_testpriority,
+    "TestCaseStatus": create_enumtype,
+    "TestCaseType": create_enumtype,
+    "PriorityType": create_enumtype,
+    "SeverityType": create_enumtype,
+    "LikelihoodType": create_enumtype,
 }
 
 
@@ -404,22 +396,11 @@ def new_valuetypeinput(node, modelclass, metadata):
     return node.add_radiobuttons(metadata.colname, types.ValueType.get_choices(), checked=0, 
             class_="radioset")
 
-def new_testcasestatus(node, modelclass, metadata):
+def new_enumtype(node, modelclass, metadata):
+    enumtype = getattr(types, metadata.coltype)
     return node.add_radiobuttons(metadata.colname, 
-            types.TestCaseStatus.get_choices(), 
-            checked=types.TestCaseStatus.get_default(), 
-            class_="radioset")
-
-def new_testcasetype(node, modelclass, metadata):
-    return node.add_radiobuttons(metadata.colname, 
-            types.TestCaseType.get_choices(), 
-            checked=types.TestCaseType.get_default(), 
-            class_="radioset")
-
-def new_testpriority(node, modelclass, metadata):
-    return node.add_radiobuttons(metadata.colname, 
-            types.TestPriorityType.get_choices(), 
-            checked=types.TestPriorityType.get_default(),
+            enumtype.get_choices(), 
+            checked=enumtype.get_default(),
             class_="radioset")
 
 _CREATORS = {
@@ -446,9 +427,11 @@ _CREATORS = {
     "PickleText": new_pickleinput,
     "ValueType": new_valuetypeinput,
     "RelationshipProperty": new_relation_input,
-    "TestCaseStatus": new_testcasestatus,
-    "TestCaseType": new_testcasetype,
-    "TestPriorityType": new_testpriority,
+    "TestCaseStatus": new_enumtype,
+    "TestCaseType": new_enumtype,
+    "PriorityType": new_enumtype,
+    "SeverityType": new_enumtype,
+    "LikelihoodType": new_enumtype,
 }
 
 

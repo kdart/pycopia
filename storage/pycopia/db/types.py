@@ -23,8 +23,9 @@ __all__ = ["INTEGER", "BIGINT", "SMALLINT", "VARCHAR", "CHAR", "TEXT",
     "NUMERIC", "FLOAT", "REAL", "INET", "CIDR", "UUID", "BIT", "MACADDR",
     "DOUBLE_PRECISION", "TIMESTAMP", "TIME", "DATE", "BYTEA", "BOOLEAN",
     "INTERVAL", "ARRAY", "ENUM", 
-    "Cidr", "Inet", "PickleText", "TestCaseStatus", "TestCaseType", "TestPriorityType",
-    "ValueType", "TestResultType", "TestObjectType", "validate_value_type"]
+    "ValidationError", "Cidr", "Inet", "PickleText", "TestCaseStatus",
+    "TestCaseType", "PriorityType", "TestResultType", "TestObjectType",
+    "ValueType", "LikelihoodType", "SeverityType", "validate_value_type"]
 
 import cPickle as pickle
 
@@ -170,7 +171,7 @@ class TestCaseType(types.TypeDecorator):
 
 
 
-class TestPriorityType(types.TypeDecorator):
+class PriorityType(types.TypeDecorator):
     """TestCase priority type."""
 
     impl = INTEGER
@@ -332,5 +333,58 @@ _VALIDATOR_MAP = {
     4: _validate_float,
     5: _validate_boolean,
 }
+
+
+class LikelihoodType(types.TypeDecorator):
+    """Approximate likelihood (probability quartile) that an event may occur."""
+
+    impl = INTEGER
+    enumerations = Enums("Unknown", "VeryLikely", "Likely", "Possible", "Unlikely", "VeryUnlikely")
+
+    def process_bind_param(self, value, dialect):
+        return  int(value)
+
+    @classmethod
+    def process_result_value(cls, value, dialect):
+        return cls.enumerations.find(value)
+
+    @classmethod
+    def get_choices(cls):
+        return cls.enumerations.choices
+
+    @classmethod
+    def get_default(cls):
+        return cls.enumerations[0]
+
+    @classmethod
+    def validate(cls, value):
+        return cls.enumerations.find(int(value))
+
+
+class SeverityType(types.TypeDecorator):
+    """Severity, or impact that an item may have on something if it did not exist."""
+
+    impl = INTEGER
+    enumerations = Enums("Unknown", "MajorLoss", "MinorLoss", "MinorLossHasReplacement", 
+            "CauseDifficulty", "Annoyance", "Trivial")
+
+    def process_bind_param(self, value, dialect):
+        return  int(value)
+
+    @classmethod
+    def process_result_value(cls, value, dialect):
+        return cls.enumerations.find(value)
+
+    @classmethod
+    def get_choices(cls):
+        return cls.enumerations.choices
+
+    @classmethod
+    def get_default(cls):
+        return cls.enumerations[0]
+
+    @classmethod
+    def validate(cls, value):
+        return cls.enumerations.find(int(value))
 
 

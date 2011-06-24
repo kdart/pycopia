@@ -227,7 +227,21 @@ fieldset.TestCaseType label {
     margin-left:1em;
 }
 
-fieldset.TestPriorityType label {
+fieldset.PriorityType label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+}
+
+fieldset.SeverityType label {
+    display: inline;
+    font-weight: normal;
+    width: auto;
+    margin-left:1em;
+}
+
+fieldset.LikelihoodType label {
     display: inline;
     font-weight: normal;
     width: auto;
