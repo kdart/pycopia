@@ -85,7 +85,8 @@ class TestResult(object):
         return self._value == constants.PASSED
 
     def not_passed(self):
-            return self._value in (constants.FAILED, constants.INCOMPLETE, constants.ABORT)
+            return self._value in (constants.FAILED, constants,EXPECTED_FAIL, 
+                    constants.INCOMPLETE, constants.ABORT)
 
     def is_failed(self):
         return self._value == constants.FAILED
@@ -872,7 +873,8 @@ class TestEntrySeries(TestEntry):
     test_name = property(lambda s: s.inst.test_name)
 
     def run(self, config=None):
-        resultset = {constants.PASSED:0, constants.FAILED:0, constants.INCOMPLETE:0}
+        resultset = {constants.PASSED:0, constants.FAILED:0, 
+                constants.EXPECTED_FAIL:0, constants.INCOMPLETE:0}
         for argset in self._counter:
             kwargs = self._sig.get_keyword_arguments(argset)
             # kwargs also contains non-keyword args, but python maps them to
@@ -885,7 +887,7 @@ class TestEntrySeries(TestEntry):
             self.result = TestResult(constants.FAILED)
         elif resultset[constants.INCOMPLETE] > 0:
             self.result = TestResult(constants.INCOMPLETE)
-        elif resultset[constants.PASSED] > 0: # must have all passed, anyway.
+        elif resultset[constants.PASSED] > 0:
             self.result = TestResult(constants.PASSED)
         return self.result
 
