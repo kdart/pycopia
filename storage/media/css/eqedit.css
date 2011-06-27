@@ -1,0 +1,33 @@
+@import url("/media/css/common.css");
+@import url("/media/css/ui.css");
+@import url("/media/css/db.css");
+
+nav {
+    border-style:outset;
+    background: lightBlue;
+    border-color: darkBlue;
+    padding: 3px;
+    border-width:5px;
+    margin-bottom: 10px;
+}
+
+nav p {
+  width: 33%;
+  display: inline-block;
+  text-align: center;
+}
+
+div#choicelist {
+  font-size: 9pt;
+  height: 50em;
+  float: right;
+  margin-top: 1em;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+div#dbmodelinstance {
+  float: left;
+  width: 50%;
+}
+

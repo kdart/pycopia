@@ -15,10 +15,16 @@
 /**
  * DBModel holds table metadata as defined in a .../pycopia/db/models.py file.
  * dbmodel.name is modelname
- * dbmodel._Meta is a list of metadata tuples:
+ * dbmodel._meta is a list of metadata tuples:
         coltype, colname, default, m2m, nullable, uselist, collection
  */
+
 function DBModel(modelname) {
+  this.init(modelname);
+};
+
+
+DBModel.prototype.init = function(modelname) {
   this.initialized = false;
   this.name = modelname;
   this._meta = {};
@@ -47,6 +53,93 @@ DBModel.prototype.get = function(entry_id) {
   return window.db.get_row(this.name, entry_id);
 };
 
+
+_ColCreators = {
+  "textinput": function(node, coldata) {
+    tid = "id_" + coldata.colname;
+    node.appendChild(LABEL({"for":tid}));
+    node.appendChild(INPUT({type:"text", "id": tid}));
+  },
+  "textarea": function(node, coldata) {
+    node.appendChild(
+    FIELDSET({"name": coldata.colname}, 
+        TEXTAREA({})));
+  },
+  "bool": function(node, coldata) {
+  },
+  "pickle": function(node, coldata) {
+  },
+  "valuetype": function(node, coldata) {
+  },
+  "relation": function(node, coldata) {
+  },
+  "testcasestatus": function(node, coldata) {
+  },
+  "testcasetype": function(node, coldata) {
+  },
+  "priority": function(node, coldata) {
+  },
+  "array": function(node, coldata) {
+  },
+  "bytearray": function(node, coldata) {
+  },
+  "bit": function(node, coldata) {
+  },
+  "cidr": function(node, coldata) {
+  },
+  "inet": function(node, coldata) {
+  },
+  "date": function(node, coldata) {
+  },
+  "timestamp": function(node, coldata) {
+  },
+  "floatingpt": function(node, coldata) {
+  },
+  "integer": function(node, coldata) {
+  },
+  "macaddr": function(node, coldata) {
+  },
+  "numeric": function(node, coldata) {
+  },
+  "time": function(node, coldata) {
+  },
+  "uuid": function(node, coldata) {
+  },
+  "enumtype": function(node, coldata) {
+  }
+};
+
+// Map column types (including custom types defined by SqlAlchemy API) to DOM constructors.
+_Creators = {
+    "ARRAY": _ColCreators.array,
+    "BIGINT": _ColCreators.textinput,
+    "BYTEA": _ColCreators.bytearray,
+    "BIT": _ColCreators.bit,
+    "BOOLEAN": _ColCreators.bool,
+    "CHAR": _ColCreators.textinput,
+    "Cidr": _ColCreators.cidr,
+    "Inet": _ColCreators.inet,
+    "DATE": _ColCreators.date,
+    "TIMESTAMP": _ColCreators.timestamp,
+    "FLOAT": _ColCreators.floatingpt,
+    "INTEGER": _ColCreators.integer,
+    "INTERVAL": _ColCreators.textinput,
+    "MACADDR": _ColCreators.macaddr,
+    "NUMERIC": _ColCreators.numeric,
+    "SMALLINT": _ColCreators.integer,
+    "VARCHAR": _ColCreators.textinput,
+    "TEXT": _ColCreators.textarea,
+    "TIME": _ColCreators.time,
+    "UUID": _ColCreators.uuid,
+    "PickleText": _ColCreators.pickle,
+    "ValueType": _ColCreators.valuetype,
+    "RelationshipProperty": _ColCreators.relation,
+    "TestCaseStatus": _ColCreators.enumtype,
+    "TestCaseType": _ColCreators.enumtype,
+    "PriorityType": _ColCreators.enumtype,
+    "SeverityType": _ColCreators.enumtype,
+    "LikelihoodType": _ColCreators.enumtype,
+};
 
 
 /**
@@ -91,8 +184,7 @@ DBModelInstance.prototype.toString = function() {
 };
 
 DBModelInstance.prototype.__dom__ = function(node) {
-  // TODO object view registry. This is the default, generic generator.
-  var tbl = TABLE(null, createDOM("caption", null, this._model.name),
+  var tbl = TABLE(null, CAPTION(null, this._model.name),
               THEAD(null,
                 TR(null,
                   TH(null, "Field"), TH(null, "Value"))));
@@ -146,12 +238,9 @@ DBModelInstance.prototype.get_id = function() {
 DBModelInstance.prototype.deleterow = function() {
   if (!this.isdeleted) {
     var d = window.db.deleterow(this.model.name, this.data.id);
-    d.addCallback(bind(this._delete_cb, this));
+    d.addCallback(function(deleted) {this.isdeleted = deleted;});
+    return d;
   };
-};
-
-DBModelInstance.prototype._delete_cb = function(deleted) {
-  this.isdeleted = deleted;
 };
 
 DBModelInstance.prototype.set = function(colname, value) {
@@ -165,6 +254,7 @@ DBModelInstance.prototype.save = function() {
   if (!this.isdeleted) {
     var d = window.db.updaterow(this.model.name, this.data.id, this.data);
     d.addCallback(bind(this._save_cb, this));
+    return d;
   };
 };
 
@@ -213,124 +303,49 @@ function jsonDBCheck(obj) {
   return obj._dbmodel_ == true;
 };
 
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-///////// Model metadata inspector applet.
 
 /**
- * Update list of table names in nav bar (column, actually).
+ * Common database CRUD functions.
+ * 
  */
-function loadModelMetaApp() {
-  loadApp(ModelMetaApp);
-};
-
-/**
- * This application object simples fills the extra navigation area with a
- * list of all db model names. Click on one to view its metadata in a
- * table. 
- */
-function ModelMetaApp() {
-  this.reload();
-  this.root = DIV({id: "modelmetaapp", "class": "applet"});
-};
-
-ModelMetaApp.prototype.reload = function() {
-  var d = window.db.get_tables();
-  d.addCallback(bind(this.dbFillExtra, this));
-};
-
-ModelMetaApp.prototype.destroy = function() {
-  placeContent("messages", null);
-};
-
-/**
- * Fill extra navigation with table names.
- *
- * @param {Array} modelnames List of table names to insert in nav bar.
- *
- */
-ModelMetaApp.prototype.dbFillExtra = function(modelnames) {
-  var tbl = TABLE(null, 
-    createDOM("caption", null, "Table Names"),
-    THEAD(null, TR(null, TH(null, "Name"))),
-    TBODY(null, map(_dbTableNameDisplay, keys(modelnames)))
-    );
-  placeContent("messages", tbl);
-};
-
-/**
- * Mapping function to return a table name row with link to call
- * dbTableInfo.
- * @param {String} modelname Name of table.
- *
- */
-function _dbTableNameDisplay(modelname) {
-  return TR(null,
-            TD(null,
-              A({"href":"javascript:dbTableInfo('"+modelname+"')"}, 
-                 modelname)
-             )
-           );
-};
-
-/**
- * Get table metadata from server.
- * @param {String} modelname Name of table.
- *
- */
-function dbTableInfo(modelname) {
-  var d = window.db.get_table_metadata(modelname);
-  d.addCallback(partial(showTableInfo, modelname));
-};
-
-/**
- * Callback for dbTableInfo. Puts table of db metadata into content
- * area.
- * @param {Array} info List of table info, plus a heading line.
- *
- */
-function showTableInfo(modelname, info) {
-  var tbl = TABLE(null,
-    createDOM("caption", null, modelname),
-    THEAD(null, headDisplay(
-        ["Type", "Name", "Default", "Many2Many", "Nullable", "Uselist"])),
-    TBODY(null, map(rowDisplay, info)));
-  placeContent("content", tbl);
-};
-
-
-
-function notifyResult(rowid, result) {
-  if (result[0]) {
-    removeElement($("rowid_" + rowid));
-    showMessage("Item '" + result[1] + "' deleted.");
-  } else {
-    window.alert("There was a problem deleting this item. " + result[1]);
-  };
-};
 
 function doDeleteRow(tablename, rowid) {
   if (window.confirm("Delete instance of " + tablename +"?")) {
     var d = window.db.deleterow(tablename, rowid);
-    d.addCallback(partial(notifyResult, rowid));
+    d.addBoth( function (result) {
+          if (result[0]) {
+            removeElement($("rowid_" + rowid));
+            showMessage("Item '" + result[1] + "' deleted.");
+          } else {
+            window.alert("There was a problem deleting this item. " + result[1]);
+          };
+        }, 
+        function () {
+            console.log("Error requesting deletion."); 
+            window.alert("Could not delete item.");
+          }
+    );
+    return d;
   }
 }
 
-function getUIData() {
-  var d = window.db.get_uidata();
-  d.addCallback(function (uidata) {window.uiData = uidata;});
-};
-
 /**
  * Initializer adds the "db" object that has methods that map the the
- * exported methods on the server side.
+ * exported methods on the server side. Also gets the user interface data (icon maps, etc.) 
  */
 
 function dbInit() {
-  window.db = new PythonProxy("/storage/api/", getUIData);
   window.modelcache = {};
   jsonEvalRegistry.register("dbmodel", jsonDBCheck, jsonConvertRow);
+  window.db = new PythonProxy("/storage/api/");
+  connectOnce(window.db, "proxyready", function () {
+        var d = window.db.get_uidata();
+        d.addCallback(function (uidata) {
+            window.uiData = uidata;
+            signal(window, "dbready");
+          });
+      }
+  );
 };
 
 function dbCleanup() {
@@ -341,6 +356,6 @@ function dbCleanup() {
 };
 
 // Initialize our stuff after page load.
-connect(window, "onload", dbInit);
-connect(window, "onunload", dbCleanup);
+connectOnce(window, "onload", dbInit);
+connectOnce(window, "onunload", dbCleanup);
 

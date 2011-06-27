@@ -1,0 +1,65 @@
+#!/usr/bin/python2
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+"""
+testsuite-export [-b|--base <basedir>] [-a|--all] [<name filter>]
+
+Create test module skeletons from TestSuite entries in the database.
+optionally provide a filter for suite names that are like the filter.
+
+"""
+
+
+import sys
+import os
+import getopt
+
+from pycopia.db.exporters import tests
+
+
+def main(argv):
+    testhome = os.environ.get("TESTHOME")
+    filt = None
+    doall = False
+    debug = False
+
+    try:
+        optlist, args = getopt.getopt(argv[1:], "db:a", ["debug", "base=", "all"])
+    except getopt.GetoptError:
+        print (__doc__)
+        sys.exit(2)
+    for opt, optarg in optlist:
+        if opt in ("-d", "--debug"):
+            debug = True
+            from pycopia import autodebug
+        elif opt in ("-a", "--all"):
+            doall = True
+        elif opt in ("-b", "--base"):
+            testhome = optarg
+
+    if not testhome:
+        print ("You need to supply the TESTHOME location (or use --base=).")
+        return 2
+
+
+    exporter = tests.TestSuiteExporter(testhome)
+
+    try:
+        if doall:
+            exporter.export_all_suites()
+        else:
+            for filt in args:
+                exporter.export_suites(filt)
+    except:
+        if debug:
+            raise
+        exc, val, tb = sys.exc_info()
+        sys.stderr.write("%s: %s\n" % (exc, val))
+        return 1
+
+    return 0
+
+
+sys.exit(main(sys.argv))
+

@@ -30,19 +30,13 @@ from pycopia.WWW.middleware import auth
 
 def cs_page_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="common.css")
-    doc.stylesheet = request.get_url("css", name="ui.css")
-    doc.stylesheet = request.get_url("css", name="db.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="ui.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="countryset.js"))
+    doc.stylesheets = ["common.css", "ui.css", "db.css"]
+    doc.scripts = ["MochiKit.js", "proxy.js", "ui.js", "db.js", "countryset.js"]
     for name, val in kwargs.items():
         setattr(doc, name, val)
     nav = doc.add_section("navigation")
     NM = doc.nodemaker
-    NBSP = NM("ASIS", None, "&nbsp;")
+    NBSP = NM("_", None)
     nav.append(NM("P", None,
          NM("A", {"href":"/"}, "Home"), NBSP,
          NM("A", {"href":".."}, "Up"), NBSP,

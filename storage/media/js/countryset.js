@@ -1,6 +1,6 @@
 
 function loadCountrySetApp() {
-  loadApp(CountrySetApp);
+  loadApp(CountrySetApp, "content");
   forEach(document.images, setIconMouseover);
 };
 
@@ -394,17 +394,10 @@ CountrySetApp.prototype._delete_cb = function(csid, disp) {
 };
 
 
-function countrysetInit() {
-  if (!window.db.initialized) { 
-    var waiter = wait(0.5); 
-    waiter.addCallback(countrysetInit);
-  } else {
-    loadCountrySetApp();
-  };
-};
-
-
-connect(window, "onload", countrysetInit);
-
-///////////////  End CountrySet editor applet ////////////
+connectOnce(window, "onload", function(ev) {
+    connectOnce(window, "dbready", function () {
+        loadCountrySetApp();
+      }
+    );
+});
 

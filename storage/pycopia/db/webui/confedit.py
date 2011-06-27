@@ -28,7 +28,6 @@ from pycopia.db import webhelpers
 from pycopia.WWW import framework
 from pycopia.WWW.middleware import auth
 
-from sqlalchemy.exc import DataError, IntegrityError
 
 
 def config_page_constructor(request, **kwargs):
@@ -41,23 +40,13 @@ def config_page_constructor(request, **kwargs):
     doc.add_javascript2head(url=request.get_url("js", name="confedit.js"))
     for name, val in kwargs.items():
         setattr(doc, name, val)
-    nav = doc.add_section("navigation")
-    NM = doc.nodemaker
-    NBSP = NM("ASIS", None, "&nbsp;")
-    nav.append(NM("P", None,
-         NM("A", {"href":"/"}, "Home"), NBSP,
-    ))
-    nav.append(NM("P", {"class_": "title"}, "Config Editor"))
-    nav.append(NM("P", None, NM("A", {"href": "/auth/logout"}, "logout")))
-    doc.add_section("messages", id="messages")
     return doc
 
 
 @auth.need_login
 @webhelpers.setup_dbsession
 def config_main(request):
-    resp = framework.ResponseDocument(request, config_page_constructor, 
-             title="Config Editor")
+    resp = framework.ResponseDocument(request, config_page_constructor, title="Config Editor")
     return resp.finalize()
 
 
