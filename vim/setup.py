@@ -48,7 +48,7 @@ def get_vimfiles():
     vimsyntax = os.path.join(VIM, "vimfiles", "syntax")
     vimcolors = os.path.join(VIM, "vimfiles", "colors")
 
-    return [(vimfiles, glob("vimfiles/*.vim"),
+    return [(vimfiles, glob("vimfiles/*.vim")),
             (vimcolors, glob("vimfiles/colors/*")),
             (vimsyntax, glob("vimfiles/syntax/*")),
            ]
