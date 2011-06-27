@@ -96,7 +96,6 @@ nmap ;ru :update<CR>:python pyterm(vim.current.buffer.name, 0)<CR>
 nmap ;ri :update<CR>:python pyterm(vim.current.buffer.name, 1)<CR>
 nmap ;ev :python print eval(vim.current.line)<CR>
 nmap ;ex :python exec vim.current.line<CR>
-
 vmap ;ex :python exec_vimrange(vim.current.range)<CR>
 vmap ;et :python exec_vimrange_in_term(vim.current.range)<CR>
 nmap ;el :python vim.current.line = str(eval(vim.current.line))<CR>
@@ -111,7 +110,6 @@ vmap ;vi :python visual_view()<CR>
 vmap ;ht :python htmlhex_visual_selection()<CR>
 nmap ;sp :python keyword_split()<CR>
 nmap <F9> :python keyword_split()<CR>
-" nmap K :python keyword_help()<CR>
 nmap ;he :python keyword_help()<CR>
 
 " what shall it be? tabs or spaces?
