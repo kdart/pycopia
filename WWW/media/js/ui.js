@@ -1,8 +1,4 @@
 
-function setUIData(data) {
-  window.uiData = data;
-};
-
 /**
  * Provide alternate graphic for mouseover effect. This is a Mochikit
  * event handler.
@@ -148,14 +144,13 @@ function headDisplay(row) {
  *
  * Sets the global "currentapp" name to the application.
  */
-function loadApp(appobject) {
+function loadApp(appobject, area) {
   if (window.currentapp === appobject) {
     window.currentapp.reload();
   } else {
-    unloadApp();
-    placeContent("extra", null); // remove any menu old app might have placed.
+    unloadApp(area);
     var app = new appobject();
-    placeContent("content", app.root); // All Apps should have a root element.
+    placeContent(area, app.root); // All Apps should have a root element.
     window.currentapp = app;
   };
 };
@@ -163,14 +158,13 @@ function loadApp(appobject) {
 /** 
  * Remove any loaded applet.
  */
-function unloadApp() {
+function unloadApp(area) {
   if (typeof(window.currentapp) != "undefined") {
     var app = window.currentapp;
     delete window.currentapp;
     app.destroy();
   };
-  placeContent("content", null);
-  placeContent("extra", null);
+  placeContent(area, null);
 };
 
 
@@ -329,7 +323,4 @@ function showMessage(obj) {
     }
   }
 }
-
-
-// var uiData = getUIData("/ui");
 

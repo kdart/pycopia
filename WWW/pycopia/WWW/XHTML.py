@@ -638,6 +638,8 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
 
     def add_stylesheets(self, namelist):
         for url in namelist:
+            if "/" not in url:
+                url = "/media/css/" + url
             self.add_stylesheet(url)
 
     stylesheets = property(None, add_stylesheets)
