@@ -94,7 +94,7 @@ class Text(object):
         return escape(self.data)
     def __repr__(self):
         cl = self.__class__
-        return "%s.%s(%r)" % (cl.__module__, cl.__name__, escape(self.data))
+        return b"%s.%s(%r)" % (cl.__module__, cl.__name__, escape(self.data))
     def __len__(self):
         return len(self.data)
     def __getslice__(self, start, end):
@@ -132,16 +132,16 @@ class CDATA(Text):
     def __str__(self):
         return self.encode(self.encoding)
     def encode(self, encoding):
-        return "\n<![CDATA[%s]]>\n" % self.data.encode(encoding)
+        return b"\n<![CDATA[%s]]>\n" % self.data.encode(encoding)
     def __unicode__(self):
         return u"<![CDATA[\n%s\n]]>\n" % (self.data,)
     def __repr__(self):
         cl = self.__class__
-        return "%s.%s(%r)" % (cl.__module__, cl.__name__, self.data)
+        return b"%s.%s(%r)" % (cl.__module__, cl.__name__, self.data)
     def emit(self, fo, encoding=None):
-        fo.write("\n<![CDATA[")
+        fo.write(b"\n<![CDATA[")
         fo.write( self.data.encode(encoding or self.encoding) )
-        fo.write("]]>\n")
+        fo.write(b"]]>\n")
 
 class Comment(Text):
     def __init__(self, data="", encoding=DEFAULT_ENCODING):
@@ -157,7 +157,7 @@ class Comment(Text):
     def __unicode__(self):
         return u"<!-- %s -->" % self._fix(self.data)
     def emit(self, fo, encoding=None):
-        fo.write( "<!-- %s -->" % self._fix(self.data).encode(encoding or self.encoding) )
+        fo.write( b"<!-- %s -->" % self._fix(self.data).encode(encoding or self.encoding) )
     def get_text(self):
         return self.data
     def insert(self, data, encoding=None):
@@ -579,19 +579,19 @@ class ElementNode(object):
     def _non_empty_str(self, encoding):
         ns = self._get_ns(encoding)
         name = self._name.encode(encoding)
-        s = ["<%s%s%s>" % (ns, name, self._attr_str(encoding))]
+        s = [b"<%s%s%s>" % (ns, name, self._attr_str(encoding))]
         map(s.append, map(lambda o: o.encode(encoding), self._children))
-        s.append("</%s%s>" % (ns, name))
-        return "".join(s)
+        s.append(b"</%s%s>" % (ns, name))
+        return b"".join(s)
 
     def _empty_str(self, encoding):
-        return "<%s%s%s />" % (self._get_ns(encoding), self._name.encode(encoding), 
+        return b"<%s%s%s />" % (self._get_ns(encoding), self._name.encode(encoding), 
                        self._attr_str(encoding))
 
     def _attr_str(self, encoding):
         attrs = map(lambda o: o.encode(encoding), self._attribs.values())
-        attrs.insert(0, "") # for space before first attribute
-        return " ".join(attrs)
+        attrs.insert(0, b"") # for space before first attribute
+        return b" ".join(attrs)
 
     def emit(self, fo, encoding=None, verify=False):
         enc = encoding or self._encoding
@@ -602,9 +602,9 @@ class ElementNode(object):
         else:
             ns = self._get_ns(enc)
             name = self._name.encode(enc)
-            fo.write("<%s%s%s>" % (ns, name, self._attr_str(enc)))
+            fo.write(b"<%s%s%s>" % (ns, name, self._attr_str(enc)))
             map(lambda o: o.emit(fo, enc), self._children)
-            fo.write("</%s%s>" % (ns, name))
+            fo.write(b"</%s%s>" % (ns, name))
 
     def validate(self, encoding=DEFAULT_ENCODING):
         ff = FakeFile(None)
@@ -853,9 +853,9 @@ class BeautifulWriter(object):
 
 # base class for whole POM documents, including Header.
 class POMDocument(object):
-    XMLHEADER = '<?xml version="1.0" encoding="%s"?>\n' % DEFAULT_ENCODING
-    DOCTYPE = ""
-    MIMETYPE = "application/xml" # reset in subclass
+    XMLHEADER = b'<?xml version="1.0" encoding="%s"?>\n' % DEFAULT_ENCODING
+    DOCTYPE = b""
+    MIMETYPE = b"application/xml" # reset in subclass
 
     def __init__(self, dtd=None, doctype=None, lang=None, encoding=DEFAULT_ENCODING):
         if doctype is None and dtd is None:
@@ -885,7 +885,7 @@ class POMDocument(object):
 
     def set_encoding(self, encoding):
         verify_encoding(encoding)
-        self.XMLHEADER = '<?xml version="1.0" encoding="%s"?>\n' % (encoding,)
+        self.XMLHEADER = b'<?xml version="1.0" encoding="%s"?>\n' % (encoding,)
         self.encoding = encoding
 
     def set_language(self, lang):
@@ -939,7 +939,7 @@ class POMDocument(object):
         fo.write(self.XMLHEADER)
         fo.write(self.DOCTYPE)
         self.root.emit(fo, encoding)
-        fo.write("\n")
+        fo.write(b"\n")
 
     def validate(self, encoding=DEFAULT_ENCODING):
         self.root.validate(encoding)
@@ -1173,20 +1173,20 @@ def make_node(path, modules, value=None):
     return rootnode
 
 def unescape(s):
-    if u'&' not in s:
+    if b'&' not in s:
         return s
-    s = s.replace(u"&lt;", u"<")
-    s = s.replace(u"&gt;", u">")
-    s = s.replace(u"&apos;", u"'")
-    s = s.replace(u"&quot;", u'"')
-    s = s.replace(u"&amp;", u"&") # Must be last
+    s = s.replace(b"&lt;", b"<")
+    s = s.replace(b"&gt;", b">")
+    s = s.replace(b"&apos;", b"'")
+    s = s.replace(b"&quot;", b'"')
+    s = s.replace(b"&amp;", b"&") # Must be last
     return s
 
 def escape(s):
-    s = s.replace(u"&", u"&amp;") # Must be first
-    s = s.replace(u"<", u"&lt;")
-    s = s.replace(u">", u"&gt;")
-    s = s.replace(u"'", u"&apos;")
-    s = s.replace(u'"', u"&quot;")
+    s = s.replace(b"&", b"&amp;") # Must be first
+    s = s.replace(b"<", b"&lt;")
+    s = s.replace(b">", b"&gt;")
+    s = s.replace(b"'", b"&apos;")
+    s = s.replace(b'"', b"&quot;")
     return s
 

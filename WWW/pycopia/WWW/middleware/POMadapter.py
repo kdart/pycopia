@@ -21,6 +21,7 @@ Adapt Pycopia XML/XHTML objects to WSGI.
 
 """
 
+
 class WSGIAdapter(object):
     """Adapt the emit() method of a POM document to the WSGI spec. It is an
     iterable object that you can return to the WSGI caller. This is also
@@ -67,12 +68,16 @@ class WSGIAdapter(object):
     def __len__(self):
         return self.length
 
+    def __del__(self):
+        self.close()
+
     def close(self):
         self._chunks = []
         self.length = 0
 
     #  emit() calls this
     def write(self, data):
+        data = data.encode(self.charset)
         self.length += len(data)
         self._chunks.append(data)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/python2
-# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # -*- coding: utf8 -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:fenc=utf-8
 # 
 # $Id$
 #
@@ -28,6 +28,10 @@ templates are required. I even use these classes with the Django
 framework.
 
 """
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import itertools
 
@@ -42,12 +46,12 @@ from pycopia.XML import POM, XMLVisitorContinue, ValidationError, XMLPathError
 
 get_class = dtds.get_class
 
-NBSP = POM.ASIS("&#160;")
+NBSP = POM.ASIS(b"&#160;")
 TRUE = True
 FALSE = False
 
-MIME_XHTML = "application/xhtml+xml"
-MIME_HTML = "text/html"
+MIME_XHTML = b"application/xhtml+xml"
+MIME_HTML = b"text/html"
 
 # tags defined to be inline - use for BeautifulWriter and other type checks
 INLINE_SPECIAL = ["span", "bdo", "object", "img", "map"]
@@ -132,7 +136,7 @@ class _Counter(object):
     def reset(self):
         self.val = 0
     def __str__(self):
-        return "%s%s" % (self.name, self.val)
+        return b"%s%s" % (self.name, self.val)
     __call__ = __str__
 
 
@@ -670,17 +674,17 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
 
     def add_javascript2head(self, text=None, url=None):
         if text:
-            sc = self.head.add(self.dtd.Script, type="text/javascript")
+            sc = self.head.add(self.dtd.Script, type=b"text/javascript")
             sc.add_cdata(text)
         elif url:
             sc = self.head.add(self.dtd.Script, 
-                           type="text/javascript", src=url)
+                           type=b"text/javascript", src=url)
 
     def _add_js_list(self, jslist):
         for url in jslist:
             if "/" not in url:
                 url = "/media/js/" + url
-            self.head.add(self.dtd.Script, type="text/javascript", src=url)
+            self.head.add(self.dtd.Script, type=b"text/javascript", src=url)
 
     scripts = property(None, _add_js_list, None, "Add a list of javascript file names.")
 
@@ -936,7 +940,7 @@ class TableMixin(ContainerMixin):
         self._verify_attributes()
         name = self._name.encode(encoding)
         s = []
-        s.append("<%s%s>" % (name, self._attr_str(encoding)))
+        s.append(b"<%s%s>" % (name, self._attr_str(encoding)))
         if self._t_caption:
             s.append(self._t_caption.encode(encoding))
         thead = self.dtd.Thead()
@@ -949,8 +953,8 @@ class TableMixin(ContainerMixin):
         tfoot = self.dtd.Tfoot()
         tfoot.append(self._footer)
         s.append(tfoot.encode(encoding))
-        s.append(("</%s>" % name))
-        return "".join(s)
+        s.append((b"</%s>" % name))
+        return b"".join(s)
 
     def emit(self, fo, encoding=None):
         encoding = encoding or self.encoding

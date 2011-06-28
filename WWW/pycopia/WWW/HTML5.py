@@ -32,9 +32,9 @@ from pycopia.WWW import XHTML
 from pycopia.dtds import html5 as DTD
 
 
-DEFAULT_LANG, DEFAULT_ENCODING = "en", "UTF-8" # its the only one I know...
+DEFAULT_LANG, DEFAULT_ENCODING = b"en", b"UTF-8" # its the only one I know...
 MIME_XHTML5="application/xhtml+xml" # use XML serialization since this uses the XHTML generator
-DOCTYPE = '<!DOCTYPE html>'
+DOCTYPE = b'<!DOCTYPE html>'
 
 # Currenty using this subset of HTML5 features shared by both FF 3.6.x and Chrome 10
 BROWSER_FEATURES = ['applicationcache', 'backgroundsize', 'borderimage', 'borderradius',
@@ -49,11 +49,11 @@ NO_BROWSER_FEATURES = ['no-audio', 'no-cssanimations', 'no-cssreflections',
         'no-inlinesvg', 'no-smil', 'no-touch', 'no-video', 'no-webgl', 'no-websockets',
         'no-websqldatabase']
 
-FEATURE_CLASS = " ".join(BROWSER_FEATURES) + " " + " ".join(NO_BROWSER_FEATURES)
+FEATURE_CLASS = b" ".join(BROWSER_FEATURES) + b" " + b" ".join(NO_BROWSER_FEATURES)
 
 
 class HTML5Document(XHTML.XHTMLDocument):
-    XMLHEADER = '<?xml version="1.0" encoding="%s"?>\n' % DEFAULT_ENCODING
+    XMLHEADER = b'<?xml version="1.0" encoding="%s"?>\n' % DEFAULT_ENCODING
     MIMETYPE=MIME_XHTML5
 
     def set_doctype(self, doctype):
