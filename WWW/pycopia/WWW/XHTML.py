@@ -821,16 +821,14 @@ class ListMixin(ContainerMixin):
 
 
 # Special support methods for XHTML tables. The makes it easy to produce simple
-# tables. easier to produce more complex tables. But it currently does not
-# support advanced table features. It allows setting cells by row and column
-# index (using a sparse table). The special emit method constructs the row
-# structure on the fly.
+# tables. 
 class TableMixin(ContainerMixin):
     # set document dtd so methods can access it to create sub-elements
     def _init(self, dtd):
         self.dtd = dtd
         self._t_caption = None # only one
-        self._headings = None
+        self._headings = self.dtd.Tr()
+        self._footer = self.dtd.Tr()
         self._t_rows = []
 
     def caption(self, content, **kwargs):
@@ -840,28 +838,67 @@ class TableMixin(ContainerMixin):
         cap.append(check_object(content))
         self._t_caption = cap
 
-    def get_headings(self):
+    @property
+    def headings(self):
         return self._headings # a row (tr) object.
+
+    @property
+    def footer(self):
+        return self._footer # a row (tr) object.
 
     def set_heading(self, col, val, **kwargs):
         """Set heading at column <col> (origin 1) to <val>."""
         val = check_object(val)
-        if not self._headings:
-            self._headings = self.dtd.Tr()
         # auto-fill intermediate cells, if necessary.
         for inter in range(col - len(self._headings)):
             self._headings.append(self.dtd.Th(**kwargs))
         th = self._headings[col-1]
         th.append(val)
-        return th # so you can set attributes...
+        return th
 
     def new_headings(self, *args, **kwargs):
-        self._headings = self.dtd.Tr()
+        self._headings = self.dtd.Tr(**kwargs)
         for hv in args:
-            th = self.dtd.Th(**kwargs)
+            th = self.dtd.Th()
             self._headings.append(th)
             th.append(check_object(hv))
         return self._headings
+
+    def new_footer(self, *args, **kwargs):
+        self._footer = self.dtd.Tr(**kwargs)
+        for hv in args:
+            th = self.dtd.Th()
+            self._footer.append(th)
+            th.append(check_object(hv))
+        return self._footer
+
+    def get_row(self, **kwargs):
+        Row = get_class(self.dtd, "Row", (RowMixin, self.dtd.Tr))
+        row = Row(**kwargs)
+        row._init(self.dtd)
+        return row
+
+    def add_row(self, **kwargs):
+        row = self.get_row(**kwargs)
+        self._t_rows.append(row)
+        return row
+
+    def new_row(self, *args, **kwargs):
+        row = self.get_row(**kwargs)
+        for obj in args:
+            if type(obj) is list:
+                for nobj in obj:
+                    t = create_POM(obj, self.dtd)
+                    td = self.dtd.Td()
+                    td.append(t)
+                    row.append(td)
+            else:
+                t = create_POM(obj, self.dtd)
+                td = self.dtd.Td()
+                td.append(t)
+                row.append(td)
+        self._t_rows.append(row)
+        return row
 
     def set_cell(self, col, row, val):
         val = check_object(val)
@@ -902,53 +939,23 @@ class TableMixin(ContainerMixin):
         s.append("<%s%s>" % (name, self._attr_str(encoding)))
         if self._t_caption:
             s.append(self._t_caption.encode(encoding))
-        if self._headings:
-            s.append(self._headings.encode(encoding))
+        thead = self.dtd.Thead()
+        thead.append(self._headings)
+        s.append(thead.encode(encoding))
+        tbody = self.dtd.Tbody()
         for row in self._t_rows:
-            s.append(row.encode(encoding))
+            tbody.append(row)
+        s.append(tbody.encode(encoding))
+        tfoot = self.dtd.Tfoot()
+        tfoot.append(self._footer)
+        s.append(tfoot.encode(encoding))
         s.append(("</%s>" % name))
         return "".join(s)
 
     def emit(self, fo, encoding=None):
         encoding = encoding or self.encoding
-        self._verify_attributes()
-        name = self._name.encode(encoding)
-        fo.write("<%s%s>" % (name, self._attr_str(encoding)))
-        if self._t_caption:
-            self._t_caption.emit(fo, encoding)
-        if self._headings:
-            self._headings.emit(fo, encoding)
-        for row in self._t_rows:
-            row.emit(fo, encoding)
-        fo.write("</%s>" % name)
+        fo.write(self.encode(encoding))
 
-    def get_row(self, **kwargs):
-        Row = get_class(self.dtd, "Row", (RowMixin, self.dtd.Tr))
-        row = Row(**kwargs)
-        row._init(self.dtd)
-        return row
-
-    def add_row(self, **kwargs):
-        row = self.get_row(**kwargs)
-        self._t_rows.append(row)
-        return row
-
-    def new_row(self, *args, **kwargs):
-        row = self.get_row(**kwargs)
-        for obj in args:
-            if type(obj) is list:
-                for nobj in obj:
-                    t = create_POM(obj, self.dtd)
-                    td = self.dtd.Td()
-                    td.append(t)
-                    row.append(td)
-            else:
-                t = create_POM(obj, self.dtd)
-                td = self.dtd.Td()
-                td.append(t)
-                row.append(td)
-        self._t_rows.append(row)
-        return row
 
 class RowMixin(ContainerMixin):
     def get_column(self, **kwargs):

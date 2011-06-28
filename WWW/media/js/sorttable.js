@@ -16,6 +16,13 @@ sorttable = {
 
   DATE_RE: /^(\d\d?)[\/\.-](\d\d?)[\/\.-]((\d\d)?\d\d)$/,
 
+  makeAllSortable: function() {
+      var tables = getElementsByTagAndClassName("table", "sortable");
+      for (var i = 0; i < tables.length; i++) {
+          sorttable.makeSortable(tables[i]);
+      }
+  },
+
   makeSortable: function(table) {
     if (table.getElementsByTagName('thead').length == 0) {
       // table doesn't have a tHead. Since it should have, create one and
@@ -48,7 +55,7 @@ sorttable = {
 
           if (this.classList.contains("sorttable_sorted")) {
             if (!this.classList.contains("reversed")) {
-                // if we're already sorted by this column, just 
+                // if we're already sorted by this column, just
                 // reverse the table, which is quicker
                 sorttable.reverse(this.sorttable_tbody);
                 this.classList.add('reversed');
@@ -59,7 +66,7 @@ sorttable = {
                 this.appendChild(sortrevind);
                 return;
               } else {
-                // if we're already sorted by this column in reverse, just 
+                // if we're already sorted by this column in reverse, just
                 // re-reverse the table, which is quicker
                 sorttable.reverse(this.sorttable_tbody);
                 this.classList.remove('reversed');
@@ -105,12 +112,12 @@ sorttable = {
             //sorttable.shaker_sort(row_array, this.sorttable_sortfunction);
             /* and comment out this one */
             row_array.sort(this.sorttable_sortfunction);
-            
+
             tb = this.sorttable_tbody;
             for (var j=0; j<row_array.length; j++) {
               tb.appendChild(row_array[j][1]);
             }
-            
+
             delete row_array;
           });
         }
@@ -126,7 +133,7 @@ sorttable = {
         if (text.match(/^-?[£$¤]?[\d,.]+%?$/)) {
           return sorttable.sort_numeric;
         }
-        // check for a date: dd/mm/yyyy or dd/mm/yy 
+        // check for a date: dd/mm/yyyy or dd/mm/yy
         // can have / or . or - as separator
         // can be mm/dd as well
         possdate = text.match(sorttable.DATE_RE)
@@ -213,7 +220,7 @@ sorttable = {
   sort_numeric: function(a,b) {
     aa = parseFloat(a[0].replace(/[^0-9.-]/g,''));
     if (isNaN(aa)) aa = 0;
-    bb = parseFloat(b[0].replace(/[^0-9.-]/g,'')); 
+    bb = parseFloat(b[0].replace(/[^0-9.-]/g,''));
     if (isNaN(bb)) bb = 0;
     return aa-bb;
   },
@@ -282,5 +289,9 @@ sorttable = {
         b++;
 
     } // while(swap)
-  }  
+  }
 }
+
+
+connectOnce(window, "onload", sorttable.makeAllSortable);
+

@@ -282,9 +282,8 @@ class ElementNode(object):
         self.__dict__["_children"] = []
         self.__dict__["_namespace"] = u""
         self.__dict__["_encoding"] = DEFAULT_ENCODING
-        ATT = self.__class__.KWATTRIBUTES
         for key, value in attribs.items():
-            xmlattr = ATT.get(key)
+            xmlattr = self.__class__.KWATTRIBUTES.get(key)
             if type(value) is tuple:
                 atns, value = value
             else:

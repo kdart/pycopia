@@ -242,13 +242,8 @@ dispatcher = auth.need_authentication(webhelpers.setup_dbsession(dispatcher))
 
 def doc_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="common.css")
-    doc.stylesheet = request.get_url("css", name="ui.css")
-    doc.stylesheet = request.get_url("css", name="db.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="ui.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
+    doc.stylesheets = ["common.css", "ui.css", "db.css"]
+    doc.scripts = ["MochiKit.js", "proxy.js", "ui.js", "sorttable.js", "db.js"]
     for name, val in kwargs.items():
         setattr(doc, name, val)
     nav = doc.add_section("navigation")
@@ -277,10 +272,12 @@ def listtable(request, tablename=None):
     resp.new_para(NM("A", {"href": request.get_url(addentry, tablename=tablename)}, 
             resp.get_icon("add")))
     cycler = itertools.cycle(["row1", "row2"]) # For alternating row styles.
-    tbl = resp.doc.add_table(width="100%")
+    tbl = resp.doc.add_table(class_="sortable", width="100%")
     tbl.caption(tablename)
     colnames = models.get_rowdisplay(klass)
     tbl.new_headings("", *colnames)
+    tbl.headings[0].class_ = "sorttable_nosort"
+    tbl.new_footer("", *colnames)
     for dbrow in query(tablename, {}):
         row = tbl.new_row(id="rowid_%s" % dbrow.id, class_=cycler.next())
         col = row.new_column(
