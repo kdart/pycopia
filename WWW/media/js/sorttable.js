@@ -62,7 +62,7 @@ sorttable = {
                 this.removeChild(document.getElementById('sorttable_sortfwdind'));
                 sortrevind = document.createElement('span');
                 sortrevind.id = "sorttable_sortrevind";
-                sortrevind.innerHTML = '&#x25B4;';
+                sortrevind.innerHTML = '&#160;&#x25B4;';
                 this.appendChild(sortrevind);
                 return;
               } else {
@@ -73,7 +73,7 @@ sorttable = {
                 this.removeChild(document.getElementById('sorttable_sortrevind'));
                 sortfwdind = document.createElement('span');
                 sortfwdind.id = "sorttable_sortfwdind";
-                sortfwdind.innerHTML = '&#x25BE;';
+                sortfwdind.innerHTML = '&#160;&#x25BE;';
                 this.appendChild(sortfwdind);
                 return;
               };
@@ -95,8 +95,9 @@ sorttable = {
           this.classList.add('sorttable_sorted');
           sortfwdind = document.createElement('span');
           sortfwdind.id = "sorttable_sortfwdind";
-          sortfwdind.innerHTML =  '&#x25BE;';
+          sortfwdind.innerHTML =  '&#160;&#x25BE;';
           this.appendChild(sortfwdind);
+
 
             // build an array to sort. This is a Schwartzian transform thing,
             // i.e., we "decorate" each row with the actual sort key,
