@@ -310,9 +310,9 @@ function jsonDBCheck(obj) {
  */
 
 function doDeleteRow(tablename, rowid) {
-  if (window.confirm("Delete instance of " + tablename +"?")) {
+  if (window.confirm("Delete instance " + rowid.toString() + " of " + tablename +"?")) {
     var d = window.db.deleterow(tablename, rowid);
-    d.addBoth( function (result) {
+    d.addCallbacks( function (result) {
           if (result[0]) {
             removeElement($("rowid_" + rowid));
             showMessage("Item '" + result[1] + "' deleted.");
@@ -325,7 +325,6 @@ function doDeleteRow(tablename, rowid) {
             window.alert("Could not delete item.");
           }
     );
-    return d;
   }
 }
 
