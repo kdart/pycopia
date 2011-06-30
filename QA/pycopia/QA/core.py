@@ -321,18 +321,23 @@ class Test(object):
 
         Runs another Test subclass with the given arguments passed to the
         `execute()`.
+
+        The report object is overridden with A NullReport by 
+        default. Therefore you won't see output from subtests. If you want to
+        see subtest output in the report give the verbose option to the test runner.
         """
-        orig = self.config.report
-        if not self._verbose: # don't let the subtest write to the report.
-            # if verbose mode then use original report (bug 708716)
+        orig = self.config.get_report()
+        if not self._verbose:
+            # If verbose mode then use original report, otherwise temporarily
+            # substitute NullReport.
             from pycopia import reports
             nr = reports.get_report(("NullReport",))
-            self.config.report = nr
+            self.config.set_report(nr)
         inst = _testclass(self.config)
         try:
             return inst(*args, **kwargs)
         finally:
-            self.config.report = orig
+            self.config.set_report(orig)
 
     def run_command(self, cmdline, env=None, timeout=None, logfile=None):
         """Run an external command. 
