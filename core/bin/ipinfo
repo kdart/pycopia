@@ -17,6 +17,7 @@ def main(argv):
 
     print "Breakdown of IP address: ", a
     print "                   Mask: ", itodq(a.mask)
+    print "            Mask bits /: ", a.maskbits
     print "                Network: ", itodq(a.network)
     print "                   Host: ", itodq(a.host)
     print "              Broadcast: ", itodq(a.broadcast)

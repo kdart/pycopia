@@ -20,6 +20,8 @@ and MS Windows frameworks.
 
 """
 
+from __future__ import print_function
+
 import sys
 import re
 
@@ -112,5 +114,5 @@ def get_platform():
 
 
 if __name__ == "__main__":
-    print get_platform()
+    print (get_platform())
 

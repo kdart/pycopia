@@ -20,13 +20,15 @@ and MS Windows frameworks.
 
 """
 
+from __future__ import print_function
+
 import sys
 import re
 
 LINUX_RELEASE_FILES = [
     "/etc/vmware-release",
-    "/etc/gentoo-release",
     "/etc/redhat-release",
+    "/etc/gentoo-release",
     "/etc/lsb-release", # Ubuntu, possibly others
 ]
 
@@ -112,5 +114,5 @@ def get_platform():
 
 
 if __name__ == "__main__":
-    print get_platform()
+    print (get_platform())
 
