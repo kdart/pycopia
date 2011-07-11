@@ -209,17 +209,50 @@ function jsonConvertSet(obj) {
   return theset;
 };
 
+// Mirror pycopia Enum type
+function Enum(value, str) {
+    this._str_ = str;
+    this.value = value;
+}
+Enum.prototype = new Object();
+Enum.prototype.constructor = Enum;
+
+Enum.prototype.toString = function() {
+  return this._str_;
+};
+
+// For Enum --> JSON
+function jsonCheckEnum(obj) {
+  return (typeof(obj) == "object") && (obj.constructor == Enum);
+};
+
+function simplifyEnum(o) {
+  return {_class_: "Enum", value: {"value":o.value, "_str_":o._str_}};
+};
+
+// For JSON -> Enum
+function jsonDecodeCheckEnum(obj) {
+  return obj._class_ == "Enum";
+};
+
+function jsonConvertEnum(obj) {
+  return new Enum(obj.value, obj._str_);
+};
+
+
 
 function proxyInit() {
   registerJSON("datetime", jsonCheckDatetime, simplifyDatetime);
   registerJSON("date", jsonCheckDate, simplifyDate);
   registerJSON("set", jsonCheckSet, simplifySet);
+  registerJSON("enum", jsonCheckEnum, simplifyEnum);
   // Create a new registry for special JSON deserialization handlers.
   window.jsonEvalRegistry = new AdapterRegistry();
   // and add first handler, a Date handler.
   jsonEvalRegistry.register("datetime", jsonDecodeCheckDatetime, jsonConvertDatetime);
   jsonEvalRegistry.register("date", jsonDecodeCheckDate, jsonConvertDate);
   jsonEvalRegistry.register("set", jsonDecodeCheckSet, jsonConvertSet);
+  jsonEvalRegistry.register("enum", jsonDecodeCheckEnum, jsonConvertEnum);
 };
 
 // connect(window, "onload", proxyInit);

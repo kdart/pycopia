@@ -11,11 +11,11 @@ import sys
 import time
 import traceback
 from datetime import datetime, date
-
 import simplejson
+
+from pycopia import aid
 from pycopia.WWW.framework import (HttpResponse, HttpResponseNotFound,
                                    HttpResponseServerError)
-
 
 _DECODER = None
 _ENCODER = None
@@ -58,7 +58,7 @@ def _DateDecoder(timestamp):
 
 ### End datetime conversions ###
 
-### set encoding
+### set encoding ###
 def _set_checker(obj):
   return isinstance(obj, set)
 
@@ -70,10 +70,24 @@ def _set_simplifier(s):
 def _set_decoder(s):
   return set(s)
 
+### Enum conversion ###
+
+def _enum_checker(obj):
+    return isinstance(obj, aid.Enum)
+
+def _enum_simplifier(obj):
+    return {"_class_": "Enum",
+            "_str_": str(obj),
+            "value": int(obj)}
+
+def _enum_decoder(d):
+    return aid.Enum(int(d["value"]), d["_str_"])
+
+### End Enum conversions ###
+
 class JSONEncoder(simplejson.JSONEncoder):
   def __init__(self):
-    super(JSONEncoder, self).__init__(ensure_ascii=False,
-        encoding="utf-8")
+    super(JSONEncoder, self).__init__(ensure_ascii=False, encoding="utf-8")
     self._registry = {}
 
   def default(self, obj):
@@ -81,6 +95,12 @@ class JSONEncoder(simplejson.JSONEncoder):
       if checker(obj):
         return simplifier(obj)
     return super(JSONEncoder, self).default(obj)
+
+#  def encode(self, obj):
+#    for checker, simplifier in self._registry.itervalues():
+#      if checker(obj):
+#        return super(JSONEncoder, self).encode(simplifier(obj))
+#    return super(JSONEncoder, self).encode(obj)
 
   def register(self, name, check, simplifier):
     self._registry[name] = (check, simplifier)
@@ -244,6 +264,7 @@ def GetJSONDecoder():
     decoder.register("datetime", _DtDecoder) # pre-register datetime objects
     decoder.register("date", _DateDecoder) # pre-register date objects
     decoder.register("set", _set_decoder) # pre-register set objects
+    decoder.register("Enum", _enum_decoder) # pre-register Enum objects
     _DECODER =  simplejson.JSONDecoder(object_hook=decoder)
   return _DECODER
 
@@ -255,6 +276,7 @@ def GetJSONEncoder():
     _ENCODER.register("datetime", _DtChecker, _DtSimplifier)
     _ENCODER.register("date", _DateChecker, _DateSimplifier)
     _ENCODER.register("set", _set_checker, _set_simplifier)
+    _ENCODER.register("enums", _enum_checker, _enum_simplifier)
   return _ENCODER
 
 

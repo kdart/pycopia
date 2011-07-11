@@ -443,11 +443,16 @@ if __name__ == "__main__":
     disp.register_encoder("models", _modelchecker, _convert_instance)
     sess = models.get_session()
     with webhelpers.GlobalDatabaseContext(sess):
-        rows = query("Equipment", {"active":True}, ["name", "model", "serno"], None, 0, 5)
-        for rowobj in rows:
-            print rowobj
-            #jse = disp._encoder.encode(rowobj)
-            #print jse
+        #rows = query("Equipment", {"active":True}, ["name", "model", "serno"], None, 0, 5)
+        #for rowobj in rows:
+        #    #print rowobj
+        #    jse = disp._encoder.encode(rowobj)
+        #    print jse
+        md = get_table_metadata("TestCase")
+        json = disp._encoder.encode(md)
+        print json
+        print type(json)
+        print len(json)
     sess.close()
 
 
