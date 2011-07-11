@@ -57,8 +57,8 @@ attributes cannot be added, but existing ones may be changed."""
 
     def __str__(self):
         n = self._name
-        s = ["%s(name=%r)" % (self.__class__.__name__, n)]
-        s = s+map(lambda it: "%s.%s = %r" % (n, it[0], it[1]), self.items())
+        s = ["%s(name=%r):" % (self.__class__.__name__, n)]
+        s = s + map(lambda it: "  %s.%s = %r" % (n, it[0], it[1]), self.items())
         s.append("\n")
         return "\n".join(s)
 
@@ -105,6 +105,7 @@ class SECTION(ConfigHolder):
 
 
 class BasicConfig(ConfigHolder):
+
     def mergefile(self, filename, globalspace=None):
         """Merge in a Python syntax configuration file that should assign
         global variables that become keys in the configuration. Returns
@@ -114,6 +115,9 @@ class BasicConfig(ConfigHolder):
             gb["SECTION"] = SECTION
             gb["sys"] = sys # in case config stuff needs these.
             gb["os"] = os
+            def include(fname):
+                execfile(get_pathname(fname), gb, self)
+            gb["include"] = include
             try:
                 execfile(filename, gb, self)
             except:
@@ -124,6 +128,7 @@ class BasicConfig(ConfigHolder):
                 return True
         else:
             return False
+
 
 def get_pathname(basename):
     basename = os.path.expandvars(os.path.expanduser(basename))
@@ -159,7 +164,7 @@ def check_config(fname):
 
 
 def _test(argv):
-    cf = get_config("ezmail.conf")
+    cf = get_config("config_test.conf")
     print cf
 
 
