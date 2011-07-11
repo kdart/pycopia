@@ -239,7 +239,7 @@ class TestcaseEditor(framework.RequestHandler):
         outerfs = form.add_fieldset(modelclass.__name__)
         for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
                         'procedure', 'reference', 'testimplementation',
-                        'functionalarea', 'prerequisite', 'automated', 'interactive'):
+                        'functionalarea', 'prerequisites', 'automated', 'interactive'):
             metadata = TC_METAMAP[colname]
             webhelpers.create_input(outerfs, modelclass, metadata, dbrow)
             outerfs.append(BR)
@@ -359,7 +359,7 @@ class TestcaseCreator(framework.RequestHandler):
         BR = form.get_new_element("Br")
         for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
                         'procedure', 'reference', 'testimplementation',
-                        'functionalarea', 'prerequisite', 'automated', 'interactive'):
+                        'functionalarea', 'prerequisites', 'automated', 'interactive'):
             metadata = TC_METAMAP[colname]
             webhelpers.new_input(outerfs, modelclass, metadata)
             outerfs.append(BR)

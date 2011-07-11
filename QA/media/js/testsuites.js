@@ -24,7 +24,7 @@
  */
 function loadTestSuiteApp() {
   loadApp(TestSuiteApp, "content");
-  forEach(document.images, setIconMouseover);
+  forEach(document.images, icons.setIconMouseover);
 };
 
 
@@ -40,10 +40,10 @@ function TestSuiteApp() {
   this.root = DIV({id: "testsuiteapp", "class": "applet"});
   var buttonbar = DIV({id: "buttonbar", class: "buttonbar"});
   // add/create icon and trash icon
-  var addicon = getIcon("add");
+  var addicon = icons.getIcon("add");
   connect(addicon, "onclick", bind(this.createTestSuite, this));
   buttonbar.appendChild(addicon);
-  var trash = getIcon("trash");
+  var trash = icons.getIcon("trash");
   var drp = new Droppable(trash, {
       accept: ["testsuite_item"],
       ondrop: bind(this._dropOnDelete, this),
