@@ -250,7 +250,7 @@ class POMAttribute(object):
     def encode(self, encoding=DEFAULT_ENCODING):
         name = self.name.encode(encoding)
         value = escape(self.value).encode(encoding)
-        return '%s="%s"' % (name, value)
+        return b'%s="%s"' % (name, value)
 
     def __repr__(self):
         return "%s(%r, %r, %r)" % (self.__class__.__name__, self.name, self.value, 
