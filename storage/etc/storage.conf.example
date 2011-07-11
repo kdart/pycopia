@@ -1,30 +1,15 @@
 #!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=0:smarttab
-# License: LGPL
-# Keith Dart <kdart@kdart.com>
 
-
-# for Durus based storage
-# location shared storage server.
-#host = "localhost"
-
-# TCP port server is listening on. Default will be used if not specified.
-#port = 2972
-
-#dbfile = "/var/cache/pycopia/nmsstore.dfs"
-#dblog =  "/var/cache/pycopia/storage.log"
-
-### For postgres database backend
-
-DATABASE_URL = database = 'postgresql://pycopia@localhost/pycopia'
-
+include("database.conf")
+include("icons.conf")
 
 ### web interface
 
 USERNAME = "lighttpd"
 
 ADMINS = [
-    ('keith@dartworks.biz', 'Keith Dart'),
+    ('me@mycompany.biz', 'My Name'),
 ]
 
 #MIDDLEWARE = [("firepython.middleware.FirePythonWSGI",)]
@@ -54,48 +39,4 @@ LOCATIONMAP = (
   (r'/media/images/(?P<name>\S+)', "images"),
 )
 
-# These should all be 24x24 icons
-ICONMAP = {
-# simplename     active         inactive (base state)
-#"xxx": ("icon_xxx_active.png", "icon_xxx_inactive.png"),
-  "default": (None, "icon_default_inactive.png"),
-  "add": ("icon_add_active.png", "icon_add_inactive.png"),
-  "edit": ("icon_edit_active.png", "icon_edit_inactive.png"),
-  "delete": ("icon_delete_active.png", "icon_delete_inactive.png"),
-  "trash": ("icon_trash_active.png", "icon_trash_inactive.png"),
-  "activate": ("icon_activate_active.png", "icon_activate_inactive.png"),
-  "isactive": ("icon_isactive_active.png", "icon_isactive_inactive.png"),
-  "isinactive": ("icon_isinactive_active.png", "icon_isinactive_inactive.png"),
-  "unknown": ("icon_unknown_active.png", "icon_unknown_inactive.png"),
-  "plus": ("icon_plus_active.png", "icon_plus_inactive.png"),
-  "minus": ("icon_minus_active.png", "icon_minus_inactive.png"),
-  "alert": (None, "icon_alert_inactive.png"),
-}
-
-# these should all be 16x16 icons
-ICONMAP_MEDIUM = {
-# simplename     active         inactive (base state)
-#"xxx": "icon_xxx.png",
-  "default": "icon_alert.png",
-  "search": "icon_searchbox.png",
-  "success": "icon_success.png",
-  "failure": "icon_error.png",
-  "incomplete": "icon_alert.png",
-  "unknown": "icon_alert.png",
-  "calendar": "icon_calendar.png",
-  "clock": "icon_clock.png",
-}
-
-# these should all be 10x10 icons
-ICONMAP_SMALL = {
-# simplename     active         inactive (base state)
-#"xxx": "icon_xxx.png",
-  "default": "icon-unknown.png",
-  "edit": "icon_changelink.png",
-  "delete": "icon_deletelink.png",
-  "add": "icon_addlink.png",
-  "unknown": "icon-unknown.png",
-  "yes": "icon-yes.png",
-  "no": "icon-no.png",
-}
 
