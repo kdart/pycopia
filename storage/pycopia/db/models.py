@@ -1185,8 +1185,11 @@ mapper(TestCase, tables.test_cases,
     properties={
         "functionalarea": relationship(FunctionalArea, secondary=tables.test_cases_areas),
         "reference": relationship(Requirement),
-        "dependents": relationship(TestCase, backref=backref("prerequisite",
-                                remote_side=[tables.test_cases.c.id])),
+        "prerequisites": relationship(TestCase, secondary=tables.test_cases_prerequisites, 
+            primaryjoin=tables.test_cases.c.id==tables.test_cases_prerequisites.c.testcase_id,
+            secondaryjoin=tables.test_cases_prerequisites.c.prerequisite_id==tables.test_cases.c.id,
+            backref="dependents"),
+        #"dependents": relationship(TestCase, backref=backref("prerequisite", remote_side=[tables.test_cases.c.id])),
     },
 )
 

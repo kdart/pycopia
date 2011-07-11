@@ -2,8 +2,13 @@
 
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
+# this module is a real hack job, but at least it works.
+
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 
 
 # python imports
@@ -13,18 +18,18 @@ import re
 import textwrap
 import logging
 from pytz import timezone
-from cStringIO import StringIO
+from io import StringIO
 
 from datetime import datetime
 
-# 3rd party imports
+# Pycopia imports
+from pycopia import aid
 from pycopia.WWW import XHTML, rst
 from pycopia.XML import XMLPathError
 from pycopia.XML.POM import ElementNode
 from pycopia import getopt
 from pycopia import passwd
 
-# Pycopia imports
 from pycopia.db import models
 from pycopia.db import types
 
@@ -69,41 +74,43 @@ class TestCaseData(object):
          'end condition'      : 'endcondition',
          'end-condition'      : 'endcondition',
          'reference'          : 'reference',
-         'prerequisites'      : 'prerequisite',
-         'prerequiste'        : 'prerequisite',
-         'prerequistes'       : 'prerequisite', # Deal with a template typo bug. :-o
+         'requirement'        : 'reference',
+         'prerequisite'       : 'prerequisites',
+         'prerequisites'      : 'prerequisites',
+         'prerequiste'        : 'prerequisites',
+         'prerequistes'       : 'prerequisites', # Deal with a template typo bug. :-o
          'procedure'          : 'procedure',
     }
 
     def __init__(self):
         data = self._data = {}
         # Pre-populate all column names with default data.
-        data["name"]              = None             # mandatory
-        data["lastchange"]        = datetime.now(UTC)
-        data["lastchangeauthor"]  = None
-        data["author"]            = None             # mandatory
-        data["reviewer"]          = None             # mandatory
-        data["tester"]            = None             # mandatory
-        data["reference"]         = None
-        data["purpose"]           = "TODO"     # mandatory
-        data["passcriteria"]      = "TODO"      # mandatory
-        data["startcondition"]    = None       # mandatory
-        data["endcondition"]      = None
-        data["procedure"]         = "See code."      # mandatory
-        data["comments"]          = None
-        data["priority"]          = types.PriorityType.get_default()
-        data["cycle"]             = types.TestCaseType.get_default()
-        data["status"]            = types.TestCaseStatus.get_default()
-        data["automated"]         = True             # mandatory
-        data["interactive"]       = False            # mandatory
-        data["valid"]             = True             # mandatory
-        data["testimplementation"]= None
-        data["bugid"]             = None
-        data["prerequisite"]      = None
+        data["name"]               = None             # mandatory
+        data["lastchange"]         = datetime.now(UTC)
+        data["lastchangeauthor"]   = None
+        data["author"]             = None             # mandatory
+        data["reviewer"]           = None             # mandatory
+        data["tester"]             = None             # mandatory
+        data["reference"]          = None
+        data["purpose"]            = "TODO"     # mandatory
+        data["passcriteria"]       = "TODO"      # mandatory
+        data["startcondition"]     = None       # mandatory
+        data["endcondition"]       = None
+        data["procedure"]          = "See code."      # mandatory
+        data["comments"]           = None
+        data["priority"]           = types.PriorityType.get_default()
+        data["cycle"]              = types.TestCaseType.get_default()
+        data["status"]             = types.TestCaseStatus.get_default()
+        data["automated"]          = True             # mandatory
+        data["interactive"]        = False            # mandatory
+        data["valid"]              = True             # mandatory
+        data["testimplementation"] = None
+        data["bugid"]              = None
         # many2many fields
         data = self._many2many = {}
-        data["dependents"]  = []
+        data["dependents"]     = []
         data["functionalarea"] = []
+        data["prerequisites"]  = []
 
     def set_from_TestCase(self, testcase):
         """Extract available data from Test instance."""
@@ -127,15 +134,14 @@ class TestCaseData(object):
         if docstring:
             self.parse_docstring(docstring)
         self.resolve_prerequisite(testcase)
+        self.resolve_reference()
 
     def __setitem__(self, name, value):
         if name not in self._data and name not in self._many2many:
             raise ValueError("Invalid column name: %r" % (name,))
-#        if name == "prerequisites":
-#            self._many2many[name] = value.split()
-#        elif name == "prerequisite": # append if singular name
-#            self._many2many["prerequisites"].append(value.strip())
-        if name == "functionalareas":
+        if name == "prerequisites":
+            self._many2many["prerequisites"] = value
+        elif name == "functionalareas":
             self._many2many[name] = value.split()
         elif name == "functionalarea":
             self._many2many["functionalarea"].append(value.strip())
@@ -186,33 +192,52 @@ class TestCaseData(object):
         if name.startswith("prerequisite"):
             for p in div.find_elements("p"):
                 prereq = " ".join(p.get_text().split())
-                for prname in prereq.split():
-                    self.__setitem__(name, prname)
+                self.__setitem__(name, prereq.split())
             return
         body = StringIO()
         for node in div:
             if isinstance(node, ElementNode) and node.__class__._name.startswith("h"):
                 continue
-            node.emit(body)
+            #node.emit(body)
+            body.write(node.get_text())
+            body.write(" ")
         body.write("\n")
         self.__setitem__(name, body.getvalue().strip())
 
     def resolve_prerequisite(self, testinstance):
-        prereq = self._data["prerequisite"]
-        if not _valid_prereq(prereq):
-            self._data["prerequisite"] = None
-            return
-        if type(prereq) in (unicode, str):
+        doc_prereqs = self._many2many["prerequisites"]
+        self._many2many["prerequisites"] = []
+        memo = set()
+        for prereq in aid.removedups([pr.implementation for pr in testinstance.prerequisites] + doc_prereqs):
+            if not _valid_prereq(prereq):
+                continue
             if "." not in prereq:
                 prereq = "%s.%s" % (testinstance.__class__.__module__, prereq)
+            if prereq in memo:
+                continue
+            memo.add(prereq)
             entry = get_TestEntry_instance(prereq, testinstance.config)
             if entry:
                 dbprereq = do_TestEntry(entry)
-                #prerequisites.append(dbprereq)
-                self._data["prerequisite"] = dbprereq
+                self._many2many["prerequisites"].append(dbprereq)
             else:
-                self._data["prerequisite"] = None
                 logging.warn("prerequisite %r could not be found." % (prereq,))
+#            elif issubclass(prereq, core.Test):
+#                preinst = prereq(config)
+#                entry = core.TestEntry(preinst, (), {}, False)
+#                dbprereq = do_TestEntry(entry)
+#                self._many2many["prerequisites"].append(dbprereq)
+
+    def resolve_reference(self):
+        if self._data["reference"]:
+            refname = self._data["reference"]
+            try:
+                ref = _dbsession.query(models.Requirement).filter(models.Requirement.uri == refname).one()
+            except models.NoResultFound:
+                ref = models.create(models.Requirement, uri=refname)
+            self._data["reference"] = ref
+        else:
+            self._data["reference"] = None
 
     def create(self):
         """Create and save new TestCase with data collected so far.

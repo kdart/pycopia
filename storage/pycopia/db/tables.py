@@ -509,7 +509,6 @@ test_cases =  Table('test_cases', metadata,
             Column(u'valid', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
             Column(u'testimplementation', VARCHAR(length=255, convert_unicode=False), primary_key=False),
             Column(u'bugid', VARCHAR(length=80, convert_unicode=False), primary_key=False),
-            Column(u'prerequisite_id', INTEGER(), primary_key=False),
             Column(u'reference_id', INTEGER(), primary_key=False),
             Column(u'time_estimate', INTERVAL(), primary_key=False), # for manual tests
     ForeignKeyConstraint([u'author_id'], [u'public.auth_user.id'], name=u'test_cases_author_id_fkey',
@@ -520,7 +519,6 @@ test_cases =  Table('test_cases', metadata,
                     onupdate="CASCADE", ondelete="SET NULL"),
             ForeignKeyConstraint([u'lastchangeauthor_id'], [u'public.auth_user.id'], name=u'test_cases_lastchangeauthor_id_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
-            ForeignKeyConstraint([u'prerequisite_id'], [u'public.test_cases.id'], name=u'test_cases_prerequisite_id_fkey'),
             ForeignKeyConstraint([u'reference_id'], [u'public.requirement_ref.id'], name=u'test_cases_requirement_ref_fkey',
                     onupdate="CASCADE", ondelete="SET NULL"),
     schema='public')
@@ -531,6 +529,17 @@ Index('index_test_cases_author_id', test_cases.c.author_id, unique=False)
 Index('index_test_cases_name_key', test_cases.c.name, unique=True)
 Index('index_test_cases_tester_id', test_cases.c.tester_id, unique=False)
 Index('index_test_cases_requirement_ref_id', test_cases.c.reference_id, unique=False)
+
+test_cases_prerequisites = Table('test_cases_prerequisites', metadata,
+    Column(u'id', INTEGER(), primary_key=True, nullable=False),
+            Column(u'testcase_id', INTEGER(), primary_key=False, nullable=False),
+            Column(u'prerequisite_id', INTEGER(), primary_key=False, nullable=False),
+    ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'test_cases_testcase_id_fkey'),
+            ForeignKeyConstraint([u'prerequisite_id'], [u'public.test_cases.id'], 
+                    name=u'test_cases_relation_prerequisite_id_fkey'),
+    schema='public')
+Index('index_test_cases_test_cases_id_key', 
+        test_cases_prerequisites.c.testcase_id, test_cases_prerequisites.c.prerequisite_id, unique=True)
 
 
 test_suites =  Table('test_suites', metadata,
@@ -645,7 +654,6 @@ language_sets_languages =  Table('language_sets_languages', metadata,
             Column(u'language_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'language_id'], [u'public.language_codes.id'], name=u'language_sets_languages_language_id_fkey'),
             ForeignKeyConstraint([u'languageset_id'], [u'public.language_sets.id'], name=u'language_sets_languages_languageset_id_fkey'),
-    
     schema='public')
 Index('index_language_sets_languages_languageset_id_key', language_sets_languages.c.languageset_id, language_sets_languages.c.language_id, unique=True)
 
