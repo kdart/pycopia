@@ -57,8 +57,7 @@ def get_model(modelname):
 
 def get_uidata():
     cf = json.current_request.config
-    return {"ICONMAP": cf.ICONMAP, 
-            "ICONMAP_SMALL": cf.ICONMAP_SMALL}
+    return {"ICONMAP": cf.ICONMAP}
 
 
 def get_table_metadata(modelname):
@@ -331,6 +330,8 @@ def view(request, tablename=None, rowid=None):
                 resp.get_icon("add")), 
             NM("A", {"href": request.get_url(edit, tablename=tablename, rowid=rowid)}, 
                 resp.get_icon("edit")),
+            NM("A", {"href": "javascript:doDeleteItem(%r, %r);" % (tablename, rowid)}, 
+                resp.get_icon("delete")),
             ))
     cycler = itertools.cycle(["row1", "row2"])
     tbl = resp.doc.add_table(width="100%", class_="rowdisplay")
