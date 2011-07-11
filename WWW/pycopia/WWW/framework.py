@@ -829,19 +829,35 @@ class ResponseDocument(object):
         response.add_header(httputils.CacheControl("no-cache"))
         return response
 
-    def get_icon(self, name):
+    def get_icon(self, name, size="large"):
+        if size == "large":
+            return self.get_large_icon(name)
+        elif size == "medium":
+            return self.get_medium_icon(name)
+        elif size == "small":
+            return self.get_small_icon(name)
+
+    def get_large_icon(self, name):
         try:
-            namepair = self.config.ICONMAP[name]
+            namepair = self.config.ICONMAP["large"][name]
         except KeyError:
-            namepair = self.config.ICONMAP["default"]
+            namepair = self.config.ICONMAP["large"]["default"]
         return self.nodemaker("Img", {"src": self.get_url("images", name=namepair[1]), 
                        "alt":name, "width":"24", "height":"24"})
 
+    def get_medium_icon(self, name):
+        try:
+            filename = self.config.ICONMAP["medium"][name]
+        except KeyError:
+            filename = self.config.ICONMAP["medium"]["default"]
+        return self.nodemaker("Img", {"src": self.get_url("images", name=filename), 
+                       "alt":name, "width":"16", "height":"16"})
+
     def get_small_icon(self, name):
         try:
-            filename = self.config.ICONMAP_SMALL[name]
+            filename = self.config.ICONMAP["small"][name]
         except KeyError:
-            filename = self.config.ICONMAP_SMALL["default"]
+            filename = self.config.ICONMAP["small"]["default"]
         return self.nodemaker("Img", {"src": self.get_url("images", name=filename), 
                        "alt":name, "width":"10", "height":"10"})
 

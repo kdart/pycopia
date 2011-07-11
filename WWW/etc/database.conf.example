@@ -1,0 +1,8 @@
+# python
+
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+DATABASE_URL = 'postgresql://pycopia@localhost/pycopia'
+# Some old code uses this name, but should be fixed soon.
+database = DATABASE_URL
+

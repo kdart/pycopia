@@ -39,10 +39,3 @@ DEFAULTNAV = [
 ]
 
 
-ICONMAP = {
-# simplename     active         inactive (base state)
-#"xxx": ("icon_xxx_active.png", "icon_xxx_inactive.png"),
-}
-
-
-

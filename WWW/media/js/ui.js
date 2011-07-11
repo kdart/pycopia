@@ -1,85 +1,112 @@
+/**
+ * General purpose user interface library for Pycopia web interfaces.
+ */
 
 /**
- * Provide alternate graphic for mouseover effect. This is a Mochikit
- * event handler.
- * @param {String} src The base file name of a icon.
- * @param {CustomEvent} ev The Mochikit event.
+ * icons namespace, manages icons, supports three sizes: small, medium, and large. Small are 10x10,
+ * medium are 16x16, and large are 24x24 pixels. It maps a simple name to a file name using the
+ * ICONMAP key in the uiData object. This is fetched from server side at load time by an app.
+ * Large icons support two images for mouseover effects.
  */
-function iconChange(src, ev) {
-  ev.target().src = src;
-};
 
-/** 
- * Return a full path given the icon base bame.
- * @param {String} basename The base (file) name of the icon.
- * @return {String} The full URL path the server needs to load the image.
- */
-function getIconPath(basename) {
-  return "/media/images/"+basename;
-};
+icons = {
+    getIconPath: function(basename) {
+      return "/media/images/"+basename;
+    },
+    /**
+     * Set mouseover callbacks for icon images.
+     * @param {Element} img The image object to set.
+     */
+    setIconMouseover: function(img) {
+      if (img.src.indexOf("icon_") >= 0) { // src initially set by server.
+        var namepair = uiData["ICONMAP"]["large"][img.alt];
+        // If _isactive_ part defined, add mouseover.
+        if (namepair && namepair[0]) {
+          connect(img, "onmouseover", 
+                  partial(icons.iconChange, icons.getIconPath(namepair[0])));
+          connect(img, "onmouseout", 
+                  partial(icons.iconChange, icons.getIconPath(namepair[1])));
+        };
+      };
+    },
+    /**
+     * Provide alternate graphic for mouseover effect. This is a Mochikit
+     * event handler.
+     * @param {String} src The base file name of a icon.
+     * @param {CustomEvent} ev The Mochikit event.
+     */
+    iconChange: function(src, ev) {
+      ev.target().src = src;
+    },
+    /**
+     * Construct in icon image element.
+     * @param {String} simplename The name of the icon (index into ICONMAP table).
+     * @param {String} size The size name, "large", "medium", or "small".
+     * @return {Element} img The image element.
+     */
+    getIcon: function(simplename, size) {
+        var size = size || "large";
+        return {large: icons.getLargeIcon,
+                medium: icons.getMediumIcon,
+                small: icons.getSmallIcon}[size](simplename);
+    },
+    getLargeIcon: function(simplename) {
 
-/**
- * Set mouseover callbacks for icon images.
- * @param {Element} img The image object to set.
- */
-function setIconMouseover(img) {
-  if (img.src.indexOf("icon_") >= 0) { // src initially set by server.
-    var namepair = uiData["ICONMAP"][img.alt];
-    // If _isactive_ part defined, add mouseover.
-    if (namepair && namepair[0]) {
-      connect(img, "onmouseover", 
-              partial(iconChange, getIconPath(namepair[0])));
-      connect(img, "onmouseout", 
-              partial(iconChange, getIconPath(namepair[1])));
-    };
-  };
-};
-
-
-/**
- * Construct in icon image element.
- * @param {String} simplename The name of the icon (index into ICONMAP 
- * table).
- * @return {Element} img The image element.
- */
-function getIcon(simplename) {
-  var activeInactive = uiData["ICONMAP"][simplename];
-  if (!activeInactive) {
-    activeInactive = uiData["ICONMAP"]["default"];
-  }
-  var img = IMG({
-              src: getIconPath(activeInactive[1]), 
-              alt: simplename, 
-              width: "24", 
-              height: "24"
-            });
-  if (activeInactive[0]) {
-    connect(img, "onmouseover", 
-            partial(iconChange, getIconPath(activeInactive[0])));
-    connect(img, "onmouseout", 
-            partial(iconChange, getIconPath(activeInactive[1])));
-  };
-  return img;
-};
-
-/**
- * Construct a small icon image element.
- * @param {String} simplename The name of the icon (index into ICONMAP_SMALL 
- * table).
- * @return {Element} img The image element.
- */
-function getSmallIcon(simplename) {
-  var iconname = uiData["ICONMAP_SMALL"][simplename];
-  if (!iconname) {
-    iconname = uiData["ICONMAP_SMALL"]["default"];
-  }
-  var img = IMG({
-              src: getIconPath(iconname), 
-              alt: simplename, 
-              width: "10", 
-              height: "10"
-            });
-  return img;
+        var activeInactive = uiData["ICONMAP"]["large"][simplename];
+        if (!activeInactive) {
+            activeInactive = uiData["ICONMAP"]["large"]["default"];
+        }
+        var img = IMG({
+                    src: icons.getIconPath(activeInactive[1]), 
+                    alt: simplename, 
+                    width: "24", 
+                    height: "24"
+                  });
+        if (activeInactive[0]) {
+          connect(img, "onmouseover", 
+                  partial(icons.iconChange, icons.getIconPath(activeInactive[0])));
+          connect(img, "onmouseout", 
+                  partial(icons.iconChange, icons.getIconPath(activeInactive[1])));
+        };
+        return img;
+    },
+    /**
+     * Construct a medium size icon image element.
+     * @param {String} simplename The name of the icon (index into ICONMAPtable).
+     * @return {Element} img The image element.
+     */
+    getMediumIcon: function(simplename) {
+      var iconname = uiData["ICONMAP"]["medium"][simplename];
+      if (!iconname) {
+        iconname = uiData["ICONMAP"]["medium"]["default"];
+      }
+      var img = IMG({
+                  src: icons.getIconPath(iconname), 
+                  alt: simplename, 
+                  width: "16", 
+                  height: "16"
+                });
+      return img;
+    },
+    /**
+     * Construct a small icon image element.
+     * @param {String} simplename The name of the icon (index into ICONMAP_SMALL 
+     * table).
+     * @return {Element} img The image element.
+     */
+    getSmallIcon: function(simplename) {
+      var iconname = uiData["ICONMAP"]["small"][simplename];
+      if (!iconname) {
+        iconname = uiData["ICONMAP"]["small"]["default"];
+      }
+      var img = IMG({
+                  src: icons.getIconPath(iconname), 
+                  alt: simplename, 
+                  width: "10", 
+                  height: "10"
+                });
+      return img;
+    }
 };
 
 
@@ -302,25 +329,27 @@ function setEditable(node, callback) {
 };
 
 // Places object into content area (content div).
-function showContent(obj) {
-  var content = document.getElementById("content");
-  if (content.hasChildNodes()) {
-    content.replaceChild(obj, content.lastChild);
-  } else {
-    content.appendChild(obj);
-  }
+function showContent(obj, areaname) {
+    var areaname = areaname || "content";
+    var content = document.getElementById(areaname);
+    if (content.hasChildNodes()) {
+      content.replaceChild(obj, content.lastChild);
+    } else {
+      content.appendChild(obj);
+    }
 }
 
 
-function showMessage(obj) {
-  if (obj) {
-    var text = document.createTextNode(obj.toString());
-    var msgarea = document.getElementById("messages");
-    if (msgarea.hasChildNodes()) {
-      msgarea.replaceChild(text, msgarea.lastChild);
-    } else {
-      msgarea.appendChild(text);
+function showMessage(obj, areaname) {
+    var areaname = areaname || "messages";
+    if (obj) {
+      var text = document.createTextNode(obj.toString());
+      var msgarea = document.getElementById(areaname);
+      if (msgarea.hasChildNodes()) {
+        msgarea.replaceChild(text, msgarea.lastChild);
+      } else {
+        msgarea.appendChild(text);
+      }
     }
-  }
 }
 
