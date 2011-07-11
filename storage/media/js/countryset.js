@@ -1,7 +1,7 @@
 
 function loadCountrySetApp() {
   loadApp(CountrySetApp, "content");
-  forEach(document.images, setIconMouseover);
+  forEach(document.images, icons.setIconMouseover);
 };
 
 /**
@@ -33,10 +33,10 @@ function CountrySetApp() {
   this.root = DIV({id: "countrysetapp", "class": "applet"});
   var buttonbar = DIV({id: "buttonbar", class: "buttonbar"});
   // add/create icon and trash icon
-  var addicon = getIcon("add");
+  var addicon = icons.getIcon("add");
   connect(addicon, "onclick", bind(this.createCountrySet, this));
   buttonbar.appendChild(addicon);
-  var trash = getIcon("trash");
+  var trash = icons.getIcon("trash");
   var drp = new Droppable(trash, {
       accept: ["countryset_item"],
       ondrop: bind(this._dropOnDelete, this),
