@@ -59,8 +59,10 @@ TableManager.prototype.fillEqtableData = function(data) {
         var drow = data[di];
         var dbid = drow[0];
         var row = TR({"dbid_id": dbid, "class": cycler.next()});
-        row.appendChild(TD(null, A({"href": format("javascript:doDeleteEquipmentRow({0});", dbid)}, getSmallIcon("delete")),
-                                 A({"href": format("javascript:doEditEquipmentRow({0});", dbid)}, getSmallIcon("edit"))));
+        row.appendChild(TD(null, A({"href": format("javascript:doDeleteEquipmentRow({0});", dbid)}, 
+                                     icons.getIcon("delete", "small")),
+                                 A({"href": format("javascript:doEditEquipmentRow({0});", dbid)}, 
+                                     icons.getIcon("edit", "small"))));
         for (var ri = 1; ri < drow.length; ri++) {
             row.appendChild(TD(null, drow[ri]));
         };

@@ -328,6 +328,28 @@ function doDeleteRow(tablename, rowid) {
   }
 }
 
+function doDeleteItem(tablename, rowid) {
+  if (window.confirm("Delete instance " + rowid.toString() + " of " + tablename +"?")) {
+    var d = window.db.deleterow(tablename, rowid);
+    d.addCallbacks( function (result) {
+          if (result[0]) {
+            // go up two in path
+            var a = window.location.pathname.split("/");
+            a.pop(); a.pop();
+            window.location.pathname = a.join("/") + "/";
+          } else {
+            window.alert("There was a problem deleting this item. " + result[1]);
+          };
+        }, 
+        function () {
+            console.log("Error requesting deletion."); 
+            window.alert("Could not delete item.");
+          }
+    );
+  }
+}
+
+
 /**
  * Initializer adds the "db" object that has methods that map the the
  * exported methods on the server side. Also gets the user interface data (icon maps, etc.) 
