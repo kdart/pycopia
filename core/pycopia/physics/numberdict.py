@@ -7,7 +7,14 @@
 # Written by Konrad Hinsen <hinsen@cnrs-orleans.fr>
 # last revision: 1999-7-23
 #
-# Modified by Keith Dart to work with new physical_quantities module..
+# Modified by Keith Dart to work with new physical_quantities module, and
+# modern Python.
+
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 
 from pycopia import dictlib
 
@@ -31,7 +38,7 @@ class NumberDict(dictlib.AttrDictDefault):
 
   def __add__(self, other):
     sum = self.copy()
-    for key in other.keys():
+    for key in other:
       sum[key] = sum[key] + other[key]
     return sum
 
@@ -39,27 +46,29 @@ class NumberDict(dictlib.AttrDictDefault):
 
   def __sub__(self, other):
     sum = self.copy()
-    for key in other.keys():
+    for key in other:
       sum[key] = sum[key] - other[key]
     return sum
 
   def __rsub__(self, other):
     sum = self.copy()
-    for key in other.keys():
+    for key in other:
       sum[key] = other[key] - self[key]
     return sum
 
   def __mul__(self, other):
     new = self.__class__(default=self._default)
-    for key in self.keys():
+    for key in self:
       new[key] = other * self[key]
     return new
 
   __rmul__ = __mul__
 
-  def __div__(self, other):
+  def __truediv__(self, other):
     new = self.__class__(default=self._default)
-    for key in self.keys():
+    for key in self:
       new[key] = self[key] / other
     return new
+
+  __div__ = __floordiv__ = __truediv__
 

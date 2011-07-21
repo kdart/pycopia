@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # -*- coding: utf-8 -*-
 # vim:ts=2:sw=2:softtabstop=2:smarttab:expandtab
 
@@ -16,8 +16,15 @@
 #   Modernized Python
 #   Use numberdict
 #   Added binary units (and removed "barns" unit)
-#   Extended PhysicalUnit constructor to allow easier and faster "casting".
+#   Extended PhysicalQuantity constructor to allow easier and faster "casting".
 #   Remove other external dependencies.
+
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+# This doesn't work here
+#from __future__ import division
+
 
 """Physical quantities with units.
 
@@ -71,39 +78,37 @@ class PhysicalQuantity(object):
            with 'rad'.
   """
 
-  _NUMBER_RE = re.compile('[+-]?[0-9]+(\\.[0-9]*)?([eE][+-]?[0-9]+)?')
+  _NUMBER_RE = re.compile(r'([+-]?[0-9]+(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?)\s*(\S+)')
 
   def __init__(self, value, unit=None):
     if unit is not None:
       self.value = float(value)
       self.unit = _findUnit(unit)
     else:
-      if type(value) is str:
+      if isinstance(value, basestring):
         match = PhysicalQuantity._NUMBER_RE.match(value)
         if match is None:
-          raise TypeError, 'No number found'
-        self.value = float(match.group(0))
-        self.unit = _findUnit(value[len(match.group(0)):]) # TODO improve...
+          raise TypeError('Not a number or number with unit')
+        self.value = float(match.group(1))
+        self.unit = _findUnit(match.group(2))
       else:
         # assume init with other PhysicalQuantity
         self.value = value.value
         self.unit = value.unit
 
   def __str__(self):
-    return str(self.value) + ' ' + self.unit.name()
+    return str(self.value) + self.unit.name()
 
   def __repr__(self):
-    return (self.__class__.__name__ + '(' + `self.value` + ',' + 
-        `self.unit.name()` + ')')
+    return "%s(%r, %r)" % (self.__class__.__name__, self.value, self.unit.name())
 
   def __float__(self):
     return self.value
 
   def _sum(self, other, sign1, sign2):
     if not isPhysicalQuantity(other):
-      raise TypeError, 'Incompatible types'
-    new_value = sign1*self.value + \
-          sign2*other.value*other.unit.conversionFactorTo(self.unit)
+      raise TypeError('Incompatible types')
+    new_value = sign1*self.value + sign2*other.value*other.unit.conversionFactorTo(self.unit)
     return self.__class__(new_value, self.unit)
 
   def __add__(self, other):
@@ -133,7 +138,7 @@ class PhysicalQuantity(object):
 
   __rmul__ = __mul__
 
-  def __div__(self, other):
+  def __truediv__(self, other):
     if not isPhysicalQuantity(other):
       return self.__class__(self.value/other, self.unit)
     value = self.value/other.value
@@ -143,9 +148,11 @@ class PhysicalQuantity(object):
     else:
       return self.__class__(value, unit)
 
+  __div__ = __floordiv__ = __truediv__
+
   def __rdiv__(self, other):
     if not isPhysicalQuantity(other):
-      return self.__class__(other/self.value, pow(self.unit, -1))
+      return self.__class__(float(other)/self.value, pow(self.unit, -1))
     value = other.value/self.value
     unit = other.unit/self.unit
     if unit.isDimensionless():
@@ -155,11 +162,11 @@ class PhysicalQuantity(object):
 
   def __pow__(self, other):
     if isPhysicalQuantity(other):
-      raise TypeError, 'Exponents must be dimensionless'
+      raise TypeError('Exponents must be dimensionless')
     return self.__class__(pow(self.value, other), pow(self.unit, other))
 
   def __rpow__(self, other):
-    raise TypeError, 'Exponents must be dimensionless'
+    raise TypeError('Exponents must be dimensionless')
 
   def __abs__(self):
     return self.__class__(abs(self.value), self.unit)
@@ -248,53 +255,46 @@ class PhysicalQuantity(object):
 
   def sin(self):
     if self.unit.isAngle():
-      return umath.sin(self.value * \
-               self.unit.conversionFactorTo(_unit_table['rad']))
+      return umath.sin(self.value * self.unit.conversionFactorTo(_unit_table['rad']))
     else:
-      raise TypeError, 'Argument of sin must be an angle'
+      raise TypeError('Argument of sin must be an angle')
 
   def cos(self):
     if self.unit.isAngle():
-      return umath.cos(self.value * \
-               self.unit.conversionFactorTo(_unit_table['rad']))
+      return umath.cos(self.value * self.unit.conversionFactorTo(_unit_table['rad']))
     else:
-      raise TypeError, 'Argument of cos must be an angle'
+      raise TypeError('Argument of cos must be an angle')
 
   def tan(self):
     if self.unit.isAngle():
-      return umath.tan(self.value * \
-               self.unit.conversionFactorTo(_unit_table['rad']))
+      return umath.tan(self.value * self.unit.conversionFactorTo(_unit_table['rad']))
     else:
-      raise TypeError, 'Argument of tan must be an angle'
+      raise TypeError('Argument of tan must be an angle')
 
 
 class PhysicalUnit(object):
 
   def __init__(self, names, factor, powers, offset=0):
-    if type(names) is str:
+    if isinstance(names, basestring):
       self.names = numberdict.NumberDict(default=0)
       self.names[names] = 1
     else:
       self.names = names
-    self.factor = factor
+    self.factor = float(factor)
     self.offset = offset
     self.powers = powers
-
-#  def __repr__(self):
-#    return 'PhysicalUnit(%r, %r, %r, %r)' % (
-#        self.names, self.factor, self.powers, self.offset)
 
   def __str__(self):
     return '<PhysicalUnit ' + self.name() + '>'
 
   def __cmp__(self, other):
     if self.powers != other.powers:
-      raise TypeError, 'Incompatible units'
+      raise TypeError('Incompatible units')
     return cmp(self.factor, other.factor)
 
   def __mul__(self, other):
     if self.offset != 0 or (isPhysicalUnit (other) and other.offset != 0):
-      raise TypeError, "cannot multiply units with non-zero offset"
+      raise TypeError("cannot multiply units with non-zero offset")
     if isPhysicalUnit(other):
       return PhysicalUnit(self.names+other.names,
                 self.factor*other.factor,
@@ -308,9 +308,9 @@ class PhysicalUnit(object):
 
   __rmul__ = __mul__
 
-  def __div__(self, other):
+  def __truediv__(self, other):
     if self.offset != 0 or (isPhysicalUnit(other) and other.offset != 0):
-      raise TypeError, "cannot divide units with non-zero offset"
+      raise TypeError("cannot divide units with non-zero offset")
     if isPhysicalUnit(other):
       return PhysicalUnit(self.names - other.names,
                 self.factor / other.factor,
@@ -318,24 +318,26 @@ class PhysicalUnit(object):
                   self.powers, other.powers))
     else:
       return PhysicalUnit(self.names + numberdict.NumberDict({str(other): -1}, default=0),
-                self.factor/other, self.powers)
+                self.factor/float(other), self.powers)
+
+  __div__ = __floordiv__ = __truediv__
 
   def __rdiv__(self, other):
     if self.offset != 0 or (isPhysicalUnit (other) and other.offset != 0):
-      raise TypeError, "cannot divide units with non-zero offset"
+      raise TypeError("cannot divide units with non-zero offset")
     if isPhysicalUnit(other):
       return PhysicalUnit(other.names-self.names,
                 other.factor/self.factor,
                 map(lambda a,b: a-b,
                   other.powers, self.powers))
     else:
-      return PhysicalUnit({str(other): 1}-self.names,
-                other/self.factor,
+      return PhysicalUnit({str(other): 1.}-self.names,
+                float(other)/self.factor,
                 map(lambda x: -x, self.powers))
 
   def __pow__(self, other):
     if self.offset != 0:
-      raise TypeError, "cannot exponentiate units with non-zero offset"
+      raise TypeError("cannot exponentiate units with non-zero offset")
     if type(other) is int:
       return PhysicalUnit(other*self.names, pow(self.factor, other),
                 map(lambda x,p=other: x*p, self.powers))
@@ -359,22 +361,20 @@ class PhysicalUnit(object):
               names[_base_names[i]] = p[i]
           return PhysicalUnit(names, f, p)
         else:
-          raise TypeError, 'Illegal exponent'
-    raise TypeError, 'Only integer and inverse integer exponents allowed'
+          raise TypeError('Illegal exponent')
+    raise TypeError('Only integer and inverse integer exponents allowed')
 
   def conversionFactorTo(self, other):
     if self.powers != other.powers:
-      raise TypeError, 'Incompatible units'
+      raise TypeError('Incompatible units')
     if self.offset != other.offset and self.factor != other.factor:
-      raise TypeError, \
-          ('Unit conversion (%s to %s) cannot be expressed ' +
-           'as a simple multiplicative factor') % \
-          (self.name(), other.name())
+      raise TypeError('Unit conversion (%s to %s) cannot be expressed '
+           'as a simple multiplicative factor' % (self.name(), other.name()))
     return self.factor/other.factor
 
   def conversionTupleTo(self, other): # added 1998/09/29 GPW
     if self.powers != other.powers:
-      raise TypeError, 'Incompatible units'
+      raise TypeError('Incompatible units')
 
     # let (s1,d1) be the conversion tuple from 'self' to base units
     #   (ie. (x+d1)*s1 converts a value x from 'self' to base units,
@@ -402,8 +402,7 @@ class PhysicalUnit(object):
     return not reduce(lambda a,b: a or b, self.powers)
 
   def isAngle(self):
-    return self.powers[7] == 1 and \
-         reduce(lambda a,b: a + b, self.powers) == 1
+    return self.powers[7] == 1 and reduce(lambda a,b: a + b, self.powers) == 1
 
   def setName(self, name):
     self.names = numberdict.NumberDict(default=0)
@@ -432,17 +431,17 @@ class PhysicalUnit(object):
 # Type checks
 
 def isPhysicalUnit(x):
-  return hasattr(x, 'factor') and hasattr(x, 'powers')
+  return isinstance(x, PhysicalUnit)
 
 def isPhysicalQuantity(x):
   "Returns 1 if |x| is an instance of PhysicalQuantity."
-  return hasattr(x, 'value') and hasattr(x, 'unit')
+  return isinstance(x, PhysicalQuantity)
 
 
 # Helper functions
 
 def _findUnit(unit):
-  if type(unit) is str:
+  if isinstance(unit, basestring):
     unit = eval(unit, _unit_table)
     for cruft in ['__builtins__', '__args__']:
       try: 
@@ -451,7 +450,7 @@ def _findUnit(unit):
         pass
 
   if not isPhysicalUnit(unit):
-    raise TypeError, str(unit) + ' is not a unit'
+    raise TypeError(str(unit) + ' is not a unit')
   return unit
 
 def _round(x):
@@ -513,8 +512,8 @@ for unit in _base_units:
 
 def _addUnit(name, unit):
   if _unit_table.has_key(name):
-    raise KeyError, 'Unit ' + name + ' already defined'
-  if type(unit) is str:
+    raise KeyError('Unit ' + name + ' already defined')
+  if isinstance(unit, basestring):
     unit = eval(unit, _unit_table)
     for cruft in ['__builtins__', '__args__']:
       try: del _unit_table[cruft]
@@ -682,39 +681,38 @@ if __name__ == '__main__':
   from numpy.core.umath import *
   l = PhysicalQuantity(10., 'm')
   big_l = PhysicalQuantity(10., 'km')
-  print big_l + l
+  print (big_l + l)
   t = PhysicalQuantity(314159., 's')
-  print t.inUnitsOf('d','h','min','s')
+  print (t.inUnitsOf('d','h','min','s'))
 
   p = PhysicalQuantity # just a shorthand...
 
   e = p('2.7 Hartree*Nav')
   e.convertToUnit('kcal/mol')
-  print e
-  print e.inBaseUnits()
+  print (e)
+  print (e.inBaseUnits())
 
   freeze = p('0 degC')
-  print freeze.inUnitsOf ('degF')
+  print (freeze.inUnitsOf ('degF'))
 
   kb = p(1000, "b")
   r = kb/p(1.0, "s")
-  print r
-  print r.inUnitsOf("B/s")
+  print (r)
+  print (r.inUnitsOf("B/s"))
 
   Kibit = p(1.0, "Kib")
-  print Kibit
-  print Kibit.inUnitsOf("B")
+  print (Kibit)
+  print (Kibit.inUnitsOf("B"))
   assert Kibit.inUnitsOf("B").value == 1024 / 8
   # 100 kB = 97.65625 KiB
-  print p(100, "kB").inUnitsOf("KiB")
+  print (p(100, "kB").inUnitsOf("KiB"))
   assert p(100, "kB").inUnitsOf("Kib").value == 97.65625 * 8
 
   PACKET = p(1.0, "n")
 
   packets = 12.0 * PACKET
-  print packets / p(1., "s")
+  print (packets / p(1., "s"))
   avgpack = p(40., "B") / PACKET
   avgrate = (packets * avgpack) / p(1., "s")
-  print avgrate.inUnitsOf("B/s")
+  print (avgrate.inUnitsOf("B/s"))
   assert avgrate.inUnitsOf("b/s").value == (12.0 * 40.0 * 8)
-
