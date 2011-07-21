@@ -327,29 +327,31 @@ class DatabaseReport(reports.NullReport):
 
     def passed(self, msg, level=1):
         self._currentresult.set("result", PASSED)
+        if not self._currentresult.get("diagnostic"):
+            self._currentresult.set("diagnostic", str(msg))
 
     def failed(self, msg, level=1):
         # If test did not write a diagnostic message then use fail message as
         # diagnostic.
         if not self._currentresult.get("diagnostic"):
-            self._currentresult.set("diagnostic", msg)
+            self._currentresult.set("diagnostic", str(msg))
         self._currentresult.set("result", FAILED)
 
     def expectedfail(self, msg, level=1):
         if not self._currentresult.get("diagnostic"):
-            self._currentresult.set("diagnostic", msg)
+            self._currentresult.set("diagnostic", str(msg))
         self._currentresult.set("result", EXPECTED_FAIL)
 
     def incomplete(self, msg, level=1):
         if not self._currentresult.get("diagnostic"):
-            self._currentresult.set("diagnostic", msg)
+            self._currentresult.set("diagnostic", str(msg))
         self._currentresult.set("result", INCOMPLETE)
 
     def abort(self, msg, level=1):
         self._currentresult.set("result", ABORT)
 
     def diagnostic(self, msg, level=1):
-        self._currentresult.set("diagnostic", msg)
+        self._currentresult.set("diagnostic", str(msg))
 
     def add_summary(self, entries): 
         pass
