@@ -78,9 +78,10 @@ class PhysicalQuantity(object):
            with 'rad'.
   """
 
-  _NUMBER_RE = re.compile(r'([+-]?[0-9]+(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?)\s*(\S+)')
+  _NUMBER_RE = re.compile(r'([+-]?[0-9]+(?:\.[0-9]*)?(?:[eE][+-]?[0-9]+)?)(\s*)(\S+)')
 
-  def __init__(self, value, unit=None):
+  def __init__(self, value, unit=None, space=" "):
+    self._space = space
     if unit is not None:
       self.value = float(value)
       self.unit = _findUnit(unit)
@@ -90,17 +91,34 @@ class PhysicalQuantity(object):
         if match is None:
           raise TypeError('Not a number or number with unit')
         self.value = float(match.group(1))
-        self.unit = _findUnit(match.group(2))
-      else:
-        # assume init with other PhysicalQuantity
+        self._space = match.group(2)
+        self.unit = _findUnit(match.group(3))
+      elif isinstance(value, PhysicalQuantity):
         self.value = value.value
         self.unit = value.unit
+        self._space = value._space
+      elif isinstance(value, tuple):
+        self.value = float(value[0])
+        self.unit = _findUnit(value[1])
+        try:
+          self._space = value[2]
+        except IndexError:
+          pass
+      else:
+        raise ValueError("PhysicalQuantity can't use {!r}".format(value))
 
   def __str__(self):
-    return str(self.value) + self.unit.name()
+    return "{}{}{}".format(str(self.value), self._space, self.unit.name())
 
   def __repr__(self):
     return "%s(%r, %r)" % (self.__class__.__name__, self.value, self.unit.name())
+
+  # sometimes we need space printed, and sometimes we dont.
+  def nospace(self):
+    self._space = ""
+
+  def usespace(self, space=" "):
+    self._space = space
 
   def __float__(self):
     return self.value
@@ -695,7 +713,7 @@ if __name__ == '__main__':
   print (e.inBaseUnits())
 
   freeze = p('0 degC')
-  print (freeze.inUnitsOf ('degF'))
+  print (freeze.inUnitsOf('degF'))
 
   kb = p(1000, "b")
   r = kb/p(1.0, "s")
@@ -718,3 +736,8 @@ if __name__ == '__main__':
   avgrate = (packets * avgpack) / p(1., "s")
   print (avgrate.inUnitsOf("B/s"))
   assert avgrate.inUnitsOf("b/s").value == (12.0 * 40.0 * 8)
+  print(PhysicalQuantity((10., "m")))
+  assert PhysicalQuantity(avgrate) == avgrate
+  assert str(PhysicalQuantity("10ms")) == "10.0ms"
+  assert str(PhysicalQuantity("10 ms")) == "10.0 ms"
+
