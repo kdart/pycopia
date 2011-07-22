@@ -495,8 +495,9 @@ _prefixes = [
        ('d',  1.e-1),
        ('c',  1.e-2),
        ('m',  1.e-3),
-       ('mu', 1.e-6),
-       ('µ',  1.e-6),
+       ('u',  1.e-6),
+       ('mu', 1.e-6), # alias for mu/micro
+       #('µ',  1.e-6), # actual mu for micro, but doesn't work now
        ('n',  1.e-9),
        ('p',  1.e-12),
        ('f',  1.e-15),
@@ -687,6 +688,7 @@ if __name__ == '__main__':
 
   p = PhysicalQuantity # just a shorthand...
 
+  print("add us:", p("1.0", "us") + p("1.0", "us")) #"µs") )
   e = p('2.7 Hartree*Nav')
   e.convertToUnit('kcal/mol')
   print (e)
