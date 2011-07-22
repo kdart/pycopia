@@ -270,6 +270,9 @@ class UserInterface(object):
             except tty.PageQuitError:
                 pass
 
+    def write(self, text):
+        self._io.write(text)
+
     def error(self, text):
         self.printf("%%r%s%%N" % (text,))
 
