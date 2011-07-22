@@ -111,7 +111,7 @@ class PhysicalQuantity(object):
     return "{}{}{}".format(str(self.value), self._space, self.unit.name())
 
   def __repr__(self):
-    return "%s(%r, %r)" % (self.__class__.__name__, self.value, self.unit.name())
+    return "%s(%r, %r, %r)" % (self.__class__.__name__, self.value, self.unit.name(), self._space)
 
   # sometimes we need space printed, and sometimes we dont.
   def nospace(self):
@@ -127,7 +127,7 @@ class PhysicalQuantity(object):
     if not isPhysicalQuantity(other):
       raise TypeError('Incompatible types')
     new_value = sign1*self.value + sign2*other.value*other.unit.conversionFactorTo(self.unit)
-    return self.__class__(new_value, self.unit)
+    return self.__class__(new_value, self.unit, self._space)
 
   def __add__(self, other):
     return self._sum(other, 1, 1)
@@ -146,54 +146,54 @@ class PhysicalQuantity(object):
 
   def __mul__(self, other):
     if not isPhysicalQuantity(other):
-      return self.__class__(self.value*other, self.unit)
+      return self.__class__(self.value*other, self.unit, self._space)
     value = self.value * other.value
     unit = self.unit * other.unit
     if unit.isDimensionless():
       return value*unit.factor
     else:
-      return self.__class__(value, unit)
+      return self.__class__(value, unit, self._space)
 
   __rmul__ = __mul__
 
   def __truediv__(self, other):
     if not isPhysicalQuantity(other):
-      return self.__class__(self.value/other, self.unit)
+      return self.__class__(self.value/other, self.unit, self._space)
     value = self.value/other.value
     unit = self.unit/other.unit
     if unit.isDimensionless():
       return value*unit.factor
     else:
-      return self.__class__(value, unit)
+      return self.__class__(value, unit, self._space)
 
   __div__ = __floordiv__ = __truediv__
 
   def __rdiv__(self, other):
     if not isPhysicalQuantity(other):
-      return self.__class__(float(other)/self.value, pow(self.unit, -1))
+      return self.__class__(float(other)/self.value, pow(self.unit, -1), self._space)
     value = other.value/self.value
     unit = other.unit/self.unit
     if unit.isDimensionless():
       return value*unit.factor
     else:
-      return self.__class__(value, unit)
+      return self.__class__(value, unit, self._space)
 
   def __pow__(self, other):
     if isPhysicalQuantity(other):
       raise TypeError('Exponents must be dimensionless')
-    return self.__class__(pow(self.value, other), pow(self.unit, other))
+    return self.__class__(pow(self.value, other), pow(self.unit, other), self._space)
 
   def __rpow__(self, other):
     raise TypeError('Exponents must be dimensionless')
 
   def __abs__(self):
-    return self.__class__(abs(self.value), self.unit)
+    return self.__class__(abs(self.value), self.unit, self._space)
 
   def __pos__(self):
     return self
 
   def __neg__(self):
-    return self.__class__(-self.value, self.unit)
+    return self.__class__(-self.value, self.unit, self._space)
 
   def __nonzero__(self):
     return self.value != 0
@@ -225,7 +225,7 @@ class PhysicalQuantity(object):
     if len(units) == 1:
       unit = units[0]
       value = _convertValue (self.value, self.unit, unit)
-      return self.__class__(value, unit)
+      return self.__class__(value, unit, self._space)
     else:
       units.sort()
       result = []
@@ -262,7 +262,7 @@ class PhysicalQuantity(object):
       num = '1'
     else:
       num = num[1:]
-    return self.__class__(new_value, num + denom)
+    return self.__class__(new_value, num + denom, self._space)
 
   def isCompatible (self, unit):
     unit = _findUnit (unit)
