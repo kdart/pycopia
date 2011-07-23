@@ -11,6 +11,7 @@ This module provides the primary test runner for the automation framework.
 import sys
 import os
 import shutil
+import warnings
 from errno import EEXIST
 
 from pycopia import timelib
@@ -95,7 +96,9 @@ class TestRunner(object):
 
         Arguments:
             objects:
-                A list of runnable object instances.
+                A list of runnable objects. A runnable object is basically
+                something that has a callable named "run" that takes a
+                configuration object as a parameter.
 
         May raise TestRunnerError if an object is not runnable by this test
         runner.
@@ -107,9 +110,49 @@ class TestRunner(object):
             elif objecttype is TypeType and issubclass(obj, core.Test):
                 self.run_test(obj)
             elif isinstance(obj, core.TestSuite):
-                self.run_object(suite)
+                self.run_object(obj)
+            elif objecttype is type and hasattr(obj, "run"):
+                # a bare class uses as a subcontainer of test or suite constructor.
+                self.run_class(obj)
             else:
-                raise TestRunnerError("%r is not a runnable object." % (obj,))
+                warnings.warn("%r is not a runnable object." % (obj,))
+
+    def run_class(self, cls):
+        """Run a container class inside a module.
+
+        The class is run as if it were a module, using the classes containing
+        module. The class is just a container, and the run method should be a
+        static method or class method.
+
+        Arguments:
+            class with run method:
+                A class object with a run() method that takes a configuration
+                object as it's single parameter.
+
+        Returns:
+            The return value of the class's run() method, or FAILED if the
+            module raised an exception.
+        """
+        rpt = self.config.report
+        cls.test_name = ".".join([cls.__module__, cls.__name__])
+        ID = get_module_version(sys.modules[cls.__module__])
+        rpt.add_message("MODULEVERSION", ID)
+        rpt.add_message("MODULESTARTTIME", timelib.now())
+        try:
+            rv = self.run_object(cls)
+        except KeyboardInterrupt:
+            rpt.add_message("MODULEENDTIME", timelib.now())
+            rpt.incomplete("Module aborted by user.")
+            raise
+        except:
+            ex, val, tb = sys.exc_info()
+            if self.config.flags.DEBUG:
+                from pycopia import debugger
+                debugger.post_mortem(tb, ex, val)
+            rpt.add_message("MODULEENDTIME", timelib.now())
+            rpt.failed("Container exception: %s (%s)" % (ex, val))
+        else:
+            rpt.add_message("MODULEENDTIME", timelib.now())
 
     def run_module(self, mod):
         """Run a test module.
@@ -129,10 +172,7 @@ class TestRunner(object):
         cf = self.config
         # make the module look like a test.
         mod.test_name = mod.__name__
-        try:
-            ID = mod.__version__[1:-1].split(":")[-1].strip()
-        except (AttributeError, IndexError): # Should be there, but don't worry if it's not.
-            ID = "unknown"
+        ID = get_module_version(mod)
         cf.report.add_message("MODULEVERSION", ID)
         cf.report.add_message("MODULESTARTTIME", timelib.now())
         try:
@@ -295,4 +335,10 @@ class TestRunner(object):
             if not os.listdir(cf.resultsdir): # TODO, stat this instead
                 os.rmdir(cf.resultsdir)
 
+
+def get_module_version(mod):
+    try:
+        return mod.__version__[1:-1].split(":")[-1].strip()
+    except (AttributeError, IndexError): # Should be there, but don't worry if it's not.
+        return "unknown"
 

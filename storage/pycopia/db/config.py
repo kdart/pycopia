@@ -217,7 +217,7 @@ class Container(object):
 
     def has_key(self, key):
         me = self.node
-        q = session.query(Config).filter(and_(
+        q = self.session.query(Config).filter(and_(
                 Config.name==key,
                 Config.parent_id==me.id,
                 Config.testcase==me.testcase,
