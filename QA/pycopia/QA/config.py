@@ -280,6 +280,8 @@ class RootContainer(config.Container):
 
     def _get_environment(self):
         """Get the Environment object defined by the test configuration.
+        Will set the owner to the currently running user. If already owned then
+        a ConfigError will be raised.
         """
         if self._cache.get("_environment") is None:
             name = self.get("environmentname", "default")
@@ -289,6 +291,12 @@ class RootContainer(config.Container):
                     env = db.query(models.Environment).filter(models.Environment.name==name).one()
                 except config.NoResultFound as err:
                     raise config.ConfigError("Bad environmentname %r: %s" % (name, err))
+                username = self.get("username") # username should be set by test runner
+                if username:
+                    if env.is_owned():
+                        if env.owner.username != username:
+                            raise config.ConfigError("Environment is currently owned by: %s" % (env.owner,))
+                    env.set_owner_by_username(db, username)
                 env = EnvironmentRuntime(db, env, self.logfile)
                 self._cache["_environment"] = env
             else:
@@ -296,7 +304,11 @@ class RootContainer(config.Container):
         return self._cache["_environment"]
 
     def _del_environment(self):
-        self._cache["_environment"] = None
+        envruntime = self._cache.get("_environment")
+        if envruntime is not None:
+            self._cache["_environment"] = None
+            envruntime._environment.clear_owner(self.session)
+            del envruntime._environment
 
     environment = property(_get_environment, None, _del_environment)
 
@@ -610,18 +622,23 @@ if __name__ == "__main__":
     print cf
     print cf.flags
     print cf.flags.DEBUG
-    print cf.environment.DUT.state
+#    print cf.environment.DUT.state
     #cf.reportname = "default"
     #print cf.get("reportname")
     #print cf.report
-    #env = cf.environment
-    #print "Environment:"
-    #print env
-    #print "Supported roles:"
-    #print env.get_supported_roles()
+    cf.username = "keith"
+    cf.environmentname = "default"
+    #env = cf._get_environment()
+    env = cf.environment
+    print "Environment:"
+    print env
+    print "Supported roles:"
+    print env.get_supported_roles()
     #print env.get_role("testcontroller")
     #print env._get_DUT()
     #dut = env.DUT
     #print dut["default_role"]
+    print (cf.environment._environment.owner)
+    del cf.environment
 
 

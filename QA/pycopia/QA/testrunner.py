@@ -317,8 +317,9 @@ class TestRunner(object):
         # cache.
         del rpt
         del cf.report
-        del cf.logfile 
-        del cf.UI 
+        del cf.logfile
+        del cf.UI
+        del cf.environment
         if cf.has_key("resultsdir"):
             for fname in cf.reportfilenames:
                 if not fname.startswith("<"): # a real file, not builtin stdio

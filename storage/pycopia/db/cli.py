@@ -244,19 +244,6 @@ class NetworkRowCommands(RowCommands):
             self._print(repr(intf))
 
 
-class TestResultRowCommands(RowCommands):
-
-    def parent(self, argv):
-        """parent
-    Move to parent record."""
-        if self._obj.parent is not None:
-            cmd = self.clone(TestResultRowCommands)
-            cmd._setup(self._obj.parent, TestResultRowCommands.get_prompt(self._obj.parent))
-            raise CLI.NewCommand(cmd)
-        else:
-            self._print("No parent.")
-
-
 class RowWithAttributesCommands(RowCommands):
 
     def attrib(self, argv):
@@ -358,6 +345,25 @@ class EquipmentRowCommands(RowWithAttributesCommands):
     Disconnect an interface from its network."""
         ifname = argv[1]
         self._obj.disconnect(_session, ifname)
+
+
+class EnvironmentRowCommands(RowWithAttributesCommands):
+
+    def owner(self, argv):
+        """owner get | set <username> | clear
+    Get or set the owner of the environment. You can use "self" as alias for yourself.  """
+        cmd = argv[1] if len(argv) > 1 else "get"
+        if cmd.startswith("ge"):
+            self._print(self._obj.owner)
+        elif cmd.startswith("se"):
+            username = argv[2]
+            if username.endswith("self"):
+                username = passwd.getpwself().name
+            self._obj.set_owner_by_username(_session, username)
+        elif cmd.startswith("cl"):
+            self._obj.clear_owner(_session)
+        else:
+            self._print(self.owner.__doc__)
 
 
 class TableCommands(CLI.BaseCommands):
@@ -616,6 +622,19 @@ class SessionCommands(TableCommands):
         self._obj.clean(_session)
 
 
+class TestResultRowCommands(RowCommands):
+
+    def parent(self, argv):
+        """parent
+    Move to parent record."""
+        if self._obj.parent is not None:
+            cmd = self.clone(TestResultRowCommands)
+            cmd._setup(self._obj.parent, TestResultRowCommands.get_prompt(self._obj.parent))
+            raise CLI.NewCommand(cmd)
+        else:
+            self._print("No parent.")
+
+
 class TestSuiteRowCommands(RowCommands):
 
     def results(self, argv):
@@ -629,6 +648,9 @@ class TestSuiteRowCommands(RowCommands):
         else:
             self._print("No results found.")
 
+
+class TestResultCommands(TableCommands):
+    pass
 
 class UserCommands(TableCommands):
 
@@ -891,7 +913,6 @@ class ConfigCommands(CLI.BaseCommands):
             self._ui.error("No such item.")
 
 
-
 # Maps table names to editor classes
 _TABLE_EDITOR_MAP = {
     "User": UserCommands,
@@ -901,12 +922,13 @@ _TABLE_EDITOR_MAP = {
     "Environment": TableWithAttributesCommands,
     "Software": TableWithAttributesCommands,
     "Corporation": TableWithAttributesCommands,
+    "TestResult": TestResultCommands,
 }
 
 _ROW_EDITOR_MAP = {
     "Equipment": EquipmentRowCommands,
     "EquipmentModel": RowWithAttributesCommands,
-    "Environment": RowWithAttributesCommands,
+    "Environment": EnvironmentRowCommands,
     "Software": RowWithAttributesCommands,
     "Corporation": RowWithAttributesCommands,
     "Network": NetworkRowCommands,

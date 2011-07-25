@@ -1048,7 +1048,10 @@ class Environment(object):
 
     def get_equipment_with_role(self, session, rolename):
         TE = TestEquipment # shorthand
-        role = session.query(SoftwareCategory).filter(SoftwareCategory.name == rolename).one()
+        try:
+            role = session.query(SoftwareCategory).filter(SoftwareCategory.name == rolename).one()
+        except NoResultFound:
+            raise ModelError("No such role defined in environment: %s" % (rolename,))
         qq = session.query(TE).filter(and_(
                 TE.environment==self, 
                 TE.UUT==False,  # UUT does not take on other roles.
@@ -1057,6 +1060,7 @@ class Environment(object):
         if te is None:
             raise ModelError("No role '{0}' defined in environment '{1}'.".format(rolename, self.name))
         return te.equipment
+
 
     def get_DUT(self, session):
         qq = session.query(TestEquipment).filter(and_(TestEquipment.environment==self,
@@ -1069,6 +1073,20 @@ class Environment(object):
             for role in te.roles:
                 rv.append(role.name)
         return removedups(rv)
+
+    # user/owner management. 
+    # This field is also used as a lock on the environment.
+    def set_owner_by_username(self, session, username):
+        user = User.get_by_username(session, username)
+        self.owner = user
+        session.commit()
+
+    def is_owned(self):
+        return self.owner is not None
+
+    def clear_owner(self, session):
+        self.owner = None
+        session.commit()
 
 
 mapper(Environment, tables.environments,
@@ -1212,11 +1230,14 @@ class TestSuite(object):
                 TestResult.starttime==sq,
                 TestResult.testsuite==self, 
                     )).scalar()
-
     @classmethod
     def get_latest_results(cls, session):
         filt = and_(TestResult.objecttype==OBJ_TESTSUITE, TestResult.valid==True)
         return session.query(TestResult).filter(filt).order_by(TestResult.starttime).limit(10)
+
+    @classmethod
+    def get_suites(cls, session):
+        return session.query(cls).filter(cls.valid==True).order_by("name").all()
 
 
 mapper(TestSuite, tables.test_suites,
@@ -1595,4 +1616,5 @@ if __name__ == "__main__":
     for tr in TestSuite.get_latest_results(sess):
         print tr
     #sess.close()
+    print (TestSuite.get_suites(sess))
 
