@@ -211,14 +211,23 @@ class RootContainer(config.Container):
         from pycopia import reports # XXX pycopia-QA circular dependency.
         if name is None:
             name = self.get("reportname", "default")
-        params = self.reports.get(name, None)
-        if params is None:
-            raise reports.ReportFindError("Reportname %r not found." % (name,))
+        if "," in name:
+            params = []
+            for n in name.split(","):
+                rptparams = self.reports.get(n, None)
+                if rptparams is None:
+                    logging.warn("Reportname %r not found." % (n,))
+                    continue
+                params.append(rptparams)
+        else:
+            params = self.reports.get(name, None)
+        if not params:
+            raise reports.ReportFindError("Report %r not found." % (name,))
         if type(params) is list:
             params = map(self._param_expand, params)
         else:
             params = self._param_expand(params)
-        return reports.get_report( params )
+        return reports.get_report(params)
 
     # reconstruct the report parameter list with dollar-variables expanded.
     def _param_expand(self, tup):
