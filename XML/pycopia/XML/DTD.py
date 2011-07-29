@@ -22,10 +22,9 @@ from pycopia import sourcegen
 from pycopia.textutils import identifier, keyword_identifier
 
 import pycopia.XML.POM
-from pycopia.XML.POM import (ContentModel, XMLAttribute, 
-                             ElementNode, Notation, ValidationError,
-                             normalize_unicode,
-                             ANY, PCDATA, EMPTY)
+from pycopia.XML.POM import (ContentModel, ElementNode, Notation, ValidationError,
+                             normalize_unicode)
+from pycopia.XML.POMparse import (XMLAttribute, ANY, PCDATA, EMPTY)
 
 ### DTD compiler components ###
 

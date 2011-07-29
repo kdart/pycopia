@@ -32,7 +32,7 @@ def write_error(msg):
     sys.stderr.write("\n")
 
 XML_HEADER_RE = re.compile(r'xml version="([0123456789.]+)" encoding="([A-Z0-9-]+)"', re.IGNORECASE)
-
+POMMODULE = POM.__name__
 
 
 class AttributeList(list):
@@ -149,7 +149,7 @@ class XMLAttribute(object):
 
     def __repr__(self):
         cl = self.__class__
-        return "%s.%s(%r, %r, %r, %r)" % (cl.__module__, cl.__name__, 
+        return "%s.%s(%r, %r, %r, %r)" % (POMMODULE, cl.__name__, 
                                self.name, self.a_type, self.a_decl, self.default)
 
     def __hash__(self):
@@ -159,10 +159,9 @@ class XMLAttribute(object):
         return True
 
     # Generate a unique identifier for internal use in dtd module.
-    # TODO verify the enumerations are unique enough.
     def get_identifier(self):
         h = self.__hash__()
-        h *= h # make non-negative
+        h = h**2 if h < 0 else h # make non-negative
         return "attrib%s_%s" % (identifier(POM.normalize_unicode(self.name)), h)
 
     def verify(self, value):
