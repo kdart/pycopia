@@ -877,6 +877,14 @@ class TestEntrySeries(TestEntry):
 
     test_name = property(lambda s: s.inst.test_name)
 
+    def match_prerequisite(self, prereq):
+        """Does this test match the specified prerequisite?
+
+        Returns True if this test name matches the supplied PreReq object.
+        Only the name is checked for series tests, since the arguments may vary.
+        """
+        return self.inst.test_name == prereq.implementation
+
     def run(self, config=None):
         resultset = {constants.PASSED:0, constants.FAILED:0, 
                 constants.EXPECTED_FAIL:0, constants.INCOMPLETE:0}
@@ -930,6 +938,11 @@ def parse_args(arguments):
     funcstr = "args, kwargs = _ArgGetter(%s)\n" % arguments
     exec funcstr in locals()
     return args, kwargs # set by exec call
+
+
+def timestamp(t):
+    """standard timesstamp string creator."""
+    return timelib.strftime("%a, %d %b %Y %H:%M:%S %Z", timelib.localtime(t))
 
 
 class TestSuite(object):
@@ -1355,7 +1368,9 @@ class TestSuite(object):
         pass
 
 
-def timestamp(t):
-    return timelib.strftime("%a, %d %b %Y %H:%M:%S %Z", timelib.localtime(t))
+class TestSuiteConstructor(object):
 
+    @staticmethod
+    def run(config):
+        raise NotImplementedError("Define in subclass")
 
