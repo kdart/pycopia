@@ -204,8 +204,8 @@ argument must match a name of a method.
         except (NewCommand, CommandQuit, CommandExit, KeyboardInterrupt):
             raise # pass these through to parser
         except CLISyntaxError as err:
-            self._print("Syntax error: %s" % (err,))
-            self._print(meth.__doc__)
+            self._ui.printf("%RSyntax error%N: {}".format(str(err.value)))
+            self._ui.help_local(meth.__doc__)
         except IndexError: # may have tried to get non-existent argv value.
             ex, val, tb = sys.exc_info()
             lev = 0
@@ -214,8 +214,8 @@ argument must match a name of a method.
                 t = t.tb_next
                 lev += 1
             if lev == 1: # Happened inside the command method.
-                self._print("Argument error.")
-                self._print(meth.__doc__)
+                self._ui.printf("%RInsufficient number of arguments.%N")
+                self._ui.help_local(meth.__doc__)
             else:        # IndexError from something called by command method.
                 if _DEBUG:
                     from pycopia import debugger

@@ -346,9 +346,9 @@ class UserInterface(object):
     def _format_doc(self, s, color):
         i = s.find("\n")
         if i > 0:
-            return color+s[:i]+self._theme.NORMAL+s[i:]+"\n"
+            return color + s[:i] + self._theme.NORMAL + self.format(s[i:]) + "\n"
         else:
-            return color+s+self._theme.NORMAL+"\n"
+            return color + s + self._theme.NORMAL + "\n"
 
     def help_local(self, text):
         self.Print(self._format_doc(text, self._theme.help_local))
