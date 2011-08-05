@@ -190,11 +190,11 @@ class HTTPResponse(object):
             return self._status
 
     def get_doc(self):
-        from pycopia.WWW import XHTML
+        from pycopia.WWW import XHTMLparse
         text = self._make_body()
         hdrs = self._make_headers()
         actualtype = hdrs["content-type"].value
-        p = XHTML.get_parser(mimetype=actualtype)
+        p = XHTMLparse.get_parser(mimetype=actualtype)
         p.feed(text)
         p.close()
         doc = p.getContentHandler().doc

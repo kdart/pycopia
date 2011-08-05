@@ -24,8 +24,10 @@ Useful interactive functions for building simple user interfaces.
 from __future__ import print_function
 
 
-__all__ = ['get_text', 'get_input', 'choose', 'yes_no', 'print_menu_list',
-'find_source_file']
+__all__ = ['get_text', 'get_input', 'default_error', 'choose',
+        'choose_multiple', 'choose_value', 'choose_key',
+        'choose_multiple_from_map', 'print_list', 'yes_no', 'edit_text',
+        'print_menu_list', 'print_menu_map', 'find_source_file']
 
 import sys, os
 
