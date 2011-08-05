@@ -167,12 +167,12 @@ class XMLAttribute(object):
     def verify(self, value):
         if self._is_enumeration:
             if value not in self.a_type:
-                raise ValidationError(
+                raise POM.ValidationError(
                         "Enumeration has wrong value for %r. %r is not one of %r." % (
                         self.name, value, self.a_type))
         elif self.a_decl == FIXED:
             if value != self.default:
-                raise ValidationError(
+                raise POM.ValidationError(
                         "Bad value for FIXED attrib for %r. %r must be %r." % (
                         self.name, value, self.default))
         return True
@@ -180,7 +180,7 @@ class XMLAttribute(object):
 
 class UnknownXMLAttribute(object):
     def verify(self, value):
-        raise ValidationError("Can't validate unknown attribute: %r" % (self.name,))
+        raise POM.ValidationError("Can't validate unknown attribute: %r" % (self.name,))
 
 
 #### new sax2 parser ###
@@ -226,7 +226,7 @@ class ContentHandler(object):
 
     def endDocument(self):
         if self.stack: # stack should be empty now
-            raise ValidationError, "unbalanced document!"
+            raise POM.ValidationError("unbalanced document!")
         if self.doc is None:
             self.doc = self._doc_factory(encoding=self.encoding)
         root = self.msg
@@ -242,7 +242,7 @@ class ContentHandler(object):
         try:
             klass = self._get_class(name)
         except AttributeError:
-            raise ValidationError, "Undefined element tag: " + name
+            raise POM.ValidationError("Undefined element tag: " + name)
         attr = {}
         for name, value in atts.items():
             attr[keyword_identifier(POM.normalize_unicode(name))] = POM.unescape(value)
@@ -308,7 +308,7 @@ class ContentHandler(object):
                     self.doc.set_doctype(modname)
                 break
         else:
-            raise ValidationError, "unknown DOCTYPE: %r" % (publicId,)
+            raise POM.ValidationError("unknown DOCTYPE: %r" % (publicId,))
         # Have to fake a file-like object for the XML parser to not
         # actually get an external entity.
         return FakeFile(systemId)

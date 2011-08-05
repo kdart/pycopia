@@ -52,6 +52,7 @@ XHTML_BASIC10 = "pycopia.dtds.xhtml_basic10"
 XHTML_BASIC11 = "pycopia.dtds.xhtml_basic11"
 XHTML_MOBILE10 = "pycopia.dtds.xhtml_mobile10"
 XMLSCHEMA = "pycopia.dtds.XMLSchema"
+SVG = "pycopia.dtds.svg11_flat_20030114"
 
 # alias for default DTD.
 WML = WML13
@@ -114,7 +115,8 @@ DOCTYPES[RSS091] = Doctype("rss", None, "rss091.dtd")
 DOCTYPES[WURFL] = Doctype("wurfl", None, "wurfl.dtd")
 DOCTYPES[XMLSCHEMA] = Doctype("xs:schema", "-//W3C//DTD XMLSCHEMA 200102//EN",
              "http://www.w3.org/2001/XMLSchema.dtd")
-
+DOCTYPES[SVG] = Doctype("svg", "-//W3C//DTD SVG 1.1//EN",
+             "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd")
 
 def get_doctype(keyname):
     return DOCTYPES.get(keyname)
