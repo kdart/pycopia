@@ -980,21 +980,22 @@ class TestSuite(object):
         """Add a TestEntry instance to the list of tests.
 
         Also adds any prerequisites, if not already present, recursively.
+        Don't automatically add prerequisites if debug level is 3 or more.
         """
-        for prereq in entry.inst.OPTIONS.prerequisites:
-            impl = prereq.implementation
-            # if a plain class name is given, assume it refers to a class
-            # in the same module and convert to full path with that
-            # module.
-            if "." not in impl:
-                impl = sys.modules[entry.inst.__class__.__module__].__name__ + "." + impl
-                prereq.implementation = impl
-            pretestclass = module.get_object(impl)
-            pretestclass.set_test_options()
-            preentry = TestEntry(pretestclass(self.config), prereq.args, prereq.kwargs, True)
-            presig, argsig = preentry.get_signature()
-            if presig not in self._multitestset:
-                self._add_with_prereq(preentry)
+        if self._debug < 3:
+            for prereq in entry.inst.OPTIONS.prerequisites:
+                impl = prereq.implementation
+                # if a plain class name is given, assume it refers to a class
+                # in the same module and convert to full path using that module.
+                if "." not in impl:
+                    impl = sys.modules[entry.inst.__class__.__module__].__name__ + "." + impl
+                    prereq.implementation = impl
+                pretestclass = module.get_object(impl)
+                pretestclass.set_test_options()
+                preentry = TestEntry(pretestclass(self.config), prereq.args, prereq.kwargs, True)
+                presig, argsig = preentry.get_signature()
+                if presig not in self._multitestset:
+                    self._add_with_prereq(preentry)
         testcaseid = entry.get_signature()
         if testcaseid not in self._testset:
             self._testset.add(testcaseid)
@@ -1157,8 +1158,8 @@ class TestSuite(object):
     prerequisites = property(_get_prerequisites)
 
     def run(self, config=None):
-        """Called when run directly from the testrunner."""
-        if config:
+        """Define the runnable interface. May be called by the test runner."""
+        if config is not None:
             self.config = config
             self.report = config.report
             self._debug = config.flags.DEBUG
@@ -1170,10 +1171,16 @@ class TestSuite(object):
     def __call__(self, *args, **kwargs):
         """Invoke the test suite.
 
-        This is the primary way to invoke a suite of tests. call the instance.
+        Calling the instance is the primary way to invoke a suite of tests.
         Any supplied parameters are passed onto the suite's initialize()
-        method. The method name is consistent with other methods of a similiar
-        nature on other objects (e.g. app.run()).
+        method. 
+
+        It will then run all TestEntry, report on interrupts, and check for
+        abort conditions. It will also skip tests whose prerequisites did not
+        pass. If the debug level is 2 or more then the tests are not skipped.
+
+        If a Test returns None (Python's default), it is reported
+        as a failure since it was not written correctly.
         """
         self.starttime = timelib.now()
         try:
@@ -1190,12 +1197,6 @@ class TestSuite(object):
         return rv
 
     def _initialize(self, *args, **kwargs):
-        """initialize phase handler for suite-level initialization.
-
-        Handles calling the user `initialize()` method, and handling
-        interrupts, reporting, and invoking the debugger if the DEBUG flag is
-        set.
-        """
         self.report.add_heading(self.test_name, 1)
         if self.config.flags.VERBOSE:
             s = ["Tests in suite:"]
@@ -1235,14 +1236,8 @@ class TestSuite(object):
         return True # No prerequisite or prereq passed.
 
     def _run_tests(self):
-        """Runs all the tests in the suite. 
-
-        Handles running the TestEntry, reporting interrupts, checking for
-        abort conditions, If a Test returns None (the default), it is reported
-        as a failure since it was not written correctly.
-        """
         for i, entry in enumerate(self._tests):
-            if not self.check_prerequisites(entry, i):
+            if self._debug < 2 and not self.check_prerequisites(entry, i):
                 continue
             # Add a note to the logfile to delimit test cases there.
             if self.config.flags.VERBOSE:
@@ -1272,12 +1267,6 @@ class TestSuite(object):
                 break
 
     def _finalize(self):
-        """Run the finalize phase for suite level.
-
-        Runs the user finalize and aborts the suite on error or interrupt. If
-        this is a sub-suite then TestSuiteAbort is raised so that the
-        top-level suite can handle it.
-        """
         try:
             self.finalize()
         except KeyboardInterrupt:
@@ -1354,7 +1343,8 @@ class TestSuite(object):
 
     ### overrideable interface. ###
     def initialize(self, *args, **kwargs):
-        """
+        """initialize phase handler for suite-level initialization.
+
         Override this if you need to do some initialization just before the
         suite is run. This is called with the arguments given to the TestSuite
         object when it was called.
@@ -1362,8 +1352,12 @@ class TestSuite(object):
         pass
 
     def finalize(self):
-        """
-        Override this if you need to do some clean-up after the suite is run.
+        """Run the finalize phase for suite level.
+
+        Aborts the suite on error or interrupt. If this is a sub-suite then
+        TestSuiteAbort is raised so that the top-level suite can handle it.
+
+        Override this if you need to do some additional clean-up after the suite is run.
         """
         pass
 
