@@ -13,7 +13,7 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-"""
+r"""
 some functions helpful in Python's interactive mode.
 
 I use it like this. Create a file called ~/.pythonrc with the following contents:
@@ -44,12 +44,12 @@ CBROWSER       - HTML browser for character terminals.
 
 Now, create some shell aliases in your .bashrc file:
 
-alias py='/usr/bin/env PYTHONSTARTUP=$HOME/.pythonrc python -i'
+alias py='python -i -c "from pycopia import interactive"'
 
 now, just type "py" at the command line to get a Python interactive mode shell
 with enhanced functionality.
 
-Alternatively, you can just 'import interactive' at the original Python prompt.
+Alternatively, you can just 'from pycopia import interactive' at the "stock" Python prompt.
 
 """
 
@@ -62,6 +62,8 @@ from __future__ import division
 import sys, os, types
 import atexit
 from pprint import pprint
+from inspect import *
+from dis import dis, distb
 
 try:
     import rlcompleter2
@@ -100,11 +102,15 @@ if "DISPLAY" in os.environ:
 
 __all__ = ['info', 'run_config', 'pyterm', 'xterm', 'edit', 'get_editor',
 'exec_editor', 'open_url', 'open_file', 'get_pydocindex', 'get_doc_urls',
-'showdoc']
+'showdoc', 'dis', 'distb']
 from pycopia.textutils import *
 from pycopia import textutils
 __all__.extend([n for n in dir(textutils) if n[0] != "_" and callable(getattr(textutils, n))])
 del textutils
+
+import inspect
+__all__.extend([n for n in dir(inspect) if n[0] != "_" and callable(getattr(inspect, n))])
+del inspect
 
 # update environ with what's in the rc file.
 if sys.platform == "win32":
@@ -404,4 +410,4 @@ readline.parse_and_bind('"\M-?": possible-completions')
 #readline.parse_and_bind("set input-meta on")
 #readline.parse_and_bind("set output-meta on")
 #readline.parse_and_bind("set convert-meta off")
-#
+

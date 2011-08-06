@@ -581,7 +581,9 @@ def Import(modname):
 
 def add2builtin(name, obj):
     """Add an object to the builtins namespace."""
-    setattr(sys.modules[_biname], name, obj)
+    bim = sys.modules[_biname]
+    if not hasattr(bim, name):
+        setattr(bim, name, obj)
 
 def add_exception(excclass, name=None):
     """Add an exception to the builtins namespace."""
