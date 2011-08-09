@@ -27,7 +27,7 @@ from __future__ import print_function
 __all__ = ['get_text', 'get_input', 'default_error', 'choose',
         'choose_multiple', 'choose_value', 'choose_key',
         'choose_multiple_from_map', 'print_list', 'yes_no', 'edit_text',
-        'print_menu_list', 'print_menu_map', 'find_source_file']
+        'print_menu_list', 'print_menu_map']
 
 import sys, os
 
@@ -288,25 +288,6 @@ def print_menu_map(mapping, lines=20):
         else:
             print ("%4.4s: %-74.74s" % (k1, mapping[k1]))
     return first
-
-def find_source_file(modname):
-    """Find the source file for a module. Give the module, or a name of one."""
-    if type(modname) is str:
-        try:
-            if "." in modname:
-                modname = __import__(modname, globals(), locals(), ["*"])
-            else:
-                modname = __import__(modname)
-        except ImportError:
-            return None
-    try:
-        basename, ext = os.path.splitext(modname.__file__)
-    except AttributeError: # C modules don't have a __file__ attribute
-        return None
-    testfile = basename + ".py"
-    if os.path.isfile(testfile):
-        return testfile
-    return None
 
 
 def _test(argv):
