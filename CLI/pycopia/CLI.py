@@ -42,7 +42,7 @@ except ImportError:
 from types import MethodType
 
 from pycopia.IO import ConsoleIO
-from pycopia.UI import DefaultTheme, UserInterface, method_repr, safe_repr
+from pycopia.UI import Theme, DefaultTheme, UserInterface, method_repr, safe_repr
 from pycopia.fsm import FSM, ANY
 from pycopia.aid import removedups, callable
 
@@ -456,7 +456,7 @@ argument must match a name of a method.
             elif opt == "-L":
                 local=True ; created=True ; inherited=False
             elif opt == "-f":
-                helpout = open(optarg, "w")
+                helpout = _get_rst_ui(optarg, self._environ)
         if not args:
             args = self.get_commands()
         for name in args:
@@ -470,15 +470,15 @@ argument must match a name of a method.
             elif local and name in self.__class__.__dict__:
                 self._ui.help_local(doc)
                 if helpout is not None:
-                    helpout.write(_rst_out(name, doc))
+                    helpout.printf(_rst_out(name, doc))
             elif created and "*" in doc: # dynamic method from generic_cli
                 self._ui.help_created(doc)
                 if helpout is not None:
-                    helpout.write(_rst_out(name, doc))
+                    helpout.printf(_rst_out(name, doc))
             elif inherited:
                 self._ui.help_inherited(doc)
                 if helpout is not None:
-                    helpout.write(_rst_out(name, doc))
+                    helpout.printf(_rst_out(name, doc))
         if helpout is not None:
             helpout.close()
 
@@ -700,9 +700,14 @@ argument must match a name of a method.
         self._reset_scopes()
 
 
+def _get_rst_ui(fname, env):
+    fo = open(fname, "w")
+    theme = Theme()
+    ui = UserInterface(fo, env, theme)
+    return ui
+
 def _rst_out(name, docstr):
     return "\n{0}\n    {1}\n\n".format(name, docstr)
-
 
 # This is needed to reset PagedIO so background events don't cause the pager to activate.
 class _RepeatWrapper(object):

@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 # $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -93,6 +93,7 @@ class Theme(object):
         self._ps3 = str(new)
     def _set_ps4(self, new):
         self._ps4 = str(new)
+    _setcolors = classmethod(lambda c: None)
     ps1 = property(lambda s: s._ps1, _set_ps1, None, "primary prompt")
     ps2 = property(lambda s: s._ps2, _set_ps2, None, "more input needed")
     ps3 = property(lambda s: s._ps3, _set_ps3, None, "choose prompt")
@@ -159,6 +160,7 @@ class ANSITheme(BasicTheme):
         cls.help_created = cls.GREEN
     _setcolors = classmethod(_setcolors)
 
+
 DefaultTheme = ANSITheme
 
 
@@ -197,7 +199,7 @@ class UserInterface(object):
 
     def finalize(self):
         pass
-    
+
     def close(self):
         if self._io is not None:
             self._io.close()
@@ -217,8 +219,8 @@ class UserInterface(object):
         self._env.setdefault("PS4", self._theme.ps4)
 
     def clone(self, theme=None):
-        return self.__class__(self._io, self._env.copy(), theme or self._theme) 
-    
+        return self.__class__(self._io, self._env.copy(), theme or self._theme)
+
     # output methods
     def Print(self, *objs):
         wr = self._io.write
@@ -290,33 +292,33 @@ class UserInterface(object):
         return self._io.raw_input(self._get_prompt("PS2"))
 
     def choose(self, somelist, defidx=0, prompt=None):
-        return cliutils.choose(somelist, 
-                    defidx, 
-                    self._get_prompt("PS3", prompt), 
+        return cliutils.choose(somelist,
+                    defidx,
+                    self._get_prompt("PS3", prompt),
                     input=self._io.raw_input, error=self.error)
 
     def choose_value(self, somemap, default=None, prompt=None):
-        return cliutils.choose_value(somemap, 
+        return cliutils.choose_value(somemap,
                     default,
-                    self._get_prompt("PS3", prompt), 
+                    self._get_prompt("PS3", prompt),
                     input=self._io.raw_input, error=self.error)
 
     def choose_key(self, somemap, default=None, prompt=None):
-        return cliutils.choose_key(somemap, 
+        return cliutils.choose_key(somemap,
                     default,
-                    self._get_prompt("PS3", prompt), 
+                    self._get_prompt("PS3", prompt),
                     input=self._io.raw_input, error=self.error)
 
     def choose_multiple(self, somelist, chosen=None, prompt=None):
-        return cliutils.choose_multiple(somelist, 
-                    chosen, 
-                    self._get_prompt("PS3", prompt), 
+        return cliutils.choose_multiple(somelist,
+                    chosen,
+                    self._get_prompt("PS3", prompt),
                     input=self._io.raw_input, error=self.error)
 
     def choose_multiple_from_map(self, somemap, chosen=None, prompt=None):
-        return cliutils.choose_multiple_from_map(somemap, 
-                    chosen, 
-                    self._get_prompt("PS3", prompt), 
+        return cliutils.choose_multiple_from_map(somemap,
+                    chosen,
+                    self._get_prompt("PS3", prompt),
                     input=self._io.raw_input, error=self.error)
 
     def get_text(self, msg=None):
@@ -389,25 +391,25 @@ class UserInterface(object):
         # maps percent-expansion items to some value.
         theme = self._theme
         self._PROMPT_EXPANSIONS = { # used in prompt strings given to readline library.
-                    "I":PROMPT_START_IGNORE + theme.BRIGHT + PROMPT_END_IGNORE, 
-                    "N":PROMPT_START_IGNORE + theme.NORMAL + PROMPT_END_IGNORE, 
+                    "I":PROMPT_START_IGNORE + theme.BRIGHT + PROMPT_END_IGNORE,
+                    "N":PROMPT_START_IGNORE + theme.NORMAL + PROMPT_END_IGNORE,
                     "D":PROMPT_START_IGNORE + theme.DEFAULT + PROMPT_END_IGNORE,
-                    "R":PROMPT_START_IGNORE + theme.BRIGHTRED + PROMPT_END_IGNORE, 
-                    "G":PROMPT_START_IGNORE + theme.BRIGHTGREEN + PROMPT_END_IGNORE, 
+                    "R":PROMPT_START_IGNORE + theme.BRIGHTRED + PROMPT_END_IGNORE,
+                    "G":PROMPT_START_IGNORE + theme.BRIGHTGREEN + PROMPT_END_IGNORE,
                     "Y":PROMPT_START_IGNORE + theme.BRIGHTYELLOW + PROMPT_END_IGNORE,
-                    "B":PROMPT_START_IGNORE + theme.BRIGHTBLUE + PROMPT_END_IGNORE, 
-                    "M":PROMPT_START_IGNORE + theme.BRIGHTMAGENTA + PROMPT_END_IGNORE, 
-                    "C":PROMPT_START_IGNORE + theme.BRIGHTCYAN + PROMPT_END_IGNORE, 
-                    "W":PROMPT_START_IGNORE + theme.BRIGHTWHITE + PROMPT_END_IGNORE, 
-                    "r":PROMPT_START_IGNORE + theme.RED + PROMPT_END_IGNORE, 
-                    "g":PROMPT_START_IGNORE + theme.GREEN + PROMPT_END_IGNORE, 
+                    "B":PROMPT_START_IGNORE + theme.BRIGHTBLUE + PROMPT_END_IGNORE,
+                    "M":PROMPT_START_IGNORE + theme.BRIGHTMAGENTA + PROMPT_END_IGNORE,
+                    "C":PROMPT_START_IGNORE + theme.BRIGHTCYAN + PROMPT_END_IGNORE,
+                    "W":PROMPT_START_IGNORE + theme.BRIGHTWHITE + PROMPT_END_IGNORE,
+                    "r":PROMPT_START_IGNORE + theme.RED + PROMPT_END_IGNORE,
+                    "g":PROMPT_START_IGNORE + theme.GREEN + PROMPT_END_IGNORE,
                     "y":PROMPT_START_IGNORE + theme.YELLOW + PROMPT_END_IGNORE,
-                    "b":PROMPT_START_IGNORE + theme.BLUE + PROMPT_END_IGNORE, 
-                    "m":PROMPT_START_IGNORE + theme.MAGENTA + PROMPT_END_IGNORE, 
-                    "c":PROMPT_START_IGNORE + theme.CYAN + PROMPT_END_IGNORE, 
-                    "w":PROMPT_START_IGNORE + theme.WHITE + PROMPT_END_IGNORE, 
-                    "n":"\n", "l":self._tty, "h":self._hostname, "u":self._username, 
-                    "$": self._priv, "d":self._cwd, "L": self._shlvl, "t":self._time, 
+                    "b":PROMPT_START_IGNORE + theme.BLUE + PROMPT_END_IGNORE,
+                    "m":PROMPT_START_IGNORE + theme.MAGENTA + PROMPT_END_IGNORE,
+                    "c":PROMPT_START_IGNORE + theme.CYAN + PROMPT_END_IGNORE,
+                    "w":PROMPT_START_IGNORE + theme.WHITE + PROMPT_END_IGNORE,
+                    "n":"\n", "l":self._tty, "h":self._hostname, "u":self._username,
+                    "$": self._priv, "d":self._cwd, "L": self._shlvl, "t":self._time,
                     "T":self._date}
         self._FORMAT_EXPANSIONS = {
                     "I": theme.BRIGHT,
@@ -427,8 +429,8 @@ class UserInterface(object):
                     "m": theme.MAGENTA,
                     "c": theme.CYAN,
                     "w": theme.WHITE,
-                    "n":"\n", "l":self._tty, "h":self._hostname, "u":self._username, 
-                    "$": self._priv, "d":self._cwd, "L": self._shlvl, "t":self._time, 
+                    "n":"\n", "l":self._tty, "h":self._hostname, "u":self._username,
+                    "$": self._priv, "d":self._cwd, "L": self._shlvl, "t":self._time,
                     "T":self._date}
 
         fp = FSM(0)
@@ -492,15 +494,15 @@ class UserInterface(object):
         if un:
             self._cache[c] = un
         return un
-    
+
     def _shlvl(self, c):
         return str(self._env.get("SHLVL", ""))
-    
+
     def _hostname(self, c):
         hn = os.uname()[1]
         self._cache[c] = hn
         return hn
-    
+
     def _priv(self, c):
         if os.getuid() == 0:
             arg = "#"
@@ -508,18 +510,18 @@ class UserInterface(object):
             arg = ">"
         self._cache[c] = arg
         return arg
-    
+
     def _tty(self, c):
         n = os.ttyname(self._io.fileno())
         self._cache[c] = n
         return n
-    
+
     def _cwd(self, c):
         return os.getcwd()
-    
+
     def _time(self, c):
         return time.strftime("%H:%M:%S", time.localtime())
-    
+
     def _date(self, c):
         return time.strftime("%m/%d/%Y", time.localtime())
 
@@ -537,7 +539,7 @@ class UserInterface(object):
             return arg
         else:
             return None
-    
+
     # pretty printing
     def _format(self, obj, indent, allowance, context, level):
         level = level + 1
@@ -682,7 +684,7 @@ def method_repr(method):
     varnames = list(method.im_func.func_code.co_varnames)[1:method.im_func.func_code.co_argcount]
     if method.im_func.func_defaults:
         ld = len(method.im_func.func_defaults)
-        varlist = [", ".join(varnames[:-ld]), 
+        varlist = [", ".join(varnames[:-ld]),
                    ", ".join(["%s=%r" % (n, v) for n, v in zip(varnames[-ld:], method.im_func.func_defaults)])]
         return "%s(%s)" % (methname, ", ".join(varlist))
     else:
@@ -711,7 +713,7 @@ def _get_object(name):
             raise UIFindError("%s is not a valid object path." % (name,))
 
 # construct a user interface from object names given as strings.
-def get_userinterface(uiname="UserInterface", 
+def get_userinterface(uiname="UserInterface",
                 ioname="IO.ConsoleIO", themename=None):
     if type(ioname) is str:
         ioobj = _get_object(ioname)
