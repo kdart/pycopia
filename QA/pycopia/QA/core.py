@@ -1362,8 +1362,14 @@ class TestSuite(object):
         pass
 
 
-class TestSuiteConstructor(object):
+class UseCase(object):
+    """UseCase type.
 
+    Used to define use cases, which typically involve constructing TestSuite
+    and running it.  These are generally more complex operations, involving
+    multiple steps. Each step can be made into a TestCase object, and assembled
+    into a TestSuite using data from the configuration. Then run here.
+    """
     @staticmethod
     def run(config):
         raise NotImplementedError("Define in subclass")
