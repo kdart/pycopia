@@ -186,9 +186,9 @@ def start_straps(port=162):
     # package.
     import os
     if port != 162:
-        cmd = "daemonize -f /tmp/straps.log straps %d" % port
+        cmd = "daemonize -f /tmp/straps_%s.log straps %d" % (os.getpid(), port)
     else:
-        cmd = "daemonize -f /tmp/straps.log straps"
+        cmd = "daemonize -f /tmp/straps_%s.log straps" % (os.getpid(),)
     rv =  os.system(cmd)
     return rv
 
