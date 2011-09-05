@@ -47,7 +47,7 @@ class OSInfo(object):
         return "\n".join(s)
 
     def is_linux(self):
-        return self.platform == "linux2"
+        return self.platform.startswith("linux")
 
     def is_windows(self):
         return self.platform == "win32"
@@ -90,7 +90,7 @@ def get_platform():
     global os 
     rv = OSInfo()
     rv.platform = sys.platform
-    if sys.platform == "linux2":
+    if sys.platform.startswith("linux"):
         import os # making this global breaks on IronPython
         osname, _, kernel, _, arch = os.uname()
         rv.arch = arch

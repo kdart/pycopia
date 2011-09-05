@@ -30,7 +30,7 @@ import Pyro.core
 
 
 # some platform specific stuff. Should be minimal
-if sys.platform == "linux2":
+if sys.platform.startswith("linux"):
     from pycopia.remote.PosixClient import *
 
 elif sys.platform == "cygwin":

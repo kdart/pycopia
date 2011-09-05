@@ -16,7 +16,7 @@ REVISION="$Revision$"
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
-if sys.platform == "linux2":
+if sys.platform.startswith("linux"):
     DATA_FILES = [('/etc/pycopia', glob("etc/*"))]
 else:
     DATA_FILES = []

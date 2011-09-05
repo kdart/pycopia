@@ -24,7 +24,7 @@ EXTENSIONS = []
 
 if sys.platform == "darwin":
     EXTENSIONS.append(Extension('pycopia.itimer', ['pycopia.itimer.pyx']))
-elif sys.platform == "linux2":
+elif sys.platform.startswith("linux"):
     EXTENSIONS.append(Extension('pycopia.itimer', ['pycopia.itimer.pyx'], libraries=["rt"]))
     SCRIPTS = glob("bin/*")
 
@@ -99,7 +99,7 @@ def unlink_old_modules():
             pass
 
 
-if sys.platform == "linux2":
+if sys.platform.startswith("linux"):
     if os.getuid() == 0 and sys.argv[1] == "install":
         print ("Installing SUID helpers.")
         try:
