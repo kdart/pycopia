@@ -32,6 +32,7 @@ os.ACCMODE = 03
 platdir = {
     "linux1":"Linux", 
     "linux2":"Linux", 
+    "linux3":"Linux", 
     "cygwin":"CYGWIN_NT", 
     "sunos5":"SunOS",
     "freebsd4":"FreeBSD", 
