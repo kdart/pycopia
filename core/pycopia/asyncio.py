@@ -35,16 +35,20 @@ class ExitNow(Exception):
     pass
 
 # fix up the os module to include more Linux/BSD constants.
-os.ACCMODE = 0o3
+os.ACCMODE = 03
 # flag for ASYNC I/O support. Note cygwin/win32 does not support it.
-O_ASYNC = os.O_ASYNC = {
-    "linux1":0o20000, # ?
-    "linux2":0o20000, 
-    "freebsd4":0x0040, 
-    "freebsd5":0x0040,  # ?
-    "darwin":0x0040,
-    "sunos5":0, # not supported
-    }.get(sys.platform, 0)
+try:
+    O_ASYNC = getattr(os, "O_ASYNC")
+except AttributeError:
+    O_ASYNC = os.O_ASYNC = {
+        "linux1":020000, # ?
+        "linux2":020000, 
+        "linux3":020000, 
+        "freebsd4":0x0040, 
+        "freebsd5":0x0040,  # ?
+        "darwin":0x0040,
+        "sunos5":0, # not supported
+        }.get(sys.platform, 0)
 
 
 class Poll(object):
