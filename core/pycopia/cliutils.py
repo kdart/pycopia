@@ -31,6 +31,8 @@ __all__ = ['get_text', 'get_input', 'default_error', 'choose',
 
 import sys, os
 
+COLUMNS, LINES = 132, 32 # TODO fetch from system
+
 # python 3 compatibility
 try:
     raw_input
@@ -265,41 +267,55 @@ def edit_text(text, prompt="Edit text"):
         os.unlink(fname)
     return text[text.find("\n")+1:]
 
-def print_menu_list(clist, lines=20):
+def print_menu_list(clist, lines=LINES, columns=COLUMNS):
     """Print a list with leading numeric menu choices. Use two columns in necessary."""
     h = max((len(clist)/2)+1, lines)
     i1, i2 = 1, h+1
+    fmt = "{{:3d}}: {{:{cols}.{cols}}}".format(cols=columns-6)
+    if h != lines:
+        fmt2 = "{{:3d}}: {{:{cols}.{cols}}} | {{:3d}}: {{:{cols}.{cols}}}".format(cols=(columns-14)/2)
     for c1, c2 in map(None, clist[:h], clist[h:]):
         if c2:
-            print ("%2d: %-33.33s | %2d: %-33.33s" % (i1, c1, i2, c2))
+            print (fmt2.format(i1, str(c1)[-(columns/2)+7:], i2, str(c2)[-(columns/2)+7:]))
         else:
-            print ("%2d: %-74.74s" % ( i1, c1))
+            print (fmt.format(i1, str(c1)[-columns+7:]))
         i1 += 1
         i2 += 1
 
-def print_menu_map(mapping, lines=20):
+def print_menu_map(mapping, lines=LINES, columns=COLUMNS):
     """Print a list with leading numeric menu choices. Use two columns in necessary."""
-    h = max((len(mapping)/2)+1, lines)
     keys = sorted(mapping.keys())
     first = keys[0]
+    fmt  = "{{!s:>4s}}: {{:{cols}.{cols}}}".format(cols=columns-6)
+    fmt2 = "{{!s:>4s}}: {{:{cols}.{cols}}} | {{!s:>4s}}: {{:{cols}.{cols}}}".format(cols=(columns-16)/2)
+    h = max((len(mapping)/2)+1, lines)
     for k1, k2 in map(None, keys[:h], keys[h:]):
         if k2 is not None:
-            print ("%4.4s: %-33.33s | %4.4s: %-33.33s" % (k1, mapping[k1], k2, mapping[k2]))
+            print (fmt2.format(k1, mapping[k1], k2, mapping[k2]))
         else:
-            print ("%4.4s: %-74.74s" % (k1, mapping[k1]))
+            print (fmt.format(k1, mapping[k1]))
     return first
 
 
 def _test(argv):
+    from pycopia import autodebug
     #from pycopia import autodebug
-    import string
+    #import string
     #l = list(string.ascii_letters)
     #c = choose(l)
     #print (c)
     #l1 = choose_multiple(l)
     #print (edit_text(__doc__))
-    sel = dict(enumerate("abcd"))
-    print (choose_multiple_from_map(sel))
+    #sel = dict(enumerate("abcd"))
+    #print (choose_multiple_from_map(sel))
+    bs = "".join(map(chr, range(33,111)))
+    l = [bs] * 100
+    #print(bs)
+    #print("----")
+    #print(l)
+    #print("----")
+    print_menu_list(l)
+    print_menu_map(dict(enumerate(l)))
 
 if __name__ == "__main__":
     import sys

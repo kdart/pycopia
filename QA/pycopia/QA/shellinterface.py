@@ -40,6 +40,9 @@ def get_module_list():
     except ImportError:
         logging.warn("Cannot find 'testcases' base package.")
         return []
+
+    from pycopia.QA import core
+
     # callback for testdir walker
     def filternames(flist, dirname, names):
         for name in names:
@@ -50,6 +53,18 @@ def get_module_list():
     os.path.walk(testhome, filternames, modnames)
     testhome_index = len(os.path.dirname(testhome)) + 1
     names = map(lambda n: n[testhome_index:].replace("/", "."), modnames)
+    for name in names[:]:
+        try:
+            mod = module.get_module(name)
+        except module.ModuleImportError:
+            names.remove(name)
+            continue
+        for attrname in dir(mod):
+            obj = getattr(mod, attrname)
+            if type(obj) is type and issubclass(obj, core.UseCase):
+                names.append(".".join([obj.__module__, obj.__name__]))
+        if getattr(mod, "run", None) is None:
+            names.remove(name)
     names.sort()
     return names
 
