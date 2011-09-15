@@ -85,7 +85,7 @@ class TestResult(object):
         return self._value == constants.PASSED
 
     def not_passed(self):
-            return self._value in (constants.FAILED, constants,EXPECTED_FAIL, 
+            return self._value in (constants.FAILED, constants.EXPECTED_FAIL, 
                     constants.INCOMPLETE, constants.ABORT)
 
     def is_failed(self):
