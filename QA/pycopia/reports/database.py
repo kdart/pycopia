@@ -164,6 +164,7 @@ class ResultHolder(object):
                         models.ProjectVersion, project=proj, valid=True,
                         major=major, minor=minor, subminor=sub, build=build)
                 dbsession.add(projectversion)
+                dbsession.commit()
             self._data["build"] = projectversion
         else:
             self._data["build"] = None

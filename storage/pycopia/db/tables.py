@@ -78,7 +78,7 @@ config =  Table('config', metadata,
             ForeignKeyConstraint([u'parent_id'], [u'public.config.id'], name=u'parent_id_refs_config_id'),
             ForeignKeyConstraint([u'user_id'], [u'public.auth_user.id'], name=u'config_user_id_fkey',
                     onupdate="CASCADE", ondelete="CASCADE"),
-    UniqueConstraint("name", "parent_id"),
+    UniqueConstraint(u"name", u"parent_id"), 
     schema='public')
 Index('index_config_testcase_id', config.c.testcase_id, unique=False)
 Index('index_config_name_key', config.c.name, config.c.parent_id, unique=True)
@@ -891,7 +891,10 @@ project_versions =  Table('project_versions', metadata,
             Column(u'subminor', INTEGER(), primary_key=False, nullable=False, default=default_obj(0)),
             Column(u'build', INTEGER(), primary_key=False),
             Column(u'valid', BOOLEAN(), primary_key=False, nullable=False, default=default_active),
-    ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], name=u'project_versions_project_id_fkey'),
+    ForeignKeyConstraint([u'project_id'], [u'public.projects.id'], 
+            name=u'project_versions_project_id_fkey'),
+    UniqueConstraint(u"project_id", u"major", u"minor", u"subminor", u"build", 
+            name=u"project_versions_unique"), 
     schema='public')
 Index('index_project_versions_project_id', project_versions.c.project_id, unique=False)
 
