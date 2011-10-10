@@ -425,6 +425,14 @@ class EnvironmentRuntime(object):
 
     supported_roles = property(get_supported_roles)
 
+    def clear(self):
+        if self._eqcache:
+            eqc = self._eqcache
+            self._eqcache = {}
+            while eqc:
+                name, obj = eqc.popitem()
+                obj.clear()
+
     def __getattr__(self, name):
         try:
             return self.get_role(name)
@@ -439,7 +447,10 @@ class EnvironmentRuntime(object):
     def set_state(self, newstate):
         return self._environment.set_attribute(self._session, "state", str(newstate))
 
-    state = property(get_state, set_state)
+    def del_state(self):
+        return self._environment.del_attribute(self._session, "state")
+
+    state = property(get_state, set_state, del_state)
 
 
 class EquipmentModelRuntime(object):
@@ -538,6 +549,8 @@ class EquipmentRuntime(object):
                     self.logfile)
         return self._controller
 
+    controller = property(get_controller)
+
     def get_initial_controller(self):
         if self._init_controller is None:
             self._init_controller = controller.get_controller(
@@ -546,16 +559,21 @@ class EquipmentRuntime(object):
                     self.logfile)
         return self._init_controller
 
-    controller = property(get_controller)
+    initial_controller = property(get_initial_controller)
 
-    def close(self):
+    def clear(self):
         if self._controller is not None:
             try:
                 self._controller.close()
             except:
                 pass
-
-    initial_controller = property(get_initial_controller)
+            self._controller = None
+        if self._init_controller is not None:
+            try:
+                self._init_controller.close()
+            except:
+                pass
+            self._init_controller = None
 
     def get_software(self):
         return SoftwareRuntime(self._equipment.software[0])

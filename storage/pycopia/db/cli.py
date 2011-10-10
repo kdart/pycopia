@@ -114,7 +114,9 @@ class DBSessionCommands(CLI.BaseCommands):
     def ls(self, argv):
         """ls
     List persistent objects."""
-        self._print_list(list(models.class_names()))
+        l = list(models.class_names())
+        l.sort()
+        self._print_list(l)
 
     def users(self, argv):
         """users

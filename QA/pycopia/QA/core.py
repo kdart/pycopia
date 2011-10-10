@@ -976,7 +976,7 @@ class TestSuite(object):
         return map(lambda t: t.result, self._tests)
     results = property(_get_results)
 
-    def _add_with_prereq(self, entry):
+    def _add_with_prereq(self, entry, _auto=False):
         """Add a TestEntry instance to the list of tests.
 
         Also adds any prerequisites, if not already present, recursively.
@@ -985,8 +985,9 @@ class TestSuite(object):
         if self._debug < 3:
             for prereq in entry.inst.OPTIONS.prerequisites:
                 impl = prereq.implementation
-                # if a plain class name is given, assume it refers to a class
-                # in the same module and convert to full path using that module.
+                # If only a class name is given, assume it refers to a class
+                # in the same module as the defining test, and convert to full
+                # path using that module.
                 if "." not in impl:
                     impl = sys.modules[entry.inst.__class__.__module__].__name__ + "." + impl
                     prereq.implementation = impl
@@ -995,11 +996,14 @@ class TestSuite(object):
                 preentry = TestEntry(pretestclass(self.config), prereq.args, prereq.kwargs, True)
                 presig, argsig = preentry.get_signature()
                 if presig not in self._multitestset:
-                    self._add_with_prereq(preentry)
+                    self._add_with_prereq(preentry, True)
         testcaseid = entry.get_signature()
-        if testcaseid not in self._testset:
-            self._testset.add(testcaseid)
+        self._testset.add(testcaseid)
+        if not _auto or testcaseid not in self._testset:
             self._tests.append(entry)
+        #elif testcaseid not in self._tests:
+        #    self._tests.append(entry)
+
 
     def add_test(self, _testclass, *args, **kwargs):
         """Add a Test subclass and its arguments to the suite.
