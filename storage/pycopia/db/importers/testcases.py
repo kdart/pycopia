@@ -26,7 +26,7 @@ from datetime import datetime
 from pycopia import aid
 from pycopia.WWW import XHTML, rst
 from pycopia.XML import XMLPathError
-from pycopia.XML.POM import ElementNode
+from pycopia.XML.POM import ElementNode, escape
 from pycopia import getopt
 from pycopia import passwd
 
@@ -199,7 +199,7 @@ class TestCaseData(object):
             if isinstance(node, ElementNode) and node.__class__._name.startswith("h"):
                 continue
             #node.emit(body)
-            body.write(node.get_text())
+            body.write(escape(node.get_text()))
             body.write(" ")
         body.write("\n")
         self.__setitem__(name, body.getvalue().strip())

@@ -39,7 +39,6 @@ table {
 
 table caption {
   font-weight: bold;
-  text-align:left; 
   font-size:110%; 
   margin:5px; 
 }
@@ -78,18 +77,16 @@ div.buttonbar {
 #container { }
 
 .applet { 
-  min-width:760px; 
+  min-width:800px; 
+  float: right;
   padding:0; 
   border-width:0;
   margin: 0 0 0 0;
 }
 
-#content { 
-  border: medium outset;
-}
+#content { }
 
 #content table {
-  margin: 10px;
 }
 
 #content table caption {
@@ -99,25 +96,24 @@ div.buttonbar {
   text-align: center;
 }
 
-div#extra {
+div#sidebar {
   background:#FF8539; 
   clear:left; 
   float:left; 
-  width:150px;
 }
 
-div#extra table {
+div#sidebar table {
   clear: both;
 }
 
-div#extra td, div#extra th { 
+div#sidebar td, div#sidebar th { 
   font-family: sans-serif;
   padding: 0px 2px 0px 2px;
   border: hidden;
   line-height: normal;
 }
 
-div#extra th { 
+div#sidebar th { 
   font-weight: bold;
   text-align: center;
 }

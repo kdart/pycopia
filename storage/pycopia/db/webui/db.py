@@ -33,7 +33,7 @@ def dbedit_page_constructor(request, **kwargs):
     container = doc.add_section("container", id="container")
     content = container.add_section("container", id="content")
     messages = container.add_section("container", id="messages")
-    extra = container.add_section("container", id="extra")
+    sidebar = container.add_section("container", id="sidebar")
     return doc
 
 
@@ -45,12 +45,9 @@ def metadata_page_constructor(request, **kwargs):
         setattr(doc, name, val)
     add_nav_section(doc, kwargs)
     container = doc.add_section("container")
-    header = container.add_section("container", id="header")
     wrapper = container.add_section("container", id="wrapper")
     content = wrapper.add_section("container", id="content")
-    messages = container.add_section("container", id="messages")
-    extra = container.add_section("container", id="extra")
-    footer = container.add_section("container", id="footer")
+    sidebar = container.add_section("container", id="sidebar")
     return doc
 
 def add_nav_section(doc, kwargs):

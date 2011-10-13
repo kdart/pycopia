@@ -27,7 +27,7 @@ def main(request):
         p = resp.NM("P", None, 
               resp.NM("A", {"href":resp.get_url(reports, report="sample")}, 
                  _("Sample Report")))
-        resp.extra.append(p)
+        resp.sidebar.append(p)
         return resp.finalize()
     else:
         return core.ONLY_GET

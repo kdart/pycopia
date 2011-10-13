@@ -350,25 +350,25 @@ div.buttonbar {
   text-align: center;
 }
 
-div#extra {
+div#sidebar {
   background:#FF8539; 
   clear:left; 
   float:left; 
   width:150px;
 }
 
-div#extra table {
+div#sidebar table {
   clear: both;
 }
 
-div#extra td, div#extra th { 
+div#sidebar td, div#sidebar th { 
   font-family: sans-serif;
   padding: 0px 2px 0px 2px;
   border: hidden;
   line-height: normal;
 }
 
-div#extra th { 
+div#sidebar th { 
   font-weight: bold;
   text-align: center;
 }

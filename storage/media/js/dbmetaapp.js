@@ -3,7 +3,7 @@
 
 
 /**
- * This application object simples fills the extra navigation area with a
+ * This application object simples fills the sidebar navigation area with a
  * list of all db model names. Click on one to view its metadata in a
  * table. 
  */
@@ -14,7 +14,7 @@ function ModelMetaApp() {
 
 ModelMetaApp.prototype.reload = function() {
   var d = window.db.get_tables();
-  d.addCallback(bind(this.dbFillExtra, this));
+  d.addCallback(bind(this.dbFillSidebar, this));
 };
 
 ModelMetaApp.prototype.destroy = function() {
@@ -22,12 +22,12 @@ ModelMetaApp.prototype.destroy = function() {
 };
 
 /**
- * Fill extra navigation with table names.
+ * Fill Sidebar navigation with table names.
  *
  * @param {Array} modelnames List of table names to insert in nav bar.
  *
  */
-ModelMetaApp.prototype.dbFillExtra = function(modelnames) {
+ModelMetaApp.prototype.dbFillSidebar = function(modelnames) {
   var tbl = TABLE(null, 
     CAPTION(null, "Table Names"),
     THEAD(null, TR(null, TH(null, "Name"))),
@@ -37,9 +37,9 @@ ModelMetaApp.prototype.dbFillExtra = function(modelnames) {
                         A({"href":"javascript:dbTableInfo('"+modelname+"')"}, 
                            modelname))
             );
-          }, keys(modelnames)))
+          }, sorted(keys(modelnames))))
     );
-  placeContent("extra", tbl);
+  placeContent("sidebar", tbl);
 };
 
 /**
@@ -48,18 +48,20 @@ ModelMetaApp.prototype.dbFillExtra = function(modelnames) {
  *
  */
 function dbTableInfo(modelname) {
-  var d = window.db.get_table_metadata(modelname);
   var heading = ["Type", "Colname", "Default", "Many2Many", "nullable", "Uselist", "Collection"]; 
+  var d = window.db.get_table_metadata(modelname);
   d.addCallback( function (info) {
       var tbl = TABLE(null,
           CAPTION(null, modelname),
           THEAD(null, headDisplay(heading)),
-          TBODY(null, map(rowDisplay, info)),
+          TBODY(null, map(rowDisplay, map(function (o) {return [o.colname, o.coltype, o["default"],
+                o.m2m, o.nullable, o.uselist, o.collection]}, info))),
           TFOOT(null, headDisplay(heading))
         );
       placeContent("modelmetaapp", tbl);
     }
   );
+  d.addErrback(function(e) {console.error(e);});
 };
 
 connectOnce(window, "onload", function(ev) {

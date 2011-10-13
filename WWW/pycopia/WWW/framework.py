@@ -783,12 +783,12 @@ def default_doc_constructor(request, **kwargs):
     wrapper = container.add_section("container", id="wrapper")
     content = wrapper.add_section("container", id="content")
     navigation = container.add_section("container", id="navigation")
-    extra = container.add_section("container", id="extra")
+    sidebar = container.add_section("container", id="sidebar")
     footer = container.add_section("container", id="footer")
     doc.header = header
     doc.content = content
     doc.nav = navigation
-    doc.extra = extra
+    doc.sidebar = sidebar
     doc.footer = footer
     return doc
 

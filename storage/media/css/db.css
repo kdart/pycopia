@@ -208,6 +208,10 @@ div#dbmodelinstance {
 }
 
 
+table.datagrid caption {
+  text-align:left; 
+}
+
 table.datagrid {
     width: 100%;
     border-collapse: collapse;
