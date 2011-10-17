@@ -30,7 +30,7 @@ function CountrySetApp() {
   this._draggables = [];
   this._csdraggables = [];
   this._droppables = [];
-  this.root = DIV({id: "countrysetapp", "class": "applet"});
+  this.root = DIV({id: "countrysetapp", "class": "applet", style: "float:none"});
   var buttonbar = DIV({id: "buttonbar", class: "buttonbar"});
   // add/create icon and trash icon
   var addicon = icons.getIcon("add");

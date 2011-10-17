@@ -221,7 +221,7 @@ Enum.prototype.toString = function() {
   return this._str_;
 };
 
-// For Enum --> JSON
+// For pycopia.aid.Enum --> JSON
 function jsonCheckEnum(obj) {
   return (typeof(obj) == "object") && (obj.constructor == Enum);
 };
@@ -230,7 +230,7 @@ function simplifyEnum(o) {
   return {_class_: "Enum", value: {"value":o.value, "_str_":o._str_}};
 };
 
-// For JSON -> Enum
+// For JSON -> pycopia.aid.Enum
 function jsonDecodeCheckEnum(obj) {
   return obj._class_ == "Enum";
 };

@@ -47,7 +47,7 @@ def ts_page_constructor(request, **kwargs):
     nav.append(NM("P", None, NM("A", {"href": "/auth/logout"}, "logout")))
     container = doc.add_section("container", id="container")
     content = container.add_section("container", id="content")
-    extra = container.add_section("container", id="extra")
+    sidebar = container.add_section("container", id="sidebar")
     messages = container.add_section("container", id="messages")
     return doc
 

@@ -43,10 +43,8 @@ def cs_page_constructor(request, **kwargs):
     ))
     nav.append(NM("P", {"class_": "title"}, kwargs["title"]))
     nav.append(NM("P", None, NM("A", {"href": "/auth/logout"}, "logout")))
-    container = doc.add_section("container", id="container")
-    content = container.add_section("container", id="content")
-    messages = container.add_section("container", id="messages")
-    extra = container.add_section("container", id="extra")
+    content = doc.add_section("container", id="content")
+    messages = doc.add_section("container", id="messages")
     return doc
 
 

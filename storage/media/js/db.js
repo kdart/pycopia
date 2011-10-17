@@ -197,8 +197,8 @@ DBModelInstance.prototype.__dom__ = function(node) {
     if (coldata === null) {
       coldata = new NULL();
     };
-    if (colmetadata[0] == "RelationshipProperty") {
-      if (colmetadata[5] == true) { // uselist
+    if (colmetadata.coltype == "RelationshipProperty") {
+      if (colmetadata.uselist == true) {
         var tr = TR(null,
                       TD(null, colname),
                       TD(null, 
@@ -216,7 +216,7 @@ DBModelInstance.prototype.__dom__ = function(node) {
 
       };
     } else {
-      var tr = TR({"class": colmetadata[0]},
+      var tr = TR({"class": colmetadata.coltype},
                     TD(null, colname),
                     TD(null, coldata.toString()));
     }

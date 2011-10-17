@@ -33,13 +33,21 @@ from pycopia.WWW.middleware import auth
 def config_page_constructor(request, **kwargs):
     doc = framework.get_acceptable_document(request)
     doc.stylesheet = request.get_url("css", name="tableedit.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    #doc.add_javascript2head(url=request.get_url("js", name="ui.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="confedit.js"))
+    doc.scripts = ["MochiKit.js", "proxy.js", "ui.js", "db.js", "config.js"]
     for name, val in kwargs.items():
         setattr(doc, name, val)
+    nav = doc.add_section("navigation")
+    NM = doc.nodemaker
+    NBSP = NM("_", None)
+    nav.append(NM("P", None,
+         NM("A", {"href":"/"}, "Home"), NBSP,
+         NM("A", {"href":".."}, "Up"), NBSP,
+    ))
+    nav.append(NM("P", {"class_": "title"}, kwargs["title"]))
+    nav.append(NM("P", None, NM("A", {"href": "/auth/logout"}, "logout")))
+    doc.add_section("container", id="content")
+    doc.add_section("container", id="sidebar")
+    doc.add_section("container", id="messages")
     return doc
 
 

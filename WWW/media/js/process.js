@@ -44,14 +44,14 @@ function showProcList(proclist) {
   if (proclist == null) {
     return;
   }
-  var extra = document.getElementById("extra");
+  var sidebar = document.getElementById("sidebar");
   var tbl = TABLE(null, 
     THEAD(null, rowDisplay(["PID", "Command"])),
     TBODY(null, map(procRowDisplay, sorted(proclist))));
-  if (extra.hasChildNodes()) {
-    extra.replaceChild(tbl, extra.lastChild);
+  if (sidebar.hasChildNodes()) {
+    sidebar.replaceChild(tbl, sidebar.lastChild);
   } else {
-    extra.appendChild(tbl);
+    sidebar.appendChild(tbl);
   }
 }
 
