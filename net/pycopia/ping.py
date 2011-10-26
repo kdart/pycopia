@@ -20,6 +20,14 @@ import sys
 from pycopia import scheduler
 from pycopia import proctools
 
+
+class Error(Exception):
+    pass
+
+class RebootDetectorError(Error):
+    """Raised when the RebootDetector cannot verify a reboot."""
+
+
 class Pinger(proctools.ProcessPipe):
     """
 This class is an interface to, and opens a pipe to, the pyntping program.
@@ -100,7 +108,7 @@ The following attributes may also be adjusted:
                 resstr += next
             scheduler.sleep(1)
         # we should have got a tuple of tuples
-        result =  eval(resstr)
+        result =  eval(resstr, {}, {})
         return result
 
 #### end Ping
@@ -180,4 +188,62 @@ def ping(host, retries=3, timeout=5, delay=1, size=64, hops=30):
 def reachable(*hosts):
     pinger = get_pinger()
     return pinger.reachable(*hosts)
+
+
+class RebootDetector(object):
+    """Detect a reboot of a remote device using "ping".
+
+    The following algorithm is used. 
+    1. Verify the target is pingable.
+    2. Loop until target is not pingable.
+    3. While target is not pingable, loop until it is pingable again.
+
+    The target must have recently initiated a reboot before this is called, and
+    still be pingable. Timing is important here.
+    """
+    UNKNOWN = 0
+    REACHABLE = 1
+    NOTREACHABLE = 2
+    REACHABLE2 = 3
+
+    def __init__(self, target, retries=30, timeout=5, delay=10, size=64, hops=30):
+        self._target = target
+        self._pinger = get_pinger(retries, timeout, delay, size, hops)
+
+    def __del__(self):
+        self._pinger.kill()
+
+    def go(self):
+        isreachable = False
+        pinger = self._pinger
+        state = RebootDetector.UNKNOWN
+        while True:
+            if state == RebootDetector.UNKNOWN:
+                host, isreachable = pinger.reachable(self._target)[0]
+                if isreachable:
+                    state = RebootDetector.REACHABLE
+                else:
+                    raise RebootDetectorError("Could not reach host initially.")
+            elif state == RebootDetector.REACHABLE:
+                r_retries = pinger.retries
+                while isreachable:
+                    host, isreachable = pinger.reachable(self._target)[0]
+                    scheduler.sleep(pinger.delay)
+                    r_retries -= 1
+                    if r_retries == 0:
+                        raise RebootDetectorError("Target did not become unreachable.")
+                else:
+                    state = RebootDetector.NOTREACHABLE
+            elif state == RebootDetector.NOTREACHABLE:
+                r_retries = pinger.retries
+                while not isreachable:
+                    host, isreachable = pinger.reachable(self._target)[0]
+                    scheduler.sleep(pinger.delay)
+                    r_retries -= 1
+                    if r_retries == 0:
+                        raise RebootDetectorError("Target did not become reachable again.")
+                else:
+                    state = RebootDetector.REACHABLE2
+                    break
+        return state == RebootDetector.REACHABLE2
 
