@@ -200,6 +200,10 @@ class RebootDetector(object):
 
     The target must have recently initiated a reboot before this is called, and
     still be pingable. Timing is important here.
+
+    Call the `go` method when you are ready to go.
+
+    May raise RebootDetectorError at any phase.
     """
     UNKNOWN = 0
     REACHABLE = 1
@@ -246,4 +250,11 @@ class RebootDetector(object):
                     state = RebootDetector.REACHABLE2
                     break
         return state == RebootDetector.REACHABLE2
+
+    def verify_reboot(self):
+        """Simple verify function not requiring exception handling."""
+        try:
+            return self.go()
+        except RebootDetectorError:
+            return False
 

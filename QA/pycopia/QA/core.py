@@ -4,9 +4,11 @@
 # LICENSE: LGPL
 
 # Copied from Pycopia test automation framework, and modified for Google Gtest.
-# Copied from Gtest, and modified for Droid test automation framework.
-# Copied from Droid back into Pycopia test automation framework.
+# Copied from Gtest, and modified for powerdroid test automation framework.
+# Copied from powerdroid back into Pycopia test automation framework.
 
+
+from __future__ import print_function
 
 """Provides base classes for test cases and suites.
 
@@ -998,11 +1000,11 @@ class TestSuite(object):
                 if presig not in self._multitestset:
                     self._add_with_prereq(preentry, True)
         testcaseid = entry.get_signature()
-        self._testset.add(testcaseid)
-        if not _auto or testcaseid not in self._testset:
+        if not _auto:
             self._tests.append(entry)
-        #elif testcaseid not in self._tests:
-        #    self._tests.append(entry)
+        elif testcaseid not in self._testset:
+                self._tests.append(entry)
+        self._testset.add(testcaseid)
 
 
     def add_test(self, _testclass, *args, **kwargs):
