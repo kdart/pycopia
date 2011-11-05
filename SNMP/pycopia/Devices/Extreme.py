@@ -68,10 +68,6 @@ class ExtremeManager(Manager.Manager):
     pass
 
 
-def get_manager(sessiondata):
-    sess = SNMP.new_session(sessiondata)
-    dev = ExtremeManager(sess)
-    dev.add_mibs(MIBS)
-    return dev
-
+def get_manager(device, community):
+    return Manager.get_manager(device, community, ExtremeManager, MIBS)
 

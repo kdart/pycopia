@@ -30,6 +30,8 @@ from pycopia.SNMP import Manager
 from pycopia.mibs import SNMPv2_MIB
 from pycopia.mibs import PowerNet_MIB
 
+MIBS = [SNMPv2_MIB, PowerNet_MIB]
+
 # for the Web/SNMP management module,
 # only these scalars seem to work.
 
@@ -195,23 +197,6 @@ class OutletControlMSP(PowerNet_MIB.sPDUOutletControlMSPEntry):
 #   SNMP.Basetypes.Enumeration(8, 'cancelPendingCommandMSP')
 
 
-# remove ugly prefixes from names
-def apc_mangler(oid_name):
-    end = len(oid_name)
-    start = 0
-    if oid_name.endswith("Entry"): # also remove possible "...Entry" from tail.
-        end = end - 5
-    if oid_name.startswith("sPDU"):
-        start = start + 4
-    return oid_name[start:end]
-
-# factory function
-def get_manager(sessiondata):
-    sessiondata.version = 0 # APC still only SNMPv1 !
-    sess = SNMP.new_session(sessiondata)
-    dev = APCManager(sess)
-    dev.add_mibs([SNMPv2_MIB])
-    dev.add_mib(PowerNet_MIB, apc_mangler, subclassmodule=sys.modules[__name__])
-    return dev
-
+def get_manager(device, community):
+    return Manager.get_manager(device, community, APCManager, MIBS)
 
