@@ -452,7 +452,10 @@ class TableCommands(CLI.BaseCommands):
             for item in q.all():
                 if ln % rows == 0:
                     self._ui.printf("%B" + hfmt.format(pkname, *heading) + "%N")
-                self._print(fmt.format(getattr(item, pkname), *[getattr(item, hn) for hn in heading]))
+                try:
+                    self._print(fmt.format(getattr(item, pkname), *[getattr(item, hn) for hn in heading]))
+                except ValueError:
+                    self._ui.printf("%R{!s:6.6s}%N: {}".format(getattr(item, pkname), str(item)))
                 ln += 1
         except:
             _session.rollback()
