@@ -1,39 +1,19 @@
+============
+Pycopia-core
+============
+
 Pycopia Python core package. 
 
 
-The core, most generic parts of the Pycopia application framework. 
+The core, most generic parts of the Pycopia application framework.  Many
+general purpose modules are here. Other Pycopia packages may depend on modules
+in here.
 
-pycopia.anypath
-pycopia.asyncinterface
-pycopia.asyncio
-pycopia.asyncserver
-pycopia.basicconfig
-pycopia.benchmarks
-pycopia.charbuffer
-pycopia.cliutils
-pycopia.combinatorics
-pycopia.daemonize
-pycopia.environ
-pycopia.ezmail
-pycopia.fsm
-pycopia.grublib
-pycopia.gtktools
-pycopia.guid
-pycopia.interactive
-pycopia.ipv4
-pycopia.logfile
-pycopia.makepassword
-pycopia.md5lib
-pycopia.methodholder
-pycopia.netstring
-pycopia.passwd
-pycopia.ringbuffer
-pycopia.rot13
-pycopia.scheduler
-pycopia.sharedbuffer
-pycopia.shparser
-pycopia.smtp_envelope
-pycopia.sourcegen
-pycopia.ssmtpd
-pycopia.table
-pycopia.texttools
+Modules for generating Python code from data.
+
+Shell-like syntax parser.
+
+IPv4 address object.
+
+Enhanced interactive mode.
+

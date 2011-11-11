@@ -1,5 +1,7 @@
-Pycopia Python aid package. 
+===========
+Pycopia-CLI
+===========
 
-These are modules containing objects that are widely useful, or extend core
-Python features.
+A general purpose CLI framework for building interactive prompts. There is
+support for colored output, build-in help, and context switching.
 

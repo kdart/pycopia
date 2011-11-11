@@ -1,5 +1,9 @@
-Pycopia Python aid package. 
+================
+Pycopia-debugger
+================
 
-These are modules containing objects that are widely useful, or extend core
-Python features.
+Pycopia enhanced debugger.
+
+Works like the standard debugger but adds colored output, and some more
+inspection commands.
 

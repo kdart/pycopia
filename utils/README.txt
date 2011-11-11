@@ -1,3 +1,7 @@
+=============
+Pycopia-utils
+=============
+
 Pycopia utilities.
 
 Opening the syslog, SNMP, and ICMP sockets require root privileges. This
@@ -31,3 +35,7 @@ needed.
 
 This module also provides a couple of patched standard extension modules that
 fix a bug in each. 
+
+The Pycopia itimer module provides and interruptable sleep function to works
+will when other signal handers are in place.
+
