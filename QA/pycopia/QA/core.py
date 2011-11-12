@@ -1022,6 +1022,21 @@ class TestSuite(object):
         entry = TestEntry(testinstance, args, kwargs, False)
         self._add_with_prereq(entry)
 
+    def add_tests(self, _testclasslist, *args, **kwargs):
+        """Add a list of tests at once. 
+
+        Similar to add_test method, but adds all test case classes found in the
+        given list.  Arguments are common to all tests. 
+        If object is a tuple it should be a (testclass, tuple, dictionary) of
+        positional and keyword arguments.
+        """
+        assert isinstance(_testclasslist, list)
+        for testclass in _testclasslist:
+            if type(testclass) is tuple:
+                self.add_test(*testclass)
+            else:
+                self.add_test(testclass, *args, **kwargs)
+
     def add_test_from_result(self, dbtestresult):
         """Add a Test from information taken from stored test result.
 
