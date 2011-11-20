@@ -23,6 +23,8 @@ name-value pairs (mappings).
 
 """
 
+import re
+
 from sqlalchemy import and_
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -45,9 +47,12 @@ def get_root(session):
 
 class Container(object):
     """Make a relational table quack like a dictionary."""
-    def __init__(self, session, configrow):
+    def __init__(self, session, configrow, user=None, testcase=None, testsuite=None):
         self.__dict__["session"] = session
         self.__dict__["node"] = configrow
+        self.__dict__["_user"] = user
+        self.__dict__["_testcase"] = testcase
+        self.__dict__["_testsuite"] = testsuite
 
     def __str__(self):
         if self.node.value is NULL:
@@ -64,8 +69,7 @@ class Container(object):
                 Config.name==name)).one()
         except NoResultFound:
             me = self.node
-            item = models.create(Config, name=name, value=value, container=me, user=me.user,
-                testcase=me.testcase, testsuite=me.testsuite)
+            item = models.create(Config, name=name, value=value, container=me, user=self._user)
             self.session.add(item)
             self.session.commit()
         else:
@@ -76,12 +80,18 @@ class Container(object):
 
     def __getitem__(self, name):
         try:
-            item = self.session.query(Config).filter(and_(Config.parent_id==self.node.id,
-                Config.name==name)).one()
+            item = self.session.query(Config).filter(and_(
+                    Config.parent_id==self.node.id,
+                    Config.name==name,
+                    Config.user==self._user,
+                    Config.testcase==self._testcase,
+                    Config.testsuite==self._testsuite,
+                )).one()
         except NoResultFound:
             raise KeyError(name)
         if item.value is NULL:
-            return Container(self.session, item)
+            return Container(self.session, item, 
+                    user=self._user, testcase=self._testcase, testsuite=self._testsuite)
         return item.value
 
     def __delitem__(self, name):
@@ -142,14 +152,26 @@ class Container(object):
     def copy(self):
         return self.__class__(self.session, self.node)
 
+    def _get_user(self, node):
+        if self._user:
+            if self._user.is_superuser:
+                return node.user 
+            else:
+                return self._user
+        else: #inherit
+            return node.user 
+
     def add_container(self, name):
         me = self.node
         if me.value is NULL:
-            new = models.create(Config, name=name, value=NULL, container=me, user=me.user,
-                testcase=me.testcase, testsuite=me.testsuite)
+            new = models.create(Config, name=name, value=NULL, container=me, 
+                    user=self._get_user(me),
+                    testcase=self._testcase or me.testcase, 
+                    testsuite=self._testsuite or me.testsuite)
             self.session.add(new)
             self.session.commit()
-            return Container(self.session, new)
+            return Container(self.session, new,
+                    user=self._user, testcase=self._testcase, testsuite=self._testsuite)
         else:
             raise ConfigError("Cannot add container to value pair.")
 
@@ -157,11 +179,11 @@ class Container(object):
         me = self.node
         c = self.session.query(Config).filter(and_(
                 Config.name==name, 
-                #Config.value==NULL, # XXX this does not work
                 Config.container==me, 
-                Config.user==me.user)).one()
+                Config.user==self._get_user(me))).one()
         if c.value is NULL:
-            return Container(self.session, c)
+            return Container(self.session, c,
+                    user=self._user, testcase=self._testcase, testsuite=self._testsuite)
         else:
             raise ConfigError("Container %r not found." % (name,))
 
@@ -195,7 +217,8 @@ class Container(object):
                 item = session.query(Config).filter(and_(
                         Config.container==node, Config.name==key)).one()
                 if item.value is NULL:
-                    return Container(session, item)
+                    return Container(session, item,
+                        user=self._user, testcase=self._testcase, testsuite=self._testsuite)
                 else:
                     return item.value
             except NoResultFound, err:
@@ -225,6 +248,67 @@ class Container(object):
                 Config.user==me.user))
         return q.count() > 0
 
+    _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
+
+    # perform shell-like variable expansion
+    def expand(self, value):
+        if '$' not in value:
+            return value
+        i = 0
+        while 1:
+            m = Container._var_re.search(value, i)
+            if not m:
+                return value
+            i, j = m.span(0)
+            oname = vname = m.group(1)
+            if vname.startswith('{') and vname.endswith('}'):
+                vname = vname[1:-1]
+            tail = value[j:]
+            value = value[:i] + str(self.get(vname, "$"+oname))
+            i = len(value)
+            value += tail
+
+    def expand_params(self, tup):
+        rv = []
+        for arg in tup:
+            if isinstance(arg, basestring):
+                rv.append(self.expand(arg))
+            else:
+                rv.append(arg)
+        return tuple(rv)
+
+    def set_owner(self, user):
+        if self._user is not None and self._user.is_superuser:
+            if self.node.container is not None:
+                self.node.set_owner(self.session, user)
+            else:
+                raise ConfigError("Root container can't be owned.")
+        else:
+            raise ConfigError("Current user must be superuser to change ownership.")
+
+    def register_user(self, username):
+        if username is not None:
+            if isinstance(username, basestring):
+                self._user = models.User.get_by_username(self.session, username)
+            elif isinstance(username, models.User):
+                self._user = username
+            else:
+                raise ValueError("Not a value user to register")
+        else:
+            self._user = None
+
+    def register_testcase(self, name):
+        if name is not None:
+            self._testcase = models.TestCase.get_by_implementation(self.session, name)
+        else:
+            self._testcase = None
+
+    def register_testsuite(self, name):
+        if name is not None:
+            self._testsuite = models.TestSuite.get_by_implementation(self.session, name)
+        else:
+            self._testsuite = None
+
 
 def get_item(session, node, key):
     return session.query(Config).filter(and_(Config.container==node, Config.name==key)).one()
@@ -233,7 +317,7 @@ def get_item(session, node, key):
 # entry point for basic configuration model.
 def get_config():
     session = models.get_session()
-    container = get_root(session)
-    return Container(session, container)
+    root = get_root(session)
+    return Container(session, root)
 
 

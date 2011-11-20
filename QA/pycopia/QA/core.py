@@ -35,7 +35,6 @@ __author__ = 'keith@kdart.com (Keith Dart)'
 import sys
 import os
 
-from pycopia import combinatorics
 from pycopia import scheduler
 from pycopia import timelib
 from pycopia import debugger
@@ -155,7 +154,7 @@ class Test(object):
         self._report = config.report 
         self._debug = config.flags.DEBUG 
         self._verbose = config.flags.VERBOSE 
-        self.__datapoints = []
+        self._datapoints = []
 
     @classmethod
     def set_test_options(cls):
@@ -178,6 +177,7 @@ class Test(object):
         The test is "kicked-off" by calling this. Any arguments are passed to
         the test implementation (`execute` method).
         """
+        self.config.register_testcase(self.test_name)
         self._report.add_heading(self.test_name, 2)
         if args or kwargs:
             self._report.add_message("TESTARGUMENTS", repr_args(args, kwargs), 2)
@@ -215,7 +215,7 @@ class Test(object):
             rv = self.incomplete("%s: Exception: (%s: %s)" % \
                     (self.test_name, ex, val))
         endtime = timelib.now()
-
+        self.config.register_testcase(None)
         self._report.add_message("STARTTIME", teststarttime, 2)
         self._report.add_message("ENDTIME", endtime, 2)
         minutes, seconds = divmod(endtime - teststarttime, 60.0)
@@ -258,9 +258,9 @@ class Test(object):
             if self._debug:
                 debugger.post_mortem(tb, ex, val)
             self.abort("Test finalize failed!")
-        if self.__datapoints and rv.is_passed():
-            self.save_data(self.__datapoints,
-                note="datapoints: %d" % (len(self.__datapoints),))
+        if self._datapoints and rv.is_passed():
+            self.save_data(self._datapoints,
+                note="datapoints: %d" % (len(self._datapoints),))
         return rv
 
     # utility methods - methods that are common to nearly all tests.
@@ -710,7 +710,7 @@ class Test(object):
     def add_datapoint(self, value):
         """Add a datapoint to the list of saved data.
         """
-        self.__datapoints.append(value)
+        self._datapoints.append(value)
 
 # --------------------
 
@@ -853,6 +853,7 @@ class TestEntrySeries(TestEntry):
     having to actually instantiate a TestEntry at suite build time.
     """
     def __init__(self, testinstance, N, chooser, filter, args, kwargs):
+        from pycopia import combinatorics
         self.inst = testinstance
         self.args = args or ()
         self.kwargs = kwargs or {}
@@ -1203,6 +1204,7 @@ class TestSuite(object):
         If a Test returns None (Python's default), it is reported
         as a failure since it was not written correctly.
         """
+        self.config.register_testsuite(self.test_name)
         self.starttime = timelib.now()
         try:
             self._initialize(*args, **kwargs)
@@ -1213,6 +1215,7 @@ class TestSuite(object):
             self._run_tests()
             rv = self._finalize()
         endtime = timelib.now()
+        self.config.register_testsuite(None)
         self.report.add_message("STARTTIME", self.starttime, 1)
         self.report.add_message("ENDTIME", endtime, 1)
         return rv

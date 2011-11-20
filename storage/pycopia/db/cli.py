@@ -37,6 +37,7 @@ from sqlalchemy import and_, or_
 from sqlalchemy.orm.exc import NoResultFound
 
 _session = None
+_user = None
 
 
 class DBSessionCommands(CLI.BaseCommands):
@@ -55,7 +56,7 @@ class DBSessionCommands(CLI.BaseCommands):
         """close
     Close the database."""
         self._obj.close()
-        raise CLI.CommandQuit
+        raise CLI.CommandQuit()
 
     def finalize(self):
         if bool(self._obj.dirty):
@@ -128,7 +129,7 @@ class DBSessionCommands(CLI.BaseCommands):
     def config(self, argv):
         """config
     Enter configuration table edit mode."""
-        root = config.get_root(self._obj)
+        root = get_root(self._obj)
         cmd = self.clone(ConfigCommands)
         cmd._setup(root, "%%YConfig%%N:%s> " % (root.name,))
         raise CLI.NewCommand(cmd)
@@ -187,13 +188,13 @@ class RowCommands(CLI.GenericCLI):
             ex, val, tb = sys.exc_info()
             self._ui.error("%s: %s" % (ex, val))
         else:
-            raise CLI.CommandQuit
+            raise CLI.CommandQuit()
 
     def abort(self, argv):
         """abort
     Abort this edit, don't commit changes."""
         _session.rollback()
-        raise CLI.CommandQuit
+        raise CLI.CommandQuit()
 
 
 class SessionRowCommands(RowCommands):
@@ -675,7 +676,7 @@ class UserCommands(TableCommands):
         else:
             models.create_user(_session, pwent)
             return
-        grp = _session.query(models.Group).filter(models.Group.name=="testing").one()
+        grp = _session.query(models.Group).filter(models.Group.name=="testers").one()
         kwargs["username"] = username
         kwargs["authservice"] = "local"
         kwargs.setdefault("is_staff", True)
@@ -768,7 +769,7 @@ class QueryCommands(CLI.BaseCommands):
         """count
     Show the count of the query."""
         self._print(self._obj.count())
-        raise CLI.CommandQuit
+        raise CLI.CommandQuit()
 
 
 class CreateCommands(CLI.BaseCommands):
@@ -805,7 +806,7 @@ class CreateCommands(CLI.BaseCommands):
     Commit the new instance."""
         _session.add(self._obj)
         _session.commit()
-        raise CLI.CommandQuit
+        raise CLI.CommandQuit()
 
 
 
@@ -822,7 +823,7 @@ class ConfigCommands(CLI.BaseCommands):
     Make <container> the current container."""
         name = argv[1]
         if name == "..":
-            raise CLI.CommandQuit
+            raise CLI.CommandQuit()
         row = _session.query(models.Config).filter(and_(
                 models.Config.name==name,
                 models.Config.container==self._obj)).one()
@@ -836,12 +837,15 @@ class ConfigCommands(CLI.BaseCommands):
 
     cd = chdir
 
+#    def _setup(self, obj, ps):
+#        super(ConfigCommands, self)._setup(obj, ps)
+
     def mkdir(self, argv):
         """mkdir <name>
     Make a new container here."""
         name = argv[1]
-        container = config.Container(_session, self._obj)
-        container.add_container(name)
+        container = config.Container(_session, self._obj, user=_user)
+        cont = container.add_container(name)
 
     def set(self, argv):
         """set [-t <type>] <name> <value>
@@ -855,7 +859,11 @@ class ConfigCommands(CLI.BaseCommands):
                 if type(tval) is not type:
                     self._ui.error("Bad type.")
                     return
-        value = tval(*tuple(args[1:]))
+        try:
+            value = tval(*tuple(args[1:]))
+        except TypeError as terr:
+            self._ui.error(err)
+            return
         name = args[0]
         row = self._get(name)
         if row is None:
@@ -916,6 +924,35 @@ class ConfigCommands(CLI.BaseCommands):
             _session.commit()
         else:
             self._ui.error("No such item.")
+
+    def owner(self, argv):
+        """owner [<name>]
+    Set the owner of this container to <name>, of possible.
+    The special name "delete" will remove ownership."""
+        name = argv[1] if len(argv) > 1 else None
+        if not _user.is_superuser:
+            self._ui.warning("Only superuser accounts can change ownership")
+            return
+        if name is None:
+            current = self._obj.user
+            choices = models.get_choices(_session, models.Config, "user", "username")
+            choices[0] = "Nobody"
+            chosen_id = self._ui.choose_key(choices, current.id if current is not None else 0, "%Iuser%N")
+            if chosen_id == 0:
+                config.Container(_session, self._obj, user=_user).set_owner(None)
+            else:
+                relmodel = models.Config.user.property.mapper.class_
+                related = _session.query(relmodel).get(chosen_id)
+                config.Container(_session, self._obj, user=_user).set_owner(related)
+        else:
+            if name.startswith("delete"):
+                config.Container(_session, self._obj, user=_user).set_owner(None)
+            else:
+                user = models.User.get_by_username(_session, name)
+                if user:
+                    config.Container(_session, self._obj, user=_user).set_owner(user)
+                else:
+                    self._ui.error("No such user.")
 
 
 # Maps table names to editor classes
@@ -1302,6 +1339,28 @@ _EDITORS = {
 }
 
 
+def get_root(session):
+    global _user
+    if _user is None:
+        user_pwent = passwd.getpwself()
+        _user = models.User.get_by_username(session, user_pwent.name)
+    root = config.get_root(session)
+    if _user.is_superuser:
+        return root
+    else:
+        newroot = session.query(models.Config).filter(and_(
+                models.Config.name==_user.username,
+                models.Config.container==root)).scalar()
+        if newroot is None:
+            container = config.Container(session, root)
+            container.register_user(_user)
+            newroot = container.add_container(_user.username)
+            return newroot.node
+        elif newroot.value is NULL:
+            return newroot
+        else:
+            raise config.ConfigError("Not a user container")
+
 
 # main program
 def dbcli(argv):
@@ -1354,7 +1413,7 @@ Options:
         parser.interact()
 
 def dbconfig(argv):
-    """dbconfig [-?] [<database_url>]
+    """dbconfig [-?D] [<database_url>]
 
 Provides an interactive session to the database configuration table.
 The argument may be a database URL. If not provide the URL specified on
@@ -1362,6 +1421,7 @@ The argument may be a database URL. If not provide the URL specified on
 
 Options:
    -?        = This help text.
+   -D        = Debug on.
 
     """
     global _session
@@ -1376,6 +1436,8 @@ Options:
         if opt == "-?":
             print dbconfig.__doc__
             return
+        if opt == "-D":
+            from pycopia import autodebug
 
     if args:
         database = args[0]
@@ -1389,7 +1451,7 @@ Options:
     ui = CLI.UserInterface(io)
     cmd = ConfigCommands(ui)
     _session = models.get_session(database)
-    root = config.get_root(_session)
+    root = get_root(_session)
     cmd._setup(root, "%%Ydbconfig%%N:%s> " % (root.name,))
     cmd._environ["session"] = _session
     parser = CLI.CommandParser(cmd, historyfile=os.path.expandvars("$HOME/.hist_dbconfig"))

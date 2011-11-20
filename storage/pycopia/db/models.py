@@ -78,10 +78,11 @@ def _get_secret():
     from pycopia import basicconfig
     try:
         cf = basicconfig.get_config("auth.conf")
-        SECRET_KEY = cf.SECRET_KEY
     except basicconfig.ConfigReadError:
         logging.warn("User encryption key not found for auth app, using default.")
         SECRET_KEY = "Testkey"
+    else:
+        SECRET_KEY = cf.SECRET_KEY
 
 
 
@@ -127,7 +128,7 @@ class User(object):
 
     # Passwords are stored in the database encrypted.
     def _set_password(self, passwd):
-        # pycrypto package.  http://www.amk.ca/python/code/crypto
+        # Using pycrypto package.
         from Crypto.Cipher import AES
         eng = AES.new(get_key(), AES.MODE_ECB)
         self._password = hexdigest(eng.encrypt((passwd + "\0"*(16 - len(passwd)))[:16]))
@@ -151,7 +152,7 @@ class User(object):
 
     @classmethod
     def get_by_username(cls, dbsession, username):
-        return dbsession.query(cls).filter(cls.username==username).one()
+        return dbsession.query(cls).filter(cls.username==username).scalar()
 
 
 def get_key():
@@ -159,10 +160,11 @@ def get_key():
     if SECRET_KEY is None:
         _get_secret()
         del _get_secret
-    h = sha1()
-    h.update(SECRET_KEY)
-    h.update("ifucnrdthsurtoocls")
-    return h.digest()[:16]
+        h = sha1()
+        h.update(SECRET_KEY)
+        h.update("ifucnrdthsurtoocls")
+        SECRET_KEY = h.digest()[:16]
+    return SECRET_KEY
 
 
 mapper(User, tables.auth_user,
@@ -196,7 +198,7 @@ def create_user(session, pwent):
             [first, last] = map(str.capitalize, pwent.name.split(".", 1))
         else:
             first, last = pwent.name, "" # Punt, first name is login name.  User can edit later.
-    grp = session.query(Group).filter(Group.name=="testing").one() # should already exist
+    grp = session.query(Group).filter(Group.name=="testers").one() # should already exist
     user = create(User, username=pwent.name, first_name=first, last_name=last, authservice="system",
             is_staff=True, is_active=True, is_superuser=False, last_login=now, date_joined=now)
     user.password = pwent.name + "123" # default, temporary password
@@ -1198,6 +1200,13 @@ class TestCase(object):
             rv.append(res.data.data)
         return rv
 
+    @classmethod
+    def get_by_name(cls, dbsession, name):
+        return dbsession.query(cls).filter(cls.name==name).scalar()
+
+    @classmethod
+    def get_by_implementation(cls, dbsession, implementation):
+        return dbsession.query(cls).filter(cls.testimplementation==implementation).scalar()
 
 mapper(TestCase, tables.test_cases,
     properties={
@@ -1238,6 +1247,14 @@ class TestSuite(object):
     @classmethod
     def get_suites(cls, session):
         return session.query(cls).filter(cls.valid==True).order_by("name").all()
+
+    @classmethod
+    def get_by_name(cls, dbsession, name):
+        return dbsession.query(cls).filter(cls.name==name).scalar()
+
+    @classmethod
+    def get_by_implementation(cls, dbsession, implementation):
+        return dbsession.query(cls).filter(cls.suiteimplementation==implementation).scalar()
 
 
 mapper(TestSuite, tables.test_suites,
@@ -1434,6 +1451,12 @@ class Config(object):
     def __repr__(self):
         return "Config(%r, %r)" % (self.name, self.value)
 
+    def set_owner(self, session, user):
+        if self.container is not None:
+            if isinstance(user, basestring):
+                user = User.get_by_username(session, user)
+            self.user = user
+            session.commit()
 
 mapper(Config, tables.config, 
     properties={

@@ -23,7 +23,7 @@ extra methods for constructing active controllers.
 """
 
 
-import sys, os, re
+import sys, os
 import logging
 
 from sqlalchemy import and_
@@ -56,6 +56,7 @@ class RootContainer(config.Container):
         cache._environment = None
         cache._configurator = None
         cache._UI = None
+        cache._userconfig = None
 
     def __repr__(self):
         return "<RootContainer>"
@@ -176,28 +177,6 @@ class RootContainer(config.Container):
         for k, v in other.items():
             self.evalset(k, v)
 
-    _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
-
-    # perform shell-like variable expansion
-    def expand(self, value):
-        if '$' not in value:
-            return value
-        i = 0
-        while 1:
-            m = RootContainer._var_re.search(value, i)
-            if not m:
-                return value
-            i, j = m.span(0)
-            oname = vname = m.group(1)
-            if vname.startswith('{') and vname.endswith('}'):
-                vname = vname[1:-1]
-            tail = value[j:]
-            value = value[:i] + str(self.get(vname, "$"+oname))
-            i = len(value)
-            value += tail
-
-    reportpath = property(lambda s: os.path.join(s.reportdir, s.reportbasename))
-
     # report object constructor
     def get_report(self):
         if self._cache._report is None:
@@ -224,20 +203,10 @@ class RootContainer(config.Container):
         if not params:
             raise reports.ReportFindError("Report %r not found." % (name,))
         if type(params) is list:
-            params = map(self._param_expand, params)
+            params = map(self.expand_params, params)
         else:
-            params = self._param_expand(params)
+            params = self.expand_params(params)
         return reports.get_report(params)
-
-    # reconstruct the report parameter list with dollar-variables expanded.
-    def _param_expand(self, tup):
-        rv = []
-        for arg in tup:
-            if isinstance(arg, basestring):
-                rv.append(self.expand(arg))
-            else:
-                rv.append(arg)
-        return tuple(rv)
 
     def set_report(self, reportname):
         if type(reportname) is str:
@@ -250,6 +219,7 @@ class RootContainer(config.Container):
         self._cache._report = None
 
     report = property(get_report, set_report, del_report, "report object")
+    reportpath = property(lambda s: os.path.join(s.reportdir, s.reportbasename))
 
     def get_logfile(self):
         from pycopia import logfile
@@ -335,7 +305,7 @@ class RootContainer(config.Container):
         uitype = self.get("userinterfacetype", "default")
         params = self.userinterfaces.get(uitype)
         if params:
-            params = self._param_expand(params)
+            params = self.expand_params(params)
         else:
             params = self.userinterfaces.get("default")
         return UI.get_userinterface(*params)
@@ -361,6 +331,37 @@ class RootContainer(config.Container):
         except config.NoResultFound as err:
             raise config.ConfigError("Bad account identifier %r: %s" % (name, err))
         return acct.login, acct.password
+
+    # user-specific configuration variables.
+    # user configuration is explicit, contained in this "userconfig" attribute,
+    # which maps to a configuration container that has the same name as the
+    # current user, and configuration items owned by that user.
+    def get_userconfig(self):
+        if self._cache.get("_userconfig") is None:
+            uc = self._build_userconfig()
+            self._cache["_userconfig"] = uc
+            return uc
+        else:
+            return self._cache["_userconfig"]
+
+    def del_userconfig(self):
+        self._cache["_userconfig"] = None
+
+    userconfig = property(get_userconfig, None, del_userconfig, 
+                        "User specific configuration area.")
+
+    def _build_userconfig(self):
+        username = self.get("username") or os.environ["USER"]
+        self.register_user(username)
+        try:
+            cont = self.get_container(username)
+        except config.NoResultFound:
+            self.add_container(username)
+            cont = self.get_container(username)
+        cont.register_user(username)
+        return cont
+
+
 
 ##### end of RootContainer ######
 
@@ -643,6 +644,7 @@ this.  """
 
 if __name__ == "__main__":
     from pycopia import autodebug
+    from pycopia import passwd
     if sys.flags.interactive:
         from pycopia import interactive
     cf = get_config()
@@ -653,7 +655,7 @@ if __name__ == "__main__":
     #cf.reportname = "default"
     #print cf.get("reportname")
     #print cf.report
-    cf.username = "keith"
+    cf.username = passwd.getpwself().name
     cf.environmentname = "default"
     #env = cf._get_environment()
     env = cf.environment
