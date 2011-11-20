@@ -24,25 +24,27 @@ platinfo = platutils.get_platform()
 CACHEDIR="/var/cache/pycopia"
 
 # Some services, such as the Pyro nameserver, are set up to run as the
-# "tester" psuedo-user.  This also creates the "tester" group that testing
+# "tester" psuedo-user.  This also creates the "testers" group that testing
 # personnel should also be a member of.
 def system_setup():
     if platinfo.is_linux():
-        import os, pwd
+        import os, pwd, grp
         if os.getuid() == 0:
             if platinfo.is_gentoo():
                 try:
                     pwent = pwd.getpwnam("tester")
                 except KeyError:
-                    os.system("useradd -c Tester " 
-                    "-G users,uucp,audio,cdrom,dialout,video,games,usb,crontab,messagebus,plugdev " 
-                    "-m -U tester") # also creates tester group
-                    print "Change password for new user tester:"
-                    os.system("passwd tester")
+                    os.system("groupadd testers")
+                    os.system("useradd -c Tester -g testers "
+                    "-G users.uucp,audio,cdrom,dialout,video,games,usb,crontab,messagebus,plugdev " 
+                    "-m tester")
+                    print "Remember to change password for new user tester."
+                    #os.system("passwd tester")
                     pwent = pwd.getpwnam("tester")
                 if not os.path.isdir(CACHEDIR):
+                    tgrp = grp.getgrnam("testers")
                     os.mkdir(CACHEDIR)
-                    os.chown(CACHEDIR, pwent.pw_uid, pwent.pw_gid)
+                    os.chown(CACHEDIR, pwent.pw_uid, tgrp.gr_gid)
                     os.chmod(CACHEDIR, 0770)
 
 

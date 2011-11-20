@@ -38,9 +38,9 @@ from pycopia.db import models
 
 from sqlalchemy.exc import IntegrityError
 
-GROUPS = "cron,audio,cdrom,video,games,postgres,usb,plugdev,testers"
+GROUPS = "cron,audio,cdrom,video,games,postgres,usb,plugdev,users"
 
-USERADD = 'useradd -c "%s %s" -g users -G %s -m %s'
+USERADD = 'useradd -c "%s %s" -g testers -G %s -m %s'
 NEWUSERS = "newusers %s"
 USERMOD = "usermod -G %s %s"
 
