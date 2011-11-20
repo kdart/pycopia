@@ -409,7 +409,7 @@ def do_default_environment(session):
     session.commit()
 
 def do_default_group(session):
-    session.add(models.create(models.Group, name="testing"))
+    session.add(models.create(models.Group, name="testers"))
     session.commit()
 
 def do_capability_groups(session):
