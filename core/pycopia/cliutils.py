@@ -272,7 +272,7 @@ def print_menu_list(clist, lines=LINES, columns=COLUMNS):
     h = max((len(clist)/2)+1, lines)
     i1, i2 = 1, h+1
     fmt = "{{:3d}}: {{:{cols}.{cols}}}".format(cols=columns-6)
-    if h != lines:
+    if h >= lines:
         fmt2 = "{{:3d}}: {{:{cols}.{cols}}} | {{:3d}}: {{:{cols}.{cols}}}".format(cols=(columns-14)/2)
     for c1, c2 in map(None, clist[:h], clist[h:]):
         if c2:
