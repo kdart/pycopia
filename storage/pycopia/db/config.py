@@ -80,13 +80,7 @@ class Container(object):
 
     def __getitem__(self, name):
         try:
-            item = self.session.query(Config).filter(and_(
-                    Config.parent_id==self.node.id,
-                    Config.name==name,
-                    Config.user==self._user,
-                    Config.testcase==self._testcase,
-                    Config.testsuite==self._testsuite,
-                )).one()
+            item = self.session.query(Config).filter(self._get_item_filter(name)).one()
         except NoResultFound:
             raise KeyError(name)
         if item.value is NULL:
@@ -152,20 +146,34 @@ class Container(object):
     def copy(self):
         return self.__class__(self.session, self.node)
 
-    def _get_user(self, node):
+    # Containers can be owned by a user. New containers created by a user are
+    # owned by the same user. If the superuser creates a new container it is
+    # not owned by anybody (set the ownership as a separate operation). Superuser
+    # can see all containers, but regular users only see their own containers.
+    # New containers created without a registered user inherit ownership from
+    # parent node.
+    # There might be some fancy SQL for all of this, but I'm better at Python than SQL. :[
+    def _get_user(self):
         if self._user:
             if self._user.is_superuser:
-                return node.user 
+                return None
             else:
                 return self._user
         else: #inherit
-            return node.user 
+            return self.node.user 
+
+    def _get_item_filter(self, name):
+        user = self._get_user()
+        if user is not None:
+            return and_(Config.name==name, Config.container==self.node, Config.user==user)
+        else:
+            return and_(Config.name==name, Config.container==self.node)
 
     def add_container(self, name):
         me = self.node
         if me.value is NULL:
             new = models.create(Config, name=name, value=NULL, container=me, 
-                    user=self._get_user(me),
+                    user=self._get_user(),
                     testcase=self._testcase or me.testcase, 
                     testsuite=self._testsuite or me.testsuite)
             self.session.add(new)
@@ -176,11 +184,7 @@ class Container(object):
             raise ConfigError("Cannot add container to value pair.")
 
     def get_container(self, name):
-        me = self.node
-        c = self.session.query(Config).filter(and_(
-                Config.name==name, 
-                Config.container==me, 
-                Config.user==self._get_user(me))).one()
+        c = self.session.query(Config).filter(self._get_item_filter(name)).one()
         if c.value is NULL:
             return Container(self.session, c,
                     user=self._user, testcase=self._testcase, testsuite=self._testsuite)
@@ -288,12 +292,14 @@ class Container(object):
 
     def register_user(self, username):
         if username is not None:
+            if self.node.id == 1:
+                raise ConfigError("Tried to register a user on root node.")
             if isinstance(username, basestring):
                 self._user = models.User.get_by_username(self.session, username)
             elif isinstance(username, models.User):
                 self._user = username
             else:
-                raise ValueError("Not a value user to register")
+                raise ValueError("{!r} is not a valid type of user to register.".format(username))
         else:
             self._user = None
 

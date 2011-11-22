@@ -352,7 +352,6 @@ class RootContainer(config.Container):
 
     def _build_userconfig(self):
         username = self.get("username") or os.environ["USER"]
-        self.register_user(username)
         try:
             cont = self.get_container(username)
         except config.NoResultFound:
@@ -663,7 +662,7 @@ if __name__ == "__main__":
     print env
     print "Supported roles:"
     print env.get_supported_roles()
-    #print env.get_role("testcontroller")
+    print env.get_role("testcontroller")
     #print env._get_DUT()
     #dut = env.DUT
     #print dut["default_role"]
