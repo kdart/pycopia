@@ -84,9 +84,9 @@ class RootContainer(config.Container):
                 raise AttributeError("RootContainer: No attribute or key '%s' found: %s" % (key, err))
 
     def __setattr__(self, key, obj):
-        if self.__class__.__dict__.has_key(key): # to force property access
+        if key in self.__class__.__dict__: # to force property access
             type.__setattr__(self.__class__, key, obj)
-        elif self.__dict__.has_key(key): # existing local attribute
+        elif key in self.__dict__: # existing local attribute
             self.__dict__[key] =  obj
         else:
             self.__dict__["_cache"].__setitem__(key, obj)
@@ -105,15 +105,15 @@ class RootContainer(config.Container):
         return super(RootContainer, self).__getitem__(key)
 
     def __setitem__(self, key, value):
-        if self._cache.has_key(key):
+        if key in self._cache:
             self._cache[key] = value
         else:
             return super(RootContainer, self).__setitem__(key, value)
 
     def __delitem__(self, key):
-        if self._cache.has_key(key):
+        try:
             del self._cache[key]
-        else:
+        except KeyError:
             super(RootContainer, self).__delitem__(key)
 
     def has_key(self, key):
@@ -662,7 +662,7 @@ if __name__ == "__main__":
     print env
     print "Supported roles:"
     print env.get_supported_roles()
-    print env.get_role("testcontroller")
+#    print env.get_role("testcontroller")
     #print env._get_DUT()
     #dut = env.DUT
     #print dut["default_role"]

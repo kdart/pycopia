@@ -89,7 +89,10 @@ class Container(object):
         return item.value
 
     def __delitem__(self, name):
-        item = self.__getitem__(name)
+        try:
+            item = self.session.query(Config).filter(self._get_item_filter(name)).one()
+        except NoResultFound:
+            raise KeyError(name)
         self.session.delete(item)
         self.session.commit()
 
