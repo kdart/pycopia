@@ -25,24 +25,18 @@ from pycopia import getopt
 from pycopia import module
 
 
-def get_module_list():
-    """Get list of test modules.
-
-    Used by user interfaces to select a module to run. All automated test
-    implementations are located in a base package called "testcases".
-
-    Returns:
-        A complete list of module names found in the "testcases" package, as
-        strings. This includes sub-packages.
-    """
+def choose_tests():
     try:
         import testcases
     except ImportError:
         logging.warn("Cannot find 'testcases' base package.")
-        return []
-
+        return None
+    from pycopia import UI
     from pycopia.QA import core
 
+    ui = UI.get_userinterface(themename="ANSITheme")
+    ui.printf("Select any number of runnable objects. %n"
+            "You can select %wmodules%N, %gUseCase%N objects, or single %yTest%N object.")
     # callback for testdir walker
     def filternames(flist, dirname, names):
         for name in names:
@@ -50,23 +44,68 @@ def get_module_list():
                 flist.append(os.path.join(dirname, name[:-3]))
     testhome = os.path.dirname(testcases.__file__)
     modnames = []
+    runnables = []
     os.path.walk(testhome, filternames, modnames)
     testhome_index = len(os.path.dirname(testhome)) + 1
-    names = map(lambda n: n[testhome_index:].replace("/", "."), modnames)
-    for name in names[:]:
+    modnames = map(lambda n: n[testhome_index:].replace("/", "."), modnames)
+    modnames.sort()
+    for modname in modnames:
         try:
-            mod = module.get_module(name)
+            mod = module.get_module(modname)
         except module.ModuleImportError:
-            names.remove(name)
+            ui.warning("  Warning: could not import '{}'".format(modname))
             continue
+        if getattr(mod, "run", None) is not None:
+            runnables.append(FormatWrapper(ui, modname, None, "%w%U%N"))
         for attrname in dir(mod):
             obj = getattr(mod, attrname)
-            if type(obj) is type and issubclass(obj, core.UseCase):
-                names.append(".".join([obj.__module__, obj.__name__]))
-        if getattr(mod, "run", None) is None:
-            names.remove(name)
-    names.sort()
-    return names
+            if type(obj) is type:
+                if issubclass(obj, core.UseCase):
+                    runnables.append(FormatWrapper(ui, modname, obj.__name__, "%U.%g%O%N"))
+                if issubclass(obj, core.Test):
+                    runnables.append(FormatWrapper(ui, modname, obj.__name__, "%U.%y%O%N"))
+    return [o.fullname for o in ui.choose_multiple(runnables, prompt="Select tests")]
+
+
+class FormatWrapper(object):
+    """Wrap module path object with a format. 
+
+    The format string should have an '%O' component that will be expanded to
+    the stringified object, and an '%U' component for the module name.
+    """
+    def __init__(self, ui, module, objname, format):
+        self._ui = ui
+        self.modname = module
+        self.name = objname
+        self._format = format
+
+    @property
+    def fullname(self):
+        if self.name:
+            return "{}.{}".format(self.modname, self.name)
+        else:
+            return self.modname
+
+    def __str__(self):
+        self._ui.register_format_expansion("O", self._str_name)
+        self._ui.register_format_expansion("U", self._str_module)
+        try:
+            return self._ui.format(self._format)
+        finally:
+            self._ui.unregister_format_expansion("O")
+            self._ui.unregister_format_expansion("U")
+
+    def _str_name(self, c):
+        return str(self.name)
+
+    def _str_module(self, c):
+        return str(self.modname)
+
+    def __len__(self):
+        return len(self.fullname)
+
+    def __cmp__(self, other):
+        return cmp(self.modname, other.modname)
 
 
 # not in a docstring since docstrings don't exist in optimize mode.
@@ -138,13 +177,9 @@ class TestRunnerInterface(object):
         self.runner.set_options(extraopts)
 
         if not args:
-            from pycopia import cliutils
-            l = get_module_list()
-            l.insert(0, None)
-            arg = cliutils.choose(l, prompt="Select test")
-            if arg is None:
-                return
-            args = [arg]
+            args = choose_tests()
+        if not args:
+            return
         objects, errors = module.get_objects(args)
         if errors:
             logging.error("Errors found while loading test object:")

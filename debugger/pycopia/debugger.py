@@ -155,7 +155,7 @@ class Debugger(bdb.Bdb):
         theme = DebuggerTheme("%GDebug%N> ")
         io = IO.ConsoleIO()
         self._ui = CLI.UserInterface(io, env=None, theme=theme)
-        self._ui.register_expansion("S", self._expansions)
+        self._ui.register_prompt_expansion("S", self._expansions)
 
     def _expansions(self, c):
         if c == "S": # current frame over total frames in backtrace

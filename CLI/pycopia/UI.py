@@ -43,7 +43,7 @@ except ImportError:
     PROMPT_START_IGNORE = ''
     PROMPT_END_IGNORE = ''
 
-from types import MethodType
+from types import MethodType, FunctionType
 
 class UIError(Exception):
     pass
@@ -240,13 +240,9 @@ class UserInterface(object):
         self._io.flush()
 
     def pprint(self, obj):
-        self._format(obj, 0, 0, {}, 0)
+        self._format(obj, 0, 0, set(), 0)
         self._io.write("\n")
         self._io.flush()
-
-    def printf(self, text):
-        "Print text run through the expansion formatter."
-        self.Print(self.format(text))
 
     def print_obj(self, obj, nl=1):
         if nl:
@@ -274,6 +270,10 @@ class UserInterface(object):
 
     def write(self, text):
         self._io.write(text)
+
+    def printf(self, text):
+        "Print text run through the expansion formatter."
+        self.Print(self.format(text))
 
     def error(self, text):
         self.printf("%%r%s%%N" % (text,))
@@ -376,15 +376,37 @@ class UserInterface(object):
         else:
             return None
 
-    def register_expansion(self, key, func):
-        """Register a percent-expansion function for the format method. The
+    def format_wrap(self, obj, formatstring):
+        return FormatWrapper(obj, self, formatstring)
+
+    def register_prompt_expansion(self, key, func):
+        """Register a percent-expansion function for the prompt format method. The
         function must take one argument, and return a string. The argument is
-        the character expanded on."""
+        the character expanded on.
+        """
         key = str(key)[0]
         if not key in self._PROMPT_EXPANSIONS:
             self._PROMPT_EXPANSIONS[key] = func
         else:
             raise ValueError("expansion key %r already exists." % (key, ))
+
+    def register_format_expansion(self, key, func):
+        """Register a percent-expansion function for the format method. The
+        function must take one argument, and return a string. The argument is
+        the character expanded on.
+        """
+        key = str(key)[0]
+        if key not in self._FORMAT_EXPANSIONS:
+            self._FORMAT_EXPANSIONS[key] = func
+        else:
+            raise ValueError("expansion key %r already exists." % (key, ))
+
+    def unregister_format_expansion(self, key):
+        key = str(key)[0]
+        try:
+            del self._FORMAT_EXPANSIONS[key]
+        except KeyError:
+            pass
 
     # FSM for prompt expansion
     def _initfsm(self):
@@ -549,10 +571,10 @@ class UserInterface(object):
             return
         rep = self._repr(obj, context, level - 1)
         typ = type(obj)
-        sepLines = len(rep) > (self._termwidth - 1 - indent - allowance)
+        sep_lines = len(rep) > (self._termwidth - 1 - indent - allowance)
         write = self._io.write
 
-        if sepLines:
+        if sep_lines:
             if typ is dict:
                 write('{\n  ')
                 length = len(obj)
@@ -597,6 +619,48 @@ class UserInterface(object):
 
     def _safe_repr(self, obj, context, maxlevels, level):
         return _safe_repr(obj, context, maxlevels, level)
+
+
+class FormatWrapper(object):
+    """Wrap any object with a format. 
+
+    The format string should have an '%O' component that will be expanded to
+    the stringified object given here.
+    """
+    def __init__(self, obj, ui, format):
+        self.value = obj
+        self._ui = ui
+        self._format = format
+
+    def __str__(self):
+        self._ui.register_format_expansion("O", self._str_value)
+        try:
+            return self._ui.format(self._format)
+        finally:
+            self._ui.unregister_format_expansion("O")
+
+    def _str_value(self, c):
+        return str(self.value)
+
+    def __len__(self):
+        return len(str(self.value))
+
+    def __repr__(self):
+        return _safe_repr(self.value, set(), None, 0)
+
+    def __cmp__(self, other):
+        if type(other) is FormatWrapper:
+            return cmp(self.value, other.value)
+        else:
+            return cmp(self.value, other)
+
+
+def safe_repr(value):
+    """Return a representational string of the given object. 
+
+    Large or recursive objects or detected and clipped.
+    """
+    return _safe_repr(value, set(), None, 0)
 
 # Return repr_string
 def _safe_repr(obj, context, maxlevels, level):
@@ -669,23 +733,35 @@ def _safe_repr(obj, context, maxlevels, level):
     if typ is MethodType:
         return method_repr(obj)
 
-    rep = repr(obj)
-    return rep
+    if typ is FunctionType:
+        return function_repr(obj)
+
+    return repr(obj)
 
 def _recursion(obj):
     return ("<Recursion on %s with id=%s>" % (type(obj).__name__, id(obj)))
 
-def safe_repr(value):
-    return _safe_repr(value, {}, None, 0)
-
 def method_repr(method):
     methname = method.im_func.func_name
     # formal names
-    varnames = list(method.im_func.func_code.co_varnames)[1:method.im_func.func_code.co_argcount]
+    varnames = list(method.im_func.func_code.co_varnames)[:method.im_func.func_code.co_argcount]
     if method.im_func.func_defaults:
         ld = len(method.im_func.func_defaults)
         varlist = [", ".join(varnames[:-ld]),
                    ", ".join(["%s=%r" % (n, v) for n, v in zip(varnames[-ld:], method.im_func.func_defaults)])]
+        return "%s(%s)" % (methname, ", ".join(varlist))
+    else:
+        return "%s(%s)" % (methname, ", ".join(varnames))
+
+def function_repr(func):
+    methname = func.func_name
+    # formal names
+    argcount = func.func_code.co_argcount
+    varnames = list(func.func_code.co_varnames)[:argcount]
+    if func.func_defaults:
+        ld = len(func.func_defaults)
+        varlist = varnames[:-ld]
+        varlist.extend(["%s=%r" % (n, v) for n, v in zip(varnames[-ld:], func.func_defaults)])
         return "%s(%s)" % (methname, ", ".join(varlist))
     else:
         return "%s(%s)" % (methname, ", ".join(varnames))
@@ -740,6 +816,8 @@ def _test(argv):
     ui.Print("Hello world!")
     inp = ui.user_input("Type something> ")
     ui.Print("You typed:", inp)
+    return ui
 
 if __name__ == "__main__":
-    _test(sys.argv)
+    ui = _test(sys.argv)
+
