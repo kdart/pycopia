@@ -57,15 +57,6 @@ class Controller(object):
         pass
 
 
-
-def reachable(target):
-    from pycopia import ping
-    pinger = ping.get_pinger()
-    res = pinger.reachable(target)
-    pinger.close()
-    return res[0][1]
-
-
 def register_controller(accessmethod, classpath):
     _CONTROLLERMAP[accessmethod] = classpath
 

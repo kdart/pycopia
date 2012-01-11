@@ -127,6 +127,7 @@ def get_pinger(retries=3, timeout=5, delay=0, size=64, hops=30, logfile=None):
     pinger.hops = hops
     return pinger
 
+
 def reachable_hosts(hostlist):
     """
 reachable_hosts(hostlist)
@@ -135,6 +136,14 @@ where <hostlist> is a list of host strings.
     pinger = get_pinger()
     res = pinger.reachable(hostlist)
     return map(lambda x: x[0], res)
+
+
+def reachable(target):
+    pinger = get_pinger()
+    res = pinger.reachable(target)
+    pinger.close()
+    return res[0][1]
+
 
 def scan_net(net):
     """
@@ -162,6 +171,7 @@ return a list of (ipaddr, time) tuples tracing a path to the given hostip.
             return tracelist
     return tracelist
 
+
 def ping(host, retries=3, timeout=5, delay=1, size=64, hops=30):
     pinger = get_pinger(retries, timeout, delay, size, hops)
     sum = 0
@@ -185,9 +195,6 @@ def ping(host, retries=3, timeout=5, delay=1, size=64, hops=30):
         print "%d packets transmitted, %d packets received, %d%% packet loss" % (Nxmit, Nrecv, 100-(Nxmit/Nrecv*100))
         print "round-trip min/avg/max = %d/%d/%d ms" % (_min, sum/Nrecv, _max)
 
-def reachable(*hosts):
-    pinger = get_pinger()
-    return pinger.reachable(*hosts)
 
 
 class RebootDetector(object):
