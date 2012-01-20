@@ -361,6 +361,7 @@ def do_Test(testinstance):
     else:
         if _FORCE:
             _dbsession.delete(dbcase)
+            _dbsession.commit()
             dbcase = create_TestCase(testinstance)
         else:
             update_TestCase(testinstance, dbcase)
@@ -380,6 +381,7 @@ def do_TestEntry(entry):
     else:
         if _FORCE:
             _dbsession.delete(dbcase)
+            _dbsession.commit()
             dbcase = create_TestCase(entry.inst)
         else:
             update_TestCase(entry.inst, dbcase)
@@ -412,6 +414,7 @@ def get_or_create_TestSuite(**kwargs):
     else:
         if _FORCE:
             _dbsession.delete(testsuite)
+            _dbsession.commit()
             testsuite = models.create(models.TestSuite, **kwargs)
             _dbsession.add(testsuite)
             _dbsession.commit()

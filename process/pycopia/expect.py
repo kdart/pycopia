@@ -401,11 +401,11 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
         while 1:
             c = self.read(1, timeout)
             if c == "":
-                return
+                raise ExpectError("EOF during read_until({!r}).".format(patt))
             buf += c
             i = buf.find(patt)
             if i >= 0:
-                return buf[:-len(patt)]
+                return buf[:i]
 
     def readline(self, timeout=None):
         return self.read_until("\n", timeout)

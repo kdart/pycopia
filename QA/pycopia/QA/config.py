@@ -332,6 +332,15 @@ class RootContainer(config.Container):
             raise config.ConfigError("Bad account identifier %r: %s" % (name, err))
         return acct.login, acct.password
 
+    def get_equipment(self, name):
+        """Get any equipment runtime from the configuration by name."""
+        db = self.session
+        try:
+            eqrow = db.query(models.Equipment).filter(models.Equipment.name.contains(name)).one()
+        except config.NoResultFound as err:
+            raise config.ConfigError("Bad equipment name %r: %s" % (name, err))
+        return EquipmentRuntime(eqrow, "unspecified", self.get_logfile(), db)
+
     # user-specific configuration variables.
     # user configuration is explicit, contained in this "userconfig" attribute,
     # which maps to a configuration container that has the same name as the
