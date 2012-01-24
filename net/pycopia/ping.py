@@ -205,10 +205,12 @@ class RebootDetector(object):
     2. Loop until target is not pingable.
     3. While target is not pingable, loop until it is pingable again.
 
-    The target must have recently initiated a reboot before this is called, and
-    still be pingable. Timing is important here.
+    The target may have recently initiated a reboot before this is called, and
+    still be pingable. Timing is important in this case.
 
-    Call the `go` method when you are ready to go.
+    Call the `go` method when you are ready to go. You may supply an optional
+    callback that will be called after the target is determined to be
+    reachable. This may initiate the actual reboot.
 
     May raise RebootDetectorError at any phase.
     """
@@ -224,7 +226,7 @@ class RebootDetector(object):
     def __del__(self):
         self._pinger.kill()
 
-    def go(self):
+    def go(self, callback=None):
         isreachable = False
         pinger = self._pinger
         state = RebootDetector.UNKNOWN
@@ -233,6 +235,8 @@ class RebootDetector(object):
                 host, isreachable = pinger.reachable(self._target)[0]
                 if isreachable:
                     state = RebootDetector.REACHABLE
+                    if callback is not None:
+                        callback()
                 else:
                     raise RebootDetectorError("Could not reach host initially.")
             elif state == RebootDetector.REACHABLE:
@@ -264,4 +268,53 @@ class RebootDetector(object):
             return self.go()
         except RebootDetectorError:
             return False
+
+
+class PoweroffDetector(object):
+    """Detect a power off of a remote device using "ping".
+
+    The following algorithm is used. 
+    1. Verify the target is pingable.
+    2. Call a callback method that may initiate a power off.
+    2. Loop until target is not pingable.
+
+    Call the `go` method when you are ready to go. You may supply an optional
+    callback that will be called after the target is determined to be
+    reachable. This may initiate the actual reboot.
+
+    May raise RebootDetectorError at any phase.
+    """
+    UNKNOWN = 0
+    REACHABLE = 1
+
+    def __init__(self, target, retries=30, timeout=5, delay=10, size=64, hops=30):
+        self._target = target
+        self._pinger = get_pinger(retries, timeout, delay, size, hops)
+
+    def __del__(self):
+        self._pinger.kill()
+
+    def go(self, callback=None):
+        isreachable = False
+        pinger = self._pinger
+        state = PoweroffDetector.UNKNOWN
+        while True:
+            if state == PoweroffDetector.UNKNOWN:
+                host, isreachable = pinger.reachable(self._target)[0]
+                if isreachable:
+                    state = PoweroffDetector.REACHABLE
+                    if callback is not None:
+                        callback()
+                else:
+                    raise RebootDetectorError("Could not reach host initially.")
+            elif state == PoweroffDetector.REACHABLE:
+                r_retries = pinger.retries
+                while isreachable:
+                    host, isreachable = pinger.reachable(self._target)[0]
+                    scheduler.sleep(pinger.delay)
+                    r_retries -= 1
+                    if r_retries == 0:
+                        raise RebootDetectorError("Target did not become unreachable in time.")
+                else:
+                    return True
 
