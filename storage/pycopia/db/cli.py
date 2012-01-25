@@ -196,6 +196,8 @@ class RowCommands(CLI.GenericCLI):
         _session.rollback()
         raise CLI.CommandQuit()
 
+    rollback = abort
+
 
 class SessionRowCommands(RowCommands):
 
@@ -250,7 +252,7 @@ class NetworkRowCommands(RowCommands):
 class RowWithAttributesCommands(RowCommands):
 
     def attrib(self, argv):
-        """attrib get|set|del|list name [value]
+        """attrib get|set|del|show|possible name [value]
     Get, set, delete an attribute. You can also list available attributes."""
         cmd = argv[1]
         if cmd.startswith("get"):
@@ -267,7 +269,7 @@ class RowWithAttributesCommands(RowCommands):
         elif cmd.startswith("show"):
             for attr in self._obj.attributes:
                 self._print(attr)
-        elif cmd.startswith("lis"):
+        elif cmd.startswith("pos"):
             self._print("Possible attributes:")
             for name, basetype in self._obj.__class__.get_attribute_list(_session):
                 self._print("   %s (%s)" % (name, basetype))
