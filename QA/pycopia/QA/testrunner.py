@@ -103,12 +103,13 @@ class TestRunner(object):
         May raise TestRunnerError if an object is not runnable by this test
         runner.
         """
+        testcases = []
         for obj in objects:
             objecttype = type(obj)
             if objecttype is ModuleType and hasattr(obj, "run"):
                 self.run_module(obj)
             elif objecttype is TypeType and issubclass(obj, core.Test):
-                self.run_test(obj)
+                testcases.append(obj)
             elif isinstance(obj, core.TestSuite):
                 self.run_object(obj)
             elif objecttype is type and hasattr(obj, "run"):
@@ -116,6 +117,8 @@ class TestRunner(object):
                 self.run_class(obj)
             else:
                 warnings.warn("%r is not a runnable object." % (obj,))
+        if testcases:
+            self.run_tests(testcases)
 
     def run_class(self, cls):
         """Run a container class inside a module.
@@ -240,6 +243,24 @@ class TestRunner(object):
 
         suite = core.TestSuite(self.config, name="%sSuite" % testclass.__name__)
         suite.add_test(testclass, *args, **kwargs)
+        return self.run_object(suite)
+
+    def run_tests(self, testclasses):
+        """Run a list of test classes.
+
+        Runs a list of test classes. Test classes are placed in a temporary
+        TestSuite.
+
+        Arguments:
+            testclasses:
+                A list of classes that are subclasses of core.Test. 
+
+        Returns:
+            The return value of the temporary TestSuite instance.
+        """
+
+        suite = core.TestSuite(self.config, name="RunTestsTempSuite")
+        suite.add_tests(testclasses)
         return self.run_object(suite)
 
     def _create_results_dir(self):
