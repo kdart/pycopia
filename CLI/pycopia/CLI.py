@@ -322,16 +322,15 @@ argument must match a name of a method.
     def printf(self, argv):
         """printf [<format>] <args>....
     Print the arguments according to the format, 
-    or all arguments if first is not a format string."""
-        if argv[1].find("%") >= 0:
-            try:
-                ns = vars(self._obj)
-            except:
-                ns = globals()
-            args, kwargs = breakout_args(argv[2:], ns)
-            self._print(str(argv[1]) % args)
-        else:
-            self._print(" ".join(argv[1:]))
+    or all arguments if first is not a format string. Format string has Python format syntax
+    ({} style expansions) combined with Pycopia UI expansions."""
+        fmt = argv[1]
+        try:
+            ns = vars(self._obj)
+        except:
+            ns = globals()
+        args, kwargs = breakout_args(argv[2:], ns)
+        self._ui.printf(fmt.format(*args, **kwargs))
 
     def exit(self, argv):
         """exit

@@ -471,6 +471,9 @@ class EquipmentModelRuntime(object):
             d[prop.type.name] = prop.value
         self._attributes = d
 
+    def __str__(self):
+        return "{} {}".format(self._attributes["manufacturer"], self._attributes["name"])
+
     def __getitem__(self, name):
         return self._attributes[name]
 
