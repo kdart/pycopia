@@ -568,11 +568,15 @@ argument must match a name of a method.
 
     def cycle(self, argv):
         """cycle <range> <command> [<arg>...]
-    Cycle the % variable through range, and re-evaluate the command for
-    each value.
+    Cycle the variable symbol % through the range, and re-evaluate the command
+    for each value.
     Range is of the form [start':']end[':' step]
-      Where start defaults to zero and step defaults to one.
-    Or, range is a list of values separated by ','."""
+    Where start defaults to zero and step defaults to one.
+    Or, range may be a list of values separated by ','.
+
+    Example:
+        > cycle 5 printf "This is {}" %
+    """
         argv.pop(0) # eat name
         rangetoken = argv.pop(0)
         argv = self._expand_aliases(argv)
@@ -706,7 +710,7 @@ def _get_rst_ui(fname, env):
     return ui
 
 def _rst_out(name, docstr):
-    return "\n{0}\n    {1}\n\n".format(name, docstr)
+    return "\n{0}\n    {1}\n".format(name, docstr)
 
 # This is needed to reset PagedIO so background events don't cause the pager to activate.
 class _RepeatWrapper(object):
