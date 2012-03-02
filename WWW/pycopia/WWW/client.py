@@ -883,3 +883,31 @@ class HTTPForm(dict):
         val = dict.__getitem__(self, key)
         return val[-1] # assumes one value with key name.
 
+
+class Client(object):
+
+    def __init__(self):
+        self._cookiejar = httputils.CookieJar()
+
+    def get(self, url, logfile=None, query=None):
+        headers = [httputils.Referer(url), httputils.Connection("keep-alive")]
+        request = HTTPRequest(url, method="GET", query=query, cookiejar=self._cookiejar, extraheaders=headers)
+        resp = request.perform(logfile)
+        if resp.status.code != 200:
+            raise RequestResponseError(str(resp.status))
+        self._cookiejar.parse_mozilla_lines(resp.cookielist)
+        return resp
+
+    def post(self, url, data, logfile=None):
+        request = HTTPRequest(url, data, method="POST", cookiejar=self._cookiejar)
+        resp = request.perform(logfile)
+        if resp.status.code != 200:
+            raise RequestResponseError(str(resp.status))
+        self._cookiejar.parse_mozilla_lines(resp.cookielist)
+        return resp
+
+    @property
+    def cookies(self):
+        return self._cookiejar.get_setcookies()
+
+
