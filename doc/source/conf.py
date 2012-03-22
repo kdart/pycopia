@@ -11,27 +11,32 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+#import sys, os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.append(os.path.abspath('.'))
 
-sys.path.append(os.path.abspath('sphinxext'))
+#sys.path.append(os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+
 extensions = [
     'sphinx.ext.autodoc', 
     'sphinx.ext.todo',
-    'matplotlib.sphinxext.only_directives',
-    'matplotlib.sphinxext.plot_directive',
-    'inheritance_diagram',
-    'numpydoc',
+    'sphinx.ext.inheritance_diagram',
+#    'matplotlib.sphinxext.only_directives',
+#    'matplotlib.sphinxext.plot_directive',
+#    'sphinx.ext.intersphinx', 
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary',
+#    'numpydoc',
 ]
+
 
 #apigen
 #ipython_console_highlighting
@@ -50,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Pycopia'
-copyright = u'2010, Keith Dart'
+copyright = u'2011, Keith Dart'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -78,7 +83,7 @@ release = '1.0'
 # for source files.
 #exclude_trees = []
 
-exclude_patterns - ['**/.svn']
+exclude_patterns = ['**/.svn']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -192,8 +197,7 @@ htmlhelp_basename = 'Pycopiadoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Pycopia.tex', u'Pycopia Documentation',
-   u'Keith Dart', 'manual'),
+  ('index', 'Pycopia.tex', u'Pycopia Documentation', u'Keith Dart', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

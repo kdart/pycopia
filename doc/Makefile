@@ -27,6 +27,9 @@ help:
 	@echo "  linkcheck to check all external links for integrity"
 	@echo "  doctest   to run all doctests embedded in the documentation (if enabled)"
 
+install: html
+	cp -af $(BUILDDIR)/html/* /var/www/localhost/htdocs/docs/
+
 clean:
 	-rm -rf $(BUILDDIR)/*
 
