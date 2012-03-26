@@ -28,7 +28,7 @@ import re
 from errno import EINTR
 
 from pycopia import scheduler
-from pycopia.aid import Enum
+from pycopia.stringmatch import compile_exact
 
 # matching types
 EXACT = 1 # string match (fastest)
@@ -36,165 +36,10 @@ GLOB = 2 # POSIX shell style match, but really uses regular expressions
 REGEX = 3 # slow but powerful RE match
 
 
-# error objects
 
 class ExpectError(Exception):
+    """Raised when the unexpected happens."""
     pass
-
-class ProtocolError(Exception):
-    pass
-
-
-# String "MatchObject" objects implement a subset of re.MatchObject objects.
-# This allows for a more consistent interface for the match types.  Since
-# string.find is about 10 times faster than an RE search with a plain string,
-# this should speed up expect matches in that case by about that much, while at
-# the same time keeping a consistent interface.
-
-class StringMatchObject(object):
-    def __init__(self, start, end, string, pos, endpos, re):
-        self._start = start
-        self._end = end
-        self.string = string
-        self.pos = pos
-        self.endpos = endpos
-        self.lastgroup = None
-        self.lastindex = None
-        self.re = re # not really an RE.
-
-    def __repr__(self):
-        return "{0}(start={1!r}, end={2!r}, string={3!r}, pos={4!r}, endpos={5!r}, re={6!r})".format(self.__class__.__name__, 
-                self._start, self._end, self.string, self.pos, self.endpos, self.re)
-
-    def expand(self, template):
-        raise NotImplementedError
-
-    def group(self, *args):
-        if args and args[0] == 0:
-            return self.string[self._start:self._end]
-        else:
-            raise IndexError("no such group")
-
-    def groups(self, default=None):
-        return ()
-
-    def groupdict(self, default=None):
-        return {}
-
-    def start(self, group=0):
-        if group == 0:
-            return self._start
-        else:
-            raise IndexError("no such group")
-
-    def end(self, group=0):
-        if group == 0:
-            return self._end
-        else:
-            raise IndexError("no such group")
-
-    def span(self, group=0):
-        if group == 0:
-            return self._start, self._end
-        else:
-            return -1, -1
-
-    def __nonzero__(self):
-        return 1
-
-# an object that looks like a compiled regular expression, but does exact
-# string matching. should be much faster in that case.
-class StringExpression(object):
-    def __init__(self, patt, flags=0):
-        self.pattern = patt
-        # bogus attributes to simulate compiled REs from re module.
-        self.flags = flags
-        self.groupindex = {}
-
-    def __repr__(self):
-        return "{0}(patt={1!r}, flags={2!r})".format(self.__class__.__name__, 
-                self.pattern, self.flags)
-
-    def search(self, text, pos=0, endpos=2147483647):
-        n = text.find(self.pattern, pos, endpos)
-        if n >= 0:
-            return StringMatchObject(n, n+len(self.pattern), text, pos, endpos, self)
-        else:
-            return None
-    match = search # match is same as search for strings
-
-    def split(self, text, maxsplit=0):
-        return text.split(self.pattern, maxsplit)
-
-    def findall(self, string, pos=0, endpos=2147483647):
-        rv = []
-        i = 0
-        while i >= 0:
-            i = string.find(self.pattern, i)
-            if i >= 0:
-                rv.append(self.pattern)
-        return rv
-
-    def finditer(self, string, pos=0, endpos=2147483647):
-        while 1:
-            mo = self.search(string, pos, endpos)
-            if mo:
-                yield mo
-            else:
-                return
-
-    def sub(self, repl, string, count=2147483647):
-        return string.replace(self.pattern, repl, count)
-
-    def subn(repl, string,  count=2147483647):
-        i = 0
-        N = 0
-        while i >= 0:
-            i = string.find(self.pattern, i)
-            if i >= 0:
-                N += 1
-        return string.replace(self.pattern, repl, count), N
-
-
-# factory function to "compile" EXACT patterns (which are strings)
-def compile_exact(string, flags=0):
-    return StringExpression(string, flags)
-
-# swiped from the fnmatch module for efficiency
-def glob_translate(pat):
-    """Translate a shell (glob style) pattern to a regular expression.
-    There is no way to quote meta-characters.
-    """
-    i, n = 0, len(pat)
-    res = ''
-    while i < n:
-        c = pat[i]
-        i = i+1
-        if c == '*':
-            res = res + '.*'
-        elif c == '?':
-            res = res + '.'
-        elif c == '[':
-            j = i
-            if j < n and pat[j] == '!':
-                j = j+1
-            if j < n and pat[j] == ']':
-                j = j+1
-            while j < n and pat[j] != ']':
-                j = j+1
-            if j >= n:
-                res = res + '\\['
-            else:
-                stuff = pat[i:j].replace('\\','\\\\')
-                i = j+1
-                if stuff[0] == '!':
-                    stuff = '^' + stuff[1:]
-                elif stuff[0] == '^':
-                    stuff = '\\' + stuff
-                res = '%s[%s]' % (res, stuff)
-        else:
-            res = res + re.escape(c)
-    return res + "$"
 
 
 class Expect(object):
@@ -560,7 +405,6 @@ through a filter function.  """
                 self.wait_for_prompt()
 
     def set_engine(self, engine):
-        assert isinstance(engine, StateMachine)
         self._engine = engine
 
     def step(self):
@@ -582,132 +426,39 @@ through a filter function.  """
                     break
 
 
-# for StateMachine
-ANY = compile_exact("")
-RESET = Enum(0, "RESET")
-
-# default transition
-def _error(mo):
-    raise ProtocolError('Symbol %r is undefined.' % (mo.string,))
-
-
-class StateMachine(object):
-    ANY = ANY # place here for easy access from other modules
-    RESET = RESET
-    def __init__(self, initial_state=RESET):
-        self._exact_transitions = {}
-        self._any_transitions = {}
-        self._re_transitions = {}
-        self.default_transition = (_error, initial_state)
-        self.initial_state = initial_state
-        self.reset()
-
-    def reset(self):
-        self.current_state = self.initial_state
-        self.stack = [] # primary stack
-        self.altstack = [] # alternate stack
-
-    #  stacks for user
-    def push(self, v):
-        self.stack.append(v)
-
-    def pop(self):
-        return self.stack.pop()
-
-    def pushalt(self, v):
-        self.altstack.append(v)
-
-    def popalt(self):
-        return self.altstack.pop()
-
-    # transition constructors
-    def set_default_transition(self, action, next_state):
-        self.default_transition = (action, next_state)
-
-    def add_exact(self, symbol, state, action, next_state):
-        if symbol is ANY:
-            self._any_transitions[state] = (action, next_state)
-        else:
-            cre = compile_exact(symbol)
-            self._exact_transitions[(symbol, state)] = (cre, action, next_state)
-
-    add = add_exact
-
-    # general add method that knows what you want. ;-)
-    def append(self, symbol, state, action, next_state):
-        if symbol is ANY:
-            self.add_any(state, action, next_state)
-        elif is_exact(symbol):
-            self.add_exact(symbol, state, action, next_state)
-        else:
-            self.add_regex(symbol, state, action, next_state)
-
-    def add_any(self, state, action, next_state):
-        self._any_transitions[state] = (action, next_state)
-
-    def add_glob(self, expression, state, action, next_state, flags=0):
-        self.add_regex(glob_translate(expression), 
-                                   state, action, next_state, flags=0)
-
-    def add_regex(self, expression, state, action, next_state, flags=0):
-        cre = re.compile(expression, flags)
-        try:
-            rel = self._re_transitions[state]
-        except IndexError:
-            rel = self._re_transitions[state] = []
-        rel.append((cre, action, next_state))
-
-    def add_list(self, expression_list, state, action, next_state):
-        for input_symbol in expression_list:
-            self.add_exact(input_symbol, state, action, next_state)
-
-    def step(self, symbol):
-        state = self.current_state
-        try:
-            mo, action, next = self._exact_transitions[(symbol, state)]
-            self.current_state = next
-            mo = cre.search(symbol)
-            if action:
-                action(mo)
-            return
-        except KeyError:
-            pass
-
-        try:
-            rel =  self._re_transitions[state]
-            for cre, action, next in rel:
-                mo = cre.search(symbol)
-                if mo:
-                    self.current_state = next
-                    if action:
-                        action(mo)
-                    return
-        except KeyError:
-            pass
-
-        try:
-            action, next =  self._any_transitions[state]
-            self.current_state = next
-            if action:
-                action(ANY.search(symbol))
-        except KeyError:
-            action, next = self.default_transition
-            self.current_state = next
-            if action:
-                action(ANY.search(symbol))
-
-    def run(self, exp):
-        self.reset()
-        while 1:
-            nexttok = exp.read_until(exp._prompt)
-            if nexttok:
-                self.step(nexttok)
+# swiped from the fnmatch module for efficiency
+def glob_translate(pat):
+    """Translate a shell (glob style) pattern to a regular expression.
+    There is no way to quote meta-characters.
+    """
+    i, n = 0, len(pat)
+    res = ''
+    while i < n:
+        c = pat[i]
+        i = i+1
+        if c == '*':
+            res = res + '.*'
+        elif c == '?':
+            res = res + '.'
+        elif c == '[':
+            j = i
+            if j < n and pat[j] == '!':
+                j = j+1
+            if j < n and pat[j] == ']':
+                j = j+1
+            while j < n and pat[j] != ']':
+                j = j+1
+            if j >= n:
+                res = res + '\\['
             else:
-                break
+                stuff = pat[i:j].replace('\\','\\\\')
+                i = j+1
+                if stuff[0] == '!':
+                    stuff = '^' + stuff[1:]
+                elif stuff[0] == '^':
+                    stuff = '\\' + stuff
+                res = '%s[%s]' % (res, stuff)
+        else:
+            res = res + re.escape(c)
+    return res + "$"
 
-
-def is_exact(pattern):
-    for c in pattern:
-        if c in ".^$*?+\\{}(),[]|":
-            return False
-    return True

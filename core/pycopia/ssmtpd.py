@@ -327,7 +327,7 @@ _listeners = {}
 
 # a singleton
 class SMTPListener(object):
-    def __init__(self, serverhost=None, port=9025, logfile=None, parser=None, forward25=YES):
+    def __init__(self, serverhost=None, port=9025, logfile=None, parser=None):
         # failsafe... check for multiple invocations
         global _listeners
         try:
@@ -340,7 +340,6 @@ class SMTPListener(object):
         self._logfile = logfile
         self._parser = parser
         self._server = None # use start()
-        self.forward25 = forward25
 
     def __del__(self):
         self.stop()

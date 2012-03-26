@@ -846,7 +846,7 @@ def test(argv):
     fromaddr = prompt("From")
     toaddrs  = prompt("To")
     mailhost  = prompt("mailhost")
-    print "Enter message, end with ^D:"
+    print "Enter message, end with empty line:"
     msg = 'From: %s\nTo: %s\nSubject: test message\n\n' % (fromaddr, toaddrs)
     while 1:
         line = raw_input("> ")
@@ -854,7 +854,7 @@ def test(argv):
             break
         msg = msg + line
     server = SMTP()
-    server.connect(mailhost, 25)
+    server.connect(mailhost, 9025)
     server.sendmail(fromaddr, toaddrs.split(","), msg)
     server.quit()
 
@@ -863,7 +863,6 @@ def test(argv):
 # Note: This always sends to localhost.
 if __name__ == '__main__':
     import sys
-    import timing 
     test(sys.argv)
 
 

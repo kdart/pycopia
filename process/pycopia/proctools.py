@@ -894,13 +894,13 @@ times the process will be respawned if the previous invocation dies.  """
             self.poller.clear()
             try:
                 rv = _method(*args, **kwargs)
-            except SystemExit, val:
-                rv = int(val)
+            except SystemExit as val:
+                rv = val.code
             except:
                 ex, val, tb = sys.exc_info()
                 try:
                     import traceback
-                    with open("/tmp/proctools_submethod.log", "w+") as errfile:
+                    with open("/tmp/" + _method.func_name + "_error.log", "w+") as errfile:
                         traceback.print_exception(ex, val, tb, None, errfile)
                 finally:
                     ex = val = tb = None

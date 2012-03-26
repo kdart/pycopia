@@ -588,7 +588,7 @@ def add2builtin(name, obj):
 def add_exception(excclass, name=None):
     """Add an exception to the builtins namespace."""
     name = name or excclass.__name__
-    bimod = sys.modules[_binname]
+    bimod = sys.modules[_biname]
     if not hasattr(bimod, name):
         setattr(bimod, name, excclass)
 
