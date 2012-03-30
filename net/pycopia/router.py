@@ -80,7 +80,7 @@ class ImpairmentsConfigurer(object):
         if es:
             return out
         else:
-            raise RouterConfigError((int(es), out))
+            raise RouterConfigError(int(es), out)
 
 
     def clear(self, interface):
@@ -107,13 +107,13 @@ class ImpairmentsConfigurer(object):
         >>> router.clear("eth1")
         """
         cmd = "tc qdisc del dev {0} root".format(interface)
-        es, out = self._perform(cmd)
-        if es:
-            return out
-        if int(es) == 2: # Indicates it was already clear, which is ok.
-            return out
-        else:
-            raise RouterConfigError((int(es), out))
+        try:
+            self._perform(cmd)
+        except RouterConfigError as rerr:
+            if rerr.args[0] == 2: # Indicates it was already clear, which is ok.
+                return
+            else:
+                raise
 
     def show(self, interface):
         r"""Get the current interface configuration.
