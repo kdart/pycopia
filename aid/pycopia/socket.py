@@ -110,7 +110,7 @@ class socket(_socket.socket):
         The semantics are similar too.  (XXX refactor to share code?)
         """
         for c in mode:
-            if c not in {"r", "w", "b"}:
+            if c not in ("r", "w", "b"):
                 raise ValueError("invalid mode %r (only r, w, b allowed)")
         writing = "w" in mode
         reading = "r" in mode or not writing
@@ -182,7 +182,7 @@ if hasattr(_socket, "socketpair"):
         return a, b
 
 
-_blocking_errnos = { EAGAIN, EWOULDBLOCK }
+_blocking_errnos = ( EAGAIN, EWOULDBLOCK )
 
 class SocketIO(io.RawIOBase):
 
@@ -361,6 +361,7 @@ def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT,
         raise error("getaddrinfo returns an empty list")
 
 
+
 class SafeSocket(socket):
     """A socket protected from interrupted system calls."""
     #accept = systemcall(socket.accept)
@@ -373,6 +374,133 @@ class SafeSocket(socket):
     # make the socket a little bit file-like by itself
     read = systemcall(socket.recv)
     write = systemcall(socket.send)
+
+
+class AsyncSocket(socket):
+    def __init__(self, family, type, proto=0):
+        super(AsyncSocket, self).__init__(family, type, proto)
+        self._state = CLOSED
+        self._buf = ""
+
+    def read(self, n=4096):
+        return self.recv(n)
+
+    # asyncio interface
+    def readable(self):
+        return True
+        #return self._state == CONNECTED
+
+    def writable(self):
+        return (self._state == CONNECTED) and bool(self._buf)
+
+    def priority(self):
+        return False
+
+    def socket_read(self):
+        if __debug__:
+            print("unhandled read", file=sys.stderr)
+
+    def write_handler(self):
+        self._send()
+        if __debug__:
+            print("unhandled read", file=sys.stderr)
+
+    def hangup_handler(self):
+        if __debug__:
+            print("unhandled hangup", file=sys.stderr)
+
+    def pri_handler(self):
+        if __debug__:
+            print("unhandled priority", file=sys.stderr)
+
+    def error_handler(self, ex, val, tb):
+        if __debug__:
+            print("unhandled error: %s (%s)"  % (ex, val), file=sys.stderr)
+
+    def handle_accept(self):
+        if __debug__:
+            print("unhandled accept", file=sys.stderr)
+
+    def handle_connect(self):
+        if __debug__:
+            print("unhandled connect", file=sys.stderr)
+
+    def read_handler(self):
+        if self._state == ACCEPTING:
+            # for an accepting socket, getting a read implies
+            # that we are connected
+            self._state = CONNECTED
+            self.handle_accept()
+        elif self._state == CLOSED:
+            self.handle_connect()
+            self._state = CONNECTED
+            self.read()
+        else:
+            self.read()
+
+    # socket methods
+    def listen(self, num):
+        self._state = ACCEPTING
+        return super(AsyncSocket, self).listen(num)
+
+    def bind(self, addr=INADDR_ANY):
+        self.addr = addr
+        return super(AsyncSocket, self).bind(addr)
+
+    def connect(self, address):
+        err = self.connect_ex(address)
+        if err in (EINPROGRESS, EALREADY, EWOULDBLOCK):
+            return
+        if err in (0, EISCONN):
+            self.addr = address
+            self._state = CONNECTED
+            self.handle_connect()
+        else:
+            raise SocketError(err)
+
+    def accept(self):
+        try:
+            sa = super(AsyncSocket, self).accept()
+        except SocketError as why:
+            if why[0] == EWOULDBLOCK:
+                pass
+            else:
+                raise SocketError(why)
+        return sa
+
+    def recv(self, amt, flags=0):
+        while 1:
+            try:
+                next = super(AsyncSocket, self).recv(amt, flags)
+            except SocketError as why:
+                if why[0] == EINTR:
+                    continue
+                else:
+                    raise
+            else:
+                break
+        return next
+
+    def _send(self, flags=0):
+        while 1:
+            try:
+                sent = super(AsyncSocket, self).send(self._buf[:4096], self._sendflags)
+            except SocketError as why:
+                if why[0] == EINTR:
+                    continue
+                else:
+                    raise
+            else:
+                self._buf = self._buf[sent:]
+                break
+        return sent
+
+    # fake the send and let the asyncio handler deal with it
+    def send(self, data, flags=0):
+        self._buf += data
+        self._sendflags = flags
+        return len(data)
+
 
 
 def opentcp(host, port, sobject=SafeSocket):
