@@ -65,7 +65,11 @@ import atexit
 from pprint import pprint
 from inspect import *
 from dis import dis, distb
-from importlib import import_module
+try:
+    from importlib import import_module
+except ImportError: # older python
+    from pycopia.module import get_module as import_module
+
 
 try:
     import rlcompleter2
@@ -159,7 +163,7 @@ else:
 del env
 
 PYTHON = os.environ.get("PYTHONBIN", sys.executable) # set PYTHONBIN for alternate interpreter
-sys.ps1 = os.environ.get("PYPS1", "Python{0}> ".format(sys.version_info.major))
+sys.ps1 = os.environ.get("PYPS1", "Python{0}> ".format(sys.version_info[0]))
 sys.ps2 = os.environ.get("PYPS2", "more...> ")
 
 

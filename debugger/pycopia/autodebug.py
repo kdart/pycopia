@@ -25,7 +25,7 @@ import sys
 
 debugger_hook = sys.__excepthook__
 
-if sys.platform == "win32" or sys.version_info.major == 3:
+if sys.platform == "win32" or sys.version_info[0] == 3:
     def debugger_hook(exc, value, tb):
         if (not hasattr(sys.stderr, "isatty") or
             not sys.stderr.isatty() or exc in (SyntaxError, IndentationError, KeyboardInterrupt)):

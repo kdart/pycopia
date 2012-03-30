@@ -130,7 +130,6 @@ class ProcStat(object):
                 self.uid, self.gid = self._get_uid()
                 self.ttyname = self._get_ttyname_linux()
             except IOError: # no such process
-                self.pid = None
                 self.stats = None
                 self.cmdline = None
                 self.ttyname = None
