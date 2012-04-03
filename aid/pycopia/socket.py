@@ -106,15 +106,10 @@ class socket(_socket.socket):
         """makefile(...) -> an I/O stream connected to the socket
 
         The arguments are as for io.open() after the filename,
-        except the only mode characters supported are 'r', 'w' and 'b'.
-        The semantics are similar too.  (XXX refactor to share code?)
         """
-        for c in mode:
-            if c not in ("r", "w", "b"):
-                raise ValueError("invalid mode %r (only r, w, b allowed)")
-        writing = "w" in mode
-        reading = "r" in mode or not writing
-        assert reading or writing
+        writing = "w" in mode or "+" in mode
+        reading = "r" in mode or (writing and "+" in mode) or not writing
+        assert reading or writing, "Must either read or write, or both."
         binary = "b" in mode
         rawmode = ""
         if reading:
@@ -247,13 +242,15 @@ class SocketIO(io.RawIOBase):
         """
         self._checkClosed()
         self._checkWritable()
-        try:
-            return self._sock.send(b)
-        except error as e:
-            # XXX what about EINTR?
-            if e.args[0] in _blocking_errnos:
-                return None
-            raise
+        while 1:
+            try:
+                return self._sock.send(b)
+            except error as e:
+                if e.args[0] == EINTR:
+                    continue
+                if e.args[0] in _blocking_errnos:
+                    return None
+                raise
 
     def readable(self):
         """True if the SocketIO is open for reading.
@@ -364,16 +361,13 @@ def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT,
 
 class SafeSocket(socket):
     """A socket protected from interrupted system calls."""
-    #accept = systemcall(socket.accept)
+    accept = systemcall(socket.accept)
     recv = systemcall(socket.recv)
     send = systemcall(socket.send)
     sendall = systemcall(socket.sendall)
     connect = systemcall(socket.connect)
     listen = systemcall(socket.listen)
     bind = systemcall(socket.bind)
-    # make the socket a little bit file-like by itself
-    read = systemcall(socket.recv)
-    write = systemcall(socket.send)
 
 
 class AsyncSocket(socket):

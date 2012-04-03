@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 # 
-#    Copyright (C) 1999-2007  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,22 +15,19 @@
 
 
 """
-Generic server builder for creating custom protocols.
-
+Generic server builder for creating networked client-server protocols that are
+text based.
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
+
 import sys
-from cStringIO import StringIO
 
 from pycopia import socket
-from pycopia import expect # the Expect object can be used to build any FSM.
-
-
-class ServerExit(EnvironmentError):
-    pass
-
-class ClientExit(EnvironmentError):
-    pass
+from pycopia import protocols
 
 
 
@@ -48,8 +45,7 @@ class ForkingModel(ProcessModel):
         self.pwent = pwent
 
     def __call__(self, func, args=None, kwargs=None):
-        self._procmanager.submethod(func, 
-                         args=args or (), kwargs=kwargs or {}, pwent=pwent)
+        self._procmanager.submethod(func, args=args or (), kwargs=kwargs or {}, pwent=self.pwent)
 
 
 class ThreadProcessModel(ProcessModel):
@@ -63,53 +59,11 @@ class ThreadProcessModel(ProcessModel):
         t.start()
 
 
-class Protocol(object):
-    def __init__(self):
-        self.states = expect.StateMachine()
-        self.exp = None
-        self.initialize()
-
-    def initialize(self):
-        """Fill this in with state transitions."""
-        pass
-
-    def set_expect(self, exp):
-        assert issubclass(exp, expect.Expect)
-        self.exp = exp
-
-    def run(self, exp):
-        states = self.states
-        states.reset()
-        try:
-            while 1:
-                next = exp.read_until()
-                if next:
-                    states.step(next)
-                else:
-                    break
-        finally:
-            self.exp = None
-
-    def handle_read(self):
-        next = self.exp.read_until()
-        states.step(next)
-
-# XXX
-
-class DefaultProtocol(Protocol):
-
-    def initialize(self):
-        states = self.states
-        states.set_default_transition(self._error, states.RESET)
-
-    def _error(self, mo):
-        print >>sys.stderr, "Error: symbol: %s, from: %s" % (mo.string, 
-                                                      self.states.current_state)
-
-
 # worker classes for servers:
 
 class BaseWorker(object):
+    PORT = None
+    PATH = None
     def __init__(self, sock, addr, protocol):
         self._sock = sock
         self.address = addr
@@ -119,8 +73,16 @@ class BaseWorker(object):
         self.send = sock.send
         self.recv = sock.recv
 
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        if self._sock:
+            self._sock.close()
+            self._sock = None
+
     def __call__(self):
-        raise NotImplementedError("override in subclass")
+        raise NotImplementedError("Worker objects should be callable. override in subclass.")
 
     def initialize(self):
         pass
@@ -131,105 +93,61 @@ class BaseWorker(object):
 
 class StreamWorker(BaseWorker):
     EOL="\n"
-    # Worker objects must be callable so the subprocess method can invoke it.
     def __call__(self):
-        fo = self._sock.makefile("w+", 1)
-        exp = expect.Expect(fo, prompt=self.EOL)
+        fo = self._sock.makefile("w+b", 0)
         self.initialize()
-        self.run(exp)
+        rv = self.run(fo)
         self.finalize()
         fo.flush() 
         fo.close()
-        self._sock.close()
+        return rv
 
-    def run(self, exp):
+    def run(self, stream):
         try:
-            self.protocol.run(exp)
-        except ServerExit:
+            self.protocol.run(stream)
+        except protocols.ProtocolExit:
             return True
-        except ProtocolError:
-            return False
 
 
 # datagram workers:
 
 class DatagramWorker(BaseWorker):
     def __call__(self, data):
-        self.protocol.reset()
         self.initialize()
         self.run(data)
         self.finalize()
 
-    def sendto(self, data, flags=0):
-        return self._sock.sendto(data, flags, self.address)
-
-    def step(self):
-        next = self._sock.recv(4096)
-        if next:
-            self.protocol.step(next)
-            return True
-        return False
-
-    def run(self, data):
-        self.protocol.step(data)
-        try:
-            while 1:
-                if not self.step():
-                    break
-        except ServerExit:
-            return True
-        except ProtocolError:
-            return False
 
 
-### real worker classes you can specify:
+### Real worker classes you can use.
 class TCPWorker(StreamWorker):
-    port = None
+    pass
 
 class UDPWorker(DatagramWorker):
-    port = None
+    pass
 
 class UnixStreamWorker(StreamWorker):
-    PATH = "/tmp/_UnixStream"
+    pass
 
 class UnixDatagramWorker(DatagramWorker):
-    PATH = "/tmp/_UnixDatagram"
+    pass
 
 ### server objects:
 
 class Server(object):
     """Base class for all servers."""
+    PORT = None # define in subclass
 
     def fileno(self):
         return self._sock.fileno()
 
+    def __del__(self):
+        self.close()
 
-class TCPServer(Server):
-    def __init__(self, workerclass, protocol, port=None, host="", 
-                  processmodel=None, debug=False):
-        if port is None:
-            port = workerclass.port
-        self._procmanager = processmodel or ForkingModel()
-        self.workerclass = workerclass
-        self.engine = protocol
-        self.debug = debug
-        self._sock = socket.tcp_listener((host, port), 5)
-        if debug:
-            global debugger
-            from pycopia import debugger
-
-    def accept(self):
-        conn, addr = self._sock.accept()
-        worker = self.workerclass(conn, addr, self.engine)
-        if self.debug:
-            try:
-                worker()
-            except:
-                ex, val, tb = sys.exc_info()
-                debugger.post_mortem(tb, ex, val)
-        else:
-            self._procmanager(worker)
-        conn.close()
+    def close(self):
+        if self._sock:
+            self._sock.close()
+            self._sock = None
 
     def run(self):
         try:
@@ -239,23 +157,29 @@ class TCPServer(Server):
             return
 
 
-class UDPServer(Server):
-    def __init__(self, workerclass, port=None, host="", debug=False):
-        if port is None:
-            port = workerclass.port
-        self._sock = socket.udp_listener((host, port))
-        self.workerclass = workerclass
-        self.debug = debug
-        if debug:
-            global debugger
-            from pycopia import debugger
-
-    def __del__(self):
-        self._sock.close()
+class StreamServer(Server):
 
     def accept(self):
+        conn, addr = self._sock.accept()
+        worker = self.workerclass(conn, addr, self.protocol)
+        try:
+            if self.debug:
+                try:
+                    return worker()
+                except:
+                    ex, val, tb = sys.exc_info()
+                    debugger.post_mortem(tb, ex, val)
+            else:
+                self._procmanager(worker)
+        finally:
+            conn.close()
+
+
+class DatagramServer(Server):
+
+    def accept(self): # TODO test this
         data, addr = self._sock.recvfrom(4096)
-        worker = self.workerclass(self._sock, addr)
+        worker = self.workerclass(self._sock, addr, self.protocol)
         if self.debug:
             try:
                 worker(data)
@@ -265,285 +189,178 @@ class UDPServer(Server):
         else:
             worker(data)
 
-    def run(self):
-        try:
-            while 1:
-                self.accept()
-        except ServerExit, val:
-            return val
 
-class UnixStreamServer(Server):
-    def __init__(self, workerclass, path=None, processmodel=None, debug=False):
-        if path is None:
-            path = workerclass.PATH
+class TCPServer(StreamServer):
+    PORT = None
+    def __init__(self, workerclass, protocol, port=None, host=None, 
+                  processmodel=None, debug=False):
+        port = port or workerclass.PORT or self.PORT
+        host = host or ""
+        self._procmanager = processmodel or ForkingModel()
+        self.workerclass = workerclass
+        self.protocol = protocol
+        self.debug = debug
+        self._sock = socket.tcp_listener((host, port), 5)
+        if debug:
+            global debugger
+            from pycopia import debugger
+
+
+class UDPServer(DatagramServer):
+    PORT = None
+    def __init__(self, workerclass, protocol, port=None, host=None, debug=False):
+        port = port or workerclass.PORT or self.PORT
+        host = host or ""
+        self._sock = socket.udp_listener((host, port))
+        self.workerclass = workerclass
+        self.protocol = protocol
+        self.debug = debug
+        if debug:
+            global debugger
+            from pycopia import debugger
+
+
+class UnixStreamServer(StreamServer):
+    PATH = "/tmp/_UnixStream"
+    def __init__(self, workerclass, protocol, path=None, processmodel=None, debug=False):
+        path = path or workerclass.PATH or self.PATH
         self._sock = socket.unix_listener(path)
         self.workerclass = workerclass
+        self.protocol = protocol
         self._procmanager = processmodel or ForkingModel()
         self.debug = debug
         if debug:
             global debugger
             from pycopia import debugger
 
-    def accept(self):
-        conn, addr = self._sock.accept()
-        worker = self.workerclass(conn, addr)
-        if self.debug:
-            try:
-                worker()
-            except:
-                ex, val, tb = sys.exc_info()
-                debugger.post_mortem(tb, ex, val)
-        else:
-            self._procmanager(worker)
-        conn.close()
 
-    def run(self):
-        try:
-            while 1:
-                self.accept()
-        except KeyboardInterrupt:
-            return
-
-class UnixDatagramServer(Server):
+class UnixDatagramServer(DatagramServer):
     PATH = "/tmp/_UnixDatagram"
-    def __init__(self, workerclass, path=None, debug=False):
-        if path is None:
-            path = self.PATH
+    def __init__(self, workerclass, protocol, path=None, debug=False):
+        path = path or workerclass.PATH or self.PATH
         self._sock = socket.udp_listener((host, port))
         self.workerclass = workerclass
+        self.protocol = protocol
         self.debug = debug
         if debug:
             global debugger
             from pycopia import debugger
 
-    def __del__(self):
-        self._sock.close()
 
 ### Client side base classes ###
 
-class BaseClient(object):
+class _BaseClient(object):
+
     def __del__(self):
         self.close()
 
     def close(self):
         if self._sock:
-            self.finalize()
             self._sock.close()
             self._sock = None
-    
-    # override this to set up your protocol
-    def initialize(self):
-        fsm = self.fsm
-        fsm.set_default_transition(self._error, fsm.RESET)
-
-    def finalize(self):
-        pass
-
-    def _error(self, s, fsm):
-        print >>sys.stderr, "bad transition symbol and state: %s, %s" % (s, fsm.current_state)
-
-    def step(self):
-        next = self.getnext()
-        if next:
-            self.fsm.step(next)
-            return True
-        return False
 
     def run(self):
         try:
-            while 1:
-                if not self.step():
-                    break
-        except ClientExit, val:
-            return val
+            self.protocol.run(self)
+        except protocols.ProtocolExit:
+            return True
 
-class StreamClient(BaseClient):
+
+class _StreamClient(_BaseClient):
     EOL = "\n"
-    def __init__(self, sock, logfile=None):
-        self._sock = sock
-        self.fsm = expect.Expect(self._sock, prompt=self.EOL, logfile=logfile)
-        self.initialize()
-
-    def getnext(self):
-        return self.fsm.read_until()
-
-    def send(self, data):
-        self._sock.sendall(data)
-
-    def recv(self, N, flags=0):
-        return self._sock.recv(N, flags)
-
-class DatagramClient(BaseClient):
-    def __init__(self, sock, logfile=None):
-        global fsm
-        from pycopia import fsm
-        self._sock = sock
-        self.fsm = fsm.FSM()
+    def __init__(self, sock, protocol, logfile=None):
+        self._sock = sock.makefile("w+b", 0)
+        self.protocol = protocol
         self._logfile = logfile
-        self.initialize()
 
-    def getnext(self):
-        data = self._sock.recv(4096)
+    def readline(self):
+        data = self._sock.readline()
         if self._logfile:
-            self.logfile.write(data)
+            self._logfile.write(data)
         return data
 
-    def send(self, data):
+    def read(self, n):
+        data = self._sock.read(n)
         if self._logfile:
-            self.logfile.write(data)
-        self._sock.send(data)
-
-    def recv(self, amt=4096):
-        data = self._sock.recv(amt)
-        if self._logfile:
-            self.logfile.write(data)
+            self._logfile.write(data)
         return data
 
+    def write(self, data):
+        if self._logfile:
+            self._logfile.write(data)
+        return self._sock.write(data)
 
-class TCPClient(StreamClient):
-    port = None
-    def __init__(self, host, port=None, logfile=None):
-        if port is None:
-            port = self.port
+
+
+class _DatagramClient(_BaseClient):
+    def __init__(self, sock, protocol, logfile=None):
+        self._sock = sock
+        self.protocol = protocol
+        self._logfile = logfile
+
+    def readline(self):
+        data, addr = self._sock.recvfrom(4096)
+        if self._logfile:
+            self._logfile.write(data)
+        return data
+
+    def write(self, data):
+        return self._sock.send(data)
+
+
+class TCPClient(_StreamClient):
+    """A client side of a TCP protocol."""
+    PORT = 9999
+    def __init__(self, host, protocol, port=None, logfile=None):
+        self._sock = None
+        port = port or self.PORT
         sock = socket.connect_tcp(host, port)
-        super(TCPClient, self).__init__(sock, logfile)
+        super(TCPClient, self).__init__(sock, protocol, logfile)
 
 
-class UnixStreamClient(StreamClient):
+class UnixStreamClient(_StreamClient):
+    """A client side of a UNIX socket protocol."""
     PATH = "/tmp/_UnixStream"
-    def __init__(self, path, logfile=None):
+    def __init__(self, protocol, path=None, logfile=None):
+        self._sock = None
         if path is None:
             path = self.PATH
         sock = socket.connect_unix(path)
-        super(UnixStreamClient, self).__init__(sock, logfile)
+        super(UnixStreamClient, self).__init__(sock, protocol, logfile)
 
 
-class UDPClient(DatagramClient):
-    port = None
-    def __init__(self, host, port=None, logfile=None):
-        if port is None:
-            port = self.port
+class UDPClient(_DatagramClient):
+    """A client side of a UDP protocol."""
+    PORT = 9999
+    def __init__(self, host, protocol, port=None, logfile=None):
+        self._sock = None
+        port = port or self.PORT
         sock = socket.connect_udp(host, port)
-        super(UDPClient, self).__init__(sock, logfile)
+        super(UDPClient, self).__init__(sock, protocol, logfile)
 
-class UnixDatagramClient(DatagramClient):
+
+class UnixDatagramClient(_DatagramClient):
+    """A client side of a UNIX datagram protocol."""
     PATH = "/tmp/_UnixDatagram"
-    def __init__(self, path=None, logfile=None):
+    def __init__(self, protocol, path=None, logfile=None):
+        self._sock = None
         if path is None:
             path = self.PATH
         sock = socket.connect_unix_datagram(path)
-        super(UnixDatagramClient, self).__init__(sock, logfile)
+        super(UnixDatagramClient, self).__init__(sock, protocol, logfile)
 
 
 
-### a simple echo server and client for testing purposes ####
-class EchoWorker(TCPWorker):
-    port = 8123
-    def run(self):
-        s = self._sock
-        s.send("%s\n" % (self.address,))
-        try:
-            while 1:
-                data = s.recv(1024)
-                if not data: 
-                    break
-                s.send(data)
-        finally:
-            s.close()
-
-class UDPEchoWorker(UDPWorker):
-    port = 8123
-    def run(self, data):
-        self._sock.sendto(data, self.address)
-        try:
-            while 1:
-                data = self._sock.recv(4096)
-                if not data:
-                    break
-                self._sock.sendto(data, self.address)
-        except KeyboardInterrupt:
-            pass
-
-
-# sample client
-class EchoClient(TCPClient):
-    port = 8123
-    def run(self):
-        try:
-            try:
-                print self._sock.recv(1024)
-                while 1:
-                    line = raw_input("> ")
-                    self._sock.send(line)
-                    data = self._sock.recv(2048)
-                    if not data:
-                        break
-                    else:
-                        print data
-            except KeyboardInterrupt:
-                pass
-        finally:
-            self._sock.close()
-
-class UDPEchoClient(UDPClient):
-    port = 8123
-    def run(self):
-        try:
-            try:
-                while 1:
-                    line = raw_input("> ")
-                    self._sock.send(line)
-                    data = self._sock.recv(2048)
-                    if not data:
-                        break
-                    else:
-                        print data
-            except KeyboardInterrupt:
-                pass
-        finally:
-            self._sock.close()
-
-
-# simple hello-bye protocol for unit testing.
-class TestServer(TCPWorker):
-    port = 8134
+class DefaultProtocol(protocols.Protocol):
+    """Default and example of constructing a protcol."""
 
     def initialize(self):
-        fsm = self.fsm
-        fsm.set_default_transition(self._error, fsm.RESET)
-        fsm.add_transition(fsm.ANY, fsm.RESET, self._start, 1)
-        fsm.add_transition("GREETINGS", 1, None, 2)
-        fsm.add_transition("BYE", 2, self._bye, fsm.RESET)
-        fsm.step(fsm.ANY) # kickstart the protocol
+        states = self.states
+        states.set_default_transition(self._error, states.RESET)
 
-    def _start(self, s, fsm):
-        print "Sending HELLO"
-        fsm.writeln("HELLO")
+    def _error(self, matchobject):
+        print ("Error: symbol: %s, from: %s" % (matchobject.string, self.states.current_state), file=sys.stderr)
 
-    def _bye(self, s, fsm):
-        print "Sending BYE"
-        fsm.writeln("BYE")
-        raise ServerExit
-
-
-class TestClient(TCPClient):
-    port = 8134
-
-    def initialize(self):
-        fsm = self.fsm
-        fsm.set_default_transition(self._error, fsm.RESET)
-        fsm.add_transition("HELLO", fsm.RESET, self._greet, 1)
-        fsm.add_transition("BYE", 1, self._bye, fsm.RESET)
-
-    def _greet(self, s, fsm):
-        print "Sending GREETINGS"
-        fsm.writeln("GREETINGS")
-        print "Sending BYE"
-        fsm.writeln("BYE") # cheat here just to keep things moving 
-
-    def _bye(self, s, fsm):
-        print "in BYE"
-        raise ClientExit, 0
 
 # helper to import a named object
 def _get_module(name):
@@ -553,10 +370,10 @@ def _get_module(name):
         mod = getattr(mod, comp)
     return mod
 
-# Generic object getters. Use the module.class path name as the name string.
-def get_client(name, dest, port=None, logfile=None):
-    """Give the pathname of a Client subclass, and destination address. This
-    will return a client connected to destination."""
+def get_client(name, dest, protocol, port=None, logfile=None):
+    """Factory function for getting a proper client object.
+    Provide the name of the client class, proper destination addrss, and protcol object.
+    """
     if type(name) is str:
         parts = name.split(".")
         mod = _get_module(".".join(parts[:-1]))
@@ -564,13 +381,23 @@ def get_client(name, dest, port=None, logfile=None):
     elif type(name) is type:
         clientclass = name
     else:
-        raise ValueError, "invalid object for 'name' parameter: %s" % (name,)
-    assert issubclass(clientclass, BaseClient), "need BaseClient type"
-    return clientclass(dest, port=port, logfile=logfile)
+        raise ValueError("invalid object for 'name' parameter: %s" % (name,))
+    assert issubclass(clientclass, _BaseClient), "need some Client type"
+    assert isinstance(protocol, protocols.Protocol), "need protocol type"
+    if issubclass(clientclass, TCPClient):
+        return clientclass(dest, protocol, port=port, logfile=logfile)
+    if issubclass(clientclass, UnixStreamClient):
+        return clientclass(protocol, path=dest, logfile=logfile)
+    if issubclass(clientclass, UDPClient):
+        return clientclass(dest, protocol, port=port, logfile=logfile)
+    if issubclass(clientclass, UnixDatagramClient):
+        return clientclass(protocol, path=dest, logfile=logfile)
 
-def get_server(name, debug=False):
-    """Give the pathname of a worker class. This will return the
-    appropriate type of server for it.
+
+def get_server(name, protocol, host=None, port=None, path=None, debug=False):
+    """General factory for server worker.
+    Give the pathname of a worker class object. 
+    Returns the appropriate type of server for it.
     """
     if type(name) is str:
         parts = name.split(".")
@@ -579,18 +406,18 @@ def get_server(name, debug=False):
     elif type(name) is type:
         workerclass = name
     else:
-        raise ValueError, "invalid object for 'name' parameter: %s" % (name,)
+        raise ValueError("invalid object for 'name' parameter: %s" % (name,))
     assert issubclass(workerclass, BaseWorker), "need BaseWorker type"
     if issubclass(workerclass, TCPWorker):
-        srv = TCPServer(workerclass, workerclass.port, debug=debug)
+        srv = TCPServer(workerclass, protocol, port=port, host=host, debug=debug)
     elif issubclass(workerclass, UDPWorker):
-        srv = UDPServer(workerclass, workerclass.port, debug=debug)
+        srv = UDPServer(workerclass, protocol, port=port, host=host, debug=debug)
     elif issubclass(workerclass, UnixStreamWorker):
-        srv = UnixStreamServer(workerclass, workerclass.PATH, debug=debug)
+        srv = UnixStreamServer(workerclass, protocol, path=path, debug=debug)
     elif issubclass(workerclass, UnixDatagramWorker):
-        srv = UnixDatagramServer(workerclass, workerclass.PATH, debug=debug)
+        srv = UnixDatagramServer(workerclass, protocol, path=path, debug=debug)
     else:
-        raise ValueError, "get_server: Could not get server"
+        raise ValueError("get_server: Could not get server")
     return srv
 
 

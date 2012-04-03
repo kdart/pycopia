@@ -44,23 +44,6 @@ from pycopia.measure import Counters
 
 class NetTests(unittest.TestCase):
 
-#    def test_tcpserver(self):
-#        """Test basic client server."""
-#        srv = clientserver.TCPServer(clientserver.EchoWorker)
-##        srv.run()
-#
-#    def test_tcpclient(self):
-#        ec = clientserver.EchoClient("localhost")
-##        ec.run()
-#
-#    def test_udpserver(self):
-#        srv = clientserver.UDPServer(clientserver.UDPEchoWorker)
-##        srv.run()
-#
-#    def test_udpclient(self):
-#        srv = clientserver.UDPEchoClient("localhost")
-##        srv.run()
-
     def test_ping(self):
         """Run a ping."""
         self.assert_(bool(ping.reachable("localhost")))

@@ -30,9 +30,11 @@ from pycopia.aid import Enum
 
 
 class ProtocolExit(Exception):
+    """Raise when the protocol completes."""
     pass
 
 class ProtocolError(Exception):
+    """Raise when the protocol transition is invalid."""
     pass
 
 
@@ -76,47 +78,6 @@ class StateMachine(object):
     def popalt(self):
         return self.altstack.pop()
 
-    # transition constructors
-    def set_default_transition(self, action, next_state):
-        self.default_transition = (action, next_state)
-
-    def add_exact(self, symbol, state, action, next_state):
-        if symbol is ANY:
-            self._any_transitions[state] = (action, next_state)
-        else:
-            cre = compile_exact(symbol)
-            self._exact_transitions[(symbol, state)] = (cre, action, next_state)
-
-    add = add_exact
-
-    # general add method that knows what you want. ;-)
-    def append(self, symbol, state, action, next_state):
-        if symbol is ANY:
-            self.add_any(state, action, next_state)
-        elif is_exact(symbol):
-            self.add_exact(symbol, state, action, next_state)
-        else:
-            self.add_regex(symbol, state, action, next_state)
-
-    def add_any(self, state, action, next_state):
-        self._any_transitions[state] = (action, next_state)
-
-    def add_glob(self, expression, state, action, next_state, flags=0):
-        self.add_regex(glob_translate(expression), 
-                                   state, action, next_state, flags=0)
-
-    def add_regex(self, expression, state, action, next_state, flags=0):
-        cre = re.compile(expression, flags)
-        try:
-            rel = self._re_transitions[state]
-        except IndexError:
-            rel = self._re_transitions[state] = []
-        rel.append((cre, action, next_state))
-
-    def add_list(self, expression_list, state, action, next_state):
-        for input_symbol in expression_list:
-            self.add_exact(input_symbol, state, action, next_state)
-
     def step(self, symbol):
         state = self.current_state
         try:
@@ -153,6 +114,42 @@ class StateMachine(object):
             if action:
                 action(ANY.search(symbol))
 
+    # transition constructors
+    def set_default_transition(self, action, next_state):
+        self.default_transition = (action, next_state)
+
+    def add_exact(self, symbol, state, action, next_state):
+        cre = compile_exact(symbol)
+        self._exact_transitions[(symbol, state)] = (cre, action, next_state)
+
+    # general add method that knows what you want. ;-)
+    def add(self, symbol, state, action, next_state):
+        if symbol is ANY:
+            self._any_transitions[state] = (action, next_state)
+        elif is_exact(symbol):
+            self.add_exact(symbol, state, action, next_state)
+        else:
+            self.add_regex(symbol, state, action, next_state)
+
+    def add_any(self, state, action, next_state):
+        self._any_transitions[state] = (action, next_state)
+
+    def add_glob(self, expression, state, action, next_state, flags=0):
+        self.add_regex(glob_translate(expression), 
+                                   state, action, next_state, flags=0)
+
+    def add_regex(self, expression, state, action, next_state, flags=0):
+        cre = re.compile(expression, flags)
+        try:
+            rel = self._re_transitions[state]
+            rel.append((cre, action, next_state))
+        except KeyError:
+            self._re_transitions[state] = [(cre, action, next_state)]
+
+    def add_list(self, expression_list, state, action, next_state):
+        for input_symbol in expression_list:
+            self.add_exact(input_symbol, state, action, next_state)
+
 
 def is_exact(pattern):
     for c in pattern:
@@ -163,11 +160,21 @@ def is_exact(pattern):
 
 
 class Protocol(object):
+    EOL = "\n"
 
-    def __init__(self):
+    def __init__(self, eol=None):
         self.states = StateMachine()
         self.iostream = None
+        self.eol = eol or self.EOL
         self.initialize(self.states)
+
+    def __str__(self):
+        if self.iostream is None:
+            return "Protocol: fsm: {}. current: {}, Not running.".format(
+                    self.states, self.states.current_state)
+        else:
+            return "Protocol: fsm: {}, current: {}, iostream: {}".format(
+                    self.states, self.states.current_state, self.iostream)
 
     def run(self, iostream):
         states = self.states
@@ -182,44 +189,50 @@ class Protocol(object):
                 else:
                     break
         finally:
-            self.iostream = None
+            pass
+            #self.iostream = None
+
+    def close(self):
+        self.states = None
+        self.iostream = None
 
     def initialize(self, states):
         """Fill this in with state transitions."""
-        return NotImplemented
+        raise NotImplementedError
 
     def start(self):
         return NotImplemented
 
+    def reset(self):
+        self.states.reset()
 
-def _test(argv):
+    def writeln(self, data):
+        self.iostream.write(data + self.eol)
+
+
+if __name__ == "__main__":
+    from pycopia import autodebug
     from pycopia import IO
 
     class TestProtocol(Protocol):
 
         def initialize(self, fsm):
             fsm.set_default_transition(self._error, fsm.RESET)
-            fsm.append("GREETINGS\n", fsm.RESET, self._bye, 2)
-            fsm.append(fsm.ANY, 2, self._bye, fsm.RESET)
+            fsm.add("GREETINGS\n", fsm.RESET, self._bye, 2)
+            fsm.add(fsm.ANY, 2, self._bye, fsm.RESET)
 
         def start(self):
-            self.iostream.write("HELLO type GREETINGS\n")
+            self.writeln("HELLO type GREETINGS")
 
         def _bye(self, match):
-            self.iostream.write("BYE\n")
+            self.writeln("BYE")
             raise ProtocolExit
 
         def _error(self, match):
-            self.iostream.write("ERROR\n")
+            self.writeln("ERROR")
 
     proto = TestProtocol()
     try:
         proto.run(IO.ConsoleIO())
     except ProtocolExit:
         print("exited")
-
-if __name__ == "__main__":
-    from pycopia import autodebug
-    import sys
-    _test(sys.argv)
-

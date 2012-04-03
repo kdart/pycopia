@@ -900,7 +900,14 @@ times the process will be respawned if the previous invocation dies.  """
                 ex, val, tb = sys.exc_info()
                 try:
                     import traceback
-                    with open("/tmp/" + _method.func_name + "_error.log", "w+") as errfile:
+                    try:
+                        fname = _method.func_name
+                    except AttributeError:
+                        try:
+                            fname = _method.__class__.__name__
+                        except AttributeError:
+                            fname = str(_method)
+                    with open("/tmp/" + fname + "_error.log", "w+") as errfile:
                         traceback.print_exception(ex, val, tb, None, errfile)
                 finally:
                     ex = val = tb = None
