@@ -26,6 +26,7 @@ name-value pairs (mappings).
 import re
 
 from sqlalchemy import and_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 
 from pycopia.db import models
@@ -179,8 +180,12 @@ class Container(object):
                     user=self._get_user(),
                     testcase=self._testcase or me.testcase, 
                     testsuite=self._testsuite or me.testsuite)
-            self.session.add(new)
-            self.session.commit()
+            try:
+                self.session.add(new)
+                self.session.commit()
+            except IntegrityError as err:
+                self.session.rollback()
+                raise ConfigError(str(err))
             return Container(self.session, new,
                     user=self._user, testcase=self._testcase, testsuite=self._testsuite)
         else:

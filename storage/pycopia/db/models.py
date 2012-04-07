@@ -1458,6 +1458,16 @@ class Config(object):
             self.user = user
             session.commit()
 
+    def get_child(self, session, name):
+        session.query(Config).filter
+
+        q = session.query(Config).filter(and_( Config.container==self, Config.name==name))
+        try:
+            return q.one()
+        except NoResultFound:
+            raise ModelError("No sub-node %r set." % (name,))
+
+
 mapper(Config, tables.config, 
     properties={
         'children': relationship(Config, cascade="all", 

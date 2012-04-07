@@ -815,10 +815,17 @@ class CreateCommands(CLI.BaseCommands):
 class ConfigCommands(CLI.BaseCommands):
 
     def ls(self, argv):
-        """ls
+        """ls [subcontainer]
     Show container."""
-        for ch in self._obj.children:
-            self._print("  ", ch)
+        name = argv[1] if len(argv) > 1 else None
+        if name is None:
+            for ch in self._obj.children:
+                self._print("  ", ch)
+        else:
+            subobj = self._obj.get_child(_session, name)
+            for ch in subobj.children:
+                self._print("  ", ch)
+
 
     def chdir(self, argv):
         """chdir/cd <container>
@@ -847,7 +854,28 @@ class ConfigCommands(CLI.BaseCommands):
     Make a new container here."""
         name = argv[1]
         container = config.Container(_session, self._obj, user=_user)
-        cont = container.add_container(name)
+        try:
+            cont = container.add_container(name)
+        except config.ConfigError as err:
+            self._ui.error(err)
+
+    def move(self, argv):
+        """move <name> <newlocation>
+    Move an entry to another location."""
+        name = argv[1]
+        newlocation = argv[2]
+        row = self._get(name)
+        if row is not None:
+            if newlocation == "..":
+                newcontainer = self._obj.container
+            else:
+                newcontainer = _session.query(models.Config).filter(and_(
+                        models.Config.name==newlocation,
+                        models.Config.container==self._obj)).one()
+            row.container = newcontainer
+            _session.commit()
+            _session.expire_all()
+
 
     def set(self, argv):
         """set [-t <type>] <name> <value>
@@ -893,6 +921,7 @@ class ConfigCommands(CLI.BaseCommands):
         if row is not None:
             _session.delete(row)
             _session.commit()
+            _session.expire_all()
             self._print("%r deleted." % (name,))
         else:
             self._ui.error("No such item: %r." % (name,))
@@ -1354,10 +1383,11 @@ def get_root(session):
                 models.Config.name==_user.username,
                 models.Config.container==root)).scalar()
         if newroot is None:
-            container = config.Container(session, root)
-            container.register_user(_user)
-            newroot = container.add_container(_user.username)
-            return newroot.node
+            raise config.ConfigError("No user container. Superuser account should add one.")
+            #container = config.Container(session, root)
+            #container.register_user(_user)
+            #newroot = container.add_container(_user.username)
+            #return newroot.node
         elif newroot.value is NULL:
             return newroot
         else:
