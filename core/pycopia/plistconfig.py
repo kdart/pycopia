@@ -34,6 +34,7 @@ class AutoAttrDict(dict):
     """
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
+        self.__dict__["_dirty"] = False
 
     def __getstate__(self):
         return self.__dict__.items()
@@ -45,7 +46,23 @@ class AutoAttrDict(dict):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, dict.__repr__(self))
 
+    def __str__(self):
+        s = []
+        if self:
+            for key in self:
+                val = self[key]
+                if isinstance(val, AutoAttrDict):
+                    s.append("{:>18.18s}=[AutoAttrDict()]".format(key))
+                else:
+                    s.append("{:>18.18s}={!r}".format(key, val))
+        else:
+            s.append("{[empty]}")
+        if self.__dict__["_dirty"]:
+            s.append("  (modified)")
+        return "\n".join(s)
+
     def __setitem__(self, key, value):
+        self.__dict__["_dirty"] = True
         return super(AutoAttrDict, self).__setitem__(key, value)
 
     def __getitem__(self, name):
@@ -57,10 +74,12 @@ class AutoAttrDict(dict):
             return d
 
     def __delitem__(self, name):
+        self.__dict__["_dirty"] = True
         return super(AutoAttrDict, self).__delitem__(name)
 
     __getattr__ = __getitem__
     __setattr__ = __setitem__
+    __delattr__ = __delitem__
 
     def copy(self):
         return AutoAttrDict(self)
@@ -83,8 +102,15 @@ class AutoAttrDict(dict):
             i = len(value)
             value += tail
 
+    def add_container(self, name):
+        d = AutoAttrDict()
+        super(AutoAttrDict, self).__setitem__(name, d)
+        self.__dict__["_dirty"] = True
+        return d
+
     def tofile(self, path_or_file):
         write_config(self, path_or_file)
+        reset_modified(self)
 
 
 _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
@@ -110,6 +136,21 @@ def write_config_to_string(conf):
 def write_config(conf, path_or_file):
     """Write a property list config file."""
     plistlib.writePlist(conf, path_or_file)
+
+def is_modified(conf):
+    if conf.__dict__["_dirty"]:
+        return True
+    for value in conf.itervalues():
+        if isinstance(value, AutoAttrDict):
+            if is_modified(value):
+                return True
+    return False
+
+def reset_modified(conf):
+    conf.__dict__["_dirty"] = False
+    for value in conf.itervalues():
+        if isinstance(value, AutoAttrDict):
+            reset_modified(value)
 
 
 def get_config(filename=None, init=None):
@@ -144,11 +185,19 @@ if __name__ == "__main__":
     assert cf.parts.program.flags.flagname == 2
     assert cf.parts.program.path == "$BASE/program"
     assert cf.parts.expand(cf.parts.program.path) == "bin/program"
+    assert is_modified(cf) == False
     cf.parts.program.flags.flagname = 3
     assert cf.parts.program.flags.flagname == 3
+    assert is_modified(cf) == True
     cf.tofile("/tmp/testplist.plist")
+    assert is_modified(cf) == False
     del cf
     cf = read_config("/tmp/testplist.plist")
     assert cf.parts.program.flags.flagname == 3
-
+    assert is_modified(cf) == False
+    del cf.parts.program.flags.flagname
+    assert len(cf.parts.program.flags) == 0
+    assert len(cf.parts.program["flags"]) == 0
+    assert is_modified(cf) == True
+    assert cf.parts.program.flags is cf.parts.program["flags"]
 
