@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 # $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -136,7 +136,7 @@ argument must match a name of a method.
         self._ui.error("%s (%s)" % (ex, val))
 
     # override this if your subcommand passes something useful back
-    # via a parameter to the CommandQuit exception. 
+    # via a parameter to the CommandQuit exception.
     def handle_subcommand(self, value):
         pass
 
@@ -306,7 +306,7 @@ argument must match a name of a method.
     #
     def debug(self, argv):
         """debug ["on"|"off"]
-    Enables debugging for CLI code. 
+    Enables debugging for CLI code.
     Enters the debugger if an exception occurs."""
         global _DEBUG
         if len(argv) > 1:
@@ -321,7 +321,7 @@ argument must match a name of a method.
 
     def printf(self, argv):
         """printf [<format>] <args>....
-    Print the arguments according to the format, 
+    Print the arguments according to the format,
     or all arguments if first is not a format string. Format string has Python format syntax
     ({} style expansions) combined with Pycopia UI expansions."""
         fmt = argv[1]
@@ -720,7 +720,7 @@ class _RepeatWrapper(object):
         self.args = args
     def __call__(self):
         apply(self.meth, self.args)
-        self.io.read(0) 
+        self.io.read(0)
 
 def globargv(argv):
     if len(argv) > 2:
@@ -844,7 +844,7 @@ class DictCLI(BaseCommands):
     Show mapping items."""
         for name, val in self._obj.items():
             self._print("%25.25r: %s" % (name, safe_repr(val)))
-        
+
     def pop(self, argv):
         """pop <key>
     Pops the given key from the mapping."""
@@ -854,7 +854,7 @@ class DictCLI(BaseCommands):
         self._print("Popped: ", repr(obj))
         self._reset_scopes()
         return obj
-    
+
     def length(self, argv):
         """length
     Display the length of this mapping object."""
@@ -864,7 +864,7 @@ class ListCLI(BaseCommands):
     """Wrap a list-like object and edit it."""
     def initialize(self):
         self._environ["PS1"] = "List> "
-    
+
     def show(self, argv):
         """show
     Display list contents."""
@@ -987,7 +987,7 @@ methods/commands that correspond to the wrapped objects methods.  """
         args, kwargs = breakout_args(argv[1:], vars(self._obj))
         rv = apply(meth, args, kwargs)
         self._print(rv)
-    
+
     def _reset_scopes(self):
         names = filter(lambda n: not n.startswith("__"), dir(self._obj))
         self.add_completion_scope("show", names)
@@ -1225,10 +1225,10 @@ def get_generic_cmd(obj, ui, cliclass=GenericCLI, aliases=None, gbl=None):
             mh = MethodHolder(obj_meth)
             doc = "%s  *\n%s" % (mh, obj_meth.__doc__ or "")
             code = cliclass._generic_call.func_code
-            nc = new.code(code.co_argcount, code.co_nlocals, code.co_stacksize, 
-                code.co_flags, code.co_code, 
+            nc = new.code(code.co_argcount, code.co_nlocals, code.co_stacksize,
+                code.co_flags, code.co_code,
                 (doc,)+code.co_consts[1:], # replace docstring
-                code.co_names, code.co_varnames, code.co_filename, 
+                code.co_names, code.co_varnames, code.co_filename,
                 code.co_name, code.co_firstlineno, code.co_lnotab)
             f = new.function(nc, gbl, name)
             m = new.instancemethod(f, cmd, cliclass)
@@ -1331,7 +1331,7 @@ class CommandParser(object):
         self._buf = ""
         if newcmd:
             self.push_command(newcmd)
-    
+
     commands = property(lambda s: s._cmd, None, None)
 
     def push_command(self, newcmd):
@@ -1345,11 +1345,13 @@ class CommandParser(object):
 
     def pop_command(self, returnval=None):
         cmd = self._cmds.pop()
-        cmd.finalize()
+        upval = cmd.finalize()
+        if upval is None:
+            upval = returnval
         if self._cmds:
             self._cmd = self._cmds[-1]
-            if returnval:
-                self._cmd.handle_subcommand(returnval)
+            if upval is not None:
+                self._cmd.handle_subcommand(upval)
         else:
             raise CommandQuit("last command object quit.")
 
@@ -1404,7 +1406,7 @@ class CommandParser(object):
         if self._logfile:
             self._logfile.write(text)
         text = self._buf + text
-        i = 0 
+        i = 0
         for c in text:
             i += 1
             try:
@@ -1424,7 +1426,7 @@ class CommandParser(object):
 
     def initialize(self):
         """initializer.
-        
+
         Responsible for setting self._fsm to a parser FSM implementing the
         CLI syntax.
         """
@@ -1440,7 +1442,7 @@ class CommandParser(object):
         f.add_transition("\\", 3, None, 6)
         f.add_transition(ANY, 1, self._slashescape, 0)
         f.add_transition(ANY, 6, self._slashescape, 3)
-        # vars 
+        # vars
         f.add_transition("$", 0, self._startvar, 7)
         f.add_transition("{", 7, self._vartext, 9)
         f.add_transition_list(self.VARCHARS, 7, self._vartext, 7)
