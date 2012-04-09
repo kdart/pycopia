@@ -48,7 +48,7 @@ ModelMetaApp.prototype.dbFillSidebar = function(modelnames) {
  *
  */
 function dbTableInfo(modelname) {
-  var heading = ["Type", "Colname", "Default", "Many2Many", "nullable", "Uselist", "Collection"]; 
+  var heading = ["Name", "Type", "Default", "Many2Many", "nullable", "Uselist", "Collection"]; 
   var d = window.db.get_table_metadata(modelname);
   d.addCallback( function (info) {
       var tbl = TABLE(null,

@@ -339,8 +339,10 @@ CountrySetApp.prototype._draggableLI = function(id, text) {
  */
 CountrySetApp.prototype.createCountrySet = function() {
   var newname = window.prompt("Name for new CountrySet?", "new_countryset");
-  var d = window.db.create(this.model.name, {name: newname});
-  d.addCallback(bind(this._createHandler, this, newname));
+  if (newname !== null) {
+    var d = window.db.create(this.model.name, {name: newname});
+    d.addCallback(bind(this._createHandler, this, newname));
+  }
 };
 
 CountrySetApp.prototype._createHandler = function(newname, csid) {
