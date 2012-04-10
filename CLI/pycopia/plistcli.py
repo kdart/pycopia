@@ -87,14 +87,20 @@ class ConfigCommands(CLI.BaseCommands):
         optlist, longoptdict, args = self.getopt(argv, "t:")
         for opt, optarg in optlist:
             if opt == "-t":
-                tval = eval(optarg, {}, {})
-                if type(tval) is not type:
-                    self._ui.error("Bad type.")
+                try:
+                    tval = eval(optarg, {}, {})
+                except:
+                    self._ui.error("Bad type. Use a valid Python type name.")
                     return
+                if type(tval) is not type:
+                    self._ui.error("Bad type. Use a valid Python type name.")
+                    return
+        if len(args) < 2:
+            raise CLI.CLISyntaxError("Need a name and value.")
         try:
-            value = tval(*tuple(args[1:]))
+            value = tval(*args[1:])
         except TypeError as terr:
-            self._ui.error(err)
+            self._ui.error(terr)
             return
         name = args[0]
         self._obj[name] = value
@@ -103,7 +109,7 @@ class ConfigCommands(CLI.BaseCommands):
     def delete(self, argv):
         """delete <name>
     Delete the named configuration item. The deleted item is saved and can be
-    undeleted here or in a different container."""
+    undeleted here or in a different subcontainer."""
         name = argv[1]
         try:
             obj = self._obj[name]

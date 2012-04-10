@@ -1,6 +1,6 @@
 #!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 # $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -16,12 +16,12 @@
 #    Lesser General Public License for more details.
 
 """
-Classes and functions for controlling, reading, and writing to co-processes. 
+Classes and functions for controlling, reading, and writing to co-processes.
 
 """
 
 import sys, os
-from signal import signal, pause 
+from signal import signal, pause
 from signal import SIGCHLD, SIGTERM, SIGSTOP, SIGCONT, SIGHUP, SIG_DFL, SIGINT
 from errno import EINTR, EBADF, ECHILD, EAGAIN, EIO
 
@@ -109,7 +109,7 @@ class Process(object):
 
     def getlog(self):
         return self._log
-    
+
     def removelog(self):
         self._log = None
 
@@ -122,7 +122,7 @@ class Process(object):
     def flushlog(self):
         if self._log:
             self._log.flush()
-    
+
     def clone(self, env=None):
         """clone([newenv])
 Spawns a copy of this process. Note that the log file is not inherited."""
@@ -227,7 +227,7 @@ ProcManager uses this."""
         self._errbuf = self._errbuf[amt:]
         return data
 
-# extra fileobject methods. 
+# extra fileobject methods.
     def readline(self, amt=2147483646):
         if amt < 0:
             amt = 2147483646
@@ -291,7 +291,7 @@ ProcManager uses this."""
     def _unread(self, data):
         self._buf = data + self._buf
 
-    # just fill local buffer. 
+    # just fill local buffer.
     def _read_fill(self):
         try:
             data = self._read(16384)
@@ -399,7 +399,7 @@ class ProcessPipe(Process):
     def isatty(self):
         return os.isatty(self._p_stdin)
 
-    def fileno(self): 
+    def fileno(self):
         if self._p_stdout is None:
             raise ValueError, "I/O operation on closed process"
         return self._p_stdout
@@ -480,7 +480,7 @@ class ProcessPty(Process):
     Forks and execs a process as given by the command line argument. The
     process's stdio is connected to this instance via a pty, and can be read
     and written to by the instances read() and write() methods. That pty
-    becomes the processes controlling terminal. 
+    becomes the processes controlling terminal.
 
     """
     def __init__(self, cmdline, logfile=None, env=None, callback=None, merge=1, pwent=None, async=False, devnull=False):
@@ -601,7 +601,7 @@ class ProcessNamedPipe(Process):
 
 
 class CoProcessPty(ProcessPty):
-    def __init__(self, method, logfile=None, env=None, 
+    def __init__(self, method, logfile=None, env=None,
                     callback=None, async=False, pwent=None):
         Process.__init__(self, "python: %s" % (method.func_name,), logfile, callback, async)
         pid, self._fd = os.forkpty()
@@ -612,7 +612,7 @@ class CoProcessPty(ProcessPty):
 
 
 class CoProcessPipe(ProcessPipe):
-    def __init__(self, method, logfile=None, env=None, 
+    def __init__(self, method, logfile=None, env=None,
                     callback=None, merge=False, async=False, pwent=None):
         Process.__init__(self, "python <=> %s" % (method.func_name,), logfile, callback, async)
 
@@ -662,7 +662,7 @@ class SubProcess(Process):
 # XXX need a more general pipeline
 class ProcessPipeline(ProcessPipe):
     """Connects two commands via a pipe, they appear as one process object."""
-    def __init__(self, cmdline, logfile=None,  env=None, callback=None, 
+    def __init__(self, cmdline, logfile=None,  env=None, callback=None,
                     merge=None, pwent=None, async=False, devnull=None):
         assert cmdline.count("|") == 1
         [cmdline1, cmdline2] = cmdline.split("|")
@@ -711,7 +711,7 @@ class ProcessPipeline(ProcessPipe):
         for i in xrange(3, 256):
             try:
                 os.close(i)
-            except: 
+            except:
                 pass
         if env:
             os.execvpe(cmd[0], cmd, env)
@@ -742,13 +742,13 @@ class ExitStatus(object):
 
     def exited(self):
         return self.state == 1
-    
+
     def stopped(self):
         return self.state == 2
-    
+
     def signalled(self):
         return self.state == 3
-    
+
     def __int__(self):
         if self.state == 1:
             return self._status
@@ -792,7 +792,7 @@ to get the instance.  """
         self.poller = asyncio.get_poller()
         self.poll = self.poller.poll # delegate poll method
         signal(SIGCHLD, _child_handler)
-    
+
     def __len__(self):
         return len(self._procs)
 
@@ -801,17 +801,17 @@ to get the instance.  """
         for p in self.getprocs():
             s.append(str(p))
         return "\n".join(s)
-    
-    def spawnprocess(self, pklass, cmd, logfile=None, env=None, callback=None, 
+
+    def spawnprocess(self, pklass, cmd, logfile=None, env=None, callback=None,
                 persistent=False, merge=True, pwent=None, async=False, devnull=False):
-        """spawnclass(classobj, cmd, logfile=None, env=None, callback=None, persistent=0) 
+        """spawnclass(classobj, cmd, logfile=None, env=None, callback=None, persistent=0)
 Start a child process using a user supplied subclass of ProcessPty or
 ProcessPipe.  """
 
         if persistent and (callback is None):
             callback = self._persistent_callback
         signal(SIGCHLD, SIG_DFL) # critical area
-        proc = pklass(cmd, logfile=logfile, env=env, callback=callback, 
+        proc = pklass(cmd, logfile=logfile, env=env, callback=callback,
                     merge=merge, pwent=pwent, async=async, devnull=devnull)
         self._procs[proc.childpid] = proc
         # XXX need a more general pipeline
@@ -822,7 +822,7 @@ ProcessPipe.  """
             self.poller.register(proc)
         return proc
 
-    def spawnpipe(self, cmd, logfile=None, env=None, callback=None, 
+    def spawnpipe(self, cmd, logfile=None, env=None, callback=None,
                     persistent=False, merge=True, pwent=None, async=False, devnull=False):
         """spawn(cmd, logfile=None, env=None, callback=None, persisten=None)
 Start a child process, connected by pipes."""
@@ -830,18 +830,18 @@ Start a child process, connected by pipes."""
             klass = ProcessPipeline
         else:
             klass = ProcessPipe
-        return self.spawnprocess(klass, cmd, logfile, env, callback, 
+        return self.spawnprocess(klass, cmd, logfile, env, callback,
                     persistent, merge, async, devnull)
 
     # default spawn method
     spawn = spawnpipe
 
-    def spawnpty(self, cmd, logfile=None, env=None, callback=None, 
+    def spawnpty(self, cmd, logfile=None, env=None, callback=None,
                     persistent=False, merge=True, pwent=None, async=False, devnull=False):
         """spawnpty(cmd, logfile=None, env=None, callback=None, persisten=None)
 Start a child process using a pty. The <persistent> variable is the number of
 times the process will be respawned if the previous invocation dies.  """
-        return self.spawnprocess(ProcessPty, cmd, logfile, env, callback, 
+        return self.spawnprocess(ProcessPty, cmd, logfile, env, callback,
                     persistent, merge, pwent, async, devnull)
 
     def coprocess(self, method, args=(), logfile=None, env=None, callback=None, async=False):
@@ -999,7 +999,7 @@ process found in this ProcManager."""
                 return
         signal(SIGCHLD, SIG_DFL) # critical area
         newproc = proc.clone()
-        self._procs[newproc.childpid] = newproc 
+        self._procs[newproc.childpid] = newproc
         signal(SIGCHLD, _child_handler)
         return newproc
 
@@ -1008,7 +1008,7 @@ process found in this ProcManager."""
             deadproc.log("*** process '%s' died: %s (restarting).\n" % (deadproc.cmdline, deadproc.exitstatus))
             scheduler.sleep(1.0)
             new = self.clone(deadproc)
-            new.logfile = deadproc.logfile
+            new._log = deadproc._log
             if new._async:
                 self.poller.register(new)
         else:
@@ -1045,7 +1045,7 @@ process found in this ProcManager."""
                     try:
                         proc = self._procs[pid]
                     except KeyError:
-                        sys.stderr.write("warning: caught SIGCHLD for unmanaged process (pid: %s).\n" % pid) 
+                        sys.stderr.write("warning: caught SIGCHLD for unmanaged process (pid: %s).\n" % pid)
                         continue
                     es = ExitStatus(proc.cmdline, sts)
                     proc.set_exitstatus(es)
@@ -1075,13 +1075,13 @@ instance. Always use this factory function to get it."""
 def remove_procmanager():
     global procmanager
     signal(SIGCHLD, SIG_DFL)
-    del procmanager 
+    del procmanager
 
 #######################################
 #### Utility functions for Linux ######
 
 # standalone process factory functions
-def spawnpipe(cmd, logfile=None, env=None, callback=None, 
+def spawnpipe(cmd, logfile=None, env=None, callback=None,
                 persistent=False, merge=True, pwent=None, async=False):
     """spawn(cmd, logfile=None, env=None)
 Start a child process, connected by pipes."""
@@ -1090,7 +1090,7 @@ Start a child process, connected by pipes."""
     return proc
 
 
-def spawnpty(cmd, logfile=None, env=None, callback=None, 
+def spawnpty(cmd, logfile=None, env=None, callback=None,
                 persistent=False, merge=True, pwent=None, async=False, devnull=False):
     """spawnpty(cmd, logfile=None, env=None)
 Start a child process using a pty."""
@@ -1115,9 +1115,9 @@ def run_as(pwent, umask=022):
     os.umask(umask)
     home = pwent.home
     try:
-      os.chdir(home) 
+      os.chdir(home)
     except OSError:
-      os.chdir("/") 
+      os.chdir("/")
     # drop privs to user
     os.setgroups(pwent.groups)
     os.setgid(pwent.gid)
@@ -1147,7 +1147,7 @@ def run_as_with_PAM(pwent, umask):
         auth.setcred(PAM.PAM_ESTABLISH_CRED|PAM.PAM_SILENT)
         auth.acct_mgmt()
         auth.open_session(PAM.PAM_SILENT)
-    # XXX 
+    # XXX
     except PAM.error, resp:
         raise AuthenticationError, resp
     os.environ["HOME"] = home
@@ -1157,9 +1157,9 @@ def run_as_with_PAM(pwent, umask):
     os.environ["PATH"] = "/bin:/usr/bin:/usr/local/bin"
     home = pwent.home
     try:
-      os.chdir(home) 
+      os.chdir(home)
     except OSError:
-      os.chdir("/") 
+      os.chdir("/")
 
     return auth
 
