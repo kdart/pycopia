@@ -28,7 +28,6 @@ from errno import EINTR, EBADF, ECHILD, EAGAIN, EIO
 from pycopia import asyncio
 from pycopia import shparser
 from pycopia.OS.procfs import ProcStat
-from pycopia import scheduler
 
 from pycopia.aid import Enum
 
@@ -788,7 +787,6 @@ to get the instance.  """
 
     def __init__(self):
         self._procs = {}
-        self._graveyard = {}
         self.poller = asyncio.get_poller()
         self.poll = self.poller.poll # delegate poll method
         signal(SIGCHLD, _child_handler)
@@ -851,7 +849,6 @@ times the process will be respawned if the previous invocation dies.  """
             sys.excepthook = sys.__excepthook__
             # child is not managing any of these
             self._procs.clear()
-            self._graveyard.clear()
             self.poller.clear()
             try:
                 rv = apply(method, args)
@@ -890,7 +887,6 @@ times the process will be respawned if the previous invocation dies.  """
         if proc.childpid == 0: # in child
             sys.excepthook = sys.__excepthook__
             self._procs.clear()
-            self._graveyard.clear()
             self.poller.clear()
             try:
                 rv = _method(*args, **kwargs)
@@ -974,17 +970,12 @@ process objects and invoke the cont() method."""
 Waits for a process object to finish. Works like os.waitpid, but takes a
 process object instead of a process ID.  """
         pid = int(proc)
-        while 1:
-            if pid in self._graveyard:
-                es = self._graveyard[pid]
-                del self._graveyard[pid]
-                return es
-            elif pid in self._procs:
-                if (option & os.WNOHANG):
-                    return 0
-                self.waitpid(pid, 0)
-            else:
-                raise ValueError, "pid or proc is unmanaged."
+        if pid in self._procs:
+            if (option & os.WNOHANG):
+                return 0
+            self.waitpid(pid, 0)
+        else:
+            raise ValueError, "pid or proc is unmanaged."
 
     def clone(self, proc=None):
         """clone([proc]) clones the supplied process object and manages it as
@@ -1007,7 +998,6 @@ process found in this ProcManager."""
         """Callback that performs a respawn, for persistent services."""
         if not deadproc.exitstatus: # abnormal exit
             deadproc.log("*** process '%s' died: %s (restarting).\n" % (deadproc.cmdline, deadproc.exitstatus))
-            scheduler.sleep(1.0)
             new = self.clone(deadproc)
             new._log = deadproc._log
             if new._async:
@@ -1016,19 +1006,6 @@ process found in this ProcManager."""
         else:
             deadproc.log("*** process '%s' normal exit (NOT restarting).\n" % (deadproc.cmdline,))
         return None
-
-    def child_status(self, pid_or_proc):
-        pid = int(pid_or_proc)
-        try:
-            es = self._graveyard[pid]
-            del self._graveyard[pid]
-            return es
-        except KeyError:
-            try:
-                proc = self._procs[pid]
-                return proc.stat()
-            except KeyError:
-                return None # XXX exception?
 
     def waitpid(self, pid, option=0):
         while 1: # loop to collect all pending exited processes
@@ -1057,7 +1034,6 @@ process found in this ProcManager."""
                             self.poller.unregister(proc)
                         proc.dead()
                         del self._procs[pid]
-                        self._graveyard[pid] = proc.exitstatus
 
     def flushlogs(self):
         "Force flushing all process logs."
@@ -1223,5 +1199,5 @@ split_command_line = shparser.get_command_splitter()
 
 
 if __name__ == "__main__":
-    print system("qaunittest test_proctools")
+    print system("runtest testcases.unittests.process.proctools")
 
