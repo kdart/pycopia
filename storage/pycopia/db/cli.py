@@ -967,8 +967,8 @@ class ConfigCommands(CLI.BaseCommands):
         if name is None:
             current = self._obj.user
             choices = models.get_choices(_session, models.Config, "user", "username")
-            choices[0] = "Nobody"
-            chosen_id = self._ui.choose_key(choices, current.id if current is not None else 0, "%Iuser%N")
+            choices.insert(0, (0, "Nobody"))
+            chosen_id = self._ui.choose_key(dict(choices), current.id if current is not None else 0, "%Iuser%N")
             if chosen_id == 0:
                 config.Container(_session, self._obj, user=_user).set_owner(None)
             else:
