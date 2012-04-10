@@ -80,7 +80,7 @@ class Authenticator(object):
         self.password = user.password
         self.authservice = user.authservice
 
-    def _pam_conv(self, auth, query_list):
+    def _pam_conv(self, auth, query_list, *args):
         resp = []
         for query, type in query_list:
             if type == PAM.PAM_PROMPT_ECHO_ON:
