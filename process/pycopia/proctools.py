@@ -809,7 +809,7 @@ Start a child process using a user supplied subclass of ProcessPty or
 ProcessPipe.  """
 
         if persistent and (callback is None):
-            callback = self._persistent_callback
+            callback = self.respawn_callback
         signal(SIGCHLD, SIG_DFL) # critical area
         proc = pklass(cmd, logfile=logfile, env=env, callback=callback,
                     merge=merge, pwent=pwent, async=async, devnull=devnull)
@@ -831,7 +831,7 @@ Start a child process, connected by pipes."""
         else:
             klass = ProcessPipe
         return self.spawnprocess(klass, cmd, logfile, env, callback,
-                    persistent, merge, async, devnull)
+                    persistent, merge, pwent, async, devnull)
 
     # default spawn method
     spawn = spawnpipe
@@ -1003,7 +1003,8 @@ process found in this ProcManager."""
         signal(SIGCHLD, _child_handler)
         return newproc
 
-    def _persistent_callback(self, deadproc):
+    def respawn_callback(self, deadproc):
+        """Callback that performs a respawn, for persistent services."""
         if not deadproc.exitstatus: # abnormal exit
             deadproc.log("*** process '%s' died: %s (restarting).\n" % (deadproc.cmdline, deadproc.exitstatus))
             scheduler.sleep(1.0)
@@ -1011,8 +1012,10 @@ process found in this ProcManager."""
             new._log = deadproc._log
             if new._async:
                 self.poller.register(new)
+            return new
         else:
             deadproc.log("*** process '%s' normal exit (NOT restarting).\n" % (deadproc.cmdline,))
+        return None
 
     def child_status(self, pid_or_proc):
         pid = int(pid_or_proc)
