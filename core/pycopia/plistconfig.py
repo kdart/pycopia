@@ -52,9 +52,9 @@ class AutoAttrDict(dict):
             for key in self:
                 val = self[key]
                 if isinstance(val, AutoAttrDict):
-                    s.append("{:>18.18s}=[AutoAttrDict()]".format(key))
+                    s.append("{:>22s}=[AutoAttrDict()]".format(key))
                 else:
-                    s.append("{:>18.18s}={!r}".format(key, val))
+                    s.append("{:>22s}={!r}".format(key, val))
         else:
             s.append("{[empty]}")
         if self.__dict__["_dirty"]:

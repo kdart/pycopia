@@ -48,12 +48,11 @@ class ConfigCommands(CLI.BaseCommands):
                 self._print(subobj)
 
     def _list(self, container):
-        for key in container:
-            val = container[key]
+        for key, val in container.iteritems():
             if isinstance(val, dict):
-                self._print("{:>18.18s} = {{...}}".format(key))
+                self._print("{:>22s} = {{...}}".format(key))
             else:
-                self._print("{:>18.18s} = {!r}".format(key, val))
+                self._print("{:>22s} = {!r}".format(key, val))
 
     def chdir(self, argv):
         """chdir/cd <container>
