@@ -86,6 +86,8 @@ class AutoAttrDict(dict):
 
     # perform shell-like variable expansion
     def expand(self, value):
+        if type(value) is not str:
+            return value
         if '$' not in value:
             return value
         i = 0
