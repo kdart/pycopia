@@ -13,6 +13,9 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+"""Object oriented asynchronous IO.
+"""
+
 from __future__ import print_function
 
 import sys, os
@@ -20,12 +23,14 @@ import select, signal, fcntl
 # the only signal module function that is exposed here. The rest are wrapped by
 # Poll.
 pause = signal.pause
-POLLERR = select.POLLERR
+
+EPOLLERR = select.EPOLLERR
+EPOLLHUP = select.EPOLLHUP
+EPOLLIN = select.EPOLLIN
+EPOLLOUT = select.EPOLLOUT
+EPOLLPRI = select.EPOLLPRI
+
 POLLNVAL = select.POLLNVAL
-POLLHUP = select.POLLHUP
-POLLIN = select.POLLIN
-POLLOUT = select.POLLOUT
-POLLPRI = select.POLLPRI
 
 from errno import EINTR, EBADF
 
@@ -41,7 +46,7 @@ try:
     O_ASYNC = getattr(os, "O_ASYNC")
 except AttributeError:
     O_ASYNC = os.O_ASYNC = {
-        "linux1":020000, # ?
+        "linux3":020000, # ?
         "linux2":020000, 
         "linux3":020000, 
         "freebsd4":0x0040, 
@@ -52,14 +57,16 @@ except AttributeError:
 
 
 class Poll(object):
-    """
+    """Object oriented interface to epoll.
+
+    Register objects that implement the PollerInterface in the singleton instance.
     """
     def __init__(self):
         self.smap = {}
-        self.pollster = select.poll()
+        self.pollster = select.epoll()
 
     def __str__(self):
-        return "Polling descriptors: %r" % (list(self.smap.keys()))
+        return "Polling descriptors: %r" % (self.smap.keys(),)
 
     def __bool__(self):
         return bool(self.smap)
@@ -71,8 +78,18 @@ class Poll(object):
         flags = self._getflags(obj)
         if flags:
             fd = obj.fileno()
-            self.smap[fd] = obj
             self.pollster.register(fd, flags)
+            self.smap[fd] = obj
+
+    def register_fd(self, fd, flags):
+        self.pollster.register(fd, flags)
+        self.smap[fd] = None
+
+    def modify(self, obj):
+        fd = obj.fileno()
+        if fd in self.smap:
+            flags = self._getflags(obj)
+            self.pollster.modify(fd, flags)
 
     def unregister(self, obj):
         self.unregister_fd(obj.fileno())
@@ -82,13 +99,9 @@ class Poll(object):
             del self.smap[fd]
         except KeyError:
             return
-        try:
-            self.pollster.unregister(fd)
-        except KeyError:
-            pass
+        self.pollster.unregister(fd)
 
-    def poll(self, timeout=-1):
-        timeout = int(timeout*1000) # the poll method time unit is milliseconds
+    def poll(self, timeout=-1.0):
         while 1:
             try:
                 rl = self.pollster.poll(timeout)
@@ -108,29 +121,29 @@ class Poll(object):
             except KeyError: # this should never happen, but let's be safe.
                 continue
             try:
-                if (flags  & POLLERR) or (flags & POLLNVAL):
-                    self.unregister_fd(fd)
+                if (flags  & EPOLLERR) or (flags & POLLNVAL):
+                    hobj.error_handler()
+                    continue
+                if (flags & EPOLLHUP):
                     hobj.hangup_handler()
                     continue
-                if (flags & POLLHUP):
-                    self.unregister_fd(fd)
-                    hobj.hangup_handler()
-                    continue
-                if (flags & POLLIN):
+                if (flags & EPOLLIN):
                     hobj.read_handler()
-                if (flags & POLLOUT):
+                if (flags & EPOLLOUT):
                     hobj.write_handler()
-                if (flags & POLLPRI):
+                if (flags & EPOLLPRI):
                     hobj.pri_handler()
+            except (ExitNow, KeyboardInterrupt, SystemExit):
+                raise
             except:
                 ex, val, tb = sys.exc_info()
-                hobj.error_handler(ex, val, tb)
+                hobj.exception_handler(ex, val, tb)
 
     # note that if you use this, unregister the default SIGIO handler
-    def loop(self, timeout=10, callback=NULL):
+    def loop(self, timeout=-1.0, callback=NULL):
         while self.smap:
             self.poll(timeout)
-            callback()
+            callback(self)
 
     def unregister_all(self):
         for obj in self.smap.values():
@@ -138,26 +151,23 @@ class Poll(object):
 
     clear = unregister_all
 
-    def _getflags(self, hobj):
+    def _getflags(self, aiobj):
         flags = 0
-        if hobj.readable():
-            flags = POLLIN
-        if hobj.writable():
-            flags |= POLLOUT
-        if hobj.priority():
-            flags |= POLLPRI
+        if aiobj.readable():
+            flags = EPOLLIN
+        if aiobj.writable():
+            flags |= EPOLLOUT
+        if aiobj.priority():
+            flags |= EPOLLPRI
         return flags
 
     def _removebad(self):
-        for fd, hobj in self.smap.items():
+        for fd, aiobj in self.smap.items():
             try:
                 os.fstat(fd)
             except OSError:
+                self.pollster.unregister(fd)
                 del self.smap[fd]
-                try:
-                    self.pollster.unregister(fd)
-                except KeyError:
-                    pass
 
 
 
@@ -189,15 +199,22 @@ class PollerInterface(object):
     def hangup_handler(self):
         pass
 
-    def error_handler(self, ex, val, tb):
+    def error_handler(self):
+        pass
+
+    def exception_handler(self, ex, val, tb):
         print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
+
+
+# Singleton instance
+poller = Poll()
+
 
 
 # Default setup is to poll our files when we get a SIGIO. This is done since
 # Python does not expose the siginfo structure. In the future, we could write a
 # new signal module that does expose the siginfo structure.
 
-# this handler manages a chain of registered callback functions. 
 class SIGIOHandler(object):
     def __init__(self):
         self.handlers = {}
@@ -205,6 +222,7 @@ class SIGIOHandler(object):
 
     def on(self):
         signal.signal(signal.SIGIO, self)
+        signal.siginterrupt(SIGIO, True)
 
     def off(self):
         signal.signal(signal.SIGIO, signal.SIG_IGN)
@@ -227,101 +245,14 @@ class SIGIOHandler(object):
         for h, args in self.handlers.values():
             h(*args)
 
+
+# Singleton instance of SIGIO handler. It's optional.
+manager = None
+
 def get_manager():
     global manager
     return manager
 
-def set_asyncio(obj):
-    if type(obj) is int:
-        fd = obj
-    elif hasattr(obj, "fileno"):
-        fd = obj.fileno()
-    else:
-        raise ValueError("set_asyncio: needs integer file descriptor, or object with fileno() method.")
-    flags = fcntl.fcntl(fd, fcntl.F_GETFL)
-    flags |= O_ASYNC
-    fcntl.fcntl(fd, fcntl.F_SETFL, flags)
-    fcntl.fcntl(fd, fcntl.F_SETOWN, os.getpid())
-
-def register_asyncio(obj):
-    set_asyncio(obj)
-    poller.register(obj)
-register = register_asyncio
-
-################################################################
-# DirectoryNotifier encapslates the code required for watching directory entry
-# contents. Subclass this and override the entry_added() and entry_removed()
-# methods. then, instantiate it with a directory name, and register it with the
-# sighandler instance.  NOTE: this only works with Python 2.2 or greater on
-# Linux. 
-# Example:
-#   dn = DirectoryNotifier(os.environ["HOME"])
-#   manager.register(dn)
-
-class DirectoryNotifier(object):
-    def __init__(self, dirname):
-        if not os.path.isdir(dirname):
-            raise RuntimeError("you can only watch a directory.")
-        self.dirname = dirname
-        self.fd = os.open(dirname, 0)
-        self.currentcontents = os.listdir(dirname)
-        self.oldsig = fcntl.fcntl(self.fd, fcntl.F_GETSIG)
-        fcntl.fcntl(self.fd, fcntl.F_SETSIG, 0)
-        fcntl.fcntl(self.fd, fcntl.F_NOTIFY, fcntl.DN_DELETE|fcntl.DN_CREATE|fcntl.DN_MULTISHOT)
-        self.initialize() # easy initializer for subclasses
-
-    def fileno(self):
-        return self.fd
-
-    def close(self):
-        if self.fd is not None:
-            fcntl.fcntl(self.fd, fcntl.F_SETSIG, self.oldsig)
-            os.close(self.fd)
-            self.fd = None
-
-    def __del__(self):
-        self.close()
-
-    def __str__(self):
-        return "%s watching %s" % (self.__class__.__name__, self.dirname)
-
-    def __call__(self):
-        newcontents = os.listdir(self.dirname)
-        if len(newcontents) > len(self.currentcontents):
-            new = [item for item in newcontents if item not in self.currentcontents]
-            self.entry_added(new)
-        elif len(newcontents) < len(self.currentcontents):
-            rem = [item for item in self.currentcontents if item not in newcontents]
-            self.entry_removed(rem)
-        else:
-            self.no_change()
-        self.currentcontents = newcontents
-
-    # override these in a subclass
-    def initialize(self):
-        pass
-
-    def entry_added(self, added):
-        print(added, "added to", self.dirname)
-
-    def entry_removed(self, removed):
-        print(removed, "removed from", self.dirname)
-
-    def no_change(self):
-        pass
-
-
-poller = Poll()
-
-def get_poller():
-    global poller
-    return poller
-
-# a singleton instance of the SIGIOHandler. Usually, users of this module only
-# have to register a DirectoryNotifier object here. Other objects (Dispatcher
-# objects) are registered with the poller (which is already set up to be called
-# when SIGIO occurs). But you may add your own hooks to it.
-manager = None
 def start_sigio():
     global manager
     if manager is None:
@@ -335,5 +266,243 @@ def stop_sigio():
     global manager
     if manager is not None:
         manager.off()
+
+
+def set_asyncio(fd_or_obj):
+    """Sets io object to use SIGIO."""
+    if type(fd_or_obj) is int:
+        fd = fd_or_obj
+    else:
+        fd = fd_or_obj.fileno()
+    flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    flags |= O_ASYNC
+    fcntl.fcntl(fd, fcntl.F_SETFL, flags)
+    fcntl.fcntl(fd, fcntl.F_SETOWN, os.getpid())
+
+
+def register_asyncio(obj):
+    set_asyncio(obj)
+    poller.register(obj)
+
+register = register_asyncio
+
+
+def unregister_asyncio(obj):
+    poller.unregister(obj)
+
+unregister = unregister_asyncio
+
+# Socket protocol handlers
+
+CLOSED = 0
+CONNECTED = 1
+
+class AsyncServerHandler(PollerInterface):
+
+    def __init__(self, sock, workerclass):
+        self._sock = sock
+        self._workerclass = workerclass
+        sock.setblocking(0)
+        poller.register(self)
+
+    def fileno(self):
+        return self._sock.fileno()
+
+    def close(self):
+        if self._sock is not None:
+            poller.unregister(self)
+            s = self._sock
+            self._sock = None
+            s.close()
+
+    closed = property(lambda self: bool(self._sock))
+
+    def readable(self):
+        return True
+
+    def writable(self):
+        return False
+
+    def priority(self):
+        return True
+
+    def read_handler(self):
+        conn, addr = self._sock.accept()
+        conn.setblocking(0)
+        h = self._workerclass(conn, addr)
+        poller.register(h)
+        return h
+
+
+class AsyncWorkerHandler(PollerInterface):
+    def __init__(self, sock, addr):
+        self._sock = sock
+        self._rem_address = addr
+        self._state = CONNECTED
+        self._buf = ""
+        self.initialize()
+
+    def fileno(self):
+        return self._sock.fileno()
+
+    def close(self):
+        if self._sock is not None:
+            poller.unregister(self)
+            s = self._sock
+            self._sock = None
+            s.close()
+            self._state = CLOSED
+
+    closed = property(lambda self: self._state == CLOSED)
+
+    def write(self, data):
+        self._buf += data
+        poller.modify(self)
+        return len(data)
+
+    def readable(self):
+        return self._state == CONNECTED
+
+    def writable(self):
+        return self._state == CONNECTED and bool(self._buf)
+
+    def priority(self):
+        return self._state == CONNECTED
+
+    def hangup_handler(self):
+        poller.unregister(self)
+        self.close()
+
+    def error_handler(self):
+        poller.unregister(self)
+
+    def write_handler(self):
+        writ = self._sock.send(self._buf)
+        self._buf = self._buf[writ:]
+        poller.modify(self)
+
+    ###### overrideable async interface  ####
+    def initialize(self):
+        pass
+
+    def read_handler(self):
+        data = self._sock.recv(4096)
+        print("unhandled read:", data, file=sys.stderr)
+
+    def pri_handler(self):
+        print("unhandled pri", file=sys.stderr)
+
+    def exception_handler(self, ex, val, tb):
+        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
+
+
+class AsyncClientHandler(PollerInterface):
+    def __init__(self, sock, addr):
+        self._sock = sock
+        self._rem_address = addr
+        self._state = CONNECTED
+        self._buf = ""
+        self.initialize()
+        poller.register(self)
+
+    def fileno(self):
+        return self._sock.fileno()
+
+    def close(self):
+        if self._sock is not None:
+            poller.unregister(self)
+            s = self._sock
+            self._sock = None
+            s.close()
+            self._state = CLOSED
+
+    closed = property(lambda self: self._state == CLOSED)
+
+    def write(self, data):
+        self._buf += data
+        poller.modify(self)
+        return len(data)
+
+    def readable(self):
+        return self._state == CONNECTED
+
+    def writable(self):
+        return self._state == CONNECTED and bool(self._buf)
+
+    def priority(self):
+        return self._state == CONNECTED
+
+    def write_handler(self):
+        writ = self._sock.send(self._buf)
+        self._buf = self._buf[writ:]
+        poller.modify(self)
+
+    def hangup_handler(self):
+        poller.unregister(self)
+        self.close()
+
+    def error_handler(self):
+        poller.unregister(self)
+
+    ###### overrideable async interface  ####
+    def initialize(self):
+        pass
+
+    def read_handler(self):
+        data = self._sock.recv(4096)
+        print("unhandled read:", data, file=sys.stderr)
+
+    def pri_handler(self):
+        print("unhandled pri", file=sys.stderr)
+
+    def exception_handler(self, ex, val, tb):
+        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
+
+
+class AsyncIOHandler(PollerInterface):
+
+    def __init__(self, fo):
+        self._fo = fo
+        self._readable = "r" in fo.mode
+        self._writable = "w" in fo.mode
+        self._buf = ""
+        poller.register(self)
+
+    def close(self):
+        if self._fo is not None:
+            poller.unregister(self)
+            #fo = self._fo
+            self._fo = None
+
+    def fileno(self):
+        return self._fo.fileno()
+
+    def write(self, data):
+        self._buf += data
+        poller.modify(self)
+        return len(data)
+
+    def initialize(self):
+        pass
+
+    def readable(self):
+        return self._readable
+
+    def writable(self):
+        return self._writable and bool(self._buf)
+
+    def write_handler(self):
+        writ = self._fo.write(self._buf)
+        self._buf = self._buf[writ:]
+        poller.modify(self)
+
+    def read_handler(self):
+        print("unhandled read", file=sys.stderr)
+
+    def error_handler(self):
+        print("unhandled error", file=sys.stderr)
+
+    def exception_handler(self, ex, val, tb):
+        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
 
 
