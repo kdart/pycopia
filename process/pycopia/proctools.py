@@ -74,7 +74,8 @@ class Process(object):
     # Override in subclass -- close your file descriptors connected to
     # subprocess.
     def close(self):
-        pass
+        if self._async:
+            asyncio.poller.unregister(self)
 
     def __repr__(self):
         return "%s(%r, %r)" % (self.__class__.__name__, self.cmdline, self._log)
@@ -316,7 +317,7 @@ ProcManager uses this."""
         return True
 
     def writable(self):
-        return True
+        return bool(self._writebuf)
 
     def priority(self):
         return False
@@ -326,17 +327,23 @@ ProcManager uses this."""
 
     def write_handler(self):
         self._write_buf()
+        if self._async:
+            asyncio.poller.modify(self)
 
     def pri_handler(self):
         pass
 
     def hangup_handler(self):
         if self._log is not None:
-            self._log.write("Hangup: %s.\n" % self.cmdline)
+            self._log.write("Hangup: {}.\n".format(self.cmdline))
 
-    def error_handler(self, ex, val, tb):
+    def error_handler(self):
         if self._log is not None:
-            self._log.write("Error event: %s (%s)\n" % (ex, val))
+            self._log.write("Async handler error occured: {}.\n".format(self.basename()))
+
+    def exception_handler(self, ex, val, tb):
+        if self._log is not None:
+            self._log.write("Error event: {} ({})\n".format(ex, val))
 
 
 class ProcessPipe(Process):
@@ -417,6 +424,7 @@ class ProcessPipe(Process):
         self.kill(SIGINT)
 
     def close(self):
+        super(ProcessPipe, self).close()
         try:
             os.close(self._p_stdin)
         except (TypeError, OSError):
@@ -556,6 +564,7 @@ class ProcessPty(Process):
         self._write(self._intr)
 
     def close(self):
+        super(ProcessPty, self).close()
         try:
             os.close(self._fd)
         except (TypeError, OSError):
@@ -787,8 +796,7 @@ to get the instance.  """
 
     def __init__(self):
         self._procs = {}
-        self.poller = asyncio.get_poller()
-        self.poll = self.poller.poll # delegate poll method
+        self.poller = asyncio.poller
         signal(SIGCHLD, _child_handler)
 
     def __len__(self):

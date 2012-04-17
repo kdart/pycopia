@@ -105,7 +105,7 @@ class Poll(object):
         while 1:
             try:
                 rl = self.pollster.poll(timeout)
-            except select.error as why:
+            except IOError as why:
                 if why[0] == EINTR:
                     continue
                 elif why[0] == EBADF:
@@ -127,12 +127,12 @@ class Poll(object):
                 if (flags & EPOLLHUP):
                     hobj.hangup_handler()
                     continue
+                if (flags & EPOLLPRI):
+                    hobj.pri_handler()
                 if (flags & EPOLLIN):
                     hobj.read_handler()
                 if (flags & EPOLLOUT):
                     hobj.write_handler()
-                if (flags & EPOLLPRI):
-                    hobj.pri_handler()
             except (ExitNow, KeyboardInterrupt, SystemExit):
                 raise
             except:
