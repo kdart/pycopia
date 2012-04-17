@@ -222,7 +222,7 @@ class SIGIOHandler(object):
 
     def on(self):
         signal.signal(signal.SIGIO, self)
-        signal.siginterrupt(SIGIO, True)
+        signal.siginterrupt(signal.SIGIO, True)
 
     def off(self):
         signal.signal(signal.SIGIO, signal.SIG_IGN)
