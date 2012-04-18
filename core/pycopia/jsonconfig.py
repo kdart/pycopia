@@ -35,7 +35,7 @@ from json.decoder import JSONDecoder
 def get_encoder():
     return JSONEncoder(skipkeys=False, ensure_ascii=True,
         check_circular=True, allow_nan=True, indent=2,
-        separators=None, encoding="ascii")
+        separators=(',', ': '), encoding="ascii")
 
 def dump(conf, fo):
     encoder = get_encoder()
