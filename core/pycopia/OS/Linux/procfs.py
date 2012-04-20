@@ -89,6 +89,7 @@ class ProcStat(object):
         self.cmdline = None
         self.pid = None
         self.ttyname = None
+        self.environment = None
         self.read(pid)
 
     def __getstate__(self):
@@ -127,6 +128,7 @@ class ProcStat(object):
             try:
                 self.stats = tuple(map(self._toint, open(self._FF % (self.pid)).read().split()))
                 self.cmdline = self.get_cmdline()
+                self.environment = self.get_environment()
                 self.uid, self.gid = self._get_uid()
                 self.ttyname = self._get_ttyname_linux()
             except IOError: # no such process
@@ -194,6 +196,15 @@ class ProcStat(object):
             return self.command
         else:
             return cmd
+
+    def get_environment(self):
+        env = {}
+        rawenv = open("/proc/%d/environ" % (self.pid,)).read()
+        for line in rawenv.split("\0"):
+            if line:
+                name, value = line.split("=", 1)
+                env[name] = value
+        return env
 
     def _get_ttyname_linux(self):
         tty_nr = self["tty_nr"]

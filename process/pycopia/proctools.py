@@ -21,7 +21,7 @@ Classes and functions for controlling, reading, and writing to co-processes.
 """
 
 import sys, os
-from signal import signal, pause
+from signal import signal
 from signal import SIGCHLD, SIGTERM, SIGSTOP, SIGCONT, SIGHUP, SIG_DFL, SIGINT
 from errno import EINTR, EBADF, ECHILD, EAGAIN, EIO
 
@@ -29,7 +29,8 @@ from pycopia import asyncio
 from pycopia import shparser
 from pycopia.OS.procfs import ProcStat
 
-from pycopia.aid import Enum
+from pycopia.aid import NULL, Enum
+from pycopia import scheduler
 
 
 # Exec flags
@@ -51,7 +52,8 @@ class Process(object):
     """Abstract base class for Processes. Handles all process handling, and
     some common functionality. I/O is handled in subclasses.
     """
-    def __init__(self, cmdline, logfile=None, callback=None, async=False, flags=0, devnull=False):
+    def __init__(self, cmdline, logfile=None, callback=None, async=False, 
+            flags=0, devnull=False):
         self.cmdline = cmdline
         self.deadchild = 0
         self.callback = callback # called at death of process
@@ -62,6 +64,7 @@ class Process(object):
         self._errbuf = ''
         self._writebuf = ''
         self.exitstatus = None
+        self._environment = None
         self._async = bool(async) # use asyncio, or not
         self._flags = int(flags)
         self._authtoken = None
@@ -123,11 +126,29 @@ class Process(object):
         if self._log:
             self._log.flush()
 
-    def clone(self, env=None):
-        """clone([newenv])
-Spawns a copy of this process. Note that the log file is not inherited."""
-        return self.__class__(self.cmdline, env=env, callback=self.callback, async=self._async)
+    def clone(self):
+        """clone()
+        Spawns a copy of this process. Note that the log file is not inherited.
+        """
+        return self.__class__(self.cmdline, env=self.environment,
+                callback=self.callback, async=self._async)
 
+    def _get_environment(self):
+        if self._environment is None:
+            ps = ProcStat(self.childpid)
+            self._environment =  ps.environment
+        return self._environment
+
+    def _set_environment(self, env):
+        assert type(env) is dict, "Environment must be a dictionary"
+        self._environment = env
+
+    def _del_environment(self):
+        self._environment = None
+
+    environment = property(_get_environment, _set_environment, _del_environment)
+
+    @property
     def basename(self):
         return os.path.basename(self.cmdline.split()[0])
 
@@ -152,7 +173,8 @@ Spawns a copy of this process. Note that the log file is not inherited."""
 
     def wait(self, option=0):
         """wait() retrieves process exit status. Note that this may block if
-the process is still running."""
+        the process is still running.
+        """
         pm = get_procmanager()
         pm.waitproc(self, option)
         return self.exitstatus
@@ -339,7 +361,7 @@ ProcManager uses this."""
 
     def error_handler(self):
         if self._log is not None:
-            self._log.write("Async handler error occured: {}.\n".format(self.basename()))
+            self._log.write("Async handler error occured: {}.\n".format(self.basename))
 
     def exception_handler(self, ex, val, tb):
         if self._log is not None:
@@ -353,9 +375,12 @@ class ProcessPipe(Process):
     and written to by the instances read() and write() methods.
 
     """
-    def __init__(self, cmdline, logfile=None,  env=None, callback=None, merge=1, pwent=None, async=False, devnull=None):
+    def __init__(self, cmdline, logfile=None,  env=None, callback=None, 
+            merge=1, pwent=None, async=False, devnull=None):
         Process.__init__(self, cmdline, logfile, callback, async)
 
+        if env:
+            self.environment = env
         cmd = split_command_line(self.cmdline)
         # now, fork the child connected by pipes
         p2cread, self._p_stdin = os.pipe()
@@ -372,15 +397,15 @@ class ProcessPipe(Process):
             os.close(1)
             os.close(2)
             if os.dup(p2cread) <> 0:
-                os._exit(1)
+                os._exit(127)
             if os.dup(c2pwrite) <> 1:
-                os._exit(1)
+                os._exit(127)
             if merge:
                 if os.dup(c2pwrite) <> 2: # merge stderr into stdout from child process
-                    os._exit(1)
+                    os._exit(127)
             else:
                 if os.dup(c2perr) <> 2:
-                    os._exit(1)
+                    os._exit(127)
             # close all other file descriptors for child.
             for i in xrange(3, 255):
                 try:
@@ -394,9 +419,9 @@ class ProcessPipe(Process):
                 else:
                     os.execvp(cmd[0], cmd)
             finally:
-                os._exit(1)
+                os._exit(127)
             # Shouldn't come here
-            os._exit(1)
+            os._exit(127)
         os.close(p2cread)
         os.close(c2pwrite)
         if c2perr:
@@ -490,8 +515,11 @@ class ProcessPty(Process):
     becomes the processes controlling terminal.
 
     """
-    def __init__(self, cmdline, logfile=None, env=None, callback=None, merge=1, pwent=None, async=False, devnull=False):
+    def __init__(self, cmdline, logfile=None, env=None, callback=None, 
+            merge=1, pwent=None, async=False, devnull=False):
         Process.__init__(self, cmdline, logfile, callback, async)
+        if env:
+            self.environment = env
         cmd = split_command_line(self.cmdline)
         try:
             pid, self._fd = os.forkpty()
@@ -533,7 +561,7 @@ class ProcessPty(Process):
                     else:
                         os.execvp(cmd[0], cmd)
                 finally:
-                    os._exit(1) # should not be reached
+                    os._exit(127) # should not be reached
 
             else: # parent
                 self.childpid = pid
@@ -638,15 +666,15 @@ class CoProcessPipe(ProcessPipe):
             os.close(1)
             os.close(2)
             if os.dup(p2cread) <> 0:
-                os._exit(1)
+                os._exit(127)
             if os.dup(c2pwrite) <> 1:
-                os._exit(1)
+                os._exit(127)
             if merge:
                 if os.dup(c2pwrite) <> 2:
-                    os._exit(1)
+                    os._exit(127)
             else:
                 if os.dup(c2perr) <> 2:
-                    os._exit(1)
+                    os._exit(127)
 
             if pwent:
                 run_as(pwent)
@@ -674,6 +702,8 @@ class ProcessPipeline(ProcessPipe):
                     merge=None, pwent=None, async=False, devnull=None):
         assert cmdline.count("|") == 1
         [cmdline1, cmdline2] = cmdline.split("|")
+        if env:
+            self.environment = env
         Process.__init__(self, cmdline2, logfile, callback, async)
         self._stderr= None
 
@@ -693,7 +723,7 @@ class ProcessPipeline(ProcessPipe):
             os.dup2(_p_stdout, 0)
             os.dup2(p_write, 1)
             self._exec(cmd1, env, pwent)
-            os._exit(99)
+            os._exit(127)
 
         # cmd2
         cmd2pid = os.fork()
@@ -703,7 +733,7 @@ class ProcessPipeline(ProcessPipe):
             os.dup2(p_read, 0)
             os.dup2(_p_stdin, 1)
             self._exec(cmd2, env, pwent)
-            os._exit(99)
+            os._exit(127)
 
         self.childpid2 = cmd2pid # XXX
         # close our copies
@@ -745,8 +775,7 @@ class ExitStatus(object):
             self.state = 3
             self._status = self.termsig = os.WTERMSIG(sts)
 
-    def status(self):
-        return self.state, self._status
+    status = property(lambda self: self._status)
 
     def exited(self):
         return self.state == 1
@@ -941,7 +970,7 @@ times the process will be respawned if the previous invocation dies.  """
     def getbyname(self, name):
         """getbyname(procname) Returns a list of process objects that match the given name."""
         name = os.path.basename(name)
-        return filter(lambda p: p.basename() == name, self._procs.values())
+        return filter(lambda p: p.basename == name, self._procs.values())
 
     def getbypid(self, pid):
         """getbypid(pid) Returns the process object that matches the given PID."""
@@ -969,26 +998,16 @@ times the process will be respawned if the previous invocation dies.  """
 
     def stopall(self):
         """stopall() sends STOP to all managed processes. To restart get the
-process objects and invoke the cont() method."""
+        process objects and invoke the cont() method.
+        """
         for p in self._procs.values():
             p.stop()
 
-    def waitproc(self, proc, option=0): # waits for a Process object.
-        """waitproc(process, [option])
-Waits for a process object to finish. Works like os.waitpid, but takes a
-process object instead of a process ID.  """
-        pid = int(proc)
-        if pid in self._procs:
-            if (option & os.WNOHANG):
-                return 0
-            self.waitpid(pid, 0)
-        else:
-            raise ValueError, "pid or proc is unmanaged."
-
     def clone(self, proc=None):
         """clone([proc]) clones the supplied process object and manages it as
-well. If no process object is supplied then clone the first managed
-process found in this ProcManager."""
+        well. If no process object is supplied then clone the first managed
+        process found in this ProcManager.
+        """
         if proc is None: # default to cloning first process found.
             procs = self._procs.values()
             if procs:
@@ -1004,16 +1023,37 @@ process found in this ProcManager."""
 
     def respawn_callback(self, deadproc):
         """Callback that performs a respawn, for persistent services."""
-        if not deadproc.exitstatus: # abnormal exit
-            deadproc.log("*** process '%s' died: %s (restarting).\n" % (deadproc.cmdline, deadproc.exitstatus))
-            new = self.clone(deadproc)
-            new._log = deadproc._log
-            if new._async:
-                self.poller.register(new)
-            return new
+        if deadproc.exitstatus.status == 127:
+            deadproc.log(
+                "*** process '%s' didn't start (NOT restarting).\n" % (deadproc.cmdline,))
+            raise ProcessError("Process never started. Check command line.")
+        elif not deadproc.exitstatus:
+            deadproc.log(
+                    "*** process '%s' died: %s (restarting in 1 sec.).\n" % (
+                            deadproc.cmdline, deadproc.exitstatus))
+            scheduler.add(1.0, pri=0, callback=self._respawn, 
+                    args=(deadproc,))
         else:
-            deadproc.log("*** process '%s' normal exit (NOT restarting).\n" % (deadproc.cmdline,))
+            deadproc.log(
+                    "*** process '%s' normal exit (NOT restarting).\n" % (deadproc.cmdline,))
         return None
+
+    def _respawn(self, deadproc):
+        new = self.clone(deadproc)
+        new._log = deadproc._log
+        if new._async:
+            self.poller.register(new)
+
+    def waitproc(self, proc, option=0): # waits for a Process object.
+        """waitproc(process, [option])
+        Waits for a process object to finish. Works like os.waitpid, but takes a
+        process object instead of a process ID.  
+        """
+        pid = int(proc)
+        if pid in self._procs:
+            if (option & os.WNOHANG):
+                return
+            self.waitpid(pid, 0)
 
     def waitpid(self, pid, option=0):
         while 1: # loop to collect all pending exited processes
@@ -1042,6 +1082,15 @@ process found in this ProcManager."""
                             self.poller.unregister(proc)
                         proc.dead()
                         del self._procs[pid]
+
+    def loop(self, timeout=-1.0, callback=NULL):
+        while True:
+            self.poller.loop(timeout, callback)
+            # If a respawn is scheduled don't exit yet.
+            if not scheduler.get_scheduler():
+                break
+            else:
+                scheduler.sleep(1.5)
 
     def flushlogs(self):
         "Force flushing all process logs."
