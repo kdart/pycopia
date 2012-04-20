@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 2009  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -14,7 +14,6 @@
 #    Lesser General Public License for more details.
 
 """
-
 Pycopia Configuration and Information storage
 ---------------------------------------------
 
@@ -44,7 +43,7 @@ class RootContainer(config.Container):
 
     The root container is special. It contains special object
     constructor methods, and a local writeable cache. It also supports
-    path access using the dot as path separator. 
+    path access using the dot as path separator.
     """
 
     def __init__(self, session, container, cache):
@@ -133,7 +132,7 @@ class RootContainer(config.Container):
             self.session.close()
             self.session = None
 
-    # files update the local cache only. 
+    # files update the local cache only.
     def mergefile(self, filename):
         if os.path.isfile(filename):
             gb = dict(list(self.items()))
@@ -144,18 +143,18 @@ class RootContainer(config.Container):
     def update(self, other):
         for k, v in other.items():
             d = self._cache
-            path = k.split(".") # allows for keys with dot-path 
+            path = k.split(".") # allows for keys with dot-path
             for part in path[:-1]:
                 d = d[part]
             # Use setattr for the sake of attribute-dicts, properties, and other objects.
-            setattr(d, path[-1], v) 
+            setattr(d, path[-1], v)
 
     def setdefault(self, key, val):
         d = self._cache
         path = key.split(".")
         for part in path[:-1]:
             d = d[part]
-        return d.setdefault(path[-1], val) 
+        return d.setdefault(path[-1], val)
 
     def evalset(self, k, v):
         """Evaluates the (string) value to convert it to an object in the
@@ -167,11 +166,11 @@ class RootContainer(config.Container):
             except:
                 pass
         d = self._cache
-        path = k.split(".") # allows for keys with dot-path 
+        path = k.split(".") # allows for keys with dot-path
         for part in path[:-1]:
             d = d[part]
         # Use setattr for attribute-dicts, properties, and other objects.
-        setattr(d, path[-1], v) 
+        setattr(d, path[-1], v)
 
     def evalupdate(self, other):
         for k, v in other.items():
@@ -320,7 +319,7 @@ class RootContainer(config.Container):
             except:
                 pass
 
-    UI = property(get_userinterface, None, del_userinterface, 
+    UI = property(get_userinterface, None, del_userinterface,
                         "User interface object used for interactive tests.")
 
     def get_account(self, identifier):
@@ -356,7 +355,7 @@ class RootContainer(config.Container):
     def del_userconfig(self):
         self._cache["_userconfig"] = None
 
-    userconfig = property(get_userconfig, None, del_userconfig, 
+    userconfig = property(get_userconfig, None, del_userconfig,
                         "User specific configuration area.")
 
     def _build_userconfig(self):
@@ -406,9 +405,9 @@ class EnvironmentRuntime(object):
         except KeyError:
             pass
         eq = EquipmentRuntime(
-                self._environment.get_DUT(self._session), 
+                self._environment.get_DUT(self._session),
                 "DUT",
-                self.logfile, 
+                self.logfile,
                 self._session)
         self._eqcache["DUT"] = eq
         return eq
@@ -557,7 +556,7 @@ class EquipmentRuntime(object):
         if self._controller is None:
             self._controller = controller.get_controller(
                     self,
-                    self["accessmethod"], 
+                    self["accessmethod"],
                     self.logfile)
         return self._controller
 
@@ -567,7 +566,7 @@ class EquipmentRuntime(object):
         if self._init_controller is None:
             self._init_controller = controller.get_controller(
                     self,
-                    self["initialaccessmethod"], 
+                    self["initialaccessmethod"],
                     self.logfile)
         return self._init_controller
 

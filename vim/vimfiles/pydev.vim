@@ -19,7 +19,7 @@ set cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 
 " set kp=pyshowdoc
 " set kp=chmsee 
-set kp=kchmviewer\ $HOME/.local/share/devhelp/books/python321rc1.chm\ --sindex 
+" set kp=kchmviewer\ $HOME/.local/share/devhelp/books/python321rc1.chm\ --sindex 
 
 " The 'NonText' highlighting will be used for 'eol', 'extends' and
 " 'precedes'.  'SpecialKey' for 'tab' and 'trail'.
@@ -27,21 +27,21 @@ function PyUseSpaces()
 	hi SpecialKey guifg=Red
 	:set ts=4 sw=4 
 	:set expandtab softtabstop=4 smarttab
-	:set listchars=trail:·,extends:>,precedes:<,tab:*# list
+	:set listchars=trail:â– ,extends:>,precedes:<,tab:â±âž list
 endfunction
 
 function PyUseTabs()
 	hi SpecialKey guifg=Blue
 	:set ts=4 sw=4 
 	:set noexpandtab softtabstop=0 smarttab 
-	:set nolist listchars=eol:$,trail:·,extends:>,precedes:<,tab:»·
+	:set nolist listchars=eol:$,trail:â– ,extends:>,precedes:<,tab:â±âž
 endfunction
 
 function GoogleSpaces()
 	hi SpecialKey guifg=Red
 	:set ts=2 sw=2 tw=74
 	:set expandtab softtabstop=2 smarttab
-	:set listchars=trail:·,extends:>,precedes:<,tab:*# list
+	:set listchars=trail:â– ,extends:>,precedes:<,tab:â±âž list
 endfunction
 
 " by default, use spaces
