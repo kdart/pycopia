@@ -892,7 +892,7 @@ class ConfigCommands(CLI.BaseCommands):
         try:
             value = tval(*tuple(args[1:]))
         except TypeError as terr:
-            self._ui.error(err)
+            self._ui.error(terr)
             return
         name = args[0]
         row = self._get(name)

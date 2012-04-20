@@ -231,7 +231,7 @@ Options:
     from pycopia import getopt
 
     try:
-        optlist, longopts, args = getopt.getopt(argv[1:], "?")
+        optlist, longopts, args = getopt.getopt(argv[1:], "?D")
     except getopt.GetoptError:
         print (jsoncli.__doc__)
         return
@@ -239,7 +239,7 @@ Options:
         if opt == "-?":
             print (jsoncli.__doc__)
             return
-        if opt == "-D":
+        elif opt == "-D":
             from pycopia import autodebug
 
     io = CLI.ConsoleIO()
