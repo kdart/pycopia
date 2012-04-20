@@ -100,7 +100,10 @@ class RootContainer(config.Container):
         try:
             return getattr(self._cache, key)
         except (AttributeError, KeyError, NameError):
-            pass
+            try:
+                return self.get_userconfig().__getitem__(key)
+            except KeyError:
+                pass
         return super(RootContainer, self).__getitem__(key)
 
     def __setitem__(self, key, value):
