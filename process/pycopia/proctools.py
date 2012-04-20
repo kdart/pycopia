@@ -56,6 +56,7 @@ class Process(object):
             flags=0, devnull=False):
         self.cmdline = cmdline
         self.deadchild = 0
+        self.closed = False
         self.callback = callback # called at death of process
         self._log = logfile # should be file-like object
         self._restart = True # restart interrupted system calls
@@ -70,8 +71,6 @@ class Process(object):
         self._authtoken = None
 
     def __del__(self):
-#       if not self.deadchild:
-#           self.killwait()
         self.close()
 
     # Override in subclass -- close your file descriptors connected to
@@ -79,6 +78,7 @@ class Process(object):
     def close(self):
         if self._async:
             asyncio.poller.unregister(self)
+        self.closed = True
 
     def __repr__(self):
         return "%s(%r, %r)" % (self.__class__.__name__, self.cmdline, self._log)
@@ -449,6 +449,8 @@ class ProcessPipe(Process):
         self.kill(SIGINT)
 
     def close(self):
+        if self.closed:
+            return
         super(ProcessPipe, self).close()
         try:
             os.close(self._p_stdin)
@@ -592,6 +594,8 @@ class ProcessPty(Process):
         self._write(self._intr)
 
     def close(self):
+        if self.closed:
+            return
         super(ProcessPty, self).close()
         try:
             os.close(self._fd)
@@ -991,7 +995,8 @@ times the process will be respawned if the previous invocation dies.  """
         else:
             procs = self.getbyname(name)
         for p in procs:
-            self.kill(p, sig)
+            p.close()
+            p.kill(sig)
 
     def kill(self, proc, sig=SIGINT):
         proc.kill(sig)
