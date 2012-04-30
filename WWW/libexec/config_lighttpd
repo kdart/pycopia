@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=0:smarttab
-# 
-#    Copyright (C) 1999-2007  Keith Dart <keith@kdart.com>
+#
+#    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,5 @@
 import sys
 from pycopia.WWW import serverconfig
 
-config = serverconfig.get_site_config()
+serverconfig.config_lighttpd(sys.argv, sys.stdout)
 
-ltc = serverconfig.LighttpdConfig()
-ltc.add_global(port=config.PORT)
-for name, serverlist in config.VHOSTS.items():
-    ltc.add_vhost(name, serverlist)
-ltc.emit(sys.stdout)

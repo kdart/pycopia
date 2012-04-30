@@ -1,8 +1,10 @@
 #!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=0:smarttab
-# 
 
 PORT = 80
+
+# Setting this also enables SSL support.
+#SSLPORT = 443
 
 SITEROOT = "/var/www"
 LOGROOT = "/var/log/lighttpd"

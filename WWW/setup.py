@@ -25,6 +25,7 @@ if platinfo.is_linux():
 
     DATAFILES = [
         ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
+        ('/etc/pycopia/ssl', glob("etc/ssl/*")),
         ('/etc/pycopia/lighttpd', glob("etc/lighttpd/*")),
         (os.path.join(sys.prefix, 'libexec', 'pycopia'), glob("libexec/*")),
     ]

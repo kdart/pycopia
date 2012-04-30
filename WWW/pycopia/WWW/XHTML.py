@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 # -*- coding: utf8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:fenc=utf-8
-# 
+#
 # $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -35,7 +35,7 @@ from __future__ import division
 
 import itertools
 
-from PIL import Image  # for automated image size
+import Image  # from PIL, for automated image size
 
 from pycopia.urlparse import quote_plus
 from pycopia.textutils import identifier
@@ -60,7 +60,7 @@ INLINE_FONTSTYLE = [ "tt", "i", "b", "big", "small"]
 INLINE_PHRASE = [ "em", "strong", "dfn", "code", "samp", "kbd",
     "cite", "var", "abbr", "acronym", "q", "sub", "sup"]
 INLINE_FORM = ["input", "select", "textarea", "label", "button"]
-INLINE = ["a"] + INLINE_SPECIAL + INLINE_FONTSTYLE + INLINE_PHRASE + INLINE_FORM 
+INLINE = ["a"] + INLINE_SPECIAL + INLINE_FONTSTYLE + INLINE_PHRASE + INLINE_FORM
 
 
 # make strings into Text objects, otherwise verify Element object.
@@ -175,7 +175,7 @@ class FlowMixin(object):
             elemclass = getattr(POM, name)
         elif name == "_":
             return NBSP
-        elif name == "JS": # special javascript handler 
+        elif name == "JS": # special javascript handler
             Scr = self.get_dtd_element("Script")
             elem = Scr(type="text/javascript")
             for cont in content:
@@ -210,7 +210,7 @@ class FlowMixin(object):
     def create_markup(self, data):
         """Create markup (a POM object tree) from Python objects."""
         return create_POM(data, self.dtd)
-    
+
     def get_creator(self):
         def _creator(container, data):
             return create_POM(data, container.dtd)
@@ -286,7 +286,7 @@ class FlowMixin(object):
     def disconnect(self, *signals):
         if signals:
             self.add_javascript('disconnectAll("%s", %s);' % (
-                 self.id, 
+                 self.id,
                  ", ".join(map(repr, signals))))
         else:
             self.add_javascript('disconnectAll("%s");' % (self.id, ))
@@ -463,7 +463,7 @@ class ContainerMixin(FlowMixin):
         self.append(t)
         return t
 
-    def new_table(self, rowiter, coliter, headings=(), renderer=_NULLRenderer, 
+    def new_table(self, rowiter, coliter, headings=(), renderer=_NULLRenderer,
                                **kwargs):
         """Construct a new table. Row iterator adds rows with first column
         filled in with object, formatted by calling the renderer callback
@@ -481,7 +481,7 @@ class ContainerMixin(FlowMixin):
         if headings:
             tbl.new_headings(*headings)
         # table body
-        if tbl_id: # if table has id, then cells get an id. 
+        if tbl_id: # if table has id, then cells get an id.
             for y, obj in enumerate(rowiter):
                 row = tbl.new_row()
                 setattr(row, "class_", cycler.next())
@@ -626,7 +626,7 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
     title = property(_get_title, add_title)
 
     def add_stylesheet(self, url):
-        self.head.add(self.dtd.Link, rel="stylesheet", 
+        self.head.add(self.dtd.Link, rel="stylesheet",
                                         type="text/css", href=url)
     def _get_stylesheet(self):
         try:
@@ -677,7 +677,7 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
             sc = self.head.add(self.dtd.Script, type=b"text/javascript")
             sc.add_cdata(text)
         elif url:
-            sc = self.head.add(self.dtd.Script, 
+            sc = self.head.add(self.dtd.Script,
                            type=b"text/javascript", src=url)
 
     def _add_js_list(self, jslist):
@@ -700,7 +700,7 @@ class XHTMLDocument(POM.POMDocument, ContainerMixin):
             sc.destroy()
 
     javascript = property(_get_javascript, add_javascript2head, _del_javascript)
-    javascriptlink = property(_get_javascript, 
+    javascriptlink = property(_get_javascript,
                     lambda self, v: self.add_javascript2head(url=v))
 
 
@@ -825,7 +825,7 @@ class ListMixin(ContainerMixin):
 
 
 # Special support methods for XHTML tables. The makes it easy to produce simple
-# tables. 
+# tables.
 class TableMixin(ContainerMixin):
     # set document dtd so methods can access it to create sub-elements
     def _init(self, dtd):
@@ -1088,7 +1088,7 @@ class FormMixin(ContainerMixin):
             lbl = self.get_label(label, "id_%s" % (name,))
         else:
             lbl = None
-        inp = self.dtd.Input(type="text", name=name, value=default, 
+        inp = self.dtd.Input(type="text", name=name, value=default,
                 maxlength=maxlength, id="id_%s" % (name,), **kwargs)
         return lbl, inp
 
@@ -1104,7 +1104,7 @@ class FormMixin(ContainerMixin):
             lbl = self.get_label(label, "id_%s" % (name,))
         else:
             lbl = None
-        inp = self.dtd.Input(type="password", name=name, value=default, 
+        inp = self.dtd.Input(type="password", name=name, value=default,
                 maxlength=maxlength, id="id_%s" % (name,))
         return lbl, inp
 
@@ -1141,7 +1141,7 @@ class FormMixin(ContainerMixin):
                 opt = self.dtd.Option(value=i)
                 opt.append(POM.Text(name))
                 sl.append(opt)
-            return 
+            return
         if et is dict and enums:
             for key, val in enums.items():
                 opt = self.dtd.Optgroup(label=key)
@@ -1441,7 +1441,7 @@ class GenericDocument(POM.POMDocument, FlowMixin):
     MIMETYPE="text/xml"
 
 
-# danger: hard-coded config. ;-) 
+# danger: hard-coded config. ;-)
 # This maps a doctype, generically determined by the root element name, to
 # a specific document class and default doctype. It simultaneously
 # contains the mimtype to document class mapping.
