@@ -52,7 +52,7 @@ class Process(object):
     """Abstract base class for Processes. Handles all process handling, and
     some common functionality. I/O is handled in subclasses.
     """
-    def __init__(self, cmdline, logfile=None, callback=None, async=False, 
+    def __init__(self, cmdline, logfile=None, callback=None, async=False,
             flags=0, devnull=False):
         self.cmdline = cmdline
         self.deadchild = 0
@@ -140,7 +140,7 @@ class Process(object):
         return self._environment
 
     def _set_environment(self, env):
-        assert type(env) is dict, "Environment must be a dictionary"
+        assert isinstance(env, dict), "Environment must be a dictionary"
         self._environment = env
 
     def _del_environment(self):
@@ -375,7 +375,7 @@ class ProcessPipe(Process):
     and written to by the instances read() and write() methods.
 
     """
-    def __init__(self, cmdline, logfile=None,  env=None, callback=None, 
+    def __init__(self, cmdline, logfile=None,  env=None, callback=None,
             merge=1, pwent=None, async=False, devnull=None):
         Process.__init__(self, cmdline, logfile, callback, async)
 
@@ -517,7 +517,7 @@ class ProcessPty(Process):
     becomes the processes controlling terminal.
 
     """
-    def __init__(self, cmdline, logfile=None, env=None, callback=None, 
+    def __init__(self, cmdline, logfile=None, env=None, callback=None,
             merge=1, pwent=None, async=False, devnull=False):
         Process.__init__(self, cmdline, logfile, callback, async)
         if env:
@@ -1036,7 +1036,7 @@ times the process will be respawned if the previous invocation dies.  """
             deadproc.log(
                     "*** process '%s' died: %s (restarting in 1 sec.).\n" % (
                             deadproc.cmdline, deadproc.exitstatus))
-            scheduler.add(1.0, pri=0, callback=self._respawn, 
+            scheduler.add(1.0, pri=0, callback=self._respawn,
                     args=(deadproc,))
         else:
             deadproc.log(
@@ -1052,7 +1052,7 @@ times the process will be respawned if the previous invocation dies.  """
     def waitproc(self, proc, option=0): # waits for a Process object.
         """waitproc(process, [option])
         Waits for a process object to finish. Works like os.waitpid, but takes a
-        process object instead of a process ID.  
+        process object instead of a process ID.
         """
         pid = int(proc)
         if pid in self._procs:

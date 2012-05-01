@@ -1,2 +1,2 @@
 include test.py
-include ez_setup.py
+recursive-include etc *

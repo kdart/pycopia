@@ -15,15 +15,30 @@ REVISION="$Revision$"
 DNAME = NAME.split("-", 1)[-1]
 EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
+
+import platutils
+platinfo = platutils.get_platform()
+
+if platinfo.is_linux():
+    DATAFILES = [
+        ('/etc/pycopia/ssl', glob("etc/ssl/*")),
+    ]
+    SCRIPTS = glob("bin/*")
+else:
+    DATAFILES = []
+    SCRIPTS = []
+
+
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-process>=1.0.dev-r138,==dev', 
+    install_requires = ['pycopia-process>=1.0.dev-r138,==dev',
                         'pycopia-CLI>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
-    scripts = glob("bin/*"), 
+    data_files = DATAFILES,
+    scripts = SCRIPTS,
     test_suite = "test.NetTests",
 
     description = "General purpose network related modules.",
@@ -38,7 +53,7 @@ setup (name=NAME, version=VERSION,
     url = "http://www.pycopia.net/",
     download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
-    classifiers = ["Operating System :: POSIX", 
+    classifiers = ["Operating System :: POSIX",
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: System :: Networking",
                    "Intended Audience :: Developers"],
