@@ -42,33 +42,33 @@ def choose_tests():
         for name in names:
             if name.endswith(".py") and not name.startswith("_"):
                 flist.append(os.path.join(dirname, name[:-3]))
-    testhome = os.path.dirname(testcases.__file__)
-    modnames = []
-    runnables = []
-    os.path.walk(testhome, filternames, modnames)
-    testhome_index = len(os.path.dirname(testhome)) + 1
-    modnames = map(lambda n: n[testhome_index:].replace("/", "."), modnames)
-    modnames.sort()
-    for modname in modnames:
-        try:
-            mod = module.get_module(modname)
-        except module.ModuleImportError:
-            ui.warning("  Warning: could not import '{}'".format(modname))
-            continue
-        if getattr(mod, "run", None) is not None:
-            runnables.append(FormatWrapper(ui, modname, None, "%w%U%N"))
-        for attrname in dir(mod):
-            obj = getattr(mod, attrname)
-            if type(obj) is type:
-                if issubclass(obj, core.UseCase):
-                    runnables.append(FormatWrapper(ui, modname, obj.__name__, "%U.%g%O%N"))
-                if issubclass(obj, core.Test):
-                    runnables.append(FormatWrapper(ui, modname, obj.__name__, "%U.%y%O%N"))
+    for testbase in testcases.__path__:
+        modnames = []
+        runnables = []
+        os.path.walk(testbase, filternames, modnames)
+        testhome_index = len(os.path.dirname(testbase)) + 1
+        modnames = map(lambda n: n[testhome_index:].replace("/", "."), modnames)
+        modnames.sort()
+        for modname in modnames:
+            try:
+                mod = module.get_module(modname)
+            except module.ModuleImportError:
+                ui.warning("  Warning: could not import '{}'".format(modname))
+                continue
+            if getattr(mod, "run", None) is not None:
+                runnables.append(FormatWrapper(ui, modname, None, "%w%U%N"))
+            for attrname in dir(mod):
+                obj = getattr(mod, attrname)
+                if type(obj) is type:
+                    if issubclass(obj, core.UseCase):
+                        runnables.append(FormatWrapper(ui, modname, obj.__name__, "%U.%g%O%N"))
+                    if issubclass(obj, core.Test):
+                        runnables.append(FormatWrapper(ui, modname, obj.__name__, "%U.%y%O%N"))
     return [o.fullname for o in ui.choose_multiple(runnables, prompt="Select tests")]
 
 
 class FormatWrapper(object):
-    """Wrap module path object with a format. 
+    """Wrap module path object with a format.
 
     The format string should have an '%O' component that will be expanded to
     the stringified object, and an '%U' component for the module name.
