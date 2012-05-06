@@ -51,5 +51,5 @@ def wxpaste(callback=None, logfile=None, extraoptions="", async=False):
     if es:
         return rv
     else:
-        raise RuntimeError, str(es)
+        raise proctools.ProcessError(es)
 
