@@ -1,0 +1,25 @@
+# vim:ts=4:sw=4:softtabstop=0:smarttab:ft=python
+
+
+SERVERTYPE = "multiplex"
+HOST = "localhost"  # don't expose us to the outside world by default
+NS_HOST = HOST
+NS_PORT = 9090      # tcp
+NS_BCPORT = 9091    # udp
+NS_BCHOST = None
+NATHOST = None
+NATPORT = 0
+COMPRESSION = False
+DOTTEDNAMES = True   # server-side
+COMMTIMEOUT = 0.0
+POLLTIMEOUT = 2.0     # seconds
+SOCK_REUSE = True    # so_reuseaddr on server sockets?
+THREADING2 = False    # use threading2 if available?
+ONEWAY_THREADED = True     # oneway calls run in their own thread
+DETAILED_TRACEBACK = False
+THREADPOOL_MINTHREADS = 4
+THREADPOOL_MAXTHREADS = 50
+THREADPOOL_IDLETIMEOUT = 5.0
+HMAC_KEY = b"pycopia"
+AUTOPROXY = True
+BROADCAST_ADDRS = "<broadcast>, 0.0.0.0"   # comma separated list of broadcast addresses

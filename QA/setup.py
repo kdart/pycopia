@@ -36,7 +36,7 @@ def system_setup():
                 except KeyError:
                     os.system("groupadd testers")
                     os.system("useradd -c Tester -g testers "
-                    "-G users.uucp,audio,cdrom,dialout,video,games,usb,crontab,messagebus,plugdev " 
+                    "-G users.uucp,audio,cdrom,dialout,video,games,usb,crontab,messagebus,plugdev "
                     "-m tester")
                     print "Remember to change password for new user tester."
                     #os.system("passwd tester")
@@ -77,16 +77,18 @@ setup (name=NAME, version=VERSION,
     packages = find_packages(),
     install_requires = [
         'pycopia-CLI>=1.0.dev-r138,<=dev',
-        'pycopia-storage>=1.0.dev-r138,<=dev', 
+        'pycopia-storage>=1.0.dev-r138,<=dev',
         'pycopia-WWW>=1.0.dev-r279,<=dev',
         'docutils>=0.5',
-        'Pyro>=3.9',
+        #'Pyro>=3.9',
+        'Pyro4>=4.13',
         ],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
     scripts = SCRIPTS,
     data_files = DATA_FILES,
+    package_data = {"": ['*.glade']},
     test_suite = "test.QATests",
 
     description = "Pycopia packages to support professional QA roles.",
@@ -102,7 +104,7 @@ setup (name=NAME, version=VERSION,
     url = "http://www.pycopia.net/",
     download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
-    classifiers = ["Operating System :: POSIX", 
+    classifiers = ["Operating System :: POSIX",
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Topic :: Software Development :: Quality Assurance",
                    "Intended Audience :: Developers"],

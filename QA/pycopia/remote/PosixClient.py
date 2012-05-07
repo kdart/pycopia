@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2012  Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -16,13 +14,13 @@
 #    Lesser General Public License for more details.
 
 """
-Client stub for connecting to file operations server.
-Any Posix specific client abstractions or special handling should go here.
+Client addidtions to transparently connect from a Posix remote agent
+client to a server running on MS Windows.
 
+A WindowsServer can raise WindowsError exception, but Pyro can't map that
+to a Python exception running under Posix. So, define that here to fake
+it.
 """
-
-# A WindowsServer can raise WindowsError exception, but Pyro can't map that to
-# a Python exception running under Posix. So, define that here to fake it.
 
 import sys, new
 

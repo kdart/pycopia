@@ -4,15 +4,12 @@
 # responsibility to syslog/syslog-ng with minimal processing by Python or
 # Pyro.
 
-# Pyro uses two loggers:
-#	Pyro.system		(pyro itself)
-#	Pyro.user		(user logger)
 
 [loggers]
-keys=root,systemLog,userLog
+keys=root,Pyro4,PycopiaLog
 
 [handlers]
-keys=rootLog_stderr,PyrosystemLogFile,PyrouserLogFile,PycopiaLog
+keys=rootLog_stderr,PyrouserLogFile,PycopiaLog
 
 [formatters]
 keys=pyroFormatter
@@ -21,14 +18,8 @@ keys=pyroFormatter
 level=NOTSET
 handlers=rootLog_stderr
 
-[logger_systemLog]
-qualname=Pyro.system
-level=DEBUG
-handlers=PyrosystemLogFile
-propagate=0
-
-[logger_userLog]
-qualname=Pyro.user
+[logger_Pyro4]
+qualname=Pyro4
 level=INFO
 handlers=PyrouserLogFile
 propagate=0
@@ -43,11 +34,6 @@ propagate=0
 class=StreamHandler
 level=NOTSET
 args=(sys.stderr,)
-
-[handler_PyrosystemLogFile]
-class=handlers.SysLogHandler
-formatter=pyroFormatter
-args=("/dev/log", handlers.SysLogHandler.LOG_DAEMON)
 
 [handler_PyrouserLogFile]
 class=handlers.SysLogHandler

@@ -1,7 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#
+#    Copyright (C) 2012 and onwards, Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -25,12 +25,12 @@ Place the following lines in c:\autoexec.bat::
 
 Now run (all on one line)::
 
-    C:\Python26>python.exe %PYTHONLIB%\site-packages\pycopia\remote\WindowsServer.py 
+    C:\Python26>python.exe %PYTHONLIB%\site-packages\pycopia\remote\WindowsServer.py
             --username DOMAIN\Administrator --password xxxxxxxx install
 
 OR, for system process that can interact with console::
 
-    C:\Python26>python.exe %PYTHONLIB%\site-packages\pycopia\remote\WindowsServer.py 
+    C:\Python26>python.exe %PYTHONLIB%\site-packages\pycopia\remote\WindowsServer.py
             --interactive install
 
 Note: if you get an error about an account not existing, you may need
@@ -43,7 +43,7 @@ If a username was supplied to run as, go to the Service Manger from the
 Windows control panel, and perform the following.
 
     - Select "Remote Agent Server" from the list. Right-clieck and select "properties".
-    - Select the "Log On" tab. 
+    - Select the "Log On" tab.
     - Click the "This account:" radio button.
     - Enter DOMAIN\Administrator in the account box (or something else appropriate).
     - Enter the proper password (twice).
@@ -54,7 +54,7 @@ Windows control panel, and perform the following.
 
 You may also need to disable the Windows firewall for this to function
 properly. This service is a massive security hole, so only run it on
-a throw-away test machine on an isolated network. 
+a throw-away test machine on an isolated network.
 
 """
 
@@ -907,7 +907,7 @@ def run_server():
     daemon=Pyro.core.Daemon()
     daemon.useNameServer(ns)
 
-    uri=daemon.connectPersistent(Win32Agent(), 
+    uri=daemon.connectPersistent(Win32Agent(),
                 "Agents.%s" % (win32api.GetComputerName().lower(),))
     daemon.requestLoop(_checkexit)
     daemon.shutdown()

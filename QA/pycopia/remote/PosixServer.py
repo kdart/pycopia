@@ -1,7 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-#    Copyright (C) 1999-2009  Keith Dart <keith@kdart.com>
+#
+#    Copyright (C) 2012 and onwards,  Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -12,38 +12,26 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+"""
+Remote control agent that runs on Posix systems.
 
 """
-Remote Responder for Linux/Posix systems.
-
-"""
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import os, sys, shutil, errno
 
-def setConfig():
-    Pyro.config.PYRO_MULTITHREADED = 0
-    Pyro.config.PYRO_LOGFILE = "/var/log/qaagent.log"
-    Pyro.config.PYRO_TRACELEVEL=3
-    Pyro.config.PYRO_USER_LOGFILE = "/var/log/qaagent_user.log"
-    Pyro.config.PYRO_USER_TRACELEVEL = 3
-
-import Pyro
-import Pyro.util
-setConfig()
-Log=Pyro.util.Log
-import Pyro.core
-import Pyro.naming
-
-UserLog = Pyro.util.UserLogger()
-# msg, warn, or error methods
-
-from pycopia import asyncio
-from pycopia import socket
 from pycopia import proctools
 from pycopia import UserFile
 from pycopia import passwd
+from pycopia.QA import logging
+from pycopia.remote import pyro
 
-_EXIT = False # singals the server wants to exit. 
+
+
+_EXIT = False # singals the server wants to exit.
 
 class PosixFile(UserFile.UserFile):
     def __repr__(self):
@@ -51,9 +39,8 @@ class PosixFile(UserFile.UserFile):
 
 # A server that performs client operations. This mostly delegates to the
 # os module. But some special methods are provided for common functions.
-class PosixAgent(Pyro.core.ObjBase, object):
+class PosixAgent(object):
     def __init__(self):
-        super(PosixAgent, self).__init__()
         self._files = {}
         self._status = {} # holds async process pids
         self._dirstack = []
@@ -305,7 +292,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
         """Run a subprocess, wait for completion and return status and
         stdout as text.
         """
-        UserLog.msg("run", cmd, "user=", str(user))
+        logging.msg("run", cmd, "user=", str(user))
         pm = proctools.get_procmanager()
         if type(user) is str:
             user = passwd.getpwnam(user)
@@ -316,7 +303,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
 
     def pipe(self, cmd, user=None):
         """Run a subprocess, but connect by pipes rather than pty."""
-        UserLog.msg("pipe", cmd, "user=", str(user))
+        logging.msg("pipe", cmd, "user=", str(user))
         pm = proctools.get_procmanager()
         if type(user) is str:
             user = passwd.getpwnam(user)
@@ -332,17 +319,17 @@ class PosixAgent(Pyro.core.ObjBase, object):
             user = passwd.getpwnam(user)
         proc = pm.spawnpty(cmd, callback=self._status_cb, pwent=user, async=async)
         # status with a key present, but None value means a running process.
-        self._status[proc.childpid] = None 
-        UserLog.msg("spawn", cmd, "user=%s async=%s pid=%d" % (user, async, proc.childpid))
+        self._status[proc.childpid] = None
+        logging.msg("spawn", cmd, "user=%s async=%s pid=%d" % (user, async, proc.childpid))
         return proc.childpid
 
     def subprocess(self, _meth, *args, **kwargs):
         """Run a python method asynchronously as a subprocess."""
-        UserLog.msg("subprocess", str(_meth))
+        logging.msg("subprocess", str(_meth))
         pm = proctools.get_procmanager()
         proc = pm.submethod(_meth, args, kwargs)
         proc.callback = self._status_cb
-        self._status[proc.childpid] = None 
+        self._status[proc.childpid] = None
         return proc.childpid
 
     def _get_process(self, pid):
@@ -362,7 +349,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
             return proc.write(data)
 
     def poll(self, pid):
-        """Poll for async process. 
+        """Poll for async process.
 
         Returns exitstatus if done, -ENOENT if no such pid is managed, or -EAGAIN
         if pid is still running.
@@ -395,7 +382,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
 
     def kill(self, pid):
         """Kills a process that was started by spawn."""
-        UserLog.msg("kill", str(pid))
+        logging.msg("kill", str(pid))
         try:
             sts = self._status.pop(pid)
         except KeyError:
@@ -431,7 +418,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
 
     def python(self, snippet):
         try:
-            code = compile(str(snippet) + '\n', '<PosixServer>', 'eval')
+            code = compile(str(snippet) + '\n', '<PosixAgent>', 'eval')
             rv = eval(code, globals(), vars(self))
         except:
             t, v, tb = sys.exc_info()
@@ -441,7 +428,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
 
     def pyexec(self, snippet):
         try:
-            code = compile(str(snippet) + '\n', '<PosixServer>', 'exec')
+            code = compile(str(snippet) + '\n', '<PosixAgent>', 'exec')
             exec code in globals(), vars(self)
         except:
             t, v, tb = sys.exc_info()
@@ -474,7 +461,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
 
     def hostname(self):
         """Returns the client hosts name."""
-        return socket.getfqdn()
+        return os.uname()[1]
 
     def md5sums(self, path):
         """Reads the md5sums.txt file in path and returns the number of files
@@ -510,7 +497,7 @@ class PosixAgent(Pyro.core.ObjBase, object):
 ###################################
 ######## main program #############
 
-_DOC = """qaagentd [-nh?] 
+_DOC = """qaagentd [-nh?]
 
 Starts the Posix QA agent (server).
 
@@ -520,49 +507,35 @@ Where:
 """
 
 def run_server(argv):
-    global _EXIT
-    from pycopia import daemonize
     import getopt
     do_daemon = True
     try:
         optlist, args = getopt.getopt(argv[1:], "nh?")
     except getopt.GetoptError:
-        print _DOC
+        print(_DOC)
         sys.exit(2)
 
     for opt, optarg in optlist:
         if opt in ("-h", "-?"):
-            print _DOC
+            print(_DOC)
             return
         elif opt == "-n":
             do_daemon = False
 
     if do_daemon:
+        from pycopia import daemonize
         daemonize.daemonize()
 
-    Pyro.core.initServer(banner=0, storageCheck=0)
-    Log.msg("qaagent", "initializing")
+    logging.msg("qaagent", "initializing")
+    h = pyro.register_server(PosixAgent())
+    def _exit_checker(poller):
+        if _EXIT:
+            pyro.unregister_server(h)
+    pyro.loop(2.0, _exit_checker)
 
-    ns=Pyro.naming.NameServerLocator().getNS()
-
-    daemon=Pyro.core.Daemon()
-    daemon.useNameServer(ns)
-
-    uri=daemon.connectPersistent(PosixAgent(), "Agents.%s" % socket.getfqdn().replace(".", "_"))
-
-    while True:
-        try:
-            daemon.handleRequests(2.0)
-            if _EXIT:
-                return
-            asyncio.poller.poll(0)
-        except KeyboardInterrupt:
-            break
-        except:
-            ex, val, tb = sys.exc_info()
-            print >>sys.stderr, ex, val
 
 
 if __name__ == "__main__":
-    run_server(sys.argv)
-
+    from pycopia import autodebug
+    #run_server(sys.argv)
+    run_server(["qaagentd", "-n"])

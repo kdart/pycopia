@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2012 Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -19,14 +17,11 @@
 The Client for Remote controllers.
 
 """
-__all__ = ["get_remote", "remote_copy", "get_proxy"]
+__all__ = ["get_remote", "remote_copy", "get_controller"]
 
 import sys, os
 
-os.environ["PYRO_CONFIG_FILE"] = "/etc/pycopia/Pyro.conf"
-
-import Pyro.core
-
+from pycopia.remote import pyro
 
 
 # some platform specific stuff. Should be minimal
@@ -45,13 +40,10 @@ class ProxyError(Exception):
     pass
 
 
-def get_remote(name):
-    Pyro.core.initClient(banner=0)
-    return get_proxy("Agents.%s" % name.replace(".", "_"))
-
-
-def get_proxy(name):
-    return Pyro.core.getProxyForURI("PYRONAME://%s" % (name,))
+def get_remote(prefix):
+    ns = pyro.locate_nameserver()
+    plist = ns.list(prefix=prefix)
+    return pyro.get_proxy(plist.popitem()[1])
 
 
 def remote_copy(agent, remfile, dst):
@@ -75,4 +67,7 @@ def get_controller(equipment, logfile=None):
         logfile.write("Got remote.Client %s\n" % (client,))
     return client
 
+
+if __name__ == "__main__":
+    rem = get_remote("PosixAgent")
 

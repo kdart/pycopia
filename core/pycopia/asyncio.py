@@ -47,9 +47,9 @@ try:
 except AttributeError:
     O_ASYNC = os.O_ASYNC = {
         "linux3":020000, # ?
-        "linux2":020000, 
-        "linux3":020000, 
-        "freebsd4":0x0040, 
+        "linux2":020000,
+        "linux3":020000,
+        "freebsd4":0x0040,
         "freebsd5":0x0040,  # ?
         "darwin":0x0040,
         "sunos5":0, # not supported
@@ -169,6 +169,28 @@ class Poll(object):
                 self.pollster.unregister(fd)
                 del self.smap[fd]
 
+    # A poller is itself selectable so may be nested in another Poll
+    # instance. Therefore, supports the async interface itself.
+    def fileno(self):
+        return self.pollster.fileno()
+
+    def readable(self):
+        return bool(self.smap)
+
+    def writable(self):
+        return False
+
+    def priority(self):
+        return False
+
+    def read_handler(self):
+        self.poll()
+
+    def error_handler(self):
+        print("Pollster error", file=sys.stderr)
+
+    def exception_handler(self, ex, val, tb):
+        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
 
 
 # Mixin for objects that only want to define a few methods for a class
@@ -257,7 +279,7 @@ def start_sigio():
     global manager
     if manager is None:
         manager = SIGIOHandler()
-        # add the local poller instance to the signal handler. 
+        # add the local poller instance to the signal handler.
         manager.register(lambda: poller.poll(0))
     else:
         manager.on()

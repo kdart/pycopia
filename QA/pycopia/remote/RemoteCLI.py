@@ -1,7 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 1999-2009  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2012 and onwards,  Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -20,15 +20,11 @@ Command line interface to Remote QA agent servers.
 
 import sys, os, time, errno
 
-os.environ["PYRO_CONFIG_FILE"] = "/etc/pycopia/Pyro.conf"
-
-import Pyro.core
-import Pyro.naming
-import Pyro.errors
 
 from pycopia import CLI
 from pycopia import UI
 from pycopia import cliutils
+from pycopia.remote import pyro
 from pycopia.remote import Client
 
 PROMPT = "remote> "
@@ -89,10 +85,10 @@ class FileCommand(CLI.BaseCommands):
         """lock <length> <start> [whence]
     Sets an exclusive lock on the file. The extent of bytes is given by
     <length>, and starting position by <start>. The start position is dependent
-    on <whence>. 
+    on <whence>.
     Values for whence:
-        "set" - relative to the start of the file (SEEK_SET) 
-        "current" - relative to the current buffer position (SEEK_CUR) 
+        "set" - relative to the start of the file (SEEK_SET)
+        "current" - relative to the current buffer position (SEEK_CUR)
         "end" - relative to the end of the file (SEEK_END) """
         length = int(argv[1])
         start = int(argv[2])
@@ -142,7 +138,7 @@ class FileCommand(CLI.BaseCommands):
         return self._obj.fsync(self._handle)
 
     def statvfs(self, argv):
-        """statvfs 
+        """statvfs
     Print information about the volume that this file is located in."""
         vfsstat = self._obj.fstatvfs(self._handle)
         self._print("Volume stats:")
@@ -281,7 +277,7 @@ class RemoteCLI(CLI.BaseCommands):
 
     def spawn(self, argv):
         """spawn [-a] [-u <user>] <cmd>
-    Runs the command on this client, and returns immediatly.  
+    Runs the command on this client, and returns immediatly.
         Options:
           -u  <user> run as given user account.
           -a run async (performs automatic reads of process output).  """
@@ -392,7 +388,7 @@ class RemoteCLI(CLI.BaseCommands):
         if finfo:
             cmd = self.clone(FileCommand)
             cmd._setup(self._obj, handle, "%s> " % (finfo,))
-            raise CLI.NewCommand, cmd 
+            raise CLI.NewCommand, cmd
         else:
             self._print("No such handle on server.")
 
@@ -853,22 +849,19 @@ class WindowsRemoteCLI(RemoteCLI):
 class TopLevelCLI(CLI.BaseCommands):
     def initialize(self):
         self._objs = {}
-        Pyro.core.initClient(banner=0)
+        self._ns = pyro.locate_nameserver()
         self._rescan()
 
     def _rescan(self):
-        locator = Pyro.naming.NameServerLocator()
-        ns = locator.getNS()
-        for name, isobject in ns.list("Agents"):
-            if isobject:
-                self._objs[name] = True
-        agents = list(self._objs.keys())
+        self._objs = self._ns.list()
+        agents = self._objs.keys()
         self.add_completion_scope("use", agents)
         self.add_completion_scope("ping", agents)
         self.add_completion_scope("whatis", agents)
 
     def finalize(self):
         self._objs = {}
+        self._ns = None
 
     def except_hook(self, ex, val, tb):
         self._print(ex, val)
@@ -883,12 +876,12 @@ class TopLevelCLI(CLI.BaseCommands):
         """ls
     Print available clients."""
         self._print("Currently available agents:")
-        for name in self._objs:
-            self._print("  %s" % (name,))
+        for name, uri in self._objs.items():
+            self._print("  {} -> {}".format(name, uri))
     dir = ls # alias
 
     def get_remote(self, name):
-        return Client.get_remote(name)
+        return pyro.get_proxy(self._objs[name])
 
     def use(self, argv):
         """use <name>
@@ -897,7 +890,7 @@ class TopLevelCLI(CLI.BaseCommands):
         clnt = self.get_remote(name)
         try:
             clnt.alive()
-        except Pyro.errors.ConnectionClosedError:
+        except pyro.ConnectionClosedError:
             del self._objs[name]
             self._print("Remote agent has disconnected.")
             return
@@ -916,7 +909,7 @@ class TopLevelCLI(CLI.BaseCommands):
         clnt = self.get_remote(name)
         try:
             clnt.alive()
-        except Pyro.errors.ConnectionClosedError:
+        except pyro.ConnectionClosedError:
             del self._objs[name]
             self._print("Remote agent has disconnected.")
             return
@@ -938,7 +931,7 @@ class TopLevelCLI(CLI.BaseCommands):
 
 
 class CLIManager(object):
-    """Manage a collection of CLI wrappers. 
+    """Manage a collection of CLI wrappers.
 
     Maps agent implementation names to specific CLI wrappers.
     """
@@ -966,7 +959,7 @@ class CLIManager(object):
             try:
                 return cls._CLI[agenttype]
             except KeyError: # use defaults if no specific cli wrapper found.
-                pass 
+                pass
         # default to platform generic CLI
         plat = clnt.platform()
         if plat == "win32":
@@ -1028,5 +1021,6 @@ methods in the module remote.??????Server may be invoked with this tool.
 
 
 if __name__ == "__main__":
+    from pycopia import autodebug
     remotecli(sys.argv)
 
