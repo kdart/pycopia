@@ -12,7 +12,7 @@ set columns=100
 
 " Make command line two lines high
 set cmdheight=3
-set listchars=eol:$,trail:·,extends:>,precedes:<,tab:»·
+set listchars=trail:â– ,extends:>,precedes:<,tab:â±âž list
 
 set background="dark"
 
