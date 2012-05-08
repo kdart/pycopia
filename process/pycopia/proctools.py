@@ -1,9 +1,7 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -21,11 +19,11 @@ Classes and functions for controlling, reading, and writing to co-processes.
 """
 
 import sys, os
+import logging
 from signal import signal
 from signal import SIGCHLD, SIGTERM, SIGSTOP, SIGCONT, SIGHUP, SIG_DFL, SIGINT
 from errno import EINTR, EBADF, ECHILD, EAGAIN, EIO
 
-from pycopia import asyncio
 from pycopia import shparser
 from pycopia.OS.procfs import ProcStat
 
@@ -37,6 +35,7 @@ from pycopia import scheduler
 IPIPE = Enum(1, "IPIPE")
 OPIPE = Enum(2, "OPIPE")
 
+
 class ProcessError(Exception):
     pass
 
@@ -46,6 +45,23 @@ class NotFoundError(ValueError):
 
 class AuthenticationError(Exception):
     pass
+
+
+# global poller set when async operation is used.
+poller = None
+
+def get_poller():
+    global poller
+    from pycopia import asyncio
+    if poller is None:
+        poller = asyncio.Poll()
+    return poller
+
+def remove_poller():
+    global poller
+    if poller is not None:
+        poller.unregister_all()
+        poller = None
 
 
 class Process(object):
@@ -77,7 +93,7 @@ class Process(object):
     # subprocess.
     def close(self):
         if self._async:
-            asyncio.poller.unregister(self)
+            poller.unregister(self)
         self.closed = True
 
     def __repr__(self):
@@ -299,13 +315,13 @@ ProcManager uses this."""
     send = write
 
     def tell(self):
-        raise IOError, (EBADF, "Process object not seekable")
+        raise IOError((EBADF, "Process object not seekable"))
 
     def seek(self, pos, whence=0):
-        raise IOError, (EBADF, "Process object not seekable")
+        raise IOError((EBADF, "Process object not seekable"))
 
     def rewind(self):
-        raise IOError, (EBADF, "Process object not seekable")
+        raise IOError((EBADF, "Process object not seekable"))
 
     def flush(self):
         return None
@@ -334,7 +350,7 @@ ProcManager uses this."""
             if self._log is not None:
                 self._log.write("Read error (error stream): (%s)\n" % (err,))
 
-# interfaces for asyncio poller/manager.
+    # Interface for asyncio poller.
     def readable(self):
         return True
 
@@ -350,7 +366,7 @@ ProcManager uses this."""
     def write_handler(self):
         self._write_buf()
         if self._async:
-            asyncio.poller.modify(self)
+            poller.modify(self)
 
     def pri_handler(self):
         pass
@@ -406,11 +422,7 @@ class ProcessPipe(Process):
             else:
                 if os.dup(c2perr) <> 2:
                     os._exit(127)
-            # close all other file descriptors for child.
-            for i in xrange(3, 255):
-                try:
-                    os.close(i)
-                except: pass
+            remove_poller()
             try:
                 if pwent:
                     run_as(pwent)
@@ -432,13 +444,13 @@ class ProcessPipe(Process):
 
     def fileno(self):
         if self._p_stdout is None:
-            raise ValueError, "I/O operation on closed process"
+            raise ValueError("I/O operation on closed process")
         return self._p_stdout
 
     def filenos(self):
         """filenos() Returns tuple of all file descriptors used in this object."""
         if self._p_stdout is None:
-            raise ValueError, "I/O operation on closed process"
+            raise ValueError("I/O operation on closed process")
         return self._p_stdout, self._p_stdin, self._stderr
 
     def nonblocking(self, flag=1):
@@ -525,15 +537,12 @@ class ProcessPty(Process):
         cmd = split_command_line(self.cmdline)
         try:
             pid, self._fd = os.forkpty()
-        except OSError, err:
-            print >>sys.stderr, "ProcessPty: Cannot forkpty."
-            print >>sys.stderr, str(err)
+        except OSError as err:
+            logging.error("ProcessPty: Cannot forkpty.")
+            logging.error(err)
         else:
             if pid == 0: # child
-                for i in xrange(3, 256):
-                    try:
-                        os.close(i)
-                    except: pass
+                remove_poller()
                 if devnull:
                     # Redirect standard file descriptors.
                     sys.stdout.flush()
@@ -554,7 +563,6 @@ class ProcessPty(Process):
                         so = se = sys.stdout = sys.stderr = logfile
                         os.dup2(so.fileno(), 1)
                         os.dup2(se.fileno(), 2)
-
                 try:
                     if pwent:
                         run_as(pwent)
@@ -575,13 +583,13 @@ class ProcessPty(Process):
 
     def fileno(self):
         if self._fd is None:
-            raise ValueError, "I/O operation on closed process"
+            raise ValueError("I/O operation on closed process")
         return self._fd
 
     def filenos(self):
         """filenos() Returns tuple of all file descriptors used in this object."""
         if self._fd is None:
-            raise ValueError, "I/O operation on closed process"
+            raise ValueError("I/O operation on closed process")
         return (self._fd,)
 
     def nonblocking(self, flag=1):
@@ -624,7 +632,7 @@ class ProcessPty(Process):
                 if self._restart and why.errno == EINTR:
                     continue
                 elif why.errno == EIO:
-                    raise EOFError, "pty is closed"
+                    raise EOFError("pty is closed")
                 else:
                     raise
             else:
@@ -750,11 +758,6 @@ class ProcessPipeline(ProcessPipe):
         # close all other file descriptors for child.
         if pwent:
             run_as(pwent)
-        for i in xrange(3, 256):
-            try:
-                os.close(i)
-            except:
-                pass
         if env:
             os.execvpe(cmd[0], cmd, env)
         else:
@@ -795,7 +798,7 @@ class ExitStatus(object):
             return self._status
         else:
             name = self.cmdline.split()[0]
-            raise ValueError, "ExitStatus: %r did not exit normally." % (name,)
+            raise ValueError("ExitStatus: %r did not exit normally." % (name,))
 
     # exit status truth value is true if normal exit, and false otherwise.
     def __nonzero__(self):
@@ -816,6 +819,7 @@ class ExitStatus(object):
             return "FIXME! unknown state"
 
 
+
 # this is the SIGCHLD signal handler
 def _child_handler(sig, stack):
     procmanager.waitpid(-1, os.WNOHANG)
@@ -829,7 +833,6 @@ to get the instance.  """
 
     def __init__(self):
         self._procs = {}
-        self.poller = asyncio.poller
         signal(SIGCHLD, _child_handler)
 
     def __len__(self):
@@ -858,7 +861,7 @@ ProcessPipe.  """
             self._procs[proc.childpid2] = proc
         signal(SIGCHLD, _child_handler)
         if proc._async:
-            self.poller.register(proc)
+            get_poller().register(proc)
         return proc
 
     def spawnpipe(self, cmd, logfile=None, env=None, callback=None,
@@ -890,7 +893,6 @@ times the process will be respawned if the previous invocation dies.  """
             sys.excepthook = sys.__excepthook__
             # child is not managing any of these
             self._procs.clear()
-            self.poller.clear()
             try:
                 rv = apply(method, args)
             except SystemExit, val:
@@ -914,7 +916,7 @@ times the process will be respawned if the previous invocation dies.  """
         self._procs[proc.childpid] = proc
         signal(SIGCHLD, _child_handler)
         if proc._async:
-            self.poller.register(proc)
+            get_poller().register(proc)
         return proc
 
     def subprocess(self, _method, *args, **kwargs):
@@ -928,7 +930,6 @@ times the process will be respawned if the previous invocation dies.  """
         if proc.childpid == 0: # in child
             sys.excepthook = sys.__excepthook__
             self._procs.clear()
-            self.poller.clear()
             try:
                 rv = _method(*args, **kwargs)
             except SystemExit as val:
@@ -960,7 +961,6 @@ times the process will be respawned if the previous invocation dies.  """
             self._procs[proc.childpid] = proc
             signal(SIGCHLD, _child_handler)
             return proc
-
 
     # introspection and query methods
     def getpids(self):
@@ -1047,7 +1047,7 @@ times the process will be respawned if the previous invocation dies.  """
         new = self.clone(deadproc)
         new._log = deadproc._log
         if new._async:
-            self.poller.register(new)
+            poller.register(new)
 
     def waitproc(self, proc, option=0): # waits for a Process object.
         """waitproc(process, [option])
@@ -1078,19 +1078,19 @@ times the process will be respawned if the previous invocation dies.  """
                     try:
                         proc = self._procs[pid]
                     except KeyError:
-                        sys.stderr.write("warning: caught SIGCHLD for unmanaged process (pid: %s).\n" % pid)
+                        logging.warn("warning: caught SIGCHLD for unmanaged process (pid: %s).\n" % pid)
                         continue
                     es = ExitStatus(proc.cmdline, sts)
                     proc.set_exitstatus(es)
                     if es.state != ExitStatus.STOPPED: # XXX untested with stopped processes
                         if proc._async:
-                            self.poller.unregister(proc)
+                            poller.unregister(proc)
                         proc.dead()
                         del self._procs[pid]
 
     def loop(self, timeout=-1.0, callback=NULL):
         while True:
-            self.poller.loop(timeout, callback)
+            poller.loop(timeout, callback)
             # If a respawn is scheduled don't exit yet.
             if not scheduler.get_scheduler():
                 break
@@ -1101,6 +1101,7 @@ times the process will be respawned if the previous invocation dies.  """
         "Force flushing all process logs."
         for proc in self._procs.values():
             proc.flushlog()
+
 
 def get_procmanager():
     """get_procmanager() returns the procmanager. A ProcManager is a singleton
@@ -1190,7 +1191,7 @@ def run_as_with_PAM(pwent, umask):
         auth.open_session(PAM.PAM_SILENT)
     # XXX
     except PAM.error, resp:
-        raise AuthenticationError, resp
+        raise AuthenticationError(resp)
     os.environ["HOME"] = home
     os.environ["USER"] = pwent.name
     os.environ["LOGNAME"] = pwent.name
@@ -1225,10 +1226,6 @@ def getstatusoutput(cmd, logfile=None, env=None, callback=None):
 
 def set_nonblocking(fd, flag=1):
     import fcntl
-    try:
-        fd = int(fd)
-    except TypeError:
-        return
     flags = fcntl.fcntl(fd, fcntl.F_GETFL)
     if flag:
         flags |= os.O_NONBLOCK # set non-blocking
@@ -1253,7 +1250,7 @@ def which(basename):
         testname = os.path.join(pe, basename)
         if os.access(testname, os.X_OK):
             return testname
-    raise NotFoundError, "which: no %r found in $PATH." % (basename,)
+    raise NotFoundError("which: no %r found in $PATH." % (basename,))
 
 
 split_command_line = shparser.get_command_splitter()

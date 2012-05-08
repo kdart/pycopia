@@ -64,6 +64,10 @@ class Poll(object):
     def __init__(self):
         self.smap = {}
         self.pollster = select.epoll()
+        fd = self.pollster.fileno()
+        flags = fcntl.fcntl(fd, fcntl.F_GETFD)
+        flags |= fcntl.FD_CLOEXEC
+        fcntl.fcntl(fd, fcntl.F_SETFD, flags)
 
     def __str__(self):
         return "Polling descriptors: %r" % (self.smap.keys(),)
