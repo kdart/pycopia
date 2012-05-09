@@ -1,0 +1,11 @@
+#!/usr/bin/python -OO
+
+# start the name server. Usually run on the controller only.
+
+import sys
+from pycopia.remote import nameserver
+
+
+nameserver.qanameserverd(sys.argv)
+
+

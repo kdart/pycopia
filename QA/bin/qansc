@@ -1,0 +1,11 @@
+#!/usr/bin/python -OO
+
+# Pycoipa name server control.
+
+import sys
+from pycopia.remote import nsc
+
+
+nsc.nsc(sys.argv)
+
+

@@ -37,7 +37,6 @@ from pycopia.QA import logging
 import Pyro4
 from Pyro4.errors import *
 
-from pycopia import debugger
 
 # Pyro config is still weird.
 def set_p4_config():
@@ -100,6 +99,7 @@ class PyroAsyncAdapter(asyncio.PollerInterface):
         self.update()
 
     def exception_handler(self, ex, val, tb):
+        from pycopia import debugger
         debugger.post_mortem(tb, ex, val)
         #print("PyroAsyncAdapter error: {} ({})".format(ex, val), file=sys.stderr)
 
