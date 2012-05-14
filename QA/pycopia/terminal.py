@@ -37,7 +37,6 @@ import bisect
 from errno import EAGAIN
 
 from pycopia import fsm
-from pycopia import asyncinterface
 from pycopia.aid import Stack, IF
 
 NUL = 0    # Fill character; ignored on input.
@@ -578,42 +577,6 @@ class Terminal(TerminalBase):
         self._buf = self._buf[N:]
         return d
 
-
-class AsyncTerminal(asyncinterface.AsyncInterface, Terminal):
-    def __init__(self, pty, screen, keyboard, printer=None):
-        from pycopia import asyncio
-        Terminal.__init__(self, pty, screen, keyboard, printer)
-        asyncinterface.AsyncInterface.__init__(self)
-        asyncio.register(self)
-
-    def write(self, data):
-        return self._pty.write(data)
-
-    def _read(self, N=100):
-        while 1:
-            try:
-                raw = self._pty.read(N)
-            except OSError, why:
-                if why[0] == EAGAIN:
-                    continue
-                else:
-                    raise
-            except EOFError:
-                self._pty = None
-                raise
-            else:
-                break
-        if self.printer:
-            self.printer.write(raw)
-        return raw
-
-    def read(self, N=4096):
-        while len(self._buf) < N:
-            raw = self._read()
-            self.fsm.process_string(raw)
-        d = self._buf[:N]
-        self._buf = self._buf[N:]
-        return d
 
 
 def get_terminal(fo, termclass=Terminal, screenclass=Screen, 

@@ -24,7 +24,6 @@ import os
 import unittest
 
 from pycopia import anypath
-from pycopia import asyncinterface
 from pycopia import asyncio
 from pycopia import asyncserver
 from pycopia import basicconfig
