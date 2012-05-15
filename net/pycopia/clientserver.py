@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=0:smarttab
-# 
+#
 #    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -16,7 +16,7 @@
 
 """
 Generic server builder for creating networked client-server protocols that are
-text based.
+text based. Provides both a thread based and subprocess based handler model.
 """
 
 from __future__ import absolute_import
@@ -98,7 +98,7 @@ class StreamWorker(BaseWorker):
         self.initialize()
         rv = self.run(fo)
         self.finalize()
-        fo.flush() 
+        fo.flush()
         fo.close()
         return rv
 
@@ -192,7 +192,7 @@ class DatagramServer(Server):
 
 class TCPServer(StreamServer):
     PORT = None
-    def __init__(self, workerclass, protocol, port=None, host=None, 
+    def __init__(self, workerclass, protocol, port=None, host=None,
                   processmodel=None, debug=False):
         port = port or workerclass.PORT or self.PORT
         host = host or ""
@@ -315,6 +315,8 @@ class TCPClient(_StreamClient):
         self._sock = None
         port = port or self.PORT
         sock = socket.connect_tcp(host, port)
+        self.host = host
+        self.port = port
         super(TCPClient, self).__init__(sock, protocol, logfile)
 
 
@@ -396,7 +398,7 @@ def get_client(name, dest, protocol, port=None, logfile=None):
 
 def get_server(name, protocol, host=None, port=None, path=None, debug=False):
     """General factory for server worker.
-    Give the pathname of a worker class object. 
+    Give the pathname of a worker class object.
     Returns the appropriate type of server for it.
     """
     if type(name) is str:

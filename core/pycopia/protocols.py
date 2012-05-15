@@ -23,6 +23,7 @@ from __future__ import print_function
 from __future__ import division
 
 
+import sys
 import re
 
 from pycopia.stringmatch import compile_exact
@@ -38,8 +39,8 @@ class ProtocolError(Exception):
     pass
 
 
-ANY = compile_exact("")
 RESET = Enum(0, "RESET")
+ANY = Enum(-1, "ANY")
 
 # default transition
 def transition_error(mo):
@@ -107,12 +108,12 @@ class StateMachine(object):
             action, next =  self._any_transitions[state]
             self.current_state = next
             if action:
-                action(ANY.search(symbol))
+                action(symbol)
         except KeyError:
             action, next = self.default_transition
             self.current_state = next
             if action:
-                action(ANY.search(symbol))
+                action(symbol)
 
     # transition constructors
     def set_default_transition(self, action, next_state):
@@ -134,12 +135,13 @@ class StateMachine(object):
     def add_any(self, state, action, next_state):
         self._any_transitions[state] = (action, next_state)
 
-    def add_glob(self, expression, state, action, next_state, flags=0):
-        self.add_regex(glob_translate(expression), 
-                                   state, action, next_state, flags=0)
+    def add_glob(self, expression, state, action, next_state):
+        self.add_regex(glob_translate(expression),
+                                   state, action, next_state)
 
-    def add_regex(self, expression, state, action, next_state, flags=0):
-        cre = re.compile(expression, flags)
+    def add_regex(self, expression, state, action, next_state,
+            ignore_case=False, multiline=False):
+        cre = re.compile(expression, _get_re_flags(ignore_case, multiline))
         try:
             rel = self._re_transitions[state]
             rel.append((cre, action, next_state))
@@ -160,6 +162,7 @@ def is_exact(pattern):
 
 
 class Protocol(object):
+    """Implement the actions for the state machine. Add bound methods to it."""
     EOL = "\n"
 
     def __init__(self, eol=None):
@@ -173,24 +176,34 @@ class Protocol(object):
             return "Protocol: fsm: {}. current: {}, Not running.".format(
                     self.states, self.states.current_state)
         else:
-            return "Protocol: fsm: {}, current: {}, iostream: {}".format(
+            return "Protocol: fsm: {},\n  current: {},\n  iostream: {}".format(
                     self.states, self.states.current_state, self.iostream)
 
+    def log(self, *args):
+        print(*args, file=sys.stderr)
+
     def run(self, iostream):
+        self.iostream = iostream
         states = self.states
         states.reset()
+        self.start()
+        while 1:
+            nextline = iostream.readline()
+            if nextline:
+                states.step(nextline)
+            else:
+                break
+
+    def step(self, iostream):
         self.iostream = iostream
         try:
-            self.start()
-            while 1:
-                nextline = iostream.readline()
-                if nextline:
-                    states.step(nextline)
-                else:
-                    break
+            nextline = iostream.readline()
+            if nextline:
+                self.states.step(nextline)
+            else:
+                raise ProtocolExit("No more data")
         finally:
-            pass
-            #self.iostream = None
+            self.iostream = None
 
     def close(self):
         self.states = None
@@ -208,6 +221,15 @@ class Protocol(object):
 
     def writeln(self, data):
         self.iostream.write(data + self.eol)
+
+
+def _get_re_flags(ignore_case, multiline):
+    flags = 0
+    if ignore_case:
+        flags |= re.I
+    if multiline:
+        flags |= re.M
+    return flags
 
 
 if __name__ == "__main__":
@@ -228,7 +250,7 @@ if __name__ == "__main__":
             self.writeln("BYE")
             raise ProtocolExit
 
-        def _error(self, match):
+        def _error(self, symbol):
             self.writeln("ERROR")
 
     proto = TestProtocol()
