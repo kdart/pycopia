@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:fenc=utf-8
 #
-#    Copyright (C) 2010 Keith Dart <keith@dartworks.biz>
+#    Copyright (C) 2012 Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -120,7 +120,6 @@ class AsyncWorkerHandler(asyncio.PollerInterface):
 
     def hangup_handler(self):
         poller.unregister(self)
-        log(self._protocol.headers)
         self.close()
 
     def error_handler(self):
@@ -138,9 +137,11 @@ class AsyncWorkerHandler(asyncio.PollerInterface):
         with self._sock.makefile("w+b", 0) as fo:
             try:
                 self._protocol.step(fo)
-                #self._protocol.step(self)
-            except (protocols.ProtocolExit, protocols.ProtocolError):
+            except protocols.ProtocolExit:
                 self.close()
+            except protocols.ProtocolError:
+                self.close()
+                raise
 
     def pri_handler(self):
         log("unhandled pri")

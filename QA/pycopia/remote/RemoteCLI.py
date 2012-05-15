@@ -223,11 +223,11 @@ class ProcCommand(CLI.BaseCommands):
 # main command class
 class RemoteCLI(CLI.BaseCommands):
 
-    PROMPTFORMAT = "Agent:%s> "
+    PROMPTFORMAT = "Agent:{}> "
 
     def _setup(self, client, name):
         self._obj = client
-        self._environ["PS1"] = self.PROMPTFORMAT % name
+        self._environ["PS1"] = self.PROMPTFORMAT.format(name)
         self._namespace = {"client":client, "environ":self._environ}
         self._reset_scopes()
 
