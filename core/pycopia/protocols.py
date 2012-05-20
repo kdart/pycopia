@@ -187,12 +187,15 @@ class Protocol(object):
         states = self.states
         states.reset()
         self.start()
-        while 1:
-            nextline = iostream.readline()
-            if nextline:
-                states.step(nextline)
-            else:
-                break
+        try:
+            while 1:
+                nextline = iostream.readline()
+                if nextline:
+                    states.step(nextline)
+                else:
+                    break
+        finally:
+            self.iostream = None
 
     def step(self, iostream):
         self.iostream = iostream
