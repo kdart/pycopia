@@ -43,8 +43,8 @@ RESET = Enum(0, "RESET")
 ANY = Enum(-1, "ANY")
 
 # default transition
-def transition_error(mo):
-    raise ProtocolError('Symbol %r is undefined.' % (mo.string,))
+def transition_error(text):
+    raise ProtocolError('Symbol {!r} is undefined.'.format(text))
 
 
 class StateMachine(object):
