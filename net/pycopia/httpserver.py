@@ -30,7 +30,7 @@ from pycopia.clientservers.servers import http_protocols
 
 def simple_http_server(argv):
     port = argv[1] if len(argv) > 1 else 8080
-    sock = socket.tcp_listener(("", int(port)))
+    sock = socket.tcp_listener(("", int(port)), 500)
     srv = asyncserver.AsyncServerHandler(
             sock, asyncserver.AsyncWorkerHandler, http_protocols.BasicHTTPServerProto())
     try:
