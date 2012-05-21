@@ -82,7 +82,7 @@ class AsyncServerHandler(asyncio.PollerInterface):
 class AsyncWorkerHandler(asyncio.PollerInterface):
     def __init__(self, sock, addr, proto):
         self._sock = sock
-        self._protocol = proto()
+        self._protocol = proto
         self._rem_address = addr
         self._state = CONNECTED
         self._writebuf = ""

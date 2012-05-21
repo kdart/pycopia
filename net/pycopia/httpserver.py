@@ -32,7 +32,7 @@ def simple_http_server(argv):
     port = argv[1] if len(argv) > 1 else 8080
     sock = socket.tcp_listener(("", int(port)))
     srv = asyncserver.AsyncServerHandler(
-            sock, asyncserver.AsyncWorkerHandler, http_protocols.BasicHTTPServerProto)
+            sock, asyncserver.AsyncWorkerHandler, http_protocols.BasicHTTPServerProto())
     try:
         asyncserver.poller.loop()
     finally:
