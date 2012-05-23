@@ -93,8 +93,9 @@ class PyroAsyncAdapter(asyncio.PollerInterface):
                 break
         readysocks = []
         for fd, flags in rl:
-            sock = self.smap[fd]
-            readysocks.append(sock)
+            sock = self.smap.get(fd)
+            if sock is not None:
+                readysocks.append(sock)
         self._pyd.events(readysocks)
         self.update()
 
