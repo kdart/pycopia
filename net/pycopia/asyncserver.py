@@ -43,7 +43,7 @@ class AsyncServerHandler(asyncio.PollerInterface):
     def __init__(self, sock, workerclass, protocol):
         self._sock = sock
         self._workerclass = workerclass
-        self._protocol = protocol
+        self.protocol = protocol
         sock.setblocking(0)
         poller.register(self)
 
@@ -74,16 +74,16 @@ class AsyncServerHandler(asyncio.PollerInterface):
     def read_handler(self):
         conn, addr = self._sock.accept()
         conn.setblocking(0)
-        h = self._workerclass(conn, addr, self._protocol)
+        h = self._workerclass(conn, addr, self.protocol)
         poller.register(h)
         return h
 
 
 class AsyncWorkerHandler(asyncio.PollerInterface):
     def __init__(self, sock, addr, proto):
+        self.address = addr
         self._sock = sock
-        self._protocol = proto
-        self._rem_address = addr
+        self.protocol = proto
         self._state = CONNECTED
         self._writebuf = ""
         self.initialize()
@@ -131,12 +131,12 @@ class AsyncWorkerHandler(asyncio.PollerInterface):
         poller.modify(self)
 
     def initialize(self):
-        self._protocol.reset()
+        self.protocol.reset()
 
     def read_handler(self):
         with self._sock.makefile("w+b", 0) as fo:
             try:
-                self._protocol.step(fo)
+                self.protocol.step(fo)
             except protocols.ProtocolExit:
                 self.close()
             except protocols.ProtocolError:
@@ -144,7 +144,7 @@ class AsyncWorkerHandler(asyncio.PollerInterface):
                 raise
 
     def pri_handler(self):
-        log("unhandled pri")
+        log("unhandled priority message")
 
     def exception_handler(self, ex, val, tb):
         traceback.print_exception(ex, val, tb)

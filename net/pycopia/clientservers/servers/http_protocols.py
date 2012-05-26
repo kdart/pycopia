@@ -56,11 +56,11 @@ class BasicHTTPServerProto(protocols.Protocol):
         raise protocols.ProtocolError(text)
 
     def _get(self, match):
-        self.reset()
+        self.clear()
         self.path = match.group(1)
         self.httpver="HTTP/{}".format(match.group(2))
 
-    def reset(self):
+    def clear(self):
         self.headers = []
         self.body = None
         self._length = 0
@@ -80,7 +80,7 @@ class BasicHTTPServerProto(protocols.Protocol):
         raise protocols.ProtocolExit("All done")
 
     def _post(self, match):
-        self.reset()
+        self.clear()
         self.path = match.group(1)
         self.httpver="HTTP/{}".format(match.group(2))
 

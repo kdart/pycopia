@@ -68,10 +68,6 @@ class BaseWorker(object):
         self._sock = sock
         self.address = addr
         self.protocol = protocol
-        # convenient method references:
-        self.sendall = sock.sendall
-        self.send = sock.send
-        self.recv = sock.recv
 
     def __del__(self):
         self.close()
