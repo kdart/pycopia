@@ -369,6 +369,9 @@ class SafeSocket(socket):
     listen = systemcall(socket.listen)
     bind = systemcall(socket.bind)
 
+CLOSED = 0
+CONNECTED = 1
+ACCEPTING = 2
 
 class AsyncSocket(socket):
     def __init__(self, family, type, proto=0):
