@@ -962,7 +962,15 @@ def parse_cookie(rawstr, patt=_CookiePattern):
 
 class Headers(list):
     """Holder for a collection of headers. Should only contain HTTPHeader
-    objects."""
+    objects.
+    Optionally initialize with a list of tuples (WSGI style headers).
+    """
+    def __init__(self, arg=None):
+        super(Headers, self).__init__()
+        if isinstance(arg, list):
+           for name, value in arg:
+                self.append(make_header(name, value))
+
     # returns string with IETF line endings.
     def __str__(self):
         return "\r\n".join(map(str, self))
@@ -1268,4 +1276,10 @@ if __name__ == "__main__":
     cj.add_cookie("pycopia", "AESFKAJS", max_age=24, path="/")
     print (httpquote("/"))
     print (cj.get_setcookies())
+
+    hl = Headers()
+    hl.add_header(("Content-Length", "222"))
+    print(hl)
+    h2 = Headers([("Content-Length", "222"), ("Host", "www.example.com")])
+    print(h2)
 

@@ -42,6 +42,8 @@ class AsyncServerHandler(asyncio.PollerInterface):
 
     def __init__(self, sock, workerclass, protocol):
         self._sock = sock
+        _host, self.server_port = sock.getsockname()
+        self.server_name = socket.getfqdn(_host)
         self._workerclass = workerclass
         self.protocol = protocol
         sock.setblocking(0)
@@ -136,7 +138,7 @@ class AsyncWorkerHandler(asyncio.PollerInterface):
     def read_handler(self):
         with self._sock.makefile("w+b", 0) as fo:
             try:
-                self.protocol.step(fo)
+                self.protocol.step(fo, self.address)
             except protocols.ProtocolExit:
                 self.close()
             except protocols.ProtocolError:

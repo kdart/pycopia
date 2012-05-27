@@ -100,7 +100,7 @@ class StreamWorker(BaseWorker):
 
     def run(self, stream):
         try:
-            self.protocol.run(stream)
+            self.protocol.run(stream, self.address)
         except protocols.ProtocolExit:
             return True
 
@@ -113,6 +113,11 @@ class DatagramWorker(BaseWorker):
         self.run(data)
         self.finalize()
 
+    def run(self, stream):
+        try:
+            self.protocol.run(stream, self.address)
+        except protocols.ProtocolExit:
+            return True
 
 
 ### Real worker classes you can use.
@@ -197,6 +202,8 @@ class TCPServer(StreamServer):
         self.protocol = protocol
         self.debug = debug
         self._sock = socket.tcp_listener((host, port), 5)
+        _host, self.server_port = self._sock.getsockname()
+        self.server_name = socket.getfqdn(_host)
         if debug:
             global debugger
             from pycopia import debugger

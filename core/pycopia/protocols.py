@@ -168,6 +168,7 @@ class Protocol(object):
     def __init__(self, eol=None):
         self.states = StateMachine()
         self.iostream = None
+        self.data = None # extra data action handlers might use.
         self.eol = eol or self.EOL
         self.initialize(self.states)
 
@@ -182,8 +183,9 @@ class Protocol(object):
     def log(self, *args):
         print(*args, file=sys.stderr)
 
-    def run(self, iostream):
+    def run(self, iostream, data=None):
         self.iostream = iostream
+        self.data = data
         states = self.states
         states.reset()
         self.start()
@@ -196,9 +198,11 @@ class Protocol(object):
                     break
         finally:
             self.iostream = None
+            self.data = None
 
-    def step(self, iostream):
+    def step(self, iostream, data=None):
         self.iostream = iostream
+        self.data = data
         try:
             nextline = iostream.readline()
             if nextline:
@@ -207,6 +211,7 @@ class Protocol(object):
                 raise ProtocolExit("No more data")
         finally:
             self.iostream = None
+            self.data = None
 
     def close(self):
         self.states = None
