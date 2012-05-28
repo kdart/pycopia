@@ -1,6 +1,6 @@
 #!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 2011  Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
@@ -12,6 +12,12 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 
 r"""
 some functions helpful in Python's interactive mode.
@@ -27,7 +33,7 @@ Some external program invocation templates should be defined. These may contain 
 '%s' that will be expanded to a file name or url.
 
 XTERM          - How to invoke xterm, e.g. "urxvtc -title Python -name Python -e %s"
-EDITOR         - editor to use in the currrent terminal, 
+EDITOR         - editor to use in the currrent terminal,
 VIEWER         - What terminal text viewer (e.g. "/usr/bin/view")
 XEDITOR        - text editor for use in the X Windows System.
 XVIEWER        - What X text viewer (e.g. "/usr/bin/gvim")
@@ -46,25 +52,17 @@ now, just type "py" at the command line to get a Python interactive mode shell
 with enhanced functionality.
 
 Alternatively, you can just invoke 'from pycopia import interactive' at the
-"stock" Python prompt. 
+"stock" Python prompt.
 
 This modules places many helpful, convenience functions in the builtins
 namespace for quck access without cluttering the __main__ namespace.
-
-
 """
-
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-
 
 import sys, os, types
 import atexit
 from pprint import pprint
 from inspect import *
-from dis import dis, distb
+#from dis import dis, distb
 try:
     from importlib import import_module
 except ImportError: # older python
@@ -79,6 +77,7 @@ except ImportError:
 from pycopia.cliutils import *
 from pycopia.textutils import *
 from pycopia.aid import add2builtin, callable, execfile
+from pycopia.urlparse import UniversalResourceLocator as URL
 
 
 try:
@@ -109,7 +108,7 @@ if "DISPLAY" in os.environ:
         choose = gtktools.list_picker # replace cliutils.choose
 
 __all__ = ['info', 'run_config', 'pyterm', 'xterm', 'edit', 'get_editor',
-'exec_editor', 'open_url', 'open_file', 'showdoc', 'dis', 'distb']
+'exec_editor', 'open_url', 'open_file', 'showdoc']
 
 def _add_all(modname):
     mod = import_module(modname)
@@ -151,7 +150,7 @@ CHMVIEWER = 'kchmviewer --search %s "%s"'
 
 try:
     env = {}
-    execfile(RCFILE, env, env) 
+    execfile(RCFILE, env, env)
 except:
     ex, val, tb = sys.exc_info()
     print ("warning: could not read config file:", RCFILE, file=sys.stderr)
@@ -213,7 +212,16 @@ def run_config(cfstring, param):
     return os.system(cmd)
 
 def pyterm(filename="", interactive=1):
-    cmd = "%s %s %s " % (PYTHON, "-i" if interactive else "", filename)
+    # Allow running remotely via ssh.
+    if "://" in filename:
+        url = URL(filename)
+        if url.scheme == "scp": # vim remote file
+            remcmd = "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", url.path)
+            cmd = 'ssh -t {} {}'.format(url.host, remcmd)
+        else:
+            return "Can't handle scheme: " + url.scheme
+    else:
+        cmd = "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", filename)
     if "DISPLAY" in os.environ:
         return run_config(os.environ.get("XTERM"), cmd)
     else:
@@ -290,7 +298,7 @@ def find_source_file(modname):
 def open_chm(search):
     """Opens the given search term with a CHM viewer. """
     if "DISPLAY" in os.environ:
-        book = os.path.expandvars(os.environ.get("CHMBOOK", 
+        book = os.path.expandvars(os.environ.get("CHMBOOK",
                 '$HOME/.local/share/devhelp/books/python321rc1.chm'))
         return run_config(os.environ.get("CHMVIEWER", 'kchmviewer --search %s "%s"'), (search, book))
     else:
