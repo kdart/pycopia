@@ -172,22 +172,16 @@ def info(obj=None):
     if obj is None:
         print ("Python keywords:")
         import keyword
-        print (pprint(keyword.kwlist))
-        print()
-        plist = [] ; clist = []
-        for bi_object in __builtins__.values():
+        for kwname in keyword.kwlist:
+            print ("  ", kwname)
+        print("Built in objects:")
+        for bi_object_name in sorted(__builtins__.keys()):
+            bi_object = __builtins__[bi_object_name]
             if callable(bi_object):
                 if type(bi_object) is types.ClassType:
-                    clist.append(bi_object.__name__)
+                    print("  {} (class)".format(bi_object.__name__))
                 elif type(bi_object) is types.FunctionType:
-                    plist.append(bi_object.func_code.co_name)
-        plist.sort() ; clist.sort()
-        print ("Python built-in functions:")
-        pprint(plist)
-        print()
-        print ("Python built-in exceptions:")
-        pprint(clist)
-        print()
+                    print("  {} (function)".format(bi_object.__name__))
     elif hasattr(obj, "__doc__") and obj.__doc__ is not None:
             print ("Documentation for %s :\n" % (obj.__name__))
             print (obj.__doc__)
@@ -199,6 +193,9 @@ def info(obj=None):
         pprint(dir(obj))
         pprint(dir(obj.__class__))
     return ""
+
+def _print_object(obj):
+    print("".format(obj))
 
 def run_config(cfstring, param):
     if not cfstring:
@@ -215,9 +212,12 @@ def pyterm(filename="", interactive=1):
     # Allow running remotely via ssh.
     if "://" in filename:
         url = URL(filename)
-        if url.scheme == "scp": # vim remote file
-            remcmd = "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", url.path)
-            cmd = 'ssh -t {} {}'.format(url.host, remcmd)
+        if url.scheme in ("scp", "sftp"): # vim remote file
+            remcmd = "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", url.path[1:]) # chop leading slash
+            if url.user:
+                cmd = 'ssh -t {}@{} {}'.format(url.user, url.host, remcmd)
+            else:
+                cmd = 'ssh -t {} {}'.format(url.host, remcmd)
         else:
             return "Can't handle scheme: " + url.scheme
     else:
