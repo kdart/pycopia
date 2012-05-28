@@ -37,8 +37,10 @@ colorscheme kwdcolors
 if v:progname == "mvim"
 	map <M-Left> :bp<CR>
 	map <C-Left> :bp<CR>
+	map <XF86Back> :bp<CR>
 	map <M-Right> :bn<CR>
 	map <C-Right> :bn<CR>
+	map <XF86Forward> :bn<CR>
 	map <M-Del> :bd<CR>
 	map ZZ :bd<CR>
 endif

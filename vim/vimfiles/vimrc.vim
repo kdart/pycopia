@@ -126,8 +126,6 @@ if v:progname == "svim"
        nmap <Esc>[C  :bn<CR>
     elseif $TERM =~ "rxvt"
        nmap <Esc>Od  :bp<CR>
-       nmap <Esc>OD  :bp<CR>
-       nmap <Esc>[5C :bn<CR>
        nmap <Esc>Oc  :bn<CR>
     endif
 endif
