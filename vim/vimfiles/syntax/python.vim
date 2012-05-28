@@ -1,169 +1,333 @@
 " Vim syntax file
-" assumes Vim version > 6.x
+" Language:	Python
+" Maintainer:	Neil Schemenauer <nas@python.ca>
+" Last Change:	2010 Sep 21
+" Credits:	Zvezdan Petkovic <zpetkovic@acm.org>
+"		Neil Schemenauer <nas@python.ca>
+"		Dmitry Vasiliev
+"
+"		This version is a major rewrite by Zvezdan Petkovic.
+"
+"		- introduced highlighting of doctests
+"		- updated keywords, built-ins, and exceptions
+"		- corrected regular expressions for
+"
+"		  * functions
+"		  * decorators
+"		  * strings
+"		  * escapes
+"		  * numbers
+"		  * space error
+"
+"		- corrected synchronization
+"		- more highlighting is ON by default, except
+"		- space error highlighting is OFF by default
+"
+" Optional highlighting can be controlled using these variables.
+"
+"   let python_no_builtin_highlight = 1
+"   let python_no_doctest_code_highlight = 1
+"   let python_no_doctest_highlight = 1
+"   let python_no_exception_highlight = 1
+"   let python_no_number_highlight = 1
+"   let python_space_error_highlight = 1
+"
+" All the options above can be switched on together.
+"
+"   let python_highlight_all = 1
+"
 
-syntax clear
+" For version 5.x: Clear all syntax items.
+" For version 6.x: Quit when a syntax file was already loaded.
+if version < 600
+  syntax clear
+elseif exists("b:current_syntax")
+  finish
+endif
 
-syn keyword pythonStatement	break continue del
-syn keyword pythonStatement	except exec finally
-syn keyword pythonStatement	pass raise
-syn keyword pythonStatement	return try
-syn keyword pythonStatement	global assert yield with
-" syn keyword pythonStatement	def class nextgroup=pythonFunction skipwhite
-" syn match   pythonFunction	"[a-zA-Z_][a-zA-Z0-9_]*" contained
-" syn match   pythonSpecial	"__[a-zA-Z0-9]+__"
-syn keyword pyTypedef          def class lambda
+" We need nocompatible mode in order to continue lines with backslashes.
+" Original setting will be restored.
+let s:cpo_save = &cpo
+set cpo&vim
+
+" Keep Python keywords in alphabetical order inside groups for easy
+" comparison with the table in the 'Python Language Reference'
+" http://docs.python.org/reference/lexical_analysis.html#keywords.
+" Groups are in the order presented in NAMING CONVENTIONS in syntax.txt.
+" Exceptions come last at the end of each group (class and def below).
+"
+" Keywords 'with' and 'as' are new in Python 2.6
+" (use 'from __future__ import with_statement' in Python 2.5).
+"
+" Some compromises had to be made to support both Python 3.0 and 2.6.
+" We include Python 3.0 features, but when a definition is duplicated,
+" the last definition takes precedence.
+"
+" - 'False', 'None', and 'True' are keywords in Python 3.0 but they are
+"   built-ins in 2.6 and will be highlighted as built-ins below.
+" - 'exec' is a built-in in Python 3.0 and will be highlighted as
+"   built-in below.
+" - 'nonlocal' is a keyword in Python 3.0 and will be highlighted.
+" - 'print' is a built-in in Python 3.0 and will be highlighted as
+"   built-in below (use 'from __future__ import print_function' in 2.6)
+"
+syn keyword pythonStatement	False, None, True
+syn keyword pythonStatement	as assert break continue del exec global
+syn keyword pythonStatement	lambda nonlocal pass return with yield
+syn keyword pythonStatement	class def nextgroup=pythonFunction skipwhite
+syn keyword pythonConditional	elif else if
 syn keyword pythonRepeat	for while
-syn keyword pythonConditional	if elif else
 syn keyword pythonOperator	and in is not or
-syn keyword pythonPreCondit	import from as
-syn match   pythonComment	"#.*$" contains=pythonTodo
-syn keyword pythonTodo		contained TODO FIXME XXX
+syn keyword pythonException	except finally raise try
+syn keyword pythonInclude	from import
 
+" Decorators (new in Python 2.4)
+syn match   pythonDecorator	"@" display nextgroup=pythonFunction skipwhite
+" The zero-length non-grouping match before the function name is
+" extremely important in pythonFunction.  Without it, everything is
+" interpreted as a function inside the contained environment of
+" doctests.
+" A dot must be allowed because of @MyClass.myfunc decorators.
+syn match   pythonFunction
+      \ "\%(\%(def\s\|class\s\|@\)\s*\)\@<=\h\%(\w\|\.\)*" contained
 
-" strings
-syn region pythonString		matchgroup=Normal start=+[uU]\='+ end=+'+ skip=+\\\\\|\\'+ contains=pythonEscape
-syn region pythonString		matchgroup=Normal start=+[uU]\="+ end=+"+ skip=+\\\\\|\\"+ contains=pythonEscape
-syn region pythonString		matchgroup=Normal start=+[uU]\="""+ end=+"""+ contains=pythonEscape
-syn region pythonString		matchgroup=Normal start=+[uU]\='''+ end=+'''+ contains=pythonEscape
+syn match   pythonComment	"#.*$" contains=pythonTodo,@Spell
+syn keyword pythonTodo		FIXME NOTE NOTES TODO XXX contained
 
-syn region pythonString		matchgroup=Normal start=+[bB]\='+ end=+'+ skip=+\\\\\|\\'+ contains=pythonEscape
-syn region pythonString		matchgroup=Normal start=+[bB]\="+ end=+"+ skip=+\\\\\|\\"+ contains=pythonEscape
-syn region pythonString		matchgroup=Normal start=+[bB]\="""+ end=+"""+ contains=pythonEscape
-syn region pythonString		matchgroup=Normal start=+[bB]\='''+ end=+'''+ contains=pythonEscape
+" Triple-quoted strings can contain doctests.
+syn region  pythonString
+      \ start=+[uU]\=\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
+      \ contains=pythonEscape,@Spell
+syn region  pythonString
+      \ start=+[uU]\=\z('''\|"""\)+ end="\z1" keepend
+      \ contains=pythonEscape,pythonSpaceError,pythonDoctest,@Spell
+syn region  pythonRawString
+      \ start=+[uU]\=[rR]\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
+      \ contains=@Spell
+syn region  pythonRawString
+      \ start=+[uU]\=[rR]\z('''\|"""\)+ end="\z1" keepend
+      \ contains=pythonSpaceError,pythonDoctest,@Spell
 
-syn region pythonRawString	matchgroup=Normal start=+[uU]\=[rR]'+ end=+'+ skip=+\\\\\|\\'+
-syn region pythonRawString	matchgroup=Normal start=+[uU]\=[rR]"+ end=+"+ skip=+\\\\\|\\"+
-syn region pythonRawString	matchgroup=Normal start=+[uU]\=[rR]"""+ end=+"""+
-syn region pythonRawString	matchgroup=Normal start=+[uU]\=[rR]'''+ end=+'''+
-syn match  pythonEscape		+\\[abfnrtv'"\\]+ contained
-syn match  pythonEscape		"\\\o\o\=\o\=" contained
-syn match  pythonEscape		"\\x\x\+" contained
-syn match  pythonEscape		"\(\\u\x\{4}\|\\U\x\{8}\)" contained
-syn match  pythonEscape		"\\$"
+syn match   pythonEscape	+\\[abfnrtv'"\\]+ contained
+syn match   pythonEscape	"\\\o\{1,3}" contained
+syn match   pythonEscape	"\\x\x\{2}" contained
+syn match   pythonEscape	"\%(\\u\x\{4}\|\\U\x\{8}\)" contained
+" Python allows case-insensitive Unicode IDs: http://www.unicode.org/charts/
+syn match   pythonEscape	"\\N{\a\+\%(\s\a\+\)*}" contained
+syn match   pythonEscape	"\\$"
 
-" numbers (including longs and complex)
-syn match   pythonNumber	"\<0x\x\+[Ll]\=\>"
-syn match   pythonNumber	"\<\d\+[LljJ]\=\>"
-syn match   pythonNumber	"\.\d\+\([eE][+-]\=\d\+\)\=[jJ]\=\>"
-syn match   pythonNumber	"\<\d\+\.\([eE][+-]\=\d\+\)\=[jJ]\=\>"
-syn match   pythonNumber	"\<\d\+\.\d\+\([eE][+-]\=\d\+\)\=[jJ]\=\>"
+if exists("python_highlight_all")
+  if exists("python_no_builtin_highlight")
+    unlet python_no_builtin_highlight
+  endif
+  if exists("python_no_doctest_code_highlight")
+    unlet python_no_doctest_code_highlight
+  endif
+  if exists("python_no_doctest_highlight")
+    unlet python_no_doctest_highlight
+  endif
+  if exists("python_no_exception_highlight")
+    unlet python_no_exception_highlight
+  endif
+  if exists("python_no_number_highlight")
+    unlet python_no_number_highlight
+  endif
+  let python_space_error_highlight = 1
+endif
 
-" Warn of any bad octals, or lowercase Ls for longs (I hate those).
-syn match pySyntaxError    "\<0\o*[89]"
-syn match pySyntaxWarning  "\<0x\x\+l"
-syn match pySyntaxWarning  "\<[1-9]\d*l"
-syn match pySyntaxWarning  "\<0\o\+\l"
+" It is very important to understand all details before changing the
+" regular expressions below or their order.
+" The word boundaries are *not* the floating-point number boundaries
+" because of a possible leading or trailing decimal point.
+" The expressions below ensure that all valid number literals are
+" highlighted, and invalid number literals are not.  For example,
+"
+" - a decimal point in '4.' at the end of a line is highlighted,
+" - a second dot in 1.0.0 is not highlighted,
+" - 08 is not highlighted,
+" - 08e0 or 08j are highlighted,
+"
+" and so on, as specified in the 'Python Language Reference'.
+" http://docs.python.org/reference/lexical_analysis.html#numeric-literals
+if !exists("python_no_number_highlight")
+  " numbers (including longs and complex)
+  syn match   pythonNumber	"\<0[oO]\=\o\+[Ll]\=\>"
+  syn match   pythonNumber	"\<0[xX]\x\+[Ll]\=\>"
+  syn match   pythonNumber	"\<0[bB][01]\+[Ll]\=\>"
+  syn match   pythonNumber	"\<\%([1-9]\d*\|0\)[Ll]\=\>"
+  syn match   pythonNumber	"\<\d\+[jJ]\>"
+  syn match   pythonNumber	"\<\d\+[eE][+-]\=\d\+[jJ]\=\>"
+  syn match   pythonNumber
+	\ "\<\d\+\.\%([eE][+-]\=\d\+\)\=[jJ]\=\%(\W\|$\)\@="
+  syn match   pythonNumber
+	\ "\%(^\|\W\)\@<=\d*\.\d\+\%([eE][+-]\=\d\+\)\=[jJ]\=\>"
+endif
 
-" Try to help the C and Perl users out there.
-syn match pySyntaxError    "\$\|@"
-syn match pySyntaxError    "\(&&\|||\)"
-syn match pySyntaxError    "/[/\*]"
-syn match pySyntaxWarning "\(++\|--\|->\|=\~\)"
-syn match pySyntaxWarning ";\s*$"
+" Group the built-ins in the order in the 'Python Library Reference' for
+" easier comparison.
+" http://docs.python.org/library/constants.html
+" http://docs.python.org/library/functions.html
+" http://docs.python.org/library/functions.html#non-essential-built-in-functions
+" Python built-in functions are in alphabetical order.
+if !exists("python_no_builtin_highlight")
+  " built-in constants
+  " 'False', 'True', and 'None' are also reserved words in Python 3.0
+  syn keyword pythonBuiltin	False True None print
+  syn keyword pythonBuiltin	NotImplemented Ellipsis __debug__
+  " built-in functions
+  syn keyword pythonBuiltin	abs all any bin bool chr classmethod
+  syn keyword pythonBuiltin	compile complex delattr dict dir divmod
+  syn keyword pythonBuiltin	enumerate eval filter float format
+  syn keyword pythonBuiltin	frozenset getattr globals hasattr hash
+  syn keyword pythonBuiltin	help hex id input int isinstance
+  syn keyword pythonBuiltin	issubclass iter len list locals map max
+  syn keyword pythonBuiltin	min next object oct open ord pow
+  syn keyword pythonBuiltin	property range repr reversed round set
+  syn keyword pythonBuiltin	setattr slice sorted staticmethod str
+  syn keyword pythonBuiltin	sum super tuple type vars zip __import__
+  " Python 2.6 only
+  syn keyword pythonBuiltin	basestring callable cmp execfile file
+  syn keyword pythonBuiltin	long raw_input reduce reload unichr
+  syn keyword pythonBuiltin	unicode xrange
+  " Python 3.0 only
+  syn keyword pythonBuiltin	ascii bytearray bytes exec memoryview
+  " non-essential built-in functions; Python 2.6 only
+  syn keyword pythonBuiltin	apply buffer coerce intern
+  " following are commonly used in Pycopia code, from the pycopia.aid module.
+  syn keyword pythonBuiltin	reorder pprint_list IF
+  syn keyword pythonBuiltin	Queue Stack removedups YES NO 
+  syn keyword pythonBuiltin	mapstr Enum Enums add_exception Write str2hex  
+  syn keyword pythonBuiltin	partial newclass NULL unsigned unsigned64 sortedlist
+  syn keyword pythonBuiltin	sgn add2builtin 
+endif
 
-" builtin functions, types and objects, not really part of the syntax
-syn keyword pythonBuiltin	Ellipsis None NotImplemented __import__ abs
-syn keyword pythonBuiltin	apply buffer callable chr classmethod cmp
-syn keyword pythonBuiltin	coerce compile complex delattr dict dir divmod
-syn keyword pythonBuiltin	eval execfile file filter float getattr globals
-syn keyword pythonBuiltin	hasattr hash hex id input int intern isinstance
-syn keyword pythonBuiltin	issubclass iter len list locals long map max
-syn keyword pythonBuiltin	min object oct open ord pow property range
-syn keyword pythonBuiltin	raw_input reduce reload repr round setattr
-syn keyword pythonBuiltin	slice staticmethod str super tuple type unichr
-syn keyword pythonBuiltin	unicode vars xrange zip bool 
-syn keyword pythonBuiltin	bytearray enumerate True False all any
-syn keyword pythonBuiltin	basestring bin bytes format frozenset next
-syn keyword pythonBuiltin	print reversed set sorted sum 
-
-" following added by nmsbuiltins module
-syn keyword pythonBuiltin	reorder pprint_list Print IF
-syn keyword pythonBuiltin	Queue Stack removedups YES NO 
-syn keyword pythonBuiltin	mapstr Enum Enums add_exception Write str2hex  
-syn keyword pythonBuiltin	partial newclass NULL unsigned unsigned64 sortedlist
-syn keyword pythonBuiltin	sgn add2builtin 
-
-" builtin exceptions and warnings
-syn keyword pythonException	ArithmeticError AssertionError AttributeError BaseException
-syn keyword pythonException	DeprecationWarning EOFError EnvironmentError BufferError
-syn keyword pythonException	Exception FloatingPointError IOError
-syn keyword pythonException	ImportError IndentiationError IndexError
-syn keyword pythonException	KeyError KeyboardInterrupt LookupError
-syn keyword pythonException	MemoryError NameError NotImplementedError
-syn keyword pythonException	OSError OverflowError OverflowWarning
-syn keyword pythonException	ReferenceError RuntimeError RuntimeWarning
-syn keyword pythonException	StandardError StopIteration SyntaxError
-syn keyword pythonException	SyntaxWarning SystemError SystemExit TabError
-syn keyword pythonException	TypeError UnboundLocalError UnicodeError
-syn keyword pythonException	UserWarning ValueError Warning WindowsError
-syn keyword pythonException	ZeroDivisionError IndentationError
-syn keyword pythonException	BytesWarning FutureWarning GeneratorExit ImportWarning
-syn keyword pythonException	PendingDeprecationWarning UnicodeDecodeError
-syn keyword pythonException	UnicodeEncodeError UnicodeTranslateError UnicodeWarning
+" From the 'Python Library Reference' class hierarchy at the bottom.
+" http://docs.python.org/library/exceptions.html
+if !exists("python_no_exception_highlight")
+  " builtin base exceptions (only used as base classes for other exceptions)
+  syn keyword pythonExceptions	BaseException Exception
+  syn keyword pythonExceptions	ArithmeticError EnvironmentError
+  syn keyword pythonExceptions	LookupError
+  " builtin base exception removed in Python 3.0
+  syn keyword pythonExceptions	StandardError
+  " builtin exceptions (actually raised)
+  syn keyword pythonExceptions	AssertionError AttributeError BufferError
+  syn keyword pythonExceptions	EOFError FloatingPointError GeneratorExit
+  syn keyword pythonExceptions	IOError ImportError IndentationError
+  syn keyword pythonExceptions	IndexError KeyError KeyboardInterrupt
+  syn keyword pythonExceptions	MemoryError NameError NotImplementedError
+  syn keyword pythonExceptions	OSError OverflowError ReferenceError
+  syn keyword pythonExceptions	RuntimeError StopIteration SyntaxError
+  syn keyword pythonExceptions	SystemError SystemExit TabError TypeError
+  syn keyword pythonExceptions	UnboundLocalError UnicodeError
+  syn keyword pythonExceptions	UnicodeDecodeError UnicodeEncodeError
+  syn keyword pythonExceptions	UnicodeTranslateError ValueError VMSError
+  syn keyword pythonExceptions	WindowsError ZeroDivisionError
+  " builtin warnings
+  syn keyword pythonExceptions	BytesWarning DeprecationWarning FutureWarning
+  syn keyword pythonExceptions	ImportWarning PendingDeprecationWarning
+  syn keyword pythonExceptions	RuntimeWarning SyntaxWarning UnicodeWarning
+  syn keyword pythonExceptions	UserWarning Warning
+endif
 
 syn keyword pyDebug            __debug__
-syn keyword pyBuiltinVariable  __bases__ __class__ __dict__ __doc__ __slots__
+syn keyword pyBuiltinVariable  __bases__ __class__ __doc__ __slots__
 syn keyword pyBuiltinVariable  __file__ __name__ __methods__ __members__
-syn keyword pyBuiltinVariable  __module__ __self__ self __package__
+syn keyword pyBuiltinVariable  __module__ __self__ self __package__ __builtins__
 
 " all of the special methods. So you know you got the right one. 8-)
-syn keyword pySpecialMethod  __init__ __del__ __repr__ __str__ __iter__
-syn keyword pySpecialMethod  __cmp__ __hash__ __nonzero__ __getstate__ __setstate__
-syn keyword pySpecialMethod  __getattr__ __setattr__ __delattr__ __getattribute__
-syn keyword pySpecialMethod  __call__ __new__ __get__
-syn keyword pySpecialMethod  __len__ __getitem__ __setitem__ __delitem__
-syn keyword pySpecialMethod  __getslice__ __setslice__ __delslice__
-syn keyword pySpecialMethod  __add__ __sub__ __mul__ __div__ __mod__
-syn keyword pySpecialMethod  __divmod__ __pow__ __lshift__ __rshift__
-syn keyword pySpecialMethod  __and__ __xor__ __or__
-syn keyword pySpecialMethod  __radd__ __rsub__ __rmul__ __rdiv__
-syn keyword pySpecialMethod  __rmod__ __rdivmod__ __rpow__ __rlshift__
-syn keyword pySpecialMethod  __rrshift__ __rand__ __rxor__ __ror__
-syn keyword pySpecialMethod  __neg__ __pos__ __add__ __invert
-syn keyword pySpecialMethod  __complex__ __int__ __long__ __float__
-syn keyword pySpecialMethod  __oct__ __hex__ __invert__
-syn keyword pySpecialMethod  __le__ __ge__ __eq__ __ne__ __lt__ __gt__
-syn keyword pySpecialMethod  __coerce__
-syn keyword pySpecialMethod  __floordiv__ __truediv__ __abs__ __rfloordiv__
-syn keyword pySpecialMethod  __rtruediv__
+syn keyword pySpecialMethod __abs__ __add__ __and__ __call__ __closure__ __cmp__ __code__
+syn keyword pySpecialMethod __del__ __getstate__ __setstate__ __complex__
+syn keyword pySpecialMethod __coerce__ __contains__ __defaults__ __delattr__ __delitem__ __delslice__
+syn keyword pySpecialMethod __dict__ __div__ __divmod__ __enter__ __eq__ __exit__ __float__
+syn keyword pySpecialMethod __floordiv__ __format__ __ge__ __get__ __getattribute__ __getitem__
+syn keyword pySpecialMethod __getnewargs__ __getslice__ __globals__ __gt__ __hash__ __hex__ __iadd__
+syn keyword pySpecialMethod __iand__ __imul__ __index__ __init__ __int__ __invert__ __ior__ __isub__
+syn keyword pySpecialMethod __iter__ __ixor__ __le__ __len__ __long__ __lshift__ __lt__ __mod__
+syn keyword pySpecialMethod __mul__ __ne__ __neg__ __new__ __nonzero__ __oct__ __or__ __pos__
+syn keyword pySpecialMethod __pow__ __radd__ __rand__ __rdiv__ __rdivmod__ __reduce__ __reduce_ex__
+syn keyword pySpecialMethod __repr__ __reversed__ __rfloordiv__ __rlshift__ __rmod__ __rmul__ __ror__
+syn keyword pySpecialMethod __rpow__ __rrshift__ __rshift__ __rsub__ __rtruediv__ __rxor__ __setattr__
+syn keyword pySpecialMethod __setitem__ __setslice__ __sizeof__ __str__ __sub__ __subclasshook__
+syn keyword pySpecialMethod __truediv__ __trunc__ __weakref__ __xor__
+syn keyword pySpecialMethod __next__
 
-" This is fast but code inside triple quoted strings screws it up. It
-" is impossible to fix because the only way to know if you are inside a
-" triple quoted string is to start from the beginning of the file. If
-" you have a fast machine you can try uncommenting the "sync minlines"
-" and commenting out the rest.
-"syn sync match pythonSync grouphere NONE "):$"
-"syn sync maxlines=200
-"syn sync minlines=2000
-syn sync minlines=1000
+if exists("python_space_error_highlight")
+  " trailing whitespace
+  syn match   pythonSpaceError	display excludenl "\s\+$"
+  " mixed tabs and spaces
+  syn match   pythonSpaceError	display " \+\t"
+  syn match   pythonSpaceError	display "\t\+ "
+endif
 
-command -nargs=+ HiLink hi def link <args>
+" Do not spell doctests inside strings.
+" Notice that the end of a string, either ''', or """, will end the contained
+" doctest too.  Thus, we do *not* need to have it as an end pattern.
+if !exists("python_no_doctest_highlight")
+  if !exists("python_no_doctest_code_higlight")
+    syn region pythonDoctest
+	  \ start="^\s*>>>\s" end="^\s*$"
+	  \ contained contains=ALLBUT,pythonDoctest,@Spell
+    syn region pythonDoctestValue
+	  \ start=+^\s*\%(>>>\s\|\.\.\.\s\|"""\|'''\)\@!\S\++ end="$"
+	  \ contained
+  else
+    syn region pythonDoctest
+	  \ start="^\s*>>>" end="^\s*$"
+	  \ contained contains=@NoSpell
+  endif
+endif
 
-" The default methods for highlighting.  Can be overridden later
-HiLink pythonStatement	Statement
-"HiLink pythonFunction		Function
-HiLink pythonConditional	Conditional
-HiLink pythonRepeat		Repeat
-HiLink pythonString		String
-HiLink pythonRawString	String
-HiLink pythonEscape		Special
-HiLink pythonOperator		Operator
-HiLink pythonPreCondit	PreCondit
-HiLink pythonComment		Comment
-HiLink pythonTodo		Todo
-HiLink pythonNumber	Number
-HiLink pythonBuiltin	Special
-HiLink pythonException	Exception
-HiLink pyTypedef           Structure
-HiLink pySpecialMethod     Library
-HiLink pythonSpecial     Library
-HiLink pyDebug             Debug
-HiLink pySyntaxError       Error
-HiLink pySyntaxWarning     Error
-HiLink pyBuiltinVariable   Library
+" Sync at the beginning of class, function, or method definition.
+syn sync match pythonSync grouphere NONE "^\s*\%(def\|class\)\s\+\h\w*\s*("
 
-delcommand HiLink
+if version >= 508 || !exists("did_python_syn_inits")
+  if version <= 508
+    let did_python_syn_inits = 1
+    command -nargs=+ HiLink hi link <args>
+  else
+    command -nargs=+ HiLink hi def link <args>
+  endif
+
+  HiLink pySpecialMethod	Library
+  HiLink pyBuiltinVariable  Library
+  " The default highlight links.  Can be overridden later.
+  HiLink pythonStatement	Statement
+  HiLink pythonConditional	Conditional
+  HiLink pythonRepeat		Repeat
+  HiLink pythonOperator		Operator
+  HiLink pythonException	Statement
+  HiLink pythonInclude		Include
+  HiLink pythonDecorator	Define
+  HiLink pythonFunction		Function
+  HiLink pythonComment		Comment
+  HiLink pythonTodo		Todo
+  HiLink pythonString		String
+  HiLink pythonRawString	String
+  HiLink pythonEscape		Special
+  if !exists("python_no_number_highlight")
+    HiLink pythonNumber		Number
+  endif
+  if !exists("python_no_builtin_highlight")
+    HiLink pythonBuiltin	Special
+  endif
+  if !exists("python_no_exception_highlight")
+    HiLink pythonExceptions	Exception
+  endif
+  if exists("python_space_error_highlight")
+    HiLink pythonSpaceError	Error
+  endif
+  if !exists("python_no_doctest_highlight")
+    HiLink pythonDoctest	Special
+    HiLink pythonDoctestValue	Define
+  endif
+
+  delcommand HiLink
+endif
 
 let b:current_syntax = "python"
 
-" vim: ts=8
+let &cpo = s:cpo_save
+unlet s:cpo_save
+
+" vim:set sw=2 sts=2 ts=8 noet:

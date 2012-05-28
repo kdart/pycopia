@@ -12,36 +12,35 @@ let g:pyindent_nested_paren = '&sw' * 2
 " set Vim parameters that suite python best
 set tm=2000
 
-set formatoptions=crql cino=(8#1 ai smartindent nowrap comments=:# 
+set formatoptions=crql cino=(8#1 ai smartindent nowrap comments=:#
 set cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 
 " set omnifunc=pythoncomplete#Complete
 
 " set kp=pyshowdoc
-" set kp=chmsee 
-" set kp=kchmviewer\ $HOME/.local/share/devhelp/books/python321rc1.chm\ --sindex 
+" set kp=kchmviewer\ $HOME/.local/share/devhelp/books/python321rc1.chm\ --sindex
 
 " The 'NonText' highlighting will be used for 'eol', 'extends' and
 " 'precedes'.  'SpecialKey' for 'tab' and 'trail'.
 function PyUseSpaces()
-	hi SpecialKey guifg=Red
-	:set ts=4 sw=4 
-	:set expandtab softtabstop=4 smarttab
-	:set listchars=trail:■,extends:>,precedes:<,tab:❱➝ list
+    hi SpecialKey guifg=Red
+    :set ts=4 sw=4
+    :set expandtab softtabstop=4 smarttab
+    :set listchars=trail:■,extends:>,precedes:<,tab:❱➝ list
 endfunction
 
 function PyUseTabs()
-	hi SpecialKey guifg=Blue
-	:set ts=4 sw=4 
-	:set noexpandtab softtabstop=0 smarttab 
-	:set nolist listchars=eol:$,trail:■,extends:>,precedes:<,tab:❱➝
+    hi SpecialKey guifg=Blue
+    :set ts=4 sw=4
+    :set noexpandtab softtabstop=0 smarttab
+    :set nolist listchars=eol:$,trail:■,extends:>,precedes:<,tab:❱➝
 endfunction
 
 function GoogleSpaces()
-	hi SpecialKey guifg=Red
-	:set ts=2 sw=2 tw=74
-	:set expandtab softtabstop=2 smarttab
-	:set listchars=trail:■,extends:>,precedes:<,tab:❱➝ list
+    hi SpecialKey guifg=Red
+    :set ts=2 sw=2 tw=74
+    :set expandtab softtabstop=2 smarttab
+    :set listchars=trail:■,extends:>,precedes:<,tab:❱➝ list
 endfunction
 
 " by default, use spaces
@@ -55,19 +54,19 @@ endfunction
 :python from pycopia.vimlib.pydev import *
 " put VIMSERVER in environment for child python processes to use.
 if has("gui_gtk") && has("gui_running")
-	:py os.environ["VIMSERVER"] = vim.eval("v:servername")
+    :py os.environ["VIMSERVER"] = vim.eval("v:servername")
 endif
 
 function! PyClean ()
-	normal ma
-	:retab
-	:%s/\s\+$//eg
-	normal 'a
+    normal ma
+    :retab
+    :%s/\s\+$//eg
+    normal 'a
 endfunction
 
 " function! PythonBalloon()
-" 	python balloonhelp()
-" 	return g:python_rv
+"   python balloonhelp()
+"   return g:python_rv
 " endfunction
 " set bexpr=PythonBalloon()
 " set ballooneval
