@@ -18,9 +18,10 @@ set history=500
 set statusline=%<%f%m%r%y%=%b\ 0x%B\ \ %l,%c%V\ %P
 set laststatus=2  " always a status line
 
+set dir=~/.vim/tmp//
 " following improves performance when using NFS. You might want to change
 " it to someplace more private.
-set dir=/var/tmp//
+" set dir=/var/tmp//
 " set undodir=~/.vim/tmp/undo//
 set hidden
 
@@ -35,6 +36,8 @@ set guioptions-=T
 set guioptions+=t
 
 set encoding=utf-8
+set printencoding=utf-8
+set popt=paper:letter
 
 " Only do this part when compiled with support for autocommands
 if has("autocmd")
@@ -45,6 +48,7 @@ endif
 
 " Don't use Ex mode, use Q for formatting
 map Q gq
+inoremap <C-space> <C-x><C-o>
 
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
@@ -53,6 +57,9 @@ if &t_Co > 2 || has("gui_running")
   set hlsearch
   colorscheme kwdcolors
 endif
+
+filetype plugin on
+filetype indent on
 
 augroup cprog
   " Remove all cprog autocommands
@@ -79,18 +86,22 @@ augroup END
 
 augroup newfile 
   au!
-  autocmd BufNewFile            *.html  0r      ~/Templates/HTML4.html
+  autocmd BufNewFile            *.vala,*.vapi 0r ~/Templates/Vala.vala
+  autocmd BufNewFile            *.html  0r      ~/Templates/HTML5.html
   autocmd BufNewFile            *.xhtml 0r      ~/Templates/XHTML.xhtml
   autocmd BufNewFile            *.c     0r      ~/Templates/C.c
   autocmd BufNewFile            *.py    0r      ~/Templates/Python.py
+  autocmd BufNewFile            *.rst   0r      ~/Templates/RST.rst
+  autocmd BufNewFile            *.txt   0r      ~/Templates/RST.rst
+  autocmd BufNewFile            *.txt   :set tw=74 noai comments=nb:>
+"  autocmd BufNewFile            /tmp/pico*   :set tw=72 noai comments=nb:>
 augroup END
 
+augroup vala
+  autocmd BufRead,BufNewFile  *.vala,*.vapi set ft=vala
+  autocmd FileType vala :so ~/.vim/vala.vim
+augroup END
 
-" augroup text
-"  autocmd BufRead /tmp/pico* :set tw=72 comments=rb:> noai
-"  autocmd FileType text :set tw=74 noai | menu Edit.Spell\ Check :update<CR>:!aspell check %<CR>:e! %<CR>
-"  autocmd FileType structuredtext :so $VIM/vimfiles/structuredtext.vim
-" augroup END
 
 augroup email
   autocmd FileType mail :set tw=72 noai fo+=tcql comments=nb:>| :nmap q :wq<CR>| :imap <C-x> <Esc>:wq<CR>
@@ -102,22 +113,45 @@ if v:progname == "mvim"
 	gui
 endif
 
-" Enable menus in screen vim (invoke vim as svim with symlink), and switch
-" buffers with control arrow.
+" Enable menus in console vim, and control-{left,right} to change buffers.
 if v:progname == "svim"
-	source $VIMRUNTIME/menu.vim
-	set wildmenu
-	set cpo-=<
-	set wcm=<C-Z>
-	map <F4> :emenu <C-Z>
-	set hidden
-       nmap <Esc>[5D :bp<CR>
+    source $VIMRUNTIME/menu.vim
+    set wildmenu
+    set cpo-=<
+    set wcm=<C-Z>
+    map <F4> :emenu <C-Z>
+    nmap ZZ :bd<CR>
+    if $TERM =~ "screen"
+       nmap <Esc>[D  :bp<CR>
+       nmap <Esc>[C  :bn<CR>
+    elseif $TERM =~ "rxvt"
        nmap <Esc>Od  :bp<CR>
        nmap <Esc>OD  :bp<CR>
        nmap <Esc>[5C :bn<CR>
        nmap <Esc>Oc  :bn<CR>
-       nmap <Esc>OC  :bn<CR>
-       nmap <Esc>[3~ :bd<CR>
-       nmap ZZ :bd<CR>
+    endif
 endif
+
+
+if &diff
+   nmap ZZ :qall!<CR>
+endif
+
+function! SuperCleverTab()
+    if strpart(getline('.'), 0, col('.') - 1) =~ '^\s*$'
+        return "\<Tab>"
+    else
+        if &omnifunc != ''
+            return "\<C-X>\<C-O>"
+        elseif &dictionary != ''
+            return "\<C-K>"
+        else
+            return "\<C-N>"
+        endif
+    endif
+endfunction
+ 
+inoremap <Tab> <C-R>=SuperCleverTab()<CR>
+
+let g:snips_author = 'My Name'
 

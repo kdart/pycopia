@@ -5,6 +5,7 @@ set visualbell
 set number
 
 set encoding=utf-8
+" set guifont=Bitstream\ Vera\ Sans\ Mono\ 11
 set guifont=Andale\ Mono\ 10
 
 set lines=58
@@ -22,6 +23,7 @@ syntax enable
   " Switch on search pattern highlighting.
 set hlsearch
 :map <F7> :set hls!<CR>
+"noremap <F8> :so `vimspell.sh %`<CR><CR>
 
   " Hide the mouse pointer while typing
 set mousehide
@@ -34,7 +36,9 @@ colorscheme kwdcolors
 
 if v:progname == "mvim"
 	map <M-Left> :bp<CR>
+	map <C-Left> :bp<CR>
 	map <M-Right> :bn<CR>
+	map <C-Right> :bn<CR>
 	map <M-Del> :bd<CR>
 	map ZZ :bd<CR>
 endif
