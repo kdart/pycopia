@@ -54,7 +54,7 @@ hi WildMenu term=standout ctermbg=Yellow ctermfg=Black guibg=Yellow guifg=Black
 hi Comment cterm=NONE ctermfg=DarkCyan ctermbg=Black guifg=skyblue guibg=black
 hi Constant cterm=NONE ctermfg=brown ctermbg=Black guifg=salmon guibg=black
 hi Debug ctermfg=lightgreen ctermbg=Black guifg=#ff80ff
-hi Define ctermfg=lightblue ctermbg=Black guifg=#ff80ff
+hi Define ctermfg=green ctermbg=Black guifg=#ff80ff
 hi Error term=reverse ctermfg=LightRed ctermbg=DarkBlue guifg=White guibg=Red
 hi Exception cterm=underline ctermfg=DarkRed ctermbg=Black  guifg=PaleVioletRed guibg=black
 hi Identifier term=NONE ctermfg=white ctermbg=Black guifg=PeachPuff
@@ -62,7 +62,7 @@ hi Ignore ctermfg=blue ctermbg=Black  guifg=grey30
 hi Keyword cterm=NONE ctermfg=DarkGreen ctermbg=Black guifg=green guibg=black
 hi Library ctermfg=white ctermbg=Black guifg=NavajoWhite1
 hi MatchParen term=reverse ctermfg=White ctermbg=black gui=bold guibg=black guifg=Yellow
-hi PreProc ctermfg=lightblue ctermbg=Black guifg=#ff80ff
+hi PreProc ctermfg=green ctermbg=Black guifg=#ff80ff
 hi Special ctermfg=DarkMagenta ctermbg=Black guifg=violet guibg=black
 hi SpecialStatement term=bold ctermfg=lightgreen ctermbg=DarkRed guifg=black guibg=#00FA9A
 hi Statement term=bold ctermfg=green ctermbg=Black  guifg=#00FA9A

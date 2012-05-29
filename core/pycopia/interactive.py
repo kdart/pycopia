@@ -15,7 +15,6 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from __future__ import unicode_literals
 from __future__ import division
 
 
@@ -42,8 +41,6 @@ CBROWSER       - HTML browser for character terminals.
 CHMBOOK        - File name of CHM help file.
 CHMVIEWER      - A GUI CHM viewer taking search and book replacements. e.g. 'kchmviewer --search %s %s'
 
-If the ~/.pyinteractiverc file does not exist a default one will be created.
-
 You can also create some shell aliases in your .bashrc file, like so:
 
 alias py='python -i -c "from pycopia import interactive"'
@@ -59,31 +56,16 @@ namespace for quck access without cluttering the __main__ namespace.
 """
 
 import sys, os, types
-import atexit
 from pprint import pprint
 from inspect import *
-#from dis import dis, distb
-try:
-    from importlib import import_module
-except ImportError: # older python
-    from pycopia.module import get_module as import_module
 
-
-try:
-    import rlcompleter2
-except ImportError:
-    import rlcompleter
-
-from pycopia.cliutils import *
-from pycopia.textutils import *
-from pycopia.aid import add2builtin, callable, execfile
-from pycopia.urlparse import UniversalResourceLocator as URL
+from pycopia import devenviron
 
 
 try:
     import readline
 except ImportError:
-    # dummy readline to make rest of this module happy.
+    # dummy readline to make rest of this module happy in case readline is not available.
     class Readline(object):
         def parse_and_bind(self, *args):
             pass
@@ -93,78 +75,55 @@ except ImportError:
             pass
     readline = Readline()
 
+try:
+    from importlib import import_module
+except ImportError: # older python
+    from pycopia.module import get_module as import_module
 
-if "DISPLAY" in os.environ:
+if sys.platform == "win32":
+    _default_hist = os.path.join(os.environ["USERPROFILE"], "_pythonhist")
+else:
+    _default_hist = os.path.join(os.environ["HOME"], ".pythonhist")
+PYHISTFILE = os.environ.get("PYHISTFILE", _default_hist)
+del _default_hist
+
+# Prefer rlcompleter2, if installed.
+try:
+    import rlcompleter2
+    rlcompleter2.setup(PYHISTFILE, verbose=0)
+except ImportError:
+    import rlcompleter
+    import atexit
     try:
-        from pycopia import gtktools
-    except ImportError:
-        pass # no gtk? oh well...
-    else:
-        # gdk "magically" stuffs these in __main__ for some strange reason.
-        # so this hack removes them.
-        main = sys.modules["__main__"]
-        del main.GInitiallyUnowned, main.GPollableInputStream, main.GPollableOutputStream
-        del main
-        choose = gtktools.list_picker # replace cliutils.choose
+        readline.read_history_file(PYHISTFILE)
+    except IOError:
+        pass
+    def savehist():
+        readline.write_history_file(PYHISTFILE)
+    atexit.register( savehist )
+    readline.parse_and_bind("tab: complete")
 
-__all__ = ['info', 'run_config', 'pyterm', 'xterm', 'edit', 'get_editor',
-'exec_editor', 'open_url', 'open_file', 'showdoc']
+
+# import some pycopia functions that are helpful for interactive use.
+from pycopia.cliutils import *
+from pycopia.textutils import *
+from pycopia.aid import add2builtin, callable, execfile
+from pycopia.devhelpers import *
+
+__all__ = ['info']
 
 def _add_all(modname):
     mod = import_module(modname)
     __all__.extend([n for n in dir(mod) if n[0] != "_" and callable(getattr(mod, n))])
 
 _add_all("pycopia.textutils")
+_add_all("pycopia.cliutils")
+_add_all("pycopia.devhelpers")
 _add_all("inspect")
 del _add_all
 
-# update environ with what's in the rc file.
-if sys.platform == "win32":
-    RCFILE = os.path.join(os.path.expandvars("$USERPROFILE"), "_pyinteractiverc")
-else:
-    RCFILE = os.path.join(os.path.expandvars("$HOME"), ".pyinteractiverc")
-
-# Create default rc file if it doesn't exist.
-if not os.path.exists(RCFILE):
-    rcfo = open(RCFILE, "w")
-    rcfo.write("""#!/usr/bin/python
-# some configuration stuff primarily for the 'interactive' module.
-
-PYPS1 = "Python> "
-PYPS2 = ".more.> "
-
-# programs
-#XTERM = "urxvtc -title Python -name Python -e %s"
-XTERM = "xterm -title Python -name Python -e %s"
-EDITOR = '/usr/bin/vim'
-XEDITOR = "/usr/bin/gvim"
-VIEWER = "/usr/bin/view"
-XVIEWER = "/usr/bin/gview"
-BROWSER = '/usr/bin/epiphany "%s"'
-CBROWSER = '/usr/bin/links "%s"'
-CHMBOOK = '$HOME/.local/share/devhelp/books/python266.chm"
-CHMVIEWER = 'kchmviewer --search %s "%s"'
-""")
-    rcfo.close()
-    del rcfo
-
-try:
-    env = {}
-    execfile(RCFILE, env, env)
-except:
-    ex, val, tb = sys.exc_info()
-    print ("warning: could not read config file:", RCFILE, file=sys.stderr)
-    print (val, file=sys.stderr)
-else:
-    for name, val in env.items():
-        if isinstance(val, basestring):
-            os.environ[str(name)] = str(val)
-del env
-
-PYTHON = os.environ.get("PYTHONBIN", sys.executable) # set PYTHONBIN for alternate interpreter
 sys.ps1 = os.environ.get("PYPS1", "Python{0}> ".format(sys.version_info[0]))
 sys.ps2 = os.environ.get("PYPS2", "more...> ")
-
 
 def info(obj=None):
     """Print some helpful information about the given object. Usually the
@@ -194,138 +153,6 @@ def info(obj=None):
         pprint(dir(obj.__class__))
     return ""
 
-def _print_object(obj):
-    print("".format(obj))
-
-def run_config(cfstring, param):
-    if not cfstring:
-        print ("No command string defined to run {0}.".format(param), file=sys.stderr)
-        return
-    try:
-        cmd = cfstring % param
-    except TypeError: # no %s in cfstring, so just stick the param on the end
-        cmd = "%s %s" % (cfstring, param)
-    print("CMD:", repr(cmd))
-    return os.system(cmd)
-
-def pyterm(filename="", interactive=1):
-    # Allow running remotely via ssh.
-    if "://" in filename:
-        url = URL(filename)
-        if url.scheme in ("scp", "sftp"): # vim remote file
-            remcmd = "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", url.path[1:]) # chop leading slash
-            if url.user:
-                cmd = 'ssh -t {}@{} {}'.format(url.user, url.host, remcmd)
-            else:
-                cmd = 'ssh -t {} {}'.format(url.host, remcmd)
-        else:
-            return "Can't handle scheme: " + url.scheme
-    else:
-        cmd = "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", filename)
-    if "DISPLAY" in os.environ:
-        return run_config(os.environ.get("XTERM"), cmd)
-    else:
-        return os.system(cmd)
-
-def xterm(cmd="/bin/sh"):
-    if "DISPLAY" in os.environ:
-        return run_config(os.environ.get("XTERM"), cmd)
-    else:
-        return os.system(cmd)
-
-def edit(modname):
-    """
-Opens the $XEDITOR with the given module source file (if found).
-    """
-    filename = find_source_file(modname)
-    if filename:
-        ed = get_editor()
-        return run_config(ed, filename)
-    else:
-        print ("Could not find source to {0}.".format(modname), file=sys.stderr)
-
-def view(modname):
-    """
-Opens the $[X]VIEWER with the given module source file (if found).
-    """
-    filename = find_source_file(modname)
-    if filename:
-        ed = get_viewer()
-        return run_config(ed, filename)
-    else:
-        print ("Could not find source to %s." % modname, file=sys.stderr)
-
-def get_editor():
-    if "DISPLAY" in os.environ:
-        ed = os.environ.get("XEDITOR", None)
-    else:
-        ed = os.environ.get("EDITOR", None)
-    if ed is None:
-        ed = get_input("Use which editor?", "/bin/vi")
-    return ed
-
-def get_viewer():
-    if "DISPLAY" in os.environ:
-        ed = os.environ.get("XVIEWER", None)
-    else:
-        ed = os.environ.get("VIEWER", None)
-    if ed is None:
-        ed = get_input("Use which viewer?", "/usr/bin/view")
-    return ed
-
-def exec_editor(*names):
-    """Runs your configured editor on a supplied list of files. Uses exec,
-there is no return!"""
-    ed = get_editor()
-    if ed.find("/") >= 0:
-        os.execv(ed, (ed,)+names)
-    else:
-        os.execvp(ed, (ed,)+names)
-
-def open_url(url):
-    """Opens the given URL in an external viewer. """
-    if "DISPLAY" in os.environ:
-        return run_config(os.environ.get("BROWSER"), url)
-    else:
-        return run_config(os.environ.get("CBROWSER"), url)
-
-def find_source_file(modname):
-    try:
-        return getsourcefile(modname)
-    except TypeError:
-        return None
-
-def open_chm(search):
-    """Opens the given search term with a CHM viewer. """
-    if "DISPLAY" in os.environ:
-        book = os.path.expandvars(os.environ.get("CHMBOOK",
-                '$HOME/.local/share/devhelp/books/python321rc1.chm'))
-        return run_config(os.environ.get("CHMVIEWER", 'kchmviewer --search %s "%s"'), (search, book))
-    else:
-        print ("open_chm: No CHM viewer for text mode.", file=sys.stderr)
-
-def open_file(filename):
-    return open_url("file://"+filename)
-
-
-def get_object_name(object):
-    objtype = type(object)
-    if objtype is str:
-        return object
-    elif objtype is types.ModuleType or objtype is types.BuiltinFunctionType:
-        return object.__name__
-    else:
-        print ("get_object_name: can't determine object name", file=sys.stderr)
-        return None
-
-
-def show_chm_doc(object, chooser=None):
-    name = get_object_name(object)
-    if name is None:
-        return
-    open_chm(name)
-
-showdoc = show_chm_doc
 
 def mydisplayhook(obj):
     pprint(obj)
@@ -342,21 +169,8 @@ def _add_builtins(names=__all__):
         add2builtin(name, getattr(sys.modules[__name__], name))
 
 _add_builtins()
+del _add_builtins
 
-if sys.platform == "win32":
-    _default_hist = os.path.join(os.environ["USERPROFILE"], "_pythonhist")
-else:
-    _default_hist = os.path.join(os.environ["HOME"], ".pythonhist")
-PYHISTFILE = os.environ.get("PYHISTFILE", _default_hist)
-
-try:
-    readline.read_history_file(PYHISTFILE)
-except IOError:
-    pass
-def savehist():
-    readline.write_history_file(PYHISTFILE)
-atexit.register( savehist )
-readline.parse_and_bind("tab: complete")
 
 ## readline key bindings
 ##readline.parse_and_bind("tab: menu-complete")

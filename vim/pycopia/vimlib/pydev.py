@@ -28,11 +28,9 @@ import re
 import ast
 import cStringIO as StringIO
 
-from pycopia import interactive
+from pycopia import devenviron
+from pycopia import devhelpers
 from pycopia import textutils
-
-pyterm = interactive.pyterm
-xterm = interactive.xterm
 
 
 XTERM = os.environ.get("XTERM", "rxvt -e")
@@ -42,6 +40,10 @@ re_def = re.compile(r"^[ \t]*def ")
 re_class = re.compile(r"^[ \t]*class ")
 re_klass_export = re.compile(r"^class ([a-zA-Z][a-zA-Z0-9_]*)")
 re_def_export = re.compile(r"^def ([a-zA-Z][a-zA-Z0-9_]*)")
+
+# pull in these to local namespace for menus.
+pyterm = devhelpers.pyterm
+xterm = devhelpers.xterm
 
 def normal(str):
     vim.command("normal "+str)
@@ -59,13 +61,13 @@ def exec_vimrange_in_term(vrange):
     tf = open(EXECTEMP , "w")
     tf.write(str_range(vrange))
     tf.close()
-    interactive.run_config(XTERM, "python -i %s" % (EXECTEMP))
+    devhelpers.run_config(XTERM, "python -i %s" % (EXECTEMP))
 
 def insert_viminfo():
     """Insert a vim line with tabbing related settings reflecting current settings."""
     # The following line is to prevent this vim from interpreting it as a real
     # v-i-m tagline.
-    vi = ["# %s" % ("".join(['v','i','m']),)] 
+    vi = ["# %s" % ("".join(['v','i','m']),)]
     for var in ('ts', 'sw', 'softtabstop'):
         vi.append("%s=%s" % (var, vim.eval("&%s" % (var,))))
     for var in ('smarttab', 'expandtab'):
@@ -136,17 +138,17 @@ def htmlhex_visual_selection():
         b[start_row-1:end_row] = htmlhex("\n".join(b[start_row-1:end_row])).split("\n") # XXX partial lines
 
 def keyword_help():
-    interactive.showdoc(vim.eval('expand("<cword>")'))
+    devhelpers.showdoc(vim.eval('expand("<cword>")'))
 
 def keyword_edit():
-    interactive.edit(vim.eval('expand("<cword>")'))
+    devhelpers.edit(vim.eval('expand("<cword>")'))
 
 def keyword_view():
-    interactive.view(vim.eval('expand("<cword>")'))
+    devhelpers.view(vim.eval('expand("<cword>")'))
 
 def keyword_split():
     modname = vim.eval('expand("<cword>")')
-    filename = interactive.find_source_file(modname)
+    filename = devhelpers.find_source_file(modname)
     if filename is not None:
         vim.command("split %s" % (filename,))
     else:
@@ -157,14 +159,14 @@ def visual_edit():
     if "\n" in text:
         print("bad selection")
     else:
-        interactive.edit(text)
+        devhelpers.edit(text)
 
 def visual_view():
     text = get_visual_selection()
     if "\n" in text:
         print("bad selection")
     else:
-        interactive.view(text)
+        devhelpers.view(text)
 
 def get_visual_selection():
     b = vim.current.buffer
