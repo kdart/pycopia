@@ -73,8 +73,8 @@ set cpo&vim
 "
 syn keyword pythonStatement	False, None, True
 syn keyword pythonStatement	as assert break continue del exec global
-syn keyword pythonStatement	lambda nonlocal pass return with yield
-syn keyword pythonStatement	class def nextgroup=pythonFunction skipwhite
+syn keyword pythonStatement	nonlocal pass return with yield
+syn keyword pythonStructure	lambda class def nextgroup=pythonFunction skipwhite
 syn keyword pythonConditional	elif else if
 syn keyword pythonRepeat	for while
 syn keyword pythonOperator	and in is not or
@@ -233,7 +233,7 @@ endif
 syn keyword pyDebug            __debug__
 syn keyword pyBuiltinVariable  __bases__ __class__ __doc__ __slots__
 syn keyword pyBuiltinVariable  __file__ __name__ __methods__ __members__
-syn keyword pyBuiltinVariable  __module__ __self__ self __package__ __builtins__
+syn keyword pyBuiltinVariable  __module__ __self__ __package__ __builtins__
 
 " all of the special methods. So you know you got the right one. 8-)
 syn keyword pySpecialMethod __abs__ __add__ __and__ __call__ __closure__ __cmp__ __code__
@@ -251,6 +251,9 @@ syn keyword pySpecialMethod __rpow__ __rrshift__ __rshift__ __rsub__ __rtruediv_
 syn keyword pySpecialMethod __setitem__ __setslice__ __sizeof__ __str__ __sub__ __subclasshook__
 syn keyword pySpecialMethod __truediv__ __trunc__ __weakref__ __xor__
 syn keyword pySpecialMethod __next__
+
+" names used by convention, such as self, that are often boilerplate and can be de-emphasized.
+syn keyword pyConvention self
 
 if exists("python_space_error_highlight")
   " trailing whitespace
@@ -293,6 +296,7 @@ if version >= 508 || !exists("did_python_syn_inits")
   HiLink pyBuiltinVariable  Library
   " The default highlight links.  Can be overridden later.
   HiLink pythonStatement	Statement
+  HiLink pythonStructure	Structure
   HiLink pythonConditional	Conditional
   HiLink pythonRepeat		Repeat
   HiLink pythonOperator		Operator
@@ -305,6 +309,8 @@ if version >= 508 || !exists("did_python_syn_inits")
   HiLink pythonString		String
   HiLink pythonRawString	String
   HiLink pythonEscape		Special
+  HiLink pyDebug             Debug
+  HiLink pyConvention             Ignore
   if !exists("python_no_number_highlight")
     HiLink pythonNumber		Number
   endif

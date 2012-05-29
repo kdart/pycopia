@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 # $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -44,19 +44,19 @@ ISPEED = 4
 OSPEED = 5
 CC = 6
 
-IFLAGS = [ "IGNBRK", "BRKINT", "IGNPAR", "PARMRK", "INPCK", "ISTRIP", 
+IFLAGS = [ "IGNBRK", "BRKINT", "IGNPAR", "PARMRK", "INPCK", "ISTRIP",
         "INLCR", "IGNCR", "ICRNL", "IXON", "IXANY", "IXOFF", "IMAXBEL", ]
 
 OFLAGS = [ "OPOST", "ONLCR", "OCRNL", "ONOCR", "ONLRET"]
 
 CFLAGS = ["CSTOPB", "CREAD", "PARENB", "CLOCAL", "CRTSCTS",]
 
-LFLAGS = [ "ISIG", "ICANON", "XCASE", "ECHO", "ECHOE", "ECHOK", "ECHONL", 
-        "ECHOCTL", "ECHOPRT", "ECHOKE", "FLUSHO", "NOFLSH", "TOSTOP", 
+LFLAGS = [ "ISIG", "ICANON", "XCASE", "ECHO", "ECHOE", "ECHOK", "ECHONL",
+        "ECHOCTL", "ECHOPRT", "ECHOKE", "FLUSHO", "NOFLSH", "TOSTOP",
         "PENDIN", "IEXTEN",]
 
-BAUDS = [ 'B0', 'B50', 'B75', 'B110', 'B134', 'B150', 'B200', 'B300', 
-    'B600', 'B1200', 'B1800', 'B2400', 'B4800', 'B9600', 'B19200', 'B38400', 
+BAUDS = [ 'B0', 'B50', 'B75', 'B110', 'B134', 'B150', 'B200', 'B300',
+    'B600', 'B1200', 'B1800', 'B2400', 'B4800', 'B9600', 'B19200', 'B38400',
     'B57600', 'B115200', 'B230400', 'B460800',]
 
 CCHARS = [ "VINTR", "VQUIT", "VERASE", "VKILL", "VEOF", "VTIME",
@@ -155,7 +155,7 @@ def flag_string(fd):
     return "\n".join(s)
 
 def stty(fd, *args):
-    """stty(fd, [flags...]) 
+    """stty(fd, [flags...])
 Stty gets or sets the termios flags for the specified file descriptor. If
 no argument is given a report is returned as a string.  If a flag string
 is given in the form "flag" or "-flag" then the flag is set, or reset,
@@ -166,7 +166,7 @@ respectively. Multiple flags of this form may be supplied.
     else:
         mode = tcgetattr(fd)
         for arg in args: # should be set of strings, possibly with leading "-"
-            cmd = {"sane":sane, "reset":sane, "cbreak":setcbreak, 
+            cmd = {"sane":sane, "reset":sane, "cbreak":setcbreak,
                     "raw":setraw, "cooked":cooked }.get(arg, None)
             if cmd is None:
                 _set_flag(mode, arg)
@@ -332,10 +332,10 @@ def interrupt(fd, intr=None):
 
 class PagedIO(object):
     """PagedIO([pagerprompt])
-Reads and writes to stdin/stdout while paging output. 
+Reads and writes to stdin/stdout while paging output.
 automatically adjusts output according to screen size.  """
     def __init__(self, pagerprompt=None):
-        self.stdout = sys.stdout 
+        self.stdout = sys.stdout
         self.stdin = sys.stdin
         self.stderr = sys.stderr
         self.mode = "rw"
@@ -417,7 +417,7 @@ automatically adjusts output according to screen size.  """
                 c = self._pause()
                 if c in "qQ":
                     raise PageQuitError
-                elif c == "\r": # XXX still needs work 
+                elif c == "\r": # XXX still needs work
                     rows = needed = 1
                 else:
                     rows = needed = self.rows-1
@@ -426,7 +426,7 @@ automatically adjusts output according to screen size.  """
     # of lines, also taking into account implicit wrapping.
     def _get_index(self, data, needed, i):
         cols = self.cols
-        l = n = 0 
+        l = n = 0
         ld = len(data)
         while 1:
             n = data.find("\n", i)
@@ -525,7 +525,7 @@ def getuser():
 def terminal_lines(data, cols=80):
     """Returns the number of lines of a terminal with 'cols' columns that the
 string will consume."""
-    l = n = i = 0 
+    l = n = i = 0
     while n >= 0:
         n = data.find("\n", i)
         l += 1 + ((((n<0 and len(data)) or n)-i)/cols)
@@ -595,7 +595,7 @@ class SerialPort(object):
         Supply a string such as "9600 8N1".
         """
         fd = self._fo.fileno()
-        baud, mode = spec.split() 
+        baud, mode = spec.split()
         set_baud(fd, baud)
         if mode == "8N1":
             return set_8N1(fd)
@@ -634,6 +634,18 @@ class SerialPort(object):
             self._fo = None
             self.closed = True
             return fo.close()
+
+
+# Decorator that will save and restore tty state around the method.
+def savetty(meth):
+    def wrapcleantty(*args, **kwargs):
+        savestate = tcgetattr(sys.stdin)
+        try:
+            rv = meth(*args, **kwargs)
+        finally:
+            tcsetattr(sys.stdin, TCSAFLUSH, savestate)
+        return rv
+    return wrapcleantty
 
 
 class SafeSerialPort(SerialPort):

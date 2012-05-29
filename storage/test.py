@@ -24,7 +24,6 @@ from pycopia import ipv4
 from pycopia import proctools
 from pycopia import scheduler
 
-from pycopia import netobjects
 from pycopia.durusplus import persistent_attrdict
 from pycopia.durusplus import persistent_data
 
@@ -42,24 +41,6 @@ class StorageTests(unittest.TestCase):
     def tearDown(self):
         self._server.kill()
         del self._server
-
-    def test_model(self):
-        dev = netobjects.NetworkDevice("testdevice")
-        net = netobjects.Network()
-        net.add_subnet("192.168.1.0/24")
-        net.add_subnet("64.171.30.154/29")
-        dev.connect("eth0", net)
-        print net
-        self.assertTrue("192.168.1.1/24" in net)
-        self.assertFalse("192.168.7.1/24" in net)
-        self.assertFalse("192.168.8.1/24" in net)
-
-    def test_IPAssignments(self):
-        ioa = netobjects.IPAssignments("testme", "172.22.80.0/24", 
-                   ipv4.IPRange("172.22.1.60/24", "172.22.1.70/24"))
-        print ioa
-        self.assertTrue("172.22.80.3/24" in ioa)
-        self.assertFalse("174.22.80.3/24" in ioa)
 
     def test_PersistentAttrDict(self):
         ad = persistent_attrdict.PersistentAttrDict()

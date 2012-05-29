@@ -46,7 +46,6 @@ try:
     O_ASYNC = getattr(os, "O_ASYNC")
 except AttributeError:
     O_ASYNC = os.O_ASYNC = {
-        "linux3":020000, # ?
         "linux2":020000,
         "linux3":020000,
         "freebsd4":0x0040,

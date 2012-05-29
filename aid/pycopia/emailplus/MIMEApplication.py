@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 # $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -29,12 +29,12 @@ class MIMEApplication(MIMENonMultipart):
 
     def __init__(self, _data, _subtype=None,
                  _encoder=Encoders.encode_base64, **_params):
-        """Create an audio/* type MIME document.
+        """Create an application/* type MIME document.
 
-        _data is a string containing the raw applicatoin data. 
+        _data is a string containing the raw applicatoin data.
 
         _encoder is a function which will perform the actual encoding for
-        transport of the application data.  
+        transport of the application data.
 
         Any additional keyword arguments are passed to the base class
         constructor, which turns them into parameters on the Content-Type
@@ -45,3 +45,9 @@ class MIMEApplication(MIMENonMultipart):
         MIMENonMultipart.__init__(self, 'application', _subtype, **_params)
         self.set_payload(_data)
         _encoder(self)
+
+
+if __name__ == "__main__":
+    data = open("/usr/lib64/python2.7/test/zipdir.zip").read()
+    m = MIMEApplication(data, "zip")
+
