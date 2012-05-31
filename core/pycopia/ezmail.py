@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 # $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -14,6 +14,10 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 
 """
 A helper module that wraps the standard email package to make simple
@@ -92,13 +96,13 @@ class AutoMessageMixin(object):
         mopts = mail_options or []
         rcptopts = rcpt_options or []
         if not self.mail_from or not self.rcpt_to:
-            raise RuntimeError, "AutoMessage: cannot send. no From or recipients."
+            raise MailError("AutoMessage: cannot send. no From or recipients.")
         if self.has_key("Bcc"):
             del self["Bcc"]
         now = timelib.now()
         self["Date"] = formatdate(now)
         self["Message-ID"] = "<%s.%x@%s>" % (
-            timelib.localtimestamp(now, fmt="%Y%m%d%H%M%S"), 
+            timelib.localtimestamp(now, fmt="%Y%m%d%H%M%S"),
             id(self) % 0x7fffffff,
             _get_hostname())
         return smtp.sendmail(self.mail_from, self.rcpt_to, self.as_string(0), mopts, rcptopts)
@@ -132,7 +136,7 @@ class AutoMessageMixin(object):
                 self._add_recipient(header, name, None)
             return
         elif not isinstance(addr, basestring):
-            raise TypeError, "recipients need to be a list or string"
+            raise TypeError("recipients need to be a list or string")
         self.rcpt_to.append(addr)
         long_addr = get_address(addr, name)
         if self.has_key(header):
@@ -144,7 +148,7 @@ class AutoMessageMixin(object):
 
 
 class AutoMessage(SimpleMessage, AutoMessageMixin):
-    def __init__(self, text, mimetype="text/plain", charset="us-ascii", 
+    def __init__(self, text, mimetype="text/plain", charset="us-ascii",
                     From=None, To=None):
         AutoMessageMixin.__init__(self, From, To)
         SimpleMessage.__init__(self, text, mimetype, charset)
@@ -192,7 +196,7 @@ def message_from_string(s, klass=SimpleMessage, strict=0):
     return parser.parsestr(s)
 
 def self_address():
-    """self_address() 
+    """self_address()
 Returns address string referring to user running this (yourself)."""
     global CONFIG
     name, longname = getuser()
@@ -252,10 +256,9 @@ def ezmail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
         else:
             outer = AutoMessage(str(obj).encode("us-ascii"))
 
+    outer.From(From)
     if To:
         outer.To(To)
-    if From:
-        outer.From(From)
     if subject:
         outer.Subject(subject)
     if cc:
@@ -289,9 +292,9 @@ def mail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
         extra_headers=None):
     try:
         return ezmail(obj, To, From, subject, cc, bcc, extra_headers)
-    except MailError, err:
-        print >>sys.stderr, "Error while sending mail!"
-        print >>sys.stderr, err
+    except MailError as err:
+        print("Error while sending mail!", file=sys.stderr)
+        print(err, file=sys.stderr)
         return None
 
 
@@ -301,24 +304,26 @@ def get_config():
 
 
 class LocalSender(object):
+    """Use local sendmail program to send mail."""
+
     def sendmail(self, From, rcpt_to, msg, mopts=None, rcptopts=None):
         from pycopia import proctools
-        cmd = "/usr/sbin/sendmail -i"
-        if From:
-            cmd += " -f %s" % From
+        cmd = "/usr/sbin/sendmail"
         for rcpt in rcpt_to:
-            cmd += " %s" % rcpt
-        proc = proctools.spawnpipe(cmd)
+            cmd += ' "%s"' % rcpt
+        proc = proctools.spawnpty(cmd)
         proc.write(msg)
-        proc.close()
+        proc.send_eof()
         proc.wait()
         return proc.exitstatus
 
+def dp(proc):
+    print(proc)
 
 # global configuration
 CONFIG = get_config()
 
 
 if __name__ == "__main__":
-    print mail(["This is a test.\n", "Another part"], None, subject="Testing ezmail")
-
+    # This needs a working mail configuration.
+    print (mail("This is a test.\n", To="keith@dartworks.biz", subject="Testing ezmail."))

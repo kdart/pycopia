@@ -76,7 +76,6 @@ class Process(object):
         self.callback = callback # called at death of process
         self._log = logfile # should be file-like object
         self._restart = True # restart interrupted system calls
-        self._rawq = []
         self._buf = ''
         self._errbuf = ''
         self._writebuf = ''
@@ -234,10 +233,7 @@ ProcManager uses this."""
         bs = len(self._buf)
         try:
             while bs < amt:
-                if self._rawq:
-                    c = self._rawq.pop(0)
-                else:
-                    c = self._read(4096)
+                c = self._read(4096)
                 if not c:
                     break
                 self._buf += c
@@ -329,27 +325,6 @@ ProcManager uses this."""
     def _unread(self, data):
         self._buf = data + self._buf
 
-    # just fill local buffer.
-    def _read_fill(self):
-        try:
-            data = self._read(16384)
-            if not data:
-                return
-            self._rawq.append(data)
-        except (IOError, EOFError), err:
-            if self._log is not None:
-                self._log.write("Read error: (%s)\n" % (err,))
-
-    def _readerr_fill(self):
-        try:
-            c = self._readerr(8192)
-            if not c:
-                return
-            self._errbuf += c
-        except (IOError, EOFError), err:
-            if self._log is not None:
-                self._log.write("Read error (error stream): (%s)\n" % (err,))
-
     # Interface for asyncio poller.
     def readable(self):
         return True
@@ -361,7 +336,9 @@ ProcManager uses this."""
         return False
 
     def read_handler(self):
-        self._read_fill()
+        data = self._read(16384)
+        if self._log is not None:
+            self._log.write(data)
 
     def write_handler(self):
         self._write_buf()
@@ -577,6 +554,7 @@ class ProcessPty(Process):
                 self.childpid = pid
                 self.childpid2 = None # for compatibility with pipeline
                 self._intr = None
+                self._eof = None
 
     def isatty(self):
         return os.isatty(self._fd)
@@ -596,10 +574,18 @@ class ProcessPty(Process):
         set_nonblocking(self._fd, flag)
 
     def interrupt(self):
+        """Like pressing Ctl-C on most terminals."""
         if self._intr is None:
             from pycopia import tty
             self._intr = tty.get_intr_char(self._fd)
         self._write(self._intr)
+
+    def send_eof(self):
+        """Like pressing Ctl-D on most terminals."""
+        if self._eof is None:
+            from pycopia import tty
+            self._eof = tty.get_eof_char(self._fd)
+        self._write(self._eof)
 
     def close(self):
         if self.closed:

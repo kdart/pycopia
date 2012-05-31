@@ -323,6 +323,10 @@ def get_intr_char(fd=0):
     mode = tcgetattr(fd)
     return mode[CC][VINTR]
 
+def get_eof_char(fd=0):
+    mode = tcgetattr(fd)
+    return mode[CC][VEOF]
+
 def interrupt(fd, intr=None):
     if intr is None:
         mode = tcgetattr(fd)
