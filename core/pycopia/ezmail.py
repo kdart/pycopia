@@ -313,6 +313,7 @@ class LocalSender(object):
             cmd += ' "%s"' % rcpt
         proc = proctools.spawnpty(cmd)
         proc.write(msg)
+        proc.write("\n")
         proc.send_eof()
         proc.wait()
         return proc.exitstatus
@@ -326,4 +327,4 @@ CONFIG = get_config()
 
 if __name__ == "__main__":
     # This needs a working mail configuration.
-    print (mail("This is a test.\n", To="keith@dartworks.biz", subject="Testing ezmail."))
+    print (mail(["This is a test.\n", "It is multipart."], To="keith@dartworks.biz", subject="Testing ezmail."))
