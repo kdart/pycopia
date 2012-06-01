@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -14,9 +14,8 @@
 #    Lesser General Public License for more details.
 
 """
-Helpers and utilities for HTTP. Contains a set of classes for constructing HTTP
-headers according to the syntax rules. See RFC 2068.
-
+Helpers and utilities for HTTP. Contains a set of classes for constructing and
+verifying HTTP headers according to the syntax rules. See RFC 2616.
 """
 
 from __future__ import print_function
@@ -30,7 +29,7 @@ from pycopia import timelib
 
 # Some useful data!
 
-HTTPMETHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE"]
+HTTPMETHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "CONNECT"]
 
 STATUSCODES = {
     100: "Continue",
@@ -48,6 +47,7 @@ STATUSCODES = {
     303: "See Other",
     304: "Not Modified",
     305: "Use Proxy",
+    307: "Temporary Redirect",
     400: "Bad Request",
     401: "Unauthorized",
     402: "Payment Required",
@@ -64,6 +64,8 @@ STATUSCODES = {
     413: "Request Entity Too Large",
     414: "Request-URI Too Large",
     415: "Unsupported Media Type",
+    416: "Requested range not satisfiable",
+    417: "Expectation Failed",
     500: "Internal Server Error",
     501: "Not Implemented",
     502: "Bad Gateway",
@@ -73,27 +75,15 @@ STATUSCODES = {
  }
 
 
-# some data for generating other user agents
-#
-# MozillaComment   ( Platform ;  Security ;  OS-or-CPU ;  
-#                   Localization information  ?[; PrereleaseVersion] )  
-#                   *[; Optional Other Comments] )
 
-PLATFORMS = ["Windows", "Macintosh", "X11"]
-SECURITY = ["U", "I", "N"]
-# * N for no security
-# * U for strong security (US export)
-# * I for weak security (International)
-MSWINDOWSLIST = [ "WinNT3.51", "WinNT4.0", "Windows NT 5.0", 
-                    "Win95", "Win98", "Win3.11", "Win 9x 4.90", ]
-MSIEVERSIONS = ["MSIE 3.0", "MSIE 4.0", "MSIE 5.0", "MSIE 5.01", "MSIE 5.5", "MSIE 6.0",]
-# X11 is output of uname -sm
-LINUXLIST = ["Linux x86_64", "Linux i686", "Linux i586", "Linux i486", "Linux i386", "Linux ppc"]
-SOLARISLIST = ["SunOS sun4u", "SunOS sun4m"]
-OSORCPU = {"Windows": MSWINDOWSLIST,
-        "Macintosh": ["68k", "PPC"],
-        "X11": LINUXLIST + SOLARISLIST,
-}
+class HeaderInvalidError(Exception):
+    pass
+
+class ValueInvalidError(HeaderInvalidError):
+    pass
+
+class UnknownHeaderError(HeaderInvalidError):
+    pass
 
 
 #### header components. These are various parts of some headers, for general use.
@@ -104,10 +94,13 @@ class QuotedString(object):
 
     def __init__(self, val):
         self.data = val
+
     def __str__(self):
         return httpquote(str(self.data))
+
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.data)
+
     def parse(self, data):
         self.data = httpunquote(data)
 
@@ -124,7 +117,7 @@ class Comment(object):
 
 
 class Product(object):
-    """Product(vendor, [version]) 
+    """Product(vendor, [version])
     vendor is a vendor string. can contain a version, or not. If not, can
     supply version separately.  version is a version number, as a string."""
     def __init__(self, vendor="Mozilla/5.0", version=None):
@@ -134,6 +127,7 @@ class Product(object):
         else:
             self.vendor = vendor
             self.version = version
+
     def __str__(self):
         return "%s%s" % (self.vendor, ("/" + self.version if self.version else ""))
 
@@ -141,13 +135,15 @@ class Product(object):
 class EntityTag(object):
     """Entity tags are used for comparing two or more entities from the same
     requested resource. HTTP/1.1 uses entity tags in the ETag, If-Match,
-    If-None-Match, and If-Range header fields.  """
-
-    def __init__(self, data, weak=0):
-        self.data = QuotedString(data)
+    If-None-Match, and If-Range header fields.
+    """
+    def __init__(self, tag, weak=0):
+        self.tag = str(tag)
         self.weak = not not weak # force to boolean
+
     def __str__(self):
-        return "%s%s" % ("W/" if self.weak else "", self.data)
+        return '%s"%s"' % ("W/" if self.weak else "", self.tag)
+
 
 class MediaRange(object):
     """MediaRange is an element in an Accept list. Here, a None values means
@@ -161,7 +157,7 @@ class MediaRange(object):
         self.extensions = kwargs
 
     def __repr__(self):
-        return "%s(type=%r, subtype=%r, q=%r, **%r)" % (self.__class__.__name__, 
+        return "%s(type=%r, subtype=%r, q=%r, **%r)" % (self.__class__.__name__,
             self.type, self.subtype, self.q, self.extensions)
 
     def __str__(self):
@@ -172,7 +168,7 @@ class MediaRange(object):
             extstr = ";%s" % (";".join(exts))
         else:
             extstr = ""
-        if self.q != 1.0: 
+        if self.q != 1.0:
             return "%s/%s;q=%1.1f%s" % (self.type, self.subtype, self.q, extstr)
         else:
             return "%s/%s%s" % (self.type, self.subtype, extstr)
@@ -212,6 +208,42 @@ class MediaRange(object):
                 return subtype == self.subtype
         else:
             return False
+
+
+class HTTPDate(object):
+    """HTTP-date    = rfc1123-date | rfc850-date | asctime-date"""
+    def __init__(self, date=None, _value=None):
+        if _value is not None:
+            self._value = _value # a time tuple
+        else:
+            if date:
+                self.parse(date)
+            else:
+                self._value = None
+
+    def parse(self, datestring):
+        try:
+            t = timelib.strptime(datestring, "%a, %d %b %Y %H:%M:%S GMT") # rfc1123 style
+        except ValueError:
+            try:
+                t = timelib.strptime(datestring, "%A, %d-%b-%y %H:%M:%S GMT") # rfc850 style
+            except ValueError:
+                try:
+                    t = timelib.strptime(datestring, "%a %b %d %H:%M:%S %Y") # asctime style
+                except ValueError:
+                    raise ValueInvalidError(datestring)
+        self._value = t
+
+    def __str__(self):
+        return timelib.strftime("%a, %d %b %Y %H:%M:%S GMT", self._value)
+
+    @classmethod
+    def now(cls):
+        return cls(_value=timelib.gmtime())
+
+    @classmethod
+    def from_float(cls, timeval):
+        return cls(_value=timelib.gmtime(timeval))
 
 
 # Value object for Accept header.
@@ -324,7 +356,7 @@ class HTTPHeaderWithParameters(HTTPHeader):
     def __repr__(self):
         if self.parameters:
             return "%s(%r, %s)" % (
-                self.__class__.__name__, self.value, 
+                self.__class__.__name__, self.value,
                 ", ".join(["%s=%r" % t for t in self.parameters.iteritems()]))
         else:
             return "%s(%r)" % (self.__class__.__name__, self.value)
@@ -335,23 +367,42 @@ class HTTPHeaderWithParameters(HTTPHeader):
 class CacheControl(HTTPHeaderWithParameters):
     HEADER="Cache-Control"
 
+
 class Connection(HTTPHeader):
     HEADER="Connection"
+
 
 class Date(HTTPHeader):
     HEADER="Date"
 
+    def parse_value(self, value):
+        return HTTPDate(value)
+
+    @classmethod
+    def now(cls):
+        return cls(HTTPDate.now())
+
 class Pragma(HTTPHeader):
     HEADER="Pragma"
 
-class TransferEncoding(HTTPHeader):
+
+class Trailer(HTTPHeader):
+    HEADER="Trailer"
+
+class TransferEncoding(HTTPHeaderWithParameters):
     HEADER="Transer-Encoding"
+
 
 class Upgrade(HTTPHeader):
     HEADER="Upgrade"
 
+
 class Via(HTTPHeader):
     HEADER="Via"
+
+
+class Warning(HTTPHeader):
+    HEADER="Warning"
 
 
 ### Entity headers
@@ -359,38 +410,46 @@ class Via(HTTPHeader):
 class Allow(HTTPHeader):
     HEADER="Allow"
 
-class ContentBase(HTTPHeader):
-    HEADER="Content-Base"
 
 class ContentEncoding(HTTPHeader):
     HEADER="Content-Encoding"
 
+
 class ContentLanguage(HTTPHeader):
     HEADER="Content-Language"
+
 
 class ContentLength(HTTPHeader):
     HEADER="Content-Length"
 
+
 class ContentLocation(HTTPHeader):
     HEADER="Content-Location"
+
 
 class ContentMD5(HTTPHeader):
     HEADER="Content-MD5"
 
+
 class ContentRange(HTTPHeader):
     HEADER="Content-Range"
+
 
 class ContentDisposition(HTTPHeaderWithParameters):
     HEADER="Content-Disposition"
 
+
 class ContentType(HTTPHeaderWithParameters):
     HEADER="Content-Type"
+
 
 class ETag(HTTPHeader):
     HEADER="ETag"
 
+
 class Expires(HTTPHeader):
     HEADER="Expires"
+
 
 class LastModified(HTTPHeader):
     HEADER="Last-Modified"
@@ -429,11 +488,11 @@ class Accept(HTTPHeader):
     def add_mediarange(self, type, subtype="*", q=1.0):
         self.data.append(MediaRange(type, subtype, q))
 
-    # Select from accepted mime types one we support. 
+    # Select from accepted mime types one we support.
     # This isn't currently right, but it's what we support (XHTML)
     # (server is given choice preference)
     def select(self, supported):
-        for mymedia in supported: 
+        for mymedia in supported:
             for accepted in self.value: # Media ordered in decreasing preference
                 maintype, subtype = mymedia.split("/", 1)
                 if accepted.match(maintype, subtype):
@@ -444,44 +503,66 @@ class Accept(HTTPHeader):
 class AcceptCharset(HTTPHeader):
     HEADER="Accept-Charset"
 
+
 class AcceptEncoding(HTTPHeader):
     HEADER="Accept-Encoding"
+
 
 class AcceptLanguage(HTTPHeader):
     HEADER="Accept-Language"
 
+
+class Expect(HTTPHeaderWithParameters):
+    HEADER="Expect"
+
+
 class From(HTTPHeader):
     HEADER="From"
+
 
 class Host(HTTPHeader):
     HEADER="Host"
 
+
 class IfModifiedSince(HTTPHeader):
     HEADER="If-Modified-Since"
+
 
 class IfMatch(HTTPHeader):
     HEADER="If-Match"
 
+
 class IfNoneMatch(HTTPHeader):
     HEADER="If-None-Match"
+
 
 class IfRange(HTTPHeader):
     HEADER="If-Range"
 
+
 class IfUnmodifiedSince(HTTPHeader):
     HEADER="If-Unmodified-Since"
+
 
 class MaxForwards(HTTPHeader):
     HEADER="Max-Forwards"
 
+
 class ProxyAuthorization(HTTPHeader):
     HEADER="Proxy-Authorization"
+
 
 class Range(HTTPHeader):
     HEADER="Range"
 
+
 class Referer(HTTPHeader):
     HEADER="Referer"
+
+
+class TE(HTTPHeader):
+    HEADER="TE"
+
 
 class Authorization(HTTPHeader):
     HEADER = "Authorization"
@@ -540,33 +621,43 @@ class UserAgent(HTTPHeader):
 
 
 ### Response headers
+class AcceptRanges(HTTPHeader):
+    HEADER="Accept-Ranges"
+
 class Age(HTTPHeader):
     HEADER="Age"
+
+
+class ETag(HTTPHeader):
+    HEADER="ETag"
+
 
 class Location(HTTPHeader):
     HEADER="Location"
 
+
 class ProxyAuthenticate(HTTPHeader):
     HEADER="Proxy-Authenticate"
+
 
 class Public(HTTPHeader):
     HEADER="Public"
 
+
 class RetryAfter(HTTPHeader):
     HEADER="Retry-After"
+
 
 class Server(HTTPHeader):
     HEADER="Server"
 
+
 class Vary(HTTPHeader):
     HEADER="Vary"
 
-class Warning(HTTPHeader):
-    HEADER="Warning"
 
 class WWWAuthenticate(HTTPHeader):
     HEADER="WWW-Authenticate"
-
 
 # cookies!  Slightly different impementation from the stock Cookie module.
 
@@ -610,6 +701,7 @@ class Cookie(HTTPHeader):
         return self._name, self.value_string()
 
 
+## cookie handling
 
 class CookieJar(object):
     """A collection of cookies. May be used in a client or server context."""
@@ -630,11 +722,11 @@ class CookieJar(object):
                 continue
             self.parse_mozilla_line(line)
 
-    def add_cookie(self, name, value, comment=None, domain=None, 
+    def add_cookie(self, name, value, comment=None, domain=None,
             max_age=None, path=None, secure=0, version=1, expires=None, httponly=False):
         if value:
-            new = RawCookie(name, value, comment=comment, domain=domain, 
-                  max_age=max_age, path=path, secure=secure, version=version, 
+            new = RawCookie(name, value, comment=comment, domain=domain,
+                  max_age=max_age, path=path, secure=secure, version=version,
                   expires=expires, httponly=httponly)
             self._cookies[(new.name, new.path, new.domain)] = new
         else:
@@ -737,7 +829,7 @@ class RawCookie(object):
     storage of a cookie. Use a CookieJar to store a collection.
     """
 
-    def __init__(self, name, value, comment=None, domain=None, 
+    def __init__(self, name, value, comment=None, domain=None,
             max_age=None, path=None, secure=0, version=1, expires=None, httponly=False):
         self.comment = self.domain = self.path = None
         self.name = name
@@ -800,15 +892,14 @@ class RawCookie(object):
         if self.version:
             s.append("Version=%s" % httpquote(str(self.version)))
         if self.expires is not None:
-            s.append("Expires=%s" % timelib.strftime(
-                 "%a, %d-%b-%Y %H:%M:%S GMT", timelib.gmtime(self.expires)))
+            s.append("Expires=%s" % HTTPDate.from_float(self.expires))
         return ";".join(s)
 
     def as_mozilla_line(self):
         domain_specified = "TRUE" if self.domain.startswith(".") else "FALSE"
         secure = "TRUE" if self.secure else "FALSE"
-        return "\t".join(map(str, [self.domain, domain_specified, 
-                      self.path, secure, self.expires, 
+        return "\t".join(map(str, [self.domain, domain_specified,
+                      self.path, secure, self.expires,
                       self.name, self.value]))
 
     def set_secure(self, val=1):
@@ -942,7 +1033,7 @@ def parse_cookie(rawstr, patt=_CookiePattern):
     while 0 <= i < n:
         # Start looking for a cookie
         match = patt.search(rawstr, i)
-        if not match: 
+        if not match:
             break         # No more cookies
 
         K,V = match.group("key"), match.group("val")
@@ -959,6 +1050,8 @@ def parse_cookie(rawstr, patt=_CookiePattern):
             cookies.append(newcookie)
     return cookies
 
+
+# Header collecitions
 
 class Headers(list):
     """Holder for a collection of headers. Should only contain HTTPHeader
@@ -1167,17 +1260,6 @@ def httpunquote(s):
 ### end copied code
 
 # some convenient functions
-def mozilla_comment(platform=None, security=None, os=None, localization=None):
-    platform = platform or "X11"
-    security = security or SECURITY[0]
-    os = os or OSORCPU[platform][0]
-    localization = localization or "en-US"
-    return Comment(platform, security, os, localization)
-
-def microsoft_comment(ieversion=None, os=None):
-    ieversion = ieversion or MSIEVERSIONS[4]
-    os = os or MSWINDOWSLIST[4]
-    return Comment("compatible", ieversion, os)
 
 _HEADERMAP = {}
 def _init():
@@ -1282,4 +1364,13 @@ if __name__ == "__main__":
     print(hl)
     h2 = Headers([("Content-Length", "222"), ("Host", "www.example.com")])
     print(h2)
+
+    d1 = HTTPDate("Sun, 06 Nov 1994 08:49:37 GMT")
+    print(d1)
+    d2 = HTTPDate("Sunday, 06-Nov-94 08:49:37 GMT")
+    print(d2)
+    d3 = HTTPDate("Sun Nov  6 08:49:37 1994")
+    print(HTTPDate.now())
+    print(Date.now())
+
 
