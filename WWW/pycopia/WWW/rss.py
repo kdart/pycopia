@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 2007  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -42,20 +42,23 @@ def new_document(doctype=dtds.RSS2, encoding=POM.DEFAULT_ENCODING):
     return doc
 
 
-def get_parser(document=None, namespaces=1, validate=0, external_ges=1, 
+def get_parser(document=None, namespaces=1, validate=0, external_ges=1,
         logfile=None, doc_factory=new_document):
+    import xml
+    if hasattr(xml, "use_pyxml"):
+        xml.use_pyxml()
     import xml.sax.sax2exts
     import xml.sax.handler
     handler = POM.ContentHandler(document, doc_factory=doc_factory, logfile=logfile)
     errorhandler = POM.ErrorHandler(logfile)
-    # create parser 
+    # create parser
     parser = xml.sax.sax2exts.XMLParserFactory.make_parser()
     parser.setFeature(xml.sax.handler.feature_namespaces, namespaces)
     parser.setFeature(xml.sax.handler.feature_validation, validate)
     parser.setFeature(xml.sax.handler.feature_external_ges, external_ges)
     parser.setFeature(xml.sax.handler.feature_external_pes, 0)
     parser.setFeature(xml.sax.handler.feature_string_interning, 1)
-    # set handlers 
+    # set handlers
     parser.setContentHandler(handler)
     parser.setDTDHandler(handler)
     parser.setEntityResolver(handler)

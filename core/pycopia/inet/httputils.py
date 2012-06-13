@@ -285,6 +285,10 @@ class HTTPHeader(object):
     def asWSGI(self):
         return self._name, str(self.value)
 
+    def verify(self):
+        if not self.value:
+            raise ValueInvalidError("No value")
+
     def parse(self, line):
         [name, val] = line.split(":", 1)
         self._name = name.strip()
@@ -382,6 +386,7 @@ class Date(HTTPHeader):
     def now(cls):
         return cls(HTTPDate.now())
 
+
 class Pragma(HTTPHeader):
     HEADER="Pragma"
 
@@ -391,6 +396,33 @@ class Trailer(HTTPHeader):
 
 class TransferEncoding(HTTPHeaderWithParameters):
     HEADER="Transer-Encoding"
+
+    def initialize(self, **kwargs):
+        self.parameters = kwargs
+        self._tencodings = []
+
+    def _get_value(self):
+        return ", ".join(self._tencodings)
+
+    def _set_value(self, value):
+        self._tencodings = [t for t in [t.strip() for t in value.split(",")] if t]
+
+    value = property(_get_value, _set_value)
+
+    def set_chunked(self):
+        self._tencodings.append("chunked")
+
+    def set_identity(self):
+        self._tencodings.append("identity")
+
+    def set_gzip(self):
+        self._tencodings.append("gzip")
+
+    def set_compress(self):
+        self._tencodings.append("compress")
+
+    def set_deflate(self):
+        self._tencodings.append("deflate")
 
 
 class Upgrade(HTTPHeader):
@@ -1373,4 +1405,11 @@ if __name__ == "__main__":
     print(HTTPDate.now())
     print(Date.now())
 
+    print(TransferEncoding("chunked"))
+    te = TransferEncoding()
+    print(te)
+    te.set_gzip()
+    print(te)
+    te.set_chunked()
+    print(te)
 

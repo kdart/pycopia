@@ -273,6 +273,7 @@ class _StreamClient(_BaseClient):
     EOL = "\n"
     def __init__(self, sock, protocol, logfile=None):
         self._sock = sock.makefile("w+b", 0)
+        sock.close()
         self.protocol = protocol
         self._logfile = logfile
 

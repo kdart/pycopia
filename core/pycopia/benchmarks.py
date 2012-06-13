@@ -216,6 +216,7 @@ if __name__ == "__main__":
     bc = BenchCompare((F1, F2), iterations=1000, loops=3)
     cmpres = bc()
     print cmpres
+    print cmpres.get_ratios()
     print
     rr = CompareResults(["one", "two", "three", "four", "five"])
     rr.append([1,2,3,4,5], 1)

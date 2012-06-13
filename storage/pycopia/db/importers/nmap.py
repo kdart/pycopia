@@ -30,6 +30,9 @@ user/administrator will have to go and assign created interfaces to hosts.
 
 from logging import warn
 
+import xml
+if hasattr(xml, "use_pyxml"):
+    xml.use_pyxml()
 import xml.sax.sax2exts
 import xml.sax.handler
 
@@ -79,7 +82,7 @@ def get_unknown_equipment(session, hostname):
 def get_unknown_equipment_model(session):
     cat = session.query(models.EquipmentCategory).filter(models.EquipmentCategory.name=="unknown").one()
     q = session.query(models.EquipmentModel).filter(models.and_(
-                models.EquipmentModel.name=="Unknown", 
+                models.EquipmentModel.name=="Unknown",
                 models.EquipmentModel.category==cat)
                 )
     try:
@@ -110,7 +113,7 @@ def add_interface(session, attribs):
     ipaddr = attribs["ipaddr"]
     attribs["interface_type"] = get_interface_type(session)
     q = session.query(models.Interface).filter(models.and_(
-                models.Interface.network==network, 
+                models.Interface.network==network,
                 models.Interface.ipaddr==ipaddr)
                 )
     # try to find equipment by matching name.
@@ -137,7 +140,7 @@ def add_interface(session, attribs):
 
 
 class ContentHandler(object):
-    """SAX content handler. 
+    """SAX content handler.
 
     Manages state and adds interface records when enough host data is collected.
     """
@@ -262,14 +265,14 @@ class ErrorHandler(object):
 
 def get_parser(dburl, logfile=None, namespaces=0, validate=0, external_ges=0):
     handler = ContentHandler(dburl)
-    # create parser 
+    # create parser
     parser = xml.sax.sax2exts.XMLParserFactory.make_parser()
     parser.setFeature(xml.sax.handler.feature_namespaces, namespaces)
     parser.setFeature(xml.sax.handler.feature_validation, validate)
     parser.setFeature(xml.sax.handler.feature_external_ges, external_ges)
     parser.setFeature(xml.sax.handler.feature_external_pes, 0)
     parser.setFeature(xml.sax.handler.feature_string_interning, 1)
-    # set handlers 
+    # set handlers
     parser.setContentHandler(handler)
     parser.setDTDHandler(handler)
     parser.setEntityResolver(handler)

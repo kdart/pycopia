@@ -31,7 +31,7 @@ from pycopia.remote import pyro
 
 
 
-_EXIT = False # singals the server wants to exit.
+_EXIT = False # signals the server wants to exit.
 
 class PosixFile(UserFile.UserFile):
     def __repr__(self):
@@ -282,9 +282,6 @@ class PosixAgent(object):
     def ismount(self, path):
         return os.path.ismount(path)
 
-    def _status_cb(self, proc):
-        self._status[proc.childpid] = proc.exitstatus
-
     def system(self, cmd):
         return proctools.system("%s >/dev/null 2>&1" % cmd)
 
@@ -331,6 +328,10 @@ class PosixAgent(object):
         proc.callback = self._status_cb
         self._status[proc.childpid] = None
         return proc.childpid
+
+    def _status_cb(self, proc):
+        self._status[proc.childpid] = proc.exitstatus
+        logging.msg("exited", str(proc.exitstatus))
 
     def _get_process(self, pid):
         pm = proctools.get_procmanager()

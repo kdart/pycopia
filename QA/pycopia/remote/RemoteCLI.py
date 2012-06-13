@@ -326,7 +326,7 @@ class RemoteCLI(CLI.BaseCommands):
             pidlist = self._obj.plist()
         for sPid in pidlist:
             stat = self._obj.pstat(int(sPid))
-            if stat == -errno.ENOENT:
+            if type(stat) is int and stat == -errno.ENOENT:
                 continue
             self._print("{stat.pid!s}: {stat.cmdline}".format(stat=stat))
 

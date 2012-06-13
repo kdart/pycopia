@@ -149,7 +149,7 @@ class XMLAttribute(object):
 
     def __repr__(self):
         cl = self.__class__
-        return "%s.%s(%r, %r, %r, %r)" % (POMMODULE, cl.__name__, 
+        return "%s.%s(%r, %r, %r, %r)" % (POMMODULE, cl.__name__,
                                self.name, self.a_type, self.a_decl, self.default)
 
     def __hash__(self):
@@ -341,21 +341,24 @@ class ErrorHandler(object):
             self._lf.write("XML Warning: %s" % (exception,))
 
 
-def get_parser(document=None, namespaces=0, validate=0, external_ges=1, 
+def get_parser(document=None, namespaces=0, validate=0, external_ges=1,
         logfile=None, doc_factory=POM.new_document):
+    import xml
+    if hasattr(xml, "use_pyxml"):
+        xml.use_pyxml()
     import xml.sax.sax2exts
     import xml.sax.handler
     import new
     handler = ContentHandler(document, doc_factory=doc_factory, logfile=logfile)
     errorhandler = ErrorHandler(logfile)
-    # create parser 
+    # create parser
     parser = xml.sax.sax2exts.XMLParserFactory.make_parser()
     parser.setFeature(xml.sax.handler.feature_namespaces, namespaces)
     parser.setFeature(xml.sax.handler.feature_validation, validate)
     parser.setFeature(xml.sax.handler.feature_external_ges, external_ges)
     parser.setFeature(xml.sax.handler.feature_external_pes, 0)
     parser.setFeature(xml.sax.handler.feature_string_interning, 1)
-    # set handlers 
+    # set handlers
     parser.setContentHandler(handler)
     parser.setDTDHandler(handler)
     parser.setEntityResolver(handler)
@@ -365,7 +368,7 @@ def get_parser(document=None, namespaces=0, validate=0, external_ges=1,
     # This is to a) make the API compatible with the HTMLParser, and b)
     # allow specifing the encoding and other headers in the request.
     parser.parse_orig = parser.parse
-    def parse(self, url, data=None, encoding=POM.DEFAULT_ENCODING, 
+    def parse(self, url, data=None, encoding=POM.DEFAULT_ENCODING,
                                     useragent=None, accept=None):
         from pycopia.WWW import urllibplus
         fo = urllibplus.urlopen(url, data, encoding, useragent=useragent, accept=accept)
