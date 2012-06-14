@@ -217,7 +217,7 @@ class HTTPDate(object):
             self._value = _value # a time tuple
         else:
             if date:
-                self.parse(date)
+                self.parse(date.strip())
             else:
                 self._value = None
 

@@ -362,7 +362,7 @@ class RootContainer(config.Container):
                         "User specific configuration area.")
 
     def _build_userconfig(self):
-        username = self.get("username") or os.environ["USER"]
+        username = self.get("username", os.environ["USER"])
         try:
             cont = self.get_container(username)
         except config.NoResultFound:

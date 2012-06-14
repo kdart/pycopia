@@ -180,7 +180,7 @@ mapper(User, tables.auth_user,
 
 def create_user(session, pwent):
     """Create a new user with a default password and name taken from the
-    password entry (from the passwd module). 
+    password entry (from the passwd module).
     """
     now = tables.time_now()
     fullname = pwent.gecos
@@ -336,7 +336,7 @@ class LanguageSet(object):
     def __str__(self):
         return str(self.name)
 
-mapper(LanguageSet, tables.language_sets, 
+mapper(LanguageSet, tables.language_sets,
     properties={
         "languages": relationship(Language, lazy=True, secondary=tables.language_sets_languages),
     }
@@ -487,7 +487,7 @@ class ProjectVersion(object):
         return "%s %s.%s.%s-%s" % (self.project, self.major, self.minor,
                 self.subminor, self.build)
 
-mapper(ProjectVersion, tables.project_versions, 
+mapper(ProjectVersion, tables.project_versions,
     properties={
         "project": relationship(Project),
     }
@@ -527,7 +527,7 @@ class Corporation(object):
 
     def set_attribute(self, session, attrname, value):
         attrtype = CorporateAttributeType.get_by_name(session, str(attrname))
-        existing = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self, 
+        existing = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self,
                             CorporateAttribute.type==attrtype)).scalar()
         if existing is not None:
             existing.value = value
@@ -540,7 +540,7 @@ class Corporation(object):
     def get_attribute(self, session, attrname):
         attrtype = CorporateAttributeType.get_by_name(session, str(attrname))
         try:
-            ea = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self, 
+            ea = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self,
                             CorporateAttribute.type==attrtype)).one()
         except NoResultFound:
             raise ModelError("No attribute %r set." % (attrname,))
@@ -594,7 +594,7 @@ class CorporateAttribute(object):
 mapper(CorporateAttribute, tables.corp_attributes,
     properties={
         "type": relationship(CorporateAttributeType),
-        "corporation": relationship(Corporation, backref=backref("attributes", 
+        "corporation": relationship(Corporation, backref=backref("attributes",
                     cascade="all, delete, delete-orphan")),
     }
 )
@@ -641,7 +641,7 @@ class Software(object):
 
     def set_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
-        existing = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self, 
+        existing = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self,
                             SoftwareAttribute.type==attrtype)).scalar()
         if existing is not None:
             existing.value = value
@@ -654,7 +654,7 @@ class Software(object):
     def get_attribute(self, session, attrname):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         try:
-            ea = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self, 
+            ea = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self,
                             SoftwareAttribute.type==attrtype)).one()
         except NoResultFound:
             raise ModelError("No attribute %r set." % (attrname,))
@@ -677,9 +677,9 @@ mapper (Software, tables.software,
     properties={
         "variants": relationship(SoftwareVariant, lazy=True, secondary=tables.software_variants),
         "category": relationship(SoftwareCategory),
-        "vendor": relationship(Corporation, 
+        "vendor": relationship(Corporation,
                 primaryjoin=tables.software.c.vendor_id==tables.corporations.c.id),
-        "manufacturer": relationship(Corporation, 
+        "manufacturer": relationship(Corporation,
                 primaryjoin=tables.software.c.manufacturer_id==tables.corporations.c.id),
     }
 )
@@ -696,7 +696,7 @@ class SoftwareAttribute(object):
 
 mapper(SoftwareAttribute, tables.software_attributes,
     properties={
-            "software": relationship(Software, backref=backref("attributes", 
+            "software": relationship(Software, backref=backref("attributes",
                     cascade="all, delete, delete-orphan")),
             "type": relationship(AttributeType),
     },
@@ -754,7 +754,7 @@ class EquipmentModel(object):
 
     def set_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
-        existing = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self, 
+        existing = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self,
                             EquipmentModelAttribute.type==attrtype)).scalar()
         if existing is not None:
             existing.value = value
@@ -767,7 +767,7 @@ class EquipmentModel(object):
     def get_attribute(self, session, attrname):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         try:
-            ea = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self, 
+            ea = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self,
                             EquipmentModelAttribute.type==attrtype)).one()
         except NoResultFound:
             raise ModelError("No attribute %r set." % (attrname,))
@@ -807,7 +807,7 @@ class EquipmentModelAttribute(object):
 
 mapper(EquipmentModelAttribute, tables.equipment_model_attributes,
     properties={
-            "equipmentmodel": relationship(EquipmentModel, backref=backref("attributes", 
+            "equipmentmodel": relationship(EquipmentModel, backref=backref("attributes",
                     cascade="all, delete, delete-orphan")),
             "type": relationship(AttributeType),
     },
@@ -822,7 +822,7 @@ class Equipment(object):
 
     def set_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
-        existing = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self, 
+        existing = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self,
                             EquipmentAttribute.type==attrtype)).scalar()
         if existing is not None:
             existing.value = value
@@ -835,7 +835,7 @@ class Equipment(object):
     def get_attribute(self, session, attrname):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         try:
-            ea = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self, 
+            ea = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self,
                             EquipmentAttribute.type==attrtype)).one()
         except NoResultFound:
             raise ModelError("No attribute %r set." % (attrname,))
@@ -854,7 +854,7 @@ class Equipment(object):
         return AttributeType.get_attribute_list(session)
 
     # interface management
-    def add_interface(self, session, name, 
+    def add_interface(self, session, name,
                 ifindex=None, interface_type=None, macaddr=None, ipaddr=None, network=None):
         if interface_type is not None and isinstance(interface_type, basestring):
             interface_type = session.query(InterfaceType).filter(InterfaceType.name==interface_type).one()
@@ -929,7 +929,7 @@ mapper(Equipment, tables.equipment,
         "account": relationship(LoginAccount),
         "language": relationship(Language),
         "location": relationship(Location),
-        "subcomponents": relationship(Equipment, 
+        "subcomponents": relationship(Equipment,
                 backref=backref('parent', remote_side=[tables.equipment.c.id])),
         "software": relationship(Software, lazy=True, secondary=tables.equipment_software),
     },
@@ -948,7 +948,7 @@ class EquipmentAttribute(object):
 
 mapper(EquipmentAttribute, tables.equipment_attributes,
     properties={
-            "equipment": relationship(Equipment, backref=backref("attributes", 
+            "equipment": relationship(Equipment, backref=backref("attributes",
                     cascade="all, delete, delete-orphan")),
             "type": relationship(AttributeType),
     },
@@ -973,10 +973,10 @@ class Interface(object):
 mapper(Interface, tables.interfaces,
     properties = {
         "interface_type": relationship(InterfaceType, order_by=tables.interface_type.c.name),
-        "subinterfaces": relationship(Interface, 
+        "subinterfaces": relationship(Interface,
                 backref=backref('parent', remote_side=[tables.interfaces.c.id])),
         "network": relationship(Network, backref="interfaces", order_by=tables.networks.c.name),
-        "equipment": relationship(Equipment, 
+        "equipment": relationship(Equipment,
                 backref=backref("interfaces", collection_class=column_mapped_collection(tables.interfaces.c.name))),
     }
 )
@@ -1015,7 +1015,7 @@ class Environment(object):
 
     def set_attribute(self, session, attrname, value):
         attrtype = EnvironmentAttributeType.get_by_name(session, str(attrname))
-        existing = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self, 
+        existing = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self,
                             EnvironmentAttribute.type==attrtype)).scalar()
         if existing is not None:
             existing.value = value
@@ -1028,7 +1028,7 @@ class Environment(object):
     def get_attribute(self, session, attrname):
         attrtype = EnvironmentAttributeType.get_by_name(session, str(attrname))
         try:
-            ea = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self, 
+            ea = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self,
                             EnvironmentAttribute.type==attrtype)).one()
         except NoResultFound:
             raise ModelError("No attribute %r set." % (attrname,))
@@ -1055,7 +1055,7 @@ class Environment(object):
         except NoResultFound:
             raise ModelError("No such role defined in environment: %s" % (rolename,))
         qq = session.query(TE).filter(and_(
-                TE.environment==self, 
+                TE.environment==self,
                 TE.UUT==False,  # UUT does not take on other roles.
                 TE.roles.contains(role)))
         te = qq.scalar()
@@ -1076,7 +1076,7 @@ class Environment(object):
                 rv.append(role.name)
         return removedups(rv)
 
-    # user/owner management. 
+    # user/owner management.
     # This field is also used as a lock on the environment.
     def set_owner_by_username(self, session, username):
         user = User.get_by_username(session, username)
@@ -1130,7 +1130,7 @@ class EnvironmentAttribute(object):
 
 mapper(EnvironmentAttribute, tables.environment_attributes,
     properties={
-            "environment": relationship(Environment, backref=backref("attributes", 
+            "environment": relationship(Environment, backref=backref("attributes",
                     cascade="all, delete, delete-orphan")),
             "type": relationship(EnvironmentAttributeType),
     },
@@ -1182,7 +1182,7 @@ class TestCase(object):
 
     def get_latest_result(self, session):
         sq = session.query(func.max(TestResult.starttime)).filter(and_(
-                TestResult.testcase==self, 
+                TestResult.testcase==self,
                 TestResult.valid==True)).subquery()
         return session.query(TestResult).filter(and_(
                 TestResult.starttime==sq,
@@ -1212,7 +1212,7 @@ mapper(TestCase, tables.test_cases,
     properties={
         "functionalarea": relationship(FunctionalArea, secondary=tables.test_cases_areas),
         "reference": relationship(Requirement),
-        "prerequisites": relationship(TestCase, secondary=tables.test_cases_prerequisites, 
+        "prerequisites": relationship(TestCase, secondary=tables.test_cases_prerequisites,
             primaryjoin=tables.test_cases.c.id==tables.test_cases_prerequisites.c.testcase_id,
             secondaryjoin=tables.test_cases_prerequisites.c.prerequisite_id==tables.test_cases.c.id,
             backref="dependents"),
@@ -1232,12 +1232,12 @@ class TestSuite(object):
 
     def get_latest_result(self, session):
         sq = session.query(func.max(TestResult.starttime)).filter(and_(
-                TestResult.objecttype==OBJ_TESTSUITE, 
-                TestResult.testsuite==self, 
+                TestResult.objecttype==OBJ_TESTSUITE,
+                TestResult.testsuite==self,
                 TestResult.valid==True)).subquery()
         return session.query(TestResult).filter(and_(
                 TestResult.starttime==sq,
-                TestResult.testsuite==self, 
+                TestResult.testsuite==self,
                     )).scalar()
     @classmethod
     def get_latest_results(cls, session):
@@ -1250,11 +1250,11 @@ class TestSuite(object):
 
     @classmethod
     def get_by_name(cls, dbsession, name):
-        return dbsession.query(cls).filter(cls.name==name).scalar()
+        return dbsession.query(cls).filter(cls.name==name).all()
 
     @classmethod
     def get_by_implementation(cls, dbsession, implementation):
-        return dbsession.query(cls).filter(cls.suiteimplementation==implementation).scalar()
+        return dbsession.query(cls).filter(cls.suiteimplementation==implementation).first()
 
 
 mapper(TestSuite, tables.test_suites,
@@ -1262,7 +1262,7 @@ mapper(TestSuite, tables.test_suites,
         "project": relationship(Project),
         "components": relationship(Component, secondary=tables.components_suites, backref="suites"),
         "testcases": relationship(TestCase, secondary=tables.test_suites_testcases, backref="suites"),
-        "subsuites": relationship(TestSuite, secondary=tables.test_suites_suites, 
+        "subsuites": relationship(TestSuite, secondary=tables.test_suites_suites,
             primaryjoin=tables.test_suites.c.id==tables.test_suites_suites.c.from_testsuite_id,
             secondaryjoin=tables.test_suites_suites.c.to_testsuite_id==tables.test_suites.c.id,
             backref="suites"),
@@ -1336,12 +1336,12 @@ class TestResult(object):
     def get_latest_run(cls, session, user):
         """Return the last Runner (top-level) TestResult for the User."""
         sq = session.query(func.max(cls.starttime)).filter(and_(
-                cls.tester==user, 
-                cls.objecttype==OBJ_TESTRUNNER, 
+                cls.tester==user,
+                cls.objecttype==OBJ_TESTRUNNER,
                 cls.valid==True)).subquery()
         return session.query(cls).filter(and_(
                 cls.starttime==sq,
-                cls.tester==user, 
+                cls.tester==user,
                 cls.objecttype==OBJ_TESTRUNNER)).scalar()
 
 
@@ -1429,7 +1429,7 @@ class Capability(object):
 mapper(Capability, tables.capability,
     properties={
         "type": relationship(CapabilityType),
-        "equipment": relationship(Equipment, backref=backref("capabilities", 
+        "equipment": relationship(Equipment, backref=backref("capabilities",
                     cascade="all, delete, delete-orphan")),
     }
 )
@@ -1468,10 +1468,10 @@ class Config(object):
             raise ModelError("No sub-node %r set." % (name,))
 
 
-mapper(Config, tables.config, 
+mapper(Config, tables.config,
     properties={
-        'children': relationship(Config, cascade="all", 
-            backref=backref("container", 
+        'children': relationship(Config, cascade="all",
+            backref=backref("container",
                     remote_side=[tables.config.c.id, tables.config.c.user_id])),
         'testcase': relationship(TestCase),
         'testsuite': relationship(TestSuite),
@@ -1533,7 +1533,7 @@ def get_choices(session, modelclass, colname, order_by=None):
 
 
 # structure returned by get_metadata function.
-MetaDataTuple = collections.namedtuple("MetaDataTuple", 
+MetaDataTuple = collections.namedtuple("MetaDataTuple",
         "coltype, colname, default, m2m, nullable, uselist, collection")
 
 
