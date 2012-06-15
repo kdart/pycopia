@@ -1,10 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: ascii -*-
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 # License: LGPL
 # Keith Dart <kdart@kdart.com>
-# $Id: ifchart,v 1.1 2005/07/25 21:25:16 kdart Exp $
-#
+
 
 import sys
 import gtk
@@ -12,7 +11,7 @@ import gtk
 try:
     import rtgraph
 except ImportError:
-    print >>sys.stderr, """The 'rtgraph' module is not installed. Obtain this from 
+    print >>sys.stderr, """The 'rtgraph' module is not installed. Obtain this from
     http://navi.cx/svn/misc/trunk/rtgraph/web/index.html
     or run 'emerge dev-python/rtgraph' in Gentoo Linux."""
     raise
@@ -62,7 +61,7 @@ def main(argv):
         pollInterval = 1000,
         size       = (384,128),
         gridSize   = 32,
-        channels   = [get_channel(sess, IF_MIB.ifInUcastPkts, port, color=(1,0,0)), 
+        channels   = [get_channel(sess, IF_MIB.ifInUcastPkts, port, color=(1,0,0)),
                       get_channel(sess, IF_MIB.ifOutUcastPkts, port, color=(0,1,0))],
         bgColor    = (0, 0, 0.3),
         gridColor  = (0, 0, 0.5),

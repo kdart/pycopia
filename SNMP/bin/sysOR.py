@@ -1,9 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -29,7 +27,7 @@ import sys
 from pycopia.SNMP import SNMP
 from pycopia.SNMP import Manager
 
-from pycopia.mibs import SNMPv2_MIB 
+from pycopia.mibs import SNMPv2_MIB
 
 
 def main(argv):

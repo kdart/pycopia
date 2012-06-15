@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 
 import sys
 from pycopia.QA import gendoc
@@ -7,7 +7,7 @@ from pycopia.QA import gendoc
 Generate HTML test case documentation from Python source code.
 
 The environment variable TESTHOME must be set to the top of the test
-package hierarchy. 
+package hierarchy.
 
 The Python docutils package, version 0.5 or greater, must also be
 installed.

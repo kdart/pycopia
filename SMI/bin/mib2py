@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python2.7
 # License: LGPL
 # Keith Dart <kdart@kdart.com>
 
@@ -7,7 +7,7 @@ Usage: mib2py [-AE] [-p <preload>] <modulename> ...
 
 Where:
     -A  = Also compile ALL modules (imported and defined).
-    -p  = Preload a module before loading the main module 
+    -p  = Preload a module before loading the main module
           (can be used multiple times)
     -E  = Compile every installed SMI module. This can take a while.
 

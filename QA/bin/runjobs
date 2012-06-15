@@ -1,4 +1,4 @@
-#!/usr/bin/python -OOS
+#!/usr/bin/python2.7 -OOS
 # -*- coding: ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # License: LGPL

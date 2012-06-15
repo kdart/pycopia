@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
@@ -10,7 +10,7 @@ Usage:
 Imports the interfaces found in the XML file generated with a command such
 as:
 
-   nmap -sP -oX netmap.xml 10.10.10.0/24 
+   nmap -sP -oX netmap.xml 10.10.10.0/24
 
 """
 

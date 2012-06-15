@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 
 """
 This utility generates the SMICONSTANTS module for the SMI library. This
 should rarely, if ever, need to be run once its run once. It pulls the SMI
-library constants that the mib mobules enumerate. 
+library constants that the mib mobules enumerate.
 
 
 """

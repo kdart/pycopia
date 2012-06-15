@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # License: LGPL
 # Keith Dart <kdart@kdart.com>
@@ -13,7 +13,7 @@ import sys
 from pycopia.inet import DICT
 
 def main(argv):
-    ds = DICT.DictConnection("dict.org")  # "127.0.0.1") 
+    ds = DICT.DictConnection("dict.org")  # "127.0.0.1")
     for word in argv[1:]:
         wdefs = ds.get_definition(word)
         for wdef in wdefs:

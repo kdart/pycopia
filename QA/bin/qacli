@@ -1,0 +1,11 @@
+#!/usr/bin/python2.7 -S
+# -*- coding: utf-8 -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+import sys
+sys.setdefaultencoding("utf-8")
+import site
+
+from pycopia.QA import cli
+
+cli.main(sys.argv)

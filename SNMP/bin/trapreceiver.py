@@ -1,7 +1,7 @@
-#!/usr/bin/python -i
+#!/usr/bin/python2.7 -i
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 1999-2009  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -38,7 +38,7 @@ def load(mibname):
     exec "import pycopia.mibs.%s" % (mibname.replace("-", "_"),) in globals(), globals()
 
 
-# Sets up trap receiver that goes into interactive mode. 
+# Sets up trap receiver that goes into interactive mode.
 # note that this only works when the Python readline module is the one from
 # pycopia, or Python later than 2.5.
 def main(argv):

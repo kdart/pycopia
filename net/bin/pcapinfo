@@ -1,10 +1,8 @@
-#!/usr/bin/python2
-
+#!/usr/bin/python2.7
 
 import sys
 
 from pycopia.pcap import report
-
 
 try:
     report.pcap_report(sys.argv)
