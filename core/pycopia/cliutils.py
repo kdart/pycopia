@@ -252,13 +252,13 @@ def yes_no(prompt, default=True, input=raw_input):
     return yesno.upper().startswith("Y")
 
 def edit_text(text, prompt="Edit text"):
-    """Run $EDITOR on text."""
-    fname = os.tempnam(os.environ["HOME"], prompt[:5])
+    """Run $EDITOR on text. Defaults to vim."""
+    fname = os.path.join(os.environ["HOME"], ".edit_text.txt")
     fo = open(fname, "w")
     fo.write(prompt + ":\n")
     fo.write(text)
     fo.close()
-    os.system('%s "%s"' % (os.environ["EDITOR"], fname))
+    os.system('%s "%s"' % (os.environ.get("EDITOR", "/usr/bin/vim"), fname))
     fo = open(fname, "r")
     try:
         text = fo.read()
