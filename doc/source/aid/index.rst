@@ -8,7 +8,8 @@ better on Linux or integrate better with the rest of Pycopia.
 .. toctree::
    :maxdepth: 2
 
-    aid
+.. automodule:: pycopia.aid
+   :members:
 
 .. automodule:: pycopia.ascii
    :members:
@@ -58,11 +59,4 @@ better on Linux or integrate better with the rest of Pycopia.
 .. automodule:: pycopia.dictlib
    :members:
 
-
-
-Indices and tables
-==================
-
-* :ref:`modindex`
-* :ref:`search`
 

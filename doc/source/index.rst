@@ -8,18 +8,29 @@
 Pycopia reference documentation
 ===============================
 
+Documentation for Pycopia modules.
+
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
+   install/index
    aid/index
+   utils/index
+   core/index
+   CLI/index
+   debugger/index
+   process/index
+   SMI/index
+   mibs/index
+   SNMP/index
+   storage/index
+   net/index
+   audio/index
+   XML/index
+   WWW/index
+   QA/index
+   vim/index
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

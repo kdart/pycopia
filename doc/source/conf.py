@@ -26,12 +26,12 @@
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 
 extensions = [
-    'sphinx.ext.autodoc', 
+    'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.inheritance_diagram',
 #    'matplotlib.sphinxext.only_directives',
 #    'matplotlib.sphinxext.plot_directive',
-#    'sphinx.ext.intersphinx', 
+#    'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosummary',
 #    'numpydoc',
