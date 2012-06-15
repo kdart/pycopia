@@ -1,19 +1,12 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
-
-import ez_setup
-ez_setup.use_setuptools()
 
 from glob import glob
 from setuptools import setup, find_packages
 
 NAME = "pycopia-net"
 VERSION = "1.0"
-REVISION="$Revision$"
-
-DNAME = NAME.split("-", 1)[-1]
-EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 
 import platutils
@@ -32,8 +25,8 @@ else:
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
-    install_requires = ['pycopia-process>=1.0.dev-r138,==dev',
-                        'pycopia-CLI>=1.0.dev-r138,==dev'],
+#    install_requires = ['pycopia-process>=1.0.dev-r138,==dev',
+#                        'pycopia-CLI>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
@@ -51,7 +44,6 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia networks",
     url = "http://www.pycopia.net/",
-    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
     classifiers = ["Operating System :: POSIX",
                    "Topic :: Software Development :: Libraries :: Python Modules",

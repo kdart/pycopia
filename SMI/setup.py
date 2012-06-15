@@ -1,33 +1,28 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 
-import ez_setup
-ez_setup.use_setuptools()
 
 from glob import glob
-from setuptools import setup, Extension 
+from setuptools import setup, Extension
 
 NAME = "pycopia-SMI"
 VERSION = "1.0"
-REVISION="$Revision$"
-
-DNAME = NAME.split("-", 1)[-1]
-EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 
 _libsmi = Extension("_libsmi", ["libsmi_wrap.c"], libraries=["smi"])
+
 
 setup (name=NAME, version=VERSION,
     ext_modules = [_libsmi],
     py_modules = ["libsmi"], # stock SWIG wrapper
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.SMI"],       # custom Python wrapper - use this one.
-    install_requires = ['pycopia-aid>=1.0.dev-r138,==dev'],
+#    install_requires = ['pycopia-aid>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
-    scripts = glob("bin/*"), 
+    scripts = glob("bin/*"),
     zip_safe = False,
     test_suite = "test.SMITests",
 
@@ -39,9 +34,8 @@ setup (name=NAME, version=VERSION,
     license = "LGPL",
     keywords = "SMI MIB SNMP",
     url = "http://www.pycopia.net/",
-    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
-    classifiers = ["Operating System :: POSIX", 
+    classifiers = ["Operating System :: POSIX",
                    "Topic :: System :: Networking :: Monitoring",
                    "Intended Audience :: Developers"],
 )

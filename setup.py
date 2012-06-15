@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # vim:ts=4:sw=4:softtabstop=0:smarttab
-# 
+#
 #    Copyright (C) 1999-2007  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@ from __future__ import print_function
 """
 Master builder (custom script).
 This top-level setup script helps with dealing with all sub-packages at
-once. It also provides an installer for a nicer developer mode. 
+once. It also provides an installer for a nicer developer mode.
 
 Invoke it like a standard setup.py script. However, Any names after the
 operation name are taken as sub-package names that are operated on. If no
@@ -218,12 +218,21 @@ def _check_rsync():
 def do_generic(name):
     pass
 
+def get_svn_revision():
+    import subprocess
+    from xml.etree import ElementTree
+    info = ElementTree.fromstring(subprocess.check_output("svn info --xml".split()))
+    rev = info.find("entry").attrib["revision"]
+    return int(rev)
+
 def main(argv):
     try:
         cmd = argv[1]
     except IndexError:
         print(__doc__)
         return 1
+    mainrev = get_svn_revision()
+    os.environ["PYCOPIA_REVISION"] = str(mainrev)
     try:
         method = globals()["do_" + cmd]
     except KeyError:

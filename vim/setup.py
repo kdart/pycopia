@@ -1,10 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 import sys, os
-
-import ez_setup
-ez_setup.use_setuptools()
 
 from setuptools import setup
 from glob import glob
@@ -12,10 +9,7 @@ from glob import glob
 
 NAME = "pycopia-vim"
 VERSION = "1.0"
-REVISION="$Revision$"
 
-DNAME = NAME.split("-", 1)[-1]
-EGGNAME = "%s-%s.dev_r%s" % (NAME.replace("-", "_"), VERSION, REVISION[1:-1].split(":")[-1].strip())
 
 # Get the VIM value from vim, which is were we need to put the .vim files.
 # There's got to be a better way..., but this screen-scraping program
@@ -66,10 +60,10 @@ setup (name=NAME, version=VERSION,
     packages = ["pycopia", "pycopia.vimlib"],
     test_suite = "test.VimTests",
     data_files = DATA_FILES,
-    scripts = glob("bin/*"), 
-    install_requires = [
-            'pycopia-process>=1.0.dev-r138,==dev', 
-            'pycopia-WWW>=1.0.dev-r138,==dev'],
+    scripts = glob("bin/*"),
+#    install_requires = [
+#            'pycopia-process>=1.0.dev-r138,==dev',
+#            'pycopia-WWW>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
@@ -84,14 +78,13 @@ setup (name=NAME, version=VERSION,
     author_email = "keith@kdart.com",
     keywords = "pycopia vim framework",
     url = "http://www.pycopia.net/",
-    download_url = "http://pycopia.googlecode.com/svn/trunk/%s#egg=%s" % (DNAME, EGGNAME),
     #download_url = "ftp://ftp.pycopia.net/pub/python/%s.%s.tar.gz" % (NAME, VERSION),
-    classifiers = ["Operating System :: POSIX", 
+    classifiers = ["Operating System :: POSIX",
                    "Topic :: Software Development :: Libraries :: Python Modules",
                    "Intended Audience :: Developers"],
 )
 
 if not DATA_FILES:
-    print ("Be sure to take a look at the files in vimfiles directory " 
+    print ("Be sure to take a look at the files in vimfiles directory "
     "and copy them to your preferred vimfiles location.")
 
