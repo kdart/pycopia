@@ -1,8 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
 #
@@ -126,7 +124,7 @@ def do_attribute_types(session):
             ("hostname", 1, "Name to use as host name. Overrides base name."),
             ("state", 1, "The current state of the device. Arbitrary string used by test framework."),
             ):
-        session.add(models.create(models.AttributeType, name=name, value_type=vtype, 
+        session.add(models.create(models.AttributeType, name=name, value_type=vtype,
                 description=desc))
         session.commit()
 
@@ -134,7 +132,7 @@ def do_env_attribute_types(session):
     for name, vtype, desc in (
             ("state", 1, "The current state of the environment. Test defined string."),
             ):
-        session.add(models.create(models.EnvironmentAttributeType, name=name, value_type=vtype, 
+        session.add(models.create(models.EnvironmentAttributeType, name=name, value_type=vtype,
                 description=desc))
         session.commit()
 
@@ -188,21 +186,21 @@ def do_interface_types(session):
             ("propPointToPointSerial", 22), #  proprietary serial
             ("ppp", 23),
             ("softwareLoopback", 24),
-            ("eon", 25),            #  CLNP over IP 
+            ("eon", 25),            #  CLNP over IP
             ("ethernet3Mbit", 26),
             ("nsip", 27),           #  XNS over IP
             ("slip", 28),           #  generic SLIP
             ("ultra", 29),          #  ULTRA technologies
             ("ds3", 30),            #  DS3-MIB
             ("sip", 31),            #  SMDS, coffee
-            ("frameRelay", 32),     #  DTE only. 
+            ("frameRelay", 32),     #  DTE only.
             ("rs232", 33),
             ("para", 34),           #  parallel-port
             ("arcnet", 35),         #  arcnet
             ("arcnetPlus", 36),     #  arcnet plus
             ("atm", 37),            #  ATM cells
             ("miox25", 38),
-            ("sonet", 39),          #  SONET or SDH 
+            ("sonet", 39),          #  SONET or SDH
             ("x25ple", 40),
             ("iso88022llc", 41),
             ("localTalk", 42),
@@ -220,17 +218,17 @@ def do_interface_types(session):
             ("propMultiplexor", 54),#  proprietary multiplexing
             ("ieee80212", 55),      #  100BaseVG
             ("fibreChannel", 56),   #  Fibre Channel
-            ("hippiInterface", 57), #  HIPPI interfaces     
+            ("hippiInterface", 57), #  HIPPI interfaces
             ("aflane8023", 59),     #  ATM Emulated LAN for 802.3
             ("aflane8025", 60),     #  ATM Emulated LAN for 802.5
-            ("cctEmul", 61),        #  ATM Emulated circuit          
-            ("isdn", 63),           #  ISDN and X.25           
-            ("v11", 64),            #  CCITT V.11/X.21             
-            ("v36", 65),            #  CCITT V.36                  
+            ("cctEmul", 61),        #  ATM Emulated circuit
+            ("isdn", 63),           #  ISDN and X.25
+            ("v11", 64),            #  CCITT V.11/X.21
+            ("v36", 65),            #  CCITT V.36
             ("g703at64k", 66),      #  CCITT G703 at 64Kbps
-            ("qllc", 68),           #  SNA QLLC                    
-            ("channel", 70),        #  channel                     
-            ("ieee80211", 71),      #  radio spread spectrum       
+            ("qllc", 68),           #  SNA QLLC
+            ("channel", 70),        #  channel
+            ("ieee80211", 71),      #  radio spread spectrum
             ("ibm370parChan", 72),  #  IBM System 360/370 OEMI Channel
             ("escon", 73),          #  IBM Enterprise Systems Connection
             ("dlsw", 74),           #  Data Link Switching
@@ -266,7 +264,7 @@ def do_interface_types(session):
             ("voiceOverIp", 104),   #  voice over IP encapsulation
             ("atmDxi", 105),        #  ATM DXI
             ("atmFuni", 106),       #  ATM FUNI
-            ("atmIma", 107),       #  ATM IMA		   
+            ("atmIma", 107),       #  ATM IMA
             ("pppMultilinkBundle", 108), #  PPP Multilink Bundle
             ("ipOverCdlc", 109),   #  IBM ipOverCdlc
             ("ipOverClaw", 110),   #  IBM Common Link Access to Workstn
@@ -275,16 +273,16 @@ def do_interface_types(session):
             ("mpc", 113),          #  IBM multi-protocol channel support
             ("ipOverAtm", 114),    #  IBM ipOverAtm
             ("iso88025Fiber", 115), #  ISO 802.5j Fiber Token Ring
-            ("tdlc", 116),	       #  IBM twinaxial data link control
+            ("tdlc", 116),         #  IBM twinaxial data link control
             ("hdlc", 118),         #  HDLC
-            ("lapf", 119),	       #  LAP F
-            ("v37", 120),	       #  V.37
+            ("lapf", 119),         #  LAP F
+            ("v37", 120),          #  V.37
             ("x25mlp", 121),       #  Multi-Link Protocol
             ("x25huntGroup", 122), #  X25 Hunt Group
             ("trasnpHdlc", 123),   #  Transp HDLC
             ("interleave", 124),   #  Interleave channel
             ("fast", 125),         #  Fast channel
-            ("ip", 126),	       #  IP (for APPN HPR in IP networks)
+            ("ip", 126),           #  IP (for APPN HPR in IP networks)
             ("docsCableMaclayer", 127),  #  CATV Mac Layer
             ("docsCableDownstream", 128), #  CATV Downstream interface
             ("docsCableUpstream", 129),  #  CATV Upstream interface
@@ -296,42 +294,42 @@ def do_interface_types(session):
             ("l2vlan", 135),       #  Layer 2 Virtual LAN using 802.1Q
             ("l3ipvlan", 136),     #  Layer 3 Virtual LAN using IP
             ("l3ipxvlan", 137),    #  Layer 3 Virtual LAN using IPX
-            ("digitalPowerline", 138), #  IP over Power Lines	
+            ("digitalPowerline", 138), #  IP over Power Lines
             ("mediaMailOverIp", 139), #  Multimedia Mail over IP
             ("dtm", 140),        #  Dynamic syncronous Transfer Mode
             ("dcn", 141),    #  Data Communications Network
             ("ipForward", 142),    #  IP Forwarding Interface
             ("msdsl", 143),       #  Multi-rate Symmetric DSL
             ("ieee1394", 144), #  IEEE1394 High Performance Serial Bus
-            ("if-gsn", 145),       #    HIPPI-6400 
+            ("if-gsn", 145),       #    HIPPI-6400
             ("dvbRccMacLayer", 146), #  DVB-RCC MAC Layer
             ("dvbRccDownstream", 147),  #  DVB-RCC Downstream Channel
             ("dvbRccUpstream", 148),  #  DVB-RCC Upstream Channel
             ("atmVirtual", 149),   #  ATM Virtual Interface
             ("mplsTunnel", 150),   #  MPLS Tunnel Virtual Interface
-            ("srp", 151),	#  Spatial Reuse Protocol
+            ("srp", 151),   #  Spatial Reuse Protocol
             ("voiceOverAtm", 152),  #  Voice Over ATM
-            ("voiceOverFrameRelay", 153),   #  Voice Over Frame Relay 
-            ("idsl", 154),		#  Digital Subscriber Loop over ISDN
+            ("voiceOverFrameRelay", 153),   #  Voice Over Frame Relay
+            ("idsl", 154),      #  Digital Subscriber Loop over ISDN
             ("compositeLink", 155),  #  Avici Composite Link Interface
-            ("ss7SigLink", 156),     #  SS7 Signaling Link 
+            ("ss7SigLink", 156),     #  SS7 Signaling Link
             ("propWirelessP2P", 157),  #   Prop. P2P wireless interface
             ("frForward", 158),    #  Frame Forward Interface
-            ("rfc1483", 159),	#  Multiprotocol over ATM AAL5
-            ("usb", 160),		#  USB Interface
+            ("rfc1483", 159),   #  Multiprotocol over ATM AAL5
+            ("usb", 160),       #  USB Interface
             ("ieee8023adLag", 161),  #  IEEE 802.3ad Link Aggregate
             ("bgppolicyaccounting", 162), #  BGP Policy Accounting
-            ("frf16MfrBundle", 163), #  FRF .16 Multilink Frame Relay 
+            ("frf16MfrBundle", 163), #  FRF .16 Multilink Frame Relay
             ("h323Gatekeeper", 164), #  H323 Gatekeeper
             ("h323Proxy", 165), #  H323 Voice and Video Proxy
-            ("mpls", 166), #  MPLS                   
+            ("mpls", 166), #  MPLS
             ("mfSigLink", 167), #  Multi-frequency signaling link
             ("hdsl2", 168), #  High Bit-Rate DSL - 2nd generation
             ("shdsl", 169), #  Multirate HDSL2
             ("ds1FDL", 170), #  Facility Data Link 4Kbps on a DS1
             ("pos", 171), #  Packet over SONET/SDH Interface
             ("dvbAsiIn", 172), #  DVB-ASI Input
-            ("dvbAsiOut", 173), #  DVB-ASI Output 
+            ("dvbAsiOut", 173), #  DVB-ASI Output
             ("plc", 174), #  Power Line Communtications
             ("nfas", 175), #  Non Facility Associated Signaling
             ("tr008", 176), #  TR008
@@ -346,7 +344,7 @@ def do_interface_types(session):
             ("digitalWrapperOverheadChannel", 186), #  Digital Wrapper
             ("aal2", 187), #  ATM adaptation layer 2
             ("radioMAC", 188), #  MAC layer over radio links
-            ("atmRadio", 189), #  ATM over radio links   
+            ("atmRadio", 189), #  ATM over radio links
             ("imt", 190), #  Inter Machine Trunks
             ("mvl", 191), #  Multiple Virtual Lines DSL
             ("reachDSL", 192), #  Long Reach DSL
@@ -354,14 +352,14 @@ def do_interface_types(session):
             ("atmVciEndPt", 194), #  ATM VCI End Point
             ("opticalChannel", 195), #  Optical Channel
             ("opticalTransport", 196), #  Optical Transport
-            ("propAtm", 197), #   Proprietary ATM       
+            ("propAtm", 197), #   Proprietary ATM
             ("voiceOverCable", 198), #  Voice Over Cable Interface
             ("infiniband", 199), #  Infiniband
             ("teLink", 200), #  TE Link
             ("q2931", 201), #  Q.2931
             ("virtualTg", 202), #  Virtual Trunk Group
             ("sipTg", 203), #  SIP Trunk Group
-            ("sipSig", 204), #  SIP Signaling   
+            ("sipSig", 204), #  SIP Signaling
             ("docsCableUpstreamChannel", 205), #  CATV Upstream Channel
             ("econet", 206), #  Acorn Econet
             ("pon155", 207), #  FSAN 155Mb Symetrical PON interface
@@ -379,14 +377,14 @@ def do_interface_types(session):
             ("homepna", 220), #  HomePNA ITU-T G.989
             ("gfp", 221), #  Generic Framing Procedure(GFP)
             ("ciscoISLvlan", 222), #  Layer 2 Virtual LAN using Cisco ISL
-            ("actelisMetaLOOP", 223), #  Acteleis proprietary MetaLOOP High Speed Link 
-            ("fcipLink", 224), #  FCIP Link 
+            ("actelisMetaLOOP", 223), #  Acteleis proprietary MetaLOOP High Speed Link
+            ("fcipLink", 224), #  FCIP Link
             ("rpr", 225), #  Resilient Packet Ring Interface Type
             ("qam", 226), #  RF Qam Interface
             ("lmp", 227), #  Link Management Protocol
             ("cblVectaStar", 228), #  Cambridge Broadband Networks Limited VectaStar
             ("docsCableMCmtsDownstream", 229), #  CATV Modular CMTS Downstream Interface
-            ("macSecControlledIF", 231), #  MACSecControlled 
+            ("macSecControlledIF", 231), #  MACSecControlled
             ("macSecUncontrolledIF", 232), #  MACSecUncontrolled
             ("aviciOpticalEther", 233), #  Avici Optical Ethernet Aggregate
             ("atmbond", 234), #  atmbond
@@ -497,7 +495,7 @@ def do_config(session):
     rn = models.create(models.Config, name="root", user=None, parent=None,
             value=aid.NULL)
     session.add(rn)
-    flags = models.create(models.Config, name="flags", user=None, container=rn, 
+    flags = models.create(models.Config, name="flags", user=None, container=rn,
             value=aid.NULL)
     session.add(flags)
     session.commit()
@@ -525,11 +523,11 @@ def do_config(session):
     reports.email = ("pycopia.reports.Email.EmailReport", "text/html", None)
     reports.html = ("StandardReport", "$username-$runnertimestamp", "text/html")
     reports.full = [
-            ("StandardReport", "-", "text/ansi; charset=utf8"), 
+            ("StandardReport", "-", "text/ansi; charset=utf8"),
             ("StandardReport", "$username-$runnertimestamp", "text/html")
             ]
     reports.production = [
-            ("StandardReport", "-", "text/ansi; charset=utf8"), 
+            ("StandardReport", "-", "text/ansi; charset=utf8"),
             ("StandardReport", "$username-$runnertimestamp", "text/html"),
             ("pycopia.reports.database.DatabaseReport",),
             ]
@@ -546,8 +544,8 @@ def init_database(argv):
         url = argv[1]
     except IndexError:
         from pycopia import basicconfig
-        cf = basicconfig.get_config("storage.conf")
-        url = cf["database"]
+        cf = basicconfig.get_config("database.conf")
+        url = cf["DATABASE_URL"]
     dbsession = models.get_session(url)
     try:
         do_schedules(dbsession)

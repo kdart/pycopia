@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
@@ -26,6 +26,7 @@ from pycopia.db import config
 from pycopia.db import webhelpers
 
 from pycopia.WWW import framework
+from pycopia.WWW import json
 from pycopia.WWW.middleware import auth
 
 
@@ -58,10 +59,15 @@ def config_main(request):
     return resp.finalize()
 
 
-@auth.need_login
-@webhelpers.setup_dbsession
-def config_update(request):
+def config_update(xxx):
     pass
+
+
+_exported = [config_update]
+
+dispatcher = auth.need_authentication(
+        webhelpers.setup_dbsession(
+            json.JSONDispatcher(_exported)))
 
 
 if __name__ == "__main__":

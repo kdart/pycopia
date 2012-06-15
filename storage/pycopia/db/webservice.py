@@ -1,10 +1,8 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
+#    Copyright (C) 2012- Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -20,7 +18,7 @@
 Provides a web service interface to the Pycopia database model. Also
 provides a basic database editor application.
 
-Usually mapped to /storage/ URL. See storage.conf.example for details.
+Usually mapped to /storage/ URL. See storage.conf for details.
 
 """
 
@@ -254,7 +252,7 @@ def doc_constructor(request, **kwargs):
          NM("A", {"href":".."}, "Up") if request.path.count("/") > 2 else NBSP, NBSP,
     ))
     nav.append(NM("P", {"class_": "title"}, "Storage Editor"))
-    nav.append(NM("P", None, 
+    nav.append(NM("P", None,
             NM("A", {"href": "/auth/logout"}, "logout")))
     doc.add_section("messages", id="messages")
     return doc
@@ -265,10 +263,10 @@ def doc_constructor(request, **kwargs):
 @webhelpers.setup_dbsession
 def listtable(request, tablename=None):
     klass = get_model(tablename)
-    resp = framework.ResponseDocument(request, doc_constructor, 
+    resp = framework.ResponseDocument(request, doc_constructor,
              title="Table %s" % (tablename,))
     NM = resp.nodemaker
-    resp.new_para(NM("A", {"href": request.get_url(addentry, tablename=tablename)}, 
+    resp.new_para(NM("A", {"href": request.get_url(addentry, tablename=tablename)},
             resp.get_icon("add")))
     cycler = itertools.cycle(["row1", "row2"]) # For alternating row styles.
     tbl = resp.doc.add_table(class_="sortable", width="100%")
@@ -280,16 +278,16 @@ def listtable(request, tablename=None):
     for dbrow in query(tablename, {}):
         row = tbl.new_row(id="rowid_%s" % dbrow.id, class_=cycler.next())
         col = row.new_column(
-            NM("Fragments", {}, 
-                NM("A", {"href": "edit/%s/" % (dbrow.id,)}, 
+            NM("Fragments", {},
+                NM("A", {"href": "edit/%s/" % (dbrow.id,)},
                     resp.get_small_icon("edit")),
-                NM("A", {"href": "javascript:doDeleteRow(%r, %r);" % (tablename, dbrow.id)}, 
+                NM("A", {"href": "javascript:doDeleteRow(%r, %r);" % (tablename, dbrow.id)},
                     resp.get_small_icon("delete")),
             )
         )
         firstname = colnames[0]
         row.new_column(
-            NM("A", {"href": request.get_url(view, tablename=tablename, rowid=dbrow.id)}, 
+            NM("A", {"href": request.get_url(view, tablename=tablename, rowid=dbrow.id)},
                     getattr(dbrow, firstname))
         )
         for colname in colnames[1:]:
@@ -301,7 +299,7 @@ def listtable(request, tablename=None):
 @auth.need_login
 @webhelpers.setup_dbsession
 def listall(request):
-    resp = framework.ResponseDocument(request, doc_constructor, 
+    resp = framework.ResponseDocument(request, doc_constructor,
              title="Tables")
     cycler = itertools.cycle(["row1", "row2"])
     tbl = resp.doc.add_table(width="100%")
@@ -312,7 +310,7 @@ def listall(request):
             continue
         row = tbl.new_row()
         setattr(row, "class_", cycler.next())
-        col = row.new_column(resp.nodemaker("A", 
+        col = row.new_column(resp.nodemaker("A",
                 {"href": request.get_url(listtable, tablename=tname)},  tname))
     return resp.finalize()
 
@@ -322,15 +320,15 @@ def listall(request):
 def view(request, tablename=None, rowid=None):
     klass = get_model(tablename)
     dbrow = webhelpers.get_row(klass, rowid)
-    resp = framework.ResponseDocument(request, doc_constructor, 
+    resp = framework.ResponseDocument(request, doc_constructor,
              title="Table %s %s" % (tablename, dbrow))
     NM = resp.nodemaker
     resp.new_para(
-            (NM("A", {"href": request.get_url(addentry, tablename=tablename)}, 
-                resp.get_icon("add")), 
-            NM("A", {"href": request.get_url(edit, tablename=tablename, rowid=rowid)}, 
+            (NM("A", {"href": request.get_url(addentry, tablename=tablename)},
+                resp.get_icon("add")),
+            NM("A", {"href": request.get_url(edit, tablename=tablename, rowid=rowid)},
                 resp.get_icon("edit")),
-            NM("A", {"href": "javascript:doDeleteItem(%r, %r);" % (tablename, rowid)}, 
+            NM("A", {"href": "javascript:doDeleteItem(%r, %r);" % (tablename, rowid)},
                 resp.get_icon("delete")),
             ))
     cycler = itertools.cycle(["row1", "row2"])
@@ -394,7 +392,7 @@ addentry = auth.need_login(webhelpers.setup_dbsession(CreateRequestHandler(doc_c
 
 
 class EditRequestHandler(framework.RequestHandler):
- 
+
     def get(self, request, tablename=None, rowid=None):
         klass = get_model(tablename)
         dbrow = webhelpers.get_row(klass, rowid)

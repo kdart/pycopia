@@ -45,15 +45,15 @@ class ModelError(Exception):
 def create_session(url=None):
     if url is None:
         from pycopia import basicconfig
-        cf = basicconfig.get_config("storage.conf")
-        url = cf["database"]
+        cf = basicconfig.get_config("database.conf")
+        url = cf["DATABASE_URL"]
     db = create_engine(url)
     tables.metadata.bind = db
     return sessionmaker(bind=db, autoflush=False)
 
 
 # Get a database session instance from a database url. If URL is not
-# provided then get it from the storage.conf configuration file.
+# provided then get it from the database.conf configuration file.
 def get_session(url=None):
     session_class = create_session(url)
     return session_class()

@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=0:smarttab
-# 
+#
 #    Copyright (C) 2010 Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -93,7 +93,7 @@ class DBSessionCommands(CLI.BaseCommands):
     def use(self, argv):
         """use <table>
     Use the given table. Name is class name of mapped table."""
-        name = argv[1] 
+        name = argv[1]
         t = getattr(models, name)
         cls = _TABLE_EDITOR_MAP.get(name, TableCommands)
         cmd = self.clone(cls)
@@ -280,10 +280,10 @@ class RowWithAttributesCommands(RowCommands):
 class EquipmentRowCommands(RowWithAttributesCommands):
 
     def interface(self, argv):
-        """interface [add-options] <add|del|show|edit|create|attach> name 
+        """interface [add-options] <add|del|show|edit|create|attach> name
     Addd a new interface to this equipment. When adding, specify interface
     parameters with long options:
-        --ipaddr=<ipaddr> 
+        --ipaddr=<ipaddr>
         --macaddr=<macaddr>
         --iftype=<iftype>
         --network=<netname>
@@ -298,11 +298,11 @@ class EquipmentRowCommands(RowWithAttributesCommands):
         cmd = args[0]
         if cmd.startswith("add"):
             name = args[1]
-            self._obj.add_interface(_session, name, 
-                ifindex=int(longopts.get("ifindex", 1)), 
-                interface_type=longopts.get("iftype", "ethernetCsmacd"), 
-                macaddr=longopts.get("macaddr"), 
-                ipaddr=longopts.get("ipaddr"), 
+            self._obj.add_interface(_session, name,
+                ifindex=int(longopts.get("ifindex", 1)),
+                interface_type=longopts.get("iftype", "ethernetCsmacd"),
+                macaddr=longopts.get("macaddr"),
+                ipaddr=longopts.get("ipaddr"),
                 network=longopts.get("network"))
         elif cmd.startswith("del"):
             name = args[1]
@@ -470,7 +470,7 @@ class TableCommands(CLI.BaseCommands):
         for metadata in sorted(models.get_metadata(self._obj)):
             if metadata.coltype == "RelationshipProperty":
                 self._print("%20.20s: %s (%s) m2m=%s, nullable=%s, uselist=%s, collection=%s" % (
-                        metadata.colname, metadata.coltype, metadata.default, 
+                        metadata.colname, metadata.coltype, metadata.default,
                         metadata.m2m, metadata.nullable, metadata.uselist, metadata.collection))
             else:
                 self._print("%20.20s: %s (%s)" % (
@@ -551,12 +551,12 @@ class TableCommands(CLI.BaseCommands):
             if grps:
                 for name, op, val in _by_three(args[:grps*3]):
                     col = getattr(self._obj, name)
-                    opm = {"=": col.__eq__, 
-                            ">": col.__gt__, 
-                            "<": col.__lt__, 
-                            "match": col.match, 
-                            "contains": col.contains, 
-                            "in": col.in_, 
+                    opm = {"=": col.__eq__,
+                            ">": col.__gt__,
+                            "<": col.__lt__,
+                            "match": col.match,
+                            "contains": col.contains,
+                            "in": col.in_,
                             "like": col.like}.get(op)
                     if opm:
                         if op == "like":
@@ -898,10 +898,10 @@ class ConfigCommands(CLI.BaseCommands):
         row = self._get(name)
         if row is None:
             myself = self._obj
-            newrow = models.create(models.Config, 
-                name=name, 
-                value=value, 
-                container=myself, 
+            newrow = models.create(models.Config,
+                name=name,
+                value=value,
+                container=myself,
                 user=myself.user,
                 testcase=myself.testcase,
                 testsuite=myself.testsuite,
@@ -1154,7 +1154,7 @@ def new_relation_input(ui, modelclass, metadata):
 
 def new_enumtype(ui, modelclass, metadata):
     enumtype = getattr(types, metadata.coltype)
-    return ui.choose_key(dict(enumtype.get_choices()), 
+    return ui.choose_key(dict(enumtype.get_choices()),
             enumtype.get_default(), "%%I%s%%N" % metadata.colname)
 
 
@@ -1305,7 +1305,7 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
     else:
         if metadata.nullable:
             choices[0] = "Nothing"
-        chosen_id = ui.choose_key(choices, current.id if current is not None else 0, 
+        chosen_id = ui.choose_key(choices, current.id if current is not None else 0,
                 "%%I%s%%N" % metadata.colname)
         if chosen_id == 0: # indicates nullable
             setattr(dbrow, metadata.colname, None)
@@ -1315,7 +1315,7 @@ def edit_relation_input(ui, modelclass, metadata, dbrow):
 
 
 def edit_valuetype(ui, modelclass, metadata, dbrow):
-    vt = ui.choose_key(dict(types.ValueType.get_choices()), getattr(dbrow, metadata.colname), 
+    vt = ui.choose_key(dict(types.ValueType.get_choices()), getattr(dbrow, metadata.colname),
             "%%I%s%%N" % metadata.colname)
     setattr(dbrow, metadata.colname, types.ValueType.validate(vt))
 
@@ -1323,8 +1323,8 @@ def edit_enumtype(ui, modelclass, metadata, dbrow):
     enumtype = getattr(types, metadata.coltype)
     current = getattr(dbrow, metadata.colname)
     chosen_id = ui.choose_key(
-            dict(enumtype.get_choices()), 
-            current, 
+            dict(enumtype.get_choices()),
+            current,
             "%%I%s%%N" % metadata.colname)
     setattr(dbrow, metadata.colname, enumtype.validate(chosen_id))
 
@@ -1400,7 +1400,7 @@ def dbcli(argv):
 
 Provides an interactive session to the database.
 The argument may be a database URL. If not provide the URL specified on
-"storage.conf" is used.
+"database.conf" is used.
 
 Options:
    -?        = This help text.
@@ -1423,8 +1423,8 @@ Options:
         database = args[0]
     else:
         from pycopia import basicconfig
-        cf = basicconfig.get_config("storage.conf")
-        database = cf.database
+        cf = basicconfig.get_config("database.conf")
+        database = cf.DATABASE_URL
         del basicconfig, cf
 
     io = CLI.ConsoleIO()
@@ -1433,7 +1433,7 @@ Options:
     _session = models.get_session(database)
     cmd._setup(_session, "db> ")
     cmd._environ["session"] = _session
-    parser = CLI.CommandParser(cmd, 
+    parser = CLI.CommandParser(cmd,
             historyfile=os.path.expandvars("$HOME/.hist_dbcli"))
     if args:
         for arg in args:
@@ -1449,7 +1449,7 @@ def dbconfig(argv):
 
 Provides an interactive session to the database configuration table.
 The argument may be a database URL. If not provide the URL specified on
-"storage.conf" is used.
+"database.conf" is used.
 
 Options:
    -?        = This help text.
@@ -1475,8 +1475,8 @@ Options:
         database = args[0]
     else:
         from pycopia import basicconfig
-        cf = basicconfig.get_config("storage.conf")
-        database = cf.database
+        cf = basicconfig.get_config("database.conf")
+        database = cf.DATABASE_URL
         del basicconfig, cf
 
     io = CLI.ConsoleIO()
