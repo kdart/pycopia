@@ -3,6 +3,8 @@
 .. vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 ..
 .. This document is in RST format <http://docutils.sourceforge.net/rst.html>.
+.. Some sphinx document builder directives:
+.. highlight:: console
 
 
 Installing on Ubuntu LTS (10.04)
@@ -54,12 +56,12 @@ Python 2.7 is not the version that LTS provides, so it has to be built from sour
 Require packages
 ++++++++++++++++
 
-Log in or sudo to _root_ account.
+Log in or sudo to *root* account.
 
-Download Python source distribution::
+Download Python source distribution. ::
 
-    cd ~
-    wget http://www.python.org/ftp/python/2.7.3/Python-2.7.3.tar.bz2
+    # cd ~
+    # wget http://www.python.org/ftp/python/2.7.3/Python-2.7.3.tar.bz2
 
 Perform the following steps to build and install Python 2.7. ::
 
@@ -72,17 +74,17 @@ Perform the following steps to build and install Python 2.7. ::
     # make altinstall
     # cd ..
 
-Note: that is _altinstall_ NOT _install_. That will prevent the installation
+Note: that is *altinstall* NOT *install*. That will prevent the installation
       from overwriting the distributions packaged Python version.
 
 Now the remaining third party modules must be obtained from the Python package index.
 
-Get the _Distribute_ package. This one has to be _bootstrapped_ this way. ::
+Get the *Distribute* package. This first package has to be "bootstrapped" this way. ::
 
     # wget -q http://python-distribute.org/distribute_setup.py
     # python2.7 distribute_setup.py
 
-And get the _pip_ tool. ::
+And get the *pip* tool. ::
 
     # wget -q https://raw.github.com/pypa/pip/master/contrib/get-pip.py
     # python2.7 get-pip.py
@@ -164,7 +166,7 @@ Edit the main configuration file. ::
 
     Search for line with `listen_addresses`, and uncomment the line. It should read:
 
-    `listen_addresses = 'localhost'`
+    listen_addresses = 'localhost'
 
 
 Edit the authentication configuration file. ::
@@ -205,7 +207,6 @@ source tree. ::
 
     # cd pycopia
     # python2.7 setup.py install
-    # mkdir /var/www/localhost/htdocs/testresults
 
 Although this setup.py has the same name as the setuptools/distribute module}
 setup file, it's really quite different. BUt you should use this one to install
@@ -216,7 +217,7 @@ install sub-packages in case you don't want or need every one.
 Prepare Database
 ++++++++++++++++
 
-Create the tables and schema, and add basic data.
+Create the tables and schema, and add basic data. ::
 
     # python2.7 -m pycopia.db.tables postgresql://pycopia@localhost/pycopia
     # python2.7 storage/init_db.py postgresql://pycopia@localhost/pycopia
@@ -346,7 +347,7 @@ Changing the "localhost" part to your hosts fully qualified domain name. This is
 
 |    Config:root> **set baseurl 'http://myhost.mydomain.biz'**
 |    Config:root> **set documentroot '/var/www/myhost.mydomain.biz'**
-|    Config:root> **set resultsdirbase '/var/www/myhost.mydomain.biz/htdocs/testresults'""**
+|    Config:root> **set resultsdirbase '/var/www/myhost.mydomain.biz/htdocs/testresults'**
 |    Config:root> **exit**
 
 

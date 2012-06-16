@@ -15,6 +15,8 @@ to write flexible, quick, and robust test cases.
 .. toctree::
    :maxdepth: 2
 
+Core Tests and Suites
+---------------------
 
 .. automodule:: pycopia.QA.core
    :members:
@@ -22,11 +24,18 @@ to write flexible, quick, and robust test cases.
 .. automodule:: pycopia.QA.constants
    :members:
 
-.. automodule:: pycopia.QA.controller
-   :members:
+Special runtime configuration
+-----------------------------
+
+This is the dynamic configration object that magically creates things that
+tests need, such as equipment information, controllers, and reports.
 
 .. automodule:: pycopia.QA.config
    :members:
+
+
+Running tests and suites
+------------------------
 
 .. automodule:: pycopia.QA.testrunner
    :members:
@@ -40,7 +49,12 @@ to write flexible, quick, and robust test cases.
 .. automodule:: pycopia.QA.jobrunner
    :members:
 
-.. automodule:: pycopia.QA.logging
+Supporting Modules
+------------------
+
+.. automodule:: pycopia.QA.controller
    :members:
 
+.. automodule:: pycopia.QA.logging
+   :members:
 

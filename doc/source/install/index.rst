@@ -82,4 +82,8 @@ NOTE: The install operation requires that the sudo command be configured for
 
    gentoo
 
+   CentOS
+
+   Redhat
+
 
