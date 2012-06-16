@@ -48,19 +48,20 @@ class RequestResponseError(Error):
 def get_page(url, data=None, logfile=None, cookiefile=None, retries=1, filename=None, **kwargs):
     """Simple page fetcher using the HTTPRequest.
 
-    Args:
-    url         : A string or UniversalResourceLocator object.
-    data        : Dictionary of POST data (of not provided a GET is performed).
-    logfile     : A file-like object to write the transaction to.
-    cookiefile  : Update cookies in this file, if provided.
-    retries     : Number of times to retry the transaction.
-    filename    : Name of file to write target object directly to.
-                  The doc and body attributes will not be available in the
-                  response if this is given.
+    Args::
+
+        url         : A string or UniversalResourceLocator object.
+        data        : Dictionary of POST data (of not provided a GET is performed).
+        logfile     : A file-like object to write the transaction to.
+        cookiefile  : Update cookies in this file, if provided.
+        retries     : Number of times to retry the transaction.
+        filename    : Name of file to write target object directly to.
+                      The doc and body attributes will not be available in the
+                      response if this is given.
 
     Extra keyword arguments are passed to the HTTPRequest object.
 
-    Returns: 
+    Returns::
         an HTTPResponse object.
     """
     request = HTTPRequest(url, data, **kwargs)
@@ -246,7 +247,7 @@ class HTTPResponse(object):
     error = property(lambda s: s._error, _set_error, None, "Error information.")
     redirectcount = property(lambda s: s._redirectcount, None, None, "Redirect count.")
     cookielist = property(lambda s: s._cookielist, None, None, "Netscape cookies.")
-    savefile = property(lambda s: s._downloadfile, set_savefile, _del_savefile, 
+    savefile = property(lambda s: s._downloadfile, set_savefile, _del_savefile,
             "File object to write response to.")
 
 
@@ -353,13 +354,13 @@ class HTTPRequest(Request):
      proxy       : (None)             Proxy host to use, if any.
      cookiejar   : (None)             A CookieJar object to get cookies from.
     """
-    def __init__(self, url, data=None, query=None, method="GET", 
-            encoding=DEFAULT_ENCODING, language=DEFAULT_LANGUAGE, 
+    def __init__(self, url, data=None, query=None, method="GET",
+            encoding=DEFAULT_ENCODING, language=DEFAULT_LANGUAGE,
             useragent=DEFAULT_UA, accept=DEFAULT_ACCEPT,
             extraheaders=None, strict=True, proxy=None, cookiejar=None,
             accept_encoding=None):
-        self.reset(url, data, query, method, 
-            encoding, language, 
+        self.reset(url, data, query, method,
+            encoding, language,
             useragent, accept,
             extraheaders, strict, proxy, cookiejar,
             accept_encoding)
@@ -530,7 +531,7 @@ class HTTPRequest(Request):
     # sets options common to all operations
     def _set_common(self, c):
         c.setopt(pycurl.FOLLOWLOCATION, 1)
-        c.setopt(pycurl.AUTOREFERER, 1) 
+        c.setopt(pycurl.AUTOREFERER, 1)
         c.setopt(pycurl.ENCODING, self._accept_encoding)
         c.setopt(pycurl.MAXREDIRS, 255)
         c.setopt(pycurl.CONNECTTIMEOUT, 30)
@@ -554,7 +555,7 @@ class HTTPRequest(Request):
             c.setopt(pycurl.COOKIEJAR, cookiefile) # write any cookies here
         else:
             # needed to enable cookie handling
-            c.setopt(pycurl.COOKIEJAR, "/dev/null") 
+            c.setopt(pycurl.COOKIEJAR, "/dev/null")
         if logfile is not None:
             logfile.write(self.__str__())
             logfile.write("\n\n")
@@ -582,8 +583,8 @@ class HTTPRequest(Request):
                 break
         return resp
 
-    def reset(self, url, data=None, query=None, method="GET", 
-            encoding=DEFAULT_ENCODING, language=DEFAULT_LANGUAGE, 
+    def reset(self, url, data=None, query=None, method="GET",
+            encoding=DEFAULT_ENCODING, language=DEFAULT_LANGUAGE,
             useragent=DEFAULT_UA, accept=DEFAULT_ACCEPT,
             extraheaders=None, strict=True, proxy=None, cookiejar=None,
             accept_encoding=None):
@@ -762,7 +763,7 @@ class HTTPConnectionManager(ConnectionManager):
                 return self.perform(logfile)
 
     def perform(self, logfile=None):
-        """Fetch all of the added Request objects. 
+        """Fetch all of the added Request objects.
 
         Return two lists. The first list is a list of responses that
         completed. The second is list of the requests that errored.

@@ -1,7 +1,5 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -16,11 +14,13 @@
 #    Lesser General Public License for more details.
 
 """
-Make a hard to guess set of passwords. 
+Make a hard to guess set of passwords.
+
 Basic algorithm:
-o Pick a dictionary word at random. This is so that the password may have
-  some mnemonic value. 
-o Munge the word in various randomly selected ways.
+
+    * Pick a dictionary word at random. This is so that the password may have
+      some mnemonic value.
+    * Munge the word in various randomly selected ways.
 """
 
 import os, sys
@@ -67,14 +67,14 @@ def hashword(plaintext):
         plaintext = string.swapcase(plaintext)
     # 0.50 chance of vowels being translated one of two ways.
     if rb[rb[2]] > 127:
-        plaintext = string.translate(plaintext, 
+        plaintext = string.translate(plaintext,
             string.maketrans('aeiou AEIOU', '@3!0& 4#10%'))
     else:
-        plaintext = string.translate(plaintext, 
+        plaintext = string.translate(plaintext,
             string.maketrans('aeiou AEIOU', '^#1$~ $3!0&'))
     # 0.4 chance of some additional consonant translation
     if rb[rb[4]] < 102:
-        plaintext = string.translate(plaintext, 
+        plaintext = string.translate(plaintext,
             string.maketrans('cglt CGLT', '(<1+ (<1+'))
     # if word is short, add some digits
     if len(plaintext) < 5:

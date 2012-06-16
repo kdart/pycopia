@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -42,9 +40,10 @@ def _classstr(tup):
 # interfaces below.
 
 def genClass(klassname, parents, attribs=None, doc=None, methods=None):
-    """genClass(name, parents, [attribs, [doc, [methods]]])
-    Return a string of Python source code defineing a class object.
-    Where:
+    """Return a string of Python source code defineing a class object.
+
+    Where::
+
         name = class name (string)
         parents = tuple of parent class objects or strings.
         attribs = class-global attributes to define, contained in a dictionary.
@@ -125,14 +124,13 @@ def genImport(module, obj=None, level=0):
 
 # a Python source producer object
 class SourceGen(object):
-    """SourceGen(outfile, [bangline])
-An instance of this SourceGen class is a factory for generating python
-source code, by writing to a file object.
+    """An instance of this SourceGen class is a factory for generating python
+    source code, by writing to a file object.
 
     """
     def __init__(self, outfile, bangline=None):
         self.outfile = outfile
-        bangline = bangline or BANGLINE 
+        bangline = bangline or BANGLINE
         self.outfile.write(bangline)
 
     def genClass(self, klassname, parents=None, attribs=None, doc=None, methods=None):
@@ -164,7 +162,7 @@ source code, by writing to a file object.
         self.write("\n")
 
 
-# factory functions. 
+# factory functions.
 # Returns a source generator ready to write to a file (or filename).
 def get_generator(outfile):
     if type(outfile) is str:
@@ -261,8 +259,8 @@ class TextHolder(object):
         return "\n".join(s)
 
 
-# python source file.
 class SourceFile(object):
+    """Represents a python source file."""
     def __init__(self, fo=None, bangline=None):
         self.fo = fo
         self.elements = []

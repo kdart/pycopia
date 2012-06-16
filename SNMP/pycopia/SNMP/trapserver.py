@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -16,44 +14,20 @@
 #    Lesser General Public License for more details.
 
 """
-More featurful trap server.
+Trap handlers.
 
 """
 
-import ezmail
-import SNMP.traps as traps
-
-import storage.Storage as Storage
-
-class PersistentTrapRecord(Storage.Persistent):
-    """Persistent holder for SNMP Traps.    """
-    def __init__(self, timestamp, ip, community, pdu):
-        self.timestamp = timestamp
-        self.ip = ip
-        self.community = community
-        self.pdu = pdu
-
-
-class TrapRecorder(object):
-    """Holds a persistent storage and adds traps to it when called.
-    """
-    def __init__(self, storage):
-        if not storage.has_key("traps"):
-            storage.add_container("traps")
-            storage.commit()
-        self._store = storage["traps"]
-
-    def __call__(self, timestamp, ip, community, pdu):
-        tr = PersistentTrapRecord(timestamp, ip, community, pdu)
-        self._store[tr.timestamp] = tr
-        self._store.commit()
-        return False
+from pycopia import basicconfig
+from pycopia import ezmail
+from pycopia.SNMP import traps
 
 
 class TrapMailer(object):
-    def __init__(self, storage):
-        self._recipients = storage.get("recipients")
-        self._from = storage.get("mailfrom")
+    """Trap handler that emails you."""
+    def __init__(self, cf):
+        self._recipients = cf.get("recipients")
+        self._from = cf.get("mailfrom")
 
     def __call__(self, timestamp, ip, community, pdu):
         tr = traps.TrapRecord(timestamp, ip, community, pdu)
@@ -65,18 +39,17 @@ class TrapMailer(object):
 def pytrapd(argv):
     """pytrapd [-d]
 
-    Run the Gtest trap daemon. Fork to background if -d is provided.
+    Run a SNMP trap handler and email you on reciept of a trap.
     """
-    import asyncio
+    from pycopia import asyncio
     if len(argv) > 1 and argv[1] == "-d":
         import daemonize
         daemonize.daemonize()
-    cf = Storage.get_config()
+    cf = basicconfig.get_config("trapserver")
 
-    recorder = TrapRecorder(cf)
     mailer = TrapMailer(cf)
 
-    handlers = [recorder, mailer]
+    handlers = [mailer]
     dispatcher = traps.get_dispatcher(handlers)
     asyncio.poller.loop()
 

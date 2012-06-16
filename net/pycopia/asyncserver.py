@@ -39,6 +39,10 @@ poller = asyncio.Poll()
 
 
 class AsyncServerHandler(asyncio.PollerInterface):
+    """Generic asynchronous server handler.
+    Register an instance of this, with a worker class and a protocol, with the
+    poller.
+    """
 
     def __init__(self, sock, workerclass, protocol):
         self._sock = sock
@@ -154,5 +158,6 @@ class AsyncWorkerHandler(asyncio.PollerInterface):
 
 
 def log(*args):
+    """Print to stderr"""
     print(*args, file=sys.stderr)
 

@@ -96,14 +96,14 @@ def pcap_report(argv):
     """pcapinfo [-h?] [-m] [-c] <pcap file>...
 
     Report information about pcap files.
-    Where:
-        -h (?)  -- Print this help.
-        -m      -- Report the set of unique MAC addresses contained in the
-                   files.
-        -c         Print Cisco style MAC addesses. Otherwise, hex strings.
-        -C <fname> Write Cisco config file for static mac entries.
-        -v <id>    Supply VLAN ID for destination MAC when writing Cisco config.
-        -i <intf>  Supply Cisco destination interface when writing Cisco config.
+    Where::
+
+        -h (?)      Print this help.
+        -m          Report the set of unique MAC addresses contained in the files.
+        -c          Print Cisco style MAC addesses. Otherwise, hex strings.
+        -C <fname>  Write Cisco config file for static mac entries.
+        -v <id>     Supply VLAN ID for destination MAC when writing Cisco config.
+        -i <intf>   Supply Cisco destination interface when writing Cisco config.
     """
     writecisco = False
     reportmacs = False

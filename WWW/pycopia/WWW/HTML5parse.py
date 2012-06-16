@@ -36,20 +36,19 @@ MIME_XHTML5="application/xhtml+xml"
 
 xhtml_parser = None
 
-"""
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <title>JavaScript Playground.</title>
-    <script src="program.js" type="text/javascript;version=1.8"></script>
-</head>
-<body>
-    <pre id="work">
-    </pre>
-</body>
-</html>
-"""
+# example doc
+#<?xml version="1.0" encoding="UTF-8"?>
+#<!DOCTYPE html>
+#<html xmlns="http://www.w3.org/1999/xhtml">
+#<head>
+#    <title>JavaScript Playground.</title>
+#    <script src="program.js" type="text/javascript;version=1.8"></script>
+#</head>
+#<body>
+#    <pre id="work">
+#    </pre>
+#</body>
+#</html>
 
 class ContainerMixin(object):
     def __init__(self, encoding=DEFAULT_ENCODING, language="en"):
@@ -85,7 +84,7 @@ class HTML5Document(ContainerMixin):
     def encode(self, encoding=DEFAULT_ENCODING, pretty=False):
         if encoding != self.encoding:
             self.set_encoding(encoding)
-        return self.XMLHEADER + self.DOCTYPE + etree.tostring(self.root, 
+        return self.XMLHEADER + self.DOCTYPE + etree.tostring(self.root,
                         pretty_print=pretty, encoding=self.encoding)
 
     def emit(self, fo, encoding=DEFAULT_ENCODING):

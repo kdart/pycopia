@@ -28,6 +28,9 @@ from pycopia import gtktools
 
 
 def edit_color_visual_selection():
+    """Spawn a color selector with the current hex coded color, and replaces it
+    with the newly selected color.
+    """
     b = vim.current.buffer
     start_row, start_col = b.mark("<")
     end_row, end_col = b.mark(">")

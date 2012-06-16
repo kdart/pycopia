@@ -1,7 +1,5 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -33,17 +31,16 @@ def sub_lists(lines, subdict):
 
 def sub_file(template_fo, dest_fo, subdict):
     """
-subfile(template, destination, substitutiondict)
-where:
-    template         - is a file object for the template file. This file
-                       contains unique strings that must match the keys in the
-                       subsititution dictionary (sustitutedict).
-    destination      - is a file object that will have the template file with
-                       substitutions written to it.
-    substitutiondict - is a dictionary with keys that must match the tag
-                       strings in the template file. The value of that
-                       dictionary entry will be substituted for the tag in the
-                       destination file.
+    template_fo
+       is a file object for the template file. This file contains unique
+       strings that must match the keys in the subsititution dictionary
+       (sustitutedict).
+    dest_fo
+        is a file object that will have the template file with substitutions written to it.
+    subdict
+        is a dictionary with keys that must match the tag strings in the
+        template file. The value of that dictionary entry will be substituted
+        for the tag in the destination file.
 
     """
     for line in template_fo.readlines():

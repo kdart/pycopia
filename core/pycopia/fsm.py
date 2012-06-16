@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -41,12 +39,16 @@ ANY = Enum(-1, "ANY")
 
 class FSM(object):
     """This class is a Finite State Machine (FSM).
-    You set up a state transition table which is the association of
+    You set up a state transition table which is the association of::
+
         (input_symbol, current_state) --> (action, next_state)
+
     When the FSM matches a pair (current_state, input_symbol)
     it will call the associated action.
-    The action is a function reference defined with a signature like this:
+    The action is a function reference defined with a signature like this::
+
             def f (input_symbol, fsm):
+
     and pass as parameters the input symbol, and the FSM instance itself.
     The action function may produce output and update the stack.
     """
@@ -90,12 +92,12 @@ class FSM(object):
     def set_default_transition(self, action, next_state):
         '''This sets the default transition.
         If the FSM cannot match the pair (input_symbol, current_state)
-        in the transition table then this is the transition that 
+        in the transition table then this is the transition that
         will be returned. This is useful for catching errors and undefined states.
         The default transition can be removed by calling
-        add_default_transition (None, None)
+        `add_default_transition (None, None)`.
         If the default is not set and the FSM cannot match
-        the input_symbol and current_state then it will 
+        the input_symbol and current_state then it will
         raise an exception (see process()).
         '''
         if action == None and next_state == None:
@@ -131,14 +133,14 @@ class FSM(object):
     def add_transition_list(self, list_input_symbols, state, action, next_state):
         '''This adds lots of the same transitions for different input symbols.
         You can pass a list or a string. Don't forget that it is handy to use
-        string.digits, string.letters, etc. to add transitions that match 
+        string.digits, string.letters, etc. to add transitions that match
         those character classes.
         '''
         for input_symbol in list_input_symbols:
             self.add_transition (input_symbol, state, action, next_state)
 
     def get_transition(self, input_symbol, state):
-        '''This tells what the next state and action would be 
+        '''This tells what the next state and action would be
         given the current state and the input_symbol.
         This returns (action, new state).
         This does not update the current state
@@ -162,9 +164,9 @@ class FSM(object):
                         raise FSMError('Transition %r is undefined.' % (input_symbol,))
 
     def process(self, input_symbol):
-        """This causes the fsm to change state and call an action.
-        (input_symbol, current_state) --> (action, next_state)
-        If the action is None then no action is taken,
+        """This causes the fsm to change state and call an action:
+        `(input_symbol, current_state) --> (action, next_state)`.
+        If the action is None then no action is taken, and
         only the current state is changed.  """
         action, next_state = self.get_transition(input_symbol, self.current_state)
         if action is not None:
@@ -174,12 +176,13 @@ class FSM(object):
 
     def step(self, token):
         """This causes the fsm to change state and call an action.
-        (token, current_state) --> (action, next_state) If the action is
-        None then no action is taken, only the current state is changed.    """
+        `(token, current_state) --> (action, next_state)` If the action is
+        None then no action is taken, only the current state is changed.
+        """
         action, next_state = self.get_transition(token, self.current_state)
         if action is not None:
             rv = action(token, self)
-            if rv is None: 
+            if rv is None:
                 if next_state is not None:
                     self.current_state = next_state
             else: # returning a value from a method sets the state, else take the FSM defined default.

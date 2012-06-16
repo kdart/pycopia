@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -14,13 +14,22 @@
 #    Lesser General Public License for more details.
 
 """
-Averaging counters.
-
+Averaging counters. Computes a running average and an exponentially weighted running average.
 """
 
 import array
 
 class RunningAverage(object):
+    """Maintains the current average.
+
+    Call the update() method with a new value periodically.
+
+    Properties:
+        ExponentialWeightedRunningAverage
+        RunningAverage
+
+    These may be referenced at any time to get the current value.
+    """
     def __init__(self, N=5):
         self._X = array.array('d', [0.0]*(N))
         n = self._N = float(N)
@@ -29,6 +38,7 @@ class RunningAverage(object):
         self._ewra = 0.0
 
     def update(self, val):
+        """Call this to update the average and weighted average."""
         val = float(val)
         self._ewra = self._ExponentialWeightedRunningAverage()
         self._X.insert(0, val)
@@ -52,7 +62,7 @@ class RunningAverage(object):
         s += pwr(a, len(X))*self._ewra
         return s
     ExponentialWeightedRunningAverage = property(_ExponentialWeightedRunningAverage)
-    EWRA = ExponentialWeightedRunningAverage 
+    EWRA = ExponentialWeightedRunningAverage
 
 
 

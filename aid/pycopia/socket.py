@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 # Wrapper module for _socket, providing some additional facilities
-# implemented in Python. 
+# implemented in Python.
 # Forked and extended for Pycopia by Keith Dart. Base module backported from Python 3
 # so you can use these methods with either Python 2 or 3.
 
@@ -27,8 +27,7 @@ inet_aton() -- convert IP addr string (123.45.67.89) to 32-bit packed format
 inet_ntoa() -- convert 32-bit packed format IP to string (123.45.67.89)
 socket.getdefaulttimeout() -- get the default timeout value
 socket.setdefaulttimeout() -- set the default timeout value
-create_connection() -- connects to an address, with an optional timeout and
-                       optional source address.
+create_connection() -- connects to an address, with an optional timeout and optional source address.
 
  [*] not available on all platforms!
 
@@ -374,6 +373,7 @@ CONNECTED = 1
 ACCEPTING = 2
 
 class AsyncSocket(socket):
+    """Socket with the asyncio modules's async interface."""
     def __init__(self, family, type, proto=0):
         super(AsyncSocket, self).__init__(family, type, proto)
         self._state = CLOSED
@@ -518,6 +518,7 @@ def opentcp(host, port, sobject=SafeSocket):
 
 # client connections:
 def connect_inet(host, port, socktype, sobject=SafeSocket):
+    """General client connections."""
     args = getaddrinfo(str(host), int(port), AF_INET, socktype)
     for family, socktype, proto, canonname, sockaddr in args:
         try:
@@ -530,12 +531,15 @@ def connect_inet(host, port, socktype, sobject=SafeSocket):
     raise
 
 def connect_tcp(host, port, sobject=SafeSocket):
+    """Make a TCP client connection."""
     return connect_inet(host, port, SOCK_STREAM, sobject)
 
 def connect_udp(host, port, sobject=SafeSocket):
+    """Make a UDP client connection."""
     return connect_inet(host, port, SOCK_DGRAM, sobject)
 
 def connect_unix(path, sobject=SafeSocket):
+    """Make a Unix socket stream client connection."""
     s = sobject(AF_UNIX, SOCK_STREAM)
     s.connect(path)
     return s
@@ -567,11 +571,13 @@ def unix_listener_datagram(path, num=5, sobject=SafeSocket):
     return s
 
 def udp_listener(addr, num=5, sobject=SafeSocket):
+    """return a bound UDP socket."""
     s = sobject(AF_INET, SOCK_DGRAM)
     s.bind(addr)
     return s
 
 def tcp_listener(addr, num=5, sobject=SafeSocket):
+    """return a TCP socket, bound and listening."""
     s = sobject(AF_INET, SOCK_STREAM)
     s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     s.bind(addr)

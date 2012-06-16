@@ -57,10 +57,10 @@ class PhysicalQuantity(object):
 
   Constructor:
 
-  - PhysicalQuantity(|value|, |unit|), where |value| is a number of
-    arbitrary type and |unit| is a string containing the unit name.
+  - PhysicalQuantity(value, unit), where `value is a number of
+    arbitrary type and `unit` is a string containing the unit name.
 
-  - PhysicalQuantity(|string|), where |string| contains both the value
+  - PhysicalQuantity(string), where `string` contains both the value
     and the unit. This form is provided to make interactive use more
     convenient.
 
@@ -199,7 +199,7 @@ class PhysicalQuantity(object):
     return self.value != 0
 
   def convertToUnit(self, unit):
-    """Changes the unit to |unit| and adjusts the value such that
+    """Changes the unit to `unit` and adjusts the value such that
     the combination is equivalent. The new unit is by a string containing
     its name. The new unit must be compatible with the previous unit
     of the object."""
@@ -452,7 +452,7 @@ def isPhysicalUnit(x):
   return isinstance(x, PhysicalUnit)
 
 def isPhysicalQuantity(x):
-  "Returns 1 if |x| is an instance of PhysicalQuantity."
+  "Returns 1 if `x` is an instance of PhysicalQuantity."
   return isinstance(x, PhysicalQuantity)
 
 
@@ -462,9 +462,9 @@ def _findUnit(unit):
   if isinstance(unit, basestring):
     unit = eval(unit, _unit_table)
     for cruft in ['__builtins__', '__args__']:
-      try: 
+      try:
         del _unit_table[cruft]
-      except KeyError: 
+      except KeyError:
         pass
 
   if not isPhysicalUnit(unit):

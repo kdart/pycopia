@@ -26,6 +26,7 @@ from __future__ import division
 from pycopia import protocols
 
 class BasicHTTPServerProto(protocols.Protocol):
+    """A simple HTTP protocol implementation, server side."""
     EOL = "\r\n"
 
     GETHEADERS = 1

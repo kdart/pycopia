@@ -14,10 +14,10 @@ from __future__ import print_function
 
 This module defines a Test class, which is the base class for all test case
 implementations. This class is not substantiated itself, but a subclass is
-defined that overrides the `execute` method. 
+defined that overrides the `execute` method.
 
 Your `execute` should return the value that the `passed` or
-`failed` methods return, as appropriate. 
+`failed` methods return, as appropriate.
 
 All test related errors are based on the `TestError` exception. You may
 also use the built-in `assert` statement. There are also various assertion
@@ -25,7 +25,7 @@ methods you may use. If a test cannot be completed for some reason you may
 also raise a 'TestIncompleteError' exception.
 
 Usually, a set of test cases is collected in a TestSuite object, and run
-sequentially by calling the suite instance. 
+sequentially by calling the suite instance.
 
 """
 
@@ -47,7 +47,7 @@ from pycopia.QA import constants
 
 # exception classes that may be raised by test methods.
 class TestError(AssertionError):
-    """TestError() Base class of testing errors. 
+    """TestError() Base class of testing errors.
 
     This is based on AssertionError so the same assertion catcher can be
     used to indicate test failure.
@@ -86,7 +86,7 @@ class TestResult(object):
         return self._value == constants.PASSED
 
     def not_passed(self):
-            return self._value in (constants.FAILED, constants.EXPECTED_FAIL, 
+            return self._value in (constants.FAILED, constants.EXPECTED_FAIL,
                     constants.INCOMPLETE, constants.ABORT)
 
     def is_failed(self):
@@ -150,10 +150,10 @@ class Test(object):
     def __init__(self, config):
         cl = self.__class__
         self.test_name = "%s.%s" % (cl.__module__, cl.__name__)
-        self.config = config 
-        self._report = config.report 
-        self._debug = config.flags.DEBUG 
-        self._verbose = config.flags.VERBOSE 
+        self.config = config
+        self._report = config.report
+        self._debug = config.flags.DEBUG
+        self._verbose = config.flags.VERBOSE
         self._datapoints = []
 
     @classmethod
@@ -324,7 +324,7 @@ class Test(object):
         Runs another Test subclass with the given arguments passed to the
         `execute()`.
 
-        The report object is overridden with A NullReport by 
+        The report object is overridden with A NullReport by
         default. Therefore you won't see output from subtests. If you want to
         see subtest output in the report give the verbose option to the test runner.
         """
@@ -342,19 +342,21 @@ class Test(object):
             self.config.set_report(orig)
 
     def run_command(self, cmdline, env=None, timeout=None, logfile=None):
-        """Run an external command. 
+        """Run an external command.
 
         This method will block until the command returns. An optional timeout
         may be supplied to prevent hanging forever.
 
-        Arguments:
-            A string that is the command line to be run. 
+        Arguments::
+
+            A string that is the command line to be run.
             A (optional) dictionary containing the environment variables.
             An (optional) timeout value that will forcibly return if the call
                 takes longer than the timeout value.
 
-        Returns:
-         A tuple of ExitStatus object and stdout/stderr (string) of the program.
+        Returns::
+
+           A tuple of ExitStatus object and stdout/stderr (string) of the program.
         """
         from pycopia import proctools
         p = proctools.spawnpipe(cmdline, logfile=logfile, env=env)
@@ -370,9 +372,9 @@ class Test(object):
         return p.exitstatus, text
 
     def debug(self):
-        """Enter The Debugger (starring Bruce Li). 
+        """Enter The Debugger (starring Bruce Li).
 
-        Forceably enter the dubugger. Win the prize, escape with your life. 
+        Forceably enter the dubugger. Win the prize, escape with your life.
         Useful when developing tests.
         """
         debugger.set_trace(start=2)
@@ -414,14 +416,14 @@ class Test(object):
 
     ### the overrideable methods follow ###
     def initialize(self):
-        """Hook method to initialize a test. 
+        """Hook method to initialize a test.
 
         Override if necessary. Establishes the pre-conditions of the test.
         """
         pass
 
     def finalize(self, result):
-        """Hook method when finalizing a test. 
+        """Hook method when finalizing a test.
 
         Override if necessary. Used to clean up any state in UUT.
         """
@@ -440,8 +442,8 @@ class Test(object):
     def passed(self, msg=constants.NO_MESSAGE):
         """Call this and return if the execute() passed.
 
-        If your execute determined that the test passed, call this. 
-        In a execute, the pattern is: `return self.passed('message').
+        If your execute determined that the test passed, call this.
+        In a execute, the pattern is: `return self.passed('message')`.
         """
         self._report.passed(msg, 2)
         return TestResult(constants.PASSED)
@@ -452,7 +454,7 @@ class Test(object):
         Call this if your test logic determines a failure. Only call this if
         your test implementation in the execute is positively sure that it
         does not meet the criteria. Other kinds of errors should return
-        `incomplete()`. 
+        `incomplete()`.
 
         In the execute method, the pattern is: `return self.failed('message')`.
         """
@@ -483,7 +485,7 @@ class Test(object):
 
         Call this and return if your test implementation determines that the
         test cannot be completed for whatever reason.
-        In a execute, the pattern is: `return self.incomplete('message').
+        In a execute, the pattern is: `return self.incomplete('message')`.
         """
         self._report.incomplete(msg, 2)
         return TestResult(constants.INCOMPLETE)
@@ -500,7 +502,7 @@ class Test(object):
     def info(self, msg, level=0):
         """Informational messages for the report.
 
-        Record non-critical information in the report object. 
+        Record non-critical information in the report object.
         The message is not recorded if the given level is greater than the current verbosity level.
         """
         if level <= self._verbose:
@@ -534,9 +536,10 @@ class Test(object):
             return self.incomplete("Could not perform test.")
 
     def report_build(self, buildstring):
-        """Report any build information. Usually a version or build
-        number.
-        The buildstring parameter must match the following pattern:
+        """Report any build information. Usually a version or build number.
+
+        The buildstring parameter must match the following pattern::
+
             <projectname>[ .:]<major>.<minor>.<subminor>.<build>
         """
         self._report.add_message("BUILD", buildstring, 1)
@@ -673,10 +676,10 @@ class Test(object):
 
         This may be called multiple times and the file will be appended to.
 
-        Arguments:
-            text: A blob of text as a string.
-            filename: the base name of the file to write. Default is test name
-                plus timestamp.
+        Arguments::
+
+            text:  A blob of text as a string.
+            filename:  the base name of the file to write. Default is test name plus timestamp.
         """
         if filename is None:
             filename = self.get_filename("saved", "txt")
@@ -728,7 +731,7 @@ class PreReq(object):
 
     def __repr__(self):
         return "%s(%r, args=%r, kwargs=%r)" % \
-                (self.__class__.__name__, self.implementation, 
+                (self.__class__.__name__, self.implementation,
                         self.args, self.kwargs)
 
     def __str__(self):
@@ -767,7 +770,7 @@ class TestEntry(object):
     def _setResult(self, val):
         self._result = val
 
-    result = property(lambda s: s._result, _setResult, 
+    result = property(lambda s: s._result, _setResult,
                 doc="The test rusult enumeration.")
 
     def match_test(self, name, args, kwargs):
@@ -820,7 +823,7 @@ class TestEntry(object):
 
 
 class SuiteEntry(TestEntry):
-    """Entry object that wraps other Suite objects. 
+    """Entry object that wraps other Suite objects.
 
     Used when sub-suites are run as test cases.
     """
@@ -889,7 +892,7 @@ class TestEntrySeries(TestEntry):
         return self.inst.test_name == prereq.implementation
 
     def run(self, config=None):
-        resultset = {constants.PASSED:0, constants.FAILED:0, 
+        resultset = {constants.PASSED:0, constants.FAILED:0,
                 constants.EXPECTED_FAIL:0, constants.INCOMPLETE:0}
         for argset in self._counter:
             kwargs = self._sig.get_keyword_arguments(argset)
@@ -953,7 +956,7 @@ class TestSuite(object):
 
     A TestSuite contains a set of test cases (subclasses of Test class) that
     are run sequentially, in the order added. It monitors abort status of
-    each test, and aborts the suite if required. 
+    each test, and aborts the suite if required.
 
     To run it, create a TestSuite object (or a subclass with some methods
     overridden), add tests with the `add_test()` method, and then call the
@@ -1024,10 +1027,10 @@ class TestSuite(object):
         self._add_with_prereq(entry)
 
     def add_tests(self, _testclasslist, *args, **kwargs):
-        """Add a list of tests at once. 
+        """Add a list of tests at once.
 
         Similar to add_test method, but adds all test case classes found in the
-        given list.  Arguments are common to all tests. 
+        given list.  Arguments are common to all tests.
         If object is a tuple it should be a (testclass, tuple, dictionary) of
         positional and keyword arguments.
         """
@@ -1051,9 +1054,9 @@ class TestSuite(object):
         entry = TestEntry(testinstance, args, kwargs, False)
         self._add_with_prereq(entry)
 
-    def add_test_series(self, _testclass, N=100, chooser=None, filter=None, 
+    def add_test_series(self, _testclass, N=100, chooser=None, filter=None,
                                         args=None, kwargs=None):
-        """Add a Test case as a series. 
+        """Add a Test case as a series.
 
         The arguments must be lists of possible values for each parameter. The
         args and kwargs arguments are lists that are combined in all possible
@@ -1067,7 +1070,7 @@ class TestSuite(object):
                     is 100 just to be safe.
 
             chooser (callable): callable that takes one number and a list
-                    argument, returns a list of the specified (N) length. 
+                    argument, returns a list of the specified (N) length.
                     Default is to chop off the top end of the list.
 
             filter (callable): callable that takes a set of arguments with the
@@ -1163,9 +1166,10 @@ class TestSuite(object):
         self.report.info(msg, 1)
 
     def report_build(self, buildstring):
-        """Report any build information. Usually a version or build
-        number.
-        The buildstring parameter must match the following pattern:
+        """Report any build information. Usually a version or build number.
+
+        The buildstring parameter must match the following pattern::
+
             <projectname>[ .:]<major>.<minor>.<subminor>.<build>
         """
         self.report.add_message("BUILD", buildstring, 1)
@@ -1195,7 +1199,7 @@ class TestSuite(object):
 
         Calling the instance is the primary way to invoke a suite of tests.
         Any supplied parameters are passed onto the suite's initialize()
-        method. 
+        method.
 
         It will then run all TestEntry, report on interrupts, and check for
         abort conditions. It will also skip tests whose prerequisites did not
@@ -1372,7 +1376,7 @@ class TestSuite(object):
         Override this if you need to do some initialization just before the
         suite is run. This is called with the arguments given to the TestSuite
         object when it was called.
-        """ 
+        """
         pass
 
     def finalize(self):

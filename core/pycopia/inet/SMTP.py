@@ -1,7 +1,5 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -56,7 +54,7 @@ Example:
 #
 # This was modified from the Python 1.5 library HTTP lib.
 #
-# Extensive modifications by Keith Dart <kdart@kdart.com>. 
+# Extensive modifications by Keith Dart <kdart@kdart.com>.
 
 import re
 import rfc822
@@ -95,7 +93,7 @@ class SMTPResponseException(SMTPException):
 
     These exceptions are generated in some instances when the SMTP
     server returns an error code.  The error code is stored in the
-    `smtp_code' attribute of the error, and the `smtp_error' attribute
+    `smtp_code` attribute of the error, and the `smtp_error` attribute
     is set to the error message.
     """
 
@@ -108,7 +106,7 @@ class SMTPSenderRefused(SMTPResponseException):
     """Sender address refused.
 
     In addition to the attributes set by on all SMTPResponseException
-    exceptions, this sets `sender' to the string that the SMTP refused.
+    exceptions, this sets `sender` to the string that the SMTP refused.
     """
     def __init__(self, code, msg, sender):
         self.smtp_code = code
@@ -209,28 +207,29 @@ def quotedata(data):
 
 class SMTP(object):
     """This class manages a connection to an SMTP or ESMTP server.
-    SMTP Objects:
-        SMTP objects have the following attributes:
-            helo_resp
-                This is the message given by the server in response to the
-                most recent HELO command.
 
-            ehlo_resp
-                This is the message given by the server in response to the
-                most recent EHLO command. This is usually multiline.
+    SMTP objects have the following attributes::
 
-            does_esmtp
-                This is a True value _after you do an EHLO command_, if the
-                server supports ESMTP.
+        helo_resp
+            This is the message given by the server in response to the
+            most recent HELO command.
 
-            esmtp_features
-                This is a dictionary, which, if the server supports ESMTP,
-                will _after you do an EHLO command_, contain the names of the
-                SMTP service extensions this server supports, and their
-                parameters (if any).
+        ehlo_resp
+            This is the message given by the server in response to the
+            most recent EHLO command. This is usually multiline.
 
-                Note, all extension names are mapped to lower case in the
-                dictionary.
+        does_esmtp
+            This is a True value _after you do an EHLO command, if the
+            server supports ESMTP.
+
+        esmtp_features
+            This is a dictionary, which, if the server supports ESMTP,
+            will _after you do an EHLO command, contain the names of the
+            SMTP service extensions this server supports, and their
+            parameters (if any).
+
+            Note, all extension names are mapped to lower case in the
+            dictionary.
 
         See each method's docstrings for details.  In general, there is a
         method of the same name to perform each SMTP command.  There is also a
@@ -244,10 +243,10 @@ class SMTP(object):
     def __init__(self, host='', port=25, bindto=None, logfile=None):
         """Initialize a new instance.
 
-        If specified, `host' is the name of the remote host to which to
-        connect.  If specified, `port' specifies the port to which to connect.
+        If specified, `host` is the name of the remote host to which to
+        connect.  If specified, `port` specifies the port to which to connect.
         By default, smtplib.SMTP_PORT is used.  An SMTPConnectError is raised
-        if the specified `host' doesn't respond correctly.  """
+        if the specified `host` doesn't respond correctly.  """
         self.host = host
         self.port = port
         self._bindto = bindto
@@ -267,7 +266,7 @@ class SMTP(object):
     def connect(self, host='localhost', port=0, bindto=None, retries=3):
         """Connect to a host on a given port.
 
-        If the hostname ends with a colon (`:') followed by a number, and
+        If the hostname ends with a colon (`:`) followed by a number, and
         there is no port specified, that suffix will be stripped off and the
         number interpreted as the port number to use.
 
@@ -282,7 +281,7 @@ class SMTP(object):
                 try: port = int(port)
                 except ValueError:
                     raise socket.error, "nonnumeric port"
-        if not port: 
+        if not port:
             port = SMTP_PORT
         if self.logfile:
             self.logfile.write('attempting SMTP.connect: %s %d\n' % (host, port))
@@ -645,14 +644,15 @@ class SMTP(object):
                  rcpt_options=[]):
         """This command performs an entire mail transaction.
 
-        The arguments are:
-            - from_addr    : The address sending this mail.
-            - to_addrs     : A list of addresses to send this mail to.  A bare
+        The arguments are::
+
+            :from_addr:      The address sending this mail.
+            :to_addrs:       A list of addresses to send this mail to.  A bare
                              string will be treated as a list with 1 address.
-            - msg          : The message to send.
-            - mail_options : List of ESMTP options (such as 8bitmime) for the
+            :msg:            The message to send.
+            :mail_options:   List of ESMTP options (such as 8bitmime) for the
                              mail command.
-            - rcpt_options : List of ESMTP options (such as DSN commands) for
+            :rcpt_options:   List of ESMTP options (such as DSN commands) for
                              all the rcpt commands.
 
         If there has been no previous EHLO or HELO command this session, this
@@ -665,32 +665,32 @@ class SMTP(object):
         recipient that was refused.  Each entry contains a tuple of the SMTP
         error code and the accompanying error message sent by the server.
 
-        This method may raise the following exceptions:
+        This method may raise the following exceptions::
 
-         SMTPHeloError          The server didn't reply properly to
-                                the helo greeting.
-         SMTPRecipientsRefused  The server rejected ALL recipients
-                                (no mail was sent).
-         SMTPSenderRefused      The server didn't accept the from_addr.
-         SMTPDataError          The server replied with an unexpected
-                                error code (other than a refusal of
-                                a recipient).
+         :SMTPHeloError:         The server didn't reply properly to
+                                 the helo greeting.
+         :SMTPRecipientsRefused: The server rejected ALL recipients
+                                 (no mail was sent).
+         :SMTPSenderRefused:     The server didn't accept the from_addr.
+         :SMTPDataError:         The server replied with an unexpected
+                                 error code (other than a refusal of
+                                 a recipient).
 
         Note: the connection will be open even after an exception is raised.
 
-        Example:
+        Example::
 
-         >>> import smtplib
-         >>> s=smtplib.SMTP("localhost")
-         >>> tolist=["one@one.org","two@two.org","three@three.org","four@four.org"]
-         >>> msg = '''\\
-         ... From: Me@my.org
-         ... Subject: testin'...
-         ...
-         ... This is a test '''
-         >>> s.sendmail("me@my.org",tolist,msg)
-         { "three@three.org" : ( 550 ,"User unknown" ) }
-         >>> s.quit()
+             >>> import smtplib
+             >>> s=smtplib.SMTP("localhost")
+             >>> tolist=["one@one.org","two@two.org","three@three.org","four@four.org"]
+             >>> msg = '''\\
+             ... From: Me@my.org
+             ... Subject: testin'...
+             ...
+             ... This is a test '''
+             >>> s.sendmail("me@my.org",tolist,msg)
+             { "three@three.org" : ( 550 ,"User unknown" ) }
+             >>> s.quit()
 
         In the above example, the message was accepted for delivery to three
         of the four addresses, and one was rejected, with the error code
@@ -708,7 +708,7 @@ class SMTP(object):
             # Hmmm? what's this? -ddm
             # self.esmtp_features['7bit']=""
             if self.has_extn('size'):
-                esmtp_opts.append("size=" + `len(msg)`)
+                esmtp_opts.append("size=" + repr(len(msg)))
             for option in mail_options:
                 esmtp_opts.append(option)
 

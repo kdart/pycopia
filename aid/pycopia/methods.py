@@ -5,7 +5,7 @@
 
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
-# a copy of the License at 
+# a copy of the License at
 #
 # http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -44,10 +44,11 @@ CO_FUTURE_WITH_STATEMENT =  0x8000
 class MethodSignature(object):
     """Introspect a method or function and store the formal arguments.
 
-    Attributes:
-        name: the name of the original function or method.
-        arguments: a list of 2-tuples, (argument name, default value). If
-            there is no default value defined the value will be NULL object.
+    Attributes::
+
+        :name:      the name of the original function or method.
+        :arguments: a list of 2-tuples, (argument name, default value). If
+                    there is no default value defined the value will be NULL object.
 
     """
     def __init__(self, method):

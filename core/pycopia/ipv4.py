@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -17,15 +15,14 @@
 
 """
 IPv4 module. Defines an IPv4 class (Internet Protocol address).
-By Keith Dart, 1999
 
-Exports helper functions:
+Exports helper functions::
 
-itodq(int) - return dotted quad string given an integer.
-dqtoi(string) - return and integer given a string in IP dotted-quad notation.
-iprange(startip, number) - return a list of sequential hosts in a network, as strings.
-ipnetrange(startnet, number) - return a list of sequential networks, as strings.
-netrange(startnet, number, [increment]) - return a list of networks, as IPv4 objects.
+    itodq(int) - return dotted quad string given an integer.
+    dqtoi(string) - return and integer given a string in IP dotted-quad notation.
+    iprange(startip, number) - return a list of sequential hosts in a network, as strings.
+    ipnetrange(startnet, number) - return a list of sequential networks, as strings.
+    netrange(startnet, number, [increment]) - return a list of networks, as IPv4 objects.
 
 
 The IPv4 class stores the IP address and mask. It also makes available the
@@ -44,8 +41,9 @@ class IPv4(object):
     Store an IP addresss. Computes the network, host, and broadcast address on
     demand.
 
-    Usage:
-    ipaddress = IPv4(address, [mask])
+    Usage::
+
+        ipaddress = IPv4(address, [mask])
 
     Supply an address as an integer,  dotted-quad string, list of 4
     integer octets, or another IPv4 object. A netmask may optionally be
@@ -57,28 +55,32 @@ class IPv4(object):
     mask is obtained from the address parameter, the mask parameter will
     be ignored.
 
-    For example:
-    ip = IPv4("10.1.1.2")
-    ip = IPv4("10.1.1.2", "255.255.255.0")
-    ip = IPv4("10.1.1.2/24") # note that if a mask value was supplied,
-                             # it would be ignored.
+    For example::
+
+        ip = IPv4("10.1.1.2")
+        ip = IPv4("10.1.1.2", "255.255.255.0")
+        ip = IPv4("10.1.1.2/24") # note that if a mask value was supplied,
+                                 # it would be ignored.
 
     Raises ValueError if the string representation is malformed, or is not an
     integer.
 
-    Class attributes that you may set or read are:
+    Class attributes that you may set or read are::
+
         address   = 32 bit integer IP address
         mask      = 32 bit integer mask
         maskbits  = number of bits in the mask
 
-    additional attributes that are read-only (UNDEFINED for /32 IPV4 objects!):
+    additional attributes that are read-only (UNDEFINED for /32 IPV4 objects!)::
+
         network             = network number, host part is zero.
         host (or hostpart)  = host number, network part is zero.
         broadcast           = directed broadcast address, host part is all ones.
         firsthost           = What would be the first address in the subnet.
         lasthost            = What would be the last address in the subnet.
 
-    Methods:
+    Methods::
+
         copy() - Return a copy of this IPv4 address.
         nextnet() - Increments the IP address into the next network range.
         previousnet() - Decrements the IP address into the previous network range.
@@ -89,27 +91,29 @@ class IPv4(object):
         getStrings() - return a 3-tuple of address, mask and broadcast as dotted
                        quad strings.
 
-    Operators:
+    Operators::
+
         An IPv4 object can be used in a "natural" way with some python
         operators.  It behaves as a sequence object when sequence
         operators are applied to it.
-        For example:
-        ip = ipv4.IPv4("192.168.1.0", "255.255.255.248")
-        ip[2] returns 2nd host in subnet.
-        ip[-1] returns broadcast address.
-        ip[0] returns network.
-        ip[1:-1] returns list of IPv4 objects from first to last host.
-        len(ip) returns number of hosts in network range, including net
-                and broadcast.
-        if ip3 in ip:     # test for inclusion in subnet
-            print "In range"
+        For example::
 
-        You may also perform some arithmetic operators;
-        ip2 = ip + 2 # assigns ip2 to new IPv4 object two hosts greater than ip.
-        ip2 > ip # returns true (can compare addresses)
-        int(ip) # return IPv4 object address as integer
-        hex(ip) # return IPv4 object address as hexadecimal string
+            ip = ipv4.IPv4("192.168.1.0", "255.255.255.248")
+            ip[2] returns 2nd host in subnet.
+            ip[-1] returns broadcast address.
+            ip[0] returns network.
+            ip[1:-1] returns list of IPv4 objects from first to last host.
+            len(ip) returns number of hosts in network range, including net
+                    and broadcast.
+            if ip3 in ip:     # test for inclusion in subnet
+                print "In range"
 
+        You may also perform some arithmetic operators::
+
+            ip2 = ip + 2 # assigns ip2 to new IPv4 object two hosts greater than ip.
+            ip2 > ip # returns true (can compare addresses)
+            int(ip) # return IPv4 object address as integer
+            hex(ip) # return IPv4 object address as hexadecimal string
 
     """
     __slots__ = ["_address", "_mask"]
@@ -152,14 +156,13 @@ class IPv4(object):
         return _NetIterator(self)
 
     def getStrings(self):
-        """getStrings()
-Returns a 3-tuple of address, mask, and broadcast address as dotted-quad string.
+        """Returns a 3-tuple of address, mask, and broadcast address as dotted-quad string.
         """
         return itodq(self._address), itodq(self._mask), itodq(self.broadcast)
     address_mask_broadcast = property(getStrings)
 
     def cidr(self):
-        """cidr() Returns string in CIDR notation."""
+        """Returns string in CIDR notation."""
         return "%s/%u" % (itodq(self._address), self.__mask2bits())
 
     CIDR = property(cidr)
@@ -192,7 +195,7 @@ Returns a 3-tuple of address, mask, and broadcast address as dotted-quad string.
             return self._address & (~self._mask & 0xffffffffL)
 
     def _set_hostpart(self, value):
-        self._address = ((self._address & self._mask) | 
+        self._address = ((self._address & self._mask) |
                 (long(value) & (~self._mask & 0xffffffffL)))
 
     host = property(_get_hostpart, _set_hostpart, None, "host part")
@@ -325,8 +328,8 @@ Returns a 3-tuple of address, mask, and broadcast address as dotted-quad string.
                 raise IndexError, "Host out of range"
         else:
             if -index < (~self._mask & 0xffffffffL) + 1:
-                return IPv4( (self._address & self._mask) + 
-                       ((~self._mask & 0xffffffffL) + index + 1), 
+                return IPv4( (self._address & self._mask) +
+                       ((~self._mask & 0xffffffffL) + index + 1),
                        self._mask)
             else:
                 raise IndexError, "Host out of range"
@@ -370,9 +373,8 @@ Returns a 3-tuple of address, mask, and broadcast address as dotted-quad string.
         return self
 
     def nexthost(self, increment=1):
-        """
-Increments this IP address object's host number. It will overflow into the
-next network range. It will not become a broadcast or network address.
+        """Increments this IP address object's host number. It will overflow into the
+        next network range. It will not become a broadcast or network address.
 
         """
         self._address = self._address + increment
@@ -382,9 +384,8 @@ next network range. It will not become a broadcast or network address.
         return self
 
     def previoushost(self, decrement=1):
-        """
-Decrements this IP address object's host number. It will underflow into the
-next network range. It will not become a broadcast or network address.
+        """Decrements this IP address object's host number. It will underflow into the
+        next network range. It will not become a broadcast or network address.
 
         """
         self._address = self._address - decrement
@@ -394,43 +395,38 @@ next network range. It will not become a broadcast or network address.
         return self
 
     def set_to_first(self):
-        """
-Set the address to the first host in the network.
+        """Set the address to the first host in the network.
         """
         self._address = (self._address & self._mask) + 1
         return self
 
     def set_to_last(self):
+        """Set the address to the last host in the network.
         """
-Set the address to the last host in the network.
-        """
-        self._address = ((self._address & self._mask) + 
+        self._address = ((self._address & self._mask) +
                              ((~self._mask & 0xffffffffL) - 1))
         return self
 
     def nextnet(self, increment=1):
-        """
-Increments the IP address into the next network range, keeping the host
-part constant. Default increment is 1, but optional increment parameter
-may be used.
+        """Increments the IP address into the next network range, keeping the host
+        part constant. Default increment is 1, but optional increment parameter
+        may be used.
 
         """
         self._address = self._address + ((~self._mask & 0xffffffffL) + 1) * increment
         return self
 
     def previousnet(self, decrement=1):
-        """
-Decrements the IP address into the next network range, keeping the host
-part constant. Default decrement is 1, but optional decrement parameter
-may be used.
-
+        """Decrements the IP address into the next network range, keeping the host
+        part constant. Default decrement is 1, but optional decrement parameter
+        may be used.
         """
         self._address = self._address - ((~self._mask & 0xffffffffL) + 1) * decrement
         return self
 
     def gethost(self):
         """gethost()
-    Resolve this IP address to a canonical name using gethostbyaddr."""
+        Resolve this IP address to a canonical name using gethostbyaddr."""
         try:
             hostname, aliases, others = socket.gethostbyaddr(str(self))
         except:
@@ -462,28 +458,28 @@ def nametoi(name):
     return dqtoi(socket.gethostbyname(name))
 
 def dqtoi(dq):
-    """dqtoi(dotted-quad-string)
-Return an integer value given an IP address as dotted-quad string. You can also
-supply the address as a a host name. """
+    """Return an integer value given an IP address as dotted-quad string.
+    You can also supply the address as a a host name.
+    """
     s = buffer(socket.inet_aton(dq))
     return (ord(s[0]) << 24) + (ord(s[1]) << 16) + (ord(s[2]) << 8) + (ord(s[3]))
 
 def itodq(addr):
-    """itodq(int_address) (integer to dotted-quad)
-Return a dotted-quad string given an integer. """
+    """Return a dotted-quad string given an integer. """
     intval = long(addr) # might get an IPv4 object
     s = "%c%c%c%c" % (((intval >> 24) & 0x000000ff), ((intval & 0x00ff0000) >> 16),
         ((intval & 0x0000ff00) >> 8), (intval & 0x000000ff))
     return socket.inet_ntoa(s)
 
 def iprange(startip, number, increment=1):
-    """
-iprange: return a list of consequtive IP address strings.
-Usage:
-    iprange(startip, number)
-Where:
-    startip is an IP address to start from.
-    number is the number of IP addresses in the returned list.
+    """Return a list of consequtive IP address strings.
+
+    Usage::
+        iprange(startip, number)
+
+    Where::
+        `startip` is an IP address to start from.
+        `number` is the number of IP addresses in the returned list.
     """
     # make a copy first
     start = IPv4(startip)
@@ -495,15 +491,16 @@ Where:
 
 
 def ipnetrange(startnet, number, increment=1):
-    """
-ipnetrange: return a list of consecutive networks, starting from initial
-network and mask, keeping the mask constant.
-Usage:
-    ipnetrange(startnet, number, [increment])
-Where:
-    startnet is an IP address where the range will start.
-    number is the number of IP networks in the range
-    optional increment will skip that number of nets.
+    """Return a list of consecutive networks, starting from initial
+    network and mask, keeping the mask constant.
+
+    Usage::
+        ipnetrange(startnet, number, [increment])
+
+    Where::
+        startnet is an IP address where the range will start.
+        number is the number of IP networks in the range
+        optional increment will skip that number of nets.
 
     """
     start = IPv4(startnet)
@@ -515,15 +512,16 @@ Where:
     return ips
 
 def netrange(startnet, number, increment=1):
-    """
-netrange: return a list of consecutive networks, starting from initial
-network and mask, keeping the mask constant.
-Usage:
-    netrange(startnet, number, [increment])
-Where:
-    startnet is an IP address where the range will start.
-    number is the number of IP networks in the range.
-    An optional increment will set the stride (count by <increment> nets).
+    """Return a list of consecutive networks, starting from initial
+    network and mask, keeping the mask constant.
+
+    Usage::
+        netrange(startnet, number, [increment])
+
+    Where::
+        startnet is an IP address where the range will start.
+        number is the number of IP networks in the range.
+        An optional increment will set the stride (count by <increment> nets).
 
     """
     ips = []
@@ -535,8 +533,7 @@ Where:
 
 
 def resolve(host, mask=None):
-    """resolve(hostname, [mask]
-Resolve a hostname to an IPv4 object. An optional mask value may me supplied."""
+    """Resolve a hostname to an IPv4 object. An optional mask value may me supplied."""
     try:
         hostname, aliases, addresses = socket.gethostbyname_ex(str(host))
     except socket.gaierror, why:
