@@ -497,6 +497,7 @@ class TestCaseImporter(object):
         _dbsession = models.get_session()
         self.config.options_override = longopts
         self.config.arguments = []
+        self.config.username = os.environ["USER"]
         try:
             if domodule:
                 for arg in args:
