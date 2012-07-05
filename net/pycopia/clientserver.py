@@ -59,6 +59,12 @@ class ThreadProcessModel(ProcessModel):
         t.start()
 
 
+class SyncronousModel(ProcessModel):
+
+    def __call__(self, func, args=None, kwargs=None):
+        return func(*args, **kwargs)
+
+
 # worker classes for servers:
 
 class BaseWorker(object):

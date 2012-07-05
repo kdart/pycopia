@@ -369,7 +369,7 @@ class ProcessPipe(Process):
 
     """
     def __init__(self, cmdline, logfile=None,  env=None, callback=None,
-            merge=1, pwent=None, async=False, devnull=None):
+            merge=1, pwent=None, async=False, devnull=None, _pgid=0):
         Process.__init__(self, cmdline, logfile, callback, async)
 
         if env:
@@ -386,6 +386,7 @@ class ProcessPipe(Process):
         self.childpid2 = None # for compatibility with pipeline
         if self.childpid == 0:
             # Child
+            os.setpgid(0, _pgid)
             os.close(0)
             os.close(1)
             os.close(2)
@@ -507,7 +508,7 @@ class ProcessPty(Process):
 
     """
     def __init__(self, cmdline, logfile=None, env=None, callback=None,
-            merge=1, pwent=None, async=False, devnull=False):
+            merge=1, pwent=None, async=False, devnull=False, _pgid=0):
         Process.__init__(self, cmdline, logfile, callback, async)
         if env:
             self.environment = env
@@ -519,6 +520,7 @@ class ProcessPty(Process):
             logging.error(err)
         else:
             if pid == 0: # child
+                os.setpgid(0, _pgid)
                 remove_poller()
                 if devnull:
                     # Redirect standard file descriptors.
@@ -636,7 +638,7 @@ class ProcessNamedPipe(Process):
 
 class CoProcessPty(ProcessPty):
     def __init__(self, method, logfile=None, env=None,
-                    callback=None, async=False, pwent=None):
+                    callback=None, async=False, pwent=None, _pgid=0):
         Process.__init__(self, "python: %s" % (method.func_name,), logfile, callback, async)
         pid, self._fd = os.forkpty()
         self.childpid = pid
@@ -818,6 +820,8 @@ is a singleton, and you should use the get_procmanager() factory function
 to get the instance.  """
 
     def __init__(self):
+        os.setpgid(0, 0)
+        self._pgid = os.getpgid(0)
         self._procs = {}
         signal(SIGCHLD, _child_handler)
 
@@ -840,7 +844,7 @@ ProcessPipe.  """
             callback = self.respawn_callback
         signal(SIGCHLD, SIG_DFL) # critical area
         proc = pklass(cmd, logfile=logfile, env=env, callback=callback,
-                    merge=merge, pwent=pwent, async=async, devnull=devnull)
+                    merge=merge, pwent=pwent, async=async, devnull=devnull, _pgid=self._pgid)
         self._procs[proc.childpid] = proc
         # XXX need a more general pipeline
         if proc.childpid2:
@@ -876,6 +880,7 @@ times the process will be respawned if the previous invocation dies.  """
         signal(SIGCHLD, SIG_DFL) # critical area
         proc = CoProcessPipe(method, logfile=logfile, env=env, callback=callback, async=async)
         if proc.childpid == 0:
+            os.setpgid(0, self._pgid)
             sys.excepthook = sys.__excepthook__
             # child is not managing any of these
             self._procs.clear()
@@ -914,6 +919,7 @@ times the process will be respawned if the previous invocation dies.  """
         signal(SIGCHLD, SIG_DFL) # critical area
         proc = SubProcess(pwent=pwent)
         if proc.childpid == 0: # in child
+            os.setpgid(0, self._pgid)
             sys.excepthook = sys.__excepthook__
             self._procs.clear()
             try:

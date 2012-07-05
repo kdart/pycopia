@@ -497,7 +497,7 @@ class Test(object):
         suite cannot continue. Raises the TestSuiteAbort exception.
         """
         self._report.abort(msg, 2)
-        raise TestSuiteAbort
+        raise TestSuiteAbort(msg)
 
     def info(self, msg, level=0):
         """Informational messages for the report.
@@ -1236,14 +1236,14 @@ class TestSuite(object):
             self.initialize(*args, **kwargs)
         except KeyboardInterrupt:
             self.info("Suite aborted by user in initialize().")
-            raise TestSuiteAbort
+            raise TestSuiteAbort("Interrupted in suite initialize.")
         except:
             ex, val, tb = sys.exc_info()
             if self._debug:
                 ex, val, tb = sys.exc_info()
                 debugger.post_mortem(tb, ex, val)
             self.info("Suite failed to initialize: %s (%s)" % (ex, val))
-            raise TestSuiteAbort, val
+            raise TestSuiteAbort(val)
 
     def check_prerequisites(self, currententry, upto):
         """Verify that the prerequisite test passed.
@@ -1274,7 +1274,7 @@ class TestSuite(object):
                 rv = entry.run()
             except KeyboardInterrupt:
                 if self._nested:
-                    raise TestSuiteAbort, "Sub-suite aborted by user."
+                    raise TestSuiteAbort("Sub-suite aborted by user.")
                 else:
                     if self.config.UI.yes_no("Test interrupted. Abort suite?"):
                         self.info("Test suite aborted by user.")
@@ -1299,8 +1299,8 @@ class TestSuite(object):
             self.finalize()
         except KeyboardInterrupt:
             if self._nested:
-                raise TestSuiteAbort, \
-                            "Suite %r aborted by user in finalize()." % (self.test_name,)
+                raise TestSuiteAbort(
+                        "Suite {!r} aborted by user in finalize().".format(self.test_name))
             else:
                 self.info("Suite aborted by user in finalize().")
         except:
@@ -1310,8 +1310,8 @@ class TestSuite(object):
                 debugger.post_mortem(tb, ex, val)
             self.info("Suite failed to finalize: %s (%s)" % (ex, val))
             if self._nested:
-                raise TestSuiteAbort, \
-                        "subordinate suite '%s' failed to finalize." % (self.test_name,)
+                raise TestSuiteAbort(
+                        "subordinate suite {!r} failed to finalize.".format(self.test_name))
         self._summarize()
         self._report_summary()
         return self.result
