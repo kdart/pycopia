@@ -38,7 +38,7 @@ class ProcessModel(object):
 
 
 class ForkingModel(ProcessModel):
-    """This is the default process model."""
+    """Fork new handlers as submethod. This is the default process model."""
     def __init__(self, pwent=None):
         from pycopia import proctools
         self._procmanager = proctools.get_procmanager()
@@ -60,8 +60,11 @@ class ThreadProcessModel(ProcessModel):
 
 
 class SyncronousModel(ProcessModel):
+    """For simple, synchronous applications requiring only one handler at a time."""
 
     def __call__(self, func, args=None, kwargs=None):
+        args = args or ()
+        kwargs = kwargs or {}
         return func(*args, **kwargs)
 
 

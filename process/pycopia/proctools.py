@@ -820,7 +820,6 @@ is a singleton, and you should use the get_procmanager() factory function
 to get the instance.  """
 
     def __init__(self):
-        os.setpgid(0, 0)
         self._pgid = os.getpgid(0)
         self._procs = {}
         signal(SIGCHLD, _child_handler)
