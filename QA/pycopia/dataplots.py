@@ -1,8 +1,6 @@
-#!/usr/bin/python2.6 -i
+#!/usr/bin/python2.7 -i
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
 #
@@ -17,7 +15,7 @@
 #    Lesser General Public License for more details.
 
 """
-Plot data
+Operate on and plot time-series data.
 
 """
 
@@ -70,10 +68,10 @@ def make_plots(dset, timemarks="0s,9d", ylim=None, columns=None,
                     ax.axvline(row[0], color="rgbymc"[int(row[1]) % 6])
 
             metadata = subset.metadata
-            title = "%s-%s-%s-%ss-%ss" % (metadata.name, 
+            title = "%s-%s-%s-%ss-%ss" % (metadata.name,
                     metadata.timestamp.strftime("%m%d%H%M%S"),
                     "-".join(labels),
-                    int(start), 
+                    int(start),
                     int(end))
             pylab.title(title, fontsize="x-small")
             font = FontProperties(size="x-small")
@@ -93,7 +91,7 @@ def make_plots(dset, timemarks="0s,9d", ylim=None, columns=None,
 
 def do_plots(filename, timemarks=None, columns=None, ylim=None, autoscale=False, eventsfile=None):
     """Make a series of graphs from the the data in file split on the time
-    marks. 
+    marks.
     """
     data = dataset.DataSet(filename=filename)
     if timemarks:
@@ -107,9 +105,9 @@ def do_plots(filename, timemarks=None, columns=None, ylim=None, autoscale=False,
         print "PNG file saved to:", name
 
 
-def Plot(filename=None, data=None, timemarks=None, 
+def Plot(filename=None, data=None, timemarks=None,
     events=None, eventfile=None,
-    ylim=None, columns=(0, 1), 
+    ylim=None, columns=(0, 1),
     autoscale=True):
     """Plot from ipython.
 
@@ -124,7 +122,7 @@ def Plot(filename=None, data=None, timemarks=None,
 
         eventfile (string): name of data file containing event marks.
 
-        events (DataSet): A pre-existing event dataset. 
+        events (DataSet): A pre-existing event dataset.
 
         ylim (tuple of (min, max): minimum and maximum Y values to plot.
 

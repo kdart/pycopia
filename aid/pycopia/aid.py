@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
 #    Copyright (C) $Date$
@@ -15,10 +15,8 @@
 #    Lesser General Public License for more details.
 
 """
-Only truly useful and general functions should go here. Also, things that
-fix Python's "warts" can go here. Many of these would be useful as new
-builtins. ;-)
-
+Collection of general purpose functions and objects that might be considered
+general enough to be new built-ins.
 """
 
 from __future__ import print_function
@@ -51,11 +49,11 @@ else: # python 2
     callable = callable
 
 
-# partial function returns callable with some parameters already setup to run. 
+# partial function returns callable with some parameters already setup to run.
 partial = functools.partial
 
-# Works like None, but is also a no-op callable and empty iterable.
 class NULLType(type):
+    """Similar to None, but is also a no-op callable and empty iterable."""
     def __new__(cls, name, bases, dct):
         return type.__new__(cls, name, bases, dct)
     def __init__(cls, name, bases, dct):
@@ -76,6 +74,7 @@ class NULLType(type):
         return self
     def next(*args):
         raise StopIteration
+
 NULL = NULLType("NULL", (type,), {})
 
 # shortcuts to save time
@@ -83,7 +82,7 @@ sow = sys.stdout.write
 sew = sys.stderr.write
 # the embedded vim interpreter replaces stdio with objects that don't have a
 # flush method!
-try: 
+try:
     soflush = sys.stdout.flush
 except AttributeError:
     soflush = NULL
@@ -93,6 +92,7 @@ except AttributeError:
     seflush = NULL
 
 class Enum(int):
+    """A named number. Behaves as an integer, but produces a name when stringified."""
     def __new__(cls, val, name=None): # name must be optional for unpickling to work
         v = int.__new__(cls, val)
         v._name = str(name)
@@ -107,6 +107,7 @@ class Enum(int):
         return "%s(%d, %r)" % (self.__class__.__name__, self, self._name)
 
 class Enums(list):
+    """A list of Enum objects."""
     def __init__(self, *init, **kwinit):
         for i, val in enumerate(init):
             if issubclass(type(val), list):
@@ -129,6 +130,7 @@ class Enums(list):
     choices = property(lambda s: map(lambda e: (int(e), str(e)), s))
 
     def find(self, value):
+        """Find the Enum with the given value."""
         if type(value) is str:
             return self.findstring(value)
         else:
@@ -136,6 +138,7 @@ class Enums(list):
             return self[i]
 
     def get_mapping(self):
+        """Returns the enumerations as a dictionary with naems as keys."""
         if self._mapping is None:
             d = dict(map(lambda it: (str(it), it), self))
             self._mapping = d
@@ -157,8 +160,8 @@ YES = Enum(1, "YES")
 DEFAULT = Enum(2, "DEFAULT")
 UNKNOWN = Enum(3, "UNKNOWN")
 
-# emulate an unsigned 32 bit and 64 bit ints with a long
 class unsigned(long):
+    """Emulate an unsigned 32 bit integer with a long."""
     floor = 0
     ceiling = 4294967295
     bits = 32
@@ -239,13 +242,14 @@ class unsigned(long):
 
 
 class unsigned64(unsigned):
+    """Emulate an unsigned 64-bit integer."""
     floor = 0
     ceiling = 18446744073709551615
     bits = 64
     _mask = 0xFFFFFFFFFFFFFFFF
 
-# a list that self-maintains a sorted order
 class sortedlist(list):
+    """A list that maintains a sorted order when appended to."""
     def insort(self, x):
         hi = len(self)
         lo = 0
@@ -310,10 +314,9 @@ def frange(limit1, limit2=None, increment=1.0):
   """
   Range function that accepts floats (and integers).
 
-  Usage:
-  frange(-2, 2, 0.1)
-  frange(10)
-  frange(10, increment=0.5)
+  >>> frange(-2, 2, 0.1)
+  >>> frange(10)
+  >>> frange(10, increment=0.5)
 
   The returned value is an iterator.  Use list(frange(...)) for a list.
   """
@@ -371,10 +374,16 @@ _findkeys = re.compile(r"%\((\w+)\)").findall
 _findfkeys = re.compile(r"[^{]{(\w+)}").findall
 del re
 
-# a string with format-style substitutions (limited to the form {name})
-# with attribute style setters, and inspection of defined substitutions
-# (attributes)
 class formatstr(str):
+    """A string with format-style substitutions (limited to the form {name})
+    with attribute style setters, and inspection of defined substitutions (attributes).
+
+    >>> fms = formatstr("This is a {value}.")
+    >>> fms.value = "somevalue"
+    >>> print (fms)
+    >>> fms.value = "othervalue"
+    >>> print (fms)
+    """
     def __new__(cls, initstr, **kwargs):
         s = str.__new__(cls, initstr)
         return s
@@ -414,8 +423,8 @@ class formatstr(str):
         return self._attribs.keys()
 
 
-# metaclasses... returns a new class with given bases and class attributes
 def newclass(name, *bases, **attribs):
+    """Returns a new class with given name, bases and class attributes."""
     class _NewType(type):
         def __new__(cls):
             return type.__new__(cls, str(name), bases, attribs)
@@ -424,8 +433,8 @@ def newclass(name, *bases, **attribs):
     return _NewType()
 
 
-# decorator for making methods enter the debugger on an exception
 def debugmethod(meth):
+    """Decorator for making methods enter the debugger on an exception."""
     def _lambda(*iargs, **ikwargs):
         try:
             return meth(*iargs, **ikwargs)
@@ -435,8 +444,8 @@ def debugmethod(meth):
             debugger.post_mortem(tb, ex, val)
     return _lambda
 
-# decorator to make system call methods safe from EINTR
 def systemcall(meth):
+    """Decorator to make system call methods safe from EINTR."""
     # have to import this way to avoid a circular import
     from _socket import error as SocketError
     def systemcallmeth(*args, **kwargs):
@@ -461,7 +470,7 @@ def systemcall(meth):
 
 def removedups(s):
     """Return a list of the elements in s, but without duplicates.
-Thanks to Tim Peters for fast method.
+    Thanks to Tim Peters for fast method.
     """
     n = len(s)
     if n == 0:
@@ -528,21 +537,29 @@ wrap for lists."""
 def reorder(datalist, indexlist):
     """reorder(datalist, indexlist)
     Returns a new list that is ordered according to the indexes in the
-    indexlist.  
+    indexlist.
     e.g.
     reorder(["a", "b", "c"], [2, 0, 1]) -> ["c", "a", "b"]
     """
     return [datalist[idx] for idx in indexlist]
 
 def enumerate(collection):
-    'Generates an indexed series:  (0,coll[0]), (1,coll[1]) ...'
+    'Generates an indexed series:  (0, collection[0]), (1, collection[1]), ...'
     i = 0
     it = iter(collection)
     while 1:
         yield (i, it.next())
         i += 1
 
+def repeat(self,n, f):
+    """Call function f, n times."""
+    i = n
+    while i > 0:
+        f()
+        i -= 1
+
 def flatten(alist):
+    """Flatten a nested set of lists into one list."""
     rv = []
     for val in alist:
         if isinstance(val, list):
@@ -552,6 +569,7 @@ def flatten(alist):
     return rv
 
 def str2hex(s):
+    """Convert string to hex-encoded string."""
     res = ["'"]
     for c in s:
         res.append("\\x%02x" % ord(c))
@@ -559,15 +577,18 @@ def str2hex(s):
     return "".join(res)
 
 def hexdigest(s):
+    """Convert string to string of hexadecimal string for each character."""
     return "".join(["%02x" % ord(c) for c in s])
 
 def unhexdigest(s):
+    """Take a string of hexadecimal numbers (as ascii) and convert to binary string."""
     l = []
     for i in xrange(0, len(s), 2):
         l.append(chr(int(s[i:i+2], 16)))
     return "".join(l)
 
 def Import(modname):
+    """Import a module with package components."""
     try:
         return sys.modules[modname]
     except KeyError:

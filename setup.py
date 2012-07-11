@@ -63,6 +63,8 @@ else:
     RSYNCCHECK = "rsync --version >/dev/null"
     SCRIPT_DIR = "/usr/local/bin"
 
+# sub-packages are listed in dependency order. A subpackage may import modules
+# from other subpackages that appear earlier in this list, but not later.
 PACKAGES = [
 "aid",
 "utils",
@@ -70,11 +72,11 @@ PACKAGES = [
 "CLI",
 "debugger",
 "process",
+"net",
 "SMI",
 "mibs",
 "SNMP",
 "storage",
-"net",
 "audio",
 "XML",
 "WWW",
@@ -87,10 +89,14 @@ PACKAGES = [
 # newer Pythons also search this location in user's directory.  We can use
 # this for storing the .pth files in develop mode. Should we also support
 # older Python?
-
 HOMESITE = os.path.join(os.path.expandvars("$HOME"), ".local", "lib",
                         "python%s" % (sys.version[:3],), "site-packages")
+
+# Where to put "squashed", or flattened target where all subpackages are
+# installed into one directory, and removing "package namespace" support.
 PYCOPIA_SQUASH = os.environ.get("PYCOPIA_SQUASH", HOMESITE)
+
+# Where top-level scripts will be installed to when install_scripts command is used.
 PYCOPIA_BIN = os.environ.get("PYCOPIA_BIN", os.path.join(os.path.expandvars("$HOME"), "bin"))
 
 

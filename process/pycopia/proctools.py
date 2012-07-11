@@ -520,7 +520,6 @@ class ProcessPty(Process):
             logging.error(err)
         else:
             if pid == 0: # child
-                os.setpgid(0, _pgid)
                 remove_poller()
                 if devnull:
                     # Redirect standard file descriptors.
