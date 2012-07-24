@@ -6,7 +6,7 @@ modules.
 """
 
 import sys, os
-from pycopia import cliutils
+from pycopia import devhelpers
 
 
 try:
@@ -40,7 +40,7 @@ def main(argv):
     if len(argv) < 2:
         print __doc__
         return
-    files = filter(None, map(cliutils.find_source_file, argv[1:]))
+    files = filter(None, map(devhelpers.find_source_file, argv[1:]))
     exec_editor(files)
 
 main(sys.argv)
