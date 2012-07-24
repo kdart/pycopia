@@ -1,8 +1,8 @@
-#!/usr/bin/python2.5
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 2010 Keith Dart <keith@dartworks.biz>
+#    Copyright (C) 2012 Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@ from __future__ import absolute_import
 
 """
 Base class for webdriver test suites. Pre-instantiates a webdriver
-instance and fetches the DUT service target.
+instance and stashes it in the config object.
 """
 
 from selenium import webdriver
@@ -32,23 +32,19 @@ CAPS = {
 }
 
 class WebdriverSuite(core.TestSuite):
-    """Webdriver test suite. 
+    """Webdriver test suite.
 
-    Add webdriver test cases to this suite. The "webdriver" object will be
-    at the root of the configuration.
+    This suite initializer creates a selenium remote control object. The target
+    is the environment's "selenium" role.  Add webdriver test cases to this
+    suite. The "webdriver" object will be at the root of the configuration.
     """
 
     def initialize(self):
         cf = self.config
         target_host = cf.environment.get_role("selenium")
-        target_url = cf.environment.DUT.get_url(cf.get("serviceprotocol"), 
-                cf.get("servicepath"))
         remote_url = "http://{ip}:4444/wd/hub".format(ip=target_host["hostname"])
-        self.info("Remote URL is: %s" % (remote_url,))
-        self.info("Target URL is: %s" % (target_url,))
-        cf.webdriver = webdriver.Remote(remote_url,
-                CAPS[cf.get("browser", "firefox")])
-        cf.webdriver.get(target_url)
+        self.info("Remote control URL is: {}".format(remote_url))
+        cf.webdriver = webdriver.Remote(remote_url, CAPS[cf.get("browser", "firefox")])
 
     def finalize(self):
         wd = self.config.webdriver

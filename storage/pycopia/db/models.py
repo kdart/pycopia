@@ -1195,10 +1195,10 @@ class TestCase(object):
                 TestResult.testcase==self))
 
     def get_data(self, session):
-        rv = []
-        for res in self.get_all_results():
-            rv.append(res.data.data)
-        return rv
+        for res in self.get_all_results(session):
+            data = res.data.data
+            if data is not None:
+                yield data
 
     @classmethod
     def get_by_name(cls, dbsession, name):

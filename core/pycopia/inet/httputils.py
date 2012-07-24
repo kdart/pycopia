@@ -603,11 +603,12 @@ class Authorization(HTTPHeader):
         return "%s: %s" % (self._name, val)
 
     def __repr__(self):
-        return "%s(username=%r, password=%r, authtype=%r)" % (
-            self.__class__.__name__, self.username, self.password, self.authtype)
+        return "%s(username=%r, password=%r, auth_scheme=%r)" % (
+            self.__class__.__name__, self.username, self.password, self.auth_scheme)
 
-    def initialize(self, username=None, password=None, authtype="basic"):
-        self.authtype = authtype
+    def initialize(self, username=None, password=None, auth_scheme="basic", token=None):
+        self.auth_scheme = auth_scheme
+        self.token = token
         self.username = username
         self.password = password
         if username and password:
@@ -615,15 +616,22 @@ class Authorization(HTTPHeader):
 
     def parse_value(self, s):
         self.value = s.lstrip()
-        authtype, b64part = tuple(s.split(None, 2))
-        self.authtype = authtype.lower()
-        self.username, self.password = tuple(base64.decodestring(b64part).split(":"))
+        auth_scheme, auth_params = tuple(s.split(None, 2))
+        self.auth_scheme = auth_scheme.lower()
+        if self.auth_scheme == "basic":
+            self.username, self.password = tuple(base64.decodestring(auth_params).split(":"))
+        elif self.auth_scheme == "digest":
+            raise NotImplementedError("TODO: digest parsing")
+        else:
+            self.token = auth_params
 
     def encode(self):
-        if self.authtype == "basic":
+        if self.auth_scheme == "basic":
             value = "Basic " + base64.encodestring("%s:%s" % (self.username, self.password))[:-1] # and chop the added newline
+        elif self.auth_scheme == "digest":
+            raise NotImplementedError("TODO: digest encoding")
         else:
-            raise ValueError("unknown authtype: %s" % (self.authtype,))
+            value = "%s %s" % (self.auth_scheme, self.token)
         return value
 
 
