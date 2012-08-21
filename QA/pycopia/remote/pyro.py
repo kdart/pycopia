@@ -14,17 +14,17 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 """
 Common support for remote control objects.
 
-Also, all Pyro interfaces go through here to encapsulate all the Pyro
-quirks.
+Also, all Pyro interfaces go through here to encapsulate all access to Pyro
+and provide factory functions common to Pycopia.
 
+It also provides for using a new configuration file, pyro4.conf, which is required.
 """
-from __future__ import absolute_import
-from __future__ import print_function
-#from __future__ import unicode_literals
-from __future__ import division
 
 import sys, os
 import select
@@ -35,6 +35,7 @@ from pycopia.QA import logging
 
 # This is the only place where Pyro4 should ever be imported.
 import Pyro4
+import Pyro4.socketutil
 from Pyro4.errors import *
 
 
@@ -102,11 +103,13 @@ class PyroAsyncAdapter(asyncio.PollerInterface):
     def exception_handler(self, ex, val, tb):
         from pycopia import debugger
         debugger.post_mortem(tb, ex, val)
-        #print("PyroAsyncAdapter error: {} ({})".format(ex, val), file=sys.stderr)
 
 
-def register_server(serverobject):
-    pyrodaemon = Pyro4.Daemon()
+def register_server(serverobject, host=None, port=0, unixsocket=None, nathost=None, natport=None):
+    """Regiseter the server with Pycopia asyncio event handler."""
+    host = host or Pyro4.config.HOST or Pyro4.socketutil.getMyIpAddress()
+    pyrodaemon = Pyro4.Daemon(host=host, port=port,
+            unixsocket=unixsocket, nathost=nathost, natport=natport)
     uri = pyrodaemon.register(serverobject)
     ns=Pyro4.locateNS()
     ns.register("{}:{}".format(serverobject.__class__.__name__, os.uname()[1]), uri)
@@ -123,7 +126,6 @@ def loop(timeout=-1, callback=asyncio.NULL):
 def get_remote(name):
     ns = Pyro4.locateNS()
     slist = ns.list(regex=name)
-    #return Pyro4.Proxy("PYRONAME://%s" % (name,))
     return Pyro4.Proxy(slist.popitem()[1])
 
 def get_proxy(uri):

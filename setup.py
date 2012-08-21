@@ -122,7 +122,7 @@ def do_eggs(name):
     return _do_commands(name, ["bdist_egg"], False)
 
 def do_rpms(name):
-    return _do_commands(name, ["bdist_rpm"], False)
+    return _do_commands(name, ["bdist_rpm", "--python", sys.executable], False)
 
 def do_msis(name):
     return _do_commands(name, ["bdist_msi"], False)
