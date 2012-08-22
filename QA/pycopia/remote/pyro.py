@@ -39,6 +39,10 @@ import Pyro4.socketutil
 from Pyro4.errors import *
 
 
+class NameNotFoundError(NamingError):
+    pass
+
+
 # Pyro config is still weird.
 def set_p4_config():
     from pycopia import basicconfig
@@ -117,19 +121,32 @@ def register_server(serverobject, host=None, port=0, unixsocket=None, nathost=No
     asyncio.poller.register(p)
     return p
 
+
+def get_remote(hostname, servicename=None):
+    """Find and return a client (proxy) give the name and optional servicename."""
+    if servicename:
+        patt = br"{}:{}.*".format(servicename, hostname)
+    else:
+        patt = br"{}.*".format(hostname)
+    ns = Pyro4.locateNS()
+    slist = ns.list(regex=patt)
+    if slist:
+        return Pyro4.Proxy(slist.popitem()[1])
+    else:
+        raise NameNotFoundError("Service name {!r} not found.".format(patt))
+
+
 def unregister_server(p):
     asyncio.poller.unregister(p)
+
 
 def loop(timeout=-1, callback=asyncio.NULL):
     asyncio.poller.loop(timeout, callback)
 
-def get_remote(name):
-    ns = Pyro4.locateNS()
-    slist = ns.list(regex=name)
-    return Pyro4.Proxy(slist.popitem()[1])
 
 def get_proxy(uri):
     return Pyro4.Proxy(uri)
+
 
 def locate_nameserver():
     return Pyro4.locateNS()

@@ -36,14 +36,12 @@ elif sys.platform == "win32":
 del sys
 
 
-class ProxyError(Exception):
+class ProxyError(pyro.PyroError):
     pass
 
 
-def get_remote(prefix):
-    ns = pyro.locate_nameserver()
-    plist = ns.list(prefix=prefix)
-    return pyro.get_proxy(plist.popitem()[1])
+def get_remote(hostname, servicename=None):
+    return pyro.get_remote(hostname, servicename)
 
 
 def remote_copy(agent, remfile, dst):
@@ -69,5 +67,5 @@ def get_controller(equipment, logfile=None):
 
 
 if __name__ == "__main__":
-    rem = get_remote("PosixAgent")
+    rem = get_remote("localhost", "PosixAgent")
 
