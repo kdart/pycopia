@@ -23,8 +23,8 @@ extra methods for constructing active controllers.
 
 
 import sys, os
-import logging
 
+from pycopia import logging
 from sqlalchemy import and_
 
 from pycopia import dictlib
@@ -197,7 +197,7 @@ class RootContainer(config.Container):
             for n in name.split(","):
                 rptparams = self.reports.get(n, None)
                 if rptparams is None:
-                    logging.warn("Reportname %r not found." % (n,))
+                    logging.warning("Reportname %r not found." % (n,))
                     continue
                 params.append(rptparams)
         else:
@@ -233,7 +233,7 @@ class RootContainer(config.Container):
                     print "Logging to:", logfilename
             except:
                 ex, val, tb = sys.exc_info()
-                logging.warn("get_logfile: Could not open log file: %s: %s" % (ex, val))
+                logging.warning("get_logfile: Could not open log file: %s: %s" % (ex, val))
                 self._cache._logfile = None
                 return None
             else:

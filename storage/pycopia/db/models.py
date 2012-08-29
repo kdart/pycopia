@@ -1,8 +1,8 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 #
-#    Copyright (C) 2009  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -14,12 +14,16 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
 """
 Defines database ORM objects.
 
 """
+import sys
 
-import logging
 import collections
 from datetime import timedelta
 from hashlib import sha1
@@ -79,7 +83,7 @@ def _get_secret():
     try:
         cf = basicconfig.get_config("auth.conf")
     except basicconfig.ConfigReadError:
-        logging.warn("User encryption key not found for auth app, using default.")
+        print("User encryption key not found for auth app, using default.", file=sys.stderr)
         SECRET_KEY = "Testkey"
     else:
         SECRET_KEY = cf.SECRET_KEY
@@ -1606,7 +1610,6 @@ def get_rowdisplay(class_):
 
 
 if __name__ == "__main__":
-    import sys
     import os
     from pycopia import autodebug
     if sys.flags.interactive:
@@ -1647,7 +1650,7 @@ if __name__ == "__main__":
     #print
     #print class_mapper(Equipment).get_property("name")
     for tr in TestSuite.get_latest_results(sess):
-        print tr
+        print (tr)
     #sess.close()
     print (TestSuite.get_suites(sess))
 

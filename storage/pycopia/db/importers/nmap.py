@@ -28,7 +28,6 @@ user/administrator will have to go and assign created interfaces to hosts.
 
 """
 
-from logging import warn
 
 import xml
 if hasattr(xml, "use_pyxml"):
@@ -36,6 +35,7 @@ if hasattr(xml, "use_pyxml"):
 import xml.sax.sax2exts
 import xml.sax.handler
 
+from pycopia.logging import warn
 from pycopia import ipv4
 from pycopia.db import models
 

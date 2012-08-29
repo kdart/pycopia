@@ -26,7 +26,7 @@ import os, sys, shutil, errno
 from pycopia import proctools
 from pycopia import UserFile
 from pycopia import passwd
-from pycopia.QA import logging
+from pycopia import logging
 from pycopia.remote import pyro
 
 

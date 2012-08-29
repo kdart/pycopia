@@ -1,10 +1,8 @@
 #!/usr/bin/python
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#        Copyright (C) 2007    Keith Dart <keith@kdart.com>
+#        Copyright (C) 2012    Keith Dart <keith@kdart.com>
 #
 #        This library is free software; you can redistribute it and/or
 #        modify it under the terms of the GNU Lesser General Public
@@ -24,8 +22,8 @@ Web server using FCGI interface of lighttpd, adapted to WSGI.
 import sys
 import os
 import getopt
-import logging
 
+from pycopia import logging
 from pycopia.OS import procfs
 from pycopia import passwd
 from pycopia import basicconfig
@@ -77,9 +75,7 @@ def get_server(config):
             app = mwobj(app, *args)
 
     if config.DEBUG:
-        logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.loglevel_debug()
 
     return FCGIServer(app,
             procmanager=pm,
@@ -156,8 +152,8 @@ def run_server(argv):
                     CONFIGFILE=cffilename,
                     PIDFILE=pidfile,
                     SOCKETPATH=socketpath,
-                    LOGFILENAME=logfilename, 
-                    DEBUG=debug, 
+                    LOGFILENAME=logfilename,
+                    DEBUG=debug,
                     SERVERNAME=servername)
     except:
         ex, val, tb = sys.exc_info()
@@ -193,7 +189,7 @@ def run_server(argv):
 # Add documentation this way since server is run in optimized mode.
 run_server._doc = """Run the Pycopia FCGI web server.
 
-    %s [-ndk?] [-l <logfile>] [-f <configfile>] [-p <pidfile>] 
+    %s [-ndk?] [-l <logfile>] [-f <configfile>] [-p <pidfile>]
                  [-s <socketpath>] [<servername>]
 
     <servername> determines the configuration, socket, log names, etc. to

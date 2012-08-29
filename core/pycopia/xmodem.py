@@ -1,6 +1,5 @@
 #!/usr/bin/python2
-# -*- coding: utf-8 -*-
-# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:fenc=utf-8
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:fenc=us-ascii
 
 # Copyright (c) 2010 Wijnand Modderman
 # modified slightly to work with Pycopia by Keith Dart.
@@ -140,13 +139,12 @@ __copyright__ = ['Copyright (c) 2010 Wijnand Modderman',
 __license__ = 'MIT'
 __version__ = '0.2.4a'
 
-import logging
 import sys
 
+from pycopia import logging
 from pycopia import scheduler
 
 # Loggerr
-log = logging.getLogger('xmodem')
 
 # Protocol bytes
 SOH = chr(0x01)
@@ -253,8 +251,7 @@ class XMODEM(object):
                     else:
                         cancel = 1
                 else:
-                    log.error('send ERROR expected NAK/CRC, got %s' % \
-                        (ord(char),))
+                    logging.error('send ERROR expected NAK/CRC, got %s' % (ord(char),))
 
             error_count += 1
             if error_count >= retry:
@@ -268,7 +265,6 @@ class XMODEM(object):
         while True:
             data = stream.read(packet_size)
             if not data:
-                log.info('sending EOS')
                 # end of stream
                 break
 
@@ -299,7 +295,7 @@ class XMODEM(object):
                         # excessive amounts of retransmissions requested,
                         # abort transfer
                         self.abort(timeout=timeout)
-                        log.warning('excessive NAKs, transfer aborted')
+                        logging.warning('excessive NAKs, transfer aborted')
                         return False
 
                     # return to loop and resend
@@ -307,7 +303,7 @@ class XMODEM(object):
 
                 # protocol error
                 self.abort(timeout=timeout)
-                log.error('protocol error')
+                logging.error('xmodem protocol error')
                 return False
 
             # keep track of sequence
@@ -409,14 +405,12 @@ class XMODEM(object):
                 if crc_mode:
                     csum = (ord(data[-2]) << 8) + ord(data[-1])
                     data = data[:-2]
-                    log.debug('CRC (%04x <> %04x)' % \
-                        (csum, self.calc_crc(data)))
+                    logging.debug('CRC (%04x <> %04x)' % (csum, self.calc_crc(data)))
                     valid = csum == self.calc_crc(data)
                 else:
                     csum = data[-1]
                     data = data[:-1]
-                    log.debug('checksum (checksum(%02x <> %02x)' % \
-                        (ord(csum), self.calc_checksum(data)))
+                    logging.debug('checksum (checksum(%02x <> %02x)' % (ord(csum), self.calc_checksum(data)))
                     valid = ord(csum) == self.calc_checksum(data)
 
                 # valid data, append chunk
@@ -463,4 +457,61 @@ class XMODEM(object):
         for char in data:
             crc = (crc << 8) ^ self.crctable[((crc >> 8) ^ ord(char)) & 0xff]
         return crc & 0xffff
+
+
+
+class StreamAdapter(object):
+
+    def __init__(self, stream):
+        self.stream = stream
+
+    def getc(self, size, timeout=10):
+        try:
+            data = scheduler.iotimeout(self.stream.read, (size,), timeout=timeout)
+        except scheduler.TimeoutError:
+            return None
+        else:
+            return data
+
+    def putc(self, data, timeout=10):
+        try:
+            size = scheduler.iotimeout(self.stream.write, (data,), timeout=timeout)
+        except scheduler.TimeoutError:
+            return None
+        else:
+            return size
+
+
+
+if __name__ == "__main__":
+    from pycopia import scheduler
+    from pycopia import tty
+
+    fname = sys.argv[1] if len(sys.argv) > 1 else "/tmp/rx.dat"
+
+
+    def getc(size, timeout=10):
+        try:
+            data = scheduler.iotimeout(sys.stdin.read, (size,), timeout=timeout)
+        except scheduler.TimeoutError:
+            return None
+        else:
+            return data
+
+    def putc(data, timeout=10):
+        try:
+            size = scheduler.iotimeout(sys.stdout.write, (data,), timeout=timeout)
+        except scheduler.TimeoutError:
+            return None
+        else:
+            return size
+
+    @tty.savetty
+    def xmodem(fname):
+        tty.setraw(sys.stdin)
+        xm = XMODEM(getc, putc)
+        with open(fname, "w") as stream:
+            xm.recv(stream)
+
+    xmodem(fname)
 

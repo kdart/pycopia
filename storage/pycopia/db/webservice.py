@@ -24,8 +24,8 @@ Usually mapped to /storage/ URL. See storage.conf for details.
 
 import sys
 import itertools
-import logging
 
+from pycopia import logging
 from pycopia.db import types
 from pycopia.db import models
 from pycopia.db import webhelpers
@@ -447,6 +447,7 @@ if __name__ == "__main__":
         #    jse = disp._encoder.encode(rowobj)
         #    print jse
         md = get_table_metadata("TestCase")
+        print(md)
         json = disp._encoder.encode(md)
         print json
         print type(json)

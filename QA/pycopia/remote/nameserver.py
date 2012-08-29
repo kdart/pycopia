@@ -24,8 +24,12 @@ from __future__ import division
 
 import sys
 
-# Must be before Pyro4 import
-from pycopia.QA import logging
+# Must be before Pyro4 import, even if not used here.
+import logging
+import logging.config
+
+logging.config.fileConfig("/etc/pycopia/logging.cfg")
+
 
 import Pyro4
 from Pyro4 import naming

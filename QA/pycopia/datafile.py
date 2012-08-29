@@ -1,7 +1,23 @@
-#!/usr/bin/python2.6
-# -*- coding: us-ascii -*-
+#!/usr/bin/python2
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+#
+#    Copyright (C) 2012 Keith Dart <keith@dartworks.biz>
+#
+#    This library is free software; you can redistribute it and/or
+#    modify it under the terms of the GNU Lesser General Public
+#    License as published by the Free Software Foundation; either
+#    version 2.1 of the License, or (at your option) any later version.
+#
+#    This library is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 """
 Manage data file names. Data files are files with data that encode
@@ -17,9 +33,9 @@ metadata values.
 
 """
 
+import sys
 import os
 import re
-import logging
 
 from pycopia import aid
 from pycopia import dictlib
@@ -109,7 +125,7 @@ def decode_filename(pathname):
                     value = valuestring
                 data[mo.group(1)] = value
             else:
-                logging.warn("name component not matched: %r" % (part,))
+                print("name component not matched: %r" % (part,), file=sys.stderr)
     return data
 
 
@@ -181,6 +197,5 @@ def _test(argv):
 
 
 if __name__ == "__main__":
-    import sys
     metadata, newmeta = _test(sys.argv)
 

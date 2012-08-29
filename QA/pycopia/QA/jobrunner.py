@@ -22,8 +22,8 @@ An interface for running test cases as unattended jobs.
 
 import sys
 import os
-import logging
 
+from pycopia import logging
 from pycopia import aid
 from pycopia import shparser
 from pycopia import getopt

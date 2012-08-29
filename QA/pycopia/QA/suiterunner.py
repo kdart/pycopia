@@ -23,11 +23,11 @@ An interface for running test cases as unattended suites.
 from __future__ import print_function
 
 import os
-import logging
 
+from pycopia import logging
 from pycopia import getopt
-from pycopia.QA import testloader
 from pycopia.db import models
+from pycopia.QA import testloader
 
 
 

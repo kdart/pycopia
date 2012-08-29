@@ -19,11 +19,11 @@ Classes and functions for controlling, reading, and writing to co-processes.
 """
 
 import sys, os
-import logging
 from signal import signal
 from signal import SIGCHLD, SIGTERM, SIGSTOP, SIGCONT, SIGHUP, SIG_DFL, SIGINT
 from errno import EINTR, EBADF, ECHILD, EAGAIN, EIO
 
+from pycopia import logging
 from pycopia import shparser
 from pycopia.OS.procfs import ProcStat
 
@@ -516,7 +516,6 @@ class ProcessPty(Process):
         try:
             pid, self._fd = os.forkpty()
         except OSError as err:
-            logging.error("ProcessPty: Cannot forkpty.")
             logging.error(err)
         else:
             if pid == 0: # child
@@ -1068,7 +1067,7 @@ times the process will be respawned if the previous invocation dies.  """
                     try:
                         proc = self._procs[pid]
                     except KeyError:
-                        logging.warn("warning: caught SIGCHLD for unmanaged process (pid: %s).\n" % pid)
+                        logging.warning("warning: caught SIGCHLD for unmanaged process (pid: %s).\n" % pid)
                         continue
                     es = ExitStatus(proc.cmdline, sts)
                     proc.set_exitstatus(es)

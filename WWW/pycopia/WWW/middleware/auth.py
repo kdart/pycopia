@@ -1,8 +1,6 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
 #
@@ -35,7 +33,7 @@ from pycopia import sysrandom as random
 
 
 HOSTNAME = os.uname()[1]
-SESSION_KEY_NAME = "PYCOPIA"
+SESSION_KEY_NAME = b"PYCOPIA"
 
 class AuthenticationError(Exception):
     pass
@@ -43,12 +41,12 @@ class AuthenticationError(Exception):
 # maps generic authservice names in the DB to actual PAM service profiles
 # provided by pycopia.
 _SERVICEMAP = {
-    None: "pycopia", # default, use PAM
-    "pam": "pycopia",
-    "system": "pycopia", # alias
-    "ldap": "pycopia_ldap", # ldap via PAM
-    "local": None, # local means use password in DB (sha1 hashed)
-    "clear": None, # clear means use password in DB (clear text)
+    None: b"pycopia", # default, use PAM
+    "pam": b"pycopia",
+    b"system": b"pycopia", # alias
+    b"ldap": b"pycopia_ldap", # ldap via PAM
+    b"local": None, # local means use password in DB (sha1 hashed)
+    b"clear": None, # clear means use password in DB (clear text)
 }
 
 
@@ -62,7 +60,7 @@ def sha1Hash(msg):
 def HMAC_SHA1(key, message):
   blocksize = 64
   ipad = b"6666666666666666666666666666666666666666666666666666666666666666"
-  opad = (b"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" + 
+  opad = (b"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\" +
       b"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
   if (len(key) > blocksize):
     key = sha1Hash(key)
@@ -173,17 +171,17 @@ class LoginHandler(framework.RequestHandler):
 
     def get(self, request):
         # This key has to fit into a 32 bit int for the javascript side.
-        key = quote(struct.pack("I", random.randint(0, 4294967295)))
+        key = quote(struct.pack(b"I", random.randint(0, 4294967295)))
         parms = {
-            "redirect": request.GET.get("redir", request.environ.get("HTTP_REFERER", "/")),
-            "key": key,
+            b"redirect": request.GET.get("redir", request.environ.get("HTTP_REFERER", "/")),
+            b"key": key,
         }
         msg = request.GET.get("message")
         if msg:
-            parms["message"] = '<p class="error">%s</p>' % (msg,)
+            parms[b"message"] = '<p class="error">%s</p>' % (msg,)
         else:
-            parms["message"] = ''
-        return framework.HttpResponse(LOGIN_PAGE % parms, "application/xhtml+xml")
+            parms[b"message"] = ''
+        return framework.HttpResponse(LOGIN_PAGE % parms, b"application/xhtml+xml")
 
     def post(self, request):
         try:
@@ -196,15 +194,15 @@ class LoginHandler(framework.RequestHandler):
 
 
 def handle_async_authentication(request):
-    name = request.POST["username"]
-    cram = request.POST["password"]
-    key = request.POST["key"]
-    redir = request.POST["redir"]
+    name = request.POST[b"username"]
+    cram = request.POST[b"password"]
+    key = request.POST[b"key"]
+    redir = request.POST[b"redir"]
     dbsession = request.dbsessionclass()
     try:
         user = dbsession.query(models.User).filter_by(username=name).one()
     except models.NoResultFound:
-        return framework.JSONResponse((401, "No such user."))
+        return framework.JSONResponse((401, b"No such user."))
     try:
         good = Authenticator(user).authenticate(cram, unquote(key))
     except AuthenticationError, err:
@@ -214,7 +212,7 @@ def handle_async_authentication(request):
         request.log_error("Authenticated by async: %s\n" % (name,))
         user.set_last_login()
         resp = framework.JSONResponse((200, redir))
-        session = _set_session(resp, user, request.get_host(), "/", 
+        session = _set_session(resp, user, request.get_host(), "/",
                     request.config.get("LOGIN_TIME", 24))
         dbsession.add(session)
         dbsession.commit()

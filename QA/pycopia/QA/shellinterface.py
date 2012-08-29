@@ -19,8 +19,8 @@
 
 import sys
 import os
-import logging
 
+from pycopia import logging
 from pycopia import getopt
 from pycopia import module
 
@@ -180,7 +180,7 @@ class TestRunnerInterface(object):
         if not args:
             args = choose_tests()
         if not args:
-            return
+            return 1
         objects, errors = module.get_objects(args)
         if errors:
             logging.error("Errors found while loading test object:")

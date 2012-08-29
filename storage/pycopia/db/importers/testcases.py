@@ -16,13 +16,13 @@ import sys
 import os
 import re
 import textwrap
-import logging
 from pytz import timezone
 from io import StringIO
 
 from datetime import datetime
 
 # Pycopia imports
+from pycopia import logging
 from pycopia import aid
 from pycopia.WWW import XHTML, rst
 from pycopia.XML import XMLPathError
@@ -520,7 +520,7 @@ class TestCaseImporter(object):
 
     def import_module(self, modname):
         if _DEBUG:
-            logging.info("Doing module: %s" % modname)
+            print("Doing module: %s" % modname)
         try:
             mod = module.get_module(modname)
             do_module(mod, self.config)

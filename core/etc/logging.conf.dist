@@ -1,0 +1,37 @@
+# -*- coding: ascii -*-
+# vim:ts=4:sw=4:softtabstop=0:smarttab:ft=python
+
+# configuration for the logging module.
+
+# Set the "facility" for the logging module. Can be one of:
+
+# AUTH       security/authorization messages (DEPRECATED Use LOG_AUTHPRIV instead)
+# AUTHPRIV   security/authorization messages (private)
+# CRON       clock daemon (cron and at)
+# DAEMON     system daemons without separate facility value
+# FTP        ftp daemon
+# KERN       kernel messages (these can't be generated from user processes)
+# LOCAL0 through LOG_LOCAL7 reserved for local use
+# LPR        line printer subsystem
+# MAIL       mail subsystem
+# NEWS       USENET news subsystem
+# SYSLOG     messages generated internally by syslogd(8)
+# USER       (default) generic user-level messages
+# UUCP       UUCP subsystem
+
+FACILITY = "USER"
+
+
+### Set the default log level. Can be one of:
+
+# EMERG      system is unusable
+# ALERT      action must be taken immediately
+# CRIT       critical conditions
+# ERR        error conditions
+# WARNING    warning conditions
+# NOTICE     normal, but significant, condition
+# INFO       informational message
+# DEBUG      debug-level message
+
+
+LEVEL = "WARNING"

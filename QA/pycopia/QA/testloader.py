@@ -5,7 +5,7 @@
 
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
-# a copy of the License at 
+# a copy of the License at
 #
 # http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -20,7 +20,7 @@
 
 The objects here are responsible for taking a desired test, or set of
 tests, looking in the database for implementations and dependencies, and
-constructing a runnable test objects. 
+constructing a runnable test objects.
 """
 
 
@@ -29,13 +29,11 @@ __author__ = 'keith@kdart.com (Keith Dart)'
 
 import sys
 import os
-import logging
 
-#from pycopia.aid import newclass
+from pycopia import logging
 from pycopia.textutils import identifier
-
-from pycopia.QA import core
 from pycopia import module
+from pycopia.QA import core
 
 
 class Error(Exception):
@@ -85,7 +83,7 @@ def get_suite(dbsuite, config):
         try:
             obj = module.get_object(impl)
         except module.ObjectImportError:
-            logging.warn("Did not find suite implementation %r." % (impl,))
+            logging.warning("Did not find suite implementation %r." % (impl,))
         else:
             if type(obj) is type and issubclass(obj, core.TestSuite):
                 return obj(config, name=name)

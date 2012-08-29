@@ -30,8 +30,13 @@ import sys, os
 import select
 
 from pycopia import asyncio
-# Must be before Pyro4 import
-from pycopia.QA import logging
+
+# Must import stock logging module before Pyro4, even if it's not used
+# here.
+import logging
+import logging.config
+
+logging.config.fileConfig("/etc/pycopia/logging.cfg")
 
 # This is the only place where Pyro4 should ever be imported.
 import Pyro4
