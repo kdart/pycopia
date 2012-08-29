@@ -20,7 +20,6 @@ Write test case template code from database entries.
 """
 
 import os
-from logging import warn
 
 
 from sqlalchemy import and_, or_

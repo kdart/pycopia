@@ -1,8 +1,8 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
+#    Copyright (C) 2012 Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -19,21 +19,22 @@ Extra database types.
 
 """
 
-__all__ = ["INTEGER", "BIGINT", "SMALLINT", "VARCHAR", "CHAR", "TEXT", 
+__all__ = ["INTEGER", "BIGINT", "SMALLINT", "VARCHAR", "CHAR", "TEXT",
     "NUMERIC", "FLOAT", "REAL", "INET", "CIDR", "UUID", "BIT", "MACADDR",
     "DOUBLE_PRECISION", "TIMESTAMP", "TIME", "DATE", "BYTEA", "BOOLEAN",
-    "INTERVAL", "ARRAY", "ENUM", 
-    "ValidationError", "Cidr", "Inet", "PickleText", "TestCaseStatus",
+    "INTERVAL", "ARRAY", "ENUM",
+    "ValidationError", "Cidr", "Inet", "PickleText", "JsonText", "TestCaseStatus",
     "TestCaseType", "PriorityType", "TestResultType", "TestObjectType",
     "ValueType", "LikelihoodType", "SeverityType", "validate_value_type"]
 
 import cPickle as pickle
+import json
 
 from pycopia.aid import Enums
 from pycopia.ipv4 import IPv4
 
 
-from sqlalchemy.dialects.postgresql import (INTEGER, BIGINT, SMALLINT, 
+from sqlalchemy.dialects.postgresql import (INTEGER, BIGINT, SMALLINT,
         VARCHAR, CHAR, TEXT, NUMERIC, FLOAT, REAL, INET,
         CIDR, UUID, BIT, MACADDR, DOUBLE_PRECISION, TIMESTAMP, TIME,
         DATE, BYTEA, BOOLEAN, INTERVAL, ARRAY, ENUM)
@@ -115,6 +116,17 @@ class PickleText(types.TypeDecorator):
             return None
         return pickle.loads(value.encode("ascii"))
 
+
+class JsonText(types.TypeDecorator):
+    """For columns that store a JSON encoded data structure in a TEXT field.
+    """
+    impl = TEXT
+
+    def process_bind_param(self, value, dialect):
+        return json.dumps(value, ensure_ascii=False).encode("utf-8")
+
+    def process_result_value(self, value, dialect):
+        return json.loads(value)
 
 # special enumeration types
 
@@ -262,7 +274,7 @@ class ValueType(types.TypeDecorator):
     """
 
     impl = INTEGER
-    enumerations = Enums("object", "string", "unicode", 
+    enumerations = Enums("object", "string", "unicode",
                     "integer", "float", "boolean")
 
     def process_bind_param(self, value, dialect):
@@ -326,10 +338,10 @@ def _validate_unicode(value):
     return unicode(value)
 
 _VALIDATOR_MAP = {
-    0: _validate_object, 
-    1: _validate_string, 
+    0: _validate_object,
+    1: _validate_string,
     2: _validate_unicode,
-    3: _validate_int, 
+    3: _validate_int,
     4: _validate_float,
     5: _validate_boolean,
 }
@@ -365,7 +377,7 @@ class SeverityType(types.TypeDecorator):
     """Severity, or impact that an item may have on something if it did not exist."""
 
     impl = INTEGER
-    enumerations = Enums("Unknown", "MajorLoss", "MinorLoss", "MinorLossHasReplacement", 
+    enumerations = Enums("Unknown", "MajorLoss", "MinorLoss", "MinorLossHasReplacement",
             "CauseDifficulty", "Annoyance", "Trivial")
 
     def process_bind_param(self, value, dialect):
