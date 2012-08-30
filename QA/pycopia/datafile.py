@@ -16,7 +16,6 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from __future__ import unicode_literals
 from __future__ import division
 
 """
@@ -181,14 +180,14 @@ def _test(argv):
     metadata["state"] = ON
     metadata["voltage"] = 2.5
     fname = metadata.get_filename("/tmp")
-    print "filename: ", fname
+    print ("filename: ", fname)
     fo = open(fname, "w")
     fo.write("some data.\n")
     fo.close()
 
     newmeta = decode_filename(fname)
-    print newmeta
-    print newmeta["voltage"]
+    print (newmeta)
+    print (newmeta["voltage"])
     with open(fname) as fo:
         fo.read()
     assert metadata.voltage == newmeta.voltage
