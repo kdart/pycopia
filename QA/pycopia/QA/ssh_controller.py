@@ -1,10 +1,8 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
+#    Copyright (C) 2012 Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -21,7 +19,7 @@ Controller that wraps an SSH session.
 
 """
 
-from pycopia import proctools
+from pycopia.OS.exitstatus import ExitStatus
 from pycopia import sshlib
 
 from pycopia.QA import controller
@@ -57,7 +55,7 @@ class ShellController(controller.Controller):
         s.readline() # eat echo line
         #ret = s.readline()
         ret = s.wait_for_prompt()
-        ret = proctools.ExitStatus(cmd, int(ret)<<8)
+        ret = ExitStatus(cmd, int(ret)<<8)
         return resp, ret
 
     def rootcommand(self, cmd, timeout=600):
@@ -169,7 +167,7 @@ class ShellController(controller.Controller):
         s.readline()
         ret = s.readline()
         s.wait_for_prompt()
-        ret = proctools.ExitStatus("<interrupted process>", int(ret)<<8)
+        ret = ExitStatus("<interrupted process>", int(ret)<<8)
         return ret
 
     def scp(self, src, dst, download=False):
@@ -189,8 +187,8 @@ def get_controller(equipment, logfile=None):
         del os.environ["TERM"]
     except KeyError:
         pass
-    ssh = sshlib.get_ssh(equipment["hostname"], equipment["user"], 
-            equipment["password"], prompt=equipment["prompt"], 
+    ssh = sshlib.get_ssh(equipment["hostname"], equipment["user"],
+            equipment["password"], prompt=equipment["prompt"],
             logfile=logfile)
     ctor = ShellController(ssh)
     ctor.host = equipment["hostname"]

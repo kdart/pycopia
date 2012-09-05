@@ -13,6 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
 """
 Classes and functions for controlling, reading, and writing to co-processes.
 
@@ -26,14 +30,10 @@ from errno import EINTR, EBADF, ECHILD, EAGAIN, EIO
 from pycopia import logging
 from pycopia import shparser
 from pycopia.OS.procfs import ProcStat
+from pycopia.OS.exitstatus import ExitStatus
 
 from pycopia.aid import NULL, Enum
 from pycopia import scheduler
-
-
-# Exec flags
-IPIPE = Enum(1, "IPIPE")
-OPIPE = Enum(2, "OPIPE")
 
 
 class ProcessError(Exception):
@@ -750,62 +750,6 @@ class ProcessPipeline(ProcessPipe):
             os.execvp(cmd[0], cmd)
 
 
-class ExitStatus(object):
-    EXITED = 1
-    STOPPED = 2
-    SIGNALED = 3
-    def __init__(self, cmdline, sts):
-        self.cmdline = cmdline
-        if os.WIFEXITED(sts):
-            self.state = 1
-            self._status = self._es = os.WEXITSTATUS(sts)
-
-        elif os.WIFSTOPPED(sts):
-            self.state = 2
-            self._status = self.stopsig = os.WSTOPSIG(sts)
-
-        elif os.WIFSIGNALED(sts):
-            self.state = 3
-            self._status = self.termsig = os.WTERMSIG(sts)
-
-    status = property(lambda self: self._status)
-
-    def exited(self):
-        return self.state == 1
-
-    def stopped(self):
-        return self.state == 2
-
-    def signalled(self):
-        return self.state == 3
-
-    def __int__(self):
-        if self.state == 1:
-            return self._status
-        else:
-            name = self.cmdline.split()[0]
-            raise ValueError("ExitStatus: %r did not exit normally." % (name,))
-
-    # exit status truth value is true if normal exit, and false otherwise.
-    def __nonzero__(self):
-        return (self.state == 1) and not self._status
-
-    def __str__(self):
-        name = self.cmdline.split()[0]
-        if self.state == 1:
-            if self._es == 0:
-                return "%s: Exited normally." % (name)
-            else:
-                return "%s: Exited abnormally with status %d." % (name, self._es)
-        elif self.state == 2:
-            return "%s is stopped." % (name)
-        elif self.state == 3:
-            return "%s exited by signal %d. " % (name, self.termsig)
-        else:
-            return "FIXME! unknown state"
-
-
-
 # this is the SIGCHLD signal handler
 def _child_handler(sig, stack):
     procmanager.waitpid(-1, os.WNOHANG)
@@ -1247,5 +1191,5 @@ split_command_line = shparser.get_command_splitter()
 
 
 if __name__ == "__main__":
-    print system("runtest testcases.unittests.process.proctools")
+    print (system("runtest testcases.unittests.process.proctools"))
 

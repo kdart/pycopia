@@ -37,6 +37,14 @@ from pycopia import basicconfig
 def warn(*args):
     print(*args, file=sys.stderr)
 
+def DEBUG(*args, **kwargs):
+    """Can use this instead of 'print' when debugging.
+    """
+    parts = []
+    for name, value in kwargs.items():
+        parts.append("{}: {!r}".format(name, value))
+    print("DEBUG", " ".join(args), ", ".join(parts), file=sys.stderr)
+
 try:
     cf = basicconfig.get_config("logging.conf")
 except basicconfig.ConfigReadError as err:

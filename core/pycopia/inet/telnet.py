@@ -1,77 +1,59 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
-"""TELNET client class.
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 
-Based on RFC 854: TELNET Protocol Specification, by J. Postel and
-J. Reynolds
+"""TELNET client module.
 
-Example:
+Forked from telnetlib and modified to better fit into Pycopia framework, such
+as having an API that works with an Expect object, and common logging.
 
->>> from astelnetlib import Telnet
->>> tn = Telnet('www.python.org', 79)   # connect to finger port
->>> tn.write('guido\r\n')
->>> print tn.read_all()
-Login       Name               TTY         Idle    When    Where
-guido    Guido van Rossum      pts/2        <Dec  2 11:10> snag.cnri.reston..
+These days telnet is mainly used for serial console server access. So this code
+adds some features for that purpose. It adds some RFC 2217 features for serial
+port control and monitoring.
 
->>>
-
-Note that read_all() won't read until eof -- it just reads some data
--- but it guarantees to read at least one byte unless EOF is hit.
-
-It is possible to pass a Telnet object to select.select() in order to
-wait until more data is available.  Note that in this case,
-read_eager() may return '' even if there was data on the socket,
-because the protocol negotiation may have eaten the data.  This is why
-EOFError is needed in some cases to distinguish between "no data" and
-"connection closed" (since the socket also appears ready for reading
-when it is closed).
-
-Bugs:
-- may hang when connection is slow in the middle of an IAC sequence
-
+This module also supports in-band file uploads by use of the ZMODEM protocol.
+This requires the software package named "lrzsz" to be installed on both ends.
 """
-
-# Forked from standard 'telnetlib' 
-# TODO: fully convert to asyncio 
 
 
 import sys
+import os
+import struct
 
+from pycopia import logging
 from pycopia import socket
-import select
+from pycopia.OS.exitstatus import ExitStatus
+
 
 __all__ = ["Telnet", "get_telnet"]
-
-# Tunable parameters
-DEBUGLEVEL = 0
 
 # Telnet protocol defaults
 TELNET_PORT = 23
 
 # Telnet protocol characters (don't change)
-IAC  = chr(255) # "Interpret As Command"
-DONT = chr(254)
-DO   = chr(253)
-WONT = chr(252)
-WILL = chr(251)
-SB   = chr(250) # sub negotiation
-GA =    chr(249) # Go ahead
-EL =    chr(248) # Erase Line
-EC =    chr(247) # Erase character
-AYT =   chr(246) # Are You There
-AO =    chr(245) # Abort output
-IP =    chr(244) # Interrupt Process
+IAC   = chr(255) # "Interpret As Command"
+DONT  = chr(254)
+DO    = chr(253)
+WONT  = chr(252)
+WILL  = chr(251)
+SB    = chr(250) # sub negotiation
+GA    = chr(249) # Go ahead
+EL    = chr(248) # Erase Line
+EC    = chr(247) # Erase character
+AYT   = chr(246) # Are You There
+AO    = chr(245) # Abort output
+IP    = chr(244) # Interrupt Process
 BREAK = chr(243) # NVT character BRK.
-DM =    chr(242) # Data Mark. 
+DM    = chr(242) # Data Mark.
                  # The data stream portion of a Synch.
-                 # This should always be accompanied by a 
-                 # TCP Urgent notification.
-NOP =   chr(241) #    No operation.
-SE  =   chr(240) #    End of subnegotiation parameters.
-IAC2 = IAC+IAC   # double IAC for escaping
+                 # This should always be accompanied by a TCP Urgent notification.
+NOP   = chr(241) # No operation.
+SE    = chr(240) # End of subnegotiation parameters.
 
+IAC2 = IAC+IAC   # double IAC for escaping
 
 # NVT special codes
 NULL = chr(0)
@@ -128,6 +110,7 @@ OLD_ENVIRON = chr(36) # Old - Environment variables
 AUTHENTICATION = chr(37) # Authenticate
 ENCRYPT = chr(38) # Encryption option
 NEW_ENVIRON = chr(39) # New - Environment variables
+
 # the following ones come from
 # http://www.iana.org/assignments/telnet-options
 # Unfortunately, that document does not assign identifiers
@@ -146,434 +129,407 @@ PRAGMA_LOGON = chr(138) # TELOPT PRAGMA LOGON
 SSPI_LOGON = chr(139) # TELOPT SSPI LOGON
 PRAGMA_HEARTBEAT = chr(140) # TELOPT PRAGMA HEARTBEAT
 EXOPL = chr(255) # Extended-Options-List
+NOOPT = chr(0)
+
+
+# COM control sub commands, RFC 2217
+SET_BAUDRATE        =  chr(1)
+SET_DATASIZE        =  chr(2)
+SET_PARITY          =  chr(3)
+SET_STOPSIZE        =  chr(4)
+SET_CONTROL         =  chr(5)
+NOTIFY_LINESTATE    =  chr(6)
+NOTIFY_MODEMSTATE   =  chr(7)
+FLOWCONTROL_SUSPEND =  chr(8)
+FLOWCONTROL_RESUME  =  chr(9)
+SET_LINESTATE_MASK  =  chr(10)
+SET_MODEMSTATE_MASK =  chr(11)
+PURGE_DATA          =  chr(12)
+
+RESP_SET_BAUDRATE        =  chr(101)
+RESP_SET_DATASIZE        =  chr(102)
+RESP_SET_PARITY          =  chr(103)
+RESP_SET_STOPSIZE        =  chr(104)
+RESP_SET_CONTROL         =  chr(105)
+RESP_NOTIFY_LINESTATE    =  chr(106)
+RESP_NOTIFY_MODEMSTATE   =  chr(107)
+RESP_FLOWCONTROL_SUSPEND =  chr(108)
+RESP_FLOWCONTROL_RESUME  =  chr(109)
+RESP_SET_LINESTATE_MASK  =  chr(110)
+RESP_SET_MODEMSTATE_MASK =  chr(111)
+RESP_PURGE_DATA          =  chr(112)
+
+
+class TelnetError(Exception):
+    pass
+
+class BadConnectionError(TelnetError):
+    pass
+
 
 class Telnet(object):
 
-    """Telnet interface class.
-
-    An instance of this class represents a connection to a telnet
-    server.  The instance is initially not connected; the open()
-    method must be used to establish a connection.  Alternatively, the
-    host name and optional port number can be passed to the
-    constructor, too.
-
-    This class has many read_*() methods.  Note that some of them
-    raise EOFError when the end of the connection is read, because
-    they can return an empty string for other reasons.  See the
-    individual doc strings.
-
-    read_all()
-        Read all data until EOF; may block.
-
-    read_some()
-        Read at least one byte or EOF; may block.
-
-    read_very_eager()
-        Read all data available already queued or on the socket,
-        without blocking.
-
-    read_eager()
-        Read either data already queued or some data available on the
-        socket, without blocking.
-
-    read_lazy()
-        Read all data in the raw queue (processing it first), without
-        doing any socket I/O.
-
-    read_very_lazy()
-        Reads all data in the cooked queue, without doing any socket
-        I/O.
-
-    """
-
-    def __init__(self, host=None, port=TELNET_PORT, nvt=None, async=0):
-        """Constructor.
-
-        When called without arguments, create an unconnected instance.
-        With a hostname argument, it connects the instance; a port
-        number is optional.
-
+    def __init__(self, host=None, port=TELNET_PORT, logfile=None):
+        """A telnet connection.
         """
-        self.debuglevel = DEBUGLEVEL
-        self.sock = None
-        self._logfile = None
-        self.rawq = ''
-        self.irawq = 0
-        self.cookedq = ''
-        self._rawq = [] # async reads fill this
-        self._buf = '' # read() buffer
-        self.eof = 0
-        self._nvt = nvt or NVT()
-        self.death_callback = None
+        self._logfile = logfile
+        self.reset()
         if host:
             self.open(host, port)
 
-    def open(self, host, port=TELNET_PORT):
-        """Connect to a host.
-
-        The optional second argument is the port number, which
-        defaults to the standard telnet port (23).
-
-        Don't try to reopen an already connected instance.
-        """
-        self.eof = 0
-        self.host = str(host)
-        self.port = int(port)
-        self.sock = socket.connect_tcp(self.host, self.port)
-        self._nvt.initialize(self)
-
     def __del__(self):
-        """Destructor -- close the connection."""
         self.close()
 
+    def __str__(self):
+        return "Telnet({!r:s}, {:d}): {} ({})".format(self.host, self.port,
+                "open" if not self.eof else "closed",
+                "binary" if self._binary else "nonbinary",
+                )
+
+    def open(self, host, port=TELNET_PORT):
+        """Open a conneciton to a host.
+        """
+        if not self.sock:
+            self.host = str(host)
+            self.port = int(port)
+            self.sock = socket.connect_tcp(self.host, self.port, socket.socket) # interruptable socket
+            self._sendall(
+                        IAC + DO + BINARY +
+                        IAC + DO + SGA +
+                        IAC + DONT + ECHO +
+                        IAC + WILL + COM_PORT_OPTION
+                        )
+            self._fill_rawq(12)
+            self._process_rawq()
+            self.eof = 0
+
     def set_logfile(self, lf):
-        """Sets the logfile."""
         self._logfile = lf
-
-    def msg(self, msg, *args):
-        """Print a debug message, when the debug level is > 0.
-
-        If extra arguments are present, they are substituted in the
-        message using the standard string formatting operator.
-
-        """
-        if self.debuglevel > 0:
-            sew = sys.stderr.write
-            sew('Telnet(%s, %d): ' % (self.host, self.port))
-            if args:
-                sew( msg % args)
-            else:
-                sew(msg)
-            sew("\n")
-
-    def set_debuglevel(self, debuglevel):
-        """Set the debug level.
-        The higher it is, the more debug output you get (in your logfile).
-        """
-        self.debuglevel = debuglevel
-
-    def close(self):
-        """Close the connection."""
-        if self._nvt:
-            self._nvt.close()
-            self._nvt = None
-        if self.sock:
-            self.sock.close()
-            self.sock = None
-        if self.death_callback:
-            self.death_callback()
-        self.eof = 1
-
-    def interrupt(self):
-        self.sock.sendall(IAC+IP)
-
-    def sync(self):
-        self.sock.sendall(IAC+DM, socket.MSG_OOB)
-
-    def send_command(self, cmd):
-        self.sock.sendall(IAC+cmd)
-
-    def send_option(self, disp, opt):
-        self.sock.sendall(IAC+disp+opt)
-
-    def get_socket(self):
-        """Return the socket object used internally."""
-        return self.sock
 
     def fileno(self):
         """Return the fileno() of the socket object used internally."""
         return self.sock.fileno()
+
+    def close(self):
+        if self.sock:
+            self.sock.close()
+            self.reset()
+        self.eof = 1
+
+    def reset(self):
+        self.sock = None
+        self.eof = 0
+        self._rawq = ''
+        self._q = ''
+        self._qi = 0
+        self._irawq = 0
+        self.iacseq = '' # Buffer for IAC sequence.
+        self.sb = 0 # flag for SB and SE sequence.
+        self.sbdataq = ''
+        self._binary = False
+        self._sga = False
+        self._do_com = False
+        self._linestate = None
+        self._modemstate = None
+        self._suspended = False
+
+    linestate = property(lambda self: self._linestate)
+    modemstate = property(lambda self: self._modemstate)
 
     def write(self, text):
         """Write a string to the socket, doubling any IAC characters.
 
         Can block if the connection is blocked.  May raise
         socket.error if the connection is closed.
-
         """
         if IAC in text:
             text = text.replace(IAC, IAC2)
-        if CR in text:
-            text = text.replace(CR, CRNULL)
-        if LF in text:
-            text = text.replace(LF, CRLF)
-        self.msg("send %r", text)
+        if self._logfile:
+            self._logfile.write("   ->: {!r}\n".format(text))
         self.sock.sendall(text)
 
-    def read(self, amt=2147483646):
-        bs = len(self._buf)
-        try:
-            while bs < amt:
-                if self._rawq:
-                    c = self._rawq.pop(0)
-                else:
-                    c = self.read_some()
-                if not c:
-                    break
-                self._buf += c
-                bs = len(self._buf)
-        except EOFError:
-            pass # let it ruturn rest of buffer
-        data = self._buf[:amt]
-        self._buf = self._buf[amt:]
-        return data
+    def read(self, amt):
+        while not self._q:
+            self._fill_rawq()
+            self._process_rawq()
+        d = self._q[self._qi:self._qi+amt]
+        self._qi += amt
+        if self._qi >= len(self._q):
+            self._q = ''
+            self._qi = 0
+        return d
 
-    def read_all(self):
-        """Read all data until EOF; block until connection closed."""
-        self.process_rawq()
-        while not self.eof:
-            self.fill_rawq()
-            self.process_rawq()
-        buf = self.cookedq
-        self.cookedq = ''
-        return buf
+    def _fill_rawq(self, n=256):
+        if self._irawq >= len(self._rawq):
+            self._rawq = ''
+            self._irawq = 0
+        buf = self.sock.recv(n)
+        if self._logfile:
+            self._logfile.write("<-{0:003d}: {1!r:s}\n".format(len(buf), buf))
+        self.eof = (not buf)
+        self._rawq += buf
 
-    def read_some(self):
-        """Read at least one byte of cooked data unless EOF is hit.
-
-        Return '' if EOF is hit.  Block if no data is immediately
-        available.
-
-        """
-        self.process_rawq()
-        while not self.cookedq and not self.eof:
-            self.fill_rawq()
-            self.process_rawq()
-        buf = self.cookedq
-        self.cookedq = ''
-        return buf
-
-    def read_very_eager(self):
-        """Read everything that's possible without blocking in I/O (eager).
-
-        Raise EOFError if connection closed and no cooked data
-        available.  Return '' if no cooked data available otherwise.
-        Don't block unless in the midst of an IAC sequence.
-
-        """
-        self.process_rawq()
-        while not self.eof and self.sock_avail():
-            self.fill_rawq()
-            self.process_rawq()
-        return self.read_very_lazy()
-
-    def read_eager(self):
-        """Read readily available data.
-
-        Raise EOFError if connection closed and no cooked data
-        available.  Return '' if no cooked data available otherwise.
-        Don't block unless in the midst of an IAC sequence.
-
-        """
-        self.process_rawq()
-        while not self.cookedq and not self.eof and self.sock_avail():
-            self.fill_rawq()
-            self.process_rawq()
-        return self.read_very_lazy()
-
-    def read_lazy(self):
-        """Process and return data that's already in the queues (lazy).
-
-        Raise EOFError if connection closed and no data available.
-        Return '' if no cooked data available otherwise.  Don't block
-        unless in the midst of an IAC sequence.
-
-        """
-        self.process_rawq()
-        return self.read_very_lazy()
-
-    def read_very_lazy(self):
-        """Return any data available in the cooked queue (very lazy).
-
-        Raise EOFError if connection closed and no data available.
-        Return '' if no cooked data available otherwise.  Don't block.
-
-        """
-        buf = self.cookedq
-        self.cookedq = ''
-        if not buf and self.eof and not self.rawq:
-            raise EOFError, 'telnet connection closed'
-        return buf
-
-    def set_nvt(self, nvt):
-        self._nvt = nvt
-
-    def set_death_callback(self, callback):
-        """Provide a callback function called after each receipt of a telnet option."""
-        self.death_callback = callback
-
-    def process_rawq(self):
-        """Transfer from raw queue to cooked queue.
-
-        Set self.eof when connection is closed.  Don't block unless in
-        the midst of an IAC sequence.
-
-        """
-        buf = ''
-        try:
-            while self.rawq:
-                c = self.rawq_getchar()
-                if c in (VT, NULL):
-                    continue
-                if c != IAC:
-                    buf = buf + c
-                    continue
-                c = self.rawq_getchar()
-                if c == IAC:
-                    buf = buf + c
-                elif c in (DO, DONT, WILL, WONT):
-                    opt = self.rawq_getchar()
-                    self._nvt.do_option(self, c, opt)
-                else:
-                    self._nvt.do_command(self, c)
-        except EOFError: # raised by self.rawq_getchar()
-            pass
-        self.cookedq = self.cookedq + buf
-
-    def rawq_getchar(self):
-        """Get next char from raw queue.
-
-        Block if no data is immediately available.  Raise EOFError
-        when connection is closed.
-
-        """
-        if not self.rawq:
-            self.fill_rawq()
+    def _rawq_getchar(self):
+        if not self._rawq:
+            self._fill_rawq()
             if self.eof:
-                raise EOFError
-        c = self.rawq[self.irawq]
-        self.irawq = self.irawq + 1
-        if self.irawq >= len(self.rawq):
-            self.rawq = ''
-            self.irawq = 0
+                raise EOFError("No data received")
+        c = self._rawq[self._irawq]
+        self._irawq += 1
+        if self._irawq >= len(self._rawq):
+            self._rawq = ''
+            self._irawq = 0
         return c
 
-    def fill_rawq(self):
-        """Fill raw queue from exactly one recv() system call.
-
-        Block if no data is immediately available.  Set self.eof when
-        connection is closed.
-
-        """
-        if self.irawq >= len(self.rawq):
-            self.rawq = ''
-            self.irawq = 0
-        # The buffer size should be fairly small so as to avoid quadratic
-        # behavior in process_rawq() above
-        buf = self.sock.recv(50)
-        if self._logfile:
-            self._logfile.write(buf)
-        self.msg("recv %s", `buf`)
-        self.eof = (not buf)
-        self.rawq = self.rawq + buf
-
-    def sock_avail(self):
-        """Test whether data is available on the socket."""
-        return select.select([self], [], [], 0) == ([self], [], [])
-
-    def interact(self):
-        self._nvt.interact(self)
-
-
-class NVT(object):
-    """Base class for TELNET terminals. Implements the basic
-NVT. May be subclassed if more elaborate terminals are required. Defines the
-available TELNET options. The instance must be callable, as it is called by
-the Telnet object for option negotiation.  """
-    OPTIONS = {
-        SGA: WILL,
-        LINEMODE: WILL,
-    }
-
-    def __init__(self, inf=None, outf=None):
-        self._inf = inf or sys.stdin
-        self._outf = outf or sys.stdout
-        self._commands = {IP: self._do_IP,
-                }
-
-    def initialize(self, tn):
-        """Called when telnet session first opened."""
-        for opt, disp in self.OPTIONS.items():
-            tn.send_option(DO, opt)
-
-    def do_option(self, tn, c, opt):
-        """Called for each option negotiation."""
-        if c in (DO, DONT):
-            resp = self.OPTIONS.get(opt, WONT)
-            tn.sock.sendall(IAC + resp + opt)
-        elif c in (WILL, WONT):
-            resp = self.OPTIONS.get(opt, DONT)
-            tn.sock.sendall(IAC + resp + opt)
-
-    def do_command(self, tn, c):
-        """Called when receiving a telnet command."""
-        meth = self._commands.get(c, self._do_default)
-        meth(tn)
-
-    def _do_default(self, tn):
-        tn.msg("unhandled command recieved.")
-
-    def _do_IP(self, tn):
-        tn.close()
-        sys.exit(1)
-
-    def close(self):
-        self._inf = None
-        self._outf = None
-
-    def interact(self, tn):
-        """Interaction function, emulates a very dumb telnet client."""
-        tnfd = tn.fileno()
-        inffd = self._inf.fileno()
-        while 1:
-            rfd, wfd, xfd = select.select([tnfd, inffd], [], [])
-            if tnfd in rfd:
-                try:
-                    text = tn.read_eager()
-                except EOFError:
-                    print '*** Connection closed by remote host ***'
-                    break
-                if text:
-                    self._outf.write(text)
-                    self._outf.flush()
-            if inffd in rfd:
-                line = self._inf.readline()
-                if not line:
-                    break
-                tn.write(line)
-
-
-def get_telnet(host, port=TELNET_PORT, nvt=None, async=0):
-    return Telnet(host, port, nvt, async)
-
-def test():
-    debuglevel = 0
-    while sys.argv[1:] and sys.argv[1] == '-d':
-        debuglevel = debuglevel+1
-        del sys.argv[1]
-    host = 'localhost'
-    if sys.argv[1:]:
-        host = sys.argv[1]
-    port = TELNET_PORT
-    if sys.argv[2:]:
-        portstr = sys.argv[2]
+    def _process_rawq(self):
+        buf = ['', ''] # data buffer and SB buffer
         try:
-            port = int(portstr)
-        except ValueError:
-            port = socket.getservbyname(portstr, 'tcp')
-    tn = Telnet()
-    tn.set_debuglevel(debuglevel)
-    tn.open(host, port)
-    tn.interact()
-    tn.close()
+            while self._rawq:
+                c = self._rawq_getchar()
+                if not self.iacseq:
+                    if c == NULL:
+                        continue
+                    if c == "\021":
+                        continue
+                    if c != IAC:
+                        buf[self.sb] += c
+                        continue
+                    else:
+                        self.iacseq += c
+                elif len(self.iacseq) == 1:
+                    if c in (DO, DONT, WILL, WONT):
+                        self.iacseq += c
+                        continue
+
+                    self.iacseq = ''
+                    if c == IAC:
+                        buf[self.sb] += c
+                    else:
+                        if c == SB: # SB ... SE start.
+                            self.sb = 1
+                            self.sbdataq = ''
+                        elif c == SE:
+                            self.sb = 0
+                            self.sbdataq += buf[1]
+                            buf[1] = ''
+                            self._suboption()
+                        else:
+                            logging.warning('Telnet: IAC {!r} not recognized'.format(c))
+                elif len(self.iacseq) == 2:
+                    cmd = self.iacseq[1]
+                    self.iacseq = ''
+                    if cmd in (DO, DONT, WILL, WONT):
+                        self._neg_option(cmd, c)
+                    else:
+                        logging.error("telnet bad command: {!r}".format(cmd))
+        except EOFError:
+            self.iacseq = '' # Reset on EOF
+            self.sb = 0
+        self._q += buf[0]
+        self.sbdataq += buf[1]
+
+    def _sendall(self, data, opt=0):
+        if self._logfile:
+            self._logfile.write("cmd->: {!r}\n".format([ord(c) for c in data]))
+        self.sock.sendall(data, opt)
+
+    def _neg_option(self, cmd, opt):
+        if cmd == DO: # 0xfd
+            if opt == BINARY: # and not self._binary:
+                self._sendall(IAC + WILL + BINARY)
+            elif opt == SGA: # and not self._sga:
+                self._sendall(IAC + WILL + SGA)
+            elif opt == COM_PORT_OPTION:
+                self._do_com = True
+            else:
+                self._sendall(IAC + WONT + opt)
+        elif cmd == WILL:
+            if opt == BINARY:
+                self._binary = True
+            elif opt == SGA:
+                self._sga = True
+            elif opt == COM_PORT_OPTION:
+                self._do_com = True
+            else:
+                self._sendall(IAC + DONT + opt)
+        elif cmd == DONT:
+            if opt in (BINARY, SGA):
+                raise BadConnectionError("Server doesn't want binary connection.")
+            else:
+                self._sendall(IAC + WONT + opt)
+        elif cmd == WONT:
+            if opt in (BINARY, SGA):
+                raise BadConnectionError("Could not negotiate binary path.")
+
+    def _suboption(self):
+        subopt = self.sbdataq
+        self.sbdataq = ''
+        if subopt[0] == COM_PORT_OPTION:
+            comopt = subopt[1]
+            if comopt == RESP_NOTIFY_LINESTATE:
+                value = subopt[2]
+                self._linestate = LineState(subopt[2])
+            elif comopt == RESP_NOTIFY_MODEMSTATE:
+                self._modemstate = ModemState(subopt[2])
+            elif comopt == RESP_FLOWCONTROL_SUSPEND:
+                self._suspended = True
+                logging.warning("Telnet: requested to suspend tx.")
+            elif comopt == RESP_FLOWCONTROL_RESUME:
+                self._suspended = False
+                logging.warning("Telnet: requested to resume tx.")
+            else:
+                logging.warning("Telnet: unhandled COM opton: {}".format(repr(subopt)))
+        else:
+            logging.warning("Telnet: unhandled subnegotion: {}".format(repr(subopt)))
+
+    def interrupt(self):
+        self._sendall(IAC + IP + IAC + DM, socket.MSG_OOB)
+
+    def sync(self):
+        self._sendall(IAC + DM, socket.MSG_OOB)
+
+    def send_command(self, cmd):
+        self._sendall(IAC+cmd)
+
+    def send_option(self, disp, opt):
+        self._sendall(IAC + disp + opt)
+
+    def set_baud(self, rate):
+        self.send_com_option(SET_BAUDRATE, struct.pack("!I", rate))
+
+    def send_com_option(self, opt, value):
+        if self._do_com:
+            self._sendall(IAC + SB + COM_PORT_OPTION + opt + value + IAC + SE)
+        else:
+            raise TelnetError("Use of COM option when not negotiated.")
+
+    def upload(self, filename):
+        """Call external ZMODEM program to upload a file.
+        Return an ExitStatus object that should indicate success or failure.
+        """
+        sockfd = self.sock.fileno()
+        pread, pwrite = os.pipe()
+        pid = os.fork()
+        if pid == 0: # child
+            os.dup2(sockfd, 0)
+            os.dup2(sockfd, 1)
+            os.dup2(pwrite, 2)
+            os.close(pread)
+            os.close(pwrite)
+            os.execlp("sz", "-b", "-q", "-y", filename)
+            os._exit(1) # not normally reached
+        # parent
+        os.close(pwrite)
+        while True:
+            wpid, es = os.waitpid(pid, 0)
+            if wpid == pid:
+                break
+        errout = os.read(pread, 4096)
+        es = ExitStatus("sz -b -q -y {}".format(filename), es)
+        es.output = errout
+        return es
+
+    # asyncio interface TODO
+    def readable(self):
+        return True
+
+    def writable(self):
+        return False
+
+    def priority(self):
+        return True
+
+    def read_handler(self):
+        self._fill_rawq()
+        self._process_rawq()
+
+    def write_handler(self):
+        pass
+
+    def pri_handler(self):
+        logging.warning("Telnet: unhandled pri event")
+
+    def hangup_handler(self):
+        logging.warning("Telnet: unhandled hangup event")
+
+    def error_handler(self):
+        logging.warning("Telnet: unhandled error")
+
+    def exception_handler(self, ex, val, tb):
+        logging.error("Telnet poller error: {} ({})".format(ex, val))
+
+
+class LineState(object):
+
+    def __init__(self, code):
+        code = ord(code)
+        self.timeouterror = code & 128
+        self.transmit_shift_register_empty = code & 64
+        self.transmit_holding_register_empty = code & 32
+        self.break_detect_error = code & 16
+        self.framing_error = code & 8
+        self.parity_error = code & 4
+        self.overrun_error = code & 2
+        self.data_ready = code & 1
+
+
+class ModemState(object):
+    def __init__(self, code):
+        code = ord(code)
+        self.carrier_detect = bool(code & 128)
+        self.ring_indicator = bool(code & 64)
+        self.dataset_ready = bool(code & 32)
+        self.clear_to_send = bool(code & 16)
+        self.delta_rx_detect = bool(code & 8)
+        self.ring_indicator = bool(code & 4)
+        self.delta_dataset_ready = bool(code & 2)
+        self.delta_clear_to_send = bool(code & 1)
+
+    def __str__(self):
+        return """ModemState:
+         carrier_detect: {}
+         ring_indicator: {}
+          dataset_ready: {}
+          clear_to_send: {}
+        delta_rx_detect: {}
+         ring_indicator: {}
+    delta_dataset_ready: {}
+    delta_clear_to_send: {}
+        """.format(
+            self.carrier_detect,
+            self.ring_indicator,
+            self.dataset_ready,
+            self.clear_to_send,
+            self.delta_rx_detect,
+            self.ring_indicator,
+            self.delta_dataset_ready,
+            self.delta_clear_to_send,
+            )
+
+
+def get_telnet(host, port=TELNET_PORT, logfile=None):
+    return Telnet(host, port, logfile)
+
 
 if __name__ == '__main__':
-    #test()
-    host = "localhost"
-    prompt = "%s>" % (host)
-    sess = Telnet()
-    sess.set_debuglevel(9)
-    sess.open(host)
-    pass
+    from pycopia import autodebug
+    from pycopia import expect
+    logging.loglevel_debug()
+    host = "venus"
+    port = 6001
+    prompt = "$ "
+    tn = Telnet(host, port)#, logfile=sys.stderr)
+    sess = expect.Expect(tn, prompt=prompt)
+    sess.write("\r")
+    sess.expect("login:")
+    sess.send("tester\r")
+    sess.expect("assword:")
+    sess.send("testme\r")
+    sess.wait_for_prompt()
+    print(sess.fileobject().upload("/etc/hosts"))
+    sess.send_slow("exit\r")
+    print("linestate:", tn.linestate)
+    print("modemstate:", tn.modemstate)
+    sess.close()
 
 

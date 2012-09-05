@@ -1,9 +1,7 @@
 #!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,11 +13,15 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
 """
 This module contains classes and functions that perform Expect-like operations
 on file objects. It is a general and object oriented approach to interacting
 with files and processes. Use this in concert with the proctools module for
-interacting with processes. 
+interacting with processes.
 
 """
 
@@ -46,8 +48,23 @@ class Expect(object):
     """Expect wraps a file-like object and provides enhanced read, write,
 readline, send, and expect methods. This is very useful when combined with
 proctool objects running interactive programs (A Process object is a
-file-like object as well)."""
-    def __init__(self, fo=None, prompt="$", timeout=90.0, logfile=None, 
+file-like object as well).
+
+The wrapped object need only implement the following methods:
+
+    Mandatory:
+        read(n)
+        write(s)
+        close()
+        fileno()
+
+    Optional:
+        restart(bool)  - Turn on or off system call restart.
+        dup()          - Duplicate the object and file descriptor (for cloning)
+        interrupt()    - Interrupt the wrapped object (usually a process object)
+
+"""
+    def __init__(self, fo=None, prompt="$", timeout=90.0, logfile=None,
                  engine=None):
         if hasattr(fo, "fileno"):
             self._fo = fo
@@ -281,7 +298,7 @@ through a filter function.  """
 
     def tcgetpgrp(self):
         return os.tcgetpgrp(self._fo.fileno())
-    
+
     def fstat(self):
         return os.fstat(self._fo.fileno())
 
@@ -290,7 +307,7 @@ through a filter function.  """
 
     def rewind(self):
         return os.lseek(self._fo.fileno(), 0, 0)
-    
+
 # Note: this interactive method is currently incompatible with the asyncio usage.
 # (it has an internal select)
     def interact(self, msg=None, escape=None, cmd_interp=None):
@@ -303,8 +320,8 @@ through a filter function.  """
         if self.cmd_interp:
             self.cmd_interp.set_session(self)
             from pycopia.CLI import CommandQuit
-        print msg or "\nEntering interactive mode."
-        print "Type ^%s to stop interacting." % (chr(ord(escape) | 0x40))
+        print (msg or "\nEntering interactive mode.")
+        print ("Type ^%s to stop interacting." % (chr(ord(escape) | 0x40)))
         # save tty state and set to raw mode
         stdin_fd = sys.stdin.fileno()
         fo_fd = self.fileno()
@@ -325,8 +342,8 @@ through a filter function.  """
                     text = self._fo.read(1)
                 except (OSError, EOFError), err:
                     tty.tcsetattr(stdin_fd, tty.TCSAFLUSH, ttystate)
-                    print '*** EOF ***'
-                    print err
+                    print ('*** EOF ***')
+                    print (err)
                     break
                 if text:
                     sys.stdout.write(text)
@@ -335,7 +352,7 @@ through a filter function.  """
                     break
             if stdin_fd in rfd:
                 char = sys.stdin.read(1)
-                if char == escape: 
+                if char == escape:
                     tty.tcsetattr(stdin_fd, tty.TCSAFLUSH, ttystate)
                     if self.cmd_interp:
                         try:
