@@ -35,11 +35,11 @@ TELNET_PORT = 23
 
 # Telnet protocol characters (don't change)
 IAC   = chr(255) # "Interpret As Command"
-DONT  = chr(254)
-DO    = chr(253)
-WONT  = chr(252)
-WILL  = chr(251)
-SB    = chr(250) # sub negotiation
+DONT  = chr(254) # 0xfe
+DO    = chr(253) # 0xfd
+WONT  = chr(252) # 0xfc
+WILL  = chr(251) # 0xfb
+SB    = chr(250) # sub negotiation 0xfa
 GA    = chr(249) # Go ahead
 EL    = chr(248) # Erase Line
 EC    = chr(247) # Erase character
@@ -335,12 +335,14 @@ class Telnet(object):
 
     def _neg_option(self, cmd, opt):
         if cmd == DO: # 0xfd
-            if opt == BINARY: # and not self._binary:
+            if opt == BINARY:
                 self._sendall(IAC + WILL + BINARY)
-            elif opt == SGA: # and not self._sga:
+            elif opt == SGA:
                 self._sendall(IAC + WILL + SGA)
             elif opt == COM_PORT_OPTION:
                 self._do_com = True
+                # Don't bother us with modem state changes
+                self._sendall(IAC+SB+COM_PORT_OPTION+SET_MODEMSTATE_MASK+"\x00"+IAC+SE)
             else:
                 self._sendall(IAC + WONT + opt)
         elif cmd == WILL:
@@ -364,6 +366,9 @@ class Telnet(object):
     def _suboption(self):
         subopt = self.sbdataq
         self.sbdataq = ''
+        if len(subopt) != 3:
+            logging.error("Bad suboption recieved: {!r}".format(subopt))
+            return
         if subopt[0] == COM_PORT_OPTION:
             comopt = subopt[1]
             if comopt == RESP_NOTIFY_LINESTATE:
