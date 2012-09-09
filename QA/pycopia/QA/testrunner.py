@@ -1,4 +1,4 @@
-#!/usr/bin/python2.5
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 
@@ -14,10 +14,11 @@ import shutil
 import warnings
 from errno import EEXIST
 
+from pycopia import logging
 from pycopia import timelib
 from pycopia.QA import core
 from pycopia.QA import constants
-from pycopia import reports 
+from pycopia import reports
 
 # for object type checking
 ModuleType = type(sys)
@@ -42,6 +43,10 @@ class TestRunner(object):
         self.config = config
         self.config.options_override = {}
         self.config.arguments = []
+        if config.flags.DEBUG:
+            logging.loglevel_debug()
+        else:
+            logging.loglevel_warning()
 
     def set_options(self, opts):
         if isinstance(opts, dict):
@@ -52,17 +57,17 @@ class TestRunner(object):
     def run_object(self, obj):
         """Run a test object (object with run() function or method).
 
-        Arguments: 
-            obj: 
+        Arguments:
+            obj:
                 A Python test object.    This object must have a `run()` function
                 or method that takes a configuration object as it's single
                 parameter. It should also have a `test_name` attribute.
 
         Messages:
             May send any of the following messages to the report object:
-                RUNNERARGUMENTS: 
+                RUNNERARGUMENTS:
                     command-line arguments given to test runner.
-                logfile: 
+                logfile:
                     name of the log file from the configuration.
                 COMMENT:
                     User supplied comment given when test object was invoked.
@@ -89,7 +94,7 @@ class TestRunner(object):
         self._set_report_url()
         cf.report.logfile(cf.logfilename)
         # run the test object!
-        return obj.run(cf) 
+        return obj.run(cf)
 
     def run_objects(self, objects):
         """Invoke the `run` method on a list of mixed runnable objects.
@@ -237,7 +242,7 @@ class TestRunner(object):
                 are passed to the `execute()` method when it is invoked.
 
         Returns:
-            The return value of the Test instance. Should be PASSED, FAILED, 
+            The return value of the Test instance. Should be PASSED, FAILED,
             INCOMPLETE, or ABORT.
         """
 
@@ -253,7 +258,7 @@ class TestRunner(object):
 
         Arguments:
             testclasses:
-                A list of classes that are subclasses of core.Test. 
+                A list of classes that are subclasses of core.Test.
 
         Returns:
             The return value of the temporary TestSuite instance.
@@ -298,7 +303,7 @@ class TestRunner(object):
         cf.username = os.environ["USER"]
         os.chdir(cf.logfiledir) # Make sure runner CWD is a writable place.
         cf.runnerstarttime = starttime = timelib.now()
-        cf.runnertimestamp = timelib.strftime("%Y%m%d%H%M%S", 
+        cf.runnertimestamp = timelib.strftime("%Y%m%d%H%M%S",
                 timelib.localtime(cf.runnerstarttime))
         try:
             rpt = cf.get_report()
@@ -309,7 +314,7 @@ class TestRunner(object):
             raise TestRunnerError("Cannot continue without report.")
         # Report file's names. save for future use.
         rpt.initialize(cf)
-        cf.reportfilenames = rpt.filenames 
+        cf.reportfilenames = rpt.filenames
         rpt.add_title("Test Results for %r." % " ".join(cf.get("argv", ["unknown"])))
         arguments = cf.get("arguments")
         # Report command line arguments, if any.

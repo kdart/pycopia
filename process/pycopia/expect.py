@@ -87,15 +87,6 @@ The wrapped object need only implement the following methods:
         self.expectindex = -1 # if a match on a list occurs, the index in the list
                               # search on the last 'expect' method call is saved here.
 
-    def __del__(self):
-        try:
-            # for Process objects, back to syscall restart mode if we are no
-            # longer wrapping it.
-            self._fo.restart(1)
-        except AttributeError:
-            pass
-        self.close()
-
     def fileobject(self):
         return self._fo
 
@@ -113,6 +104,12 @@ The wrapped object need only implement the following methods:
         if self._fo:
             fo = self._fo
             self._fo = None
+            try:
+                # for Process objects, back to syscall restart mode if we are no
+                # longer wrapping it.
+                fo.restart(1)
+            except AttributeError:
+                pass
             return fo.close()
 
     def is_open(self):

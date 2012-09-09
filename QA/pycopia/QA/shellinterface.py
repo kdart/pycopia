@@ -183,9 +183,9 @@ class TestRunnerInterface(object):
             return 1
         objects, errors = module.get_objects(args)
         if errors:
-            logging.error("Errors found while loading test object:")
+            logging.warn("Errors found while loading test object:")
             for error in errors:
-                logging.error(error)
+                logging.warn(error)
         if objects:
             cf.argv = args
             self.runner.initialize()

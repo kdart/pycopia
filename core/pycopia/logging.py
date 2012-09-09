@@ -45,6 +45,7 @@ def DEBUG(*args, **kwargs):
         parts.append("{}: {!r}".format(name, value))
     print("DEBUG", " ".join(args), ", ".join(parts), file=sys.stderr)
 
+# config file is optional here
 try:
     cf = basicconfig.get_config("logging.conf")
 except basicconfig.ConfigReadError as err:
@@ -124,6 +125,15 @@ def loglevel_critical():
 def loglevel_alert():
     loglevel(syslog.LOG_ALERT)
 
+
+# common logging patterns
+def exception_error(prefix):
+    ex, val, tb = sys.exc_info()
+    error("{}: {}: {}".format(prefix, ex, val))
+
+def exception_warning(prefix):
+    ex, val, tb = sys.exc_info()
+    warning("{}: {}: {}".format(prefix, ex, val))
 
 # compatibility functions
 

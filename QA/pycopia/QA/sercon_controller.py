@@ -50,11 +50,22 @@ class SerialConsoleController(controller.Controller):
         self._intf = expect.Expect(tn, prompt=self.PROMPT)
         self.login()
 
+    def close(self):
+        if self._intf is not None:
+            s = self._intf
+            self._intf = None
+            s.close()
+
     def login(self):
         s = self._intf
-
         s.write("\r")
-        s.expect("login:")
+        s.expect([
+                ("login:", expect.EXACT, self._login),
+                self.PROMPT,
+                ])
+
+    def _login(self, match):
+        s = self._intf
         s.send(self.user + "\r")
         s.expect("assword:")
         s.send(self.password + "\r")
@@ -92,9 +103,8 @@ class SerialConsoleController(controller.Controller):
         return rv
 
     def exit(self):
-        s = self._intf
-        s.send_slow("exit\r")
-        s.close()
+        self._intf.send_slow("exit\r")
+        self.close()
 
 
 def get_controller(equipment, logfile=None):

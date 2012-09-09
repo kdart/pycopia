@@ -177,8 +177,12 @@ class Telnet(object):
         if host:
             self.open(host, port)
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, extype, exvalue, traceback):
         self.close()
+        return False
 
     def __str__(self):
         return "Telnet({!r:s}, {:d}): {} ({})".format(self.host, self.port,
@@ -201,6 +205,7 @@ class Telnet(object):
                         )
             self._fill_rawq(12)
             self._process_rawq()
+            self._closed = 0
             self.eof = 0
 
     def set_logfile(self, lf):
@@ -219,6 +224,7 @@ class Telnet(object):
     def reset(self):
         self.sock = None
         self.eof = 0
+        self._closed = 1
         self._rawq = ''
         self._q = ''
         self._qi = 0
@@ -235,6 +241,7 @@ class Telnet(object):
 
     linestate = property(lambda self: self._linestate)
     modemstate = property(lambda self: self._modemstate)
+    closed = property(lambda self: self._closed)
 
     def write(self, text):
         """Write a string to the socket, doubling any IAC characters.

@@ -41,9 +41,6 @@ class Controller(object):
         if self._logfile is not None:
             self._logfile.write(text)
 
-    def __getattr__(self, name):
-        return getattr(self._equipment, name)
-
     def __str__(self):
         return "<%s: %r>" % (self.__class__.__name__, self._equipment)
 

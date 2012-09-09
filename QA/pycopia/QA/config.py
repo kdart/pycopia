@@ -29,6 +29,7 @@ from sqlalchemy import and_
 
 from pycopia import dictlib
 from pycopia import aid
+from pycopia import scheduler
 
 from pycopia.db import models
 from pycopia.db import config
@@ -230,10 +231,9 @@ class RootContainer(config.Container):
             try:
                 lf = logfile.ManagedLog(logfilename, self.get("logfilesize", 1000000))
                 if self.flags.VERBOSE:
-                    print "Logging to:", logfilename
+                    logging.info("Logging to: {}".format(logfilename))
             except:
-                ex, val, tb = sys.exc_info()
-                logging.warning("get_logfile: Could not open log file: %s: %s" % (ex, val))
+                logging.exception_warning("get_logfile: Could not open log file")
                 self._cache._logfile = None
                 return None
             else:
@@ -442,7 +442,11 @@ class EnvironmentRuntime(object):
             self._eqcache = {}
             while eqc:
                 name, obj = eqc.popitem()
-                obj.clear()
+                try:
+                    obj.clear()
+                except:
+                    logging.exception_error("environment clear: {!r}".format(obj))
+                scheduler.sleep(1) # some devices need time to fully clear or disconnect
 
     def __getattr__(self, name):
         try:
@@ -580,13 +584,13 @@ class EquipmentRuntime(object):
             try:
                 self._controller.close()
             except:
-                pass
+                logging.exception_warning("controller close: {!r}".format(self._controller))
             self._controller = None
         if self._init_controller is not None:
             try:
                 self._init_controller.close()
             except:
-                pass
+                logging.exception_warning("initial controller close: {!r}".format(self._init_controller))
             self._init_controller = None
 
     def get_software(self):

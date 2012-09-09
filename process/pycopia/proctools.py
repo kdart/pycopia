@@ -85,8 +85,12 @@ class Process(object):
         self._flags = int(flags)
         self._authtoken = None
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, extype, exvalue, traceback):
         self.close()
+        return False
 
     # Override in subclass -- close your file descriptors connected to
     # subprocess.
