@@ -428,7 +428,12 @@ class Telnet(object):
             os.dup2(pwrite, 2)
             os.close(pread)
             os.close(pwrite)
-            os.execlp("sz", "-b", "-q", "-y", filename)
+            for fd in xrange(3,64):
+                try:
+                    os.close(fd)
+                except:
+                    pass
+            os.execlp("sz", "sz", "-b", "-q", "-y", filename)
             os._exit(1) # not normally reached
         # parent
         os.close(pwrite)
