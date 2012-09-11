@@ -395,10 +395,12 @@ class Telnet(object):
             logging.warning("Telnet: unhandled subnegotion: {}".format(repr(subopt)))
 
     def interrupt(self):
-        self._sendall(IAC + IP + IAC + DM, socket.MSG_OOB)
+        self._sendall(IAC + IP)
+        self.sync()
 
     def sync(self):
         self._sendall(IAC + DM, socket.MSG_OOB)
+        self._process_rawq()
 
     def send_command(self, cmd):
         self._sendall(IAC+cmd)
@@ -433,7 +435,8 @@ class Telnet(object):
                     os.close(fd)
                 except:
                     pass
-            os.execlp("sz", "sz", "-b", "-q", "-y", filename)
+            os.write(0, "rz -e\r") # needed with -e flag on sz
+            os.execlp("sz", "sz", "-e", "-q", "-y", "-L", "128", filename)
             os._exit(1) # not normally reached
         # parent
         os.close(pwrite)
@@ -442,7 +445,7 @@ class Telnet(object):
             if wpid == pid:
                 break
         errout = os.read(pread, 4096)
-        es = ExitStatus("sz -b -q -y {}".format(filename), es)
+        es = ExitStatus("sz {}".format(filename), es)
         es.output = errout
         return es
 

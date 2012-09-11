@@ -32,6 +32,9 @@ from pycopia import expect
 from pycopia.OS.exitstatus import ExitStatus
 from pycopia.QA import controller
 
+class UploadError(controller.ControllerError):
+    pass
+
 
 class SerialConsoleController(controller.Controller):
     """Interface to a serial console server using the telnet protocol."""
@@ -73,32 +76,33 @@ class SerialConsoleController(controller.Controller):
         s.send_slow("export PS1=%r ; unset PROMPT_COMMAND\r" % (self.PROMPT,))
         s.read_until(self.PROMPT)
         s.read_until(self.PROMPT) # twice due to prompt being in echoed command line
-        s.write("export TERM=vt100 ; HISTSIZE=0\r")
+        s.send_slow("export TERM=vt100 ; HISTSIZE=0\r")
         s.wait_for_prompt()
-        s.write("stty cols 132\r")
+        s.send_slow("stty cols 132 pass8 raw\r")
         s.wait_for_prompt()
-        s.write("unalias -a\r")
+        s.send("unalias -a\r")
         s.wait_for_prompt()
 
     def command(self, cmd, timeout=600):
         "write a shell command and return the output and the exit status."
         s = self._intf
+        s.send_slow(str(cmd))
         s.write("\r")
-        s.wait_for_prompt()
-        s.write(str(cmd))
-        s.write("\r")
+        s.readline() # discard echoed command
         resp = s.read_until(self.PROMPT)
         s.write("echo $?\r")
         s.read_until("\n") # consume echo command that was echoed
         ret = s.wait_for_prompt()
         ret = ExitStatus(cmd, int(ret)<<8)
-        return resp, ret
+        return ret, resp
 
     def upload(self, filename):
         s = self._intf
         s.write("\r")
         s.wait_for_prompt()
         rv = s.fileobject().upload(filename)
+        if not rv:
+            raise UploadError("Could not upload: {}: {}".format(filename, rv))
         s.wait_for_prompt()
         return rv
 
