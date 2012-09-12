@@ -446,14 +446,14 @@ class EnvironmentRuntime(object):
                     obj.clear()
                 except:
                     logging.exception_error("environment clear: {!r}".format(obj))
-            gc.collect()
-            for obj in gc.garbage:
-                try:
-                    obj.close()
-                except:
-                    logging.exception_warning("environment garbage collect: {!r}".format(obj))
-            del gc.garbage[:]
-            scheduler.sleep(1) # some devices need time to fully clear or disconnect
+        gc.collect()
+        for obj in gc.garbage:
+            try:
+                obj.close()
+            except:
+                logging.exception_warning("environment garbage collect: {!r}".format(obj))
+        del gc.garbage[:]
+        scheduler.sleep(2) # some devices need time to fully clear or disconnect
 
     def __getattr__(self, name):
         try:
