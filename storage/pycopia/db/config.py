@@ -1,7 +1,7 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-#    Copyright (C) 2009  Keith Dart <keith@kdart.com>
+#
+#    Copyright (C) 2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@ Pycopia Configuration and Information storage
 ---------------------------------------------
 
 Wrap the Config table in the database and make it look like a tree of
-name-value pairs (mappings). 
+name-value pairs (mappings).
 
 """
 
@@ -85,7 +85,7 @@ class Container(object):
         except NoResultFound:
             raise KeyError(name)
         if item.value is NULL:
-            return Container(self.session, item, 
+            return Container(self.session, item,
                     user=self._user, testcase=self._testcase, testsuite=self._testsuite)
         return item.value
 
@@ -114,9 +114,9 @@ class Container(object):
 
     def iterkeys(self):
         for name, in self.session.query(Config.name).filter(and_(
-            Config.parent_id==self.node.id, 
-            Config.user==self.node.user, 
-            Config.testcase==self.node.testcase, 
+            Config.parent_id==self.node.id,
+            Config.user==self.node.user,
+            Config.testcase==self.node.testcase,
             Config.testsuite==self.node.testsuite)):
             yield name
 
@@ -125,9 +125,9 @@ class Container(object):
 
     def iteritems(self):
         for name, value in self.session.query(Config.name, Config.value).filter(and_(
-            Config.parent_id==self.node.id, 
-            Config.user==self.node.user, 
-            Config.testcase==self.node.testcase, 
+            Config.parent_id==self.node.id,
+            Config.user==self.node.user,
+            Config.testcase==self.node.testcase,
             Config.testsuite==self.node.testsuite)):
             yield name, value
 
@@ -136,9 +136,9 @@ class Container(object):
 
     def itervalues(self):
         for value, in self.session.query(Config.value).filter(and_(
-            Config.parent_id==self.node.id, 
-            Config.user==self.node.user, 
-            Config.testcase==self.node.testcase, 
+            Config.parent_id==self.node.id,
+            Config.user==self.node.user,
+            Config.testcase==self.node.testcase,
             Config.testsuite==self.node.testsuite)):
             yield value
 
@@ -164,7 +164,7 @@ class Container(object):
             else:
                 return self._user
         else: #inherit
-            return self.node.user 
+            return self.node.user
 
     def _get_item_filter(self, name):
         user = self._get_user()
@@ -176,9 +176,9 @@ class Container(object):
     def add_container(self, name):
         me = self.node
         if me.value is NULL:
-            new = models.create(Config, name=name, value=NULL, container=me, 
+            new = models.create(Config, name=name, value=NULL, container=me,
                     user=self._get_user(),
-                    testcase=self._testcase or me.testcase, 
+                    testcase=self._testcase or me.testcase,
                     testsuite=self._testsuite or me.testsuite)
             try:
                 self.session.add(new)
@@ -205,9 +205,9 @@ class Container(object):
     def __iter__(self):
         me = self.node
         self.__dict__["_set"] = iter(self.session.query(Config).filter(and_(
-            Config.parent_id==me.id, 
-            Config.user==me.user, 
-            Config.testcase==me.testcase, 
+            Config.parent_id==me.id,
+            Config.user==me.user,
+            Config.testcase==me.testcase,
             Config.testsuite==me.testsuite)))
         return self
 

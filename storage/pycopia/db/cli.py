@@ -537,7 +537,15 @@ class TableCommands(CLI.BaseCommands):
                 return q.get(rowid)
         q = self._get_query(argv)
         try:
-            return q.one()
+            ret = list(q)
+            l = len(ret)
+            if l == 0:
+                return None
+            elif l == 1:
+                return ret[0]
+            else:
+                ret.insert(0, None)
+                return self._ui.choose(ret, 0, "Which one? ")
         except:
             _session.rollback()
             raise
