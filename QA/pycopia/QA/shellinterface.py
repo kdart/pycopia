@@ -180,7 +180,7 @@ class TestRunnerInterface(object):
         if not args:
             args = choose_tests()
         if not args:
-            return 1
+            return 2
         objects, errors = module.get_objects(args)
         if errors:
             logging.warn("Errors found while loading test object:")
@@ -189,7 +189,10 @@ class TestRunnerInterface(object):
         if objects:
             cf.argv = args
             self.runner.initialize()
-            self.runner.run_objects(objects)
+            rv = self.runner.run_objects(objects)
             self.runner.finalize()
+            return not rv # inverted to to shell semantics (zero is good) being different from result code
+        else:
+            return int(bool(errors)) + 2
 
 

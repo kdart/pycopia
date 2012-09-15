@@ -18,16 +18,17 @@ def runtest(argv):
     tr = testrunner.TestRunner(cfg)
     tri = shellinterface.TestRunnerInterface(tr)
     try:
-        tri(argv)
+        return tri(argv)
     except testrunner.TestRunnerError:
         ex, val, tb = sys.exc_info()
         if cfg.flags.DEBUG:
             from pycopia import debugger
             debugger.post_mortem(tb, ex, val)
+            return 2
         else:
             import traceback
             traceback.print_exception(ex, val, tb)
+            return 2
 
-
-runtest(sys.argv)
+sys.exit(runtest(sys.argv))
 

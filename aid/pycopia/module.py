@@ -5,7 +5,7 @@
 
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
-# a copy of the License at 
+# a copy of the License at
 #
 # http://www.apache.org/licenses/LICENSE-2.0
 #
@@ -124,15 +124,17 @@ def get_objects(namelist):
             A list of object names, as strings.
 
     Returns:
-        A list of object instances corresponding to the given names. May be
-        shorter than the provided list due to objects not being found.
+        A tuple of two lists. First list contains object instances
+        corresponding to the given names. May be shorter than the provided
+        list due to objects not being found.  Second list is list of
+        errors for names that could not be produced.
     """
     rv = []
     errors = []
     for name in namelist:
         try:
             obj = get_object(name)
-        except ModuleImportError as err:
+        except (ModuleImportError, ObjectImportError) as err:
             errors.append(err)
         else:
             rv.append(obj)

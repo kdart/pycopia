@@ -108,22 +108,24 @@ class TestRunner(object):
         May raise TestRunnerError if an object is not runnable by this test
         runner.
         """
+        rv = 0
         testcases = []
         for obj in objects:
             objecttype = type(obj)
             if objecttype is ModuleType and hasattr(obj, "run"):
-                self.run_module(obj)
+                rv = self.run_module(obj)
             elif objecttype is TypeType and issubclass(obj, core.Test):
                 testcases.append(obj)
             elif isinstance(obj, core.TestSuite):
-                self.run_object(obj)
+                rv = self.run_object(obj)
             elif objecttype is type and hasattr(obj, "run"):
                 # a bare class uses as a subcontainer of test or suite constructor.
-                self.run_class(obj)
+                rv = self.run_class(obj)
             else:
                 warnings.warn("%r is not a runnable object." % (obj,))
         if testcases:
-            self.run_tests(testcases)
+            rv = self.run_tests(testcases)
+        return rv
 
     def run_class(self, cls):
         """Run a container class inside a module.
@@ -161,6 +163,7 @@ class TestRunner(object):
             rpt.failed("Container exception: %s (%s)" % (ex, val))
         else:
             rpt.add_message("MODULEENDTIME", timelib.now())
+        return rv
 
     def run_module(self, mod):
         """Run a test module.
@@ -202,14 +205,15 @@ class TestRunner(object):
             if rv is None:
                 # If module run() function returns None we take that to mean that
                 # it runs a TestSuite itself. Report nothing.
-                pass
-            # But if the module returns something else we take that to mean that
+                return 0
+            elif type(rv) is core.TestResult:
+                return bool(rv)
+            # If the module returns something else we take that to mean that
             # it is reporting some true/false value to report as pass/fail.
             elif rv:
                 return cf.report.passed("Return evaluates True.")
             else:
                 return cf.report.failed("Return evaluates False.")
-            return rv
 
     def run_suite(self, suite):
         """Run a TestSuite object.
