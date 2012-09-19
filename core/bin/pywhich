@@ -1,23 +1,58 @@
 #!/usr/bin/python2.7
 
-"""pywhich <modname>
-Tell which Python module is imported.
-"""
+# Tell you which object is obtained by an import. This can also be used in
+# shell scripts to determine if a particular package is installed or not. Will
+# return errorlevel of 2 if object is not found.
+
+
+from __future__ import print_function
+
 
 import sys
+import imp
 
-def main(argv):
+
+_DESC = {
+    imp.PY_SOURCE: "python source file",
+    imp.PY_COMPILED: "compiled code object file",
+    imp.C_EXTENSION: "dynamically loadable shared library",
+    imp.PKG_DIRECTORY: "base package",
+    imp.C_BUILTIN: "built-in module",
+    imp.PY_FROZEN: "frozen module",
+}
+
+def pywhich(argv):
+    """pywhich <modname>
+    Tell you which actual file is being used by an import. The module name should be a full module path (e.g. pycopia.OS.rtc
+    """
     if len(argv) < 2:
-        print __doc__
+        print (pywhich.__doc__)
         return
     for modname in argv[1:]:
         try:
-            mod = __import__(modname)
-        except:
-            ex, val, tb = sys.exc_info()
-            print "%s (%s)" % (ex, val)
-            print "Could not import %r." % modname
+            fo, path, (suffix, mode, mtype) = imp.find_module(modname) # finds builtins
+        except ImportError: # the simpler find_module throws this on namespace packages and subpackages.
+            try:
+                __import__(modname)
+                pkg = sys.modules[modname]
+                if hasattr(pkg, "__path__"): # complex package
+                    print("{} => {} (package).".format(modname, pkg.__path__[0]))
+                else:
+                    print("{} => {}".format(modname, pkg.__file__))
+            except:
+                ex, val, tb = sys.exc_info()
+                print("{} => {}: {}!".format(modname, ex.__name__, val))
+                return 2
         else:
-            print "%15s : %s" % (modname, mod.__file__)
+            if fo is None:
+                print("{} => {} ({}).".format(modname, path, _DESC[mtype]))
+            else:
+                fo.close()
+                __import__(modname)
+                pkg = sys.modules[modname]
+                if hasattr(pkg, "__path__"):
+                    print("{} => {} (package).".format(modname, pkg.__file__))
+                else:
+                    print("{} => {} ({}).".format(modname, pkg.__file__, _DESC[mtype]))
 
-main(sys.argv)
+sys.exit(pywhich(sys.argv))

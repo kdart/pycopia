@@ -1,7 +1,7 @@
-#!/usr/bin/python2
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 #
-#    Copyright (C) 1999-2007  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,19 +15,21 @@
 
 from __future__ import print_function
 
-"""
+DOC = """
 Master builder (custom script).
 This top-level setup script helps with dealing with all sub-packages at
-once. It also provides an installer for a nicer developer mode.
+once. It also provides an installer for a simplify setting up developer mode.
 
 Invoke it like a standard setup.py script. However, Any names after the
 operation name are taken as sub-package names that are operated on. If no
 names are given then all packages are operated on.
 
 Commands:
- list             -- List available subpackages. These are the names you may optionally supply.
+ list             -- List available subpackages. These are the names you may
+                     optionally supply.
  publish          -- Put source distribution on pypi.
- build            -- Run setuptools build phase on named sub-packages (or all of them).
+ build            -- Run setuptools build phase on named sub-packages
+                     (or all of them).
  install          -- Run setuptools install phase.
  install_scripts  -- Only install scripts (files in bin) with a direct copy.
  eggs             -- Build distributable egg package.
@@ -35,21 +37,30 @@ Commands:
  msis             -- Build Microsoft .msi on Windows.
  wininst          -- Build .exe installer on Windows.
  develop          -- Developer mode, as defined by setuptools.
- develophome      -- Developer mode, installing .pth and script files in user directory.
+ develophome      -- Developer mode, installing .pth and script files in
+                     user directory.
  clean            -- Run setuptools clean phase.
  squash           -- Squash (flatten) all named sub-packages into single tree
-                     in $PYCOPIA_SQUASH, or user site-directory if no $PYCOPIA_SQUASH defined.
-                     This also removes the setuptools runtime dependency.
+                     in $PYCOPIA_SQUASH, or user site-directory if no
+                     $PYCOPIA_SQUASH defined.  This also removes the setuptools
+                     runtime dependency.
 
 Most regular setuptools commands also work. They are passed through by
 default.
 
-NOTE: The install operation requires that the sudo command be configured for you.
+NOTE: The install operation requires that the sudo command be configured for
+      you.
 
 """
 
 import sys
 import os
+import site
+
+try:
+    import setuptools
+except ImportError:
+    print("Pycopia requires the package named 'setuptools' to be installed.", file=sys.stderr)
 
 try:
     WEXITSTATUS = os.WEXITSTATUS
@@ -86,15 +97,10 @@ PACKAGES = [
 "fepy",
 ]
 
-# newer Pythons also search this location in user's directory.  We can use
-# this for storing the .pth files in develop mode. Should we also support
-# older Python?
-HOMESITE = os.path.join(os.path.expandvars("$HOME"), ".local", "lib",
-                        "python%s" % (sys.version[:3],), "site-packages")
 
 # Where to put "squashed", or flattened target where all subpackages are
 # installed into one directory, and removing "package namespace" support.
-PYCOPIA_SQUASH = os.environ.get("PYCOPIA_SQUASH", HOMESITE)
+PYCOPIA_SQUASH = os.environ.get("PYCOPIA_SQUASH", site.USER_SITE)
 
 # Where top-level scripts will be installed to when install_scripts command is used.
 PYCOPIA_BIN = os.environ.get("PYCOPIA_BIN", os.path.join(os.path.expandvars("$HOME"), "bin"))
@@ -157,9 +163,9 @@ def do_install_scripts(name):
     return _do_scripts(name, PYCOPIA_BIN)
 
 def do_develophome(name):
-    if not os.path.isdir(HOMESITE):
-        os.makedirs(HOMESITE)
-    rv = _do_commands(name, ["develop", "--install-dir", HOMESITE, "--script-dir", PYCOPIA_BIN, "-l -N"], False)
+    if not os.path.isdir(site.USER_SITE):
+        os.makedirs(site.USER_SITE)
+    rv = _do_commands(name, ["develop", "--install-dir", site.USER_SITE, "--script-dir", PYCOPIA_BIN, "-l -N"], False)
     rvs = _do_scripts(name, PYCOPIA_BIN)
     return rv and rvs
 
@@ -235,7 +241,7 @@ def main(argv):
     try:
         cmd = argv[1]
     except IndexError:
-        print(__doc__)
+        print(DOC)
         return 1
     mainrev = get_svn_revision()
     os.environ["PYCOPIA_REVISION"] = str(mainrev)

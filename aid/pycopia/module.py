@@ -1,5 +1,5 @@
-#!/usr/bin/python2.4
-# vim:ts=2:sw=2:softtabstop=0:tw=74:smarttab:expandtab
+#!/usr/bin/python2.7
+# vim:ts=4:sw=4:softtabstop=0:tw=74:smarttab:expandtab
 #
 # Copyright The Android Open Source Project
 
@@ -17,10 +17,14 @@
 
 # Modified by Keith Dart to conform to Pycopia style.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
 """Common utility methods and objects for Droid.
 """
 
-__author__ = 'keith@kdart.com (Keith Dart)'
+__author__ = 'keith@dartworks.biz (Keith Dart)'
 __original__author__ = 'dart@google.com (Keith Dart)'
 
 import sys
@@ -34,17 +38,13 @@ class ObjectImportError(ImportError):
 
 
 def Import(modname):
-    """Improved import function that handles subpackage."""
+    """Improved __import__ function that returns fully initialized subpackages."""
     try:
         return sys.modules[modname]
     except KeyError:
         pass
-    mod = __import__(modname)
-    pathparts = modname.split(".")
-    for part in pathparts[1:]:
-        mod = getattr(mod, part)
-    sys.modules[modname] = mod
-    return mod
+    __import__(modname)
+    return sys.modules[modname]
 
 
 def get_module(name):
@@ -63,14 +63,11 @@ def get_module(name):
     except KeyError:
         pass
     try:
-        mod = __import__(name)
+        __import__(name)
     except ImportError as err:
         raise ModuleImportError("Error loading: %s (%s)." % (name, err))
     else:
-        components = name.split('.')
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        return mod
+        return sys.modules[name]
 
 
 def get_object(name):
@@ -91,14 +88,14 @@ def get_object(name):
     i = name.rfind(".")
     if i >= 0:
         try:
-            mod = __import__(name, globals(), locals(), ["*"])
+            __import__(name)
         except ImportError:
             pass
         else:
-            return mod # path is a package module
+            return sys.modules[name]
         mod = get_module(name[:i]) # module name component
         try:
-            return getattr(mod, name[i+1:]) # path is an object inside module
+            return getattr(mod, name[i+1:]) # path tail is an object inside module
         except AttributeError:
             raise ObjectImportError("%r not found in %r." % (name[i+1:], mod.__name__))
     else:
@@ -139,4 +136,5 @@ def get_objects(namelist):
         else:
             rv.append(obj)
     return rv, errors
+
 
