@@ -22,6 +22,7 @@ CLI interface to Pycopia database storage.
 
 import sys
 import os
+import json
 from decimal import Decimal
 
 from pycopia import CLI
@@ -1070,6 +1071,16 @@ def update_row(modelclass, dbrow, data):
                 except: # allows use of unquoted strings.
                     pass
                 setattr(dbrow, metadata.colname, value)
+
+        elif metadata.coltype == "JsonText":
+            if value is None:
+                if metadata.nullable:
+                    setattr(dbrow, metadata.colname, value)
+                else:
+                    setattr(dbrow, metadata.colname, "")
+            else:
+                value = json.loads(value)
+                setattr(dbrow, metadata.colname, value)
         else:
             setattr(dbrow, metadata.colname, value)
     return dbrow
@@ -1134,7 +1145,14 @@ def new_pickleinput(ui, modelclass, metadata):
         default = ""
     else:
         default = repr(metadata.default)
-    return ui.get_value("Object for %r: " % (metadata.colname,), metadata.default)
+    return ui.get_value("Object for %r: " % (metadata.colname,), default)
+
+def new_jsontext(ui, modelclass, metadata):
+    if metadata.default is None:
+        default = ""
+    else:
+        default = json.dumps(jsonmetadata.default)
+    return ui.get_value("JSON for %r: " % (metadata.colname,), default)
 
 def new_uuid(ui, modelclass, metadata):
     return ui.user_input("UUID for %r: " % (metadata.colname,))
@@ -1188,6 +1206,7 @@ _CREATORS = {
     "TIME": new_time,
     "UUID": new_uuid,
     "PickleText": new_pickleinput,
+    "JsonText": new_jsontext,
     "ValueType": new_valuetypeinput,
     "RelationshipProperty": new_relation_input,
     "TestCaseStatus": new_enumtype,
@@ -1214,6 +1233,7 @@ _FORMATS = { # some may be None values
     "TIME": ("{:%H:%M:%S}", 8),
     "UUID": ("{:<20.20}", 20),
     "PickleText": ("{!r:25.25}", 25),
+    "JsonText": ("{!r:25.25}", 25),
     "RelationshipProperty": ("{!s:15.15}", 15),
 }
 
@@ -1345,6 +1365,13 @@ def edit_pickleinput(ui, modelclass, metadata, dbrow):
         pass
     setattr(dbrow, metadata.colname, value)
 
+def edit_jsontext(ui, modelclass, metadata, dbrow):
+    current = getattr(dbrow, metadata.colname)
+    value = ui.get_value(metadata.colname + ":\n", default=json.dumps(current))
+    value = json.loads(value)
+    setattr(dbrow, metadata.colname, value)
+
+
 
 _EDITORS = {
     "ARRAY": None,
@@ -1368,6 +1395,7 @@ _EDITORS = {
     "TIME": edit_field,
     "UUID": edit_text,
     "PickleText": edit_pickleinput,
+    "JsonText": edit_jsontext,
     "ValueType": edit_valuetype,
     "RelationshipProperty": edit_relation_input,
     "TestCaseStatus": edit_enumtype,

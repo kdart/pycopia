@@ -1057,7 +1057,7 @@ class Environment(object):
         try:
             role = session.query(SoftwareCategory).filter(SoftwareCategory.name == rolename).one()
         except NoResultFound:
-            raise ModelError("No such role defined in environment: %s" % (rolename,))
+            raise ModelError("No such role defined in environment: {0}".format(rolename))
         qq = session.query(TE).filter(and_(
                 TE.environment==self,
                 TE.UUT==False,  # UUT does not take on other roles.
@@ -1293,18 +1293,6 @@ mapper(TestJob, tables.test_jobs,
 )
 
 
-class TestResultData(object):
-    ROW_DISPLAY = ("note",)
-
-    def __str__(self):
-        return "TestResultData: note: %r" % (self.note,)
-
-    def __repr__(self):
-        return "TestResultData(%r, %r)" % (self.data, self.note)
-
-mapper(TestResultData, tables.test_results_data)
-
-
 class TestResult(object):
     ROW_DISPLAY = ("testsuite", "testcase", "testimplementation", "tester", "result", "starttime")
     def __init__(self, **kwargs):
@@ -1352,7 +1340,6 @@ class TestResult(object):
 mapper(TestResult, tables.test_results,
     properties = {
         "tester": relationship(User),
-        "data": relationship(TestResultData),
         "environment": relationship(Environment, order_by=tables.environments.c.name),
         "testcase": relationship(TestCase),
         "testsuite": relationship(TestSuite),
@@ -1361,6 +1348,23 @@ mapper(TestResult, tables.test_results,
                                 remote_side=[tables.test_results.c.id])),
     }
 )
+
+class TestResultData(object):
+    ROW_DISPLAY = ("note",)
+
+    def __str__(self):
+        return "TestResultData: note: %r" % (self.note,)
+
+    def __repr__(self):
+        return "TestResultData(%r, %r)" % (self.data, self.note)
+
+mapper(TestResultData, tables.test_results_data,
+        properties = {
+            "testresult": relationship(TestResult, backref=backref("data",
+                    cascade="all, delete, delete-orphan")),
+        }
+)
+
 
 ################ risk assessment tables
 

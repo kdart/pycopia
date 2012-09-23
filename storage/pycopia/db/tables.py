@@ -290,8 +290,12 @@ test_results_data =  Table('test_results_data', metadata,
     Column(u'id', INTEGER(), primary_key=True, nullable=False),
             Column(u'data', JsonText(), primary_key=False, nullable=False),
             Column(u'note', VARCHAR(length=255, convert_unicode=False), primary_key=False),
+            Column(u'test_results_id', INTEGER(), primary_key=False),
+        ForeignKeyConstraint([u'test_results_id'], [u'public.test_results.id'], name=u'test_results_data_test_results_fkey',
+                    onupdate="CASCADE", ondelete="CASCADE"),
     schema='public')
 Index('index_test_results_data_pkey', test_results_data.c.id, unique=True)
+Index('fki_test_results_data_test_results_fkey', test_results_data.c.test_results_id, unique=True)
 
 
 test_results =  Table('test_results', metadata,
@@ -309,7 +313,6 @@ test_results =  Table('test_results', metadata,
             Column(u'arguments', VARCHAR(length=255, convert_unicode=False), primary_key=False),
             Column(u'result', TestResultType(), primary_key=False, nullable=False),
             Column(u'diagnostic', TEXT(length=None, convert_unicode=False), primary_key=False),
-            Column(u'testresultdata_id', INTEGER(), primary_key=False),
             Column(u'resultslocation', VARCHAR(length=255, convert_unicode=False), primary_key=False),
             Column(u'reportfilename', VARCHAR(length=255, convert_unicode=False), primary_key=False),
             Column(u'note', TEXT(length=None, convert_unicode=False), primary_key=False),
@@ -321,11 +324,9 @@ test_results =  Table('test_results', metadata,
             ForeignKeyConstraint([u'build_id'], [u'public.project_versions.id'], name=u'test_results_build_id_fkey'),
             ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'test_results_environment_id_fkey'),
             ForeignKeyConstraint([u'testcase_id'], [u'public.test_cases.id'], name=u'test_results_testcase_id_fkey'),
-            ForeignKeyConstraint([u'testresultdata_id'], [u'public.test_results_data.id'], name=u'test_results_testresultdata_id_fkey'),
             ForeignKeyConstraint([u'testsuite_id'], [u'public.test_suites.id'], name=u'test_results_testsuite_id_fkey'),
     schema='public')
 Index('index_test_results_testcase_id', test_results.c.testcase_id, unique=False)
-Index('index_test_results_testresultdata_id', test_results.c.testresultdata_id, unique=False)
 Index('index_test_results_build_id', test_results.c.build_id, unique=False)
 Index('index_test_results_parent_id', test_results.c.parent_id, unique=False)
 Index('index_test_results_tester_id', test_results.c.tester_id, unique=False)

@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 # LICENSE: LGPL
@@ -154,7 +154,6 @@ class Test(object):
         self._report = config.report
         self._debug = config.flags.DEBUG
         self._verbose = config.flags.VERBOSE
-        self._datapoints = []
 
     @classmethod
     def set_test_options(cls):
@@ -258,9 +257,6 @@ class Test(object):
             if self._debug:
                 debugger.post_mortem(tb, ex, val)
             self.abort("Test finalize failed!")
-        if self._datapoints and rv.is_passed():
-            self.save_data(self._datapoints,
-                note="datapoints: %d" % (len(self._datapoints),))
         return rv
 
     # utility methods - methods that are common to nearly all tests.
@@ -702,18 +698,16 @@ class Test(object):
         return UserFile.UserFile(fullname)
 
     def save_data(self, data, note=None):
-        """Send an add_data message to the report. The object is serialized (pickled).
+        """Send an add_data message to the report.
+
+        The object is serialized to JSON, so only use basic types.
 
         Arguments:
-            obj: any python object.
+            data: any python object.
             note: A text note describing the data for future users (optional).
         """
         self._report.add_data(data, note)
 
-    def add_datapoint(self, value):
-        """Add a datapoint to the list of saved data.
-        """
-        self._datapoints.append(value)
 
 # --------------------
 

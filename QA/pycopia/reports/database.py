@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
@@ -45,9 +45,8 @@ _COLUMNS = {
     "arguments": None,          # TESTARGUMENTS (Test), RUNNERARGUMENTS (module)
     "result": None,             # PASSED, FAILED, EXPECTED_FAIL, INCOMPLETE, ABORT
     "diagnostic": None,         # The diagnostic message before failure.
-    "data": None,               # optional serialized data (reference)
     "resultslocation": None,    # url
-    "testimplementation": None, # implementation 
+    "testimplementation": None, # implementation
     "reportfilename": None,
     "note": None,               # COMMENT
     "valid": True,
@@ -63,11 +62,12 @@ class ResultHolder(object):
         self.parent = None
         self._children = []
         self._data = _COLUMNS.copy()
+        self._datapoints = [] # mutable type
 
     def __str__(self):
         d = self._data
         return "%s (%s) - %s start: %s end: %s" % (
-            types.OBJECTTYPES[d["objecttype"]], d["testimplementation"], 
+            types.OBJECTTYPES[d["objecttype"]], d["testimplementation"],
             d["result"], d["starttime"], d["endtime"])
 
     def get_result(self):
@@ -102,6 +102,8 @@ class ResultHolder(object):
         self.resolve_build(dbsession)
         tr = models.create(models.TestResult, **self._data)
         dbsession.add(tr)
+        if self._data["objecttype"] == TEST:
+            self.resolve_data(dbsession, tr)
         for child in self._children:
             child.commit(dbsession, tr)
 
@@ -169,6 +171,21 @@ class ResultHolder(object):
         else:
             self._data["build"] = None
 
+    def resolve_data(self, dbsession, testrecord):
+        dp = self._datapoints
+        if dp:
+            tdl = [models.create(models.TestResultData, data=hldr.data, note=hldr.note, testresult=testrecord)
+                    for hldr in dp]
+            for tr in tdl:
+                dbsession.add(tr)
+            testrecord.data = tdl
+        self._datapoints = None
+
+
+class DataHolder(object):
+    def __init__(self, data, note):
+        self.data = data
+        self.note = note
 
 
 def get_user(conf):
@@ -224,7 +241,7 @@ class DatabaseReport(reports.NullReport):
         root = self._rootresult
         self._rootresult = None
         if self._debug:
-            sys.stdout.write("\nReport structure:\n")
+            sys.stderr.write("\nReport structure:\n")
             root.emit(sys.stdout)
         else:
             root.commit(self._dbsession)
@@ -245,28 +262,28 @@ class DatabaseReport(reports.NullReport):
 
     def push_result(self, otype):
         if self._debug:
-            sys.stdout.write("     *** push_result: %s\n" % (types.OBJECTTYPES[otype],))
+            sys.stderr.write("     *** push_result: %s\n" % (types.OBJECTTYPES[otype],))
         new = self.new_result(otype)
         self._currentresult.append(new)
         self._currentresult = new
 
     def pop_result(self):
         if self._debug:
-            sys.stdout.write("     *** pop_result\n")
+            sys.stderr.write("     *** pop_result\n")
         self._currentresult = self._currentresult.parent
 
     def logfile(self, filename):
         pass # XXX store log file name?
 
-    def add_title(self, text): 
+    def add_title(self, text):
         # only the test runner sends this.
         pass
 
-    def add_heading(self, text, level): 
+    def add_heading(self, text, level):
         # level = 1 for suites, 2 for tests, 3 for other
         # signals new test and test suite record.
         currenttype = self._currentresult.get("objecttype")
-        if currenttype == RUNNER: 
+        if currenttype == RUNNER:
             self.push_result(level)     # runner -> (suite | test)
         elif currenttype == MODULE:
             self.push_result(level)     # module -> (suite | test)
@@ -274,19 +291,19 @@ class DatabaseReport(reports.NullReport):
             if level == 1:                        # suite -> suite
                 self.add_result(level)
             elif level == 2:                    # suite -> test
-                self.push_result(level) 
+                self.push_result(level)
         elif currenttype == TEST:
             if level == 1:                        # test -> suite
                 self.pop_result()
             elif level == 2:                    # test -> test
-                self.add_result(level) 
+                self.add_result(level)
             elif level == 3:                    # suite summary result starting
-                self.pop_result() 
+                self.pop_result()
         # Add the implementation name if a suite or a test.
         if level in (1,2):
             self._currentresult.set("testimplementation", text)
 
-    def add_message(self, msgtype, msg, level=0): 
+    def add_message(self, msgtype, msg, level=0):
         if msgtype == "RUNNERARGUMENTS":
             self._rootresult.set("arguments", msg)
         elif msgtype == "RUNNERSTARTTIME":
@@ -354,19 +371,19 @@ class DatabaseReport(reports.NullReport):
     def diagnostic(self, msg, level=1):
         self._currentresult.set("diagnostic", str(msg))
 
-    def add_summary(self, entries): 
+    def add_summary(self, entries):
         pass
 
-    def add_text(self, text): 
+    def add_text(self, text):
         pass
 
-    def add_data(self, data, note=None): 
-        testdata = models.create(models.TestResultData, data=data, note=note)
-        if not self._debug:
-            self._dbsession.add(testdata)
-        self._currentresult.set("data", testdata)
+    def add_data(self, data, note=None):
+        if self._debug:
+            sys.stderr.write("     *** add data: {!r}\n".format(data))
+        else:
+            self._currentresult._datapoints.append(DataHolder(data, note))
 
-    def add_url(self, text, url): 
+    def add_url(self, text, url):
         self._rootresult.set("resultslocation", url)
 
 

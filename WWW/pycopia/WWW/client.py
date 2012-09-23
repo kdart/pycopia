@@ -332,6 +332,16 @@ class TimingInfo(object):
         self.redirect += other.redirect
         return self
 
+    def todict(self):
+        return {
+            "namelookup": self.namelookup,
+            "connect": self.connect,
+            "pretransfer": self.pretransfer,
+            "starttransfer": self.starttransfer,
+            "total": self.total,
+            "redirect": self.redirect,
+        }
+
 
 class Request(object):
     """Base class for all types of URL requests.
