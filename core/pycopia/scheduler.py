@@ -1,9 +1,7 @@
 #!/usr/bin/python2.6
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -29,13 +27,6 @@ from errno import EINTR
 from pycopia import itimer
 alarm = itimer.alarm # allows subsecond precision using floats
 
-# enables custom readline module to process Python signal handlers when idle
-import readline
-try:
-    readline.set_event_hook(lambda:None)
-except AttributeError:
-    pass # not a modified readline module :-(
-del readline
 
 __all__ = ["get_scheduler"]
 
@@ -47,9 +38,9 @@ def insort(a, x, lo=0, hi=None):
         hi = len(a)
     while lo < hi:
         mid = (lo+hi) // 2
-        if x < a[mid]: 
+        if x < a[mid]:
             hi = mid
-        else: 
+        else:
             lo = mid+1
     a.insert(lo, x)
     return lo
@@ -207,7 +198,7 @@ Creates an Event object and adds it to the event queue. Returns the event
 object. The callback will be run with the supplied arguments, after the elapsed
 interval. If the repeat flag is given the job is rescheduled indefinitely."""
         assert delay > 0
-        event = _Event(delay, callback, args or (), kwargs or {}, repeat) 
+        event = _Event(delay, callback, args or (), kwargs or {}, repeat)
         self.add_event(event)
         return event
 
@@ -236,7 +227,7 @@ timeout value is reached."""
             return function(*args, **kwargs)
         finally:
             self.remove(to)
-    
+
     def iotimeout(self, function, args=(), kwargs={}, timeout=30):
         """Wraps an IO function that may block in the kernel. Provides a
 timeout feature."""
@@ -300,6 +291,6 @@ def repeat(interval, method, *args):
 
 if __name__ == "__main__":
     import os
-    os.system("runtest unittests.core.scheduler")
+    os.system("runtest testcases.unittests.core.scheduler")
 
 

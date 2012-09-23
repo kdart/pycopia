@@ -15,7 +15,6 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-from __future__ import unicode_literals
 from __future__ import division
 
 """
@@ -24,11 +23,13 @@ Functions to aid Python development.
 
 import sys
 import os
+import imp
 
 # These days we deal a lot with URLs, so import a URL parser/generator as well.
 from pycopia.urlparse import UniversalResourceLocator as URL
 
 PYTHON = os.environ.get("PYTHONBIN", sys.executable) # set PYTHONBIN for alternate interpreter
+
 
 def run_config(cfstring, param):
     if not cfstring:
@@ -40,6 +41,7 @@ def run_config(cfstring, param):
         cmd = "%s %s" % (cfstring, param)
     print("CMD:", repr(cmd))
     return os.system(cmd)
+
 
 def pyterm(filename="", interactive=1):
     # Allow running remotely via ssh.
@@ -60,11 +62,13 @@ def pyterm(filename="", interactive=1):
     else:
         return os.system(cmd)
 
+
 def xterm(cmd="/bin/sh"):
     if "DISPLAY" in os.environ:
         return run_config(os.environ.get("XTERM"), cmd)
     else:
         return os.system(cmd)
+
 
 def edit(modname):
     """
@@ -76,6 +80,17 @@ Opens the $XEDITOR with the given module source file (if found).
         return run_config(ed, filename)
     else:
         print ("Could not find source to {0}.".format(modname), file=sys.stderr)
+
+
+def edit_import_line(importline):
+    """Find the module referenced by the import source line and open in editor."""
+    filename = find_source_file_from_import_line(importline)
+    if filename:
+        ed = get_editor()
+        return run_config(ed, filename)
+    else:
+        print ("Could not find source for {0}.".format(importline.strip()), file=sys.stderr)
+
 
 def view(modname):
     """
@@ -122,11 +137,87 @@ def open_url(url):
     else:
         return run_config(os.environ.get("CBROWSER"), url)
 
-def find_source_file(modname):
+def find_source_file(modname, path=None):
+    if "." in modname:
+        pkgname, modname = modname.rsplit(".", 1)
+        pkg = find_package(pkgname)
+        return find_source_file(modname, pkg.__path__)
     try:
-        return getsourcefile(modname)
-    except TypeError:
+        fo, fpath, (suffix, mode, mtype) = imp.find_module(modname, path)
+    except ImportError:
+        ex, val, tb = sys.exc_info()
+        print("{} => {}: {}!".format(modname, ex.__name__, val), file=sys.stderr)
         return None
+    if mtype == imp.PKG_DIRECTORY:
+        fo, ipath, desc = imp.find_module("__init__", [fpath])
+        fo.close()
+        return ipath
+    elif mtype == imp.PY_SOURCE:
+        return fpath
+    else:
+        return None
+
+
+def find_source_file_from_import_line(line):
+    if line.startswith("import "):
+        return find_source_file(line[7:].strip())
+    elif line.startswith("from "):
+        fromparts = line.split()
+        return find_from_package(fromparts[1], fromparts[3])
+    else:
+        return None
+
+def _iter_subpath(packagename):
+    s = 0
+    while True:
+        i = packagename.find(".", s + 1)
+        if i < 0:
+            yield packagename
+            break
+        yield packagename[:i]
+        s = i + 1
+
+def _load_package(packagename, basename, searchpath):
+    fo, _file, desc = imp.find_module(packagename, searchpath)
+    if basename:
+        fullname = "{}.{}".format(basename, packagename)
+    else:
+        fullname = packagename
+    return imp.load_module(fullname, fo, _file, desc)
+
+
+def find_package(packagename, searchpath=None):
+    try:
+        return sys.modules[packagename]
+    except KeyError:
+        pass
+    for pkgname in _iter_subpath(packagename):
+        if "." in pkgname:
+            basepkg, subpkg = pkgname.rsplit(".", 1)
+            pkg = sys.modules[basepkg]
+            _load_package(subpkg, basepkg, pkg.__path__)
+        else:
+            try:
+                sys.modules[pkgname]
+            except KeyError:
+                _load_package(pkgname, None, searchpath)
+    return sys.modules[packagename]
+
+
+def find_from_package(pkgname, modname):
+    pkg = find_package(pkgname)
+    try:
+        fo, fpath, (suffix, mode, mtype) = imp.find_module(modname, pkg.__path__)
+    except ImportError:
+        ex, val, tb = sys.exc_info()
+        print("{} => {}: {}!".format(modname, ex.__name__, val), file=sys.stderr)
+        return None
+    fo.close()
+    if mtype == imp.PY_SOURCE:
+        return fpath
+    else:
+        return None
+
 
 def open_chm(search):
     """Opens the given search term with a CHM viewer. """
@@ -159,4 +250,25 @@ def show_chm_doc(object, chooser=None):
     open_chm(name)
 
 showdoc = show_chm_doc
+
+# XXX
+if __name__ == "__main__":
+    from pycopia import autodebug
+    for testname in (
+            "import re\n",
+            "import pycopia.aid\n",
+            "import pycopia.WWW\n",
+            "import pycopia.WWW.XHTML\n",
+            "from pycopia import aid\n",
+            "from pycopia.OS import IOCTL\n",
+            "from pycopia.WWW import XHTML\n",
+            "import puremvc\n",
+            "import puremvc.patterns\n",
+            "import puremvc.patterns.proxy\n",
+            "import Pyro4\n",
+#            "import sqlalchemy\n",
+#            "from sqlalchemy import sql\n",
+#            "import sqlalchemy.sql\n",
+            ):
+        print(testname.strip(), "=>", find_source_file_from_import_line(testname))
 

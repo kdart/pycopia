@@ -103,6 +103,7 @@ nmap ;el :python vim.current.line = str(eval(vim.current.line))<CR>
 nmap ;iv :python insert_viminfo()<CR>
 nmap ;ia :python insert__all__()<CR>
 nmap ;ed :python keyword_edit()<CR>
+nmap ;ei :python import_edit()<CR>
 nmap ;vi :python keyword_view()<CR>
 vmap ;ed :python visual_edit()<CR>
 vmap ;vi :python visual_view()<CR>

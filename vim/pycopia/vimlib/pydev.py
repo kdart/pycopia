@@ -143,6 +143,9 @@ def keyword_help():
 def keyword_edit():
     devhelpers.edit(vim.eval('expand("<cword>")'))
 
+def import_edit():
+    devhelpers.edit_import_line(vim.current.line)
+
 def keyword_view():
     devhelpers.view(vim.eval('expand("<cword>")'))
 
