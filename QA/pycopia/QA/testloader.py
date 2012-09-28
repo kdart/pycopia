@@ -92,23 +92,6 @@ def get_suite(dbsuite, config):
     return core.TestSuite(config, name=name)
 
 
-def get_module_file(mod):
-    """Find the source file for a module. Give the module, or a name of one.
-
-    Returns:
-        Full path name of Python source file. Returns None if not found."""
-    if type(mod) is str:
-        mod = module.get_module(mod)
-    try:
-        basename, ext = os.path.splitext(mod.__file__)
-    except AttributeError: # C modules don't have a __file__ attribute
-        return None
-    testfile = basename + ".py"
-    if os.path.isfile(testfile):
-        return testfile
-    return None
-
-
 def get_TestSuite_from_module(mod, config):
     """Get an existing suite from a module."""
     for methname in ("get_suite", "GetSuite"):

@@ -156,7 +156,11 @@ class User(object):
 
     @classmethod
     def get_by_username(cls, dbsession, username):
-        return dbsession.query(cls).filter(cls.username==username).scalar()
+        return dbsession.query(cls).filter(cls.username==username).first()
+
+    @property
+    def full_name(self):
+        return "{} {}".format(self.first_name, self.last_name)
 
 
 def get_key():
@@ -176,8 +180,6 @@ mapper(User, tables.auth_user,
         "permissions": relationship(Permission, lazy=True, secondary=tables.auth_user_user_permissions),
         "groups": relationship(Group, lazy=True, secondary=tables.auth_user_groups),
         "password": synonym('_password', map_column=True),
-#        "full_name": column_property( (tables.auth_user.c.first_name + " " +
-#                tables.auth_user.c.last_name).label('full_name') ),
     })
 
 
@@ -532,7 +534,7 @@ class Corporation(object):
     def set_attribute(self, session, attrname, value):
         attrtype = CorporateAttributeType.get_by_name(session, str(attrname))
         existing = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self,
-                            CorporateAttribute.type==attrtype)).scalar()
+                            CorporateAttribute.type==attrtype)).first()
         if existing is not None:
             existing.value = value
         else:
@@ -553,7 +555,7 @@ class Corporation(object):
     def del_attribute(self, session, attrtype):
         attrtype = CorporateAttributeType.get_by_name(session, str(attrtype))
         attrib = session.query(CorporateAttribute).filter(and_(
-                CorporateAttribute.corporation==self, CorporateAttribute.type==attrtype)).scalar()
+                CorporateAttribute.corporation==self, CorporateAttribute.type==attrtype)).first()
         if attrib:
             self.attributes.remove(attrib)
         session.commit()
@@ -577,9 +579,6 @@ mapper(Corporation, tables.corporations,
         "address": relationship(Address),
         "contact": relationship(Contact),
         "country": relationship(Country),
-#        "parent": relationship(Corporation,  backref="subsidiaries"),
-#        "parent": relationship(Corporation,  backref=backref("subsidiaries",
-#                                remote_side=[tables.corporations.c.id])),
     }
 )
 
@@ -646,7 +645,7 @@ class Software(object):
     def set_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         existing = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self,
-                            SoftwareAttribute.type==attrtype)).scalar()
+                            SoftwareAttribute.type==attrtype)).first()
         if existing is not None:
             existing.value = value
         else:
@@ -667,10 +666,10 @@ class Software(object):
     def del_attribute(self, session, attrtype):
         attrtype = AttributeType.get_by_name(session, str(attrtype))
         attrib = session.query(SoftwareAttribute).filter(and_(
-                SoftwareAttribute.software==self, SoftwareAttribute.type==attrtype)).scalar()
+                SoftwareAttribute.software==self, SoftwareAttribute.type==attrtype)).first()
         if attrib:
             self.attributes.remove(attrib)
-        session.commit()
+            session.commit()
 
     @staticmethod
     def get_attribute_list(session):
@@ -759,7 +758,7 @@ class EquipmentModel(object):
     def set_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         existing = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self,
-                            EquipmentModelAttribute.type==attrtype)).scalar()
+                            EquipmentModelAttribute.type==attrtype)).first()
         if existing is not None:
             existing.value = value
         else:
@@ -780,10 +779,10 @@ class EquipmentModel(object):
     def del_attribute(self, session, attrtype):
         attrtype = AttributeType.get_by_name(session, str(attrtype))
         attrib = session.query(EquipmentModelAttribute).filter(and_(
-                EquipmentModelAttribute.equipmentmodel==self, EquipmentModelAttribute.type==attrtype)).scalar()
+                EquipmentModelAttribute.equipmentmodel==self, EquipmentModelAttribute.type==attrtype)).first()
         if attrib:
             self.attributes.remove(attrib)
-        session.commit()
+            session.commit()
 
     @staticmethod
     def get_attribute_list(session):
@@ -827,7 +826,7 @@ class Equipment(object):
     def set_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         existing = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self,
-                            EquipmentAttribute.type==attrtype)).scalar()
+                            EquipmentAttribute.type==attrtype)).first()
         if existing is not None:
             existing.value = value
         else:
@@ -848,10 +847,10 @@ class Equipment(object):
     def del_attribute(self, session, attrname):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         attrib = session.query(EquipmentAttribute).filter(and_(
-                EquipmentAttribute.equipment==self, EquipmentAttribute.type==attrtype)).scalar()
+                EquipmentAttribute.equipment==self, EquipmentAttribute.type==attrtype)).first()
         if attrib:
             self.attributes.remove(attrib)
-        session.commit()
+            session.commit()
 
     @staticmethod
     def get_attribute_list(session):
@@ -1020,7 +1019,7 @@ class Environment(object):
     def set_attribute(self, session, attrname, value):
         attrtype = EnvironmentAttributeType.get_by_name(session, str(attrname))
         existing = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self,
-                            EnvironmentAttribute.type==attrtype)).scalar()
+                            EnvironmentAttribute.type==attrtype)).first()
         if existing is not None:
             existing.value = value
         else:
@@ -1041,10 +1040,10 @@ class Environment(object):
     def del_attribute(self, session, attrtype):
         attrtype = EnvironmentAttributeType.get_by_name(session, str(attrtype))
         attrib = session.query(EnvironmentAttribute).filter(and_(
-                EnvironmentAttribute.environment==self, EnvironmentAttribute.type==attrtype)).scalar()
+                EnvironmentAttribute.environment==self, EnvironmentAttribute.type==attrtype)).first()
         if attrib:
             self.attributes.remove(attrib)
-        session.commit()
+            session.commit()
 
     @staticmethod
     def get_attribute_list(session):
@@ -1062,7 +1061,7 @@ class Environment(object):
                 TE.environment==self,
                 TE.UUT==False,  # UUT does not take on other roles.
                 TE.roles.contains(role)))
-        te = qq.scalar()
+        te = qq.first()
         if te is None:
             raise ModelError("No role '{0}' defined in environment '{1}'.".format(rolename, self.name))
         return te.equipment
@@ -1071,7 +1070,10 @@ class Environment(object):
     def get_DUT(self, session):
         qq = session.query(TestEquipment).filter(and_(TestEquipment.environment==self,
                 TestEquipment.UUT==True))
-        return qq.scalar().equipment
+        eq = qq.first()
+        if eq is None:
+            raise ModelError("DUT is not defined in environment '{}'.".format(self.name))
+        return eq.equipment
 
     def get_supported_roles(self, session):
         rv = []
@@ -1191,7 +1193,7 @@ class TestCase(object):
         return session.query(TestResult).filter(and_(
                 TestResult.starttime==sq,
                 TestResult.testcase==self,
-                    )).scalar()
+                    )).first()
 
     def get_all_results(self, session):
         return session.query(TestResult).filter(and_(
@@ -1200,17 +1202,18 @@ class TestCase(object):
 
     def get_data(self, session):
         for res in self.get_all_results(session):
-            data = res.data.data
-            if data is not None:
-                yield data
+            data = res.data
+            if data:
+                for datum in data:
+                    yield datum
 
     @classmethod
     def get_by_name(cls, dbsession, name):
-        return dbsession.query(cls).filter(cls.name==name).scalar()
+        return dbsession.query(cls).filter(cls.name==name).first()
 
     @classmethod
     def get_by_implementation(cls, dbsession, implementation):
-        return dbsession.query(cls).filter(cls.testimplementation==implementation).scalar()
+        return dbsession.query(cls).filter(cls.testimplementation==implementation).first()
 
 mapper(TestCase, tables.test_cases,
     properties={
@@ -1220,7 +1223,6 @@ mapper(TestCase, tables.test_cases,
             primaryjoin=tables.test_cases.c.id==tables.test_cases_prerequisites.c.testcase_id,
             secondaryjoin=tables.test_cases_prerequisites.c.prerequisite_id==tables.test_cases.c.id,
             backref="dependents"),
-        #"dependents": relationship(TestCase, backref=backref("prerequisite", remote_side=[tables.test_cases.c.id])),
     },
 )
 
@@ -1242,7 +1244,7 @@ class TestSuite(object):
         return session.query(TestResult).filter(and_(
                 TestResult.starttime==sq,
                 TestResult.testsuite==self,
-                    )).scalar()
+                    )).first()
     @classmethod
     def get_latest_results(cls, session):
         filt = and_(TestResult.objecttype==OBJ_TESTSUITE, TestResult.valid==True)
@@ -1334,7 +1336,7 @@ class TestResult(object):
         return session.query(cls).filter(and_(
                 cls.starttime==sq,
                 cls.tester==user,
-                cls.objecttype==OBJ_TESTRUNNER)).scalar()
+                cls.objecttype==OBJ_TESTRUNNER)).first()
 
 
 mapper(TestResult, tables.test_results,
@@ -1647,14 +1649,30 @@ if __name__ == "__main__":
 
 #    print "\nlatest run:"
 #    user = User.get_by_username(sess, "keith")
+#    print(user)
+#    print(type(user))
+#    print(user.full_name)
 #    lr = TestResult.get_latest_run(sess, user)
 #    print lr
 #    print
     #print dir(class_mapper(Equipment))
     #print
     #print class_mapper(Equipment).get_property("name")
-    for tr in TestSuite.get_latest_results(sess):
-        print (tr)
-    #sess.close()
-    print (TestSuite.get_suites(sess))
+#    for tr in TestSuite.get_latest_results(sess):
+#        print (tr)
+    tc = TestCase.get_by_implementation(sess, "testcases.unittests.WWW.client.HTTPPageFetch")
+    print(tc)
+#    print(tc.id)
+#    ltr = tc.get_latest_result(sess)
+#    print(ltr)
+#    print(ltr.id)
+#    print(ltr.data)
+#    print(ltr.data[0].data)
+#
+#    for tr in tc.get_data(sess):
+#        print(tr)
+#
+#    print(type(TestSuite.get_by_implementation(sess, "testcases.unittests.WWW.mobileget.MobileSendSuite")))
+#    print (TestSuite.get_suites(sess))
+    sess.close()
 

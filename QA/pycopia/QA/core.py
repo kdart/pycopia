@@ -43,6 +43,7 @@ from pycopia import dictlib
 from pycopia import module
 from pycopia import methods
 from pycopia.QA import constants
+from pycopia.db.config import ConfigError
 
 
 # exception classes that may be raised by test methods.
@@ -200,19 +201,27 @@ class Test(object):
         except TestIncompleteError, errval:
             rv = self.incomplete("Caught incomplete exception: %s" % (errval,))
         # Test asserts and validation errors are based on this.
-        except AssertionError, errval:
+        except AssertionError as errval:
             rv = self.failed("failed assertion: %s" % (errval,))
         except TestSuiteAbort:
+            self.config.register_testcase(None)
             raise # pass this one up to suite
         except debugger.DebuggerQuit: # set_trace "leaks" BdbQuit
             rv = self.incomplete("%s: Debugger exit." % (self.test_name, ))
+        except ConfigError as cerr:
+            rv = self.incomplete("Configuration error: {}".format(cerr))
+            self.config.register_testcase(None)
+            if self._debug:
+                ex, val, tb = sys.exc_info()
+                debugger.post_mortem(tb, ex, val)
+                tb = None
+            raise TestSuiteAbort(cerr)
         except:
             ex, val, tb = sys.exc_info()
             if self._debug:
                 debugger.post_mortem(tb, ex, val)
                 tb = None
-            rv = self.incomplete("%s: Exception: (%s: %s)" % \
-                    (self.test_name, ex, val))
+            rv = self.incomplete("%s: Exception: (%s: %s)" % (self.test_name, ex, val))
         endtime = timelib.now()
         self.config.register_testcase(None)
         self._report.add_message("STARTTIME", teststarttime, 2)
@@ -277,7 +286,7 @@ class Test(object):
         return os.path.join(self.config.resultsdir, filename)
 
     def get_file(self, basename=None, ext="log", mode="a+"):
-        """Return a file object for a log file in the results location."""
+        """Return a file object that you can write to in the results location."""
         fname = self.get_filename(basename, ext)
         return UserFile.UserFile(fname, mode)
 

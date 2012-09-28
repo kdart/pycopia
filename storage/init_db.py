@@ -469,6 +469,22 @@ def do_corporations(session):
         session.add(models.create(models.Corporation, name=name, notes=desc))
     session.commit()
 
+def do_riskcategory(session):
+    for name, desc, in (
+        ("Capability", " Can it perform the required functions?"),
+        ("Reliability", " Will it work well and resist failure in all required situations?"),
+        ("Usability", " How easy is it for a real user to use the product?"),
+        ("Performance", " How speedy and responsive is it?"),
+        ("Installability", " How easily can it be installed onto its target platform?"),
+        ("Compatibility", " How well does it work with external components & configurations?"),
+        ("Supportability", " How economical will it be to provide support to users of the product?"),
+        ("Testability", " How effectively can the product be tested?"),
+        ("Maintainability", " How economical will it be to build, fix or enhance the product?"),
+        ("Portability", " How economical will it be to port or reuse the technology elsewhere?"),
+        ("Localizability", " How economical will it be to publish the product in another language?"),
+        ):
+        session.add(models.create(models.RiskCategory, name=name, description=desc))
+    session.commit()
 
 
 #def do_XXX(session):
@@ -562,6 +578,7 @@ def init_database(argv):
         do_capability_groups(dbsession)
         do_capability_types(dbsession)
         do_corporations(dbsession)
+        do_riskcategory(dbsession)
         do_config(dbsession)
     finally:
         dbsession.close()

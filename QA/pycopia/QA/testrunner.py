@@ -313,8 +313,9 @@ class TestRunner(object):
             rpt = cf.get_report()
         except reports.ReportFindError, err:
             cf.UI.error(str(err))
-            cf.UI.Print("Use at least one of the following:")
+            cf.UI.printf("%YUse at least one of the following%N:")
             cf.UI.print_list(cf.reports.keys())
+            cf.UI.Print("\n")
             raise TestRunnerError("Cannot continue without report.")
         # Report file's names. save for future use.
         rpt.initialize(cf)

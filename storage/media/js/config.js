@@ -152,10 +152,17 @@ function alertConfigDelete(cfName, img, isSuccessful) {
  * Initialize the client-side data and DOM for the config admin views.
  * @param {Event} ev The Mochikit event triggered by page load.
  */
-function userconfigInit(ev) {
+function userConfigInit(ev) {
   forEach(document.images, setupConfigIcons);
   forEach(getElementsByTagAndClassName("span", "editable"),
           configSetupEditable);
 }
+
+connectOnce(window, "onload", function(ev) {
+    connectOnce(window, "dbready", function () {
+        userConfigInit();
+      }
+    );
+});
 
 
