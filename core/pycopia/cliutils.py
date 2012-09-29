@@ -1,9 +1,7 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,14 +13,14 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 
 """
 Useful interactive functions for building simple user interfaces.
 
 """
-
-from __future__ import print_function
-
 
 __all__ = ['get_text', 'get_input', 'default_error', 'choose',
         'choose_multiple', 'choose_value', 'choose_key',
@@ -31,13 +29,22 @@ __all__ = ['get_text', 'get_input', 'default_error', 'choose',
 
 import sys, os
 
-COLUMNS, LINES = 132, 32 # TODO fetch from system
-
 # python 3 compatibility
 try:
     raw_input
 except NameError:
     raw_input = input
+
+
+def _get_winsize(fd):
+    import fcntl, struct, termios
+    WINSIZEFMT = b"HHHH"
+    winsize = fcntl.ioctl(fd, termios.TIOCGWINSZ, b"\0"*struct.calcsize(WINSIZEFMT))
+    l, c = struct.unpack(WINSIZEFMT, winsize)[:2] # row, col, xpix, ypix
+    return max(l, 24), max(c, 80)
+
+LINES, COLUMNS = _get_winsize(0)
+del _get_winsize
 
 
 def get_text(prompt="", msg=None, input=raw_input):
@@ -159,7 +166,7 @@ def choose_value(somemap, default=None, prompt="choose", input=raw_input, error=
 
 
 def choose_key(somemap, default=0, prompt="choose", input=raw_input, error=default_error):
-    """Select a key from a mapping. 
+    """Select a key from a mapping.
     Returns the key selected.
     """
     keytype = type(print_menu_map(somemap))
@@ -181,9 +188,9 @@ def choose_key(somemap, default=0, prompt="choose", input=raw_input, error=defau
         return idx
 
 
-def choose_multiple_from_map(somemap, chosen=None, prompt="choose multiple", 
+def choose_multiple_from_map(somemap, chosen=None, prompt="choose multiple",
             input=raw_input, error=default_error):
-    """Choose multiple items from a mapping. 
+    """Choose multiple items from a mapping.
     Returns a mapping of items chosen. Type in the key to select the values.
     """
     somemap = somemap.copy()
@@ -267,38 +274,48 @@ def edit_text(text, prompt="Edit text"):
         os.unlink(fname)
     return text[text.find("\n")+1:]
 
+
 def print_menu_list(clist, lines=LINES, columns=COLUMNS):
     """Print a list with leading numeric menu choices. Use two columns in necessary."""
-    h = max((len(clist)/2)+1, lines)
-    i1, i2 = 1, h+1
     fmt = "{{:3d}}: {{:{cols}.{cols}}}".format(cols=columns-6)
-    if h >= lines:
-        fmt2 = "{{:3d}}: {{:{cols}.{cols}}} | {{:3d}}: {{:{cols}.{cols}}}".format(cols=(columns-14)/2)
-    for c1, c2 in map(None, clist[:h], clist[h:]):
-        if c2:
-            print (fmt2.format(i1, str(c1)[-(columns/2)+7:], i2, str(c2)[-(columns/2)+7:]))
-        else:
-            print (fmt.format(i1, str(c1)[-columns+7:]))
-        i1 += 1
-        i2 += 1
+    if columns > 80:
+        fmt2 = "{{:3d}}: {{:{cols}.{cols}}} | {{:3d}}: {{:{cols}.{cols}}}".format(cols=(columns-14)//2)
+        h = (len(clist)+1)//2
+        i1, i2 = 1, h+1
+        for c1, c2 in map(None, clist[:h], clist[h:]):
+            if c2:
+                print (fmt2.format(i1, str(c1)[-(columns//2)+7:], i2, str(c2)[-(columns//2)+7:]))
+            else:
+                print (fmt.format(i1, str(c1)[-columns+7:]))
+            i1 += 1
+            i2 += 1
+    else:
+        for i, c1 in enumerate(clist):
+            print (fmt.format(i+1, str(c1)[-columns+7:]))
+
 
 def print_menu_map(mapping, lines=LINES, columns=COLUMNS):
     """Print a list with leading numeric menu choices. Use two columns in necessary."""
     keys = sorted(mapping.keys())
     first = keys[0]
     fmt  = "{{!s:>4s}}: {{:{cols}.{cols}}}".format(cols=columns-6)
-    fmt2 = "{{!s:>4s}}: {{:{cols}.{cols}}} | {{!s:>4s}}: {{:{cols}.{cols}}}".format(cols=(columns-16)/2)
-    h = max((len(mapping)/2)+1, lines)
-    for k1, k2 in map(None, keys[:h], keys[h:]):
-        if k2 is not None:
-            print (fmt2.format(k1, mapping[k1], k2, mapping[k2]))
-        else:
-            print (fmt.format(k1, mapping[k1]))
+    if columns > 80:
+        fmt2 = "{{!s:>4s}}: {{:{cols}.{cols}}} | {{!s:>4s}}: {{:{cols}.{cols}}}".format(cols=(columns-16)//2)
+        h = (len(mapping)+1)//2
+        for k1, k2 in map(None, keys[:h], keys[h:]):
+            if k2 is not None:
+                print (fmt2.format(k1, mapping[k1], k2, mapping[k2]))
+            else:
+                print (fmt.format(k1, mapping[k1]))
+    else:
+        for key in keys:
+            print (fmt.format(key, mapping[key]))
     return first
 
 
 def _test(argv):
     from pycopia import autodebug
+    print ("columns:", COLUMNS, "ines:", LINES)
     #from pycopia import autodebug
     #import string
     #l = list(string.ascii_letters)
@@ -308,14 +325,16 @@ def _test(argv):
     #print (edit_text(__doc__))
     #sel = dict(enumerate("abcd"))
     #print (choose_multiple_from_map(sel))
-    bs = "".join(map(chr, range(33,111)))
-    l = [bs] * 100
+    lsize = LINES
+    l = []
+    for i in range(lsize):
+        l.append("{}_{}".format(i, "".join(map(chr, range(34,109)))))
     #print(bs)
     #print("----")
     #print(l)
     #print("----")
-    print_menu_list(l)
-    print_menu_map(dict(enumerate(l)))
+    choose_multiple(l, prompt="choose")
+    #print_menu_map(dict(enumerate(l)))
 
 if __name__ == "__main__":
     import sys
