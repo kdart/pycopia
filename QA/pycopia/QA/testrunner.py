@@ -11,7 +11,6 @@ This module provides the primary test runner for the automation framework.
 import sys
 import os
 import shutil
-import warnings
 from errno import EEXIST
 
 from pycopia import logging
@@ -122,7 +121,7 @@ class TestRunner(object):
                 # a bare class uses as a subcontainer of test or suite constructor.
                 rv = self.run_class(obj)
             else:
-                warnings.warn("%r is not a runnable object." % (obj,))
+                logging.warn("%r is not a runnable object." % (obj,))
         if testcases:
             rv = self.run_tests(testcases)
         return rv
@@ -366,6 +365,22 @@ class TestRunner(object):
             # If resultsdir ends up empty, remove it.
             if not os.listdir(cf.resultsdir): # TODO, stat this instead
                 os.rmdir(cf.resultsdir)
+
+    def report_global(self):
+        """Report common information.
+        Send some information to the user interface about the available
+        parameters that a user may provide to run a test.
+        """
+        from pycopia.db import models
+        cf = self.config
+        ui = cf.UI
+        ui.printf("%YAvailable report names for the '%G--reportname=%N' %Yoption%N:")
+        ui.print_list(sorted(cf.reports.keys()))
+        ui.Print("\n")
+        ui.printf("%YAvailable environment names for the '%G--environmentname=%N' %Yoption%N:")
+        db = cf.session
+        ui.print_list(sorted([env.name for env in db.query(models.Environment).all()]))
+
 
 
 def get_module_version(mod):

@@ -1,7 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 2009  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2012  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -118,6 +118,13 @@ class RootContainer(config.Container):
             del self._cache[key]
         except KeyError:
             super(RootContainer, self).__delitem__(key)
+
+    def get(self, key, default=None):
+        try:
+            rv = self.__getitem__(key)
+        except KeyError:
+            rv = default
+        return rv
 
     def has_key(self, key):
         return self._cache.has_key(key) or super(RootContainer, self).has_key(key)

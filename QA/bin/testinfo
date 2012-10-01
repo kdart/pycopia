@@ -1,0 +1,32 @@
+#!/usr/bin/python2.7 -S
+# -*- coding: ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+import sys
+sys.setdefaultencoding("utf-8")
+import site
+
+from pycopia.QA import config
+from pycopia.QA import testreporter
+from pycopia.QA import shellinterface
+
+def testinfo(argv):
+    cfg = config.get_config()
+    cfg.userinterfacetype = "default"
+    tr = testreporter.TestReporter(cfg)
+    tri = shellinterface.TestReporterInterface(tr)
+    try:
+        return tri(argv)
+    except testreporter.TestReporterError:
+        ex, val, tb = sys.exc_info()
+        if cfg.flags.DEBUG:
+            from pycopia import debugger
+            debugger.post_mortem(tb, ex, val)
+            return 2
+        else:
+            import traceback
+            traceback.print_exception(ex, val, tb)
+            return 2
+
+sys.exit(testinfo(sys.argv))
+

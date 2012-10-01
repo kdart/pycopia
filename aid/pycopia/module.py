@@ -28,10 +28,12 @@ __author__ = 'keith@dartworks.biz (Keith Dart)'
 __original__author__ = 'dart@google.com (Keith Dart)'
 
 import sys
+import imp
 
 
 class ModuleImportError(ImportError):
     """Raised when a test module could not be located."""
+
 
 class ObjectImportError(ImportError):
     """Raised when a test object could not be located."""
@@ -108,7 +110,7 @@ def get_class(path):
     Return a class object from a string specifiying the full package and
     name path.
     """
-    [modulename, classname] = path.rsplit(".", 1)
+    modulename, classname = path.rsplit(".", 1)
     mod = Import(modulename)
     return getattr(mod, classname)
 
@@ -137,4 +139,64 @@ def get_objects(namelist):
             rv.append(obj)
     return rv, errors
 
+
+def _iter_subpath(packagename):
+    s = 0
+    while True:
+        i = packagename.find(".", s + 1)
+        if i < 0:
+            yield packagename
+            break
+        yield packagename[:i]
+        s = i + 1
+
+def _load_package(packagename, basename, searchpath):
+    fo, _file, desc = imp.find_module(packagename, searchpath)
+    if basename:
+        fullname = "{}.{}".format(basename, packagename)
+    else:
+        fullname = packagename
+    return imp.load_module(fullname, fo, _file, desc)
+
+
+def find_package(packagename, searchpath=None):
+    """Find a package by fully qualified name."""
+    try:
+        return sys.modules[packagename]
+    except KeyError:
+        pass
+    for pkgname in _iter_subpath(packagename):
+        if "." in pkgname:
+            basepkg, subpkg = pkgname.rsplit(".", 1)
+            pkg = sys.modules[basepkg]
+            _load_package(subpkg, basepkg, pkg.__path__)
+        else:
+            try:
+                sys.modules[pkgname]
+            except KeyError:
+                _load_package(pkgname, None, searchpath)
+    return sys.modules[packagename]
+
+
+def find_module(modname, path=None):
+    """Find a module, also handling subpackages.
+    Similar to imp.find_module(), except works with subpackages.
+    This does not load the module, so no side effects from the module. It
+    does load the package, so any contents of __init__.py are run and may
+    have side effects.
+
+    Returns:
+        fo     -- Open file object.
+        fname  -- file name of the file found
+        desc   -- a 3-tuple of extension, mode, and file type.
+    """
+    if "." in modname:
+        pkgname, modname = modname.rsplit(".", 1)
+        pkg = find_package(pkgname)
+        return find_module(modname, pkg.__path__)
+    try:
+        info = imp.find_module(modname, path)
+    except ImportError:
+        return None
+    return info
 

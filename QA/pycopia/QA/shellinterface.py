@@ -1,8 +1,8 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
+#    Copyright (C) 2009- Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -14,10 +14,15 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 
-#### The command-line interface object. ####
+"""
+The command-line interface to a test runner or reporter.  Adapts options given
+on a command line to paramters to test cases and operates the test runner.
+"""
 
-import sys
 import os
 
 from pycopia import logging
@@ -115,7 +120,7 @@ Invoke a test or test suite from a shell.
 
 Usage:
 
-    %s [-hdviIcf] [-n <string>] arg...
+    %s [-h?dDviIr] [-c|-f <configfile>] [-n <string>] arg...
 
     Where the arguments are test suite or test case names. If none are
     supplied a menu is presented.
@@ -130,8 +135,18 @@ Usage:
             -v -- Increase verbosity.
             -i -- Set flag to run interactive tests.
             -I -- Set flag to skip interactive tests.
-            -c or -f <file> -- Merge in extra configuration file.
             -n <string> -- Add a comment to the test report.
+            -c or -f <file> -- Merge in extra configuration file.
+            -r -- Report on test case or test suite specified. Don't run it.
+                  Without arguments show the possible report and environment
+                  names.
+
+    Long options are passed as parameters to test cases, in the configuration
+    object. Common long options are:
+
+            --reportname=      -- The name of the report to use,
+                                  defined in the config.reports area.
+            --environmentname= -- Name of the environment to use.
 """
 
 class TestRunnerInterface(object):
@@ -151,25 +166,31 @@ class TestRunnerInterface(object):
         Invoke the test runner by calling it.
         """
         cf = self.runner.config
-        optlist, extraopts, args = getopt.getopt(argv[1:], "h?dDviIc:f:n:")
+        cf.flags.REPORT = False
+        cf.flags.INTERACTIVE = False
+        cf.flags.DEBUG = 0
+        cf.flags.VERBOSE = 0
+        optlist, extraopts, args = getopt.getopt(argv[1:], "h?dDviIrc:f:n:")
         for opt, optarg in optlist:
             if opt in ("-h", "-?"):
-                print TestRunnerInterfaceDoc % (os.path.basename(argv[0]),)
+                print (TestRunnerInterfaceDoc % (os.path.basename(argv[0]),))
                 return
-            if opt == "-d":
+            elif opt == "-d":
                 cf.flags.DEBUG += 1
-            if opt == "-D":
+            elif opt == "-D":
                 from pycopia import autodebug # top-level debug for framework bugs
-            if opt == "-v":
+            elif opt == "-v":
                 cf.flags.VERBOSE += 1
-            if opt == "-i":
+            elif opt == "-i":
                 cf.flags.INTERACTIVE = True
-            if opt == "-I":
+            elif opt == "-I":
                 cf.flags.INTERACTIVE = False
-            if opt == "-c" or opt == "-f":
+            elif opt == "-c" or opt == "-f":
                 cf.mergefile(optarg)
-            if opt == "-n":
+            elif opt == "-n":
                 cf.comment = optarg
+            elif opt == "-r":
+                cf.flags.REPORT = True
         cf.evalupdate(extraopts)
         # original command line arguments saved for the report
         cf.arguments = [os.path.basename(argv[0])] + argv[1:]
@@ -178,7 +199,11 @@ class TestRunnerInterface(object):
         self.runner.set_options(extraopts)
 
         if not args:
-            args = choose_tests()
+            if cf.flags.REPORT:
+                self.runner.report_global()
+                return 0
+            else:
+                args = choose_tests()
         if not args:
             return 2
         objects, errors = module.get_objects(args)
@@ -191,8 +216,71 @@ class TestRunnerInterface(object):
             self.runner.initialize()
             rv = self.runner.run_objects(objects)
             self.runner.finalize()
-            return not rv # inverted to to shell semantics (zero is good) being different from result code
+            return not rv # inverted due to shell semantics (zero is good) being different from result code
         else:
             return int(bool(errors)) + 2
+
+
+TestReporterInterfaceDoc = r"""
+Report various information about a tests and suites.
+
+Usage:
+
+    %s [-hgdDv] [-c|-f <configfile>] arg...
+
+    Where the arguments are test suite or test case names. If none are
+    supplied a menu is presented.
+    Options:
+        Tells the runner what test modules to run, and sets the flags in the
+        configuration. Options are:
+
+            -h -- Print help text and return.
+            -g -- Report on global configuration options.
+            -d -- Turn on debugging for tests.
+            -D -- Turn on debugging for tool itself.
+            -v -- Increase verbosity, show more information.
+            -c or -f <file> -- Merge in extra configuration file.
+
+"""
+
+class TestReporterInterface(object):
+    """A Basic CLI interface to a TestReporter object.
+
+    Instantiate with an instance of a TestReporter.
+
+    Call the instance of this with an argv list to report on the given runnable items.
+    """
+    def __init__(self, testreporter):
+        self.reporter = testreporter
+
+    def __call__(self, argv):
+        cf = self.reporter.config
+        cf.flags.DEBUG = 0
+        cf.flags.VERBOSE = 0
+        optlist, extraopts, args = getopt.getopt(argv[1:], "h?gdDvc:f:")
+        for opt, optarg in optlist:
+            if opt in ("-h", "-?"):
+                print (TestReporterInterfaceDoc % (os.path.basename(argv[0]),))
+                return
+            elif opt == "-g":
+                self.reporter.report_global()
+            elif opt == "-d":
+                cf.flags.DEBUG += 1
+            elif opt == "-D":
+                from pycopia import autodebug # top-level debug for framework bugs
+            elif opt == "-v":
+                cf.flags.VERBOSE += 1
+            elif opt == "-c" or opt == "-f":
+                cf.mergefile(optarg)
+        cf.evalupdate(extraopts)
+        if not args:
+            args = choose_tests()
+        if not args:
+            return
+        objects, errors = module.get_objects(args)
+        if errors:
+            self.reporter.report_errors(errors)
+        if objects:
+            self.reporter.report_objects(objects)
 
 
