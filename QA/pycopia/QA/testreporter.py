@@ -153,13 +153,17 @@ class TestReporter(object):
         else:
             ui.Print("Some class that we don't know what to do with.")
 
-    def report_testsuite(self, suite):
+    def report_testsuite(self, suite, level=1):
         ui = self.config.UI
+        indent = "  " * level
         cls = suite.__class__
         ui.printf(REPORT_TESTSUITE.format(objname=cls.__name__, name=suite.test_name, module=cls.__module__))
-        ui.Print("That has the following test cases added.")
+        ui.Print("  "*(level-1), "Suite has the following test cases added.")
         for tcentry in suite:
-            ui.Print("  ", repr(tcentry))
+            ui.Print(indent, repr(tcentry))
+            if isinstance(tcentry, core.SuiteEntry):
+                ui.Print(indent, "Nested suite:")
+                self.report_testsuite(tcentry.inst, level+1)
 
     def report_test(self, testcase):
         ui = self.config.UI
