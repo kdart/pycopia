@@ -20,6 +20,7 @@ Simple trap reciever that prints traps to stdout.
 
 import sys
 
+from pycopia import module
 from pycopia import asyncio
 from pycopia import interactive # sets up nicer CLI
 
@@ -35,7 +36,8 @@ def _handler(traprecord):
     print
 
 def load(mibname):
-    exec "import pycopia.mibs.%s" % (mibname.replace("-", "_"),) in globals(), globals()
+    module.Import("pycopia.mibs.%s" % (mibname.replace("-", "_"),))
+    return "OK"
 
 
 # Sets up trap receiver that goes into interactive mode.
