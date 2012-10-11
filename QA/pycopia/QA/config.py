@@ -438,6 +438,21 @@ class EnvironmentRuntime(object):
         self._eqcache[rolename] = eq
         return eq
 
+    def get_all_with_role(self, rolename):
+        eqlist = self._environment.get_all_equipment_with_role(self._session, rolename)
+        first = self._eqcache.get(rolename)
+        if first:
+            rlist = [first]
+            rlist.extend([EquipmentRuntime(eq, rolename, self.logfile, self._session) for eq in eqlist if eq.name != first.name])
+            return rlist
+        else:
+            rlist = [EquipmentRuntime(eq, rolename, self.logfile, self._session) for eq in eqlist]
+            if rlist:
+                self._eqcache[rolename] = rlist[0]
+                return rlist
+            else:
+                raise config.ConfigError("No equipment with role {} available in environment.".format(rolename))
+
     def get_supported_roles(self):
         return self._environment.get_supported_roles(self._session)
 

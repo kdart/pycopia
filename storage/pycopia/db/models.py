@@ -617,6 +617,10 @@ class SoftwareCategory(object):
     def __repr__(self):
         return str(self.name)
 
+    @classmethod
+    def get_by_name(cls, session, rolename):
+        return session.query(cls).filter(cls.name == rolename).first()
+
 mapper(SoftwareCategory, tables.software_category)
 
 
@@ -1053,10 +1057,9 @@ class Environment(object):
 
     def get_equipment_with_role(self, session, rolename):
         TE = TestEquipment # shorthand
-        try:
-            role = session.query(SoftwareCategory).filter(SoftwareCategory.name == rolename).one()
-        except NoResultFound:
-            raise ModelError("No such role defined in environment: {0}".format(rolename))
+        role = SoftwareCategory.get_by_name(session, rolename)
+        if role is None:
+           raise ModelError("No such role defined in environment: {0}".format(rolename))
         qq = session.query(TE).filter(and_(
                 TE.environment==self,
                 TE.UUT==False,  # UUT does not take on other roles.
@@ -1066,6 +1069,15 @@ class Environment(object):
             raise ModelError("No role '{0}' defined in environment '{1}'.".format(rolename, self.name))
         return te.equipment
 
+    def get_all_equipment_with_role(self, session, rolename):
+        TE = TestEquipment # shorthand
+        role = SoftwareCategory.get_by_name(session, rolename)
+        if role is None:
+            raise ModelError("No such role defined in environment: {0}".format(rolename))
+        qq = session.query(TE).filter(and_(
+                TE.environment==self,
+                TE.roles.contains(role)))
+        return [te.equipment for te in qq.all()]
 
     def get_DUT(self, session):
         qq = session.query(TestEquipment).filter(and_(TestEquipment.environment==self,
