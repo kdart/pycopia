@@ -1,9 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -148,13 +146,16 @@ class DebuggerTheme(UI.ANSITheme):
     pass
 
 class Debugger(bdb.Bdb):
+    def __init__(self, skip=None, io=None):
+        bdb.Bdb.__init__(self, skip)
+        self._io = io or IO.ConsoleIO()
+
     def reset(self):
         bdb.Bdb.reset(self) # old style class
         self.forget()
         self._parser = None
         theme = DebuggerTheme("%GDebug%N> ")
-        io = IO.ConsoleIO()
-        self._ui = CLI.UserInterface(io, env=None, theme=theme)
+        self._ui = CLI.UserInterface(self._io, env=None, theme=theme)
         self._ui.register_prompt_expansion("S", self._expansions)
 
     def _expansions(self, c):
@@ -218,7 +219,7 @@ class Debugger(bdb.Bdb):
         frame.f_locals['__exception__'] = exc_type, exc_value
         if type(exc_type) == type(''):
             exc_type_name = exc_type
-        else: 
+        else:
             exc_type_name = exc_type.__name__
         self.print_exc(exc_type_name, exc_value)
         self.interaction(frame, exc_traceback)
@@ -294,7 +295,7 @@ class Debugger(bdb.Bdb):
             id = idstring[1].strip()
         else:
             return failed
-        if id == '': 
+        if id == '':
             return failed
         parts = id.split('.')
         # Protection for derived debuggers
@@ -359,7 +360,7 @@ class Debugger(bdb.Bdb):
             s.append(self._ui.format('%I->%N'))
             s.append(_saferepr(rv))
         line = linecache.getline(filename, lineno)
-        if line: 
+        if line:
             s.append("\n  ")
             s.append(line.strip())
         return "".join(s)
@@ -372,7 +373,7 @@ class Debugger(bdb.Bdb):
         sys.settrace(None)
         globals = self.curframe.f_globals
         locals = self.curframe.f_locals
-        p = Debugger()
+        p = Debugger(io=self._ui.IO)
         p.reset()
         sys.call_tracing(p.run, (arg, globals, locals))
         sys.settrace(p.trace_dispatch)
@@ -392,7 +393,7 @@ class DebuggerParser(CLI.CommandParser):
         # slashes
         f.add_transition("\\", 0, None, 1)
         f.add_transition(ANY, 1, self._slashescape, 0)
-        # vars 
+        # vars
         f.add_transition("$", 0, self._startvar, 7)
         f.add_transition("{", 7, self._vartext, 9)
         f.add_transition_list(self.VARCHARS, 7, self._vartext, 7)
@@ -511,7 +512,7 @@ class DebuggerCommands(CLI.BaseCommands):
         if line:
             # now set the break point
             err = self._dbg.set_break(filename, line, temporary, cond)
-            if err: 
+            if err:
                 self._print('***', err)
             else:
                 bp = self._dbg.get_breaks(filename, line)[-1]
@@ -626,7 +627,7 @@ class DebuggerCommands(CLI.BaseCommands):
                 err = "Invalid line number (%s)" % arg
             else:
                 err = self._dbg.clear_break(filename, lineno)
-            if err: 
+            if err:
                 self._print('***', err)
             return
         numberlist = arg.split()
@@ -740,9 +741,9 @@ class DebuggerCommands(CLI.BaseCommands):
         for i in range(n):
             name = co.co_varnames[i]
             self._print(name, '=', None)
-            if name in dict: 
+            if name in dict:
                 self._print(dict[name])
-            else: 
+            else:
                 self._print("*** undefined ***")
 
     def retval(self, argv):
@@ -768,9 +769,9 @@ class DebuggerCommands(CLI.BaseCommands):
             self._ui.printf("%%I%s%%N (" % (f.f_code.co_name or "<lambda>",))
             co = f.f_code
             n = co.co_argcount
-            if co.co_flags & 4: 
+            if co.co_flags & 4:
                 n += 1
-            if co.co_flags & 8: 
+            if co.co_flags & 8:
                 n += 1
             local = f.f_locals
             for name in co.co_varnames[:n]:
@@ -854,17 +855,17 @@ class DebuggerCommands(CLI.BaseCommands):
             self._print('***', exc_type_name + ':', repr(v))
             return
         # Is it a function?
-        try: 
+        try:
             code = value.func_code
-        except: 
+        except:
             pass
         else:
             self._print('Function', code.co_name)
             return
         # Is it an instance method?
-        try: 
+        try:
             code = value.im_func.func_code
-        except: 
+        except:
             pass
         else:
             self._print('Method', code.co_name)
@@ -951,9 +952,9 @@ def set_trace(frame=None, start=0):
     Debugger().set_trace(frame, start)
 
 # post mortems used to debug
-def post_mortem(t, exc=None, val=None):
+def post_mortem(t, exc=None, val=None, io=None):
     "Start debugging at the given traceback."
-    p = Debugger()
+    p = Debugger(io=io)
     p.reset()
     while t.tb_next is not None:
         t = t.tb_next
@@ -974,10 +975,10 @@ def debug(method, *args, **kwargs):
         else:
             post_mortem(tb, ex, val)
 
-def pm():
+def pm(io=None):
     "Start debugging with the system's last traceback."
     ex, val, tb = sys.exc_info()
-    post_mortem(tb, ex, val)
+    post_mortem(tb, ex, val, io)
 
 # show the external doc
 def help():
