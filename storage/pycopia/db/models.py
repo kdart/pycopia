@@ -1512,6 +1512,12 @@ def class_names():
         yield mapper._identity_class.__name__
 
 
+def get_primary_key_value(dbrow):
+    mapper = class_mapper(dbrow.__class__)
+    pkname = str(mapper.primary_key[0].name)
+    return getattr(dbrow, pkname)
+
+
 def get_choices(session, modelclass, colname, order_by=None):
     """Get possible choices for a field.
 
@@ -1674,6 +1680,7 @@ if __name__ == "__main__":
 #        print (tr)
     tc = TestCase.get_by_implementation(sess, "testcases.unittests.WWW.client.HTTPPageFetch")
     print(tc)
+    print(get_primary_key_value(tc))
 #    print(tc.id)
 #    ltr = tc.get_latest_result(sess)
 #    print(ltr)

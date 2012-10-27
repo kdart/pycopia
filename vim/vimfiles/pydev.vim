@@ -18,7 +18,7 @@ set cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 " set omnifunc=pythoncomplete#Complete
 
 " set kp=pyshowdoc
-" set kp=kchmviewer\ $HOME/.local/share/devhelp/books/python321rc1.chm\ --sindex
+set kp=kchmviewer\ $PYCHMBOOK\ --sindex
 
 " The 'NonText' highlighting will be used for 'eol', 'extends' and
 " 'precedes'.  'SpecialKey' for 'tab' and 'trail'.

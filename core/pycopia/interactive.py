@@ -166,7 +166,10 @@ sys.displayhook = mydisplayhook
 # cluttering the __main__ namespace.
 def _add_builtins(names=__all__):
     for name in names:
-        add2builtin(name, getattr(sys.modules[__name__], name))
+        try:
+            add2builtin(name, getattr(sys.modules[__name__], name))
+        except AttributeError:
+            pass
 
 _add_builtins()
 del _add_builtins

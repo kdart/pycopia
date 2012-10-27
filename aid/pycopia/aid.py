@@ -28,6 +28,20 @@ from errno import EINTR
 from collections import deque, Callable
 import functools
 
+
+def add2builtin(name, obj):
+    """Add an object to the builtins namespace."""
+    bim = sys.modules[_biname]
+    if not hasattr(bim, name):
+        setattr(bim, name, obj)
+
+def add_exception(excclass, name=None):
+    """Add an exception to the builtins namespace."""
+    name = name or excclass.__name__
+    bimod = sys.modules[_biname]
+    if not hasattr(bimod, name):
+        setattr(bimod, name, excclass)
+
 # python 3 compatibility
 try:
     long
@@ -43,6 +57,9 @@ except NameError: # signals python3
         glbl = glbl or globals()
         loc = loc or locals()
         exec(open(fn).read(), glbl, loc)
+    add2builtin("execfile", execfile)
+    add2builtin("callable", callable)
+    add2builtin("raw_input", input)
 else: # python 2
     _biname = "__builtin__"
     execfile = execfile
@@ -588,28 +605,12 @@ def unhexdigest(s):
     return "".join(l)
 
 def Import(modname):
-    """Import a module with package components."""
+    """Improved __import__ function that returns fully initialized subpackages."""
     try:
         return sys.modules[modname]
     except KeyError:
         pass
-    mod = __import__(modname)
-    pathparts = modname.split(".")
-    for part in pathparts[1:]:
-        mod = getattr(mod, part)
-    sys.modules[modname] = mod
-    return mod
+    __import__(modname)
+    return sys.modules[modname]
 
-def add2builtin(name, obj):
-    """Add an object to the builtins namespace."""
-    bim = sys.modules[_biname]
-    if not hasattr(bim, name):
-        setattr(bim, name, obj)
-
-def add_exception(excclass, name=None):
-    """Add an exception to the builtins namespace."""
-    name = name or excclass.__name__
-    bimod = sys.modules[_biname]
-    if not hasattr(bimod, name):
-        setattr(bimod, name, excclass)
 

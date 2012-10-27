@@ -230,7 +230,7 @@ if !exists("python_no_exception_highlight")
   syn keyword pythonExceptions	UserWarning Warning
 endif
 
-syn keyword pyDebug            __debug__
+syn keyword pyDebug            __debug__ DEBUG
 syn keyword pyBuiltinVariable  __bases__ __class__ __doc__ __slots__
 syn keyword pyBuiltinVariable  __file__ __name__ __methods__ __members__
 syn keyword pyBuiltinVariable  __module__ __self__ __package__ __builtins__

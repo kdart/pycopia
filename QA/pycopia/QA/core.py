@@ -534,11 +534,14 @@ class Test(object):
             passed = UI.yes_no("Did it pass?")
             msg = UI.user_input("%gComments%N? " if passed else "%rReason%N? ")
             if passed:
-                return self.passed(msg)
+                return self.passed("OK, user reported passed. " + msg)
             else:
-                return self.failed(msg)
+                if msg:
+                    self.diagnostic(msg)
+                return self.failed("User reported failure.")
         else:
-            return self.incomplete("Could not perform test.")
+            msg = UI.user_input("%YReason%N? ")
+            return self.incomplete("Could not perform test. " + msg)
 
     def report_build(self, buildstring):
         """Report any build information. Usually a version or build number.

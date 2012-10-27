@@ -18,6 +18,7 @@ Debugger that can be used instead of the pdb module. This one provides a nicer
 command interface by using the CLI module.
 
 """
+from __future__ import print_function
 
 import sys, os
 import linecache
@@ -645,6 +646,8 @@ class DebuggerCommands(CLI.BaseCommands):
     context of most commands.  'bt' is an alias for this command."""
         self._dbg.print_stack_trace()
 
+    backtrace = where # alias
+
     def up(self, argv):
         """up
     Move the current frame one level up in the stack trace
@@ -890,7 +893,6 @@ class DebuggerCommands(CLI.BaseCommands):
             start = max(0,  self._dbg.lineno - 9)
         lines = linecache.getlines(filename)[start:]
         for lineno, line in enumerate(lines):
-            #line = linecache.getline(filename, lineno)
             mo = patt.search(line)
             if mo:
                 self._print_source(filename, lineno+start-10, lineno+start+10)
@@ -991,6 +993,7 @@ def help():
             del io
             return True
     return False
+
 
 if __name__=='__main__':
     runcall(help)

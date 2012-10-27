@@ -211,7 +211,7 @@ class IPv4(object):
     # The IPv4 object can be initialized a variety of ways.
     def __handleAddress(self, address):
         # determine input type and convert if necessary
-        if type(address) is str:
+        if isinstance(address, basestring):
             # first, check for optional slash notation, and handle it.
             aml = address.split("/")
             if len(aml) > 1:
@@ -228,7 +228,7 @@ class IPv4(object):
             self._address = address._address
             self._mask = address._mask
         else:
-            raise ValueError
+            raise ValueError("Can't convert {!r} to IPv4".format(address))
 
     def __handleMask(self, mask):
         if type(mask) is str:
@@ -461,7 +461,10 @@ def dqtoi(dq):
     """Return an integer value given an IP address as dotted-quad string.
     You can also supply the address as a a host name.
     """
-    s = buffer(socket.inet_aton(dq))
+    try:
+        s = buffer(socket.inet_aton(dq))
+    except socket.error, why:
+        raise ValueError, why
     return (ord(s[0]) << 24) + (ord(s[1]) << 16) + (ord(s[2]) << 8) + (ord(s[3]))
 
 def itodq(addr):
