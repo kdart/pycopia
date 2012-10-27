@@ -42,8 +42,10 @@ Shortcuts for creating equipment and environments.
 """
 
 import sys
+
 import urwid
 
+from pycopia import getopt
 from pycopia.db import models
 from pycopia.db.tui import widgets
 
@@ -78,20 +80,20 @@ class DBEditor(object):
 
     def unhandled_input(self, k):
         if k == "esc":
-            self._popform(None)
+            self._popform(None, None)
         elif k == "f1":
             self.show_help()
         elif k == "f2":
             self.reset()
             self.top.body = self.form
         elif k == "f5":
-            self.create_form(models.TestCase)
+            self.get_create_form(models.TestCase)
         elif k == "f16":
-            self.create_form(models.TestSuite)
+            self.get_create_form(models.TestSuite)
         elif k == "f9":
-            self.create_form(models.Equipment)
+            self.get_create_form(models.Equipment)
         elif k == "f10":
-            self.create_form(models.Environment)
+            self.get_create_form(models.Environment)
 
     def reset(self):
         self._formtrail = []
@@ -106,10 +108,11 @@ class DBEditor(object):
         urwid.disconnect_signal(form, 'pushform', self._pushform)
         urwid.connect_signal(newform, 'pushform', self._pushform)
         urwid.connect_signal(newform, 'popform', self._popform)
+        urwid.connect_signal(newform, 'message', self._message)
         self.form = newform
         self.top.body = self.form
 
-    def _popform(self, form):
+    def _popform(self, form, pkval):
         if self._formtrail:
             formclass, sess, modelclass, row = self._formtrail.pop()
             self.form = formclass(sess, modelclass, row)
@@ -118,19 +121,22 @@ class DBEditor(object):
         else:
             raise urwid.ExitMainLoop()
 
+    def _message(self, form, msg):
+        self.message(msg)
+
     def message(self, msg):
-        self.top.set_footer(urwid.AttrWrap(urwid.Text(msg), "foot"))
+        self.top.set_footer(urwid.AttrWrap(urwid.Text(msg), "important"))
         self.loop.set_alarm_in(5.0, self._restore_footer)
 
-    def list_form(self, modelclass):
+    def get_list_form(self, modelclass):
         form = widgets.get_list_form(self.session, modelclass)
         urwid.emit_signal(self.form, 'pushform', self.form, form)
 
-    def create_form(self, modelclass):
+    def get_create_form(self, modelclass):
         form = widgets.get_create_form(self.session, modelclass)
         urwid.emit_signal(self.form, 'pushform', self.form, form)
 
-    def edit_form(self, row):
+    def get_edit_form(self, row):
         form = widgets.get_edit_form(self.session, row)
         urwid.emit_signal(self.form, 'pushform', self.form, form)
 
@@ -148,17 +154,49 @@ class HelpDialog(urwid.WidgetWrap):
     signals = ['close']
 
     def __init__(self):
-        close_button = urwid.Button(("selectable", "OK"))
+        close_button = urwid.Button(("buttn", "OK"))
         urwid.connect_signal(close_button, 'click', lambda button:self._emit("close"))
         lb =urwid.LineBox(urwid.Filler(urwid.Pile([urwid.Text(__doc__), close_button]), valign="top"))
         self.__super.__init__(lb)
 
 
 def main(argv):
-    sess = models.get_session()
+    """dbedit [-d] [<databaseurl>]
+    """
+    debug = False
+    try:
+        optlist, longopts, args = getopt.getopt(argv[1:], "?hdD")
+    except getopt.GetoptError:
+            print (main.__doc__)
+            return
+    for opt, val in optlist:
+        if opt in ("-?", "-h"):
+            print (main.__doc__)
+            return
+        elif opt == "-d":
+            debug = True
+        elif opt == "-D":
+            from pycopia import autodebug
+    if args:
+        database = args[0]
+    else:
+        from pycopia import basicconfig
+        cf = basicconfig.get_config("database.conf")
+        database = cf.DATABASE_URL
+        del basicconfig, cf
+
+    sess = models.get_session(database)
     try:
         app = DBEditor(sess)
-        app.run()
+        try:
+            app.run()
+        except:
+            if debug:
+                ex, val, tb = sys.exc_info()
+                from pycopia import debugger
+                debugger.post_mortem(tb, ex, val)
+            else:
+                raise
     finally:
         sess.close()
 
@@ -170,8 +208,8 @@ if __name__ == "__main__":
         main(sys.argv)
     except:
         ex, val, tb = sys.exc_info()
-        from pycopia import IOurxvt
-        io = IOurxvt.UrxvtIO()
-        debugger.post_mortem(tb, ex, val, io)
-        io.close()
+        #from pycopia import IOurxvt
+        #io = IOurxvt.UrxvtIO()
+        debugger.post_mortem(tb, ex, val)
+        #io.close()
 
