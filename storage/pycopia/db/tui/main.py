@@ -52,7 +52,7 @@ from pycopia.db.tui import widgets
 
 class DBEditor(object):
 
-    def __init__(self, session):
+    def __init__(self, session, debug=False):
         self.loop =None
         self.session = session
         header = urwid.AttrMap(urwid.Text("Storage Editor", align="center"), "head")
@@ -70,6 +70,9 @@ class DBEditor(object):
                 "foot")
         self.reset()
         self.top = urwid.Frame(urwid.AttrMap(self.form, 'body'), header=header, footer=self.footer)
+        if debug:
+            from pycopia import logwindow
+            widgets.DEBUG = logwindow.DebugLogWindow()
 
     def run(self):
         self.loop = urwid.MainLoop(self.top, widgets.PALETTE,
@@ -94,6 +97,9 @@ class DBEditor(object):
             self.get_create_form(models.Equipment)
         elif k == "f10":
             self.get_create_form(models.Environment)
+        else:
+            widgets.DEBUG("unhandled key:", k)
+
 
     def reset(self):
         self._formtrail = []
@@ -187,7 +193,7 @@ def main(argv):
 
     sess = models.get_session(database)
     try:
-        app = DBEditor(sess)
+        app = DBEditor(sess, debug)
         try:
             app.run()
         except:

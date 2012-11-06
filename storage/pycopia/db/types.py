@@ -311,14 +311,14 @@ def _validate_int(value):
     return int(value)
 
 def _validate_boolean(value):
-    if type(value) is str:
+    if isinstance(value, basestring):
         value = value.lower()
         if value in ("on", "1", "true", "t", "y", "yes"):
             return True
         elif value in ("off", "0", "false", "f", "n", "no"):
             return False
         else:
-            raise ValidationError("Invalid boolean string")
+            raise ValidationError("Invalid boolean string: {!r}".format(value))
     else:
         return bool(value)
 

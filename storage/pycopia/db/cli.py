@@ -1288,6 +1288,16 @@ def edit_key(ui, modelclass, metadata, dbrow):
     key = ui.get_key("Press a key for %r: " % (metadata.colname,))
     setattr(dbrow, metadata.colname, key)
 
+def edit_timestamp(ui, modelclass, metadata, dbrow):
+	dt = getattr(dbrow, metadata.colname)
+	if dt is not None:
+		val = dt.isoformat()
+	else:
+		val = ""
+    new = ui.get_value(metadata.colname + "? ", val)
+	#newval = 
+    setattr(dbrow, metadata.colname, new)
+
 def edit_field(ui, modelclass, metadata, dbrow):
     new = ui.get_value(metadata.colname + "? ", getattr(dbrow, metadata.colname))
     setattr(dbrow, metadata.colname, new)
@@ -1383,7 +1393,7 @@ _EDITORS = {
     "Cidr": edit_field,
     "Inet": edit_field,
     "DATE": edit_field,
-    "TIMESTAMP": edit_field,
+    "TIMESTAMP": edit_timestamp,
     "FLOAT": edit_float,
     "INTEGER": edit_integer,
     "INTERVAL": edit_field,

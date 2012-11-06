@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
-# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:fenc=utf-8
 #
 #    Copyright (C) 2010 Keith Dart <keith@dartworks.biz>
 #
@@ -23,6 +23,7 @@ Widgets for DB editor.
 
 """
 
+import sys
 from datetime import datetime
 
 import urwid
@@ -30,9 +31,11 @@ import urwid
 from sqlalchemy.exc import IntegrityError
 
 from pycopia import ipv4
+from pycopia.aid import NULL
 from pycopia.db import types
 from pycopia.db import models
 
+DEBUG = NULL
 
 PALETTE = [
     ('banner', 'black', 'light gray', 'standout,underline'),
@@ -68,6 +71,7 @@ PALETTE = [
     ('important','light magenta','default',('standout','underline')),
     ('key', "black", 'light cyan', 'underline'),
     ('collabel','light gray','black'),
+    ('coldivider','light blue','black'),
     ('notnulllabel','light magenta','black'),
     ('selectable','black', 'dark cyan'),
     ('shadow','white','black'),
@@ -83,16 +87,22 @@ PALETTE = [
 AM = urwid.AttrMap
 
 
+class InputDivider(urwid.WidgetWrap):
+    def __init__(self, legend):
+        wid = urwid.Columns([
+                (25, AM(urwid.Text("{}:".format(legend), align="left"), "coldivider")),
+                 urwid.Divider(u"-")], dividechars=1)
+        self.__super.__init__(wid)
+
+
 class BaseInput(urwid.WidgetWrap):
-    signals = ["update", "pushform"]
+    signals = ["update", "pushform", "message"]
 
     def _col_creator(self, metadata, widget, legend=None):
         return urwid.Columns([
-                ('fixed', 25,
-                        urwid.Padding(AM(urwid.Text(legend or metadata.colname),
-                        "collabel" if (metadata.nullable or metadata.uselist) else "notnulllabel"),
-                        align="right", right=2)),
-                 widget ])
+                (25, AM(urwid.Text(legend or metadata.colname, align="right"),
+                            "collabel" if (metadata.nullable or metadata.uselist) else "notnulllabel")),
+                 widget], dividechars=1)
 
     def _not_implemented(self, metadata):
         return urwid.Text([metadata.coltype, ("notimplemented", " Not implemented yet")])
@@ -134,11 +144,10 @@ class IntInput(BaseInput):
 
 
 class FloatInput(BaseInput):
-    signals = ["update"]
     def __init__(self, model, metadata, value, legend=None):
         val = u"0.0" if value is None else str(value)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
-        self.__super.__init__(self._col_creator(metadata, self.wid))
+        self.__super.__init__(self._col_creator(metadata, self.wid, legend))
 
     @property
     def value(self):
@@ -328,9 +337,9 @@ class ValueTypeInput(BaseInput):
         for b in blist:
             if b.value == value:
                 b.state = True
-        self.wid = urwid.GridFlow(glist, maxl+4, 1, 1, 'left')
+        self.wid = urwid.GridFlow(glist, maxl+4, 1, 0, 'left')
         self.blist = blist
-        self.__super.__init__(self._col_creator(metadata, self.wid))
+        self.__super.__init__(self._col_creator(metadata, self.wid, legend))
 
     @property
     def value(self):
@@ -356,9 +365,9 @@ class EnumTypeInput(BaseInput):
         for b in blist:
             if b.value == value:
                 b.state = True
-        self.wid = urwid.GridFlow(glist, maxl+4, 1, 1, 'left')
+        self.wid = urwid.GridFlow(glist, maxl+4, 1, 0, 'left')
         self.blist = blist
-        self.__super.__init__(self._col_creator(metadata, self.wid))
+        self.__super.__init__(self._col_creator(metadata, self.wid, legend))
 
     @property
     def value(self):
@@ -453,8 +462,9 @@ class RelationshipInput(BaseInput):
             newwid = self._create_relation_input()
             self._w.widget_list[1] = newwid
 
-    def _pop_multiform(self, form, dbvalue):
-        self.dbvalue = dbvalue
+    def _pop_multiform(self, form, dbvalue=NULL):
+        if dbvalue is not NULL:
+            self.dbvalue = dbvalue
         self._w.widget_list[1] = self._get_top_button(self._get_top_label())
 
     def _cancel(self, b):
@@ -485,6 +495,267 @@ class RelationshipInput(BaseInput):
     def _get_related_row(self, pk):
         relmodel = getattr(self.modelclass, self.metadata.colname).property.mapper.class_
         return self.session.query(relmodel).get(pk)
+
+
+class AttributeInput(BaseInput):
+    def __init__(self, session, model, metadata, row, legend=None):
+        self.session = session
+        self.modelclass = model
+        self.metadata = metadata
+        self.row = row
+        wid = self.build()
+        self.__super.__init__(self._col_creator(metadata, wid, legend))
+
+    def build(self):
+        wlist = []
+        addnew = urwid.Button("Add")
+        urwid.connect_signal(addnew, 'click', self._add_new_attribute)
+        addnew = urwid.AttrWrap(addnew, 'selectable', 'butfocus')
+        wlist.append(addnew)
+        for attrib in getattr(self.row, self.metadata.colname): # list-like attribute
+            entry = ListEntry(urwid.Columns(
+                    [(30, urwid.Text(str(attrib.type))), 
+                     urwid.Text(unicode(attrib.value).encode("utf-8"))]))
+            entry.attrname = attrib.type.name
+            urwid.connect_signal(entry, 'activate', self._edit_attribute)
+            urwid.connect_signal(entry, 'delete', self._delete)
+            wlist.append(entry)
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(wlist))
+        return urwid.BoxAdapter(urwid.LineBox(listbox), max(7, len(wlist)+2))
+
+    # edit attrib
+    def _edit_attribute(self, entry):
+        value = self.row.get_attribute(self.session, entry.attrname)
+        frm = AttributeEditForm(entry.attrname, unicode(value).encode("utf-8"))
+        urwid.connect_signal(frm, 'ok', self._edit_ok, entry)
+        urwid.connect_signal(frm, 'cancel', self._edit_cancel, entry)
+        self._saveentryval = entry._w
+        entry._w = frm
+
+    def _edit_cancel(self, form, entry):
+        urwid.disconnect_signal(form, 'ok', self._edit_ok, entry)
+        urwid.disconnect_signal(form, 'cancel', self._edit_cancel, entry)
+        saveentry = self._saveentryval
+        del self._saveentryval
+        entry._w = saveentry
+
+    def _edit_ok(self, form, newtext, entry):
+        try:
+            self.row.set_attribute(self.session, entry.attrname, newtext)
+        except:
+            ex, val, tb = sys.exc_info()
+            self.session.rollback()
+            self._emit("message", "{}: {}".format(ex.__name__, val))
+            return
+        urwid.disconnect_signal(form, 'ok', self._edit_ok, entry)
+        urwid.disconnect_signal(form, 'cancel', self._edit_cancel, entry)
+        saveentry = self._saveentryval
+        del self._saveentryval
+        saveentry.base_widget[1].base_widget.set_text(newtext)
+        entry._w = saveentry
+
+
+    # create attrib
+    def _add_new_attribute(self, b):
+        frm = AttributeAddForm(self.session, self.modelclass)
+        urwid.connect_signal(frm, 'ok', self._add_new_attribute_ok)
+        urwid.connect_signal(frm, 'cancel', self._add_new_attribute_cancel)
+        listbox = self._w.contents[1][0].base_widget
+        listbox.body.append(frm) # listwalker
+        listbox.set_focus(len(listbox.body)-1)
+
+    def _add_new_attribute_cancel(self, dlg):
+        listbox = self._w.contents[1][0].base_widget
+        frm = listbox.body.pop()
+        listbox.set_focus(0)
+
+    def _add_new_attribute_ok(self, form, data):
+        attrname, attrvalue = data
+        try:
+            self.row.set_attribute(self.session, attrname, attrvalue)
+        except:
+            ex, val, tb = sys.exc_info()
+            self.session.rollback()
+            self._emit("message", "{}: {}".format(ex.__name__, val))
+            return
+        old, attr = self._w.contents[1] # attr e.g. (wid, ("given", 25, False))
+        self._w.contents[1] = (self.build(), attr)
+
+    # delete attrib
+    def _delete(self, listentry):
+        urwid.disconnect_signal(listentry, 'activate', self._edit_attribute)
+        urwid.disconnect_signal(listentry, 'delete', self._delete)
+        text, attr = listentry._w.base_widget[0].get_text()
+        dlg = DeleteDialog(text)
+        urwid.connect_signal(dlg, 'ok', self._delete_ok, listentry)
+        urwid.connect_signal(dlg, 'cancel', self._delete_cancel, listentry)
+        self._oldw = listentry._w
+        listentry._w = dlg
+
+    def _delete_ok(self, dlg, listentry):
+        listbox = self._w.contents[1][0].base_widget
+        assert type(listbox) is urwid.ListBox
+        listbox.body.remove(listentry)
+        urwid.disconnect_signal(dlg, 'ok', self._delete_ok, listentry)
+        urwid.disconnect_signal(dlg, 'cancel', self._delete_cancel, listentry)
+        del self._oldw
+        # now actually delete the attribute
+        self.row.del_attribute(self.session, listentry.attrname)
+
+    def _delete_cancel(self, dlg, listentry):
+        urwid.disconnect_signal(dlg, 'ok', self._delete_ok, listentry)
+        urwid.disconnect_signal(dlg, 'cancel', self._delete_cancel, listentry)
+        listentry._w = self._oldw
+        del self._oldw
+        # restore sig handlers
+        urwid.connect_signal(listentry, 'activate', self._edit_attribute)
+        urwid.connect_signal(listentry, 'delete', self._delete)
+
+
+class DeleteDialog(urwid.WidgetWrap):
+    __metaclass__ = urwid.MetaSignals
+    signals = ["ok", "cancel"]
+
+    def __init__(self, text):
+        ok = urwid.Button("OK")
+        urwid.connect_signal(ok, 'click', self._ok)
+        ok = AM(ok, 'selectable', 'butfocus')
+        cancel = urwid.Button("Cancel")
+        urwid.connect_signal(cancel, 'click', self._cancel)
+        cancel = AM(cancel, 'selectable', 'butfocus')
+        dlg = urwid.Columns([urwid.Text(text), 
+                AM(urwid.Text("Delete?"), "important"), 
+                (10, ok), 
+                (10, cancel)], dividechars=1, focus_column=2)
+        self.__super.__init__(dlg)
+
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        return self._w.keypress(size, key)
+
+    def _ok(self, b):
+        self._emit("ok")
+
+    def _cancel(self, b):
+        self._emit("cancel")
+
+
+class AttributeEditForm(urwid.WidgetWrap):
+    __metaclass__ = urwid.MetaSignals
+    signals = ["ok", "cancel"]
+
+    def __init__(self, name, text):
+        wid = self.build(name, text)
+        self.__super.__init__(wid)
+
+    def build(self, name, text):
+        ls = urwid.Text(name)
+        te = urwid.Edit(edit_text=text, multiline=True, allow_tab=True)
+        ok = urwid.Button("OK")
+        urwid.connect_signal(ok, 'click', self._ok)
+        ok = AM(ok, 'selectable', 'butfocus')
+        cancel = urwid.Button("Cancel")
+        urwid.connect_signal(cancel, 'click', self._cancel)
+        cancel = AM(cancel, 'selectable', 'butfocus')
+        return urwid.Columns([ls, ("weight", 2, te), (10, ok), (10, cancel)], dividechars=1, focus_column=1)
+
+    def _ok(self, b):
+        widget_list = self._w.widget_list
+        data = widget_list[1].get_text()[0]
+        self._emit("ok", data)
+    
+    def _cancel(self, b):
+        self._emit("cancel")
+
+class AttributeAddForm(urwid.WidgetWrap):
+    __metaclass__ = urwid.MetaSignals
+    signals = ["ok", "cancel"]
+
+    def __init__(self, session, model):
+        self.session = session
+        self.modelclass = model
+        wid = self.build()
+        self.__super.__init__(wid)
+
+    def get_form_buttons(self):
+        ok = urwid.Button("OK")
+        urwid.connect_signal(ok, 'click', self._ok)
+        ok = AM(ok, 'selectable', 'butfocus')
+        cancel = urwid.Button("Cancel")
+        urwid.connect_signal(cancel, 'click', self._cancel)
+        cancel = AM(cancel, 'selectable', 'butfocus')
+        return ok, cancel
+
+    def build(self):
+        choices = [c[0] for c in self.modelclass.get_attribute_list(self.session)] # list of (name, basetype) pairs
+        ls = AM(ListScrollSelector(choices), "selectable", "butfocus")
+        te = urwid.Edit(edit_text=u"", multiline=True, allow_tab=True)
+        ok, cancel = self.get_form_buttons()
+        return urwid.Columns([ls, ("weight", 2, te), (10, ok), (10, cancel)], dividechars=1, focus_column=0)
+
+    def _ok(self, b):
+        widget_list = self._w.widget_list
+        data = (widget_list[0].base_widget.value, widget_list[1].get_text()[0] )
+        self._emit("ok", data)
+
+    def _cancel(self, b):
+        self._emit("cancel")
+
+
+class ListScrollSelector(urwid.Widget):
+    _selectable = True
+    _sizing = frozenset(['flow'])
+    signals = ["click"]
+    UPARR=u"↑"
+    DOWNARR=u"↓"
+
+    def __init__(self, choicelist):
+        self.__super.__init__()
+        self._list = choicelist
+        self._max = len(choicelist)
+        assert self._max > 0, "Need list with at least one element"
+        self._index = 0
+        self._text = self._list[self._index]
+        maxwidth = reduce(lambda c,m: max(c,m), map(lambda o: len(str(o)), choicelist), 0)
+        self._fmt = u"{} {{:{}.{}s}} {}".format(self.UPARR, maxwidth, maxwidth, self.DOWNARR)
+        self._layout = urwid.text_layout.default_layout
+
+    def keypress(self, size, key):
+        cmd =  self._command_map[key]
+        if cmd == 'cursor up':
+            self._index = (self._index + 1) % self._max
+            self.set_text(self._list[self._index])
+        elif cmd == 'cursor down':
+            self._index = (self._index - 1) % self._max
+            self.set_text(self._list[self._index])
+        elif cmd == "activate":
+            self._emit("click")
+        else:
+            return key
+
+    def rows(self, size, focus=False):
+        return 1
+
+    def render(self, size, focus=False):
+        (maxcol,) = size
+        text = self._fmt.format(self._text).encode("utf-8")
+        c = urwid.TextCanvas([text], maxcol=maxcol)
+        c.cursor = self.get_cursor_coords(size)
+        return c
+
+    def set_text(self, text):
+        self._text = text
+        self._invalidate()
+
+    def get_cursor_coords(self, size):
+        return None
+
+    @property
+    def value(self):
+        return self._list[self._index] 
+
 
 
 # Map database types and psuedo-types to a form element
@@ -564,6 +835,11 @@ class ListEntry(urwid.WidgetWrap):
         return True
 
     def keypress(self, size, key):
+        try:
+            if self._w.keypress(size, key) is None:
+                return
+        except AttributeError:
+            pass
         if self._command_map[key] != 'activate':
             if key == "delete":
                 self._emit('delete')
@@ -599,6 +875,7 @@ class MultiselectListForm(urwid.WidgetWrap):
         cancel = urwid.Button("Cancel")
         urwid.connect_signal(cancel, 'click', self._cancel)
         cancel = urwid.AttrWrap(cancel, 'selectable', 'butfocus')
+        # footer and header
         footer = urwid.GridFlow([done, add, cancel], 15, 3, 1, 'center')
         header = urwid.Padding(urwid.Text(
             ("popup", "Select multiple idtems. Tab to button box to select buttons. Arrow keys move selection.")))
@@ -621,8 +898,8 @@ class MultiselectListForm(urwid.WidgetWrap):
 
     def keypress(self, size, key):
         if self._command_map[key] != 'next selectable':
-            self._w.keypress(size, key)
-            return key
+            return self._w.keypress(size, key)
+            #return key
         if isinstance(self._w, urwid.Frame):
             self._w.set_focus("footer" if self._w.get_focus() == "body" else "body")
 
@@ -646,14 +923,13 @@ class MultiselectListForm(urwid.WidgetWrap):
         self._w.set_body(self._build_list())
 
     def _cancel(self, b):
-        dbvalue = self.old_dbvalue
         self.old_dbvalue = None
-        self._emit("popform", dbvalue)
+        self.currentvalue = None
+        self._emit("popform", NULL)
 
     def _done_multiselect(self, b):
         self.old_dbvalue = None
         dbvalue = self.currentvalue
-        self.currentvalue = None
         self._emit("popform", dbvalue)
 
     def _multi_select(self, b, newstate, val):
@@ -680,6 +956,7 @@ class Form(urwid.WidgetWrap):
         else:
             self.metadata = None
         self.row = row
+        self.formwidgets =[] # list of only input widgets
         display_widget = self.build()
         self.__super.__init__(display_widget)
         self.newpk = None
@@ -687,18 +964,54 @@ class Form(urwid.WidgetWrap):
     def build(self):
         raise NotImplementedError("Override in subclass: return a top-level Frame widget")
 
-    def get_buttons(self):
-        l = [
-            AM(urwid.Button("OK", self._ok), 'selectable', 'butfocus'),
-            AM(urwid.Button("Cancel", self._cancel), 'selectable', 'butfocus'),
-            ]
-        butgrid = urwid.GridFlow(l, 10, 3, 1, 'center')
+    # from construction helpers
+    def get_form_buttons(self, defaultdata=None):
+        ok = urwid.Button("OK")
+        urwid.connect_signal(ok, 'click', self._ok, defaultdata)
+        ok = AM(ok, 'selectable', 'butfocus')
+        cancel = urwid.Button("Cancel")
+        urwid.connect_signal(cancel, 'click', self._cancel)
+        cancel = AM(cancel, 'selectable', 'butfocus')
+        butgrid = urwid.GridFlow([ok, cancel], 10, 3, 1, 'center')
         return urwid.Pile([urwid.Divider(), butgrid ], focus_item=1)
 
-    def message(self, msg):
-        self._emit("message", msg)
+    def get_default_data(self, deflist):
+        data = {}
+        for name in deflist:
+            data[name] = self.metadata[name].default,
+        return data
 
-    def _message(self, form, msg):
+    def build_data_input(self, colmd, data=NULL, legend=None):
+        typewidget = _TYPE_CREATE_WIDGETS[colmd.coltype]
+        wid = typewidget(self.modelclass, colmd, data if data is not NULL else colmd.default, legend)
+        wid.colname = colmd.colname
+        self.formwidgets.append(wid)
+        return wid
+
+    def build_relation_input(self, colmd, data=NULL, legend=None):
+        wid = RelationshipInput(self.session, self.modelclass, colmd, data if data is not NULL else colmd.default, legend)
+        urwid.connect_signal(wid, "pushform", self._subform)
+        wid.colname = colmd.colname
+        self.formwidgets.append(wid)
+        return wid
+
+    def build_input(self, colmd, data=NULL, legend=None):
+        if colmd.coltype == "RelationshipProperty":
+            return self.build_relation_input(colmd, data, legend)
+        else:
+            return self.build_data_input(colmd, data, legend)
+
+    def build_divider(self, legend):
+        return InputDivider(legend)
+
+    def build_attribute_input(self, colmd, data):
+        wid = AttributeInput(self.session, self.modelclass, colmd, self.row)
+        #urwid.connect_signal(wid, "pushform", self._subform)
+        urwid.connect_signal(wid, 'message', self._message)
+        wid.colname = colmd.colname
+        return wid
+
+    def message(self, msg):
         self._emit("message", msg)
 
     def _subform(self, oldform, newform):
@@ -708,15 +1021,19 @@ class Form(urwid.WidgetWrap):
                 "center", ("relative", 80), "middle", ("relative", 80), min_width=40, min_height=20)
         self._w = ovl
 
-    def _popform(self, form, pkval):
+    def _message(self, form, msg):
+        self._emit("message", msg)
+
+    def _popform(self, form, *extra):
         ovl = self._w
         self._w = ovl.bottom_w
 
-    def _ok(self, b):
+    # form dispostion callbacks
+    def _ok(self, b, data=None):
         raise NotImplementedError("Need to implement _ok in subclass")
 
     def _cancel(self, b):
-        self._emit("popform", None)
+        self._emit("popform")
 
 
 
@@ -752,7 +1069,7 @@ class TableForm(Form):
         "SoftwareCategory",
         "SoftwareVariant",
         "TestCase",
-        "TestEquipment",
+#        "TestEquipment",
         "TestJob",
         "TestSuite",
     ]
@@ -868,8 +1185,8 @@ class GenericListForm(Form):
 
     def keypress(self, size, key):
         if self._command_map[key] != 'next selectable':
-            self._w.keypress(size, key)
-            return key
+            return self._w.keypress(size, key)
+            #return key
         self._w.set_focus("header" if self._w.get_focus() == "body" else "body")
 
 
@@ -881,9 +1198,9 @@ class GenericCreateForm(Form):
                 urwid.AttrMap(urwid.Text("Arrow keys navigate, Enter to select form button. Type into other fields."), "formhead"),
                 urwid.Divider(),
                 ])
-        formstack = []
-        self.formwidgets =[]
-        for key in sorted(self.metadata.keys()):
+        formstack = [] # list of all form widgets to display
+        doinput, _ = sort_inputs(self.modelclass)
+        for key in doinput:
             md = self.metadata[key]
             if md.coltype == "RelationshipProperty":
                 # only show columns that don't need our primary key (which wont exist yet)
@@ -902,12 +1219,12 @@ class GenericCreateForm(Form):
                 self.formwidgets.append(wid)
             else:
                 formstack.append(NotImplementedInput(self.modelclass, md, None))
-        formstack.append(self.get_buttons())
+        formstack.append(self.get_form_buttons())
         listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
         return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
 
-    def _ok(self, b):
-        data = {}
+    def _ok(self, b, data=None):
+        data = data or {}
         errlist = []
         widgets = self.formwidgets
         for inputwid in widgets:
@@ -948,7 +1265,8 @@ class GenericEditForm(Form):
                 ])
         formstack = []
         self.formwidgets = []
-        for key in sorted(self.metadata.keys()):
+        doinput, m2m = sort_inputs(self.modelclass)
+        for key in doinput + m2m:
             md = self.metadata[key]
             if md.coltype == "RelationshipProperty":
                 wid = RelationshipInput(self.session, self.modelclass, md, getattr(self.row, md.colname))
@@ -965,12 +1283,12 @@ class GenericEditForm(Form):
                 self.formwidgets.append(wid)
             else:
                 formstack.append(NotImplementedInput(self.modelclass, md, getattr(self.row, md.colname)))
-        formstack.append(self.get_buttons())
+        formstack.append(self.get_form_buttons())
         listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
         return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
 
-    def _ok(self, b):
-        data = {}
+    def _ok(self, b, data=None):
+        data = data or {}
         widgets = self.formwidgets
         self.formwidgets = None
         for wid in widgets:
@@ -990,12 +1308,65 @@ class GenericEditForm(Form):
 
 
 
-class EquipmentCreateForm(Form):
-    pass
+class EquipmentCreateForm(GenericCreateForm):
+
+    def build(self):
+        header = urwid.Pile([
+                urwid.AttrMap(urwid.Text("Create Equipment"), "formhead"),
+                urwid.AttrMap(urwid.Text("Arrow keys navigate, Enter to select form button. Type into other fields."), "formhead"),
+                urwid.Divider(),
+                ])
+        formstack = []
+        for groupname, group in [
+                (None, ("model", "name", "serno")),
+                ("Localization", ("language",)),
+                ("Asset management", ("owner", "location", "sublocation", "vendor")),
+                ("Automation", ("account",)),
+                ("structural relationship", ('parent',)),
+                ("Addtional Info", ("comments",)),
+                ]:
+            if groupname:
+                formstack.append(self.build_divider(groupname))
+            for colname in group:
+                colmd = self.metadata[colname]
+                wid = self.build_input(colmd)
+                formstack.append(wid)
+        data = self.get_default_data(["active", "addeddate"])
+        formstack.append(self.get_form_buttons(data))
+        listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
+        return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
 
 
-class EquipmentEditForm(Form):
-    pass
+
+class EquipmentEditForm(GenericEditForm):
+    def build(self):
+        header = urwid.Pile([
+                urwid.AttrMap(urwid.Text("Edit Equipment"), "formhead"),
+                urwid.AttrMap(urwid.Text("Arrow keys navigate, Enter to select form button. Type into other fields."), "formhead"),
+                urwid.Divider(),
+                ])
+        formstack = []
+        for groupname, group in [
+                (None, ("model", "name", "serno", "interfaces")),
+                ("Localization", ("language",)),
+                ("Asset management", ("active", "owner", "location", "sublocation", "vendor", "software")),
+                ("Automation", ("account",)),
+                ("structural relationship", ('parent', 'subcomponents')),
+                ("Addtional Info", ("comments",)),
+                ]:
+            if groupname:
+                formstack.append(self.build_divider(groupname))
+            for colname in group:
+                colmd = self.metadata[colname]
+                wid = self.build_input(colmd, getattr(self.row, colmd.colname))
+                formstack.append(wid)
+        for colname in ('attributes',):# TODO ('capabilities', 'attributes'):
+            colmd = self.metadata[colname]
+            wid = self.build_attribute_input(colmd, getattr(self.row, colmd.colname))
+            formstack.append(wid)
+        formstack.append(self.get_form_buttons())
+        listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
+        return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
 
 
 class TestCaseCreateForm(Form):
@@ -1007,17 +1378,17 @@ class TestCaseEditForm(Form):
 
 
 _SPECIAL_CREATE_FORMS = {
-#        "Equipment": EquipmentCreateForm,
+        "Equipment": EquipmentCreateForm,
 #        "TestCase": TestCaseCreateForm,
 }
 
 _SPECIAL_EDIT_FORMS = {
-#        "Equipment": EquipmentEditForm,
+        "Equipment": EquipmentEditForm,
 #        "TestCase": TestCaseEditForm,
 }
 
 _SPECIAL_LIST_FORMS = {
-#        "Equipment": EquipmentEditForm,
+#        "Equipment": EquipmentListForm,
 }
 
 def get_create_form(session, modelclass):
@@ -1038,7 +1409,7 @@ def get_edit_form(session, rowobj):
 
 class YesNoDialog(urwid.WidgetWrap):
     __metaclass__ = urwid.MetaSignals
-    signals = ["ok", "cancel"]
+    signals = ["ok", "cancel", "popform", "message"]
 
     def __init__(self, text):
         display_widget = self.build(text)
@@ -1064,6 +1435,27 @@ class YesNoDialog(urwid.WidgetWrap):
 
 
 ### utility functions
+
+def sort_inputs(modelclass):
+    first = []
+    one2many = []
+    many2many = []
+    for md in models.get_metadata(modelclass):
+        if md.nullable:
+            if md.coltype == "RelationshipProperty":
+                if md.uselist:
+                    many2many.append(md.colname)
+                else:
+                    one2many.append(md.colname)
+            else:
+                first.append(md.colname)
+        else:
+            if md.coltype == "RelationshipProperty":
+                one2many.insert(0, md.colname)
+            else:
+                first.insert(0, md.colname)
+    return first + one2many, many2many
+
 
 def get_related_choices(session, modelclass, colname, order_by=None):
     mapper = models.class_mapper(modelclass)
@@ -1095,7 +1487,9 @@ def get_related_choices(session, modelclass, colname, order_by=None):
 
 def update_row(session, modelclass, dbrow, data):
     for metadata in models.get_metadata(modelclass):
-        value = data.get(metadata.colname)
+        value = data.get(metadata.colname, NULL) # must use NULL for sentinal since None is a valid value.
+        if value is NULL:
+            continue
         if not value and metadata.nullable:
             value = None
         if metadata.coltype == "RelationshipProperty":
@@ -1160,12 +1554,24 @@ class TestForm(Form):
     def build(self):
         self.edit = urwid.Edit("Edit me: ", multiline=True)
         header = urwid.AttrMap(urwid.Text("Edit this text"), "head")
-        buts = self.get_buttons()
-        listbox = urwid.ListBox(urwid.SimpleListWalker([self.edit, buts]))
+        buts = self.get_form_buttons()
+
+        ls = ListScrollSelector(["one", "two", "three", "four", "five", "six"])
+        urwid.connect_signal(ls, 'click', self._scroll_select)
+
+        cols = urwid.Columns([urwid.Edit("input: ", multiline=False), #ls,
+                (25, AM(urwid.Text("legend", align="right"), "collabel")),
+                 AM(urwid.Edit("input", multiline=False), "body")])
+
+        listbox = urwid.ListBox(urwid.SimpleListWalker([self.edit, cols, buts]))
+
         frm = urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
-        ovr = urwid.Frame(urwid.Filler(urwid.Text("Inside frame")))
-        ovl = urwid.Overlay(urwid.LineBox(ovr), frm, "center", 80, "middle", 24)
-        return ovl
+        #ovr = urwid.Frame(urwid.Filler(urwid.Text("Inside frame")))
+        #ovl = urwid.Overlay(urwid.LineBox(ovr), frm, "center", 80, "middle", 24)
+        return frm
+
+    def _scroll_select(self, ls):
+        DEBUG(ls.value)
 
     def run(self):
         loop = urwid.MainLoop(self, PALETTE, unhandled_input=self.unhandled_input, pop_ups=True,
@@ -1182,10 +1588,26 @@ def _test(argv):
     app = TestForm()
     print(app.run())
 
-# XXX for testing
-from pycopia import logwindow
-DEBUG = logwindow.DebugLogWindow()
 
 if __name__ == "__main__":
     import sys
-    #_test(sys.argv)
+    from pycopia import autodebug
+    from pycopia import logwindow
+    DEBUG = logwindow.DebugLogWindow()
+    modelclass = models.Equipment
+    basic = []
+    many2many = []
+    one2many = []
+    for md in models.get_metadata(modelclass):
+        if md.coltype == "RelationshipProperty":
+            if md.uselist:
+                many2many.append(md.colname)
+            else:
+                one2many.append(md.colname)
+        else:
+            basic.append(md.colname)
+
+    print(" basic data:", basic)
+    print(" One 2 many:", one2many)
+    print("Many 2 many:", many2many)
+    _test(sys.argv)
