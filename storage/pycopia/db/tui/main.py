@@ -55,7 +55,6 @@ class DBEditor(object):
     def __init__(self, session, debug=False):
         self.loop =None
         self.session = session
-        header = urwid.AttrMap(urwid.Text("Storage Editor", align="center"), "head")
         self.footer = urwid.AttrMap(
                 urwid.Text([
                         ("key", "ESC"), " Quit  ",
@@ -69,7 +68,7 @@ class DBEditor(object):
                     ]),
                 "foot")
         self.reset()
-        self.top = urwid.Frame(urwid.AttrMap(self.form, 'body'), header=header, footer=self.footer)
+        self.top = urwid.Frame(urwid.AttrMap(self.form, 'body'), footer=self.footer)
         if debug:
             from pycopia import logwindow
             widgets.DEBUG = logwindow.DebugLogWindow()
@@ -103,7 +102,7 @@ class DBEditor(object):
 
     def reset(self):
         self._formtrail = []
-        self.form = widgets.TableForm(self.session)
+        self.form = widgets.TopForm(self.session)
         urwid.connect_signal(self.form, 'pushform', self._pushform)
 
     def _restore_footer(self, loop, user_data):

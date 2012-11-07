@@ -1037,9 +1037,19 @@ class Form(urwid.WidgetWrap):
 
 
 
-class TableForm(Form):
+class TopForm(Form):
 
-    _EDITABLE_CLASSES = [
+    _PRIMARY_TABLES = [
+        "EquipmentModel",
+        "Equipment",
+        "Environment",
+#        "TestEquipment",
+        "TestCase",
+        "TestSuite",
+        "TestJob",
+    ]
+
+    _SUPPORT_TABLES = [
         "Address",
         "AttributeType",
         "CapabilityGroup",
@@ -1048,11 +1058,8 @@ class TableForm(Form):
         "Contact",
         "CorporateAttributeType",
         "Corporation",
-        "Environment",
         "EnvironmentAttributeType",
-        "Equipment",
         "EquipmentCategory",
-        "EquipmentModel",
         "FunctionalArea",
         "Interface",
         "Location",
@@ -1068,23 +1075,34 @@ class TableForm(Form):
         "Software",
         "SoftwareCategory",
         "SoftwareVariant",
-        "TestCase",
-#        "TestEquipment",
-        "TestJob",
-        "TestSuite",
     ]
 
     def build(self):
-        header = urwid.AttrMap(urwid.Text("Tables (select one to view list)"), "subhead")
-        self.blist = [TableItemWidget(s) for s in self._EDITABLE_CLASSES]
-        for b in self.blist:
+        menulist = []
+        # big title
+        bt = urwid.BigText("Storage Editor", urwid.HalfBlock5x4Font())
+        bt = urwid.Padding(bt, "center", None)
+        # primary tables for editing
+        self.primlist = [TableItemWidget(s) for s in self._PRIMARY_TABLES]
+        for b in self.primlist:
             urwid.connect_signal(b, 'activate', self._select)
-        listbox = urwid.ListBox(urwid.SimpleListWalker(self.blist))
-        return urwid.Frame(urwid.AttrMap(listbox, 'top'), header=header)
+        pmenu = urwid.GridFlow(self.primlist, 20, 2, 1, "left")
+        # heading blurbs
+        subhead = urwid.AttrMap(urwid.Text("Select an object type to view or edit."), "subhead")
+        supportsubhead = urwid.AttrMap(urwid.Text("Select a supporting object to view or edit."), "subhead")
+        # secondary/support tables
+        self.seclist = [TableItemWidget(s) for s in self._SUPPORT_TABLES]
+        for b in self.seclist:
+            urwid.connect_signal(b, 'activate', self._select)
+        smenu = urwid.GridFlow(self.seclist, 25, 1, 0, "left")
+        divider = urwid.Divider(u"-")
+        menulist = [bt, divider, subhead, pmenu, divider, supportsubhead, smenu]
+        listbox = urwid.ListBox(urwid.SimpleListWalker(menulist))
+        return urwid.Frame(listbox)
 
     def _select(self, selb):
-        for b in self.blist:
-            urwid.disconnect_signal(b, 'activate', self._select)
+#        for b in self.primlist:
+#            urwid.disconnect_signal(b, 'activate', self._select)
         form = get_list_form(self.session, getattr(models, selb.modelname))
         self._emit("pushform", form)
 
