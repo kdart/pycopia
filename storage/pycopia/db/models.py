@@ -564,6 +564,10 @@ class Corporation(object):
     def get_attribute_list(session):
         return CorporateAttributeType.get_attribute_list(session)
 
+    @staticmethod
+    def get_attribute_class():
+        return CorporateAttributeType
+
     def add_service(self, session, service):
         svc = session.query(FunctionalArea).filter(FunctionArea.name == service).one()
         self.services.append(svc)
@@ -679,6 +683,10 @@ class Software(object):
     def get_attribute_list(session):
         return AttributeType.get_attribute_list(session)
 
+    @staticmethod
+    def get_attribute_class():
+        return AttributeType
+
 
 mapper (Software, tables.software,
     properties={
@@ -792,6 +800,10 @@ class EquipmentModel(object):
     def get_attribute_list(session):
         return AttributeType.get_attribute_list(session)
 
+    @staticmethod
+    def get_attribute_class():
+        return AttributeType
+
 
 mapper(EquipmentModel, tables.equipment_model,
     properties={
@@ -859,6 +871,10 @@ class Equipment(object):
     @staticmethod
     def get_attribute_list(session):
         return AttributeType.get_attribute_list(session)
+
+    @staticmethod
+    def get_attribute_class():
+        return AttributeType
 
     # interface management
     def add_interface(self, session, name,
@@ -1052,6 +1068,10 @@ class Environment(object):
     @staticmethod
     def get_attribute_list(session):
         return EnvironmentAttributeType.get_attribute_list(session)
+
+    @staticmethod
+    def get_attribute_class():
+        return EnvironmentAttributeType
 
     equipment = association_proxy('testequipment', 'equipment')
 

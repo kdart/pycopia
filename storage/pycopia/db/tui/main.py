@@ -131,7 +131,7 @@ class DBEditor(object):
 
     def message(self, msg):
         self.top.set_footer(urwid.AttrWrap(urwid.Text(msg), "important"))
-        self.loop.set_alarm_in(5.0, self._restore_footer)
+        self.loop.set_alarm_in(15.0, self._restore_footer)
 
     def get_list_form(self, modelclass):
         form = widgets.get_list_form(self.session, modelclass)

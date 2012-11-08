@@ -27,6 +27,7 @@ __all__ = ["INTEGER", "BIGINT", "SMALLINT", "VARCHAR", "CHAR", "TEXT",
     "TestCaseType", "PriorityType", "TestResultType", "TestObjectType",
     "ValueType", "LikelihoodType", "SeverityType", "validate_value_type"]
 
+import sys
 import cPickle as pickle
 import json
 
@@ -323,11 +324,13 @@ def _validate_boolean(value):
         return bool(value)
 
 def _validate_object(value):
-    if type(value) is str:
+    if isinstance(value, basestring):
         try:
             return eval(value, {}, {})
         except:
-            return value
+            ex, val, tb = sys.exc_info()
+            del tb
+            raise ValidationError("Could not evaluate object: {}: {}".format(ex,__name__, val))
     else:
         return value
 
