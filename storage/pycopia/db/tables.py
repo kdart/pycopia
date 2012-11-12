@@ -131,6 +131,7 @@ corp_attributes =  Table('corp_attributes', metadata,
             Column(u'corporation_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'corporation_id'], [u'public.corporations.id'], name=u'corp_attributes_corporation_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.corp_attribute_type.id'], name=u'corp_attributes_type_id_fkey'),
+    UniqueConstraint(u"type_id", u"corporation_id"),
     schema='public')
 Index('index_corp_attributes_type_id', corp_attributes.c.type_id, unique=False)
 Index('index_corp_attributes_corporation_id', corp_attributes.c.corporation_id, unique=False)
@@ -220,6 +221,7 @@ software_attributes =  Table('software_attributes', metadata,
             Column(u'software_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'software_id'], [u'public.software.id'], name=u'software_attributes_software_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'software_attributes_type_id_fkey'),
+    UniqueConstraint(u"type_id", u"software_id"),
     schema='public')
 Index('index_software_attributes_software_id', software_attributes.c.software_id, unique=False)
 Index('index_software_attributes_type_id', software_attributes.c.type_id, unique=False)
@@ -241,6 +243,7 @@ environment_attributes =  Table('environment_attributes', metadata,
             Column(u'environment_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'environment_id'], [u'public.environments.id'], name=u'environment_attributes_environment_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.environmentattribute_type.id'], name=u'environment_attributes_type_id_fkey'),
+    UniqueConstraint(u"type_id", u"environment_id"),
     schema='public')
 Index('index_environment_attributes_environment_id', environment_attributes.c.environment_id, unique=False)
 Index('index_environment_attributes_type_id', environment_attributes.c.type_id, unique=False)
@@ -798,6 +801,7 @@ equipment_attributes =  Table('equipment_attributes', metadata,
             Column(u'equipment_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipment_id'], [u'public.equipment.id'], name=u'equipment_attributes_equipment_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'equipment_attributes_type_id_fkey'),
+    UniqueConstraint(u"type_id", u"equipment_id"),
     schema='public')
 Index('index_equipment_attributes_type_id', equipment_attributes.c.type_id, unique=False)
 Index('index_equipment_attributes_equipment_id', equipment_attributes.c.equipment_id, unique=False)
@@ -810,6 +814,7 @@ equipment_model_attributes =  Table('equipment_model_attributes', metadata,
             Column(u'equipmentmodel_id', INTEGER(), primary_key=False, nullable=False),
     ForeignKeyConstraint([u'equipmentmodel_id'], [u'public.equipment_model.id'], name=u'equipment_model_attributes_equipmentmodel_id_fkey'),
             ForeignKeyConstraint([u'type_id'], [u'public.attribute_type.id'], name=u'equipment_model_attributes_type_id_fkey'),
+    UniqueConstraint(u"type_id", u"equipmentmodel_id"),
     schema='public')
 Index('index_equipment_model_attributes_type_id', equipment_model_attributes.c.type_id, unique=False)
 Index('index_equipment_model_attributes_equipmentmodel_id', equipment_model_attributes.c.equipmentmodel_id, unique=False)

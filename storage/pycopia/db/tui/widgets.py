@@ -39,8 +39,6 @@ from pycopia.db import models
 DEBUG = NULL
 
 PALETTE = [
-    ('banner', 'black', 'light gray', 'standout,underline'),
-    ('bg', 'black', 'dark blue'),
     #('body','black','light gray', 'standout'),
     ('body','default', 'default'),
     ('popup','black','light gray', 'standout'),
@@ -518,7 +516,7 @@ class AttributeInput(BaseInput):
         wlist.append(addnew)
         for attrib in getattr(self.row, self.metadata.colname): # list-like attribute
             entry = ListEntry(urwid.Columns(
-                    [(30, urwid.Text(str(attrib.type))), 
+                    [(30, urwid.Text(str(attrib.type))),
                      urwid.Text(unicode(attrib.value).encode("utf-8"))]))
             entry.attrname = attrib.type.name
             urwid.connect_signal(entry, 'activate', self._edit_attribute)
@@ -545,7 +543,7 @@ class AttributeInput(BaseInput):
 
     def _edit_ok(self, form, newtext, entry):
         try:
-            self.row.set_attribute(self.session, entry.attrname, newtext)
+            self.row.update_attribute(self.session, entry.attrname, newtext)
         except:
             ex, val, tb = sys.exc_info()
             self.session.rollback()
@@ -555,7 +553,8 @@ class AttributeInput(BaseInput):
         urwid.disconnect_signal(form, 'cancel', self._edit_cancel, entry)
         saveentry = self._saveentryval
         del self._saveentryval
-        saveentry.base_widget[1].base_widget.set_text(newtext)
+        newval = self.row.get_attribute(self.session, entry.attrname)
+        saveentry.base_widget[1].base_widget.set_text(unicode(newval).encode("utf-8"))
         entry._w = saveentry
 
     # create attrib
@@ -576,6 +575,9 @@ class AttributeInput(BaseInput):
         attrname, attrvalue = data
         try:
             self.row.set_attribute(self.session, attrname, attrvalue)
+        except IntegrityError:
+            self.session.rollback()
+            self._emit("message", "Cannot add, attribute already exists.")
         except:
             ex, val, tb = sys.exc_info()
             self.session.rollback()
@@ -620,28 +622,33 @@ class TestEquipmentInput(BaseInput):
         self.session = session
         self.modelclass = model
         self.metadata = metadata
-        self.row = row # Environment row
+        self.environmentrow = row # an Environment row
         wid = self.build()
         self.__super.__init__(self._col_creator(metadata, wid, legend))
 
     def build(self):
-        wlist = []
         addnew = urwid.Button("Add")
         urwid.connect_signal(addnew, 'click', self._add_new_testequipment)
         addnew = urwid.AttrWrap(addnew, 'selectable', 'butfocus')
-        wlist.append(addnew)
-        for te in getattr(self.row, self.metadata.colname): # list-like attribute
-            if te.UUT:
-                ts = unicode(te)
-            else:
-                ts = u"{}  roles: {}".format(te, u", ".join(unicode(role) for role in te.roles))
-            entry = ListEntry( urwid.Text(ts.encode("utf-8"))) 
+        wlist = [addnew]
+        for te in getattr(self.environmentrow, self.metadata.colname): # list-like attribute
+            entry = ListEntry( urwid.Text(self._stringify_te(te)))
             urwid.connect_signal(entry, 'activate', self._edit_testequipment)
             urwid.connect_signal(entry, 'delete', self._delete_testequipment)
             entry.testequipment = te
-            wlist.append(entry)
+            if te.UUT:
+                wlist.insert(1, entry)
+            else:
+                wlist.append(entry)
         listbox = urwid.ListBox(urwid.SimpleFocusListWalker(wlist))
         return urwid.BoxAdapter(urwid.LineBox(listbox), max(7, len(wlist)+2))
+
+    def _stringify_te(self, te):
+        if te.roles:
+            ts = u"{}  roles: {}".format(te, u", ".join(unicode(role) for role in te.roles))
+        else:
+            ts = unicode(te)
+        return ts.encode("utf-8")
 
     def _add_new_testequipment(self, b):
         frm = TestEquipmentAddForm(self.session)
@@ -651,8 +658,7 @@ class TestEquipmentInput(BaseInput):
 
     def _add_new_testequipment_ok(self, frm, data):
         eq, roles, uut = data
-        #newdata = {"environment": self.row, "equipment": eq, "UUT": uut, "roles": roles}
-        dbrow = models.create(models.TestEquipment, environment=self.row, equipment=eq, UUT=uut, roles=roles)
+        dbrow = models.create(models.TestEquipment, environment=self.environmentrow, equipment=eq, UUT=uut, roles=roles)
         self.session.add(dbrow)
         try:
             self.session.commit()
@@ -660,22 +666,49 @@ class TestEquipmentInput(BaseInput):
             self.session.rollback()
             ex, val, tb = sys.exc_info()
             self._emit("message", "{}: {}".format(ex.__name__, val))
-        ts = u"{}  roles: {}".format(dbrow, u", ".join(unicode(role) for role in dbrow.roles))
-        entry = ListEntry( urwid.Text(ts.encode("utf-8"))) 
+        entry = ListEntry(urwid.Text(self._stringify_te(dbrow)))
         urwid.connect_signal(entry, 'activate', self._edit_testequipment)
         urwid.connect_signal(entry, 'delete', self._delete_testequipment)
         entry.testequipment = dbrow
         listbox = self._w.contents[1][0].base_widget
         listbox.body.append(entry)
+        urwid.disconnect_signal(frm, 'ok', self._add_new_testequipment_ok)
+        urwid.disconnect_signal(frm, 'cancel', self._add_new_testequipment_cancel)
         frm._emit("popform")
 
     def _add_new_testequipment_cancel(self, frm):
+        urwid.disconnect_signal(frm, 'ok', self._add_new_testequipment_ok)
+        urwid.disconnect_signal(frm, 'cancel', self._add_new_testequipment_cancel)
         frm._emit("popform")
 
-    def _edit_testequipment(self, b):
-# XXX TODO
-        self._emit("message", "edit not implemented yet")
-        pass
+    # editing
+    def _edit_testequipment(self, entry):
+        frm = TestEquipmentEditForm(self.session, entry.testequipment)
+        urwid.connect_signal(frm, 'ok', self._edit_testequipment_ok, entry)
+        urwid.connect_signal(frm, 'cancel', self._edit_testequipment_cancel, entry)
+        self._emit("pushform", frm)
+
+    def _edit_testequipment_cancel(self, form, entry):
+        try:
+            self.session.rollback()
+        except:
+            ex, val, tb = sys.exc_info()
+            self._emit("message", "{}: {}".format(ex.__name__, val))
+        urwid.disconnect_signal(form, 'ok', self._edit_testequipment_ok, entry)
+        urwid.disconnect_signal(form, 'cancel', self._edit_testequipment_cancel, entry)
+        form._emit("popform")
+
+    def _edit_testequipment_ok(self, form, entry):
+        try:
+            self.session.commit()
+        except:
+            self.session.rollback()
+            ex, val, tb = sys.exc_info()
+            self._emit("message", "{}: {}".format(ex.__name__, val))
+        entry._w.base_widget.set_text(self._stringify_te(entry.testequipment))
+        urwid.disconnect_signal(form, 'ok', self._edit_testequipment_ok, entry)
+        urwid.disconnect_signal(form, 'cancel', self._edit_testequipment_cancel, entry)
+        form._emit("popform")
 
     # deleting
     def _delete_testequipment(self, listentry):
@@ -727,9 +760,9 @@ class DeleteDialog(urwid.WidgetWrap):
         cancel = urwid.Button("Cancel")
         urwid.connect_signal(cancel, 'click', self._cancel)
         cancel = AM(cancel, 'selectable', 'butfocus')
-        dlg = urwid.Columns([urwid.Text(text), 
-                AM(urwid.Text("Delete?"), "important"), 
-                (10, ok), 
+        dlg = urwid.Columns([urwid.Text(text),
+                AM(urwid.Text("Delete?"), "important"),
+                (10, ok),
                 (10, cancel)], dividechars=1, focus_column=2)
         self.__super.__init__(dlg)
 
@@ -769,7 +802,7 @@ class AttributeEditForm(urwid.WidgetWrap):
         widget_list = self._w.widget_list
         data = widget_list[1].get_text()[0]
         self._emit("ok", data)
-    
+
     def _cancel(self, b):
         self._emit("cancel")
 
@@ -846,7 +879,7 @@ class TestEquipmentAddForm(urwid.WidgetWrap):
         maxlen = 0
         uutcb = urwid.CheckBox(u"DUT/UUT", state=False)
         urwid.connect_signal(uutcb, 'change', self._uut_select)
-        blist = [uutcb]
+        blist = [AM(uutcb, "important")]
         for role in self._roles:
             label = str(role)
             maxlen = max(len(label), maxlen)
@@ -893,6 +926,61 @@ class TestEquipmentAddForm(urwid.WidgetWrap):
         self._emit("cancel")
 
 
+class TestEquipmentEditForm(urwid.WidgetWrap):
+    # For usability we only edit the roles. Otherwise, delete and re-add.
+    __metaclass__ = urwid.MetaSignals
+    signals = ["ok", "cancel", "popform", "message"]
+
+    def __init__(self, session, testequipment):
+        self.session = session
+        self._roles = list(session.query(models.SoftwareCategory).order_by("name"))
+        self._testequipment = testequipment
+        wid = self.build()
+        self.__super.__init__(wid)
+
+    def get_form_buttons(self):
+        ok = urwid.Button("OK")
+        urwid.connect_signal(ok, 'click', self._ok)
+        ok = AM(ok, 'selectable', 'butfocus')
+        cancel = urwid.Button("Cancel")
+        urwid.connect_signal(cancel, 'click', self._cancel)
+        cancel = AM(cancel, 'selectable', 'butfocus')
+        return ok, cancel
+
+    def build(self):
+        showeq = urwid.Text(self._testequipment.equipment.name)
+        maxlen = 0
+        uutcb = urwid.CheckBox(u"DUT/UUT", state=self._testequipment.UUT)
+        urwid.connect_signal(uutcb, 'change', self._uut_select)
+        blist = [AM(uutcb, "important")]
+        for role in self._roles:
+            label = str(role)
+            maxlen = max(len(label), maxlen)
+            state = role in self._testequipment.roles
+            but = urwid.CheckBox(str(role), state=state)
+            urwid.connect_signal(but, 'change', self._multi_select, role)
+            blist.append(but)
+        roleboxes = urwid.Padding(urwid.GridFlow(blist, maxlen+4, 1, 0, "left"))
+    #    # buttons
+        ok, cancel = self.get_form_buttons()
+        buts = urwid.Columns([(10, ok), (10, cancel)], dividechars=1, focus_column=0)
+        div = urwid.Divider()
+        return urwid.ListBox(urwid.SimpleListWalker([AM(showeq, "flagged"), div, roleboxes, div, buts]))
+
+    def _uut_select(self, b, newstate):
+        self._testequipment.UUT = newstate
+
+    def _multi_select(self, b, newstate, role):
+        if newstate is True:
+            self._testequipment.roles.append(role)
+        else:
+            self._testequipment.roles.remove(role)
+
+    def _ok(self, b):
+        self._emit("ok")
+
+    def _cancel(self, b):
+        self._emit("cancel")
 
 
 class ListScrollSelector(urwid.Widget):
@@ -946,7 +1034,7 @@ class ListScrollSelector(urwid.Widget):
 
     @property
     def value(self):
-        return self._list[self._index] 
+        return self._list[self._index]
 
 
 
@@ -1395,6 +1483,8 @@ class GenericListForm(Form):
             self.session.delete(row)
             self.session.commit()
         except IntegrityError as ierr:
+            DEBUG("delete row failed", ierr)
+            self.session.rollback()
             self._emit("message", str(ierr))
         else:
             urwid.disconnect_signal(listentry, 'activate', self._edit, row.id)
@@ -1419,8 +1509,8 @@ class GenericCreateForm(Form):
     def build(self):
         header = urwid.Pile([
                 urwid.AttrMap(urwid.Text("Create {}".format(self.modelclass.__name__)), "formhead"),
-                urwid.AttrMap(urwid.Text("Use arrow keys to navigate, " 
-                        "Press Enter to select form buttons. Type directly into other fields." 
+                urwid.AttrMap(urwid.Text("Use arrow keys to navigate, "
+                        "Press Enter to select form buttons. Type directly into other fields."
                         "Select and press Enter in the OK button when done. Or Cancel, if you change your mind."), "formhead"),
                 urwid.Divider(),
                 ])
@@ -1459,10 +1549,13 @@ class GenericCreateForm(Form):
         pkval = self._commit(data)
         if pkval is not None:
             self.formwidgets = None
+            #XXX
+            self._emit("message", "Not implemented yet")
             self._emit("popform", pkval)
-            row = self.session.query(self.modelclass).get(pkval)
-            eform = get_edit_form(self.session, row)
-            self._emit("pushform", eform, models.get_primary_key_value(row))
+#            row = self.session.query(self.modelclass).get(pkval)
+#            eform = get_edit_form(self.session, row)
+##            self._emit("pushform", eform)
+        #self._emit("popform", None)
 
     def _commit(self, data):
         data = data or {}
@@ -1617,7 +1710,7 @@ class EnvironmentCreateForm(GenericCreateForm):
                 urwid.AttrMap(urwid.Text("Create Environment"), "formhead"),
                 urwid.AttrMap(urwid.Text(
                         "Arrow keys navigate,"
-                        "Owner is optional, it serves as a lock on the environment. " 
+                        "Owner is optional, it serves as a lock on the environment. "
                         "Usually you should leave it as None."), "formhead"),
                 urwid.Divider(),
                 ])
@@ -1647,7 +1740,7 @@ class EnvironmentEditForm(GenericEditForm):
         colmd = self.metadata["attributes"]
         wid = self.build_attribute_input(colmd, getattr(self.row, colmd.colname))
         formstack.append(wid)
-        # test equipment 
+        # test equipment
         colmd = self.metadata["testequipment"]
         tewid = self.build_testequipment_input(colmd, getattr(self.row, "testequipment"))
         formstack.append(tewid)
@@ -1674,7 +1767,7 @@ class CorporationCreateForm(GenericCreateForm):
                 urwid.AttrMap(urwid.Text("Create Corporation"), "formhead"),
                 urwid.AttrMap(urwid.Text(
                         "Arrow keys navigate,"
-                        "Owner is optional, it serves as a lock on the environment. " 
+                        "Owner is optional, it serves as a lock on the environment. "
                         "Usually you should leave it as None."), "formhead"),
                 urwid.Divider(),
                 ])

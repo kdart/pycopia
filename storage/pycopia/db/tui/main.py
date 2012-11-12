@@ -109,8 +109,7 @@ class DBEditor(object):
         self.top.set_footer(self.footer)
 
     def _pushform(self, form, newform):
-        self._formtrail.append((form.__class__, form.session, form.modelclass, form.row))
-        urwid.disconnect_signal(form, 'pushform', self._pushform)
+        self._formtrail.append(form)
         urwid.connect_signal(newform, 'pushform', self._pushform)
         urwid.connect_signal(newform, 'popform', self._popform)
         urwid.connect_signal(newform, 'message', self._message)
@@ -118,10 +117,12 @@ class DBEditor(object):
         self.top.body = self.form
 
     def _popform(self, form, pkval):
+        if form is not None:
+            urwid.disconnect_signal(form, 'pushform', self._pushform)
+            urwid.disconnect_signal(form, 'popform', self._popform)
+            urwid.disconnect_signal(form, 'message', self._message)
         if self._formtrail:
-            formclass, sess, modelclass, row = self._formtrail.pop()
-            self.form = formclass(sess, modelclass, row)
-            urwid.connect_signal(self.form, 'pushform', self._pushform)
+            self.form = self._formtrail.pop()
             self.top.body = self.form
         else:
             raise urwid.ExitMainLoop()

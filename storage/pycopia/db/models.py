@@ -531,16 +531,23 @@ class Corporation(object):
     def __str__(self):
         return str(self.name)
 
-    def set_attribute(self, session, attrname, value):
+    def update_attribute(self, session, attrname, value):
         attrtype = CorporateAttributeType.get_by_name(session, str(attrname))
         existing = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self,
                             CorporateAttribute.type==attrtype)).first()
-        if existing is not None:
-            existing.value = value
-        else:
+        if existing is None:
             attrib = create(CorporateAttribute, corporation=self, type=attrtype, value=value)
             session.add(attrib)
             self.attributes.append(attrib)
+        else:
+            existing.value = value
+        session.commit()
+
+    def set_attribute(self, session, attrname, value):
+        attrtype = CorporateAttributeType.get_by_name(session, str(attrname))
+        attrib = create(CorporateAttribute, corporation=self, type=attrtype, value=value)
+        session.add(attrib)
+        self.attributes.append(attrib)
         session.commit()
 
     def get_attribute(self, session, attrname):
@@ -650,16 +657,23 @@ class Software(object):
     def __repr__(self):
         return self.name
 
-    def set_attribute(self, session, attrname, value):
+    def update_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         existing = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self,
                             SoftwareAttribute.type==attrtype)).first()
-        if existing is not None:
-            existing.value = value
-        else:
+        if existing is None:
             attrib = create(SoftwareAttribute, software=self, type=attrtype, value=value)
             session.add(attrib)
             self.attributes.append(attrib)
+        else:
+            existing.value = value
+        session.commit()
+
+    def set_attribute(self, session, attrname, value):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        attrib = create(SoftwareAttribute, software=self, type=attrtype, value=value)
+        session.add(attrib)
+        self.attributes.append(attrib)
         session.commit()
 
     def get_attribute(self, session, attrname):
@@ -767,16 +781,23 @@ class EquipmentModel(object):
     def __str__(self):
         return str(self.name)
 
-    def set_attribute(self, session, attrname, value):
+    def update_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         existing = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self,
                             EquipmentModelAttribute.type==attrtype)).first()
-        if existing is not None:
-            existing.value = value
-        else:
+        if existing is None:
             attrib = create(EquipmentModelAttribute, equipmentmodel=self, type=attrtype, value=value)
             session.add(attrib)
             self.attributes.append(attrib)
+        else:
+            existing.value = value
+        session.commit()
+
+    def set_attribute(self, session, attrname, value):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        attrib = create(EquipmentModelAttribute, equipmentmodel=self, type=attrtype, value=value)
+        session.add(attrib)
+        self.attributes.append(attrib)
         session.commit()
 
     def get_attribute(self, session, attrname):
@@ -839,16 +860,23 @@ class Equipment(object):
     def __str__(self):
         return str(self.name)
 
-    def set_attribute(self, session, attrname, value):
+    def update_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         existing = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self,
                             EquipmentAttribute.type==attrtype)).first()
-        if existing is not None:
-            existing.value = value
-        else:
+        if existing is None:
             attrib = create(EquipmentAttribute, equipment=self, type=attrtype, value=value)
             session.add(attrib)
             self.attributes.append(attrib)
+        else:
+            existing.value = value
+        session.commit()
+
+    def set_attribute(self, session, attrname, value):
+        attrtype = AttributeType.get_by_name(session, str(attrname))
+        attrib = create(EquipmentAttribute, equipment=self, type=attrtype, value=value)
+        session.add(attrib)
+        self.attributes.append(attrib)
         session.commit()
 
     def get_attribute(self, session, attrname):
@@ -1036,16 +1064,23 @@ class Environment(object):
     def __repr__(self):
         return self.name
 
-    def set_attribute(self, session, attrname, value):
+    def update_attribute(self, session, attrname, value):
         attrtype = EnvironmentAttributeType.get_by_name(session, str(attrname))
         existing = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self,
                             EnvironmentAttribute.type==attrtype)).first()
-        if existing is not None:
-            existing.value = value
-        else:
+        if existing is None:
             attrib = create(EnvironmentAttribute, environment=self, type=attrtype, value=value)
             session.add(attrib)
             self.attributes.append(attrib)
+        else:
+            existing.value = value
+        session.commit()
+
+    def set_attribute(self, session, attrname, value):
+        attrtype = EnvironmentAttributeType.get_by_name(session, str(attrname))
+        attrib = create(EnvironmentAttribute, environment=self, type=attrtype, value=value)
+        session.add(attrib)
+        self.attributes.append(attrib)
         session.commit()
 
     def get_attribute(self, session, attrname):
@@ -1151,7 +1186,7 @@ mapper(TestEquipment, tables.testequipment,
     properties={
         "roles": relationship(SoftwareCategory, secondary=tables.testequipment_roles),
         "equipment": relationship(Equipment),
-        "environment": relationship(Environment, backref="testequipment"),
+        "environment": relationship(Environment, backref=backref("testequipment", cascade="all, delete, delete-orphan")),
     },
 )
 
@@ -1395,7 +1430,7 @@ class TestResultData(object):
 mapper(TestResultData, tables.test_results_data,
         properties = {
             "testresult": relationship(TestResult, backref=backref("data",
-                    cascade="all, delete, delete-orphan")),
+                    cascade="all, delete, delete-orphan", passive_deletes=True)),
         }
 )
 
@@ -1698,9 +1733,9 @@ if __name__ == "__main__":
     #print class_mapper(Equipment).get_property("name")
 #    for tr in TestSuite.get_latest_results(sess):
 #        print (tr)
-    tc = TestCase.get_by_implementation(sess, "testcases.unittests.WWW.client.HTTPPageFetch")
-    print(tc)
-    print(get_primary_key_value(tc))
+#    tc = TestCase.get_by_implementation(sess, "testcases.unittests.WWW.client.HTTPPageFetch")
+#    print(tc)
+#    print(get_primary_key_value(tc))
 #    print(tc.id)
 #    ltr = tc.get_latest_result(sess)
 #    print(ltr)

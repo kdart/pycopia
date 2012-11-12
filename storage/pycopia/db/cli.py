@@ -36,6 +36,7 @@ from pycopia.db import config
 
 from sqlalchemy import and_, or_
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import IntegrityError
 
 _session = None
 _user = None
@@ -253,7 +254,7 @@ class NetworkRowCommands(RowCommands):
 class RowWithAttributesCommands(RowCommands):
 
     def attrib(self, argv):
-        """attrib get|set|del|show|possible name [value]
+        """attrib get|set|update|del|show|possible name [value]
     Get, set, delete an attribute. You can also list available attributes."""
         cmd = argv[1]
         if cmd.startswith("get"):
@@ -262,8 +263,16 @@ class RowWithAttributesCommands(RowCommands):
             self._print(v)
         elif cmd.startswith("set"):
             name = argv[2]
-            value = CLI.clieval(argv[3])
-            self._obj.set_attribute(_session, name, value)
+            value = argv[3]
+            try:
+                self._obj.set_attribute(_session, name, value)
+            except IntegrityError as err:
+                _session.rollback()
+                self._ui.error(err)
+        elif cmd.startswith("upd"):
+            name = argv[2]
+            value = argv[3]
+            self._obj.update_attribute(_session, name, value)
         elif cmd.startswith("del"):
             name = argv[2]
             self._obj.del_attribute(_session, name)
@@ -464,6 +473,15 @@ class TableCommands(CLI.BaseCommands):
         except:
             _session.rollback()
             raise
+
+    def count(self, argv):
+        """count [<criteria>]
+    Show the count of row selected by criteria.
+    """
+        mapper = models.class_mapper(self._obj)
+        pkname = str(mapper.primary_key[0].name)
+        q = self._get_query(argv)
+        self._print(q.count())
 
     def describe(self, argv):
         """describe
