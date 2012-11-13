@@ -123,6 +123,7 @@ class DBEditor(object):
             urwid.disconnect_signal(form, 'message', self._message)
         if self._formtrail:
             self.form = self._formtrail.pop()
+            self.form.invalidate()
             self.top.body = self.form
         else:
             raise urwid.ExitMainLoop()

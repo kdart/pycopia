@@ -993,6 +993,7 @@ class ListScrollSelector(urwid.Widget):
     def __init__(self, choicelist):
         self.__super.__init__()
         self._list = choicelist
+        self._prefix = ""
         self._max = len(choicelist)
         assert self._max > 0, "Need list with at least one element"
         self._index = 0
@@ -1004,13 +1005,23 @@ class ListScrollSelector(urwid.Widget):
     def keypress(self, size, key):
         cmd =  self._command_map[key]
         if cmd == 'cursor up':
-            self._index = (self._index + 1) % self._max
+            self._prefix = ""
+            self._index = (self._index - 1) % self._max
             self.set_text(self._list[self._index])
         elif cmd == 'cursor down':
-            self._index = (self._index - 1) % self._max
+            self._prefix = ""
+            self._index = (self._index + 1) % self._max
             self.set_text(self._list[self._index])
         elif cmd == "activate":
             self._emit("click")
+        elif key == "backspace":
+            self._prefix = self._prefix[:-1]
+        elif len(key) == 1 and key.isalnum():
+            self._prefix += key
+            i = prefix_index(self._list, self._prefix, self._index + 1)
+            if i is not None:
+                self._index = i
+                self.set_text(self._list[i])
         else:
             return key
 
@@ -1306,6 +1317,9 @@ class Form(urwid.WidgetWrap):
     def message(self, msg):
         self._emit("message", msg)
 
+    def invalidate(self):
+        return NotImplemented
+
     def _subform(self, oldform, newform):
         urwid.connect_signal(newform, 'popform', self._popform)
         urwid.connect_signal(newform, 'message', self._message)
@@ -1424,30 +1438,21 @@ class GenericListForm(Form):
         "RelationshipProperty": ("{!s:15.15}", 15),
     }
 
-    def build(self):
-        mapper = models.class_mapper(self.modelclass)
-        pkname = str(mapper.primary_key[0].name)
-        clsname = self.modelclass.__name__
-        q = self.session.query(self.modelclass).order_by(pkname)
-        colnames = models.get_rowdisplay(self.modelclass)
-        # col headings
-        l = [('fixed', 6, urwid.Text(("colhead", pkname))) ]
-        for colname in colnames:
-            md = self.metadata[colname]
-            fmt, width = self._FORMATS.get(md.coltype, ("{!s:10.10}", 10))
-            l.append( ('fixed', width, urwid.Text(("colhead", md.colname))) )
-        cb = urwid.Button("Create new {}".format(clsname.lower()))
-        urwid.connect_signal(cb, 'click', self._create)
-        header = urwid.Pile(
-                [urwid.Columns([AM(urwid.Text(clsname), "subhead"), AM(cb, "selectable", "butfocus") ],
-                focus_column=1), urwid.Columns(l, dividechars=1)])
-        # data
+    def invalidate(self):
+        listbox = urwid.ListBox(self.get_items())
+        self._w.body = urwid.AttrMap(listbox, 'body')
+        # TODO disconnect old, existing signals
+            #urwid.disconnect_signal(le, 'activate', self._edit, pk)
+            #urwid.disconnect_signal(le, 'delete', self._delete, pk)
+
+    def get_items(self):
+        q = self.session.query(self.modelclass).order_by(self._pkname)
         items = []
         for row in q.all():
             disprow = []
-            pk = getattr(row, pkname)
+            pk = getattr(row, self._pkname)
             disprow.append( ('fixed', 6, urwid.Text(str(pk))) )
-            for colname in colnames:
+            for colname in self._colnames:
                 md = self.metadata[colname]
                 fmt, width = self._FORMATS.get(md.coltype, ("{!s:10.10}", 10))
                 disprow.append( ('fixed', width, urwid.Text(fmt.format(getattr(row, colname)))) )
@@ -1455,10 +1460,27 @@ class GenericListForm(Form):
             urwid.connect_signal(le, 'activate', self._edit, pk)
             urwid.connect_signal(le, 'delete', self._delete, pk)
             items.append(le)
-        listbox = urwid.ListBox(urwid.SimpleListWalker(items))
+        return urwid.SimpleListWalker(items)
+
+    def build(self):
+        self._pkname = str(models.class_mapper(self.modelclass).primary_key[0].name)
+        self._colnames = models.get_rowdisplay(self.modelclass)
+        # col headings
+        l = [('fixed', 6, urwid.Text(("colhead", self._pkname))) ]
+        clsname = self.modelclass.__name__
+        for colname in self._colnames:
+            md = self.metadata[colname]
+            fmt, width = self._FORMATS.get(md.coltype, ("{!s:10.10}", 10))
+            l.append( ('fixed', width, urwid.Text(("colhead", md.colname))) )
+        cb = urwid.Button("Create new {}".format(clsname.lower()))
+        urwid.connect_signal(cb, 'click', self._create_cb)
+        header = urwid.Pile(
+                [urwid.Columns([AM(urwid.Text(clsname), "subhead"), AM(cb, "selectable", "butfocus") ],
+                focus_column=1), urwid.Columns(l, dividechars=1)])
+        listbox = urwid.ListBox(self.get_items())
         return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header, focus_part="body")
 
-    def _create(self, b):
+    def _create_cb(self, b):
         cform = get_create_form(self.session, self.modelclass)
         self._emit("pushform", cform)
 
@@ -1549,9 +1571,9 @@ class GenericCreateForm(Form):
         pkval = self._commit(data)
         if pkval is not None:
             self.formwidgets = None
-            #XXX
-            self._emit("message", "Not implemented yet")
             self._emit("popform", pkval)
+            self._emit("message", "OK follwed by edit is not implemented yet. Please select it to edit.")
+            #XXX This is current broken by some problem elsewhere.
 #            row = self.session.query(self.modelclass).get(pkval)
 #            eform = get_edit_form(self.session, row)
 ##            self._emit("pushform", eform)
@@ -1980,6 +2002,14 @@ def update_row(session, modelclass, dbrow, data):
     return dbrow
 
 
+def prefix_index(thelist, prefix, index=0):
+    while index < len(thelist):
+        if thelist[index].startswith(prefix):
+            return index
+        index += 1
+    return None
+
+
 
 #################################
 ## XXX for trying out experimental stuff
@@ -2034,20 +2064,27 @@ if __name__ == "__main__":
     from pycopia import autodebug
     from pycopia import logwindow
     DEBUG = logwindow.DebugLogWindow()
-    modelclass = models.Corporation
-    basic = []
-    many2many = []
-    one2many = []
-    for md in models.get_metadata(modelclass):
-        if md.coltype == "RelationshipProperty":
-            if md.uselist:
-                many2many.append(md.colname)
-            else:
-                one2many.append(md.colname)
-        else:
-            basic.append(md.colname)
+    #modelclass = models.Corporation
+    #basic = []
+    #many2many = []
+    #one2many = []
+    #for md in models.get_metadata(modelclass):
+    #    if md.coltype == "RelationshipProperty":
+    #        if md.uselist:
+    #            many2many.append(md.colname)
+    #        else:
+    #            one2many.append(md.colname)
+    #    else:
+    #        basic.append(md.colname)
 
-    print(" basic data:", basic)
-    print(" One 2 many:", one2many)
-    print("Many 2 many:", many2many)
-    _test(sys.argv)
+    #print(" basic data:", basic)
+    #print(" One 2 many:", one2many)
+    #print("Many 2 many:", many2many)
+
+    l = ["one", "two", "three", "four", "five", "six"]
+    i = prefix_index(l, "th")
+    print(i, l[i])
+    i = prefix_index(l, "s", i)
+    print(i, l[i])
+
+    #_test(sys.argv)
