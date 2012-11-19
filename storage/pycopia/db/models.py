@@ -43,6 +43,11 @@ from pycopia.db.types import validate_value_type, OBJ_TESTRUNNER, OBJ_TESTSUITE
 
 
 class ModelError(Exception):
+    """Raised when something doesn't make sense for this model"""
+    pass
+
+class ModelAttributeError(ModelError):
+    """Raised for errors related to models with attributes."""
     pass
 
 
@@ -427,7 +432,7 @@ class AttributeType(object):
         try:
             attrtype = session.query(cls).filter(cls.name==str(name)).one()
         except NoResultFound:
-            raise ModelError("No attribute type %r defined." % (name,))
+            raise ModelAttributeError("No attribute type %r defined." % (name,))
         return attrtype
 
     @classmethod
@@ -511,7 +516,7 @@ class CorporateAttributeType(object):
         try:
             attrtype = session.query(cls).filter(cls.name==str(name)).one()
         except NoResultFound:
-            raise ModelError("No attribute type %r defined." % (name,))
+            raise ModelAttributeError("No attribute type %r defined." % (name,))
         return attrtype
 
     @classmethod
@@ -556,7 +561,7 @@ class Corporation(object):
             ea = session.query(CorporateAttribute).filter(and_(CorporateAttribute.corporation==self,
                             CorporateAttribute.type==attrtype)).one()
         except NoResultFound:
-            raise ModelError("No attribute %r set." % (attrname,))
+            raise ModelAttributeError("No attribute %r set." % (attrname,))
         return ea.value
 
     def del_attribute(self, session, attrtype):
@@ -682,7 +687,7 @@ class Software(object):
             ea = session.query(SoftwareAttribute).filter(and_(SoftwareAttribute.software==self,
                             SoftwareAttribute.type==attrtype)).one()
         except NoResultFound:
-            raise ModelError("No attribute %r set." % (attrname,))
+            raise ModelAttributeError("No attribute %r set." % (attrname,))
         return ea.value
 
     def del_attribute(self, session, attrtype):
@@ -806,7 +811,7 @@ class EquipmentModel(object):
             ea = session.query(EquipmentModelAttribute).filter(and_(EquipmentModelAttribute.equipmentmodel==self,
                             EquipmentModelAttribute.type==attrtype)).one()
         except NoResultFound:
-            raise ModelError("No attribute %r set." % (attrname,))
+            raise ModelAttributeError("No attribute %r set." % (attrname,))
         return ea.value
 
     def del_attribute(self, session, attrtype):
@@ -885,7 +890,7 @@ class Equipment(object):
             ea = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self,
                             EquipmentAttribute.type==attrtype)).one()
         except NoResultFound:
-            raise ModelError("No attribute %r set." % (attrname,))
+            raise ModelAttributeError("No attribute %r set." % (attrname,))
         return ea.value
 
     def del_attribute(self, session, attrname):
@@ -1046,7 +1051,7 @@ class EnvironmentAttributeType(object):
         try:
             attrtype = session.query(cls).filter(cls.name==str(name)).one()
         except NoResultFound:
-            raise ModelError("No attribute type %r defined." % (name,))
+            raise ModelAttributeError("No attribute type %r defined." % (name,))
         return attrtype
 
     @classmethod
@@ -1089,7 +1094,7 @@ class Environment(object):
             ea = session.query(EnvironmentAttribute).filter(and_(EnvironmentAttribute.environment==self,
                             EnvironmentAttribute.type==attrtype)).one()
         except NoResultFound:
-            raise ModelError("No attribute %r set." % (attrname,))
+            raise ModelAttributeError("No attribute %r set." % (attrname,))
         return ea.value
 
     def del_attribute(self, session, attrtype):
@@ -1567,10 +1572,30 @@ def class_names():
         yield mapper._identity_class.__name__
 
 
+def get_primary_key(class_):
+    """Return the primary key column."""
+    return class_mapper(class_).primary_key
+
+
 def get_primary_key_value(dbrow):
-    mapper = class_mapper(dbrow.__class__)
-    pkname = str(mapper.primary_key[0].name)
-    return getattr(dbrow, pkname)
+    pkname = get_primary_key_name(dbrow.__class__)
+    if pkname:
+        return getattr(dbrow, str(pkname))
+    else:
+        raise ModelError("No primary key for this row: {!r}".format(dbrow))
+
+
+def get_primary_key_name(class_):
+    """Return name or names of primary key column. Return None if not defined."""
+    mapper = class_mapper(class_)
+    pk = mapper.primary_key
+    pk_l = len(pk)
+    if pk_l == 0:
+        return None
+    elif pk_l == 1:
+        return pk[0].name
+    else:
+        return tuple(p.name for p in pk)
 
 
 def get_choices(session, modelclass, colname, order_by=None):
@@ -1748,5 +1773,6 @@ if __name__ == "__main__":
 #
 #    print(type(TestSuite.get_by_implementation(sess, "testcases.unittests.WWW.mobileget.MobileSendSuite")))
 #    print (TestSuite.get_suites(sess))
+    #print(get_primary_key(Session))
     sess.close()
 

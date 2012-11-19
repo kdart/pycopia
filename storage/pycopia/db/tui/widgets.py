@@ -29,10 +29,11 @@ from datetime import datetime
 
 import urwid
 
+from sqlalchemy import and_, or_, not_, func, exists
 from sqlalchemy.exc import IntegrityError
 
 from pycopia import ipv4
-from pycopia.aid import NULL
+from pycopia.aid import NULL, Enum
 from pycopia.db import types
 from pycopia.db import models
 
@@ -77,6 +78,9 @@ PALETTE = [
     ('title', 'white', 'black', 'bold'),
     ('colhead', 'yellow', 'black', 'default'),
 ]
+
+UP = Enum(1, "UP")
+DOWN = Enum(2, "DOWN")
 
 
 ### shorthand notation
@@ -983,6 +987,73 @@ class TestEquipmentEditForm(urwid.WidgetWrap):
         self._emit("cancel")
 
 
+# extra widgets
+
+class FilterInput(urwid.WidgetWrap):
+    signals = ["change"]
+    _sizing = frozenset(['flow'])
+#    UPARR=u"↑"
+#    DOWNARR=u"↓"
+
+    DIRECTION = {
+        UP: urwid.SelectableIcon(u"↑", 0),
+        DOWN: urwid.SelectableIcon(u"↓", 0),
+    }
+    #reserve_columns = 1
+
+    def __init__(self):
+        self._edit = SimpleEdit()
+        self._direction = UP
+        wid = urwid.Columns([self._edit, ("fixed", 1, FilterInput.DIRECTION[self._direction])])
+        self.__super.__init__(wid)
+
+    def keypress(self, size, key):
+        key = self._w.keypress(size, key)
+        if key is not None:
+            cmd =  self._command_map[key]
+            if cmd == "activate":
+                self._emit("change")
+                return None
+            else:
+                return key
+    @property
+    def value(self):
+        return self._edit._edit_text, self._direction
+
+
+
+class SimpleEdit(urwid.Edit):
+    signals = ["change"]
+
+    DIRECTION = {
+        UP: urwid.SelectableIcon(u"↑", 0),
+        DOWN: urwid.SelectableIcon(u"↓", 0),
+    }
+    def __init__(self):
+        self.__super.__init__(u"", u"", multiline=False)
+
+    def keypress(self, size, key):
+        key = self.__super.keypress(size, key)
+        if key is not None:
+            cmd =  self._command_map[key]
+            if cmd == "activate":
+                self._emit("change")
+                return None
+            else:
+                return key
+
+    def set_edit_text(self, text):
+        self._edit_text = text
+        if self.edit_pos > len(text):
+            self.edit_pos = len(text)
+        self._invalidate()
+
+    @property
+    def value(self):
+        return self._edit_text
+
+
+
 class ListScrollSelector(urwid.Widget):
     _selectable = True
     _sizing = frozenset(['flow'])
@@ -1000,7 +1071,6 @@ class ListScrollSelector(urwid.Widget):
         self.set_text(self._list[self._index])
         maxwidth = reduce(lambda c,m: max(c,m), map(lambda o: len(str(o)), choicelist), 0)
         self._fmt = u"{} {{:{}.{}s}} {}".format(self.UPARR, maxwidth, maxwidth, self.DOWNARR)
-        self._layout = urwid.text_layout.default_layout
 
     def keypress(self, size, key):
         cmd =  self._command_map[key]
@@ -1018,12 +1088,20 @@ class ListScrollSelector(urwid.Widget):
             self._prefix = self._prefix[:-1]
         elif len(key) == 1 and key.isalnum():
             self._prefix += key
-            i = prefix_index(self._list, self._prefix, self._index + 1)
+            i = self.prefix_index(self._list, self._prefix, self._index + 1)
             if i is not None:
                 self._index = i
                 self.set_text(self._list[i])
         else:
             return key
+
+    @staticmethod
+    def prefix_index(thelist, prefix, index=0):
+        while index < len(thelist):
+            if thelist[index].startswith(prefix):
+                return index
+            index += 1
+        return None
 
     def rows(self, size, focus=False):
         return 1
@@ -1174,7 +1252,7 @@ class MultiselectListForm(urwid.WidgetWrap):
         return urwid.Frame(listbox, header=header, footer=footer, focus_part="body")
 
     def _build_list(self):
-        choices = get_related_choices(self.session, self.modelclass, self.metadata.colname, None)
+        choices = get_related_choices(self.session, self.modelclass, self.metadata, None)
         choices.update(self.currentvalue)
         wlist = []
         current = self.currentvalue
@@ -1238,6 +1316,69 @@ class MultiselectListForm(urwid.WidgetWrap):
                 pass
 
 
+class MultiselectForm(urwid.WidgetWrap):
+    __metaclass__ = urwid.MetaSignals
+    signals = ["popform", "message"]
+
+    def __init__(self, relationinput):
+        self.session = relationinput.session
+        self.metadata = relationinput.metadata
+        self.modelclass = relationinput.modelclass
+        self.currentvalue = relationinput.dbvalue.copy()
+        self.old_dbvalue = relationinput.dbvalue.copy()
+        display_widget = self.build()
+        self.__super.__init__(display_widget)
+
+    def build(self):
+        # buttons
+        done = urwid.Button("Done")
+        urwid.connect_signal(done, 'click', self._done_multiselect)
+        done = urwid.AttrWrap(done, 'selectable', 'butfocus')
+        add = urwid.Button("Add New")
+        urwid.connect_signal(add, 'click', self._add_new)
+        add = urwid.AttrWrap(add, 'selectable', 'butfocus')
+        cancel = urwid.Button("Cancel")
+        urwid.connect_signal(cancel, 'click', self._cancel)
+        cancel = urwid.AttrWrap(cancel, 'selectable', 'butfocus')
+        # footer and header
+        header = urwid.GridFlow([done, add, cancel], 15, 3, 1, 'center')
+        footer = urwid.Padding(urwid.Text(
+            ("popup", "Tab to button box to select buttons. Arrow keys transfer selection.")))
+        body = self._build_body()
+        return urwid.Frame(body, header=header, footer=footer, focus_part="body")
+
+    def _build_body(self):
+        listbox = self._build_list()
+
+    def _build_list(self):
+        choices = get_related_choices(self.session, self.modelclass, self.metadata, None)
+
+        #listbox.body.remove(listentry)
+
+        #choices.update(self.currentvalue)
+        wlist = []
+#        current = self.currentvalue
+#        for pk, cobj in choices.items():
+#            if pk in current:
+#                but = urwid.CheckBox(str(cobj), state=True)
+#            else:
+#                but = urwid.CheckBox(str(cobj), state=False)
+#            urwid.connect_signal(but, 'change', self._multi_select, (pk, cobj))
+#            wlist.append(but)
+#        return urwid.ListBox(urwid.SimpleListWalker(wlist))
+
+
+    def keypress(self, size, key):
+        if self._command_map[key] != 'next selectable':
+            return self._w.keypress(size, key)
+        if isinstance(self._w, urwid.Frame):
+            self._w.set_focus("header" if self._w.get_focus() == "body" else "body")
+
+    def _message(self, b, msg):
+        self._emit("message"< msg)
+
+
+
 #### top level forms
 class Form(urwid.WidgetWrap):
     __metaclass__ = urwid.MetaSignals
@@ -1281,7 +1422,7 @@ class Form(urwid.WidgetWrap):
     def get_default_data(self, deflist):
         data = {}
         for name in deflist:
-            data[name] = self.metadata[name].default,
+            data[name] = self.metadata[name].default
         return data
 
     def build_data_input(self, colmd, data=NULL, legend=None):
@@ -1446,11 +1587,16 @@ class GenericListForm(Form):
             #urwid.disconnect_signal(le, 'delete', self._delete, pk)
 
     def get_items(self):
-        q = self.session.query(self.modelclass).order_by(self._pkname)
+        q = self.session.query(self.modelclass).order_by(self._orderby)
+        if self._filter:
+            filt = []
+            for name, value in self._filter.items():
+                filt.append(getattr(self.modelclass, name).like("%{}%".format(value)))
+            q = q.filter(*filt)
         items = []
-        for row in q.all():
+        for row in q:
             disprow = []
-            pk = getattr(row, self._pkname)
+            pk = getattr(row, str(self._pkname))
             disprow.append( ('fixed', 6, urwid.Text(str(pk))) )
             for colname in self._colnames:
                 md = self.metadata[colname]
@@ -1463,22 +1609,46 @@ class GenericListForm(Form):
         return urwid.SimpleListWalker(items)
 
     def build(self):
-        self._pkname = str(models.class_mapper(self.modelclass).primary_key[0].name)
+        self._pkname = models.get_primary_key_name(self.modelclass)
+        self._orderby = self._pkname
+        self._filter = {}
         self._colnames = models.get_rowdisplay(self.modelclass)
         # col headings
-        l = [('fixed', 6, urwid.Text(("colhead", self._pkname))) ]
+        colforms = [('fixed', 6, urwid.Text(("colhead", "filt:")))]
+        colnames = [('fixed', 6, urwid.Text(("colhead", self._pkname))) ]
         clsname = self.modelclass.__name__
         for colname in self._colnames:
             md = self.metadata[colname]
             fmt, width = self._FORMATS.get(md.coltype, ("{!s:10.10}", 10))
-            l.append( ('fixed', width, urwid.Text(("colhead", md.colname))) )
+            colnames.append( ('fixed', width, urwid.Text(("colhead", md.colname))) )
+            if md.coltype in ("TEXT", "VARCHAR"):
+                fb = SimpleEdit() # TODO use filter input to select sort order
+                fb.colname = md.colname
+                urwid.connect_signal(fb, "change", self._set_filter)
+                colforms.append(('fixed', width, AM(fb, "selectable")))
+            else:
+                colforms.append(('fixed', width, urwid.Divider()))
+
         cb = urwid.Button("Create new {}".format(clsname.lower()))
         urwid.connect_signal(cb, 'click', self._create_cb)
-        header = urwid.Pile(
-                [urwid.Columns([AM(urwid.Text(clsname), "subhead"), AM(cb, "selectable", "butfocus") ],
-                focus_column=1), urwid.Columns(l, dividechars=1)])
+        header = urwid.Pile( [
+                urwid.Columns([AM(urwid.Text(clsname), "subhead"), AM(cb, "selectable", "butfocus") ], focus_column=1), 
+                urwid.Columns(colforms, dividechars=1),
+                urwid.Columns(colnames, dividechars=1),
+                ])
         listbox = urwid.ListBox(self.get_items())
         return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header, focus_part="body")
+
+    def _set_filter(self, fb):
+        colname, value = fb.colname, fb.value
+        if value:
+            self._filter[colname] = value
+        else:
+            try:
+                del self._filter[colname]
+            except KeyError:
+                pass
+        self.invalidate()
 
     def _create_cb(self, b):
         cform = get_create_form(self.session, self.modelclass)
@@ -1581,6 +1751,7 @@ class GenericCreateForm(Form):
 
     def _commit(self, data):
         data = data or {}
+        DEBUG(data)
         errlist = []
         widgets = self.formwidgets
         for inputwid in widgets:
@@ -1601,6 +1772,8 @@ class GenericCreateForm(Form):
         except:
             self.session.rollback()
             ex, val, tb = sys.exc_info()
+            del tb
+            DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
         return pkval
 
@@ -1825,26 +1998,90 @@ class CorporationEditForm(GenericEditForm):
         return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
 
 
-class TestCaseCreateForm(Form):
-    pass
+class TestCaseCreateForm(GenericCreateForm):
+
+    def build(self):
+        header = urwid.Pile([
+                urwid.AttrMap(urwid.Text("Create TestCase"), "formhead"),
+                urwid.AttrMap(urwid.Text("Arrow keys navigate, Enter to select "
+                "form button. Type into other fields."), "formhead"),
+
+                urwid.Divider(),
+                ])
+        formstack = []
+        for groupname, group in [
+                (None, ("name", "purpose", "passcriteria")),
+                ("Details", ("startcondition", "endcondition", "procedure")),
+                ("Management", ("automated", "interactive", "testimplementation", "time_estimate")),
+                ("Requirement", ("reference", "cycle", "priority")),
+                ("Comments", ("comments",)),
+                ]:
+            if groupname:
+                formstack.append(self.build_divider(groupname))
+            for colname in group:
+                colmd = self.metadata[colname]
+                wid = self.build_input(colmd)
+                formstack.append(wid)
+        data = self.get_default_data(["lastchange", "valid", "status"])
+        formstack.append(self.get_form_buttons(data, create=True))
+        listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
+        return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
+
+# basic data: ['name', 'lastchange', 'purpose', 'passcriteria',
+# 'startcondition', 'endcondition', 'procedure', 'comments', 'priority',
+# 'cycle', 'status', 'automated', 'interactive', 'valid', 'testimplementation',
+# 'bugid', 'time_estimate']
+# One 2 many: ['reference']
+#Many 2 many: ['prerequisites', 'functionalarea', 'suites', 'dependents']
+
+#['automated', 'bugid', 'comments', 'cycle', 'dependents', 'endcondition',
+#'functionalarea', 'interactive', 'lastchange', 'name', 'passcriteria',
+#'prerequisites', 'priority', 'procedure', 'purpose', 'reference',
+#'startcondition', 'status', 'suites', 'testimplementation', 'time_estimate',
+#'valid']
 
 
-class TestCaseEditForm(Form):
-    pass
+class TestCaseEditForm(GenericEditForm):
+
+    def build(self):
+        header = urwid.Pile([
+                urwid.AttrMap(urwid.Text("Edit Test Case"), "formhead"),
+                urwid.AttrMap(urwid.Text("Arrow keys navigate, Enter to select form button. Type into other fields."), "formhead"),
+                urwid.Divider(),
+                ])
+        formstack = []
+        for groupname, group in [
+                (None, ("name", "purpose", "passcriteria")),
+                ("Details", ("startcondition", "endcondition", "procedure", "prerequisites")),
+                ("Management", ("valid", "automated", "interactive", "functionalarea", "testimplementation", "time_estimate", "bugid")),
+                ("Requirement", ("reference", "cycle", "priority")),
+                ("Status", ("status",)),
+                ("Comments", ("comments",)),
+                ]:
+            if groupname:
+                formstack.append(self.build_divider(groupname))
+            for colname in group:
+                colmd = self.metadata[colname]
+                wid = self.build_input(colmd, getattr(self.row, colmd.colname))
+                formstack.append(wid)
+        data = self.get_default_data(["lastchange"])
+        formstack.append(self.get_form_buttons(data))
+        listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
+        return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
 
 
 _SPECIAL_CREATE_FORMS = {
         "Equipment": EquipmentCreateForm,
         "Environment": EnvironmentCreateForm,
         "Corporation": CorporationCreateForm,
-#        "TestCase": TestCaseCreateForm,
+        "TestCase": TestCaseCreateForm,
 }
 
 _SPECIAL_EDIT_FORMS = {
         "Equipment": EquipmentEditForm,
         "Environment": EnvironmentEditForm,
         "Corporation": CorporationEditForm,
-#        "TestCase": TestCaseEditForm,
+        "TestCase": TestCaseEditForm,
 }
 
 _SPECIAL_LIST_FORMS = {
@@ -1917,17 +2154,16 @@ def sort_inputs(modelclass):
     return first + one2many, many2many
 
 
-def get_related_choices(session, modelclass, colname, order_by=None):
+def get_related_choices(session, modelclass, metadata, order_by=None):
     mapper = models.class_mapper(modelclass)
-    mycol = getattr(modelclass, colname)
+    mycol = getattr(modelclass, metadata.colname)
     try:
         relmodel = mycol.property.mapper.class_
     except AttributeError:
         return {}
 
-    mymeta = models.get_column_metadata(modelclass, colname)
-    if mymeta.uselist:
-        if mymeta.m2m:
+    if metadata.uselist:
+        if metadata.m2m:
             q = session.query(relmodel)
         else:
             # only those that are currently unassigned
@@ -1942,7 +2178,7 @@ def get_related_choices(session, modelclass, colname, order_by=None):
         pass
     if order_by:
         q = q.order_by(getattr(relmodel, order_by))
-    return dict((models.get_primary_key_value(relrow), relrow) for relrow in q)
+    return dict((getattr(relrow, "id"), relrow) for relrow in q)
 
 
 def update_row(session, modelclass, dbrow, data):
@@ -2002,13 +2238,6 @@ def update_row(session, modelclass, dbrow, data):
     return dbrow
 
 
-def prefix_index(thelist, prefix, index=0):
-    while index < len(thelist):
-        if thelist[index].startswith(prefix):
-            return index
-        index += 1
-    return None
-
 
 
 #################################
@@ -2021,24 +2250,55 @@ class TestForm(Form):
 
     def build(self):
         sess = models.get_session()
-        self.edit = urwid.Edit("Edit me: ", multiline=True)
-        header = urwid.AttrMap(urwid.Text("Edit this text"), "head")
-        buts = self.get_form_buttons()
-
-        #ls = ListScrollSelector(["one", "two", "three", "four", "five", "six"])
-        #urwid.connect_signal(ls, 'click', self._scroll_select)
-
-        cols = urwid.Columns([urwid.Edit("input: ", multiline=False), #ls,
-                (25, AM(urwid.Text("legend", align="right"), "collabel")),
-                 AM(urwid.Edit("input", multiline=False), "body")])
-
-        tefrm = urwid.BoxAdapter(TestEquipmentAddForm(sess), 20)
-        listbox = urwid.ListBox(urwid.SimpleListWalker([self.edit, tefrm, cols, buts]))
-
-        frm = urwid.Frame(listbox, header=header)
+#        self.edit = urwid.Edit("Edit me: ", multiline=True)
+#        header = urwid.AttrMap(urwid.Text("Edit this text"), "head")
+#        buts = self.get_form_buttons()
+#
+#        fi = SimpleEdit()
+#        ls = ListScrollSelector(["one", "two", "three", "four", "five", "six"])
+#        urwid.connect_signal(ls, 'click', self._scroll_select)
+#
+#        cols = urwid.Columns([fi, urwid.Edit("input: ", multiline=False), ls,
+#                (25, AM(urwid.Text("legend", align="right"), "collabel")),
+#                 AM(urwid.Edit("input", multiline=False), "body")])
+#
+#        tefrm = urwid.BoxAdapter(TestEquipmentAddForm(sess), 20)
+#        listbox = urwid.ListBox(urwid.SimpleListWalker([self.edit, tefrm, cols, buts]))
+#
+#        frm = urwid.Frame(listbox, header=header)
         #ovr = urwid.Frame(urwid.Filler(urwid.Text("Inside frame")))
         #ovl = urwid.Overlay(urwid.LineBox(ovr), frm, "center", 80, "middle", 24)
-        return frm
+        T = urwid.Text
+        M = models.Equipment
+        md = models.get_column_metadata(M, "interfaces")
+
+        eq = sess.query(M).get(80)
+        choices = get_related_choices(sess, M, md, None)
+        #DEBUG(choices)
+
+        current = eq.interfaces
+        currentvalues = {}
+        for v in current.values():
+            currentvalues[v.id] = v
+
+        leftlist = []
+        rightlist = []
+        for pk, row in choices.items():
+            entry = ListEntry(urwid.Text(unicode(row).encode("utf-8")))
+            #urwid.connect_signal(entry, 'activate', self._single_select, pk)
+            leftlist.append(entry)
+
+        for pk, row in currentvalues.items():
+            entry = ListEntry(urwid.Text(unicode(row).encode("utf-8")))
+            #urwid.connect_signal(entry, 'activate', self._single_select, pk)
+            rightlist.append(entry)
+
+
+        left = urwid.ListBox(urwid.SimpleListWalker(leftlist))
+        right = urwid.ListBox(urwid.SimpleListWalker(rightlist))
+        center = urwid.Filler(urwid.Text("<-"))
+        return urwid.Columns([left, center, right])
+        #return frm
 
     def _scroll_select(self, ls):
         DEBUG(ls.value)
@@ -2064,27 +2324,20 @@ if __name__ == "__main__":
     from pycopia import autodebug
     from pycopia import logwindow
     DEBUG = logwindow.DebugLogWindow()
-    #modelclass = models.Corporation
-    #basic = []
-    #many2many = []
-    #one2many = []
-    #for md in models.get_metadata(modelclass):
-    #    if md.coltype == "RelationshipProperty":
-    #        if md.uselist:
-    #            many2many.append(md.colname)
-    #        else:
-    #            one2many.append(md.colname)
-    #    else:
-    #        basic.append(md.colname)
-
-    #print(" basic data:", basic)
-    #print(" One 2 many:", one2many)
-    #print("Many 2 many:", many2many)
-
-    l = ["one", "two", "three", "four", "five", "six"]
-    i = prefix_index(l, "th")
-    print(i, l[i])
-    i = prefix_index(l, "s", i)
-    print(i, l[i])
-
-    #_test(sys.argv)
+#    modelclass = models.TestCase
+#    basic = []
+#    many2many = []
+#    one2many = []
+#    for md in models.get_metadata(modelclass):
+#        if md.coltype == "RelationshipProperty":
+#            if md.uselist:
+#                many2many.append(md.colname)
+#            else:
+#                one2many.append(md.colname)
+#        else:
+#            basic.append(md.colname)
+#
+#    print(" basic data:", basic)
+#    print(" One 2 many:", one2many)
+#    print("Many 2 many:", many2many)
+    _test(sys.argv)
