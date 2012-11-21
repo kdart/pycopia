@@ -865,6 +865,9 @@ class Equipment(object):
     def __str__(self):
         return str(self.name)
 
+    def __unicode__(self):
+        return self.name
+
     def update_attribute(self, session, attrname, value):
         attrtype = AttributeType.get_by_name(session, str(attrname))
         existing = session.query(EquipmentAttribute).filter(and_(EquipmentAttribute.equipment==self,
@@ -1017,6 +1020,17 @@ class Interface(object):
     def __str__(self):
         return "%s (%s)" % (self.name, self.ipaddr)
 
+    def __unicode__(self):
+        extra = []
+        if self.ipaddr is not None:
+            extra.append(unicode(self.ipaddr.CIDR))
+        if self.macaddr is not None:
+            extra.append(unicode(self.macaddr))
+        if extra:
+            return u"%s (%s)" % (self.name, u", ".join(extra))
+        else:
+            return self.name
+
     def __repr__(self):
         return "Interface(%r, ipaddr=%r)" % (self.name, self.ipaddr)
 
@@ -1026,6 +1040,11 @@ class Interface(object):
         session.add(intf)
         session.commit()
 
+    @classmethod
+    def select_unattached(cls, session):
+        return session.query(cls).filter(cls.equipment == None).order_by(cls.ipaddr)
+
+
 mapper(Interface, tables.interfaces,
     properties = {
         "interface_type": relationship(InterfaceType, order_by=tables.interface_type.c.name),
@@ -1033,7 +1052,8 @@ mapper(Interface, tables.interfaces,
                 backref=backref('parent', remote_side=[tables.interfaces.c.id])),
         "network": relationship(Network, backref="interfaces", order_by=tables.networks.c.name),
         "equipment": relationship(Equipment,
-                backref=backref("interfaces", collection_class=column_mapped_collection(tables.interfaces.c.name))),
+                backref=backref("interfaces", collection_class=column_mapped_collection(tables.interfaces.c.name),
+                        cascade="all, delete")),
     }
 )
 
@@ -1770,7 +1790,9 @@ if __name__ == "__main__":
 #
 #    for tr in tc.get_data(sess):
 #        print(tr)
-#
+    for intf in Interface.select_unattached(sess):
+        #print(intf)
+        print(unicode(intf))
 #    print(type(TestSuite.get_by_implementation(sess, "testcases.unittests.WWW.mobileget.MobileSendSuite")))
 #    print (TestSuite.get_suites(sess))
     #print(get_primary_key(Session))

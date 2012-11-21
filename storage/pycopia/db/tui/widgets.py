@@ -105,6 +105,12 @@ class BaseInput(urwid.WidgetWrap):
                             "collabel" if (metadata.nullable or metadata.uselist) else "notnulllabel")),
                  widget], dividechars=1)
 
+    def message(self, msg):
+        self._emit("message", msg)
+
+    def _message(self, b, msg): # callback form
+        self._emit("message", msg)
+
     def _not_implemented(self, metadata):
         return urwid.Text([metadata.coltype, ("notimplemented", " Not implemented yet")])
 
@@ -753,6 +759,123 @@ class TestEquipmentInput(BaseInput):
         urwid.connect_signal(listentry, 'delete', self._delete_testequipment)
 
 
+class EquipmentInterfaceInput(BaseInput):
+    def __init__(self, session, model, metadata, row, legend=None):
+        self.session = session
+        self.modelclass = model
+        self.metadata = metadata
+        self.equipmentrow = row # an Equipment row
+        wid = self.build()
+        self.__super.__init__(self._col_creator(metadata, wid, legend))
+
+    def build(self):
+        addnew = urwid.Button("Add")
+        urwid.connect_signal(addnew, 'click', self._add_new_interface)
+        addnew = urwid.AttrWrap(addnew, 'selectable', 'butfocus')
+        attach = urwid.Button("Attach existing")
+        urwid.connect_signal(attach, 'click', self._attach_interface)
+        attach = urwid.AttrWrap(attach, 'selectable', 'butfocus')
+        wlist = [urwid.Columns([addnew, attach], dividechars=1)]
+        for intf in self.equipmentrow.interfaces.values():
+            wlist.append(self._get_intf_entry(intf))
+        listbox = urwid.ListBox(urwid.SimpleFocusListWalker(wlist))
+        return urwid.BoxAdapter(urwid.LineBox(listbox), max(7, len(wlist)+2))
+
+    def _get_intf_entry(self, intf):
+        entry = ListEntry(urwid.Text(unicode(intf).encode("utf-8")))
+        urwid.connect_signal(entry, 'activate', self._edit_interface)
+        urwid.connect_signal(entry, 'delete', self._delete_interface)
+        entry.interface = intf
+        return entry
+
+    def _delete_interface(self, listentry):
+        urwid.disconnect_signal(listentry, 'activate', self._edit_interface)
+        urwid.disconnect_signal(listentry, 'delete', self._delete_interface)
+        text, attr = listentry._w.base_widget.get_text()
+        dlg = DeleteDialog(text)
+        urwid.connect_signal(dlg, 'ok', self._delete_ok, listentry)
+        urwid.connect_signal(dlg, 'cancel', self._delete_cancel, listentry)
+        self._oldw = listentry._w
+        listentry._w = dlg
+
+    def _delete_ok(self, dlg, listentry):
+        urwid.disconnect_signal(dlg, 'ok', self._delete_ok, listentry)
+        urwid.disconnect_signal(dlg, 'cancel', self._delete_cancel, listentry)
+        del self._oldw
+        self.session.delete(listentry.interface)
+        try:
+            self.session.commit()
+        except:
+            ex, val, tb = sys.exc_info()
+            self.session.rollback()
+            self._emit("message", "{}: {}".format(ex.__name__, val))
+        else:
+            listbox = self._w.contents[1][0].base_widget
+            assert type(listbox) is urwid.ListBox
+            listbox.body.remove(listentry)
+            listentry.interface = None
+            urwid.disconnect_signal(listentry, 'activate', self._edit_interface)
+            urwid.disconnect_signal(listentry, 'delete', self._delete_interface)
+
+    def _delete_cancel(self, dlg, listentry):
+        urwid.disconnect_signal(dlg, 'ok', self._delete_ok, listentry)
+        urwid.disconnect_signal(dlg, 'cancel', self._delete_cancel, listentry)
+        listentry._w = self._oldw
+        del self._oldw
+        # restore sig handlers
+        urwid.connect_signal(listentry, 'activate', self._edit_interface)
+        urwid.connect_signal(listentry, 'delete', self._delete_interface)
+
+    def _add_new_interface(self, b):
+        frm = get_create_form(self.session, models.Interface)
+        urwid.connect_signal(frm, 'message', self._message)
+        urwid.connect_signal(frm, 'popform', self._add_complete)
+        self._emit("pushform", frm)
+
+    def _add_complete(self, form, pkval=None):
+        DEBUG("EquipmentInterfaceInput add_complete", form, pkval)
+        urwid.disconnect_signal(form, 'popform', self._add_complete)
+        if pkval is not None:
+            intf = self.session.query(models.Interface).get(pkval)
+            if intf.name in self.equipmentrow.interfaces:
+                self._emit("message", "Interface with that name already exists. Not adding.")
+            else:
+                self.equipmentrow.interfaces.set(intf)
+                try:
+                    self.session.commit()
+                except:
+                    ex, val, tb = sys.exc_info()
+                    self.session.rollback()
+                    self._emit("message", "{}: {}".format(ex.__name__, val))
+                else:
+                    listbox = self._w.contents[1][0].base_widget
+                    assert type(listbox) is urwid.ListBox
+                    entry = self._get_intf_entry(intf)
+                    listbox.body.append(entry)
+        form._emit("popform")
+
+    def _edit_interface(self, listentry):
+        frm = get_edit_form(self.session, listentry.interface)
+        urwid.connect_signal(frm, 'message', self._message)
+        urwid.connect_signal(frm, 'popform', self._edit_complete, listentry)
+        self._emit("pushform", frm)
+
+    def _edit_complete(self, form, pkval, listentry):
+        DEBUG("EquipmentInterfaceInput edit_complete", form, listentry, pkval)
+        urwid.disconnect_signal(form, 'popform', self._edit_complete, listentry)
+        urwid.disconnect_signal(form, 'message', self._message)
+        listentry._w.base_widget.set_text(unicode(listentry.interface).encode("utf-8"))
+        #self._invalidate()
+        form._emit("popform")
+
+    def _attach_interface(self, b):
+        frm = InterfaceAttachForm(self.session, self.equipmentrow)
+        urwid.connect_signal(frm, 'popform', self._add_complete)
+        self._emit("pushform", frm)
+
+
+### Misc. dialogs
+
 class DeleteDialog(urwid.WidgetWrap):
     __metaclass__ = urwid.MetaSignals
     signals = ["ok", "cancel"]
@@ -985,6 +1108,47 @@ class TestEquipmentEditForm(urwid.WidgetWrap):
 
     def _cancel(self, b):
         self._emit("cancel")
+
+
+class InterfaceAttachForm(urwid.WidgetWrap):
+    __metaclass__ = urwid.MetaSignals
+    signals = ["popform", "message"]
+
+    def __init__(self, session, equipment):
+        self.session = session
+        self._equipment = equipment
+        wid = self.build()
+        self.__super.__init__(wid)
+
+    def build(self):
+        wlist = []
+        entry = ListEntry(urwid.Text("None (cancel)"))
+        urwid.connect_signal(entry, 'activate', self._cancel)
+        wlist.append(entry)
+        for intf in models.Interface.select_unattached(self.session):
+            wlist.append(self._get_intf_entry(intf))
+        return urwid.ListBox(urwid.SimpleListWalker(wlist))
+
+    def _get_intf_entry(self, intf):
+        entry = ListEntry(urwid.Text(unicode(intf).encode("utf-8")))
+        urwid.connect_signal(entry, 'activate', self._sel_interface)
+        entry.interface = intf
+        return entry
+
+    def _cancel(self, entry):
+        self._emit("popform", None)
+
+    def _sel_interface(self, entry):
+#        try:
+#            self._equipment.interfaces.set(entry.interface)
+#            self.session.commit()
+#        except:
+#            ex, val, tb = sys.exc_info()
+#            self.session.rollback()
+#            self._emit("message", "{}: {}".format(ex.__name__, val))
+        intf = entry.interface
+        del entry.interface
+        self._emit("popform", intf.id)
 
 
 # extra widgets
@@ -1397,9 +1561,6 @@ class Form(urwid.WidgetWrap):
         self.__super.__init__(display_widget)
         self.newpk = None
 
-    def build(self):
-        raise NotImplementedError("Override in subclass: return a top-level Frame widget")
-
     # from construction helpers
     def get_form_buttons(self, defaultdata=None, create=False):
         ok = urwid.Button("OK")
@@ -1472,8 +1633,17 @@ class Form(urwid.WidgetWrap):
         self._emit("message", msg)
 
     def _popform(self, form, *extra):
+        DEBUG("Form popform", form)
+        urwid.disconnect_signal(form, 'popform', self._popform)
+        urwid.disconnect_signal(form, 'message', self._message)
         ovl = self._w
         self._w = ovl.bottom_w
+
+    def _cancel(self, b):
+        self._emit("popform")
+
+    def build(self):
+        raise NotImplementedError("Override in subclass: return a top-level Frame widget")
 
     # form dispostion callbacks
     def _ok(self, b, data=None):
@@ -1481,9 +1651,6 @@ class Form(urwid.WidgetWrap):
 
     def _ok_and_edit(self, b, data=None):
         raise NotImplementedError("Need to implement _ok in subclass")
-
-    def _cancel(self, b):
-        self._emit("popform")
 
 
 
@@ -1622,10 +1789,10 @@ class GenericListForm(Form):
             fmt, width = self._FORMATS.get(md.coltype, ("{!s:10.10}", 10))
             colnames.append( ('fixed', width, urwid.Text(("colhead", md.colname))) )
             if md.coltype in ("TEXT", "VARCHAR"):
-                fb = SimpleEdit() # TODO use filter input to select sort order
+                fb = SimpleEdit() # TODO use FilterInput to select sort order, once it works
                 fb.colname = md.colname
                 urwid.connect_signal(fb, "change", self._set_filter)
-                colforms.append(('fixed', width, AM(fb, "selectable")))
+                colforms.append(('fixed', width, AM(fb, "selectable", "butfocus")))
             else:
                 colforms.append(('fixed', width, urwid.Divider()))
 
@@ -1742,16 +1909,16 @@ class GenericCreateForm(Form):
         if pkval is not None:
             self.formwidgets = None
             self._emit("popform", pkval)
-            self._emit("message", "OK follwed by edit is not implemented yet. Please select it to edit.")
+            #self._emit("message", "OK follwed by edit is not implemented yet. Please select it to edit.")
             #XXX This is current broken by some problem elsewhere.
-#            row = self.session.query(self.modelclass).get(pkval)
-#            eform = get_edit_form(self.session, row)
-##            self._emit("pushform", eform)
+            row = self.session.query(self.modelclass).get(pkval)
+            eform = get_edit_form(self.session, row)
+            self._emit("pushform", eform)
         #self._emit("popform", None)
 
     def _commit(self, data):
+        DEBUG("CreateForm commit", data)
         data = data or {}
-        DEBUG(data)
         errlist = []
         widgets = self.formwidgets
         for inputwid in widgets:
@@ -1779,7 +1946,6 @@ class GenericCreateForm(Form):
 
     def _cancel(self, b):
         self._emit("popform", None)
-
 
 
 class GenericEditForm(Form):
@@ -1873,7 +2039,7 @@ class EquipmentEditForm(GenericEditForm):
                 ])
         formstack = []
         for groupname, group in [
-                (None, ("model", "name", "serno", "interfaces")),
+                (None, ("model", "name", "serno")),
                 ("Localization", ("language",)),
                 ("Asset management", ("active", "owner", "location", "sublocation", "vendor", "software")),
                 ("Automation", ("account",)),
@@ -1890,15 +2056,20 @@ class EquipmentEditForm(GenericEditForm):
             colmd = self.metadata[colname]
             wid = self.build_attribute_input(colmd, getattr(self.row, colmd.colname))
             formstack.append(wid)
+        formstack.insert(3, self.build_interface_input())
         formstack.append(self.get_form_buttons())
         listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
         return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
 
+    def build_interface_input(self):
+        colmd = self.metadata["interfaces"]
+        wid = EquipmentInterfaceInput(self.session, self.modelclass, colmd, self.row)
+        urwid.connect_signal(wid, "pushform", self._subform)
+        urwid.connect_signal(wid, 'message', self._message)
+        return wid
+
 
 class EnvironmentCreateForm(GenericCreateForm):
-    # basic data: ['name']
-    # One 2 many: ['owner']
-    # Many 2 many: ['attributes', 'testequipment']
 
     def build(self):
         header = urwid.Pile([
@@ -1953,9 +2124,6 @@ class EnvironmentEditForm(GenericEditForm):
 
 
 class CorporationCreateForm(GenericCreateForm):
-    # basic data: ['name', 'notes']
-    # One 2 many: ['country', 'contact', 'address']
-    #Many 2 many: ['services', 'attributes']
 
     def build(self):
         header = urwid.Pile([
@@ -1974,6 +2142,63 @@ class CorporationCreateForm(GenericCreateForm):
         formstack.append(self.get_form_buttons(create=True))
         listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
         return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
+
+
+class InterfaceCreateForm(GenericCreateForm):
+
+    def build(self):
+        header = urwid.Pile([
+                urwid.AttrMap(urwid.Text("Create Interface"), "formhead"),
+                urwid.AttrMap(urwid.Text("Arrow keys navigate, Enter to select form button. Type into other fields."), "formhead"),
+                urwid.Divider(),
+                ])
+        formstack = []
+        for groupname, group in [
+                (None, ("name", "alias", "ifindex", "description")),
+                ("Network Address", ("ipaddr",)),
+                ("Media Access Address", ("macaddr", "vlan")),
+                ("Extra Info", ("interface_type", "mtu", "speed")),
+                ("Administrative", ("status",)),
+                ("Associations", ("network", "parent")),
+                ]:
+            if groupname:
+                formstack.append(self.build_divider(groupname))
+            for colname in group:
+                colmd = self.metadata[colname]
+                wid = self.build_input(colmd)
+                formstack.append(wid)
+        formstack.append(self.get_form_buttons(create=True))
+        listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
+        return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
+
+
+class InterfaceEditForm(GenericEditForm):
+
+    def build(self):
+        header = urwid.Pile([
+                urwid.AttrMap(urwid.Text("Edit Interface"), "formhead"),
+                urwid.AttrMap(urwid.Text("Arrow keys navigate, Enter to select form button. Type into other fields."), "formhead"),
+                urwid.Divider(),
+                ])
+        formstack = []
+        for groupname, group in [
+                (None, ("name", "alias", "ifindex", "description")),
+                ("Network Address", ("ipaddr",)),
+                ("Media Access Address", ("macaddr", "vlan")),
+                ("Extra Info", ("interface_type", "mtu", "speed")),
+                ("Administrative", ("status",)),
+                ("Associations", ("network", "equipment", "parent", "subinterfaces")),
+                ]:
+            if groupname:
+                formstack.append(self.build_divider(groupname))
+            for colname in group:
+                colmd = self.metadata[colname]
+                wid = self.build_input(colmd, getattr(self.row, colmd.colname))
+                formstack.append(wid)
+        formstack.append(self.get_form_buttons())
+        listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
+        return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
+
 
 
 class CorporationEditForm(GenericEditForm):
@@ -2027,19 +2252,6 @@ class TestCaseCreateForm(GenericCreateForm):
         listbox = urwid.ListBox(urwid.SimpleListWalker(formstack))
         return urwid.Frame(urwid.AttrMap(listbox, 'body'), header=header)
 
-# basic data: ['name', 'lastchange', 'purpose', 'passcriteria',
-# 'startcondition', 'endcondition', 'procedure', 'comments', 'priority',
-# 'cycle', 'status', 'automated', 'interactive', 'valid', 'testimplementation',
-# 'bugid', 'time_estimate']
-# One 2 many: ['reference']
-#Many 2 many: ['prerequisites', 'functionalarea', 'suites', 'dependents']
-
-#['automated', 'bugid', 'comments', 'cycle', 'dependents', 'endcondition',
-#'functionalarea', 'interactive', 'lastchange', 'name', 'passcriteria',
-#'prerequisites', 'priority', 'procedure', 'purpose', 'reference',
-#'startcondition', 'status', 'suites', 'testimplementation', 'time_estimate',
-#'valid']
-
 
 class TestCaseEditForm(GenericEditForm):
 
@@ -2072,6 +2284,7 @@ class TestCaseEditForm(GenericEditForm):
 
 _SPECIAL_CREATE_FORMS = {
         "Equipment": EquipmentCreateForm,
+        "Interface": InterfaceCreateForm,
         "Environment": EnvironmentCreateForm,
         "Corporation": CorporationCreateForm,
         "TestCase": TestCaseCreateForm,
@@ -2079,6 +2292,7 @@ _SPECIAL_CREATE_FORMS = {
 
 _SPECIAL_EDIT_FORMS = {
         "Equipment": EquipmentEditForm,
+        "Interface": InterfaceEditForm,
         "Environment": EnvironmentEditForm,
         "Corporation": CorporationEditForm,
         "TestCase": TestCaseEditForm,
@@ -2324,20 +2538,20 @@ if __name__ == "__main__":
     from pycopia import autodebug
     from pycopia import logwindow
     DEBUG = logwindow.DebugLogWindow()
-#    modelclass = models.TestCase
-#    basic = []
-#    many2many = []
-#    one2many = []
-#    for md in models.get_metadata(modelclass):
-#        if md.coltype == "RelationshipProperty":
-#            if md.uselist:
-#                many2many.append(md.colname)
-#            else:
-#                one2many.append(md.colname)
-#        else:
-#            basic.append(md.colname)
-#
-#    print(" basic data:", basic)
-#    print(" One 2 many:", one2many)
-#    print("Many 2 many:", many2many)
-    _test(sys.argv)
+    modelclass = models.Interface
+    basic = []
+    many2many = []
+    one2many = []
+    for md in models.get_metadata(modelclass):
+        if md.coltype == "RelationshipProperty":
+            if md.uselist:
+                many2many.append(md.colname)
+            else:
+                one2many.append(md.colname)
+        else:
+            basic.append(md.colname)
+
+    print(" basic data:", basic)
+    print(" One 2 many:", one2many)
+    print("Many 2 many:", many2many)
+    #_test(sys.argv)

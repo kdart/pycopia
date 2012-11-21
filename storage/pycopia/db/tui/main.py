@@ -170,7 +170,7 @@ class HelpDialog(urwid.WidgetWrap):
 def main(argv):
     """dbedit [-d] [<databaseurl>]
     """
-    debug = False
+    debug = 0
     try:
         optlist, longopts, args = getopt.getopt(argv[1:], "?hdD")
     except getopt.GetoptError:
@@ -181,7 +181,7 @@ def main(argv):
             print (main.__doc__)
             return
         elif opt == "-d":
-            debug = True
+            debug += 1
         elif opt == "-D":
             from pycopia import autodebug
     if args:
@@ -201,7 +201,14 @@ def main(argv):
             if debug:
                 ex, val, tb = sys.exc_info()
                 from pycopia import debugger
-                debugger.post_mortem(tb, ex, val)
+                if debug > 1:
+                    from pycopia import IOurxvt
+                    io = IOurxvt.UrxvtIO()
+                else:
+                    io = None
+                debugger.post_mortem(tb, ex, val, io)
+                if debug > 1:
+                    io.close()
             else:
                 raise
     finally:
