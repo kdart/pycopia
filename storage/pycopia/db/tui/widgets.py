@@ -557,6 +557,7 @@ class AttributeInput(BaseInput):
         except:
             ex, val, tb = sys.exc_info()
             self.session.rollback()
+            DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
             return
         urwid.disconnect_signal(form, 'ok', self._edit_ok, entry)
@@ -587,10 +588,12 @@ class AttributeInput(BaseInput):
             self.row.set_attribute(self.session, attrname, attrvalue)
         except IntegrityError:
             self.session.rollback()
+            DEBUG(ex.__name__, val)
             self._emit("message", "Cannot add, attribute already exists.")
         except:
             ex, val, tb = sys.exc_info()
             self.session.rollback()
+            DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
             return
         old, attr = self._w.contents[1] # attr e.g. (wid, ("given", 25, False))
@@ -675,6 +678,7 @@ class TestEquipmentInput(BaseInput):
         except:
             self.session.rollback()
             ex, val, tb = sys.exc_info()
+            DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
         entry = ListEntry(urwid.Text(self._stringify_te(dbrow)))
         urwid.connect_signal(entry, 'activate', self._edit_testequipment)
@@ -703,6 +707,7 @@ class TestEquipmentInput(BaseInput):
             self.session.rollback()
         except:
             ex, val, tb = sys.exc_info()
+            DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
         urwid.disconnect_signal(form, 'ok', self._edit_testequipment_ok, entry)
         urwid.disconnect_signal(form, 'cancel', self._edit_testequipment_cancel, entry)
@@ -714,6 +719,7 @@ class TestEquipmentInput(BaseInput):
         except:
             self.session.rollback()
             ex, val, tb = sys.exc_info()
+            DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
         entry._w.base_widget.set_text(self._stringify_te(entry.testequipment))
         urwid.disconnect_signal(form, 'ok', self._edit_testequipment_ok, entry)
@@ -744,6 +750,7 @@ class TestEquipmentInput(BaseInput):
         except:
             ex, val, tb = sys.exc_info()
             self.session.rollback()
+            DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
         listentry.testequipment = None
         urwid.disconnect_signal(listentry, 'activate', self._edit_testequipment)
@@ -808,6 +815,7 @@ class EquipmentInterfaceInput(BaseInput):
         except:
             ex, val, tb = sys.exc_info()
             self.session.rollback()
+            DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
         else:
             listbox = self._w.contents[1][0].base_widget
@@ -833,7 +841,6 @@ class EquipmentInterfaceInput(BaseInput):
         self._emit("pushform", frm)
 
     def _add_complete(self, form, pkval=None):
-        DEBUG("EquipmentInterfaceInput add_complete", form, pkval)
         urwid.disconnect_signal(form, 'popform', self._add_complete)
         if pkval is not None:
             intf = self.session.query(models.Interface).get(pkval)
@@ -846,6 +853,7 @@ class EquipmentInterfaceInput(BaseInput):
                 except:
                     ex, val, tb = sys.exc_info()
                     self.session.rollback()
+                    DEBUG(ex.__name__, val)
                     self._emit("message", "{}: {}".format(ex.__name__, val))
                 else:
                     listbox = self._w.contents[1][0].base_widget
@@ -861,7 +869,6 @@ class EquipmentInterfaceInput(BaseInput):
         self._emit("pushform", frm)
 
     def _edit_complete(self, form, pkval, listentry):
-        DEBUG("EquipmentInterfaceInput edit_complete", form, listentry, pkval)
         urwid.disconnect_signal(form, 'popform', self._edit_complete, listentry)
         urwid.disconnect_signal(form, 'message', self._message)
         listentry._w.base_widget.set_text(unicode(listentry.interface).encode("utf-8"))
@@ -1437,7 +1444,7 @@ class MultiselectListForm(urwid.WidgetWrap):
             self._w.set_focus("footer" if self._w.get_focus() == "body" else "body")
 
     def _message(self, b, msg):
-        self._emit("message"< msg)
+        self._emit("message", msg)
 
     def _add_new(self, b):
         colname = self.metadata.colname
@@ -1539,7 +1546,7 @@ class MultiselectForm(urwid.WidgetWrap):
             self._w.set_focus("header" if self._w.get_focus() == "body" else "body")
 
     def _message(self, b, msg):
-        self._emit("message"< msg)
+        self._emit("message", msg)
 
 
 
@@ -1633,7 +1640,6 @@ class Form(urwid.WidgetWrap):
         self._emit("message", msg)
 
     def _popform(self, form, *extra):
-        DEBUG("Form popform", form)
         urwid.disconnect_signal(form, 'popform', self._popform)
         urwid.disconnect_signal(form, 'message', self._message)
         ovl = self._w
@@ -1819,6 +1825,7 @@ class GenericListForm(Form):
 
     def _create_cb(self, b):
         cform = get_create_form(self.session, self.modelclass)
+        urwid.connect_signal(cform, 'pushform', lambda oform, newform: self._emit("pushform", newform))
         self._emit("pushform", cform)
 
     def _edit(self, b, pk):
@@ -1842,7 +1849,6 @@ class GenericListForm(Form):
             self.session.delete(row)
             self.session.commit()
         except IntegrityError as ierr:
-            DEBUG("delete row failed", ierr)
             self.session.rollback()
             self._emit("message", str(ierr))
         else:
@@ -1909,15 +1915,11 @@ class GenericCreateForm(Form):
         if pkval is not None:
             self.formwidgets = None
             self._emit("popform", pkval)
-            #self._emit("message", "OK follwed by edit is not implemented yet. Please select it to edit.")
-            #XXX This is current broken by some problem elsewhere.
             row = self.session.query(self.modelclass).get(pkval)
             eform = get_edit_form(self.session, row)
             self._emit("pushform", eform)
-        #self._emit("popform", None)
 
     def _commit(self, data):
-        DEBUG("CreateForm commit", data)
         data = data or {}
         errlist = []
         widgets = self.formwidgets
@@ -1942,7 +1944,7 @@ class GenericCreateForm(Form):
             del tb
             DEBUG(ex.__name__, val)
             self._emit("message", "{}: {}".format(ex.__name__, val))
-        return pkval
+        return pkval # will be None on failure, user may try again or cancel
 
     def _cancel(self, b):
         self._emit("popform", None)
@@ -2455,7 +2457,7 @@ def update_row(session, modelclass, dbrow, data):
 
 
 #################################
-## XXX for trying out experimental stuff
+## Below is for trying out experimental stuff
 
 class TestForm(Form):
     def __init__(self):
@@ -2532,13 +2534,7 @@ def _test(argv):
     app = TestForm()
     print(app.run())
 
-
-if __name__ == "__main__":
-    import sys
-    from pycopia import autodebug
-    from pycopia import logwindow
-    DEBUG = logwindow.DebugLogWindow()
-    modelclass = models.Interface
+def _report_metadata(modelclass):
     basic = []
     many2many = []
     one2many = []
@@ -2550,8 +2546,16 @@ if __name__ == "__main__":
                 one2many.append(md.colname)
         else:
             basic.append(md.colname)
-
     print(" basic data:", basic)
     print(" One 2 many:", one2many)
     print("Many 2 many:", many2many)
+
+
+if __name__ == "__main__":
+    import sys
+    from pycopia import autodebug
+    from pycopia import logwindow
+    DEBUG = logwindow.DebugLogWindow()
+    #_report_metadata(models.Interface)
     #_test(sys.argv)
+
