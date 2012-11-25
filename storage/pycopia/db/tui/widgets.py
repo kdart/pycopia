@@ -29,7 +29,6 @@ from datetime import datetime
 
 import urwid
 
-from sqlalchemy import and_, or_, not_, func, exists
 from sqlalchemy.exc import IntegrityError
 
 from pycopia import ipv4
@@ -40,7 +39,6 @@ from pycopia.db import models
 DEBUG = NULL
 
 PALETTE = [
-    #('body','black','light gray', 'standout'),
     ('body','default', 'default'),
     ('popup','black','light gray', 'standout'),
     ('top','default', 'default'),

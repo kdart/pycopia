@@ -48,6 +48,7 @@ import urwid
 from pycopia import getopt
 from pycopia.db import models
 from pycopia.db.tui import widgets
+from pycopia.db.tui import eventloop
 
 
 class DBEditor(object):
@@ -75,8 +76,7 @@ class DBEditor(object):
 
     def run(self):
         self.loop = urwid.MainLoop(self.top, widgets.PALETTE,
-                unhandled_input=self.unhandled_input, pop_ups=True,
-                event_loop=urwid.GLibEventLoop())
+                unhandled_input=self.unhandled_input, pop_ups=True, event_loop=eventloop.PycopiaEventLoop())
         self.loop.run()
         self.loop = None
 
