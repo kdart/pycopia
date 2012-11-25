@@ -1,7 +1,7 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 1999-2011  Keith Dart <keith@dart.us.com>
+#    Copyright (C) 1999-2012  Keith Dart <keith@dart.us.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -36,6 +36,7 @@ from errno import EINTR, EBADF
 
 from pycopia.aid import NULL
 
+
 class ExitNow(Exception):
     pass
 
@@ -62,6 +63,9 @@ class Poll(object):
     """
     def __init__(self):
         self.smap = {}
+        self._fd_callbacks = {}
+        self._idle_callbacks = {}
+        self._idle_handle = 0
         self.pollster = select.epoll()
         fd = self.pollster.fileno()
         flags = fcntl.fcntl(fd, fcntl.F_GETFD)
@@ -84,10 +88,6 @@ class Poll(object):
             self.pollster.register(fd, flags)
             self.smap[fd] = obj
 
-    def register_fd(self, fd, flags):
-        self.pollster.register(fd, flags)
-        self.smap[fd] = None
-
     def modify(self, obj):
         fd = obj.fileno()
         if fd in self.smap:
@@ -95,14 +95,45 @@ class Poll(object):
             self.pollster.modify(fd, flags)
 
     def unregister(self, obj):
-        self.unregister_fd(obj.fileno())
-
-    def unregister_fd(self, fd):
+        fd = obj.fileno()
         try:
             del self.smap[fd]
         except KeyError:
             return
         self.pollster.unregister(fd)
+
+    def register_fd(self, fd, flags, callback):
+        self.pollster.register(fd, flags)
+        self.smap[fd] = None
+        self._fd_callbacks[fd] = callback
+
+    def unregister_fd(self, fd):
+        try:
+            del self.smap[fd]
+        except KeyError:
+            return False
+        try:
+            del self._fd_callbacks[fd]
+        except KeyError:
+            return False
+        self.pollster.unregister(fd)
+        return True
+
+    def register_idle(self, callback):
+        self._idle_handle += 1
+        self._idle_callbacks[self._idle_handle] = callback
+        return self._idle_handle
+
+    def unregister_idle(self, handle):
+        try:
+            del self._idle_callbacks[handle]
+        except KeyError:
+            return False
+        return True
+
+    def _run_idle(self):
+        for callback in self._idle_callbacks.values():
+            callback()
 
     def poll(self, timeout=-1.0):
         while 1:
@@ -110,9 +141,10 @@ class Poll(object):
                 rl = self.pollster.poll(timeout)
             except IOError as why:
                 if why[0] == EINTR:
+                    self._run_idle()
                     continue
                 elif why[0] == EBADF:
-                    self._removebad() # remove objects that might have went away
+                    self._removebad() # remove objects or fd that might have went away
                     continue
                 else:
                     raise
@@ -123,8 +155,11 @@ class Poll(object):
                 hobj = self.smap[fd]
             except KeyError: # this should never happen, but let's be safe.
                 continue
+            if hobj is None: # signals simple callback
+                self._fd_callbacks[fd]()
+                continue
             try:
-                if (flags  & EPOLLERR) or (flags & POLLNVAL):
+                if (flags & EPOLLERR) or (flags & POLLNVAL):
                     hobj.error_handler()
                     continue
                 if (flags & EPOLLHUP):
@@ -142,15 +177,17 @@ class Poll(object):
                 ex, val, tb = sys.exc_info()
                 hobj.exception_handler(ex, val, tb)
 
-    # note that if you use this, unregister the default SIGIO handler
     def loop(self, timeout=-1.0, callback=NULL):
         while self.smap:
             self.poll(timeout)
+            self._run_idle()
             callback(self)
 
     def unregister_all(self):
         for obj in self.smap.values():
             self.unregister(obj)
+        self._fd_callbacks = {}
+        self._idle_callbacks = {}
 
     clear = unregister_all
 
@@ -165,12 +202,18 @@ class Poll(object):
         return flags
 
     def _removebad(self):
-        for fd, aiobj in self.smap.items():
+        for fd in self.smap.keys():
             try:
                 os.fstat(fd)
             except OSError:
                 self.pollster.unregister(fd)
                 del self.smap[fd]
+        for fd in self._fd_callbacks.keys():
+            try:
+                os.fstat(fd)
+            except OSError:
+                self.pollster.unregister(fd)
+                del self._fd_callbacks[fd]
 
     # A poller is itself selectable so may be nested in another Poll
     # instance. Therefore, supports the async interface itself.
@@ -231,9 +274,18 @@ class PollerInterface(object):
         print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
 
 
-# Singleton instance
-poller = Poll()
+# Main poller is a singleton instance, in the module scope.
 
+# Automatic, lazy instantiation of poller object when first referenced.
+class _Poll_builder(object):
+
+    def __getattr__(self, name):
+        global poller
+        if isinstance(poller, _Poll_builder):
+            poller = Poll()
+        return getattr(poller, name)
+
+poller = _Poll_builder()
 
 
 # Default setup is to poll our files when we get a SIGIO. This is done since
@@ -273,10 +325,6 @@ class SIGIOHandler(object):
 
 # Singleton instance of SIGIO handler. It's optional.
 manager = None
-
-def get_manager():
-    global manager
-    return manager
 
 def start_sigio():
     global manager
