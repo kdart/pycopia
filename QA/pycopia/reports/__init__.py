@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -30,7 +28,7 @@ e.g.:
      get_report( ("StandardReport", "reportfile", "text/plain") )
 
 Note that the argument is a single tuple. A list of these may be supplied
-for a "stacked" report. 
+for a "stacked" report.
 
 The first argument is a report object name (plus module, if necessary).
 Any remaining argumments in the tuple are passed to the specified reports
@@ -51,7 +49,7 @@ _FORMATTERS = {
     None: ("StandardFormatter", "txt"), # default
     "text/plain": ("StandardFormatter", "txt"), # plain text
     "text/ascii": ("StandardFormatter", "asc"), # plain text
-    "text/html": ("pycopia.reports.Html.XHTMLFormatter", "html"), # HTML 
+    "text/html": ("pycopia.reports.Html.XHTMLFormatter", "html"), # HTML
     "text/ansi": ("pycopia.reports.ANSI.ANSIFormatter", "ansi"), # text with ANSI-term color escapes
     "text/ansi; charset=utf8": ("pycopia.reports.utf8ANSI.UTF8Formatter", "ansi"),
 }
@@ -120,11 +118,11 @@ class NullReport(object):
     class for all Report objects."""
     # overrideable methods
     def write(self, text):
-        raise NotImplementedError, "override me!"
+        raise NotImplementedError("override me!")
     def writeline(self, text=""):
-        raise NotImplementedError, "override me!"
+        raise NotImplementedError("override me!")
     def writelines(self, lines):
-        raise NotImplementedError, "override me!"
+        raise NotImplementedError("override me!")
     filename = property(lambda s: None)
     filenames = property(lambda s: [])
     def initialize(self, config=None): pass
@@ -153,11 +151,11 @@ class DebugReport(NullReport):
     """
     # overrideable methods
     def write(self, text):
-        raise NotImplementedError, "override me!"
+        raise NotImplementedError("override me!")
     def writeline(self, text=""):
-        raise NotImplementedError, "override me!"
+        raise NotImplementedError("override me!")
     def writelines(self, lines):
-        raise NotImplementedError, "override me!"
+        raise NotImplementedError("override me!")
     filename = property(lambda s: "")
     filenames = property(lambda s: [])
     def initialize(self, config=None):
@@ -220,7 +218,7 @@ the filename specified is "-" then use stdout.  """
         else:
             fo = name # better be a file object
         UserFile.FileWrapper.__init__(self, fo)
-    
+
     filename = property(lambda s: s._fo.name)
     filenames = property(lambda s: [s._fo.name])
 
@@ -370,7 +368,7 @@ class TerseReport(StandardReport):
 class StackedReport(object):
     """StackedReport allows stacking of reports, which creates multiple
     reports simultaneously.  It adds a new method, add_report() that is
-    used to add on a new report object. """ 
+    used to add on a new report object. """
     def __init__(self, rpt=None):
         self._reports = []
         if rpt:
@@ -384,7 +382,7 @@ class StackedReport(object):
         elif isinstance(rpt_or_name, NullReport):
             self._reports.append(rpt_or_name)
         else:
-            raise BadReportError, "StackedReport: report must be name of report or report object."
+            raise BadReportError("StackedReport: report must be name of report or report object.")
 
     def _get_names(self):
         rv = []
@@ -477,15 +475,13 @@ def _get_object(name):
                 try:
                     mod = __import__(modname, globals(), locals(), ["*"])
                 except ImportError, err:
-                    raise ReportFindError, \
-                        "Could not find report module %s: %s" % (modname, err)
+                    raise ReportFindError("Could not find report module %s: %s" % (modname, err))
             try:
                 return getattr(mod, name[i+1:])
             except AttributeError:
-                    raise ReportFindError, \
-                        "Could not find report object: %s" % (name,)
+                    raise ReportFindError("Could not find report object: %s" % (name,))
         else:
-            raise ReportFindError, "%s is not a valid object path." % (name,)
+            raise ReportFindError("%s is not a valid object path." % (name,))
 
 
 def get_report(args):
@@ -494,7 +490,7 @@ def get_report(args):
     of reports. A StackedReport object will be generated in that case.
     Otherwise, args should be a tuple, with first arg the name of a report or
     None (for StandardReport), and remaining args get passed to report
-    initializer.  
+    initializer.
     """
 
     if type(args) is list:
@@ -508,7 +504,7 @@ def get_report(args):
         return apply(StandardReport, args[1:])
     robj = _get_object(name)
     if not hasattr(robj, "info"):
-        raise ReportFindError, "%s is not a valid report object." % (name,)
+        raise ReportFindError("%s is not a valid report object." % (name,))
     return apply(robj, args[1:])
 
 def get_formatter(name, *args):
