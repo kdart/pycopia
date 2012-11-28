@@ -1144,13 +1144,6 @@ class InterfaceAttachForm(urwid.WidgetWrap):
         self._emit("popform", None)
 
     def _sel_interface(self, entry):
-#        try:
-#            self._equipment.interfaces.set(entry.interface)
-#            self.session.commit()
-#        except:
-#            ex, val, tb = sys.exc_info()
-#            self.session.rollback()
-#            self._emit("message", "{}: {}".format(ex.__name__, val))
         intf = entry.interface
         del entry.interface
         self._emit("popform", intf.id)
@@ -2095,7 +2088,10 @@ class EnvironmentEditForm(GenericEditForm):
     def build(self):
         header = urwid.Pile([
                 urwid.AttrMap(urwid.Text("Edit {}".format(self.modelclass.__name__)), "formhead"),
-                urwid.AttrMap(urwid.Text("Arrow keys navigate, Enter to select form button. Type into other fields."), "formhead"),
+                urwid.AttrMap(urwid.Text("Arrow keys navigate, "
+                        "Enter to select form button. Tab to switch to header."
+                        "Type into other fields."), "formhead"),
+                AM(urwid.Button("Copy from...", on_press=self._create_copy_input), "selectable", "butfocus"),
                 urwid.Divider(),
                 ])
         formstack = []
@@ -2121,6 +2117,55 @@ class EnvironmentEditForm(GenericEditForm):
         urwid.connect_signal(wid, 'message', self._message)
         wid.colname = colmd.colname
         return wid
+
+    def _create_copy_input(self, b):
+        Env = models.Environment
+        choices = self.session.query(Env.id, Env.name).filter(Env.id != self.row.id).order_by(Env.name)
+        canc = urwid.Button("Cancel")
+        urwid.connect_signal(canc, 'click', self._copy_cancel)
+        butcol = urwid.Columns([AM(canc, "buttn", "buttnf")])
+        wlist = [butcol]
+        for pk, cname in choices:
+            entry = ListEntry(urwid.Text(cname))
+            urwid.connect_signal(entry, 'activate', self._copy_select)
+            entry.pkey = pk
+            wlist.append(entry)
+        listbox = urwid.ListBox(urwid.SimpleListWalker(wlist))
+        box = urwid.BoxAdapter(urwid.LineBox(listbox), 9)
+        self._w.header.base_widget.widget_list[-1] = box
+
+    def _copy_cancel(self, b):
+        self._w.header.base_widget.focus_position = 2
+        self._w.header.base_widget.widget_list[-1] = urwid.Divider()
+        self._w.set_focus("body")
+
+    def _copy_select(self, entry):
+        self._w.header.base_widget.focus_position = 2
+        self._w.header.base_widget.widget_list[-1] = urwid.Divider()
+        self._w.set_focus("body")
+        self._copy_environment(entry.pkey)
+        self._w= self.build()
+
+    def _copy_environment(self, envid):
+        env = self.session.query(models.Environment).get(envid)
+        DEBUG(env.testequipment)
+        for te in env.testequipment:
+            newte = models.create(models.TestEquipment,
+                    roles=te.roles[:], equipment=te.equipment, UUT=te.UUT, environment=self.row)
+            self.session.add(newte)
+
+        for attr in env.attributes:
+            newattr = models.create(models.EnvironmentAttribute,
+                    environment=self.row, type=attr.type, value=attr.value)
+            self.session.add(newattr)
+        self.session.commit()
+
+    def keypress(self, size, key):
+        if self._command_map[key] != 'next selectable':
+            return self._w.keypress(size, key)
+        if isinstance(self._w, urwid.Frame):
+            self._w.set_focus("header" if self._w.get_focus() == "body" else "body")
+
 
 
 class CorporationCreateForm(GenericCreateForm):
