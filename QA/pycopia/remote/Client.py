@@ -59,8 +59,8 @@ def remote_copy(agent, remfile, dst):
     agent.fclose(h)
 
 
-def get_controller(equipment, logfile=None):
-    client = get_remote(equipment["hostname"])
+def get_controller(equipment, logfile=None, servicename="PosixAgent"):
+    client = get_remote(equipment["hostname"], servicename)
     if logfile:
         logfile.write("Got remote.Client %s\n" % (client,))
     return client

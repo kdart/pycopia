@@ -25,6 +25,7 @@ from __future__ import division
 import os
 from datetime import datetime
 
+from pycopia import methods
 
 class DebugLogWindow(object):
     """Open a urxvt terminal window to write debug messages to.
@@ -56,13 +57,31 @@ class DebugLogWindow(object):
         print(datetime.now(), ":", ", ".join(map(repr, objs)), file=self._fo)
 
 
+# automatic, lazy construction of DEBUG object
+def _debug_builder(*args):
+    global DEBUG
+    if DEBUG is _debug_builder:
+        DEBUG = DebugLogWindow()
+    DEBUG(*args)
+
+DEBUG = _debug_builder
+
+# decorator to report on function calls
+def logcall(f):
+    def _debug(*args, **kwargs):
+        ms = methods.MethodSignature(f)
+        argdict = ms.get_keyword_arguments(args, kwargs)
+        DEBUG(str(methods.MethodSignature(f)),
+                ", ".join("{!s}={!r}".format(t[0], t[1]) for t in argdict.items() if t[0] != "self"))
+        return f(*args, **kwargs)
+    _debug.__doc__ = f.__doc__
+    return _debug
+
 
 if __name__=='__main__':
     import signal
-    DEBUG = DebugLogWindow()
     DEBUG("test me")
     DEBUG("test me", "again")
     signal.pause()
     DEBUG.close()
-    #runcall(help)
 
