@@ -48,7 +48,15 @@ def pyterm(filename="", interactive=1):
     if "://" in filename:
         url = URL(filename)
         if url.scheme in ("scp", "sftp"): # vim remote file
-            remcmd = "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", url.path[1:]) # chop leading slash
+            # Assumes remote dev environment is the same as local one.
+            path = url.path[1:]
+            if not path.startswith("/"): # from HOME
+                if url.user:
+                    user = url.user
+                else:
+                    user = os.environ["USER"]
+                path = "/home/{}/{}".format(user, path)
+            remcmd = python_command(path, interactive)
             if url.user:
                 cmd = 'ssh -t {}@{} {}'.format(url.user, url.host, remcmd)
             else:
@@ -56,11 +64,19 @@ def pyterm(filename="", interactive=1):
         else:
             return "Can't handle scheme: " + url.scheme
     else:
-        cmd = "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", filename)
+        cmd = python_command(filename, interactive)
     if "DISPLAY" in os.environ:
         return run_config(os.environ.get("XTERM"), cmd)
     else:
         return os.system(cmd)
+
+
+def python_command(name, interactive=1):
+    modname = module_from_path(name)
+    if modname:
+        return "{} {} -m '{}' ".format(PYTHON, "-i" if interactive else "", modname)
+    else:
+        return "{} {} '{}' ".format(PYTHON, "-i" if interactive else "", name)
 
 
 def xterm(cmd="/bin/sh"):
@@ -217,6 +233,21 @@ def find_from_package(pkgname, modname):
         return fpath
     else:
         return None
+
+
+def module_from_path(fname):
+    """Find and return the module name given a full path name.
+    Return None if file name not in the package path.
+    """
+    dirname, basename = os.path.split(fname)
+    for p in sys.path:
+        if fname.startswith(p):
+            pkgname = ".".join(dirname[len(p)+1:].split("/"))
+            if pkgname:
+                return pkgname + "." + os.path.splitext(basename)[0]
+            else:
+                return os.path.splitext(basename)[0]
+    return None
 
 
 def open_chm(search):
