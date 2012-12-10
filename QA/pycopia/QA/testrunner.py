@@ -203,8 +203,8 @@ class TestRunner(object):
             cf.report.add_message("MODULEENDTIME", timelib.now())
             if rv is None:
                 # If module run() function returns None we take that to mean that
-                # it runs a TestSuite itself. Report nothing.
-                return 0
+                # it runs a TestSuite itself. Report PASSED value.
+                return 1
             elif type(rv) is core.TestResult:
                 return bool(rv)
             # If the module returns something else we take that to mean that
