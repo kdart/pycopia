@@ -32,17 +32,27 @@ class DebugLogWindow(object):
     Call the instance with any number of arguments to write to window.
     """
 
-    def __init__(self):
+    def __init__(self, do_stderr=False):
+        self._do_stderr = do_stderr
         self._fo = None
 
     def __del__(self):
         self.close()
+
+    def fileno(self):
+        if self._fo is not None:
+            return self._fo.fileno()
+        else:
+            return -1
 
     def close(self):
         if self._fo is not None:
             fo = self._fo
             self._fo = None
             fo.close()
+            if self._do_stderr:
+                os.close(2)
+                os.dup2(1, 2)
 
     def __call__(self, *objs):
         if self._fo is None:
@@ -51,6 +61,9 @@ class DebugLogWindow(object):
             if pid: # parent
                 os.close(masterfd)
                 self._fo = os.fdopen(slavefd, "w+", 0)
+                if self._do_stderr:
+                    os.close(2)
+                    os.dup2(slavefd, 2)
             else: # child
                 os.close(slavefd)
                 os.execlp("urxvt", "urxvt", "-pty-fd", str(masterfd))

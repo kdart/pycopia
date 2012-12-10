@@ -46,23 +46,23 @@ Many other constants may be defined; these may be used in calls to
 the setsockopt() and getsockopt() methods.
 """
 
-
 from __future__ import print_function
 
 import _socket
 from _socket import *
 
 import os, sys, io
+import fcntl, struct
 
 from errno import (EBADF, EAGAIN, EALREADY, EINPROGRESS, EWOULDBLOCK, ECONNRESET,
      ENOTCONN, ESHUTDOWN, EINTR, EISCONN, EADDRNOTAVAIL, EBADF)
 
-__all__ = ['SafeSocket', 'AsyncSocket', 'getfqdn', 'create_connection',
-'opentcp', 'connect_inet', 'connect_tcp', 'connect_udp', 'connect_unix',
-'connect_unix_datagram', 'unix_listener', 'unix_listener_datagram',
-'udp_listener', 'tcp_listener', 'check_port', 'islocal']
+__all__ = ['socket', 'SocketIO', 'SafeSocket', 'AsyncSocket', 'getfqdn',
+'create_connection', 'opentcp', 'connect_inet', 'connect_tcp', 'connect_udp',
+'connect_unix', 'connect_unix_datagram', 'unix_listener',
+'unix_listener_datagram', 'udp_listener', 'tcp_listener', 'check_port',
+'islocal', 'inq', 'outq']
 __all__.extend(os._get_exports_list(_socket))
-
 
 from pycopia.aid import systemcall
 
@@ -70,6 +70,10 @@ from pycopia.aid import systemcall
 SocketError = error
 HostError = herror
 GetAddressInfoError = gaierror
+
+# extra ioctl numbers
+SIOCINQ = 0x541B
+SIOCOUTQ = 0x5411
 
 
 class socket(_socket.socket):
@@ -100,6 +104,11 @@ class socket(_socket.socket):
                                 s[7:])
         return s
 
+    def inq(self):
+        return inq(self)
+
+    def outq(self):
+        return outq(self)
 
     def makefile(self, mode="rwb", buffering=None, encoding=None, errors=None, newline=None):
         """makefile(...) -> an I/O stream connected to the socket
@@ -612,4 +621,11 @@ def islocal(host):
         s.close()
         return 1
 
+def inq(sock):
+    """How many bytes are still in the kernel's input buffer?"""
+    return struct.unpack("I", fcntl.ioctl(sock.fileno(), SIOCINQ, '\0\0\0\0'))[0]
+
+def outq(sock):
+    """How many bytes are still in the kernel's output buffer?"""
+    return struct.unpack("I", fcntl.ioctl(sock.fileno(), SIOCOUTQ, '\0\0\0\0'))[0]
 

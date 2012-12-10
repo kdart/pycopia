@@ -19,7 +19,7 @@
 from __future__ import print_function
 
 import sys, os
-import select, signal, fcntl
+import select, signal, fcntl, struct
 # the only signal module function that is exposed here. The rest are wrapped by
 # Poll.
 pause = signal.pause
@@ -29,10 +29,13 @@ EPOLLHUP = select.EPOLLHUP
 EPOLLIN = select.EPOLLIN
 EPOLLOUT = select.EPOLLOUT
 EPOLLPRI = select.EPOLLPRI
+# These are not implemented here
+#EPOLLET = select.EPOLLET
+#EPOLLONESHOT = select.EPOLLONESHOT
 
 POLLNVAL = select.POLLNVAL
 
-from errno import EINTR, EBADF
+from errno import EINTR
 
 from pycopia.aid import NULL
 
@@ -55,6 +58,9 @@ except AttributeError:
         "sunos5":0, # not supported
         }.get(sys.platform, 0)
 
+# ioctl codes
+FIONREAD = TIOCINQ = SIOCINQ = 0x541B
+TIOCOUTQ = SIOCOUTQ = 0x5411
 
 class Poll(object):
     """Object oriented interface to epoll.
@@ -111,13 +117,18 @@ class Poll(object):
         try:
             del self.smap[fd]
         except KeyError:
-            return False
+            pass
+        else:
+            self.pollster.unregister(fd)
+            return True
         try:
             del self._fd_callbacks[fd]
         except KeyError:
-            return False
-        self.pollster.unregister(fd)
-        return True
+            pass
+        else:
+            self.pollster.unregister(fd)
+            return True
+        return False
 
     def register_idle(self, callback):
         self._idle_handle += 1
@@ -143,9 +154,6 @@ class Poll(object):
                 if why[0] == EINTR:
                     self._run_idle()
                     continue
-                elif why[0] == EBADF:
-                    self._removebad() # remove objects or fd that might have went away
-                    continue
                 else:
                     raise
             else:
@@ -159,11 +167,11 @@ class Poll(object):
                 self._fd_callbacks[fd]()
                 continue
             try:
-                if (flags & EPOLLERR) or (flags & POLLNVAL):
+                if (flags & EPOLLERR):
                     hobj.error_handler()
                     continue
-                if (flags & EPOLLHUP):
-                    hobj.hangup_handler()
+                if (flags & POLLNVAL):
+                    self.unregister_fd(fd)
                     continue
                 if (flags & EPOLLPRI):
                     hobj.pri_handler()
@@ -171,6 +179,8 @@ class Poll(object):
                     hobj.read_handler()
                 if (flags & EPOLLOUT):
                     hobj.write_handler()
+                if (flags & EPOLLHUP):
+                    hobj.hangup_handler()
             except (ExitNow, KeyboardInterrupt, SystemExit):
                 raise
             except:
@@ -201,27 +211,13 @@ class Poll(object):
             flags |= EPOLLPRI
         return flags
 
-    def _removebad(self):
-        for fd in self.smap.keys():
-            try:
-                os.fstat(fd)
-            except OSError:
-                self.pollster.unregister(fd)
-                del self.smap[fd]
-        for fd in self._fd_callbacks.keys():
-            try:
-                os.fstat(fd)
-            except OSError:
-                self.pollster.unregister(fd)
-                del self._fd_callbacks[fd]
-
     # A poller is itself selectable so may be nested in another Poll
     # instance. Therefore, supports the async interface itself.
     def fileno(self):
         return self.pollster.fileno()
 
     def readable(self):
-        return bool(self.smap)
+        return bool(self.smap) or bool(self._fd_callbacks)
 
     def writable(self):
         return False
@@ -233,10 +229,11 @@ class Poll(object):
         self.poll()
 
     def error_handler(self):
-        print("Pollster error", file=sys.stderr)
+        print("Poll error", file=sys.stderr)
 
     def exception_handler(self, ex, val, tb):
-        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
+        print("Poll exception: %s (%s)" % (ex, val), file=sys.stderr)
+        raise ex, val, tb
 
 
 # Mixin for objects that only want to define a few methods for a class
@@ -271,7 +268,7 @@ class PollerInterface(object):
         pass
 
     def exception_handler(self, ex, val, tb):
-        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
+        print("Poller exception: %s (%s)" % (ex, val), file=sys.stderr)
 
 
 # Main poller is a singleton instance, in the module scope.
@@ -365,6 +362,7 @@ def unregister_asyncio(obj):
 
 unregister = unregister_asyncio
 
+
 # Socket protocol handlers
 
 CLOSED = 0
@@ -447,6 +445,7 @@ class AsyncWorkerHandler(PollerInterface):
         self.close()
 
     def error_handler(self):
+        print("AsyncWorkerHandler error", file=sys.stderr)
         poller.unregister(self)
 
     def write_handler(self):
@@ -458,15 +457,23 @@ class AsyncWorkerHandler(PollerInterface):
     def initialize(self):
         pass
 
-    def read_handler(self):
-        data = self._sock.recv(4096)
-        print("unhandled read:", data, file=sys.stderr)
+    def read_handler(self, size=4096):
+        data = self._sock.recv(size)
+        print("AsyncWorkerHandler: unhandled read:", data, file=sys.stderr)
 
     def pri_handler(self):
-        print("unhandled pri", file=sys.stderr)
+        print("AsyncWorkerHandler: unhandled pri", file=sys.stderr)
 
     def exception_handler(self, ex, val, tb):
-        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
+        print("AsyncWorkerHandler error: %s (%s)" % (ex, val), file=sys.stderr)
+
+    def inq(self):
+        """How many bytes are still in the kernel's input buffer?"""
+        return struct.unpack("I", fcntl.ioctl(self._sock.fileno(), SIOCINQ, '\0\0\0\0'))[0]
+
+    def outq(sock):
+        """How many bytes are still in the kernel's output buffer?"""
+        return struct.unpack("I", fcntl.ioctl(self._sock.fileno(), SIOCOUTQ, '\0\0\0\0'))[0]
 
 
 class AsyncClientHandler(PollerInterface):
@@ -514,22 +521,24 @@ class AsyncClientHandler(PollerInterface):
         poller.unregister(self)
         self.close()
 
+    ###### overrideable async interface  ####
     def error_handler(self):
+        print("AsyncClient error", file=sys.stderr)
         poller.unregister(self)
 
-    ###### overrideable async interface  ####
     def initialize(self):
         pass
 
     def read_handler(self):
         data = self._sock.recv(4096)
-        print("unhandled read:", data, file=sys.stderr)
+        print("AsyncClient read:", data, file=sys.stderr)
 
     def pri_handler(self):
-        print("unhandled pri", file=sys.stderr)
+        print("AsyncClient pri", file=sys.stderr)
 
     def exception_handler(self, ex, val, tb):
-        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
+        print("AsyncClient exception: %s (%s)" % (ex, val), file=sys.stderr)
+        raise ex, val, tb
 
 
 class AsyncIOHandler(PollerInterface):
@@ -570,12 +579,12 @@ class AsyncIOHandler(PollerInterface):
         poller.modify(self)
 
     def read_handler(self):
-        print("unhandled read", file=sys.stderr)
+        print("AsyncIOHandler unhandled read", file=sys.stderr)
 
     def error_handler(self):
-        print("unhandled error", file=sys.stderr)
+        print("AsyncIOHandler unhandled error", file=sys.stderr)
 
     def exception_handler(self, ex, val, tb):
-        print("Poller error: %s (%s)" % (ex, val), file=sys.stderr)
-
+        print("AsyncIOHandler exception: %s (%s)" % (ex, val), file=sys.stderr)
+        raise ex, val, tb
 

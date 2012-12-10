@@ -134,8 +134,9 @@ class RemoteReport(object):
 
 #### server side.
 
-
 class LocalReportProxy(asyncio.AsyncWorkerHandler):
+
+    REPORT = None
 
     _METHODMAP = {
         0: "initialize",
@@ -162,37 +163,41 @@ class LocalReportProxy(asyncio.AsyncWorkerHandler):
 
     def initialize(self):
         self._packer = struct.Struct("II")
-        self._report = _reportq.pop()
 
     @classmethod
     def add_report(cls, report):
         cls._reportlist.append(report)
 
     def read_handler(self):
+        self._read()
+        while socket.inq(self._sock):
+            self._read()
+
+    def _read(self):
         data = self._sock.recv(self._packer.size)
+        if not data:
+            return
         tag, length = self._packer.unpack(data)
         p = self._sock.recv(length)
         args = pickle.loads(p)
-        getattr(self._report, LocalReportProxy._METHODMAP[tag])(*args)
+        getattr(self.REPORT, LocalReportProxy._METHODMAP[tag])(*args)
 
 
 class ReportReceiver(object):
     """Manages a report receiver (server).
     Supply another object with a report interface that will be called.
     """
-    def __init__(self):
+    def __init__(self, destination_report):
+        class ReportProxyWrapper(LocalReportProxy):
+            REPORT = destination_report
         sock = socket.unix_listener(_get_path())
-        self._h = asyncio.AsyncServerHandler(sock, LocalReportProxy)
-
-    def push_report(self, report):
-        _reportq.append(report)
+        self._h = asyncio.AsyncServerHandler(sock, ReportProxyWrapper)
 
     def close(self):
         if self._h is not None:
             self._h.close()
             self._h = None
-
-_reportq = []
+            os.unlink(_get_path())
 
 
 if __name__ == "__main__":
@@ -201,8 +206,7 @@ if __name__ == "__main__":
 
     rpt = reports.get_report( ("StandardReport", "-", "text/plain") )
 
-    rx = ReportReceiver()
-    rx.push_report(rpt)
+    rx = ReportReceiver(rpt)
     tx = RemoteReport()
 
     def txstepper(tx):
@@ -213,9 +217,12 @@ if __name__ == "__main__":
         yield tx.passed("A message for a passed condition.")
         yield tx.finalize()
 
-    scheduler.get_scheduler().add(2.0, callback=txstepper(tx).next, repeat=True)
+    scheduler.get_scheduler().add(0.1, callback=txstepper(tx).next, repeat=True)
     try:
-        asyncio.poller.loop()
+        try:
+            asyncio.poller.loop()
+        except StopIteration:
+            pass
     finally:
         tx.close()
         rx.close()

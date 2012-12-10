@@ -13,6 +13,11 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
+
 """
 Various test reports and formatters are defined here. These are used for
 unit test and test framework reporting.
@@ -149,6 +154,9 @@ class NullReport(object):
 class DebugReport(NullReport):
     """Used for debugging tests and reports. Just emits plain messages.
     """
+    def __init__(self):
+        self._initialize = 0
+        self._finalize = 0
     # overrideable methods
     def write(self, text):
         raise NotImplementedError("override me!")
@@ -159,45 +167,47 @@ class DebugReport(NullReport):
     filename = property(lambda s: "")
     filenames = property(lambda s: [])
     def initialize(self, config=None):
-        print "initialize: %r" % (config,)
-    def logfile(self, filename):
-        print "logfile:", filename
+        print ("initialize: %r" % (config,))
+        self._initialize += 1
     def finalize(self):
-        print "finalize"
+        self._finalize += 1
+        print ("finalize. call imbalance: %d\n" % (self._initialize - self._finalize))
+    def logfile(self, filename):
+        print ("logfile:", filename)
     def add_title(self, title):
-        print "add_title:", title
+        print ("add_title:", title)
     def add_heading(self, text, level=1):
-        print "add_heading:", repr(text), level
+        print ("add_heading:", repr(text), level)
     def add_message(self, msgtype, msg, level=1):
-        print "add_message:", msgtype, repr(msg), level
+        print ("add_message:", msgtype, repr(msg), level)
     def add_summary(self, entries):
-        print "add_summary"
+        print ("add_summary", repr(entries))
     def add_text(self, text):
-        print "add_text"
+        print ("add_text", repr(text))
     def add_analysis(self, text):
-        print "add_analysis"
+        print ("add_analysis", repr(text))
     def add_data(self, data, note=None):
-        print "add_data %r note: %s" % (data, note)
+        print ("add_data %r note: %s" % (data, note))
     def add_url(self, text, url):
-        print "add_url:", repr(text), repr(url)
+        print ("add_url:", repr(text), repr(url))
     def passed(self, msg=NO_MESSAGE, level=1):
-        print "passed:", repr(msg), level
+        print ("passed:", repr(msg), level)
     def failed(self, msg=NO_MESSAGE, level=1):
-        print "failed:", repr(msg), level
+        print ("failed:", repr(msg), level)
     def expectedfail(self, msg=NO_MESSAGE, level=1):
-        print "expected fail:",repr(msg), level
+        print ("expected fail:",repr(msg), level)
     def incomplete(self, msg=NO_MESSAGE, level=1):
-        print "incomplete:", repr(msg), level
+        print ("incomplete:", repr(msg), level)
     def abort(self, msg=NO_MESSAGE, level=1):
-        print "abort:", repr(msg), level
+        print ("abort:", repr(msg), level)
     def info(self, msg, level=1):
-        print "info:", repr(msg), level
+        print ("info:", repr(msg), level)
     def diagnostic(self, msg, level=1):
-        print "diagnostic:", repr(msg), level
+        print ("diagnostic:", repr(msg), level)
     def newpage(self):
-        print "newpage"
+        print ("newpage")
     def newsection(self):
-        print "newsection"
+        print ("newsection")
 
 
 class StandardReport(UserFile.FileWrapper, NullReport):
