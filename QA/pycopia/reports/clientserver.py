@@ -27,6 +27,9 @@ The "reports" section of the configuration should have:
     remote=('pycopia.reports.database.clientserver.RemoteReport',)
 
 Then you can use this as `--reportname=remote` in a test
+
+This can be used to adapt the synchronous nature of running test scripts to
+asynchronous user interfaces.
 """
 
 import sys
@@ -89,7 +92,7 @@ class RemoteReport(object):
         self._send(5, msgtype, msg, level)
 
     def add_summary(self, entries):
-        lines = map(str, entries)
+        lines = [(repr(entry), entry.result) for entry in entries]
         self._send(6, lines)
 
     def add_text(self, text):
@@ -163,10 +166,6 @@ class LocalReportProxy(asyncio.AsyncWorkerHandler):
 
     def initialize(self):
         self._packer = struct.Struct("II")
-
-    @classmethod
-    def add_report(cls, report):
-        cls._reportlist.append(report)
 
     def read_handler(self):
         self._read()
