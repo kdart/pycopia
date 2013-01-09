@@ -44,7 +44,7 @@ from types import MethodType
 from pycopia.IO import ConsoleIO
 from pycopia.UI import Theme, DefaultTheme, UserInterface, method_repr, safe_repr
 from pycopia.fsm import FSM, ANY
-from pycopia.aid import removedups, callable
+from pycopia.aid import removedups
 
 from pycopia import timelib
 from pycopia import environ
@@ -282,8 +282,8 @@ argument must match a name of a method.
             for name in filter(self._command_filt, dir(self)):
                 ## this filters out aliases (same function id)
                 meth = getattr(self, name)
-                hashfilter[id(meth.im_func)] = meth.im_func.func_name
-            self._command_list = hashfilter.values()
+                hashfilter[id(meth.__func__)] = meth.__func__.__name__
+            self._command_list = list(hashfilter.values())
             self._command_list.sort()
         return self._command_list
 
@@ -342,7 +342,7 @@ argument must match a name of a method.
         """printenv [name ...]
     Shows the shell environment that processes will run with.  """
         if len(argv) == 1:
-            names = self._environ.keys()
+            names = list(self._environ.keys())
             names.sort()
             ms = reduce(max, map(len, names))
             for name in names:
@@ -1218,10 +1218,10 @@ def get_generic_cmd(obj, ui, cliclass=GenericCLI, aliases=None, gbl=None):
         # _generic_call method in the GenericCLI class.
         else:
             obj_meth = getattr(obj, name)
-            if id(obj_meth.im_func) in hashfilter: # filter out aliases
+            if id(obj_meth.__func__) in hashfilter: # filter out aliases
                 continue
             else:
-                hashfilter[id(obj_meth.im_func)] = True
+                hashfilter[id(obj_meth.__func__)] = True
             mh = MethodHolder(obj_meth)
             doc = "%s  *\n%s" % (mh, obj_meth.__doc__ or "")
             code = cliclass._generic_call.func_code

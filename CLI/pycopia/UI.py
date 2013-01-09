@@ -30,7 +30,6 @@ from pycopia import cliutils
 from pycopia import tty
 
 from pycopia.fsm import FSM, ANY
-from pycopia.aid import callable
 
 # set the PROMPT ignore depending on whether or not readline module is
 # available.
