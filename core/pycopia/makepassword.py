@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -13,6 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 """
 Make a hard to guess set of passwords.
 
@@ -24,7 +28,12 @@ Basic algorithm:
 """
 
 import os, sys
-import random, string
+import random
+
+if sys.version_info.major == 3:
+    ord = lambda x: x
+
+from pycopia import textutils
 
 WORDPLACES = ["/usr/dict/words", "/usr/share/dict/words"]
 
@@ -34,9 +43,11 @@ def getrandomlist():
     cryptographically strong random number generator.
     """
     fd = os.open("/dev/urandom", os.O_RDONLY)
-    randnums = map(ord, list(os.read(fd, 256)))
-    os.close(fd)
-    return randnums
+    try:
+        randnums = map(ord, os.read(fd, 256))
+    finally:
+        os.close(fd)
+    return list(randnums)
 
 def getrandomwords(N=2):
     """
@@ -44,7 +55,7 @@ def getrandomwords(N=2):
     The psuedo-random number generator is suitable for this purpose.
     """
     wordlist = []
-    wordfile = filter(os.path.isfile, WORDPLACES)[0]
+    wordfile = list(filter(os.path.isfile, WORDPLACES))[0]
     words = open(wordfile, "r").readlines()
     plainword = "" ; i = 0
     while i < N:
@@ -64,24 +75,21 @@ def hashword(plaintext):
     rb = getrandomlist()
     # 0.25 chance of case being swapped
     if rb[rb[0]] < 64:
-        plaintext = string.swapcase(plaintext)
+        plaintext = plaintext.swapcase()
     # 0.50 chance of vowels being translated one of two ways.
     if rb[rb[2]] > 127:
-        plaintext = string.translate(plaintext,
-            string.maketrans('aeiou AEIOU', '@3!0& 4#10%'))
+        plaintext = plaintext.translate(textutils.maketrans('aeiou AEIOU', '@3!0& 4#10%'))
     else:
-        plaintext = string.translate(plaintext,
-            string.maketrans('aeiou AEIOU', '^#1$~ $3!0&'))
-    # 0.4 chance of some additional consonant translation
-    if rb[rb[4]] < 102:
-        plaintext = string.translate(plaintext,
-            string.maketrans('cglt CGLT', '(<1+ (<1+'))
+        plaintext = plaintext.translate(textutils.maketrans('aeiou AEIOU', '^#1$~ $3!0&'))
+    # 0.1 chance of some additional consonant translation
+    if rb[rb[4]] < 25:
+        plaintext = plaintext.translate(textutils.maketrans('cglt CGLT', '(<1+ (<1+'))
     # if word is short, add some digits
     if len(plaintext) < 5:
-        plaintext = plaintext + `rb[5]`
+        plaintext = plaintext + repr(rb[5])
     # 0.2 chance of some more digits appended
     if rb[rb[3]] < 51:
-        plaintext = plaintext + `rb[205]`
+        plaintext = plaintext + repr(rb[205])
     return plaintext
 
 def get_hashed_password():
@@ -106,5 +114,5 @@ def main(argv):
 
 if __name__ == "__main__":
     for pw, mnemonic in main(sys.argv):
-        print "password is: %s (mnemonic is: %s)" % (pw, mnemonic)
+        print ("password is: %s (mnemonic is: %s)" % (pw, mnemonic))
 

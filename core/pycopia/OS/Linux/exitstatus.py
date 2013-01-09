@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
@@ -14,7 +14,9 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import os
 
@@ -60,6 +62,7 @@ class ExitStatus(object):
     # exit status truth value is true if normal exit, and false otherwise.
     def __nonzero__(self):
         return (self.state == 1) and not self._status
+    __bool__ = __nonzero__
 
     def __str__(self):
         name = self.cmdline.split()[0]

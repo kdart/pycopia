@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 # vim:ts=2:sw=2:softtabstop=2:smarttab:expandtab
 
@@ -17,14 +17,14 @@
 #   Use numberdict
 #   Added binary units (and removed "barns" unit)
 #   Extended PhysicalQuantity constructor to allow easier and faster "casting".
+#   Make compatible with python 3
 #   Remove other external dependencies.
 
-from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
-# This doesn't work here
-#from __future__ import division
+from __future__ import division
 
+from functools import reduce
 
 """Physical quantities with units.
 
@@ -44,6 +44,10 @@ recommended values from CODATA. Other conversion factors
 guarantee for the correctness of all entries in the unit
 table, so use this at your own risk!
 """
+import sys
+
+if sys.version_info.major == 3:
+  basestring = str
 
 import re
 from numpy.core import umath
@@ -126,7 +130,7 @@ class PhysicalQuantity(object):
   def _sum(self, other, sign1, sign2):
     if not isPhysicalQuantity(other):
       raise TypeError('Incompatible types')
-    new_value = sign1*self.value + sign2*other.value*other.unit.conversionFactorTo(self.unit)
+    new_value = sign1 * self.value + sign2 * other.value * other.unit.conversionFactorTo(self.unit)
     return self.__class__(new_value, self.unit, self._space)
 
   def __add__(self, other):
@@ -140,9 +144,23 @@ class PhysicalQuantity(object):
   def __rsub__(self, other):
     return self._sum(other, -1, 1)
 
-  def __cmp__(self, other):
-    diff = self._sum(other, 1, -1)
-    return cmp(diff.value, 0)
+  def __eq__(self, other):
+    return self.value == other.value * other.unit.conversionFactorTo(self.unit)
+
+  def __ne__(self, other):
+    return self.value != other.value * other.unit.conversionFactorTo(self.unit)
+
+  def __lt__(self, other):
+    return self.value < other.value * other.unit.conversionFactorTo(self.unit)
+
+  def __le__(self, other):
+    return self.value <= other.value * other.unit.conversionFactorTo(self.unit)
+
+  def __gt__(self, other):
+    return self.value > other.value * other.unit.conversionFactorTo(self.unit)
+
+  def __ge__(self, other):
+    return self.value >= other.value * other.unit.conversionFactorTo(self.unit)
 
   def __mul__(self, other):
     if not isPhysicalQuantity(other):
@@ -166,9 +184,9 @@ class PhysicalQuantity(object):
     else:
       return self.__class__(value, unit, self._space)
 
-  __div__ = __floordiv__ = __truediv__
+  __div__ = __truediv__
 
-  def __rdiv__(self, other):
+  def __rtruediv__(self, other):
     if not isPhysicalQuantity(other):
       return self.__class__(float(other)/self.value, pow(self.unit, -1), self._space)
     value = other.value/self.value
@@ -177,6 +195,7 @@ class PhysicalQuantity(object):
       return value*unit.factor
     else:
       return self.__class__(value, unit, self._space)
+  __rdiv__ = __rtruediv__
 
   def __pow__(self, other):
     if isPhysicalQuantity(other):
@@ -197,6 +216,7 @@ class PhysicalQuantity(object):
 
   def __nonzero__(self):
     return self.value != 0
+  __bool__ = __nonzero__
 
   def convertToUnit(self, unit):
     """Changes the unit to `unit` and adjusts the value such that
@@ -221,7 +241,7 @@ class PhysicalQuantity(object):
     systems like hour/minute/second. The original object will not
     be changed.
     """
-    units = map(_findUnit, units)
+    units = list(map(_findUnit, units))
     if len(units) == 1:
       unit = units[0]
       value = _convertValue (self.value, self.unit, unit)
@@ -247,7 +267,7 @@ class PhysicalQuantity(object):
     new_value = self.value * self.unit.factor
     num = ''
     denom = ''
-    for i in xrange(9):
+    for i in range(9):
       unit = _base_names[i]
       power = self.unit.powers[i]
       if power < 0:
@@ -305,19 +325,40 @@ class PhysicalUnit(object):
   def __str__(self):
     return '<PhysicalUnit ' + self.name() + '>'
 
-  def __cmp__(self, other):
+  def _check(self, other):
     if self.powers != other.powers:
       raise TypeError('Incompatible units')
-    return cmp(self.factor, other.factor)
+
+  def __eq__(self, other):
+    self._check(other)
+    return self.factor == other.factor
+
+  def __ne__(self, other):
+    self._check(other)
+    return self.factor != other.factor
+
+  def __lt__(self, other):
+    self._check(other)
+    return self.factor < other.factor
+
+  def __le__(self, other):
+    self._check(other)
+    return self.factor <= other.factor
+
+  def __gt__(self, other):
+    self._check(other)
+    return self.factor > other.factor
+
+  def __ge__(self, other):
+    self._check(other)
+    return self.factor >= other.factor
 
   def __mul__(self, other):
     if self.offset != 0 or (isPhysicalUnit (other) and other.offset != 0):
       raise TypeError("cannot multiply units with non-zero offset")
     if isPhysicalUnit(other):
       return PhysicalUnit(self.names+other.names,
-                self.factor*other.factor,
-                map(lambda a,b: a+b,
-                  self.powers, other.powers))
+                self.factor*other.factor, list(map(lambda a,b: a+b, self.powers, other.powers)))
     else:
       return PhysicalUnit(self.names+{str(other): 1},
                 self.factor*other,
@@ -331,45 +372,38 @@ class PhysicalUnit(object):
       raise TypeError("cannot divide units with non-zero offset")
     if isPhysicalUnit(other):
       return PhysicalUnit(self.names - other.names,
-                self.factor / other.factor,
-                map(lambda a,b: a - b,
-                  self.powers, other.powers))
+                self.factor / other.factor, list(map(lambda a,b: a - b, self.powers, other.powers)))
     else:
       return PhysicalUnit(self.names + numberdict.NumberDict({str(other): -1}, default=0),
                 self.factor/float(other), self.powers)
+  __div__ = __truediv__
 
-  __div__ = __floordiv__ = __truediv__
-
-  def __rdiv__(self, other):
+  def __rtruediv__(self, other):
     if self.offset != 0 or (isPhysicalUnit (other) and other.offset != 0):
       raise TypeError("cannot divide units with non-zero offset")
     if isPhysicalUnit(other):
       return PhysicalUnit(other.names-self.names,
-                other.factor/self.factor,
-                map(lambda a,b: a-b,
-                  other.powers, self.powers))
+                other.factor/self.factor, list(map(lambda a,b: a-b, other.powers, self.powers)))
     else:
       return PhysicalUnit({str(other): 1.}-self.names,
-                float(other)/self.factor,
-                map(lambda x: -x, self.powers))
+                float(other)/self.factor, [-x for x in self.powers])
+  __rdiv__ = __rtruediv__
 
   def __pow__(self, other):
     if self.offset != 0:
       raise TypeError("cannot exponentiate units with non-zero offset")
     if type(other) is int:
       return PhysicalUnit(other*self.names, pow(self.factor, other),
-                map(lambda x,p=other: x*p, self.powers))
+                #list(map(lambda x,p=other: x*p, self.powers)))
+                [x*other for x in self.powers])
     if type(other) is float:
       inv_exp = 1./other
       rounded = int(umath.floor(inv_exp+0.5))
       if abs(inv_exp-rounded) < 1.e-10:
-        if reduce(lambda a, b: a and b,
-              map(lambda x, e=rounded: x%e == 0, self.powers)):
+        if reduce(lambda a, b: a and b, map(lambda x, e=rounded: x%e == 0, self.powers)):
           f = pow(self.factor, other)
-          p = map(lambda x,p=rounded: x/p, self.powers)
-          if reduce(lambda a, b: a and b,
-                map(lambda x, e=rounded: x%e == 0,
-                  self.names.values())):
+          p = [x/rounded for x in self.powers]
+          if reduce(lambda a, b: a and b, map(lambda x, e=rounded: x%e == 0, self.names.values())):
             names = self.names/rounded
           else:
             names = numberdict.NumberDict(default=0)
@@ -530,7 +564,7 @@ for unit in _base_units:
   _unit_table[unit[0]] = unit[1]
 
 def _addUnit(name, unit):
-  if _unit_table.has_key(name):
+  if name in _unit_table:
     raise KeyError('Unit ' + name + ' already defined')
   if isinstance(unit, basestring):
     unit = eval(unit, _unit_table)
@@ -550,7 +584,7 @@ def _addPrefixed(unit):
 
 _unit_table['kg'] = PhysicalUnit('kg',   1., [0,1,0,0,0,0,0,0,0])
 
-_addUnit('Hz', '1/s')        # Hertz
+_addUnit('Hz', '1./s')        # Hertz
 _addUnit('N', 'm*kg/s**2')       # Newton
 _addUnit('Pa', 'N/m**2')       # Pascal
 _addUnit('J', 'N*m')         # Joule
@@ -565,13 +599,13 @@ _addUnit('T', 'Wb/m**2')       # Tesla
 _addUnit('H', 'Wb/A')        # Henry
 _addUnit('lm', 'cd*sr')        # Lumen
 _addUnit('lx', 'lm/m**2')      # Lux
-_addUnit('Bq', '1/s')        # Becquerel
+_addUnit('Bq', '1./s')        # Becquerel
 _addUnit('Gy', 'J/kg')         # Gray
 _addUnit('Sv', 'J/kg')         # Sievert
 
 del _unit_table['kg']
 
-for unit in _unit_table.keys():
+for unit in list(_unit_table.keys()):
   _addPrefixed(unit)
 
 # Fundamental constants
@@ -697,6 +731,7 @@ _addPrefixed('B')
 # to have this available.
 
 if __name__ == '__main__':
+  from pycopia import autodebug
   from numpy.core.umath import *
   l = PhysicalQuantity(10., 'm')
   big_l = PhysicalQuantity(10., 'km')
@@ -740,4 +775,9 @@ if __name__ == '__main__':
   assert PhysicalQuantity(avgrate) == avgrate
   assert str(PhysicalQuantity("10ms")) == "10.0ms"
   assert str(PhysicalQuantity("10 ms")) == "10.0 ms"
+  # conversions and comparisons
+  assert p(.9, "m") == p(90, "cm")
+  assert p(3.5, "inch") == p(8.89, "cm")
+  assert p(1., "qt") < p(947., "ml")
+  assert p(1.1, "qt") > p(947., "ml")
 

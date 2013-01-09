@@ -20,6 +20,9 @@ This means that you should not use the stock time.sleep() function when
 using this module.  Instead, use get_scheduler().sleep(x) to sleep.
 
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import signal
 from errno import EINTR
@@ -137,6 +140,7 @@ class Scheduler(object):
 
     def __nonzero__(self):
         return len(self.eventq)
+    __bool__ = __nonzero__
 
     def add_event(self, event):
         rem = self.alarm(0)

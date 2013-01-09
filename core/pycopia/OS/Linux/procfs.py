@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,6 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+
 """
 Access to /proc/PID file system information.
 
@@ -23,11 +25,10 @@ Access to /proc/PID file system information.
 import os
 from signal import SIGTERM
 
+from pycopia import textutils
 from pycopia.aid import sortedlist
 
-import string
-_CMDTRANS = string.maketrans("\0\n", "  ")
-del string
+_CMDTRANS = textutils.maketrans("\0\n", "  ")
 
 class ProcStat(object):
     """Status information about a process. """
@@ -110,6 +111,7 @@ class ProcStat(object):
 
     def __nonzero__(self):
         return bool(self.stats)
+    __bool__ = __nonzero__
 
     def _toint(self, it):
         try:
@@ -188,7 +190,7 @@ class ProcStat(object):
     def get_cmdline(self):
         try:
             cmd = open("/proc/%d/cmdline" % (self.pid,)).read()
-        except IOError, err:
+        except IOError as err:
             self.pid = None
             return "<unknown>"
         cmd = cmd.translate(_CMDTRANS).strip()
@@ -223,7 +225,7 @@ class ProcStat(object):
     def _get_uid(self):
         try:
             statuslines = open("/proc/%d/status" % (self.pid,)).readlines()
-        except IOError, err:
+        except IOError as err:
             return 0, 0
         uid = 0
         gid = 0
@@ -236,11 +238,11 @@ class ProcStat(object):
 
     def get_stat(self, name):
         if not self.stats:
-            raise ValueError, "no stats - run read(pid)"
+            raise ValueError("no stats - run read(pid)")
         try:
             val =  self.stats[self._STATINDEX[name]]
         except KeyError:
-            raise ValueError, "no attribute %s" % name
+            raise ValueError("no attribute %s" % name)
         # ugly hack to work around Linux having "(,)" around command name
         if name == "command":
             return val[1:-1]
@@ -250,14 +252,14 @@ class ProcStat(object):
     def __getattr__(self, name):
         try:
             return self.get_stat(name)
-        except ValueError, err:
-            raise AttributeError, err
+        except ValueError as err:
+            raise AttributeError(err)
 
     def __getitem__(self, name):
         try:
             return getattr(self, name)
-        except AttributeError, err:
-            raise KeyError, err
+        except AttributeError as err:
+            raise KeyError(err)
 
 
 class CPUMeasurer(object):
@@ -331,7 +333,7 @@ A collection of all processes running, like the standard 'ps' command. """
             p0.pid = p0.ppid = 0
             p0.cmdline = "<kernel>"
         for p in self._ptable.values():
-            try: 
+            try:
                 self._ptable[p.ppid]._children.append(p.pid)
             except AttributeError: # no child list yet
                 self._ptable[p.ppid]._children = sortedlist([p.pid])
@@ -370,19 +372,19 @@ def ps(argv=None):
     if not argv:
         t = ProcStatTable()
         t.read()
-        print t
+        print (t)
     else:
         for spid in argv:
             try:
                 pid = int(spid)
             except:
                 continue
-            print
-            print ProcStat(pid)
+            print()
+            print (ProcStat(pid))
 
 def pstree():
     t = ProcStatTable()
-    print t.tree()
+    print (t.tree())
 
 def killall(procname, sig=SIGTERM):
     """killall(procname, [signal]) Sends a signal (default SIGTERM) to all processes that match the given name."""
@@ -397,7 +399,7 @@ def _test(argv):
     for x in range(10000000):
         x = x*2
     time.sleep(1)
-    print measurer.end(time.time())
+    print (measurer.end(time.time()))
 
 if __name__ == "__main__":
     import sys
