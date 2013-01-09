@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,6 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
 """The daemonize module contains a function (deamonize) that when run will
 cause the current process to detach itself from a controlling terminal and run
 in the background (that is, become a Unix daemon).  """
@@ -27,19 +29,19 @@ def daemonize(logfile=None, pidfile=None):
     """This forks the current process into a daemon. Takes an optional
     file-like object to write stdout and stderr to. Preferrable this will
     be a logfile.ManagedLog object so that your disk does not fill up.
-    """ 
+    """
 
     # Do first fork.
-    try: 
+    try:
         if os.fork() > 0:
             os._exit(0) # Exit first parent.
-    except OSError, e: 
+    except OSError as e:
         sys.stderr.write ("fork #1 failed: (%d) %s\n" % (e.errno, e.strerror))
 
     # Decouple from parent environment.
-    os.chdir("/") 
-    os.umask(0) 
-    os.setsid() 
+    os.chdir("/")
+    os.umask(0)
+    os.setsid()
 
     # Do second fork.
     pid = os.fork()
@@ -63,7 +65,7 @@ def daemonize(logfile=None, pidfile=None):
     # log file is stdout and stderr, otherwise /dev/null
     if logfile is None:
         sys.stdout = open(DEVNULL, 'w')
-        sys.stderr = open(DEVNULL, 'w', 0)
+        sys.stderr = open(DEVNULL, 'wb', 0)
     else:
         so = se = sys.stdout = sys.stderr = logfile
         os.dup2(so.fileno(), 1)
@@ -73,9 +75,9 @@ def daemonize(logfile=None, pidfile=None):
 
 if __name__ == "__main__":
     import time
-    #import logfile
-    #lf = logfile.ManagedStdio("/var/tmp/test_daemonize", 1000, 5)
-    lf = None
+    from pycopia import logfile
+    lf = logfile.ManagedStdio("/var/tmp/test_daemonize", 1000, 5)
+    #lf = None
     try:
         daemonize(lf)
     except SystemExit:
@@ -83,17 +85,17 @@ if __name__ == "__main__":
     except:
         import traceback
         ex, val, tb = sys.exc_info()
-        print ex, val
-        print "----"
+        print (ex, val)
+        print ("----")
         traceback.print_tb(tb)
 
     else:
         c = 0
-        sys.stdout.write('Daemon stdout output\n')
-        sys.stdout.write(repr(sys.stdout))
-        sys.stdout.write('\n')
+        sys.stdout.write(b'Daemon stdout output\n')
+        sys.stdout.write(repr(sys.stdout).encode("ascii"))
+        sys.stdout.write(b'\n')
         while 1:
-            sys.stdout.write('%d: %s\n' % (c, time.asctime()) )
+            sys.stdout.write(('%d: %s\n' % (c, time.asctime())).encode("ascii") )
             sys.stdout.flush()
             c += 1
             time.sleep(1)

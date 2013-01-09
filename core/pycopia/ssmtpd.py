@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,8 +13,13 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 """
-A simple SMTP server. 
+A simple SMTP server.
 
 
 TODO:
@@ -67,8 +70,8 @@ automatically parsed, and any errors returned to the client.  """
             try:
                 self.socket.bind(("", self.port))
                 break
-            except socket.error, msg:
-                print >>sys.stderr, "couldn't bind port",self.port," - ",msg,"retrying..."
+            except socket.error as msg:
+                print ("couldn't bind port",self.port," - ",msg,"retrying...", file=sys.stderr)
             scheduler.sleep(5)
         self.socket.listen(50)
         self.conversation = None
@@ -119,7 +122,7 @@ Fetches the conversation list-object from this server."""
         self.conversation = None
         return conversation
 
-    matchaddr = re.compile (".*<(.*)>.*")
+    matchaddr = re.compile (b".*<(.*)>.*")
     def get_address (self, line):
         match = self.matchaddr.match(line)
         if not match:
@@ -133,13 +136,13 @@ Fetches the conversation list-object from this server."""
         while 1:
             try:
                 conn, self.otheraddr = self.socket.accept()
-            except socket.error, why:
-                if why[0] == EINTR:
+            except socket.error as why:
+                if why.errno == EINTR:
                     continue
-                if why[0] == EAGAIN:
+                if why.errno == EAGAIN:
                     if timeout > 0 and count > tries:
                         self.socket.setblocking(1)
-                        raise TimeoutError, "did not accept() in time."
+                        raise TimeoutError("did not accept() in time.")
                     count += 1
                     scheduler.sleep(6)
                     continue
@@ -178,7 +181,7 @@ Closes the server (stops listening)."""
         while 1:
             try:
                 line = self.file.readline()
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if why.errno == EINTR:
                     continue
                 else:
@@ -205,9 +208,9 @@ Closes the server (stops listening)."""
         if self.logfile:
             self.logfile.write(("SENT: %s\n" % (line,)))
         try:
-            self.conn.send(line + CRLF)
+            self.conn.send((line + CRLF).encode("ascii"))
         except IOError:
-            raise ConversationOverException
+            raise ConversationOverException()
 
     def smtp_conversation(self, conversation=None):
         self.conversation = conversation # should be a list object
@@ -221,10 +224,10 @@ Closes the server (stops listening)."""
             if not command:
                 self.conn_close()
                 break
-            method = getattr(self, 'smtp_' + command.upper(), None)
+            method = getattr(self, 'smtp_' + command.decode("ascii").upper(), None)
             if not method:
                 self.send_line('500 Error: command "%s" not implemented' % command)
-                print >>sys.stderr, "no handler for command '%s'" % command
+                print ("no handler for command '%s'" % command, file=sys.stderr)
                 continue
             try:
                 method(args)
@@ -250,8 +253,7 @@ Closes the server (stops listening)."""
             return
         fromaddr = self.get_address(args)
         self.current = Envelope(fromaddr)
-        self.current.write("Received: from %s (%s) by %s with SMTP ; %s\r\n" % \
-                (self._client, self.otheraddr[0], self.hostname, formatdate()))
+        self.current.write("Received: from %s (%s) by %s with SMTP ; %s\r\n" % (self._client, self.otheraddr[0], self.hostname, formatdate()))
         self.envelopes.append(self.current)
         self.send_line("250 sender <%r> ok" % fromaddr)
 
@@ -271,7 +273,7 @@ Closes the server (stops listening)."""
             self.send_line('501 Syntax: QUIT')
             return
         self.send_line("221 %s closing channel" % (self.hostname,))
-        raise ConversationOverException
+        raise ConversationOverException()
 
     def smtp_DATA(self, args):
         if self.current is None or not self.current.mail_from:
@@ -283,7 +285,7 @@ Closes the server (stops listening)."""
         self.send_line ("354 feed me")
         self._state = 2
         while 1:
-            line = self.file.readline()
+            line = self.file.readline().decode("ascii")
             if self.logfile:
                 self.logfile.write(line)
             if line == '.\r\n':
@@ -294,11 +296,11 @@ Closes the server (stops listening)."""
                     self.send_line("250 OK")
                 except: # parser error
                     ex, val, tb = sys.exc_info()
-                    print >>sys.stderr, ex, val
+                    print (ex, val, file=sys.stderr)
                     self._reset()
                     self.send_line("451 %s (%s)" % (ex, val))
                     break
-                raise DataFinish
+                raise DataFinish()
             self.current.writeln(line.rstrip(CRLF))
 
     def smtp_RSET(self, args):
@@ -332,7 +334,7 @@ class SMTPListener(object):
         global _listeners
         try:
             _listeners[port]
-            raise RuntimeError, "Use the factory function get_smtpd() instead."
+            raise RuntimeError("Use the factory function get_smtpd() instead.")
         except KeyError:
             pass
         self._serverhost = serverhost
@@ -406,8 +408,9 @@ def kill_smtpd(port=9025):
 
 
 if __name__ == "__main__":
+    from pycopia import autodebug
     def _print_env(env):
-        print env
+        print (env)
 
     if len(sys.argv) > 1:
         port = int(sys.argv[1])

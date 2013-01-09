@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -12,6 +12,8 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import print_function
 
 '''SMTP/ESMTP client class.
 
@@ -57,12 +59,12 @@ Example:
 # Extensive modifications by Keith Dart <kdart@kdart.com>.
 
 import re
-import rfc822
+from email.utils import parseaddr
 import types
 import base64
 import hmac
 from errno import EINTR, ECONNREFUSED
-from cStringIO import StringIO
+from io import BytesIO
 
 from pycopia import socket
 from pycopia import scheduler
@@ -182,18 +184,9 @@ class SSLFakeFile(object):
 def quoteaddr(addr):
     """Quote a subset of the email addresses defined by RFC 821.
 
-    Should be able to handle anything rfc822.parseaddr can handle.
     """
-    m = (None, None)
-    try:
-        m=rfc822.parseaddr(addr)[1]
-    except AttributeError:
-        pass
-    if m == (None, None): # Indicates parse failure or AttributeError
-        #something weird here.. punt -ddm
-        return "<%s>" % addr
-    else:
-        return "<%s>" % m
+    m=parseaddr(addr)[1]
+    return "<%s>" % m
 
 def quotedata(data):
     """Quote data for email.
@@ -280,7 +273,7 @@ class SMTP(object):
                 host, port = host[:i], host[i+1:]
                 try: port = int(port)
                 except ValueError:
-                    raise socket.error, "nonnumeric port"
+                    raise socket.error("nonnumeric port")
         if not port:
             port = SMTP_PORT
         if self.logfile:
@@ -298,7 +291,7 @@ class SMTP(object):
                     self.sock.bind((bindto, socket.IPPORT_USERRESERVED))
                     self._bindto = bindto
                 self._connect(sa, retries)
-            except socket.error, msg:
+            except socket.error as msg:
                 if self.logfile:
                     self.logfile.write('SMTP.connect fail: %s %d\n' % (host, port))
                 if self.sock:
@@ -307,7 +300,7 @@ class SMTP(object):
                 continue
             break
         if not self.sock:
-            raise socket.error, msg
+            raise socket.error(msg)
         (code, msg) = self.getreply()
         if self.logfile:
             self.logfile.write('SMTP.connect: %s %d\n' % (host, port))
@@ -318,7 +311,7 @@ class SMTP(object):
         while retry < retries:
             try:
                 self.sock.connect(addr)
-            except socket.error, msg:
+            except socket.error as msg:
                 if msg[0] == ECONNREFUSED: # might be busy
                     scheduler.sleep(2)
                     continue
@@ -344,10 +337,10 @@ class SMTP(object):
     def putcmd(self, cmd, args=""):
         """Send a command to the server."""
         if args == "":
-            str = '%s%s' % (cmd, CRLF)
+            out = '%s%s' % (cmd, CRLF)
         else:
-            str = '%s %s%s' % (cmd, args, CRLF)
-        self.send(str)
+            out = '%s %s%s' % (cmd, args, CRLF)
+        self.send(out.encode("ascii"))
 
     def getreply(self):
         """Get a reply from the server.
@@ -368,7 +361,7 @@ class SMTP(object):
         while 1:
             try:
                 line = self.file.readline()
-            except IOError, err:
+            except IOError as err:
                 if err[0] == EINTR:
                     continue
                 else:
@@ -390,7 +383,7 @@ class SMTP(object):
             # Check if multiline response.
             if line[3:4]!="-":
                 break
-        errmsg = "\n".join(resp)
+        errmsg = b"\n".join(resp)
         if self.logfile:
             self.logfile.write('reply: retcode (%s); Msg: %s\n' % (errcode,errmsg))
         return errcode, errmsg
@@ -487,7 +480,7 @@ class SMTP(object):
         """SMTP 'noop' command -- doesn't do anything :>"""
         return self.docmd("noop")
 
-    def mail(self,sender,options=[]):
+    def mail(self,sender, options=[]):
         """SMTP 'mail' command -- begins mail xfer session."""
         optionlist = ''
         if options and self.does_esmtp:
@@ -523,7 +516,7 @@ class SMTP(object):
                 q = q + CRLF
             q = q + "." + CRLF
             self.send(q)
-            (code,msg)=self.getreply()
+            (code, msg)=self.getreply()
             if self.logfile:
                 self.logfile.write("data: %s %r\n" % (code,msg))
             return (code,msg)
@@ -698,6 +691,7 @@ class SMTP(object):
         empty dictionary.
 
         """
+        msg = msg.encode("ascii")
         if self.helo_resp is None and self.ehlo_resp is None:
             if not (200 <= self.ehlo()[0] <= 299):
                 (code,resp) = self.helo()
@@ -705,10 +699,8 @@ class SMTP(object):
                     raise SMTPHeloError(code, resp)
         esmtp_opts = []
         if self.does_esmtp:
-            # Hmmm? what's this? -ddm
-            # self.esmtp_features['7bit']=""
             if self.has_extn('size'):
-                esmtp_opts.append("size=" + repr(len(msg)))
+                esmtp_opts.append("size={0:d}".format(len(msg)))
             for option in mail_options:
                 esmtp_opts.append(option)
 
@@ -791,7 +783,7 @@ parser object to the 'parse()' method."""
         """write(text)
 Writes text to the message body."""
         if self.data is None:
-            self.data = StringIO()
+            self.data = BytesIO()
         self.data.write(text)
 
     def writeln(self, text):
@@ -843,16 +835,21 @@ def test(argv):
     def prompt(prompt):
         return raw_input(prompt+": ")
 
-    fromaddr = prompt("From")
-    toaddrs  = prompt("To")
-    mailhost  = prompt("mailhost")
-    print "Enter message, end with empty line:"
+    #fromaddr = prompt("From")
+    #toaddrs  = prompt("To")
+    #mailhost  = prompt("mailhost")
+    fromaddr = "keith@dartworks.biz"
+    toaddrs  = "keith@dartworks.biz"
+    mailhost  = "localhost"
+
+    #print ("Enter message, end with empty line:")
     msg = 'From: %s\nTo: %s\nSubject: test message\n\n' % (fromaddr, toaddrs)
-    while 1:
-        line = raw_input("> ")
-        if not line:
-            break
-        msg = msg + line
+    #while 1:
+    #    line = raw_input("> ")
+    #    if not line:
+    #        break
+    #    msg = msg + line
+    msg = msg + "A message \n\n.\n"
     server = SMTP()
     server.connect(mailhost, 9025)
     server.sendmail(fromaddr, toaddrs.split(","), msg)

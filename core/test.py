@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,10 +13,12 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-"""
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 
-"""
 import os
 
 import unittest
@@ -43,7 +43,6 @@ from pycopia import makepassword
 from pycopia import md5lib
 from pycopia import methodholder
 from pycopia import netstring
-from pycopia import ringbuffer
 from pycopia import rot13
 from pycopia import scheduler
 from pycopia import sharedbuffer
@@ -70,7 +69,6 @@ from pycopia.inet import rfc2822
 from pycopia.inet import SMTP
 from pycopia.inet import telnet
 from pycopia.inet import toc
-from pycopia.inet import XHTMLcgi
 
 from pycopia.ISO import iso3166
 from pycopia.ISO import iso639a
@@ -95,44 +93,44 @@ class CoreTests(unittest.TestCase):
 
         l1 = list(r1)
         l2 = list(r2)
-        print l1
-        print l1 == l2
-        print r3, list(r3)
+        print(l1)
+        print(l1 == l2)
+        print(r3, list(r3))
 
         ip = ipv4.IPv4("172.22.4.1/24")
-        print ip.address
+        print(ip.address)
         ip.address = "172.22.4.2/24"
-        print ip.address
+        print(ip.address)
         ip.address = -1407843325
-        print ip.CIDR
+        print(ip.CIDR)
 
         ip = ipv4.IPv4("1.1.1.1/30")
-        print len(ip)
-        print len(ipv4.IPv4("1.1.1.1/29"))
-        print len(ipv4.IPv4("1.1.1.1/28"))
-        print len(ipv4.IPv4("1.1.1.1/24"))
+        print(len(ip))
+        print(len(ipv4.IPv4("1.1.1.1/29")))
+        print(len(ipv4.IPv4("1.1.1.1/28")))
+        print(len(ipv4.IPv4("1.1.1.1/24")))
         for each_ip in ip:
-            print each_ip
+            print(each_ip)
 
     def test_passwd(argv):
         pwent = passwd.getpwself()
-        print repr(pwent)
-        print str(pwent)
-        print int(pwent)
-        print pwent.name
-        print pwent.home
-        print pwent.uid
-        print pwent[3]
+        print(repr(pwent))
+        print(str(pwent))
+        print(int(pwent))
+        print(pwent.name)
+        print(pwent.home)
+        print(pwent.uid)
+        print(pwent[3])
 
     def test_shparser(self):
         sh = shparser.ShellParser(_print_argv)
         args = sh.feedline('echo -q -N "" -t tparm -b 1024 -f "bogus one" $PATH ${PATH}')
-        print args
+        print(args)
 
     def test_re_inverse(self):
         import sre_parse
         RE = r'(firstleft|)somestring(\s.*|) \S(a|b) [fgh]+ {2,3}R(\S)'
-        print sre_parse.parse(RE)
+        print(sre_parse.parse(RE))
         for i in range(20):
             ms = re_inverse.make_match_string(RE)
         for i in range(20):
@@ -140,7 +138,7 @@ class CoreTests(unittest.TestCase):
 
 
 def _print_argv(argv):
-    print repr(argv)
+    print(repr(argv))
 
 
 if __name__ == '__main__':

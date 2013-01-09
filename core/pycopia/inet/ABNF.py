@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -14,6 +12,8 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import print_function
 
 """
 Constants and constructs from rfc2234, Augmented BNF definition.
@@ -31,14 +31,14 @@ def crange(start, fin):
 class CharRange(str):
     def __new__(cls, begin, end):
         s = str()
-        for i in xrange(begin, end+1):
+        for i in range(begin, end+1):
             s += chr(i)
         return str.__new__(cls, s)
 
     def __init__(self, begin, end):
         self.begin = begin
         self.end = end
-    
+
 
 # a set of characters
 class CharSet(str):
@@ -114,6 +114,6 @@ def headerlines(bigstring):
 
 if __name__ == "__main__":
     ts = """line one: w1 w2    w3\tw4\r\n\t   \tw5\t\t\tw6\r\nline two: \r\nline three:\r\n\r\nBody."""
-    print repr(ts)
-    print repr(normalize(ts))
+    print (repr(ts))
+    print (repr(normalize(ts)))
 

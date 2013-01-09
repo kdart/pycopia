@@ -21,9 +21,10 @@ plistconfig module. The only difference is the on-disk storage format.
 
 from __future__ import absolute_import
 from __future__ import print_function
-#from __future__ import unicode_literals
+from __future__ import unicode_literals
 from __future__ import division
 
+import sys
 import os
 import re
 
@@ -31,11 +32,14 @@ from json.encoder import JSONEncoder
 from json.decoder import JSONDecoder
 
 
+# for python 2.x and 3.x compatibility
+if sys.version_info.major == 3:
+    unicode = str
+
 
 def get_encoder():
-    return JSONEncoder(skipkeys=False, ensure_ascii=True,
-        check_circular=True, allow_nan=True, indent=2,
-        separators=(',', ': '), encoding="ascii")
+    return JSONEncoder(skipkeys=False, ensure_ascii=False,
+        check_circular=True, allow_nan=True, indent=2, separators=(',', ': '))
 
 def dump(conf, fo):
     encoder = get_encoder()
@@ -51,7 +55,7 @@ def load(fo):
     return loads(s)
 
 def loads(s):
-    decoder = JSONDecoder(encoding="ascii", object_hook=_object_hook, parse_float=None,
+    decoder = JSONDecoder(encoding="utf-8", object_hook=_object_hook, parse_float=None,
         parse_int=None, parse_constant=None, object_pairs_hook=None)
     return decoder.decode(s)
 
@@ -59,9 +63,7 @@ def loads(s):
 def _object_hook(d):
     rv = {}
     for key, value in d.iteritems():
-        if type(value) is unicode:
-            value = value.encode("ascii")
-        rv[key.encode("ascii")] = value
+        rv[key] = value
     return rv
 
 
@@ -122,7 +124,7 @@ class AutoAttrDict(dict):
 
     # perform shell-like variable expansion
     def expand(self, value):
-        if type(value) not in (str, unicode):
+        if not isinstance(value, (str, unicode)):
             return value
         if '$' not in value:
             return value
@@ -155,7 +157,7 @@ _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
 
 def read_config(path_or_file):
     """Read a JSON config file."""
-    if type(path_or_file) is str:
+    if isinstance(path_or_file, (str, unicode)):
         fp = open(path_or_file, "r")
         doclose = True
     else:
@@ -174,7 +176,7 @@ def _convert_dict(d):
 
 def write_config(conf, path_or_file):
     """Write a JSON config file."""
-    if type(path_or_file) is str:
+    if isinstance(path_or_file, (str, unicode)):
         fp = open(path_or_file, "w+")
         doclose = True
     else:

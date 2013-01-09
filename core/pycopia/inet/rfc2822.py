@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -14,6 +12,8 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import print_function
 
 """
 Objects for constructing, parsing, and editing rfc 2822 compliant messages
@@ -232,7 +232,7 @@ class Headers(dict):
             return dict.__getitem__(self, name.lower())
         except KeyError:
             return None
-    
+
     def get(self, key, default=None):
         return dict.get(self, key.lower(), default)
 
@@ -244,10 +244,10 @@ class Headers(dict):
 class Body(object):
     def __init__(self, text=""):
         self.text = str(text)
-    
+
     def __str__(self):
         return self.text
-    
+
     def emit(self, fo):
         fo.write(self.text)
 
@@ -259,7 +259,7 @@ class Message(object):
 
     def __str__(self):
         return str(self.header)+"\n\n"+str(self.body)
-    
+
     def emit(self, fo):
         self.header.emit(fo)
         fo.write("\n\n")
@@ -364,13 +364,13 @@ class RFC2822Parser(object):
     def setContentHandler(self, handler):
         assert isinstance(handler, _HandlerBase), "must be handler object."
         self._contenthandler = handler
-    
+
     def getContentHandler(self):
         return self._contenthandler
 
     def setErrorHandler(self, handler):
         self._errorhandler = handler
-    
+
     def getErrorHandler(self):
         return self._errorhandler
 
@@ -381,7 +381,7 @@ class RFC2822Parser(object):
             self.parseFile(fo)
         finally:
             fo.close()
-    
+
     # parser unfolds folded strings
     def parseFile(self, fo):
         self._contenthandler.startDocument()
@@ -426,7 +426,7 @@ class RFC2822Parser(object):
               )
         f = _RFC2822FSM(NAME)
         f.add_default_transition(self._error, NAME)
-        # 
+        #
         f.add_transition_list(IANA_TOKEN, NAME, self._addtext, NAME)
         f.add_transition(":", NAME, self._endname, VALUE)
         f.add_transition(";", NAME, self._endname, PARAMNAME)
@@ -452,7 +452,7 @@ class RFC2822Parser(object):
         f.add_transition(ANY, VSLASH, self._slashescape, VALUE)
 #       f.add_transition("\\", QUOTE, None, SLASHQUOTE)
 #       f.add_transition(ANY, SLASHQUOTE, self._slashescape, QUOTE)
-#       # double quotes 
+#       # double quotes
 #       f.add_transition(DQUOTE, xxx, None, QUOTE)
 #       f.add_transition(DQUOTE, QUOTE, self._doublequote, xxx)
 #       f.add_transition(ANY, QUOTE, self._addtext, QUOTE)
@@ -464,7 +464,7 @@ class RFC2822Parser(object):
             self._errorhandler(c, fsm)
         else:
             fsm.reset()
-            raise RFC2822SyntaxError, 'Syntax error: %s\n%r' % (c, fsm.stack)
+            raise RFC2822SyntaxError('Syntax error: %s\n%r' % (c, fsm.stack))
 
     def _addtext(self, c, fsm):
         fsm.arg += c
@@ -517,19 +517,19 @@ class _HandlerBase(object):
 
     def endDocument(self):
         pass
-    
+
 
 
 class TestHandler(_HandlerBase):
     def handleLine(self, name, paramdict, value):
-        print "%r %r %r" % (name, paramdict, value)
+        print ("%r %r %r" % (name, paramdict, value))
 
     def startDocument(self):
-        print "*** startDocument"
+        print ("*** startDocument")
 
     def endDocument(self):
-        print "*** endDocument"
-    
+        print ("*** endDocument")
+
 
 
 class BufferedFile(object):

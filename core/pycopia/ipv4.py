@@ -13,6 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+
 """
 IPv4 module. Defines an IPv4 class (Internet Protocol address).
 
@@ -32,9 +36,21 @@ See the IPv4 documentation for more details.
 
 """
 
-from sys import maxint
+import struct
+
+# for python 2.x and 3.x interoperability
+try:
+    from sys import maxint
+except ImportError:
+    from sys import maxsize as maxint
+    long = int
+    basestring = str
+    ord = lambda x: x
+
 # for the address translation functions
 from pycopia import socket
+
+
 
 class IPv4(object):
     """
@@ -119,17 +135,17 @@ class IPv4(object):
     __slots__ = ["_address", "_mask"]
     def __init__(self, address, mask=None):
         # determine input type and convert if necessary
-        self._address = 0x0L; self._mask = None
+        self._address = 0x0; self._mask = None
         self.__handleAddress(address)
         # handle the optional mask parameter. Default to class mask.
         if self._mask is None:
             if mask is None:
-                if self._address & 0x80000000L == 0:
-                    self._mask = 0xff000000L
-                elif self._address & 0x40000000L == 0:
-                    self._mask = 0xffff0000L
+                if self._address & 0x80000000 == 0:
+                    self._mask = 0xff000000
+                elif self._address & 0x40000000 == 0:
+                    self._mask = 0xffff0000
                 else:
-                    self._mask = 0xffffff00L
+                    self._mask = 0xffffff00
             else:
                  self.__handleMask(mask)
 
@@ -184,19 +200,19 @@ class IPv4(object):
         if self._mask == 0xffffffff:
             return 0xffffffff
         else:
-            return self._address | (~self._mask & 0xffffffffL)
+            return self._address | (~self._mask & 0xffffffff)
     broadcast = property(_get_broadcast)
 
     def _get_hostpart(self):
         # check for host specific address
-        if self._mask == 0xffffffffL:
+        if self._mask == 0xffffffff:
             return self._address
         else:
-            return self._address & (~self._mask & 0xffffffffL)
+            return self._address & (~self._mask & 0xffffffff)
 
     def _set_hostpart(self, value):
         self._address = ((self._address & self._mask) |
-                (long(value) & (~self._mask & 0xffffffffL)))
+                (long(value) & (~self._mask & 0xffffffff)))
 
     host = property(_get_hostpart, _set_hostpart, None, "host part")
     hostpart = host
@@ -205,7 +221,7 @@ class IPv4(object):
                  None, None, "first host in range")
 
     lasthost = property(lambda s: IPv4(
-            (s._address & s._mask) + ((~s._mask & 0xffffffffL) - 1), s._mask),
+            (s._address & s._mask) + ((~s._mask & 0xffffffff) - 1), s._mask),
             None, None, "last host in range")
 
     # The IPv4 object can be initialized a variety of ways.
@@ -240,13 +256,13 @@ class IPv4(object):
         elif type(mask) in (long, int):
             self._mask = long(mask)
         else:
-            raise ValueError, "Invalid mask value: %r" % (mask,)
+            raise ValueError("Invalid mask value: %r" % (mask,))
 
     def __bits2mask(self, bits):
         if bits <= 32 and bits >= 0:
-            return (0xffffffffL << (32 - bits)) & 0xffffffffL
+            return (0xffffffff << (32 - bits)) & 0xffffffff
         else:
-            raise ValueError, "mask bits must be in range 0 to 32"
+            raise ValueError("mask bits must be in range 0 to 32")
 
     def __mask2bits(self):
         # Try to work around the fact the in Python, right shifts are always
@@ -278,10 +294,6 @@ class IPv4(object):
 
     def __hash__(self):
         return int(self._address % maxint)
-
-#    def __cmp__(self, other):
-#        other = self.__class__(other)
-#        return cmp(self._address, other._address)
 
     def __eq__(self, other):
         other = self.__class__(other)
@@ -321,28 +333,28 @@ class IPv4(object):
     # returns the broadcast address.
     def __getitem__(self, index):
         if index >= 0:
-            if index <= (~self._mask & 0xffffffffL):
+            if index <= (~self._mask & 0xffffffff):
                 return IPv4(
                   (self._address & self._mask) + index, self._mask)
             else:
-                raise IndexError, "Host out of range"
+                raise IndexError("Host out of range")
         else:
-            if -index < (~self._mask & 0xffffffffL) + 1:
+            if -index < (~self._mask & 0xffffffff) + 1:
                 return IPv4( (self._address & self._mask) +
-                       ((~self._mask & 0xffffffffL) + index + 1),
+                       ((~self._mask & 0xffffffff) + index + 1),
                        self._mask)
             else:
-                raise IndexError, "Host out of range"
+                raise IndexError("Host out of range")
 
     def __setitem__(self, index, value):
-        raise IndexError, "cannot set a sequence index"
+        raise IndexError("cannot set a sequence index")
 
     # len(ip) is number of hosts in range, including net and broadcast.
     def __len__(self):
-        return (~self._mask & 0xffffffffL) + 1
+        return (~self._mask & 0xffffffff) + 1
 
     def __getslice__(self, start, end):
-        length = (~self._mask & 0xffffffffL) + 1
+        length = (~self._mask & 0xffffffff) + 1
         selfnet = self._address & self._mask
         if end < 0:
             end = length + end
@@ -351,7 +363,7 @@ class IPv4(object):
         start = min(start, length)
         end = min(end, length)
         sublist = []
-        for i in xrange(start, end):
+        for i in range(start, end):
             sublist.append(IPv4(selfnet + i, self._mask))
         return sublist
 
@@ -361,14 +373,14 @@ class IPv4(object):
     def __isub__(self, other):
         self._address -= long(other)
         # if host becomes broadcast address, bump it to next network
-        if self.host == (~self._mask & 0xffffffffL):
+        if self.host == (~self._mask & 0xffffffff):
             self._address -= 2
         return self
 
     def __iadd__(self, other):
         self._address += long(other)
         # if host becomes broadcast address, bump it to next network
-        if self.host == (~self._mask & 0xffffffffL):
+        if self.host == (~self._mask & 0xffffffff):
             self._address += 2
         return self
 
@@ -404,7 +416,7 @@ class IPv4(object):
         """Set the address to the last host in the network.
         """
         self._address = ((self._address & self._mask) +
-                             ((~self._mask & 0xffffffffL) - 1))
+                             ((~self._mask & 0xffffffff) - 1))
         return self
 
     def nextnet(self, increment=1):
@@ -413,7 +425,7 @@ class IPv4(object):
         may be used.
 
         """
-        self._address = self._address + ((~self._mask & 0xffffffffL) + 1) * increment
+        self._address = self._address + ((~self._mask & 0xffffffff) + 1) * increment
         return self
 
     def previousnet(self, decrement=1):
@@ -421,7 +433,7 @@ class IPv4(object):
         part constant. Default decrement is 1, but optional decrement parameter
         may be used.
         """
-        self._address = self._address - ((~self._mask & 0xffffffffL) + 1) * decrement
+        self._address = self._address - ((~self._mask & 0xffffffff) + 1) * decrement
         return self
 
     def gethost(self):
@@ -440,16 +452,18 @@ class _NetIterator(object):
     def __init__(self, net):
         mask = self.mask = net._mask
         self.start = (net._address & mask)
-        self.end = (net._address & mask) + (~mask & 0xffffffffL) - 1
+        self.end = (net._address & mask) + (~mask & 0xffffffff) - 1
 
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.start == self.end:
             raise StopIteration
         self.start += 1
         return IPv4(self.start, self.mask)
+    next = __next__
+
 
 ### Useful helper functions. May also be useful outside this module. ###
 
@@ -462,16 +476,16 @@ def dqtoi(dq):
     You can also supply the address as a a host name.
     """
     try:
-        s = buffer(socket.inet_aton(dq))
-    except socket.error, why:
-        raise ValueError, why
+        s = socket.inet_aton(dq)
+    except socket.error as why:
+        raise ValueError(why)
     return (ord(s[0]) << 24) + (ord(s[1]) << 16) + (ord(s[2]) << 8) + (ord(s[3]))
 
 def itodq(addr):
     """Return a dotted-quad string given an integer. """
     intval = long(addr) # might get an IPv4 object
-    s = "%c%c%c%c" % (((intval >> 24) & 0x000000ff), ((intval & 0x00ff0000) >> 16),
-        ((intval & 0x0000ff00) >> 8), (intval & 0x000000ff))
+    s = struct.pack(b"bbbb", (intval >> 24) & 0x000000ff, (intval & 0x00ff0000) >> 16,
+        (intval & 0x0000ff00) >> 8, intval & 0x000000ff)
     return socket.inet_ntoa(s)
 
 def iprange(startip, number, increment=1):
@@ -487,7 +501,7 @@ def iprange(startip, number, increment=1):
     # make a copy first
     start = IPv4(startip)
     ips = []
-    for i in xrange(number):
+    for i in range(number):
         ips.append(str(start))
         start.nexthost(increment)
     return ips
@@ -509,7 +523,7 @@ def ipnetrange(startnet, number, increment=1):
     start = IPv4(startnet)
     ips = []
     baseaddress = start.address
-    for i in xrange(number):
+    for i in range(number):
         start.address = baseaddress + (~start.mask+1) * (i*increment)
         ips.append(str(start))
     return ips
@@ -529,7 +543,7 @@ def netrange(startnet, number, increment=1):
     """
     ips = []
     counter = IPv4(startnet)
-    for i in xrange(number):
+    for i in range(number):
         ips.append(counter.copy())
         counter.nextnet(increment)
     return ips
@@ -539,12 +553,12 @@ def resolve(host, mask=None):
     """Resolve a hostname to an IPv4 object. An optional mask value may me supplied."""
     try:
         hostname, aliases, addresses = socket.gethostbyname_ex(str(host))
-    except socket.gaierror, why:
-        raise ValueError, "Unable to resolve host: %s" % (why[1])
+    except socket.gaierror as why:
+        raise ValueError("Unable to resolve host: %s" % (why[1]))
     if addresses:
         return IPv4(addresses[0], mask)
     else:
-        raise ValueError, "No addresses found."
+        raise ValueError("No addresses found.")
 
 def sortnets(l):
     l = list(l)
@@ -592,13 +606,14 @@ class IPRange(object):
             return False
         return self._start._address <= other._address and self._end._address >= other._address
 
-    def next(self):
+    def __next__(self):
         if self._index <= self._len:
             rv = self._start+self._index
             self._index += 1
             return rv
         else:
             raise StopIteration
+    next = __next__
 
     def __iter__(self):
         self._index = 0
@@ -608,7 +623,7 @@ class IPRange(object):
         if idx < 0:
             idx = self._len + idx + 1
         if idx < 0 or idx > self._len:
-            raise IndexError, "IPRange index out of range"
+            raise IndexError("IPRange index out of range")
         else:
             return self._start + idx
 

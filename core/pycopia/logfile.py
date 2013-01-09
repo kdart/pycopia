@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -22,6 +20,10 @@ rotates itself when a maximum size is reached.
 """
 
 import sys, os
+
+if sys.version_info.major == 3:
+    import io
+    file = io.FileIO
 
 class SizeError(IOError):
     pass
@@ -81,7 +83,7 @@ class ManagedLog(object):
     def written(self):
         return self._lf.written
 
-    def rotate(self): 
+    def rotate(self):
         self._lf = rotate(self._lf, self.maxsave)
 
     # auto-delegate remaining methods (but you should not read or seek an open

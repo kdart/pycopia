@@ -44,14 +44,14 @@ class ExitNow(Exception):
     pass
 
 # fix up the os module to include more Linux/BSD constants.
-os.ACCMODE = 03
+os.ACCMODE = 3
 # flag for ASYNC I/O support. Note cygwin/win32 does not support it.
 try:
     O_ASYNC = getattr(os, "O_ASYNC")
 except AttributeError:
     O_ASYNC = os.O_ASYNC = {
-        "linux2":020000,
-        "linux3":020000,
+        "linux2":0o20000,
+        "linux3":0o20000,
         "freebsd4":0x0040,
         "freebsd5":0x0040,  # ?
         "darwin":0x0040,
@@ -151,7 +151,7 @@ class Poll(object):
             try:
                 rl = self.pollster.poll(timeout)
             except IOError as why:
-                if why[0] == EINTR:
+                if why.errno == EINTR:
                     self._run_idle()
                     continue
                 else:
@@ -233,7 +233,6 @@ class Poll(object):
 
     def exception_handler(self, ex, val, tb):
         print("Poll exception: %s (%s)" % (ex, val), file=sys.stderr)
-        raise ex, val, tb
 
 
 # Mixin for objects that only want to define a few methods for a class
@@ -538,7 +537,6 @@ class AsyncClientHandler(PollerInterface):
 
     def exception_handler(self, ex, val, tb):
         print("AsyncClient exception: %s (%s)" % (ex, val), file=sys.stderr)
-        raise ex, val, tb
 
 
 class AsyncIOHandler(PollerInterface):
@@ -586,5 +584,4 @@ class AsyncIOHandler(PollerInterface):
 
     def exception_handler(self, ex, val, tb):
         print("AsyncIOHandler exception: %s (%s)" % (ex, val), file=sys.stderr)
-        raise ex, val, tb
 

@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,6 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 """
 Basic configuration holder objects.
 
@@ -23,6 +25,15 @@ Basic configuration holder objects.
 
 import sys, os
 import warnings
+
+
+
+if sys.version_info.major == 3:
+    def execfile(fn, glbl, loc):
+        exec(open(fn).read(), glbl, loc)
+else: # python 2
+    execfile = execfile
+
 
 class BasicConfigError(Exception):
     pass
@@ -57,14 +68,14 @@ attributes cannot be added, but existing ones may be changed."""
 
     def __str__(self):
         n = self._name
-        s = ["%s(name=%r):" % (self.__class__.__name__, n)]
-        s = s + map(lambda it: "  %s.%s = %r" % (n, it[0], it[1]), self.items())
+        s = ["{}(name={!r}):".format(self.__class__.__name__, n)]
+        s = s + ["  {}.{} = {!r}".format(n, it[0], it[1]) for it in self.items()]
         s.append("\n")
         return "\n".join(s)
 
     def __setitem__(self, key, value):
         if self._locked and not key in self:
-            raise ConfigLockError, "setting attribute on locked config holder"
+            raise ConfigLockError("setting attribute on locked config holder")
         return super(ConfigHolder, self).__setitem__(key, value)
 
     def __getitem__(self, name):
@@ -82,10 +93,10 @@ attributes cannot be added, but existing ones may be changed."""
 
     def unlock(self):
         dict.__setattr__(self, "_locked", 0)
-    
+
     def islocked(self):
         return self._locked
-    
+
     def copy(self):
         ch = ConfigHolder(self)
         if self.islocked():
@@ -148,7 +159,7 @@ def get_config(fname, initdict=None, globalspace=None, **kwargs):
         cf.update(kwargs)
         return cf
     else:
-        raise ConfigReadError, "did not successfully read %r." % (fname,)
+        raise ConfigReadError("did not successfully read %r." % (fname,))
 
 def check_config(fname):
     """check_config(filename) -> bool
@@ -165,7 +176,7 @@ def check_config(fname):
 
 def _test(argv):
     cf = get_config("config_test.conf")
-    print cf
+    print (cf)
 
 
 if __name__ == "__main__":

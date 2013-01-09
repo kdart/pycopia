@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,16 +13,26 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 """
 Functions and classes for doing object permutation.
 
 """
 
+import sys
+
+if sys.version_info.major == 3:
+    basestring = str
+
+from functools import reduce
+
 def factorial(x):
     """factorial(x)
     return x!
     """
-    return x<=0 or reduce(lambda a,b: a*b, xrange(1,x+1) )
+    return x<=0 or reduce(lambda a,b: a*b, range(1,x+1) )
 fact = factorial
 
 def nCr(n, r):
@@ -47,7 +55,7 @@ class Permuter(object):
 
     def __getitem__(self, idx):
         return get_permutation(self.seq, idx)
-    
+
     def __len__(self):
         return factorial(len(self.seq))
 
@@ -62,7 +70,7 @@ class PermuterIter(object):
     def __iter__(self):
         return (self)
 
-    def next(self):
+    def __next__(self):
         if self.i >= self.maximum:
             raise StopIteration
         n = get_permutation(self.seq, self.i)
@@ -71,6 +79,7 @@ class PermuterIter(object):
             return "".join(n)
         else:
             return n
+    next = __next__
 
 
 # default pruning policy. Other possibilites are random selection or upper end.
@@ -84,7 +93,7 @@ class ListCounter(object):
         self._lists = lists
         self._lengths = [len(l) for l in lists]
         if self._lengths.count(0) > 0:
-            raise ValueError, "All lists must have at least one element."
+            raise ValueError("All lists must have at least one element.")
         self._places = len(self._lengths)
         self.reset()
 
@@ -96,9 +105,10 @@ class ListCounter(object):
         self.reset()
         return self
 
-    def next(self):
+    def __next__(self):
         self._increment(0)
         return self.fetch()
+    next = __next__
 
     def _increment(self, place):
         carry, self._counters[place] = divmod(self._counters[place]+1, self._lengths[place])
@@ -134,9 +144,10 @@ class KeywordCounter(object):
         self._counter.reset()
         return self
 
-    def next(self):
+    def __next__(self):
         values = self._counter.next() # the list counter will raise StopIteration
         return self.fetch(values)
+    next = __next__
 
     def get_number(self):
         return self._counter.get_number()
@@ -146,7 +157,7 @@ class KeywordCounter(object):
 
 
 
-# Python algorithm from snippet by Christos Georgiou 
+# Python algorithm from snippet by Christos Georgiou
 def get_permutation(seq, index):
     "Returns the <index>th permutation of <seq>"
     seqc= list(seq[:])
@@ -160,10 +171,10 @@ def get_permutation(seq, index):
 
 
 def unique_combinations(items, n):
-    if n==0: 
+    if n==0:
         yield []
     else:
-        for i in xrange(len(items)):
+        for i in range(len(items)):
             for cc in unique_combinations(items[i+1:], n-1):
                 yield [items[i]] + cc
 
@@ -174,11 +185,11 @@ def prune(maxN, sets, chooser=prune_end):
     don't care if you "hit" all combinations.  This simple algorithm basically
     reduces the number of entries taken from the largest set. If then are equal
     numbered, then removal is left to right.
-    
+
     maxN is the maximum number of combinations.
-    sets is a list of lists containing the items to be combined. 
+    sets is a list of lists containing the items to be combined.
     chooser implements the pruning policy. It should be a function taking a
-    number, N, and a list and returning a new list with N elements.  
+    number, N, and a list and returning a new list with N elements.
     """
     lenlist = [len(l) for l in sets]
     while reduce(lambda a,b: a*b, lenlist, 1) > maxN:
@@ -199,35 +210,35 @@ def maxi(seq):
 
 # some self test if run as main script
 if __name__ == "__main__":
-    import interactive
+    from pycopia import interactive
     perm = Permuter("abc")
     for p in perm:
-        print p
+        print (p)
 
     perm = Permuter(range(10))
     for i in [0, 1, 10, 55, 1000, 3600000, 3628799, 3628800]:
-        print perm[i]
+        print (perm[i])
 
-    print "---"
+    print ("---")
 
 #    10*5*2 = 100
     s1 = range(10)
     s2 = range(5)
     s3 = range(2)
     lc = ListCounter(prune(60, [s1, s2, s3]))
-    print lc.get_number()
+    print (lc.get_number())
     for i, l in enumerate(lc):
-        print "%02d. %s" % (i, l)
+        print ("%02d. %s" % (i, l))
 
     try:
         badlc = ListCounter([[], s2, s3])
     except ValueError:
         pass
     else:
-        print "*** didn't find zero length"
+        print ("*** didn't find zero length")
 
     kc = KeywordCounter(arg1=s1, arg2=s2, arg3=s3)
-    print kc.get_number()
+    print (kc.get_number())
     for kwargs in kc:
-        print kwargs
+        print (kwargs)
 

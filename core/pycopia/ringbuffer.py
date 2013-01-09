@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999- Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -16,7 +14,7 @@
 #    Lesser General Public License for more details.
 
 """
-Defines a Buffer and a RingBuffer object that act as character/byte buffers.
+Defines a RingBuffer object that act as character/byte buffers.
 
 """
 
@@ -24,17 +22,15 @@ import mmap
 
 # get an anonymous mmap range. Only works on Linux (possibly other Unix)
 def _get_buf(size):
-    _buf = mmap.mmap(-1, size, flags=mmap.MAP_PRIVATE|mmap.MAP_ANONYMOUS, 
+    _buf = mmap.mmap(-1, size, flags=mmap.MAP_PRIVATE|mmap.MAP_ANONYMOUS,
                     prot=mmap.PROT_READ|mmap.PROT_WRITE )
     _buf.seek(0,2) # move seek pointer to end
     return _buf
 
 
 class RingBuffer(object):
-    """RingBuffer([size, [safeflag]])
-    Return a character oriented ring buffer with read and write methods. If
-    safeflag is set then a ValueError exception will be raised if a write will
-    overwrite data.
+    """RingBuffer([size])
+    Return a character oriented ring buffer with read and write methods.
 
     """
     def __init__(self, size=8192):
@@ -46,7 +42,7 @@ class RingBuffer(object):
 
     def __str__(self):
         return self.getvalue()
-    
+
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.size)
 
@@ -55,7 +51,7 @@ class RingBuffer(object):
         self._top = 0
         self._buf.seek(0)
 
-    def getvalue(self): # StringIO interface
+    def getvalue(self):
         t, b, s = self._top, self._bot, self.size
         if t >= b:
             return self._buf[b:t]
@@ -68,13 +64,13 @@ class RingBuffer(object):
     def __len__(self):
         t, b, s = self._top, self._bot, self.size
         return (t + (t < b)*s) - b
-    
+
     def __del__(self):
         try:
             self.close()
         except:
             pass
-    
+
     def __iadd__(self, seq):
         self.write(seq)
         return self
@@ -92,22 +88,22 @@ class RingBuffer(object):
         if whence == 0: # "seeking" from start moves up bottom ptr
             pos = min((t + (t < b)*bs) - b, pos) # pos truncated to length of data
             wrap, i = divmod(b+pos, bs)
-            self._bot = i   
+            self._bot = i
             self._buf.seek(i, 0)
 
         elif whence == 1:
-            raise ValueError, "ring buffer has no current position."
+            raise IOError("ring buffer has no current position.")
 
         elif whence == 2: # seeking backwards from top moves bottom ptr up
             assert pos < 0
-            n = t+pos 
+            n = t+pos
             if n <= 0:
                 n += bs
-            self._bot = n   
+            self._bot = n
             self._buf.seek(n,0)
         else:
-            raise ValueError, "whence must be 0 or 2."
-    
+            raise IOError("whence must be 0 or 2.")
+
     def find(self, string, start=0):
         t, b, bs = self._top, self._bot, self.size
         if b+start < t:

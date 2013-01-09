@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -14,15 +12,19 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
-
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 """
 Benchmark support. Tools for helping you choose the best Python implementation
-of algorithms and functions. 
+of algorithms and functions.
 
 """
 
 
 import itertools
+from functools import reduce
 
 from pycopia import table
 from pycopia.timelib import now
@@ -59,7 +61,7 @@ class FunctionTimerResult(object):
 
 class ResultSet(list):
     def __str__(self):
-        s = map(str, self)
+        s = [str(e) for e in self]
         s.append("--------------------")
         s.append("min: %.9f max: %.9f avg: %.9f" % (self.get_min(), self.get_max(), self.average()))
         return "\n".join(s)
@@ -77,13 +79,13 @@ class ResultSet(list):
 
 def _form_name(meth, args, kwargs):
     if args and kwargs:
-        return "%s(*%r, **%r)" % (meth.func_name, args, kwargs)
+        return "%s(*%r, **%r)" % (meth.__name__, args, kwargs)
     if args and not kwargs:
-        return "%s%r" % (meth.func_name, args)
+        return "%s%r" % (meth.__name__, args)
     if not args and kwargs:
-        return "%s(**%r)" % (meth.func_name, kwargs)
+        return "%s(**%r)" % (meth.__name__, kwargs)
     if not args and not kwargs:
-        return "%s()" % (meth.func_name,)
+        return "%s()" % (meth.__name__,)
 
 
 class FunctionTimer(object):
@@ -97,10 +99,10 @@ benchmarks, and to characterize baseline performance."""
         return self.runtime
 
     def calibrate(self):
-        print "Calibrating...",
+        print ("Calibrating...", end="")
         self._overhead = 0.0
         self._overhead = self.run(lambda x:None, (1,)).runtime
-        print "done (%d iterations, %.3f ms of overhead)." % (self._iter, self._overhead*1000.0)
+        print ("done (%d iterations, %.3f ms of overhead)." % (self._iter, self._overhead*1000.0))
 
     def run(self, meth, args=(), kwargs={}, argiterator=None):
         res = FunctionTimerResult(_form_name(meth, args, kwargs))
@@ -109,8 +111,12 @@ benchmarks, and to characterize baseline performance."""
         else:
             iterator = itertools.repeat(args)
         start = now()
-        for i in xrange(self._iter):
-            args = iterator.next()
+        try:
+            _next = iterator.__next__
+        except AttributeError:
+            _next = iterator.next
+        for i in range(self._iter):
+            args = _next()
             rv = meth(*args, **kwargs)
         end = now()
         res.runtime = ((end - start)/self._iter) - self._overhead
@@ -129,18 +135,18 @@ def get_timer(iterations=10000):
 class BenchMarker(object):
     def __init__(self, testmeth, iterations=10000, loops=1):
         if not callable(testmeth):
-            raise TypeError, "test method must be callable"
+            raise TypeError("test method must be callable")
         self.testmeth = testmeth
         self.loops = loops
         self._timer = get_timer(iterations)
 
     def get_name(self):
-        return self.testmeth.func_name
+        return self.testmeth.__name__
     name = property(get_name)
 
     def __call__(self, args=(), kwargs={}, argiterator=None):
         rs = ResultSet()
-        for loop in xrange(self.loops):
+        for loop in range(self.loops):
             rs.append(self._timer.run(self.testmeth, args, kwargs, argiterator))
         return rs
 
@@ -180,15 +186,15 @@ class BenchCompare(object):
         self._methlist = []
         for meth in methodlist:
             if not callable(meth):
-                raise TypeError, "test method must be callable"
+                raise TypeError("test method must be callable")
             self._methlist.append( meth )
 
 
     def __call__(self, args=(), kwargs={}, argiterator=None, tablewidth=130):
-        headings = map(lambda o: o.func_name, self._methlist)
-        names = map(lambda o: _form_name(o, args, kwargs), self._methlist)
+        headings = [o.__name__ for o in self._methlist]
+        names = [_form_name(o, args, kwargs) for o in self._methlist]
         rep = CompareResults(headings, title=" vs. ".join(names), width=tablewidth)
-        for loop in xrange(self.loops):
+        for loop in range(self.loops):
             newrow = []
             for meth in self._methlist:
                 newrow.append( self._timer.run(meth, args, kwargs, argiterator) )
@@ -197,11 +203,12 @@ class BenchCompare(object):
             iv = newrow[0]
             for res in newrow[1:]:
                 if iv.returnvalue != res.returnvalue:
-                    raise ValueError, "inconsistent values returned"
+                    raise ValueError("inconsistent values returned")
         return rep
 
 
 if __name__ == "__main__":
+    from pycopia import autodebug
     import random
     def F1():
         f = "abcdefgxxxxxxxxxxxxxxxxxx" * random.randint(2, 4000)
@@ -211,18 +218,18 @@ if __name__ == "__main__":
 
     bm = BenchMarker(F1, loops=5)
     res = bm()
-    print res
-    print
+    print (res)
+    print()
     bc = BenchCompare((F1, F2), iterations=1000, loops=3)
     cmpres = bc()
-    print cmpres
-    print cmpres.get_ratios()
-    print
+    print (cmpres)
+    print (cmpres.get_ratios())
+    print()
     rr = CompareResults(["one", "two", "three", "four", "five"])
     rr.append([1,2,3,4,5], 1)
     rr.append([1,2,3,4,5], 2)
     rr.append([1,2,3,4,5], 3)
     rat = rr.get_ratios()
-    print rat
+    print (rat)
 
 

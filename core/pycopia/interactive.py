@@ -107,7 +107,7 @@ except ImportError:
 # import some pycopia functions that are helpful for interactive use.
 from pycopia.cliutils import *
 from pycopia.textutils import *
-from pycopia.aid import add2builtin, callable, execfile
+from pycopia.aid import add2builtin, execfile
 from pycopia.devhelpers import *
 
 __all__ = ['info']
