@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
 #    Copyright (C) 1999-Keith Dart <keith@kdart.com>
@@ -493,9 +493,9 @@ class DebuggerCommands(CLI.BaseCommands):
                 except:
                     func = arg
                 try:
-                    if hasattr(func, 'im_func'):
-                        func = func.im_func
-                    code = func.func_code
+                    if hasattr(func, '__func__'):
+                        func = func.__func__
+                    code = func.__code__
                     lineno = code.co_firstlineno
                     filename = code.co_filename
                 except:
@@ -859,7 +859,7 @@ class DebuggerCommands(CLI.BaseCommands):
             return
         # Is it a function?
         try:
-            code = value.func_code
+            code = value.__code__
         except:
             pass
         else:
@@ -867,7 +867,7 @@ class DebuggerCommands(CLI.BaseCommands):
             return
         # Is it an instance method?
         try:
-            code = value.im_func.func_code
+            code = value.__func__.__code__
         except:
             pass
         else:

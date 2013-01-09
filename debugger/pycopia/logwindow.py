@@ -18,8 +18,8 @@
 Log messages to a separate windows. That window is the urxvt program, which must be installed.
 
 """
-from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 from __future__ import division
 
 import os
@@ -60,14 +60,21 @@ class DebugLogWindow(object):
             pid = os.fork()
             if pid: # parent
                 os.close(masterfd)
-                self._fo = os.fdopen(slavefd, "w+", 0)
+                self._fo = os.fdopen(slavefd, "w+b", 0)
                 if self._do_stderr:
                     os.close(2)
                     os.dup2(slavefd, 2)
             else: # child
                 os.close(slavefd)
                 os.execlp("urxvt", "urxvt", "-pty-fd", str(masterfd))
-        print(datetime.now(), ":", ", ".join(map(repr, objs)), file=self._fo)
+        fo = self._fo
+        fo.write("{}: ".format(datetime.now()).encode("utf-8"))
+        lo = len(objs) - 1
+        for i, o in enumerate(objs):
+            fo.write(repr(o).encode("utf-8"))
+            if i < lo:
+                fo.write(b", ")
+        fo.write(b"\n")
 
 
 # automatic, lazy construction of DEBUG object
@@ -93,8 +100,8 @@ def logcall(f):
 
 if __name__=='__main__':
     import signal
-    DEBUG("test me")
-    DEBUG("test me", "again")
+    DEBUG(b"test me")
+    DEBUG(b"test me", b"again")
     signal.pause()
     DEBUG.close()
 
