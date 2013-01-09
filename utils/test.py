@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999- Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,9 +13,11 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 """
-
-
 """
 
 import unittest
@@ -33,14 +33,14 @@ s = time.time()
 
 def catcher(n,f):
     global s
-    print 'Alarmed in %.4f' % ( time.time() - s )
+    print('Alarmed in %.4f' % ( time.time() - s ))
     s = time.time()
 
 class UtilsTests(unittest.TestCase):
 
     def test_itimer(self):
         signal.signal(signal.SIGALRM, catcher)
-        print 'Setting alarm for 0.3 seconds with repeat every 0.5 seconds'
+        print('Setting alarm for 0.3 seconds with repeat every 0.5 seconds')
         try:
             itimer.setitimer(itimer.ITIMER_REAL, 0.3, 0.5)
             initial, interval =  itimer.getitimer(itimer.ITIMER_REAL)
@@ -56,19 +56,19 @@ class UtilsTests(unittest.TestCase):
     def test_z_alarm(self):
         global s
         signal.signal(signal.SIGALRM, catcher)
-        print 'Setting alarm for 0.3 seconds'
+        print('Setting alarm for 0.3 seconds')
         start = s = time.time()
         itimer.alarm(0.3)
         signal.pause()
         self.assertAlmostEqual(time.time()-start, 0.3, places=2)
 
-        print 'Setting alarm for 1.1 seconds'
+        print('Setting alarm for 1.1 seconds')
         start = s = time.time()
         itimer.alarm(1.1)
         signal.pause()
         self.assertAlmostEqual(time.time()-start, 1.1, places=2)
 
-        print 'Setting alarm for 5.5 seconds'
+        print('Setting alarm for 5.5 seconds')
         start = s = time.time()
         itimer.alarm(5.5)
         signal.pause()
