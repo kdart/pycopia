@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,10 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-"""
-
-
-"""
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 import unittest
 
@@ -43,18 +41,18 @@ class AidTests(unittest.TestCase):
 
     def test_mapstr(self):
         TEST = aid.mapstr("some%(one)s one\nsome%(two)s three\nsome%(three)s four")
-        print TEST.attributes
+        print(TEST.attributes)
         try:
-            print TEST
+            print(TEST)
         except ValueError:
-            print "got correct error from %r" % TEST
+            print("got correct error from %r" % TEST)
         TEST.one = "one"
         TEST.two = "thing"
         TEST.three = "where"
-        print TEST
+        print(TEST)
         s = str(TEST) # makes new, substituted, string
         assert s == "someone one\nsomething three\nsomewhere four"
-        print TEST.three
+        print(TEST.three)
 
     def test_formatstr(self):
         src = "one {one} {{notaone}} two {two}"
@@ -64,31 +62,31 @@ class AidTests(unittest.TestCase):
 
     def test_newclass(self):
         New = aid.newclass("New", MyBaseClass)
-        print New()
+        print(New())
 
     def test_AttrDictWrapper(self):
         ld = {"one":1, "two":2, "three":3}
         gd = {"gbone":1, "gbtwo":2, "gbthree":3}
         lw = dictlib.AttrDictWrapper(ld)
         lw.four = gd
-        print lw.one
-        print lw.two
-        print lw.four.gbone
-        print lw.four["gbtwo"]
+        print(lw.one)
+        print(lw.two)
+        print(lw.four.gbone)
+        print(lw.four["gbtwo"])
 
     def test_AttrDict(self):
         d = dictlib.AttrDict()
         d.one = "one"
-        print d
-        print d.get
-        print d.one
-        print d["one"]
+        print(d)
+        print(d.get)
+        print(d.one)
+        print(d["one"])
         d["two"] = 2
-        print d.two
-        print d["two"]
+        print(d.two)
+        print(d["two"])
 
     def test_UserFile(self):
-        fd = UserFile.UserFile("/etc/hosts", "r")
+        fd = UserFile.UserFile("/etc/hosts", "rb")
         while 1:
             d = fd.read(1024)
             if not d:
@@ -97,18 +95,18 @@ class AidTests(unittest.TestCase):
 
     def test_timelib(self):
         mt = timelib.localtime_mutable()
-        print mt
+        print(mt)
         mt.add_seconds(3600)
-        print mt
-        print timelib.strftime("%Y-%m-%d", timelib.weekof(timelib.time()))
+        print(mt)
+        print(timelib.strftime("%Y-%m-%d", timelib.weekof(timelib.time())))
 
         t = timelib.now()
         for d in range(1, 60):
             week = timelib.weekof(t+(d*60*60*24))
-            print timelib.MutableTime(week)
+            print(timelib.MutableTime(week))
 
-        print "Local time:"
-        print timelib.localtimestamp()
+        print("Local time:")
+        print(timelib.localtimestamp())
 
         p = timespec.TimespecParser()
         for spec, secs in [

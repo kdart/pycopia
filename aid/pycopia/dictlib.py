@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -32,7 +30,7 @@ class AttrDictWrapper(object):
     def __init__(self, mapping=None):
         self.__dict__["_mapping"] = mapping or {}
 
-    # attribute-style access 
+    # attribute-style access
     def __getattribute__(self, key):
         try:
             return super(AttrDictWrapper, self).__getattribute__(key)
@@ -122,7 +120,7 @@ class AttrDictDefault(dict):
             self.__dict__[key] = val
 
     def __repr__(self):
-        return "%s(%s, %r)" % (self.__class__.__name__, dict.__repr__(self), 
+        return "%s(%s, %r)" % (self.__class__.__name__, dict.__repr__(self),
             self.__dict__["_default"])
 
     def __setitem__(self, key, value):
@@ -151,7 +149,7 @@ class AttrDictDefault(dict):
 class ObjectCache(dict):
     """A dict that caches objects. Adds a method, get_object, that
     works like get() but takes a constructor callable that is called if
-    the object is not found here.  
+    the object is not found here.
     """
     def get_object(self, index, constructor, **kwargs):
         try:
@@ -165,7 +163,7 @@ class ObjectCache(dict):
 class SortedDict(dict):
     "A dictionary that keeps its keys in the order in which they're inserted."
     def __init__(self, data=None):
-        if data is None: 
+        if data is None:
             data = {}
         dict.__init__(self, data)
         self.keyOrder = data.keys()
@@ -338,6 +336,6 @@ class MultiValueDict(dict):
                         self.setlistdefault(key, []).append(value)
                 except TypeError:
                     raise ValueError("MultiValueDict.update() takes either a MultiValueDict or dictionary")
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             self.setlistdefault(key, []).append(value)
 

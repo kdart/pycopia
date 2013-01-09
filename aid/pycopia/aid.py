@@ -1,8 +1,7 @@
 #!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) $Date$
-#    Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999- Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -25,7 +24,7 @@ from __future__ import print_function
 import sys
 from math import ceil
 from errno import EINTR
-from collections import deque, Callable
+from collections import deque
 import functools
 
 
@@ -46,28 +45,32 @@ def add_exception(excclass, name=None):
 try:
     long
 except NameError: # signals python3
-    #import builtins as __builtins__
+    import io
     long = int
     _biname = "builtins"
-
-    def callable(f):
-        return isinstance(f, Callable)
 
     def execfile(fn, glbl=None, loc=None):
         glbl = glbl or globals()
         loc = loc or locals()
         exec(open(fn).read(), glbl, loc)
+    # add py2-like builtins
     add2builtin("execfile", execfile)
-    add2builtin("callable", callable)
     add2builtin("raw_input", input)
+    add2builtin("file", io.BufferedReader)
 else: # python 2
     _biname = "__builtin__"
     execfile = execfile
-    callable = callable
 
+    def enumerate(collection):
+        'Generates an indexed series:  (0, collection[0]), (1, collection[1]), ...'
+        i = 0
+        it = iter(collection)
+        while 1:
+            yield (i, it.next())
+            i += 1
 
-# partial function returns callable with some parameters already setup to run.
 partial = functools.partial
+
 
 class NULLType(type):
     """Similar to None, but is also a no-op callable and empty iterable."""
@@ -89,6 +92,8 @@ class NULLType(type):
         return False
     def __iter__(self):
         return self
+    def __next__(*args):
+        raise StopIteration
     def next(*args):
         raise StopIteration
 
@@ -121,7 +126,7 @@ class Enum(int):
     def __str__(self):
         return self._name
     def __repr__(self):
-        return "%s(%d, %r)" % (self.__class__.__name__, self, self._name)
+        return "{}({:d}, {!r})".format(self.__class__.__name__, self, self._name)
 
 class Enums(list):
     """A list of Enum objects."""
@@ -141,7 +146,7 @@ class Enums(list):
         self.sort()
 
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, list.__repr__(self))
+        return "{}({})".format(self.__class__.__name__, list.__repr__(self))
 
     # works nicely with WWW framework.
     choices = property(lambda s: map(lambda e: (int(e), str(e)), s))
@@ -189,7 +194,7 @@ class unsigned(long):
         if val < self.floor or val > self.ceiling:
             raise OverflowError("value %s out of range for type %s" % (val, self.__class__.__name__))
     def __repr__(self):
-        return "%s(%sL)" % (self.__class__.__name__, self)
+        return "%s(%s)" % (self.__class__.__name__, self)
     def __add__(self, other):
         return self.__class__(long.__add__(self, other))
     def __sub__(self, other):
@@ -437,7 +442,7 @@ class formatstr(str):
 
     @property
     def attributes(self):
-        return self._attribs.keys()
+        return list(self._attribs.keys())
 
 
 def newclass(name, *bases, **attribs):
@@ -499,7 +504,7 @@ def removedups(s):
     except TypeError:
         del u  # move on to the next method
     else:
-        return u.keys()
+        return list(u.keys())
     # We can't hash all the elements.  Second fastest is to sort,
     # which brings the equal elements together; then duplicates are
     # easy to weed out in a single pass.
@@ -559,14 +564,6 @@ def reorder(datalist, indexlist):
     reorder(["a", "b", "c"], [2, 0, 1]) -> ["c", "a", "b"]
     """
     return [datalist[idx] for idx in indexlist]
-
-def enumerate(collection):
-    'Generates an indexed series:  (0, collection[0]), (1, collection[1]), ...'
-    i = 0
-    it = iter(collection)
-    while 1:
-        yield (i, it.next())
-        i += 1
 
 def repeat(self,n, f):
     """Call function f, n times."""

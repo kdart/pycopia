@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999- Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,9 +13,14 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
+
 """
 Defines the UserFile file object. This enhances the standard file object with
-easier file locking. It also handles interrupted system calls when reading.  
+easier file locking. It also handles interrupted system calls when reading.
 
 This module also provides a TextFile object that can read and write text files
 for the different platforms that have different line ending styles.
@@ -28,6 +31,9 @@ import sys, os
 import fcntl, stat
 from errno import EINTR
 
+if sys.version_info.major == 3:
+    import io
+    file = io.FileIO
 
 class UserFile(file):
     def read(self, amt=-1):
@@ -379,7 +385,7 @@ def open_textfile(name, mode="r", bufsize=-1, linesep="unix"):
 this file with the writeline(s) method will have the appropriate line
 endings.  """
     # may specify line separator by platform name as well.
-    linesep = {"unix":"\n", "dos":"\r\n", 
+    linesep = {"unix":"\n", "dos":"\r\n",
                 "mac":"\r", "ietf":"\r\n"}.get(linesep, linesep)
     return TextFile(name, mode, bufsize, linesep)
 

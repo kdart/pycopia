@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -45,23 +43,23 @@ characters in it."""
     import random
     rng = random.random
     lseq = len(alphanumeric)
-    x = range(size)
+    x = list(range(size))
     for i in x:
         x[i] = alphanumeric[int(rng() * lseq)]
     return "".join(x)
 
 def crange(start, fin):
     """like range(), but for characters."""
-    for i in xrange(start, fin+1):
+    for i in range(start, fin+1):
         yield chr(i)
 
 def maketrans(s, d):
     """maketrans(frm, to) -> string
     Return a translation table (a string of 256 bytes long). """
-    tbl = range(256) 
+    tbl = list(range(256))
     for src, dest in zip(s, d):
         tbl[ord(src)] = ord(dest)
-    return "".join(map(chr, tbl))
+    return "".join([chr(b) for b in tbl])
 
 tbl = ["_"]*256
 for c in alphanumeric:
@@ -259,11 +257,13 @@ def _combine(args):
 
 
 def _test(argv):
-    print (grep("b", "abacdefg"))
-    print (grep("x", "abacdefg"))
-    print (cut(file("/etc/passwd"), fields=(0,), delim=":"))
+    print (list(grep("b", "abacdefg")))
+    print (list(grep("x", "abacdefg")))
+    print (cut(open("/etc/passwd", "r"), fields=(0,), delim=":"))
+    maketrans("-", "_")
 
 if __name__ == "__main__":
+    from pycopia import autodebug
     import sys
     _test(sys.argv)
 

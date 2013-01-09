@@ -1,7 +1,5 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) Keith Dart <keith@kdart.com>
 #
@@ -14,6 +12,10 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
 Time related functions. You can use this in place of the stock 'time' module.
@@ -28,7 +30,7 @@ from time import *
 now = time
 
 # Python time tuple:
-# Index   Attribute   Values 
+# Index   Attribute   Values
 # 0 tm_year (for example, 1993)
 # 1 tm_mon range [1,12]
 # 2 tm_mday range [1,31]
@@ -61,20 +63,20 @@ class MutableTime(object):
         return "%s(%r, %r)" % (self.__class__.__name__, self._tm, self._fmt)
 
     def __str__(self):
-        return strftime(self._fmt, self._tm)
+        return strftime(self._fmt, tuple(self._tm))
 
     def __iter__(self):
         return iter(self._tm)
 
     def __float__(self):
-        return mktime(self._tm)
+        return mktime(tuple(self._tm))
 
     def __int__(self):
         return int(self.__float__())
 
     def __coerce__(self, other):
         try:
-            return mktime(self._tm), float(other)
+            return mktime(tuple(self._tm)), float(other)
         except:
             return None
 
@@ -107,7 +109,7 @@ class MutableTime(object):
             self._tm[idx] = int(val)
 
     def __sub__(self, other):
-        return mktime(self._tm) - mktime(tuple(other))
+        return mktime(tuple(self._tm)) - mktime(tuple(other))
 
     def __add__(self, secs):
         new = self.__class__(self._tm[:], self._fmt)
@@ -115,23 +117,23 @@ class MutableTime(object):
         return new
 
     def __mul__(self, other):
-        return mktime(self._tm) * float(other)
+        return mktime(tuple(self._tm)) * float(other)
 
     def __div__(self, other):
-        return mktime(self._tm) / float(other)
+        return mktime(tuple(self._tm)) / float(other)
 
     def __iadd__(self, secs):
-        csec = mktime(self._tm)
+        csec = mktime(tuple(self._tm))
         csec += secs
         self._tm = localtime(csec)
         return self
 
     def __isub__(self, secs):
-        csec = mktime(self._tm)
+        csec = mktime(tuple(self._tm))
         csec -= secs
         self._tm = localtime(csec)
         return self
-    
+
     def copy(self):
         return self.__class__(self._tm, self._fmt)
 

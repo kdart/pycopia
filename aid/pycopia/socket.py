@@ -75,15 +75,22 @@ GetAddressInfoError = gaierror
 SIOCINQ = 0x541B
 SIOCOUTQ = 0x5411
 
+import sys
+
+# enables this module to work with either python 2.x or 3.x
+if sys.version_info.major == 2:
+    _compatsocket = lambda self, family, type, proto, fileno: _socket.socket.__init__(self, family, type, proto)
+else:
+    _compatsocket = _socket.socket.__init__
+
 
 class socket(_socket.socket):
-
     """A subclass of _socket.socket adding the makefile() method."""
 
     __slots__ = ["__weakref__", "_io_refs", "_closed"]
 
-    def __init__(self, family=AF_INET, type=SOCK_STREAM, proto=0):
-        _socket.socket.__init__(self, family, type, proto)
+    def __init__(self, family=AF_INET, type=SOCK_STREAM, proto=0, fileno=None):
+        _compatsocket(self, family, type, proto, fileno)
         self._io_refs = 0
         self._closed = False
 
@@ -109,6 +116,15 @@ class socket(_socket.socket):
 
     def outq(self):
         return outq(self)
+
+    # for python 3.x  compatibility
+    if sys.version_info.major == 3:
+        def accept(self):
+            """accept() -> (socket object, address info)
+            """
+            fd, addr = self._accept()
+            sock = socket(self.family, self.type, self.proto, fileno=fd)
+            return sock, addr
 
     def makefile(self, mode="rwb", buffering=None, encoding=None, errors=None, newline=None):
         """makefile(...) -> an I/O stream connected to the socket
@@ -369,7 +385,7 @@ def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT,
 
 class SafeSocket(socket):
     """A socket protected from interrupted system calls."""
-    accept = systemcall(socket.accept)
+    #accept = systemcall(socket.accept)
     recv = systemcall(socket.recv)
     send = systemcall(socket.send)
     sendall = systemcall(socket.sendall)

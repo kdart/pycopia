@@ -560,6 +560,10 @@ _MODEMAP = {
     "w": os.O_WRONLY,
     "w+": os.O_RDWR,
     "r+": os.O_RDWR,
+    "rb": 0, # O_RDONLY
+    "wb": os.O_WRONLY,
+    "w+b": os.O_RDWR,
+    "r+b": os.O_RDWR,
 }
 
 
@@ -567,7 +571,7 @@ class SerialPort(object):
     """Interface to serial/tty ports. This class is not protected from
     interrupted system calls.
     """
-    def __init__(self, fname, mode="w+", setup="9600 8N1"):
+    def __init__(self, fname, mode="w+b", setup="9600 8N1"):
         st = os.stat(fname).st_mode
         if not stat.S_ISCHR(stat.S_IFMT(st)):
             raise ValueError("{0} is not a character device.".format(fname))
