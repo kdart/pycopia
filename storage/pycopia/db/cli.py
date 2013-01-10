@@ -19,6 +19,9 @@
 CLI interface to Pycopia database storage.
 
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import sys
 import os
@@ -1307,13 +1310,13 @@ def edit_key(ui, modelclass, metadata, dbrow):
     setattr(dbrow, metadata.colname, key)
 
 def edit_timestamp(ui, modelclass, metadata, dbrow):
-	dt = getattr(dbrow, metadata.colname)
-	if dt is not None:
-		val = dt.isoformat()
-	else:
-		val = ""
+    dt = getattr(dbrow, metadata.colname)
+    if dt is not None:
+        val = dt.isoformat()
+    else:
+        val = ""
     new = ui.get_value(metadata.colname + "? ", val)
-	#newval = 
+    #newval =
     setattr(dbrow, metadata.colname, new)
 
 def edit_field(ui, modelclass, metadata, dbrow):
@@ -1476,11 +1479,11 @@ Options:
     try:
         optlist, longopts, args = getopt.getopt(argv[1:], "?")
     except getopt.GetoptError:
-            print dbcli.__doc__
+            print (dbcli.__doc__)
             return
     for opt, val in optlist:
         if opt == "-?":
-            print dbcli.__doc__
+            print (dbcli.__doc__)
             return
 
     if args:
@@ -1526,11 +1529,11 @@ Options:
     try:
         optlist, longopts, args = getopt.getopt(argv[1:], "?")
     except getopt.GetoptError:
-            print dbconfig.__doc__
+            print (dbconfig.__doc__)
             return
     for opt, val in optlist:
         if opt == "-?":
-            print dbconfig.__doc__
+            print (dbconfig.__doc__)
             return
         if opt == "-D":
             from pycopia import autodebug

@@ -1,5 +1,5 @@
 #!/usr/bin/python2.7
-# -*- coding: us-ascii -*-
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 #
 #    Copyright (C) 2012  Keith Dart <keith@kdart.com>
@@ -14,8 +14,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 from __future__ import division
 
 """
@@ -72,12 +72,12 @@ def get_session(url=None):
 # new model objects in the usual way. Use this general factory function instead.
 def create(klass, **kwargs):
     inst = klass()
-    for k, v in kwargs.iteritems():
+    for k, v in kwargs.items():
         setattr(inst, k, v)
     return inst
 
 def update(inst, **kwargs):
-    for k, v in kwargs.iteritems():
+    for k, v in kwargs.items():
         setattr(inst, k, v)
 
 # Set password encryption key for the site.
@@ -915,9 +915,9 @@ class Equipment(object):
     # interface management
     def add_interface(self, session, name,
                 ifindex=None, interface_type=None, macaddr=None, ipaddr=None, network=None):
-        if interface_type is not None and isinstance(interface_type, basestring):
+        if interface_type is not None and isinstance(interface_type, str):
             interface_type = session.query(InterfaceType).filter(InterfaceType.name==interface_type).one()
-        if network is not None and isinstance(network, basestring):
+        if network is not None and isinstance(network, str):
             network = session.query(Network).filter(Network.name==network).one()
         intf = create(Interface, name=name, equipment=self, ifindex=ifindex,
                 interface_type=interface_type, macaddr=macaddr, ipaddr=ipaddr,
@@ -956,7 +956,7 @@ class Equipment(object):
         network.
         """
         intf = self.interfaces[intf]
-        if isinstance(network, basestring):
+        if isinstance(network, str):
             network = session.query(Network).filter(Network.name==network).one()
         # alter the IP mask to match the network
         addr = intf.ipaddr
@@ -1027,7 +1027,7 @@ class Interface(object):
         if self.macaddr is not None:
             extra.append(unicode(self.macaddr))
         if extra:
-            return u"%s (%s)" % (self.name, u", ".join(extra))
+            return "%s (%s)" % (self.name, ", ".join(extra))
         else:
             return self.name
 
@@ -1555,7 +1555,7 @@ class Config(object):
 
     def set_owner(self, session, user):
         if self.container is not None:
-            if isinstance(user, basestring):
+            if isinstance(user, str):
                 user = User.get_by_username(session, user)
             self.user = user
             session.commit()
@@ -1792,7 +1792,7 @@ if __name__ == "__main__":
 #        print(tr)
     for intf in Interface.select_unattached(sess):
         #print(intf)
-        print(unicode(intf))
+        print(intf)
 #    print(type(TestSuite.get_by_implementation(sess, "testcases.unittests.WWW.mobileget.MobileSendSuite")))
 #    print (TestSuite.get_suites(sess))
     #print(get_primary_key(Session))

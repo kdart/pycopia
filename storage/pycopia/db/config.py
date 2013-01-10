@@ -21,7 +21,25 @@ Pycopia Configuration and Information storage
 Wrap the Config table in the database and make it look like a tree of
 name-value pairs (mappings).
 
+Values are serialized Python objects (pickles). So you can have arbitrary data
+structures as values. In theory you can add object instances as well, but this
+should be avoided.
+
+The NULL object (from pycopia.aid) as value is used as a sentinal to signal a
+"directory", or container node. It should not be a value.
+
+Containers can be owned by a user. New containers created by a user are owned
+by the same user. If a user with flag superuser creates a new container it is
+not owned by anybody (set the ownership as a separate operation). A superuser can
+see all containers, but non-superuser users only see their own containers.  New
+containers created without a registered user inherit ownership from parent
+node.
+
 """
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import re
 
@@ -49,11 +67,11 @@ def get_root(session):
 class Container(object):
     """Make a relational table quack like a dictionary."""
     def __init__(self, session, configrow, user=None, testcase=None, testsuite=None):
-        self.__dict__["session"] = session
-        self.__dict__["node"] = configrow
-        self.__dict__["_user"] = user
-        self.__dict__["_testcase"] = testcase
-        self.__dict__["_testsuite"] = testsuite
+        self.__dict__[b"session"] = session
+        self.__dict__[b"node"] = configrow
+        self.__dict__[b"_user"] = user
+        self.__dict__[b"_testcase"] = testcase
+        self.__dict__[b"_testsuite"] = testsuite
 
     def __str__(self):
         if self.node.value is NULL:
@@ -75,7 +93,6 @@ class Container(object):
             self.session.commit()
         else:
             item.value = value
-            #self.session.update(item) # SA says deprecated.
             self.session.add(item)
             self.session.commit()
 
@@ -150,13 +167,7 @@ class Container(object):
     def copy(self):
         return self.__class__(self.session, self.node)
 
-    # Containers can be owned by a user. New containers created by a user are
-    # owned by the same user. If the superuser creates a new container it is
-    # not owned by anybody (set the ownership as a separate operation). Superuser
-    # can see all containers, but regular users only see their own containers.
-    # New containers created without a registered user inherit ownership from
-    # parent node.
-    # There might be some fancy SQL for all of this, but I'm better at Python than SQL. :[
+    # There might be some fancy SQL for all of this...
     def _get_user(self):
         if self._user:
             if self._user.is_superuser:
@@ -204,27 +215,28 @@ class Container(object):
 
     def __iter__(self):
         me = self.node
-        self.__dict__["_set"] = iter(self.session.query(Config).filter(and_(
+        self.__dict__[b"_set"] = iter(self.session.query(Config).filter(and_(
             Config.parent_id==me.id,
             Config.user==me.user,
             Config.testcase==me.testcase,
             Config.testsuite==me.testsuite)))
         return self
 
-    def next(self):
+    def __next__(self):
         try:
-            item = self.__dict__["_set"].next()
+            item = self.__dict__[b"_set"].next()
             return item.name
         except StopIteration:
-            del self.__dict__["_set"]
+            del self.__dict__[b"_set"]
             raise
+    next = __next__
 
     def __getattribute__(self, key):
         try:
             return super(Container, self).__getattribute__(key)
         except AttributeError:
-            node = self.__dict__["node"]
-            session = self.__dict__["session"]
+            node = self.__dict__[b"node"]
+            session = self.__dict__[b"session"]
             try:
                 item = session.query(Config).filter(and_(
                         Config.container==node, Config.name==key)).one()
@@ -233,7 +245,7 @@ class Container(object):
                         user=self._user, testcase=self._testcase, testsuite=self._testsuite)
                 else:
                     return item.value
-            except NoResultFound, err:
+            except NoResultFound as err:
                 raise AttributeError("Container: No attribute or key '%s' found: %s" % (key, err))
 
     def __setattr__(self, key, obj):
@@ -260,7 +272,7 @@ class Container(object):
                 Config.user==me.user))
         return q.count() > 0
 
-    _var_re = re.compile(r'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
+    _var_re = re.compile(br'\$([a-zA-Z0-9_\?]+|\{[^}]*\})')
 
     # perform shell-like variable expansion
     def expand(self, value):

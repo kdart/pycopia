@@ -1,5 +1,5 @@
 #!/usr/bin/python2.7
-# -*- coding: us-ascii -*-
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
 #    Copyright (C) 2012 Keith Dart <keith@dartworks.biz>
@@ -13,6 +13,11 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 """
 Extra database types.
@@ -28,8 +33,18 @@ __all__ = ["INTEGER", "BIGINT", "SMALLINT", "VARCHAR", "CHAR", "TEXT",
     "ValueType", "LikelihoodType", "SeverityType", "validate_value_type"]
 
 import sys
-import cPickle as pickle
 import json
+
+# works with both python 2.7 and 3.x
+try:
+    import cPickle as pickle
+    dumps = pickle.dumps
+    loads = pickle.loads
+except ImportError:
+    import pickle
+    dumps = lambda o: pickle.dumps(o, protocol=0, fix_imports=True).decode("ascii")
+    loads = lambda o: pickle.loads(o, fix_imports=True)
+
 
 from pycopia.aid import Enums
 from pycopia.ipv4 import IPv4
@@ -110,12 +125,12 @@ class PickleText(types.TypeDecorator):
     def process_bind_param(self, value, dialect):
         if value is None:
             return None
-        return pickle.dumps(value)
+        return dumps(value)
 
     def process_result_value(self, value, dialect):
         if value is None:
             return None
-        return pickle.loads(value.encode("ascii"))
+        return loads(value.encode("ascii"))
 
 
 class JsonText(types.TypeDecorator):
@@ -301,7 +316,7 @@ class ValueType(types.TypeDecorator):
 def validate_value_type(value_type, value):
     try:
         return _VALIDATOR_MAP[value_type](value)
-    except (ValueError, TypeError), err:
+    except (ValueError, TypeError) as err:
         raise ValidationError(err)
 
 ### attribute base type validation and conversion

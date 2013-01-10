@@ -14,8 +14,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 from __future__ import division
 
 """
@@ -26,6 +26,9 @@ Widgets for DB editor.
 import sys
 import json
 from datetime import datetime
+
+if sys.version_info.major == 3:
+    unicode = str
 
 import urwid
 
@@ -90,7 +93,7 @@ class InputDivider(urwid.WidgetWrap):
     def __init__(self, legend):
         wid = urwid.Columns([
                 (25, AM(urwid.Text("{}:".format(legend), align="left"), "coldivider")),
-                 urwid.Divider(u"-")], dividechars=1)
+                 urwid.Divider("-")], dividechars=1)
         self.__super.__init__(wid)
 
 
@@ -132,7 +135,7 @@ class BooleanInput(BaseInput):
 
 class IntInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"0" if value is None else str(value)
+        val = "0" if value is None else str(value)
         self.wid = urwid.IntEdit(default=val)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
 
@@ -150,7 +153,7 @@ class IntInput(BaseInput):
 
 class FloatInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"0.0" if value is None else str(value)
+        val = "0.0" if value is None else str(value)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
 
@@ -168,7 +171,7 @@ class FloatInput(BaseInput):
 
 class IntervalInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else str(value)
+        val = "" if value is None else str(value)
         legend = legend or "{} (time interval)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -180,7 +183,7 @@ class IntervalInput(BaseInput):
 
 class CharInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else value
+        val = "" if value is None else value
         self.nullable = metadata.nullable
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -197,7 +200,7 @@ class CharInput(BaseInput):
 
 class TextInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else value
+        val = "" if value is None else value
         self.nullable = metadata.nullable
         self.wid = urwid.Edit(edit_text=val, multiline=True, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -214,7 +217,7 @@ class TextInput(BaseInput):
 
 class PythonInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else repr(value)
+        val = "" if value is None else repr(value)
         self.nullable = metadata.nullable
         legend = legend or "{} (Python)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=True, allow_tab=True)
@@ -229,7 +232,7 @@ class PythonInput(BaseInput):
 
 class JsonInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else json.dumps(value, ensure_ascii=False)
+        val = "" if value is None else json.dumps(value, ensure_ascii=False)
         self.nullable = metadata.nullable
         legend = legend or "{} (JSON)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=True, allow_tab=True)
@@ -244,7 +247,7 @@ class JsonInput(BaseInput):
 
 class CidrInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else str(value.CIDR)
+        val = "" if value is None else str(value.CIDR)
         legend = legend or "{} (x.x.x.0/m)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -263,7 +266,7 @@ class CidrInput(BaseInput):
 
 class InetInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else str(value.CIDR)
+        val = "" if value is None else str(value.CIDR)
         legend = legend or "{} (x.x.x.x/m)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -282,7 +285,7 @@ class InetInput(BaseInput):
 
 class MACInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else str(value)
+        val = "" if value is None else str(value)
         legend = legend or "{} (xx:xx:xx:xx:xx:xx)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -294,7 +297,7 @@ class MACInput(BaseInput):
 
 class DateInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else str(value)
+        val = "" if value is None else str(value)
         legend = legend or "{} (date)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -306,7 +309,7 @@ class DateInput(BaseInput):
 
 class TimeInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else str(value)
+        val = "" if value is None else str(value)
         legend = legend or "{} (time)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -318,7 +321,7 @@ class TimeInput(BaseInput):
 
 class TimestampInput(BaseInput):
     def __init__(self, model, metadata, value, legend=None):
-        val = u"" if value is None else str(value)
+        val = "" if value is None else str(value)
         legend = legend or "{} (date time)".format(metadata.colname)
         self.wid = urwid.Edit(edit_text=val, multiline=False, allow_tab=False)
         self.__super.__init__(self._col_creator(metadata, self.wid, legend))
@@ -656,7 +659,7 @@ class TestEquipmentInput(BaseInput):
 
     def _stringify_te(self, te):
         if te.roles:
-            ts = u"{}  roles: {}".format(te, u", ".join(unicode(role) for role in te.roles))
+            ts = "{}  roles: {}".format(te, ", ".join(unicode(role) for role in te.roles))
         else:
             ts = unicode(te)
         return ts.encode("utf-8")
@@ -964,7 +967,7 @@ class AttributeAddForm(urwid.WidgetWrap):
         ls = ListScrollSelector(choices)
         urwid.connect_signal(ls, 'change', self._update_desc)
         ls = AM(ls, "selectable", "butfocus")
-        te = urwid.Edit(edit_text=u"", multiline=True, allow_tab=True)
+        te = urwid.Edit(edit_text="", multiline=True, allow_tab=True)
         ok, cancel = self.get_form_buttons()
         cols = urwid.Columns([ls, ("weight", 2, te), (10, ok), (10, cancel)], dividechars=1, focus_column=0)
         self.descw = urwid.Text(self._attribute_types[choices[0]].description)
@@ -1006,10 +1009,10 @@ class TestEquipmentAddForm(urwid.WidgetWrap):
         return ok, cancel
 
     def build(self):
-        self._showeq = urwid.Text(u"")
+        self._showeq = urwid.Text("")
         eqi = self._create_equipment_input()
         maxlen = 0
-        uutcb = urwid.CheckBox(u"DUT/UUT", state=False)
+        uutcb = urwid.CheckBox("DUT/UUT", state=False)
         urwid.connect_signal(uutcb, 'change', self._uut_select)
         blist = [AM(uutcb, "important")]
         for role in self._roles:
@@ -1082,7 +1085,7 @@ class TestEquipmentEditForm(urwid.WidgetWrap):
     def build(self):
         showeq = urwid.Text(self._testequipment.equipment.name)
         maxlen = 0
-        uutcb = urwid.CheckBox(u"DUT/UUT", state=self._testequipment.UUT)
+        uutcb = urwid.CheckBox("DUT/UUT", state=self._testequipment.UUT)
         urwid.connect_signal(uutcb, 'change', self._uut_select)
         blist = [AM(uutcb, "important")]
         for role in self._roles:
@@ -1154,12 +1157,12 @@ class InterfaceAttachForm(urwid.WidgetWrap):
 class FilterInput(urwid.WidgetWrap):
     signals = ["change"]
     _sizing = frozenset(['flow'])
-#    UPARR=u"↑"
-#    DOWNARR=u"↓"
+#    UPARR="↑"
+#    DOWNARR="↓"
 
     DIRECTION = {
-        UP: urwid.SelectableIcon(u"↑", 0),
-        DOWN: urwid.SelectableIcon(u"↓", 0),
+        UP: urwid.SelectableIcon("↑", 0),
+        DOWN: urwid.SelectableIcon("↓", 0),
     }
     #reserve_columns = 1
 
@@ -1188,11 +1191,11 @@ class SimpleEdit(urwid.Edit):
     signals = ["change"]
 
     DIRECTION = {
-        UP: urwid.SelectableIcon(u"↑", 0),
-        DOWN: urwid.SelectableIcon(u"↓", 0),
+        UP: urwid.SelectableIcon("↑", 0),
+        DOWN: urwid.SelectableIcon("↓", 0),
     }
     def __init__(self):
-        self.__super.__init__(u"", u"", multiline=False)
+        self.__super.__init__("", "", multiline=False)
 
     def keypress(self, size, key):
         key = self.__super.keypress(size, key)
@@ -1220,8 +1223,8 @@ class ListScrollSelector(urwid.Widget):
     _selectable = True
     _sizing = frozenset(['flow'])
     signals = ["click", "change"]
-    UPARR=u"↑"
-    DOWNARR=u"↓"
+    UPARR="↑"
+    DOWNARR="↓"
 
     def __init__(self, choicelist):
         self.__super.__init__()
@@ -1232,7 +1235,7 @@ class ListScrollSelector(urwid.Widget):
         self._index = 0
         self.set_text(self._list[self._index])
         maxwidth = reduce(lambda c,m: max(c,m), map(lambda o: len(str(o)), choicelist), 0)
-        self._fmt = u"{} {{:{}.{}s}} {}".format(self.UPARR, maxwidth, maxwidth, self.DOWNARR)
+        self._fmt = "{} {{:{}.{}s}} {}".format(self.UPARR, maxwidth, maxwidth, self.DOWNARR)
 
     def keypress(self, size, key):
         cmd =  self._command_map[key]
@@ -1708,7 +1711,7 @@ class TopForm(Form):
         for b in self.seclist:
             urwid.connect_signal(b, 'activate', self._select)
         smenu = urwid.GridFlow(self.seclist, 25, 1, 0, "left")
-        divider = urwid.Divider(u"-", top=1, bottom=1)
+        divider = urwid.Divider("-", top=1, bottom=1)
         menulist = [bt, divider, subhead, pmenu, divider, supportsubhead, smenu]
         listbox = urwid.ListBox(urwid.SimpleListWalker(menulist))
         return urwid.Frame(listbox)
@@ -2599,6 +2602,6 @@ if __name__ == "__main__":
     from pycopia import autodebug
     from pycopia import logwindow
     DEBUG = logwindow.DebugLogWindow()
-    #_report_metadata(models.Interface)
+    _report_metadata(models.Interface)
     #_test(sys.argv)
 
