@@ -13,7 +13,7 @@ VERSION = "1.0"
 
 setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
-    packages = ["pycopia", "pycopia.emailplus"],
+    packages = ["pycopia",],
     test_suite = "test.AidTests",
 
     author = "Keith Dart",
