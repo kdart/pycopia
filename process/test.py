@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999- Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,10 +13,9 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-"""
-
-
-"""
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import unittest
 
@@ -55,14 +52,14 @@ class ProcessTests(unittest.TestCase):
         self.assertTrue(files)
         self.assertFalse(ls.readerr())
         ls.close()
-        es = ls.stat()
+        es = ls.wait()
         self.assertTrue(es)
 
     def test_lserror(self):
         ls = proctools.spawnpipe("ls /usr/binxx", merge=0)
-        print ls.read()
-        print "errors:"
-        print ls.readerr()
+        print(ls.read())
+        print("errors:")
+        print(ls.readerr())
         ls.close()
         ls.wait()
         es = ls.stat()
@@ -76,14 +73,14 @@ class ProcessTests(unittest.TestCase):
         es = lspm.stat()
         self.assertTrue(es)
 
-    def test_pipeline(self):
-        ptest = proctools.spawnpipe("cat /etc/hosts | sort")
-        hosts = ptest.read()
-        self.assertTrue(bool(hosts))
-        self.assertFalse(bool(ptest.readerr()))
-        ptest.close()
-        es = ptest.stat()
-        self.assertTrue(es)
+#    def test_pipeline(self):
+#        ptest = proctools.spawnpipe("cat /etc/hosts | sort")
+#        hosts = ptest.read()
+#        self.assertTrue(bool(hosts))
+#        self.assertFalse(bool(ptest.readerr()))
+#        ptest.close()
+#        es = ptest.stat()
+#        self.assertTrue(es)
 
     def test_subprocess(self):
         sub = proctools.subprocess(_sub_function)
@@ -98,15 +95,16 @@ class ProcessTests(unittest.TestCase):
 
     def XXXtest_sudo(self):
         pw = sudo.getpw()
-        proc = sudo.sudo("/sbin/ifconfig -a", password=pw)
-        print proc.read()
-        print repr(proc.readerr())
+        proc = sudo.sudo("/bin/ifconfig -a", password=pw)
+        print(proc.read())
+        print(repr(proc.readerr()))
         proc.wait()
         sudo.sudo_reset()
 
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 

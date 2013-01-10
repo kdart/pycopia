@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -13,8 +13,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 from __future__ import division
 
 """
@@ -76,9 +76,9 @@ class Process(object):
         self.callback = callback # called at death of process
         self._log = logfile # should be file-like object
         self._restart = True # restart interrupted system calls
-        self._buf = ''
-        self._errbuf = ''
-        self._writebuf = ''
+        self._buf = b''
+        self._errbuf = b''
+        self._writebuf = b''
         self.exitstatus = None
         self._environment = None
         self._async = bool(async) # use asyncio, or not
@@ -273,16 +273,16 @@ ProcManager uses this."""
         rs = min(100, amt)
         while 1:
             c = self.read(rs)
-            i = c.find("\n")
+            i = c.find(b"\n")
 
             if i < 0 and len(c) > amt:
                 i = amt-1
             elif amt <= i:
                 i = amt-1
-            if i >= 0 or c == '':
+            if i >= 0 or c == b'':
                 bufs.append(c[:i+1])
                 self._unread(c[i+1:])
-                return "".join(bufs)
+                return b"".join(bufs)
 
             bufs.append(c)
             amt -= len(c)
@@ -394,15 +394,15 @@ class ProcessPipe(Process):
             os.close(0)
             os.close(1)
             os.close(2)
-            if os.dup(p2cread) <> 0:
+            if os.dup(p2cread) != 0:
                 os._exit(127)
-            if os.dup(c2pwrite) <> 1:
+            if os.dup(c2pwrite) != 1:
                 os._exit(127)
             if merge:
-                if os.dup(c2pwrite) <> 2: # merge stderr into stdout from child process
+                if os.dup(c2pwrite) != 2: # merge stderr into stdout from child process
                     os._exit(127)
             else:
-                if os.dup(c2perr) <> 2:
+                if os.dup(c2perr) != 2:
                     os._exit(127)
             remove_poller()
             try:
@@ -468,7 +468,7 @@ class ProcessPipe(Process):
         while 1:
             try:
                 writ = os.write(self._p_stdin, data)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if self._restart and why.errno == EINTR:
                     continue
                 else:
@@ -480,7 +480,7 @@ class ProcessPipe(Process):
         while 1:
             try:
                 next = os.read(fd, length)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if self._restart and why.errno == EINTR:
                     continue
                 else:
@@ -606,7 +606,7 @@ class ProcessPty(Process):
         while 1:
             try:
                 writ = os.write(self._fd, data)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if self._restart and why.errno == EINTR:
                     continue
                 else:
@@ -618,7 +618,7 @@ class ProcessPty(Process):
         while 1:
             try:
                 next = os.read(self._fd, length)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if self._restart and why.errno == EINTR:
                     continue
                 elif why.errno == EIO:
@@ -641,7 +641,7 @@ class ProcessNamedPipe(Process):
 class CoProcessPty(ProcessPty):
     def __init__(self, method, logfile=None, env=None,
                     callback=None, async=False, pwent=None, _pgid=0):
-        Process.__init__(self, "python: %s" % (method.func_name,), logfile, callback, async)
+        Process.__init__(self, "python: %s" % (method.__name__,), logfile, callback, async)
         pid, self._fd = os.forkpty()
         self.childpid = pid
         self.childpid2 = None # for compatibility with pipeline
@@ -651,8 +651,8 @@ class CoProcessPty(ProcessPty):
 
 class CoProcessPipe(ProcessPipe):
     def __init__(self, method, logfile=None, env=None,
-                    callback=None, merge=False, async=False, pwent=None):
-        Process.__init__(self, "python <=> %s" % (method.func_name,), logfile, callback, async)
+                    callback=None, merge=False, async=False, pwent=None, _pgid=0):
+        Process.__init__(self, "python <=> %s" % (method.__name__,), logfile, callback, async)
 
         p2cread, self._p_stdin = os.pipe()
         self._p_stdout, c2pwrite = os.pipe()
@@ -667,15 +667,15 @@ class CoProcessPipe(ProcessPipe):
             os.close(0)
             os.close(1)
             os.close(2)
-            if os.dup(p2cread) <> 0:
+            if os.dup(p2cread) != 0:
                 os._exit(127)
-            if os.dup(c2pwrite) <> 1:
+            if os.dup(c2pwrite) != 1:
                 os._exit(127)
             if merge:
-                if os.dup(c2pwrite) <> 2:
+                if os.dup(c2pwrite) != 2:
                     os._exit(127)
             else:
-                if os.dup(c2perr) <> 2:
+                if os.dup(c2perr) != 2:
                     os._exit(127)
 
             if pwent:
@@ -689,7 +689,7 @@ class CoProcessPipe(ProcessPipe):
 
 # simply forks this python process
 class SubProcess(Process):
-    def __init__(self, pwent=None):
+    def __init__(self, pwent=None, _pgid=0):
         Process.__init__(self, sys.argv[0])
         pid = os.fork()
         if pid == 0 and pwent:
@@ -701,7 +701,7 @@ class SubProcess(Process):
 class ProcessPipeline(ProcessPipe):
     """Connects two commands via a pipe, they appear as one process object."""
     def __init__(self, cmdline, logfile=None,  env=None, callback=None,
-                    merge=None, pwent=None, async=False, devnull=None):
+                    merge=None, pwent=None, async=False, devnull=None, _pgid=0):
         assert cmdline.count("|") == 1
         [cmdline1, cmdline2] = cmdline.split("|")
         if env:
@@ -830,8 +830,8 @@ times the process will be respawned if the previous invocation dies.  """
             # child is not managing any of these
             self._procs.clear()
             try:
-                rv = apply(method, args)
-            except SystemExit, val:
+                rv = method(*args)
+            except SystemExit as val:
                 rv = int(val)
             except:
                 ex, val, tb = sys.exc_info()
@@ -876,7 +876,7 @@ times the process will be respawned if the previous invocation dies.  """
                 try:
                     import traceback
                     try:
-                        fname = _method.func_name
+                        fname = _method.__name__
                     except AttributeError:
                         try:
                             fname = _method.__class__.__name__
@@ -1001,7 +1001,7 @@ times the process will be respawned if the previous invocation dies.  """
         while 1: # loop to collect all pending exited processes
             try:
                 pid, sts = os.waitpid(pid, option)
-            except EnvironmentError, why:
+            except EnvironmentError as why:
                 if why.errno == ECHILD: # no children left
                     break
                 elif why.errno == EINTR:
@@ -1087,7 +1087,7 @@ object connected to the master end of the child pty.  """
     return cp
 
 
-def run_as(pwent, umask=022):
+def run_as(pwent, umask=0o22):
     """Drop privileges to given user's password entry, and set up
     environment. Assumes the parent process has root privileges.
     """
@@ -1109,39 +1109,6 @@ def run_as(pwent, umask=022):
     os.environ["SHELL"] = pwent.shell
     os.environ["PATH"] = "/bin:/usr/bin:/usr/local/bin"
     return None
-
-
-def run_as_with_PAM(pwent, umask):
-    """NOTE: this is currently experimental and untested."""
-    import PAM
-    auth = PAM.pam()
-    auth.start("su", pwent.name)
-    os.setgroups(pwent.groups)
-    os.setgid(pwent.gid)
-    os.setegid(pwent.gid)
-    os.setuid(pwent.uid)
-    os.seteuid(pwent.uid)
-    try:
-        #auth.authenticate(PAM.PAM_SILENT)
-        auth.setcred(PAM.PAM_ESTABLISH_CRED|PAM.PAM_SILENT)
-        auth.acct_mgmt()
-        auth.open_session(PAM.PAM_SILENT)
-    # XXX
-    except PAM.error, resp:
-        raise AuthenticationError(resp)
-    os.environ["HOME"] = home
-    os.environ["USER"] = pwent.name
-    os.environ["LOGNAME"] = pwent.name
-    os.environ["SHELL"] = pwent.shell
-    os.environ["PATH"] = "/bin:/usr/bin:/usr/local/bin"
-    home = pwent.home
-    try:
-      os.chdir(home)
-    except OSError:
-      os.chdir("/")
-
-    return auth
-
 
 def waitproc(proc, option=0):
     pm = get_procmanager()
@@ -1193,7 +1160,7 @@ def which(basename):
 split_command_line = shparser.get_command_splitter()
 
 
-
 if __name__ == "__main__":
-    print (system("runtest testcases.unittests.process.proctools"))
+    pass
+    #print (system("runtest testcases.unittests.process.proctools"))
 

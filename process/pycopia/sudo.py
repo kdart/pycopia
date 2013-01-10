@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,6 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 """
 Run things as root (or another user) via sudo.
 
@@ -22,13 +24,10 @@ Run things as root (or another user) via sudo.
 from pycopia import proctools
 from pycopia.aid import IF
 
-try:
-    SUDO = proctools.which("sudo")
-except ValueError:
-    raise ImportError, "'sudo' program not found in PATH"
+SUDO = proctools.which("sudo")
 
 def sudo(command, user=None, password=None, extraopts=None, logfile=None):
-    opts = "-S %s" % (IF(user, "-u %s" % (user,), ""),)
+    opts = "-S %s" % ("-u %s" % user if user else "")
     cmd = "%s %s %s %s" % (SUDO, opts, extraopts or "", command)
     proc = proctools.spawnpipe(cmd, logfile=logfile, merge=0)
     if password:
@@ -49,7 +48,7 @@ def sudo_command(cmd, password=None, logfile=None):
     errs = proc.readerr()
     es = proc.wait()
     if errs or not es:
-        raise RuntimeError, (es, errs)
+        raise RuntimeError((es, errs))
     return rv
 
 def getpw():

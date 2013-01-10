@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
 #    Copyright (C) 1999-2012  Keith Dart <keith@kdart.com>
@@ -13,9 +13,9 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
+from __future__ import unicode_literals
 
 """
 This module contains classes and functions that perform Expect-like operations
@@ -31,6 +31,9 @@ from errno import EINTR
 
 from pycopia import scheduler
 from pycopia.stringmatch import compile_exact
+
+if sys.version_info.major == 3:
+    basestring = str
 
 # matching types
 EXACT = 1 # string match (fastest)
@@ -64,8 +67,7 @@ The wrapped object need only implement the following methods:
         interrupt()    - Interrupt the wrapped object (usually a process object)
 
 """
-    def __init__(self, fo=None, prompt="$", timeout=90.0, logfile=None,
-                 engine=None):
+    def __init__(self, fo=None, prompt="$", timeout=90.0, logfile=None, engine=None):
         if hasattr(fo, "fileno"):
             self._fo = fo
             try:
@@ -74,7 +76,7 @@ The wrapped object need only implement the following methods:
             except AttributeError:
                 pass
         else:
-            raise ValueError, "Expect: first parameter not a file-like object."
+            raise ValueError("Expect: first parameter not a file-like object.")
         self.default_timeout = timeout
         self._log = logfile
         self.cmd_interp = None
@@ -179,7 +181,7 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
         if isinstance(patt, basestring):
             solist.append(self._get_re(patt.encode(), mtype, callback))
         elif ptype is tuple:
-            solist.append(apply(self._get_re, patt))
+            solist.append(self._get_re(patt))
         elif ptype is list:
             map(lambda p: self._get_search_list(p, mtype, callback, solist), patt)
         elif patt is None:
@@ -232,10 +234,10 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
             while 1:
                 try:
                     data = self._fo.read(amt)
-                except EnvironmentError, val:
+                except EnvironmentError as val:
                     if val.errno == EINTR:
                         if self._timed_out == 1:
-                            raise scheduler.TimeoutError, "expect: timed out during read."
+                            raise scheduler.TimeoutError("expect: timed out during read.")
                         else:
                             continue
                     else:
@@ -331,13 +333,13 @@ through a filter function.  """
         while 1:
             try:
                 rfd, wfd, xfd = select.select([fo_fd, stdin_fd], [], [])
-            except select.error, errno:
-                if errno[0] == EINTR:
+            except select.error as err:
+                if err.errno == EINTR:
                     continue
             if fo_fd in rfd:
                 try:
                     text = self._fo.read(1)
-                except (OSError, EOFError), err:
+                except (OSError, EOFError) as err:
                     tty.tcsetattr(stdin_fd, tty.TCSAFLUSH, ttystate)
                     print ('*** EOF ***')
                     print (err)

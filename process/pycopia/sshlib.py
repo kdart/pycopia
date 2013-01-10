@@ -1,7 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+
+#    Copyright (C) 1999- Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -14,7 +14,7 @@
 #    Lesser General Public License for more details.
 
 """
-Wrapper for the ssh program. 
+Wrapper for the ssh program.
 
 Provides get_ssh, ssh_command, and scp functions.
 
@@ -24,15 +24,11 @@ import sys, os
 
 from pycopia import proctools
 from pycopia import expect
-from pycopia.aid import IF
 
-try:
-    SSH = proctools.which("ssh")
-    SCP = proctools.which("scp")
-    KEYGEN = proctools.which("ssh-keygen")
-    KEYSCAN = proctools.which("ssh-keyscan")
-except ValueError:
-    raise ImportError, "ssh program not found!"
+SSH = proctools.which("ssh")
+SCP = proctools.which("scp")
+KEYGEN = proctools.which("ssh-keygen")
+KEYSCAN = proctools.which("ssh-keyscan")
 
 class SSHRetry(RuntimeError):
     pass
@@ -53,7 +49,7 @@ class SSHExpect(expect.Expect):
         self.send("\r~.\r")
 
     def login(self, password=None):
-        """login([password]) 
+        """login([password])
 Supplies a password for the SSH session. Net necessarily any subsequent login
 prompts. """
         if password is None:
@@ -64,14 +60,14 @@ prompts. """
             if mo:
                 i = self.expectindex
                 if i == 0:
-                    raise SSHRetry, "SSHExpect.sshlogin: try again, bad host key."
+                    raise SSHRetry("SSHExpect.sshlogin: try again, bad host key.")
                 elif i == 1:
                     self._fo.write(password+"\r")
                     break
                 elif i == 2:
                     continue
             else:
-                raise RuntimeError, "SSHExpect.sshlogin: unknown response."
+                raise RuntimeError("SSHExpect.sshlogin: unknown response.")
 
     def death_callback(self, deadssh):
         if self._log:
@@ -114,7 +110,7 @@ password if a password is given.  Returns an SSHExpect object.
 The logfile parameter should be a file-like object (has a 'write' method).
 """
     pm = proctools.get_procmanager()
-    hostuser = IF(user, "%s@%s" % (user, host), host)
+    hostuser = "%s@%s" % (user, host) if user else host
     command = "%s %s %s %s %s" % (SSH, SSH_OPTIONS, extraoptions, hostuser, cmd or "")
     sshproc = pm.spawnpty(command, logfile=logfile, async=async)
     ssh = SSHExpect(sshproc)
@@ -134,12 +130,12 @@ required."""
         remove_known_host(host)
         return get_ssh(host, *args, **kwargs)
 
-def scp(srchost=None, srcpath=None, dsthost=None, dstpath=None, user=None, 
+def scp(srchost=None, srcpath=None, dsthost=None, dstpath=None, user=None,
                 password=None, prompt=None, callback=None, logfile=None):
     """scp(source, destination, [password])
 Copies the file from source to destination. these parameters are strings that
 are passed directly to the scp command, and should follow the syntax for this
-command. 
+command.
     """
     opts = "-q"
     src = location(srchost, user, srcpath)
@@ -161,16 +157,16 @@ command.
 def location(host=None, user=None, path=None, forssh=False):
     """Construct an appropriate ssh/scp path spec based on the combination of
     parameters. Supply host, user, and path."""
-    sep = IF(forssh, "", ":")
+    sep = "" if forssh else ":"
     if host is None:
         if user is None:
             if path is None:
-                raise ValueError, "must supply at least one of host, or user."
+                raise ValueError("must supply at least one of host, or user.")
             else:
                 return path
         else:
             if path is None:
-                raise ValueError, "user without host?"
+                raise ValueError("user without host?")
             else:
                 return path # ignore user in this case
     else:
@@ -284,7 +280,7 @@ def keygen(keytype="dsa", bits=1024, comment="", filename=None, passphrase=None,
     ph = passphrase or ""
     if os.path.exists(fn):
         if safe:
-            raise SSHRetry, "key file %s already exists." % (fn,)
+            raise SSHRetry("key file %s already exists." % (fn,))
         else:
             os.unlink(fn)
     command = '%s -q -N "%s" -t %s -b %s -C "%s" -f %s' % \
@@ -437,11 +433,11 @@ def new_key(keytype="dsa", bits=1024, comment="", filename=None, passphrase=None
     pass
 
 # map to tuple of private key, public key classes
-_CLSMAP = {"ssh-dss": (SSHKeyDSA, SSHKeyDSApub), 
-            "ssh-rsa": (SSHKeyRSA, SSHKeyRSApub), 
-            "rsa1": (SSHKeyRSA1, SSHKeyRSA1pub), 
-            "rsa": (SSHKeyRSA, SSHKeyRSApub), 
-            "dsa": (SSHKeyDSA, SSHKeyDSApub), 
+_CLSMAP = {"ssh-dss": (SSHKeyDSA, SSHKeyDSApub),
+            "ssh-rsa": (SSHKeyRSA, SSHKeyRSApub),
+            "rsa1": (SSHKeyRSA1, SSHKeyRSA1pub),
+            "rsa": (SSHKeyRSA, SSHKeyRSApub),
+            "dsa": (SSHKeyDSA, SSHKeyDSApub),
             }
 KEYTYPES = _CLSMAP.keys()
 

@@ -24,7 +24,10 @@ netcat (nc) is suid to root, you can forward privileged ports, such as SMTP.
 import sys
 from pycopia import proctools
 
-NETCAT = proctools.which("nc")
+try:
+    NETCAT = proctools.which("nc")
+except proctools.NotFoundError:
+    NETCAT = proctools.which("netcat")
 
 TESTED_VERSIONS = ["[v1.10]"]
 

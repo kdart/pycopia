@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,18 +13,18 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 """
 Wrapper for the 'rsync' program. See the rsync manpage for more details.
 
 """
 
-
 from pycopia import proctools
 
-try:
-    RSYNC = proctools.which("rsync")
-except ValueError:
-    raise ImportError, "rsync program not found!"
+RSYNC = proctools.which("rsync")
 
 TESTED_VERSIONS = ["rsync  version 2.5.5  protocol version 26"]
 
@@ -78,6 +76,7 @@ def check_version():
 
 if __name__ == "__main__":
     if check_version():
-        print "your rsync version is good!"
+        print ("your rsync version is good!")
     else:
-        print "your rsync version is an untested one, beware of errors!"
+        print ("your rsync version is an untested one, beware of errors!")
+

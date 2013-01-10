@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -22,11 +20,8 @@ Use wxcut and wxpaste to get and set the X selection.
 
 from pycopia import proctools
 
-try:
-    WXCOPY = proctools.which("wxcopy")
-    WXPASTE = proctools.which("wxpaste")
-except ValueError:
-    raise ImportError, "wxcopy or wxpaste program not found! Install WindowMaker for these."
+WXCOPY = proctools.which("wxcopy")
+WXPASTE = proctools.which("wxpaste")
 
 WXCOPY_OPTIONS = '-clearselection'
 WXPASTE_OPTIONS = ''

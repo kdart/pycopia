@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -24,7 +22,7 @@ to the cron system.
 
 import sys, os
 import re
-from cStringIO import  StringIO
+
 from pycopia import proctools
 
 DOW = {
@@ -89,7 +87,7 @@ class Variable(object):
             else:
                 nv = False
         # Name and value expressions must match if both given.
-        if name and value: 
+        if name and value:
             return nv and vv
         # If only name expression given, return match for it.
         if name and not value:
@@ -143,8 +141,8 @@ class CrontabLine(object):
         if command:
             if re.search(command, self.command) is None:
                 return False
-        for attr, check in ((self.minute, minute), (self.hour, hour), 
-                            (self.day_of_month, day_of_month), 
+        for attr, check in ((self.minute, minute), (self.hour, hour),
+                            (self.day_of_month, day_of_month),
                             (self.month, month), (self.day_of_week, day_of_week)):
             if check is not None:
                 checker = attr.new(check)
@@ -298,8 +296,8 @@ class CrontabFile(object):
                   month=None, day_of_week=None, start=0):
         for i, obj in enumerate(self._lines[start:]):
             if type(obj) is CrontabLine:
-                if obj.match(command=command, minute=minute, hour=hour, 
-                        day_of_month=day_of_month, month=month, 
+                if obj.match(command=command, minute=minute, hour=hour,
+                        day_of_month=day_of_month, month=month,
                         day_of_week=day_of_week):
                     return i, obj
         return -1, None
@@ -408,7 +406,7 @@ def open(filename=None, username=None):
 
 
 def submit(crontab, username=None, password=None):
-    """Submit a crontab via the crontab program. 
+    """Submit a crontab via the crontab program.
     Supply a crontab object. If it is to be installed for a different user
     supply the `username` parameter. If this is not run as root, then sudo is
     used and you must supply your own password for sudo."""
@@ -452,12 +450,13 @@ class IntSet(object):
 
     """
     MIN = 0
-    MAX = sys.maxint
+    MAX = 2147483647 # arbitrary maximum
+
     def __init__(self,data=None, sep = ',', rng='-'):
         self.pairs = []
         self.sep = sep
         self.rng = rng
-        if data: 
+        if data:
             self.parse(str(data))
         else:
             self.pairs.append((self.MIN, self.MAX))
@@ -475,22 +474,22 @@ class IntSet(object):
         return self.pairs != other.pairs
 
     def __repr__(self):
-        return '%s(%r, %r, %r)' % (self.__class__.__name__, 
+        return '%s(%r, %r, %r)' % (self.__class__.__name__,
                                            self.__str__(), self.sep, self.rng)
     def __str__(self):
         if (len(self.pairs) == 1
-                and self.pairs[0][0] == self.MIN 
+                and self.pairs[0][0] == self.MIN
                 and self.pairs[0][1] == self.MAX):
             return "*"
         s = ''
         for lo, hi in self.pairs:
-            if lo == hi: 
+            if lo == hi:
                 t = repr(lo)
-            else: 
+            else:
                 t = repr(lo) + self.rng + repr(hi)
-            if s: 
+            if s:
                 s += (self.sep + t)
-            else: 
+            else:
                 s = t
         return s
 
@@ -532,7 +531,7 @@ class IntSet(object):
 
     def contains(self, x):
         for lo, hi in self.pairs:
-            if lo <= x <= hi: 
+            if lo <= x <= hi:
                 return True
         return False
     __contains__ = contains
@@ -563,7 +562,7 @@ class IntSet(object):
         self.pairs.append((x, x))
 
     def addpair(self, xlo, xhi):
-        if xlo > xhi: 
+        if xlo > xhi:
             return
         self.pairs.append((xlo, xhi))
         self.normalize()
