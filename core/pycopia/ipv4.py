@@ -484,7 +484,7 @@ def dqtoi(dq):
 def itodq(addr):
     """Return a dotted-quad string given an integer. """
     intval = long(addr) # might get an IPv4 object
-    s = struct.pack(b"bbbb", (intval >> 24) & 0x000000ff, (intval & 0x00ff0000) >> 16,
+    s = struct.pack(b"BBBB", (intval >> 24) & 0x000000ff, (intval & 0x00ff0000) >> 16,
         (intval & 0x0000ff00) >> 8, intval & 0x000000ff)
     return socket.inet_ntoa(s)
 
