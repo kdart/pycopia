@@ -181,7 +181,7 @@ delegates this to the wrapped Process object. Otherwise, does nothing."""
         if isinstance(patt, basestring):
             solist.append(self._get_re(patt.encode(), mtype, callback))
         elif ptype is tuple:
-            solist.append(self._get_re(patt))
+            solist.append(self._get_re(*patt))
         elif ptype is list:
             map(lambda p: self._get_search_list(p, mtype, callback, solist), patt)
         elif patt is None:
