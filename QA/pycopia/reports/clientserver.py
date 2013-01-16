@@ -37,6 +37,7 @@ import os
 import struct
 import cPickle as pickle
 
+from pycopia import reports
 from pycopia import socket
 from pycopia import asyncio
 
@@ -48,7 +49,7 @@ def _get_path():
     return "/tmp/qareport-{}.s".format(os.getuid())
 
 
-class RemoteReport(object):
+class RemoteReport(reports.NullReport):
     """An object with a report interface that sends messages to a socket. Use
     this from the test framework, running a test.
     """
@@ -64,9 +65,6 @@ class RemoteReport(object):
         if self._sock is not None:
             self._sock.close()
             self._sock = None
-
-    filename = property(lambda self: None)
-    filenames = property(lambda self: [])
 
     def _send(self, mid, *args):
         d = pickle.dumps(args)
