@@ -7,6 +7,9 @@
 This module provides the primary test runner for the automation framework.
 
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 import sys
 import os
@@ -51,7 +54,7 @@ class TestRunner(object):
         if isinstance(opts, dict):
             self.config.options_override = opts
         else:
-            raise ValueError, "Options must be dictionary type."
+            raise ValueError("Options must be dictionary type.")
 
     def run_object(self, obj):
         """Run a test object (object with run() function or method).
@@ -275,7 +278,7 @@ class TestRunner(object):
         """Make results dir, don't worry if it already exists."""
         try:
             os.mkdir(self.config.resultsdir)
-        except OSError, error:
+        except OSError as error:
             if error[0] == EEXIST:
                 pass
             else:
@@ -310,7 +313,7 @@ class TestRunner(object):
                 timelib.localtime(cf.runnerstarttime))
         try:
             rpt = cf.get_report()
-        except reports.ReportFindError, err:
+        except reports.ReportFindError as err:
             cf.UI.error(str(err))
             cf.UI.printf("%YUse at least one of the following%N:")
             cf.UI.print_list(cf.reports.keys())
