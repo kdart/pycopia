@@ -1,0 +1,11 @@
+#!/usr/bin/python2.7 -S
+# vim:ts=4:sw=4:softtabstop=0:smarttab
+
+import sys
+sys.setdefaultencoding("utf-8")
+import site
+
+from pycopia.QA.tui import main
+
+main.main(sys.argv)
+
