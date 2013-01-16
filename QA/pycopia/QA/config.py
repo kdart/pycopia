@@ -369,7 +369,11 @@ class RootContainer(config.Container):
                         "User specific configuration area.")
 
     def _build_userconfig(self):
-        username = self.get("username", os.environ["USER"])
+        try:
+            #username = self.__getitem__("username")
+            username = self._cache["username"]
+        except KeyError:
+            username = os.environ["USER"]
         try:
             cont = self.get_container(username)
         except config.NoResultFound:
@@ -654,7 +658,7 @@ class SoftwareRuntime(object):
         return self._attributes[name]
 
 
-def get_config(_extrafiles=None, initdict=None, **kwargs):
+def get_config(_extrafiles=None, initdict=None, session=None, **kwargs):
     """get_config([extrafiles], [initdict=], [**kwargs])
 Returns a RootContainer instance containing configuration parameters.
 An extra dictionary may be merged in with the 'initdict' parameter.
@@ -667,7 +671,7 @@ this.  """
         _extrafiles = [_extrafiles]
     if _extrafiles:
         files.extend(_extrafiles)
-    session = models.get_session()
+    session = session or models.get_session()
     rootnode = config.get_root(session)
     cache = dictlib.AttrDict()
     flags = dictlib.AttrDict()
