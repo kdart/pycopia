@@ -367,7 +367,7 @@ argument must match a name of a method.
             idx = int(argv[1])
             self._print(readline.get_history_item(idx))
         else:
-            for i in xrange(readline.get_current_history_length()):
+            for i in range(readline.get_current_history_length()):
                 self._print(readline.get_history_item(i))
 
     def export(self, argv):
@@ -556,15 +556,15 @@ argument must match a name of a method.
         elif interval == 0:
             try:
                 while 1:
-                    apply(meth, (argv,))
-                    # OOO cheat a little. This is need to keep PagedIO
+                    meth(argv)
+                    # OOO cheat a little. This is required to keep PagedIO
                     # from asking to press a key.
                     self._ui._io.read(0)
             except KeyboardInterrupt:
                 pass
         else:
-            for i in xrange(-interval):
-                apply(meth, (argv,))
+            for i in range(-interval):
+                meth(argv)
 
     def cycle(self, argv):
         """cycle <range> <command> [<arg>...]
@@ -595,7 +595,7 @@ argument must match a name of a method.
             newargs = argv[:]
             newargs[sloc] = newargs[sloc].replace("%", str(i))
             self._ui.Print(" ".join(newargs))
-            apply(meth, (newargs,))
+            meth(newargs)
 
     def stop(self, argv):
         """stop
@@ -621,7 +621,7 @@ argument must match a name of a method.
         argv = self._expand_aliases(argv)
         meth = getattr(self, argv[0])
         start = timelib.now()
-        rv = apply(meth, (argv,))
+        rv = meth(argv)
         end = timelib.now()
         elapsed = (end-start)*1000.0
         self._environ["LASTTIME"] = elapsed
@@ -719,7 +719,7 @@ class _RepeatWrapper(object):
         self.meth = meth
         self.args = args
     def __call__(self):
-        apply(self.meth, self.args)
+        self.meth(*self.args)
         self.io.read(0)
 
 def globargv(argv):
@@ -985,7 +985,7 @@ methods/commands that correspond to the wrapped objects methods.  """
     def _generic_call(self, argv):
         meth = getattr(self._obj, argv[0])
         args, kwargs = breakout_args(argv[1:], vars(self._obj))
-        rv = apply(meth, args, kwargs)
+        rv = meth(*args, **kwargs)
         self._print(rv)
 
     def _reset_scopes(self):
@@ -1571,7 +1571,7 @@ def run_cli_wrapper(argv, wrappedclass=Shell, cliclass=GenericCLI, theme=None):
     else:
         targs, kwargs = (), {}
     try:
-        obj = apply(wrappedclass, targs, kwargs)
+        obj = wrappedclass(*targs, **kwargs)
     except (ValueError, TypeError):
         print ("Bad parameters.")
         print (wrappedclass.__doc__)
