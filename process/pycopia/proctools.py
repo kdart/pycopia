@@ -520,7 +520,7 @@ class ProcessPty(Process):
         try:
             pid, self._fd = os.forkpty()
         except OSError as err:
-            logging.error(err)
+            logging.error(str(err))
         else:
             if pid == 0: # child
                 remove_poller()
