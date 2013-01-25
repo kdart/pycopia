@@ -24,6 +24,9 @@ Defines database ORM objects.
 """
 import sys
 
+if sys.version_info.major == 3:
+    basestring = str
+
 import collections
 from datetime import timedelta
 from hashlib import sha1
@@ -915,9 +918,9 @@ class Equipment(object):
     # interface management
     def add_interface(self, session, name,
                 ifindex=None, interface_type=None, macaddr=None, ipaddr=None, network=None):
-        if interface_type is not None and isinstance(interface_type, str):
+        if interface_type is not None and isinstance(interface_type, basestring):
             interface_type = session.query(InterfaceType).filter(InterfaceType.name==interface_type).one()
-        if network is not None and isinstance(network, str):
+        if network is not None and isinstance(network, basestring):
             network = session.query(Network).filter(Network.name==network).one()
         intf = create(Interface, name=name, equipment=self, ifindex=ifindex,
                 interface_type=interface_type, macaddr=macaddr, ipaddr=ipaddr,
@@ -956,7 +959,7 @@ class Equipment(object):
         network.
         """
         intf = self.interfaces[intf]
-        if isinstance(network, str):
+        if isinstance(network, basestring):
             network = session.query(Network).filter(Network.name==network).one()
         # alter the IP mask to match the network
         addr = intf.ipaddr
@@ -1555,7 +1558,7 @@ class Config(object):
 
     def set_owner(self, session, user):
         if self.container is not None:
-            if isinstance(user, str):
+            if isinstance(user, basestring):
                 user = User.get_by_username(session, user)
             self.user = user
             session.commit()
