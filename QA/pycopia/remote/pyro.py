@@ -28,6 +28,7 @@ It also provides for using a new configuration file, pyro4.conf, which is requir
 
 import sys, os
 import select
+import socket
 
 from pycopia import asyncio
 
@@ -121,20 +122,21 @@ def register_server(serverobject, host=None, port=0, unixsocket=None, nathost=No
             unixsocket=unixsocket, nathost=nathost, natport=natport)
     uri = pyrodaemon.register(serverobject)
     ns=Pyro4.locateNS()
-    ns.register("{}:{}".format(serverobject.__class__.__name__, os.uname()[1]), uri)
+    ns.register("{}:{}".format(serverobject.__class__.__name__, socket.getfqdn()), uri)
     p = PyroAsyncAdapter(pyrodaemon)
     asyncio.poller.register(p)
     return p
 
 
 def get_remote(hostname, servicename=None):
-    """Find and return a client (proxy) give the name and optional servicename."""
+    """Find and return a client (proxy) give the fully qualified host name and optional servicename.
+    """
     if servicename:
-        patt = br"{}:{}.*".format(servicename, hostname)
+        patt = "{}:{}".format(servicename, hostname)
     else:
-        patt = br"{}.*".format(hostname)
+        patt = hostname
     ns = Pyro4.locateNS()
-    slist = ns.list(regex=patt)
+    slist = ns.list(prefix=patt)
     if slist:
         return Pyro4.Proxy(slist.popitem()[1])
     else:
