@@ -9,7 +9,7 @@ library constants that the mib mobules enumerate.
 """
 
 import sys, os
-from SMI import SMI
+from pycopia.SMI import SMI
 
 
 cfile = open (os.path.join("/", "var", "tmp", "SMICONSTANTS.py"), "w")

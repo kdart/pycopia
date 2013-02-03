@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,13 +13,17 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 """
-This is a hand-edited libsmi shadow module. 
+This is a hand-edited libsmi shadow module.
 
 SMI module for python. This is merely a wrapper for the libsmi library (written
 in C).  This is the primary Python programmer interface to the libsmi
 wrapper.  This module replaces the SWIG generated shadow classes.
-It also provides iterator objects for efficient node iteration. 
+It also provides iterator objects for efficient node iteration.
 
 Keith Dart <kdart@kdart.com>
 """
@@ -289,7 +291,7 @@ class Node(SMIobject):
     def get_rowstatus(self):
         if self.nodekind == SMI_NODEKIND_ROW:
             for col in self.get_children():
-                if col.syntax.name == "RowStatus":
+                if col.syntax is not None and col.syntax.name == "RowStatus":
                     return col
         else:
             return None
@@ -419,7 +421,7 @@ class Flags(object):
             newflag |= (flag & SMI_FLAG_MASK)
         _libsmi.smiSetFlags(newflag)
     set_flags = staticmethod(set_flags)
-    
+
     def get_flags():
         flags = _libsmi.smiGetFlags()
         return flags
@@ -559,10 +561,10 @@ error that have name prefixed by pattern to the value severity."""
     _libsmi.smiSetSeverity(pattern, severity)
 
 def get_module(modulename):
-    return _libsmi.smiGetModule(modulename)
+    return _libsmi.smiGetModule(modulename.encode("ascii"))
 
 def load_module(modulename):
-    return _libsmi.smiLoadModule(modulename)
+    return _libsmi.smiLoadModule(modulename.encode("ascii"))
 
 def load_modules(*args):
     """
@@ -572,26 +574,26 @@ module names, and loads them.
 
     """
     for arg in args:
-        if type(arg) is type([]):
+        if type(arg) is list:
             for argl in arg:
-                _libsmi.smiLoadModule(argl)
+                _libsmi.smiLoadModule(argl.encode("ascii"))
         else:
-            _libsmi.smiLoadModule(arg)
+            _libsmi.smiLoadModule(arg.encode("ascii"))
 
 def get_modules(statusfilt=None):
-    """returns generator that iterates over all loaded modules."""
+    """returns an iterator that iterates over all loaded modules."""
     return _list_generator(None, _libsmi.smiGetFirstModule, _libsmi.smiGetNextModule, statusfilt)
 
 def default_error_handler(path, line, severity, msg, tag):
-    print >>sys.stderr, "libsmi error: %s:%d" % (path, line)
-    print >>sys.stderr, " * severity: %d\n %s %s" % (severity, msg, tag)
+    print ("libsmi error: %s:%d" % (path, line), file=sys.stderr)
+    print (" * severity: %d\n %s %s" % (severity, msg, tag), file=sys.stderr)
 
-def init(key="python", error_handler=default_error_handler):
+def init(key=b"python", error_handler=default_error_handler):
     _libsmi.Init(key)
     set_error_handler(error_handler)
     load_modules("SNMPv2-SMI", "SNMPv2-TC", "SNMPv2-CONF")
     # filter out pibs from path
-    set_path(":".join(filter(lambda pe: pe.find("pib") == -1, get_path().split(":"))))
+    set_path(b":".join([pe.encode("ascii") for pe in get_path().split(":") if pe.find("pib") == -1]))
 
 #   NB if you call this while you still hold references to objects you will get
 #   segfaults when you access the ojects.
@@ -609,14 +611,15 @@ if __name__ == "__main__":
     #m = get_module("TCP-MIB")
     m = get_module("SNMPv2-MIB")
     #m = get_module("TUBS-IBR-TEST-MIB")
-    print m.name
-    print "Has scalars:"
+    print (m.name)
+    print ("Has scalars:")
     for scalar in m.get_scalars():
-        print scalar.name, scalar.OID, scalar.value
-    print
-    print "---"
-    print scalar
-    print "---"
-    print get_node_by_OID(scalar.OID)
+        print (scalar.name, scalar.OID, scalar.value)
+    print()
+    print ("---")
+    print (scalar)
+    print ("---")
+    print (get_node_by_OID(scalar.OID))
     uptime = m.get_node("sysUpTime")
     sysname = m.get_node("sysName")
+    print(sysname)

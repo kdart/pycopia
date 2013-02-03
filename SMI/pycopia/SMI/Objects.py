@@ -1,6 +1,6 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -12,6 +12,11 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
 Basic SMI objects that are not BER base types. SMI base types are here.
@@ -99,7 +104,7 @@ class ModuleObject(_Generic):
         return "%s()" % (self.__class__.__name__)
 
 # this class is overloaded a bit. It can perform operations on entire
-# tables, but also represent a single row, or object instance. 
+# tables, but also represent a single row, or object instance.
 class RowObject(object):
     index = None
     rowstatus = None
@@ -146,13 +151,13 @@ class RowObject(object):
                 return col.get(self.session)
             except:
                 ex, err, tb = sys.exc_info()
-                raise AttributeError, err, tb
-        else: # return cached value 
+                raise AttributeError(err)
+        else: # return cached value
             col = self.COLUMNS.get(key, None)
             if col:
                 return col.value
             else:
-                raise AttributeError, "no attribute or cached column named %s" % (key)
+                raise AttributeError("no attribute or cached column named %s" % (key))
 
     def __setattr__(self, key, value):
         if self.session and self.indexoid:
@@ -161,10 +166,10 @@ class RowObject(object):
                 col.set(value, self.session)
             except:
                 ex, err, tb = sys.exc_info()
-                raise AttributeError, err, tb
+                raise AttributeError(err)
         else:
             if __debug__:
-                print "warning: setting attribute in RowObject instance."
+                print ("warning: setting attribute in RowObject instance.")
             self.__dict__[key] = value
 
     def __str__(self):
@@ -180,7 +185,7 @@ class RowObject(object):
         return self._decode_index_oid(self.indexoid[:])[0]
     def get_indexvalues(self):
         return self._decode_index_oid(self.indexoid[:])
-    
+
     def add_column(self, colobj):
         self.COLUMNS[colobj.__class__.__name__] = colobj
 
@@ -238,7 +243,7 @@ class RowObject(object):
     ### RowStatus methods
     def _rowstatus_action(self, session, value):
         if not session:
-            raise ValueError, "no session specified"
+            raise ValueError("no session specified")
         if self.rowstatus and self.indexoid:
             vbl = Basetypes.VarBindList()
             vbl.append(Basetypes.VarBind(self.rowstatus.OID+self.indexoid, self.rowstatus.syntaxobject(value)))
@@ -267,7 +272,7 @@ class RowObject(object):
 
     def _create_vbl(self, *indexargs, **attribs):
         if not self.create:
-            raise ValueError, "Cannot create object of type "+self.__class__.__name__
+            raise ValueError("Cannot create object of type "+self.__class__.__name__)
         self.__dict__["indexoid"] = self._make_index_oid(indexargs)
         vbl = Basetypes.VarBindList()
         for key, value in attribs.items():
@@ -322,13 +327,13 @@ class ScalarObject(object):
     def set(self, val, session=None):
         sess = session or self.session
         if self.access != SMI_ACCESS_READ_WRITE:
-            raise RuntimeError, "Scalar is not writeable"
+            raise RuntimeError("Scalar is not writeable")
         val = self.syntaxobject(val)
         try:
             sess.set_varbind(Basetypes.VarBind(self.OID, val))
         except:
             self.value = None
-            raise 
+            raise
         else:
             self.value = val
 
@@ -471,7 +476,7 @@ class ObjectTable(dict):
         if rowobj is None:
             rowobj = self[indexstr] = self.rowclass(rowindex)
         rowobj.add_column(colobj)
-    
+
     def __iter__(self):
         return self.itervalues()
 
@@ -564,7 +569,7 @@ class RunningRate(object):
     def _get_ewra(self):
         return self._ewra
     ExponentialWeightedRunningAverage = property(_get_ewra)
-    EWRA = ExponentialWeightedRunningAverage 
+    EWRA = ExponentialWeightedRunningAverage
 
 
 class RateCounter(object):

@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,6 +13,12 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
+
 """
 An SMI parser and collection of tools. This package wraps the SWIG generated
 code that in turn wraps the libsmi library. The libsmi library is a C library
@@ -25,18 +29,16 @@ libsmi home page:
 http://www.ibr.cs.tu-bs.de/projects/libsmi/
 
 """
-
 import sys
 
-from pycopia.aid import Import
 
 # "global" OIDMAP contains reverse OID for all imported MIBS.
 OIDMAP = {}
 
 def update_oidmap(basemodname):
-    global OIDMAP
     modname = "%s_OID" % basemodname
-    oidmod = Import(modname)
+    __import__(modname)
+    oidmod = sys.modules[modname]
     OIDMAP.update(oidmod.OIDMAP)
     # clean up extra references
     delattr(oidmod, "OIDMAP")

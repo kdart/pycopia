@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,6 +13,10 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
 """
 SNMP basic types, and well-known textual conventions.
 
@@ -22,6 +24,7 @@ SNMP basic types, and well-known textual conventions.
 
 from struct import pack
 from array import array
+from functools import reduce
 
 from pycopia import ipv4
 from pycopia.aid import unsigned, unsigned64, IF, Enum
@@ -43,7 +46,7 @@ class Ranges(list):
     def __repr__(self):
         return "%s.%s(%s)" % (self.__class__.__module__, self.__class__.__name__, ", ".join(map(repr, self)))
     def verify(self, value):
-        if True in map(lambda r: r.verify(value), self):
+        if True in [r.verify(value) for r in self]:
             return True
         return False
     def get_max(self):
@@ -56,24 +59,24 @@ class Ranges(list):
     min = property(get_min, None, None, "minimum value in ranges")
 
 
-# This object is the interface to the pysmi module. 
+# This object is the interface to the pysmi module.
 class OID(list):
     def __init__(self, oid):
         if type(oid) is str:
             # filter out empty members (leading dot causes this)
-            map(self.append, map(int, filter(len, oid.split('.'))))
+            list(map(self.append, list(map(int, list(filter(len, oid.split('.')))))))
         elif isinstance(oid, list):
             self.extend( oid )
         else:
-            raise ValueError, "OID must be initialized with OID string, or list. "
+            raise ValueError("OID must be initialized with OID string, or list. ")
 
     def __str__(self):
-        return ".".join(map(lambda x: '%lu' % x, self))
-        
+        return ".".join(['%lu' % x for x in self])
+
     def __repr__(self):
         cl = self.__class__
         return "%s.%s(%s)" % (cl.__module__, cl.__name__, super(OID, self).__repr__())
-    
+
     def __cmp__(self, other):
         if not other:
             return -1
@@ -113,9 +116,9 @@ class OID(list):
 # Abstract base classes for SNMP objects
 class ObjectSyntax(object):
     def _ber_(self):
-        raise NotImplementedError, "define _ber_in object class."
+        raise NotImplementedError("define _ber_in object class.")
     def _oid_(self):
-        raise NotImplementedError, "define _ber_in object class."
+        raise NotImplementedError("define _ber_in object class.")
     def __repr__(self):
         return "%s.%s()" % (self.__class__.__module__, self.__class__.__name__)
     def __str__(self):
@@ -128,14 +131,14 @@ class ApplicationSyntax(ObjectSyntax):
     pass
 
 class _ImplicitUnsigned(ApplicationSyntax):
-    ranges = Ranges(Range(0, 4294967295L))
+    ranges = Ranges(Range(0, 4294967295))
 
     def verify(self):
         return self.ranges.verify(self)
 
     def verify_ex(self):
         if not self.ranges.verify(self):
-            raise ValueError, "value %s out of range for type %s" % (self, self.__class__.__name__)
+            raise ValueError("value %s out of range for type %s" % (self, self.__class__.__name__))
 
     def _ber_(self):
         if self == 0:
@@ -202,7 +205,7 @@ class Integer32(int, SimpleSyntax):
         return self.ranges.verify(self)
     def verify_ex(self):
         if not self.ranges.verify(self):
-            raise ValueError, "value %s out of range for type %s" % (self, self.__class__.__name__)
+            raise ValueError("value %s out of range for type %s" % (self, self.__class__.__name__))
 
     def _ber_(self):
         if self == 0:
@@ -249,7 +252,7 @@ class Enumeration(INTEGER):
         return self in self.enumerations
     def verify_ex(self):
         if not self in self.enumerations:
-            raise ValueError, "value %s out of range for type %s" % (self, self.__class__.__name__)
+            raise ValueError("value %s out of range for type %s" % (self, self.__class__.__name__))
 
 
 class OctetString(array, SimpleSyntax):
@@ -279,7 +282,7 @@ class OctetString(array, SimpleSyntax):
         return self.ranges.verify(len(self))
     def verify_ex(self):
         if not self.ranges.verify(len(self)):
-            raise OverflowError, "size (%s) out of range for type %s" % (len(self), self.__class__.__name__)
+            raise OverflowError("size (%s) out of range for type %s" % (len(self), self.__class__.__name__))
     def __repr__(self):
         return "%s.%s(%r)" % (self.__class__.__module__, self.__class__.__name__, "".join(self))
     def _ber_(self):
@@ -289,7 +292,7 @@ class OctetString(array, SimpleSyntax):
             l = []
         else:
             l = [len(self)]
-        return ObjectIdentifier(l+map(ord, self))
+        return ObjectIdentifier(l+list(map(ord, self)))
 
     def oid_decode(self, oid):
         if not self.implied:
@@ -319,7 +322,7 @@ class BITS(OctetString):
                 self._extend(octet)
             self[octet] = chr(ord(self[octet]) | (128 >> obit))
         else:
-            raise ValueError, "invalid bit for this syntax: %s" % (bit,)
+            raise ValueError("invalid bit for this syntax: %s" % (bit,))
 
     def clear(self, bit):
         octet, obit = divmod(bit, 8)
@@ -385,17 +388,17 @@ class ObjectIdentifier(OID, SimpleSyntax):
                     0x80 | ((subid >> 14) & 0x7f), 0x80 | ((subid >> 7) & 0x7f), \
                     subid & 0x7f)
             # 31 bits long subid
-            elif subid >= 268435456L and subid < 2147483648L:
+            elif subid >= 268435456 and subid < 2147483648:
                 result += '%c%c%c%c%c' % (0x80 | ((subid>>28) & 0x0f), \
                     0x80 | ((subid>>21) & 0x7f), 0x80 | ((subid >> 14) & 0x7f), \
                     0x80 | ((subid >> 7) & 0x7f), subid & 0x7f)
             # 32 bits long subid
-            elif subid >= -2147483648L and subid < 0:
+            elif subid >= -2147483648 and subid < 0:
                 result += '%c%c%c%c%c' % (0x80 | ((subid>>28) & 0x0f), \
                     0x80 | ((subid>>21) & 0x7f), 0x80 | ((subid >> 14) & 0x7f), \
                     0x80 | ((subid >> 7) & 0x7f), subid & 0x7f)
             else:
-                raise BadOID, "problem with subid: %s" % (subid,)
+                raise BadOID("problem with subid: %s" % (subid,))
         return self._ber_tag + encode_length(len(result)) + result
 
     def _oid_(self):
@@ -437,9 +440,9 @@ class IpAddress(ipv4.IPv4, ApplicationSyntax):
         result = pack("!l", self._address)
         return self._ber_tag + "\x04" + result
     def _oid_(self):
-        return ObjectIdentifier( [(self._address >> 24) & 0x000000ff, 
-                    ((self._address & 0x00ff0000) >> 16), 
-                    ((self._address & 0x0000ff00) >> 8), 
+        return ObjectIdentifier( [(self._address >> 24) & 0x000000ff,
+                    ((self._address & 0x00ff0000) >> 16),
+                    ((self._address & 0x0000ff00) >> 8),
                     (self._address & 0x000000ff)]  )
     def oid_decode(self, oid):
         assert len(oid) >= 4
@@ -494,12 +497,13 @@ class Opaque(OctetString):
 class Counter64(unsigned64, _ImplicitUnsigned):
     "IMPLICIT INTEGER (0..18446744073709551615)"
     _ber_tag = '\x46'
-    ranges = Ranges(Range(0, 18446744073709551615L))
+    ranges = Ranges(Range(0, 18446744073709551615))
 
 # values indicating errors
 class _VarBindException(object):
-    def __nonzero__(self):
+    def __bool__(self):
         return 0
+    __nonzero__ = __bool__
     def __repr__(self):
         return "%s()" % self.__class__.__name__
     def __str__(self):
@@ -530,13 +534,13 @@ class DisplayString(OctetString):
 class PhysAddress(OctetString):
     format = "1x:"
     def __str__(self):
-        return ":".join(map (lambda x: "%02x" % x, map(ord, self)))
+        return ":".join(["%02x" % x for x in list(map(ord, self))])
 
 class MacAddress(OctetString):
     format = "1x:"
     ranges = Ranges(Range(6, 6))
     def __str__(self):
-        return ":".join(map (lambda x: "%02x" % x, map(ord, self)))
+        return ":".join(["%02x" % x for x in list(map(ord, self))])
 
 class TruthValue(Enumeration):
     enumerations = [Enum(1,"true"), Enum(2,"false")]
@@ -651,7 +655,7 @@ class _ImplicitPDU(object):
         return "%s.%s(%r, %r, %r, %r)" % (cl.__module__, cl.__name__, self.request_id, \
                     self.error_status, self.error_index, self.varbinds)
     def _ber_(self):
-        return _encode_pdu(self._ber_tag, self.request_id, self.error_status, 
+        return _encode_pdu(self._ber_tag, self.request_id, self.error_status,
                     self.error_index, self.varbinds)
 
     def add_varbind(self, varbind):
@@ -675,7 +679,7 @@ class _BulkPDU(object):
         return "%s.%s(%r, %r, %r, %r)" % (cl.__module__, cl.__name__, self.request_id, \
                     self.non_repeaters, self.max_repetitions, self.varbinds)
     def _ber_(self):
-        return _encode_pdu(self._ber_tag, self.request_id, self.non_repeaters, 
+        return _encode_pdu(self._ber_tag, self.request_id, self.non_repeaters,
                     self.max_repetitions, self.varbinds)
     def add_nonrepeater(self, oid):
         self.varbinds.insert(0, VarBind(ObjectIdentifier(oid)))
@@ -781,6 +785,6 @@ def check_encoding(obj):
         else:
             return ""
     for i, e in enumerate(ber(obj)):
-        print "%-3d: %s %s" % (i, hex(ord(e)), character(e) )
+        print ("%-3d: %s %s" % (i, hex(ord(e)), character(e) ))
 
 

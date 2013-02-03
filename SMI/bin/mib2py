@@ -2,6 +2,7 @@
 # License: LGPL
 # Keith Dart <kdart@kdart.com>
 
+
 """
 Usage: mib2py [-AE] [-p <preload>] <modulename> ...
 
@@ -13,6 +14,8 @@ Where:
 
 """
 
+from __future__ import print_function
+
 import sys, getopt
 from pycopia.SMI import Compile
 
@@ -23,7 +26,7 @@ everythingflag = 0
 try:
     optlist, args = getopt.getopt(sys.argv[1:], "EAp:")
 except:
-    print __doc__
+    print (__doc__)
     sys.exit(1)
 
 for opt, val in optlist:
@@ -40,5 +43,5 @@ elif args:
     for modname in args:
         Compile.compile_module(modname, preloads, allflag)
 else:
-    print __doc__
+    print (__doc__)
 

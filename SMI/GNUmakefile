@@ -1,9 +1,9 @@
-# $Id: GNUmakefile,v 1.1 2005/07/25 21:25:18 kdart Exp $
+# make file for wrapper only
 
 all: build
 
 libsmi_wrap.c: libsmi.i
-	swig -no_default -python libsmi.i
+	swig -nodefaultctor -nodefaultdtor -python -modern -py3 -fastunpack libsmi.i
 
 build: libsmi_wrap.c
 	python setup.py build

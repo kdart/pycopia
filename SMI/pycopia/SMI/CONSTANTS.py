@@ -1,9 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -30,7 +28,7 @@ from pycopia import aid
 # enumeration's name. If not listed here then use the flag name itself.
 _NAMES = {
     "SMI_BASETYPE_BITS":               "Bits",
-    "SMI_BASETYPE_ENUM":              "Enumeration",
+    "SMI_BASETYPE_ENUM":               "Enumeration",
     "SMI_BASETYPE_FLOAT128":           "Float128",
     "SMI_BASETYPE_FLOAT32":            "Float32",
     "SMI_BASETYPE_FLOAT64":            "Float64",
@@ -40,14 +38,13 @@ _NAMES = {
     "SMI_BASETYPE_OCTETSTRING":        "OctetString",
     "SMI_BASETYPE_UNSIGNED32":         "Unsigned32",
     "SMI_BASETYPE_UNSIGNED64":         "Counter64",
-    "SMI_ACCESS_NOT_ACCESSIBLE": "not-accessible",
-    "SMI_ACCESS_NOTIFY": "accessible-for-notify",
-    "SMI_ACCESS_READ_ONLY": "read-only",
-    "SMI_ACCESS_READ_WRITE": "read-write",
-    "SMI_STATUS_CURRENT": "current",
-    "SMI_STATUS_DEPRECATED": "deprecated",
-    "SMI_STATUS_OBSOLETE": "obsolete",
-
+    "SMI_ACCESS_NOT_ACCESSIBLE":       "not-accessible",
+    "SMI_ACCESS_NOTIFY":               "accessible-for-notify",
+    "SMI_ACCESS_READ_ONLY":            "read-only",
+    "SMI_ACCESS_READ_WRITE":           "read-write",
+    "SMI_STATUS_CURRENT":              "current",
+    "SMI_STATUS_DEPRECATED":           "deprecated",
+    "SMI_STATUS_OBSOLETE":             "obsolete",
 }
 
 # pull C #defines from _libsmi C module, assign to Enum types. Override the

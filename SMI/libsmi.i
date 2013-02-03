@@ -17,29 +17,29 @@ static PyObject *ErrorHandler = NULL;
 static PyObject *
 libsmi_Init(PyObject *self, PyObject *args)
 {
-	PyObject *tag = NULL;
-	char	*stag = NULL;
-	register int rv = 0;
-	
-	if (PyTuple_Size(args) == 0)
-		rv = smiInit(NULL);
-	else {
-		if (!PyArg_ParseTuple(args, "O:smiInit", &tag))
-			return NULL;
-		if(PyObject_IsTrue(tag)) {
-			stag = PyString_AsString(tag);
-			rv = smiInit(stag);
-		} else {
-			rv = smiInit(NULL);
-		}
-	}
-	if (rv) {
-		PyErr_SetString(SmiError, "smiInit: Failed to initialize libsmi!");
-		return NULL;
-	} else {
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
+    PyObject *tag = NULL;
+    char    *stag = NULL;
+    register int rv = 0;
+
+    if (PyTuple_Size(args) == 0)
+        rv = smiInit(NULL);
+    else {
+        if (!PyArg_ParseTuple(args, "O:smiInit", &tag))
+            return NULL;
+        if(PyObject_IsTrue(tag)) {
+            stag = PyString_AsString(tag);
+            rv = smiInit(stag);
+        } else {
+            rv = smiInit(NULL);
+        }
+    }
+    if (rv) {
+        PyErr_SetString(SmiError, "smiInit: Failed to initialize libsmi!");
+        return NULL;
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
 }
 
 
@@ -48,38 +48,38 @@ typedef void (SmiErrorHandler) (char *path, int line, int severity, char *msg, c
 */
 void libsmi_ErrorHandler(char *path, int line, int severity, char *msg, char *tag)
 {
-	PyObject *arglist, *result;
+    PyObject *arglist, *result;
 
-	if (ErrorHandler) {
-		arglist = Py_BuildValue("(siiss)", path, line, severity, msg, tag);
-		result = PyEval_CallObject(ErrorHandler, arglist);
-		Py_DECREF(arglist);
-		if (result == NULL) {
-			PyErr_Clear();
-		} else {
-			Py_DECREF(result);
-		}
-	}
+    if (ErrorHandler) {
+        arglist = Py_BuildValue("(siiss)", path, line, severity, msg, tag);
+        result = PyEval_CallObject(ErrorHandler, arglist);
+        Py_DECREF(arglist);
+        if (result == NULL) {
+            PyErr_Clear();
+        } else {
+            Py_DECREF(result);
+        }
+    }
 
 }
 
 static PyObject *
 libsmi_SetErrorHandler(PyObject *self, PyObject *args)
 {
-	PyObject *pycb;
+    PyObject *pycb;
 
-	if (!PyArg_ParseTuple(args, "O:SetErrorHandler", &pycb))
-		return NULL;
-	if (!PyCallable_Check(pycb)) {
-		PyErr_SetString(PyExc_TypeError, "SetErrorHandler: parameter must be callable.");
-		return NULL;
-	}
-	Py_XINCREF(pycb);
-	Py_XDECREF(ErrorHandler);
-	ErrorHandler = pycb;
-	smiSetErrorHandler(libsmi_ErrorHandler);
-	Py_INCREF(Py_None);
-	return Py_None;
+    if (!PyArg_ParseTuple(args, "O:SetErrorHandler", &pycb))
+        return NULL;
+    if (!PyCallable_Check(pycb)) {
+        PyErr_SetString(PyExc_TypeError, "SetErrorHandler: parameter must be callable.");
+        return NULL;
+    }
+    Py_XINCREF(pycb);
+    Py_XDECREF(ErrorHandler);
+    ErrorHandler = pycb;
+    smiSetErrorHandler(libsmi_ErrorHandler);
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 
@@ -87,46 +87,24 @@ libsmi_SetErrorHandler(PyObject *self, PyObject *args)
  *
  */
 
-/*
-static PyObject *
-SmiSubid_FromList(PyObject *self, PyObject *args) {
-	PyObject *thelist;
-	PyObject *swigptr;
-	int len, i;
-
-	if(!PyArg_ParseTuple(args,"O:SmiSubid_FromList",&thelist)) return NULL;
-	if(!PySequence_Check(thelist)) {
-		PyErr_SetString(PyExc_TypeError, 
-			"SmiSubid_FromList: parameter must be a sequence object.");
-		return NULL;
-	}
-	len = PyObject_Length(thelist);
-	swigptr = ptrcreate("int", 0, len);
-
-	for (i = 0; i < len; i++) {
-		ptrset(swigptr, PySequence_GetItem(thelist, i), i, "int");
-	}
-	return swigptr;
-}
-*/
 
 /* List_FromSmiSubid(SmiSubidPtr, oidlen)
  */
 static PyObject *
 List_FromSmiSubid(PyObject *self, PyObject *args)
 {
-	int size, i;
-	PyObject *oidptr, *list;
-	SmiSubid *oid;
+    int size, i;
+    PyObject *oidptr, *list;
+    SmiSubid *oid;
 
-	if(!PyArg_ParseTuple(args,"Oi:List_FromSmiSubid",&oidptr, &size)) return NULL;
-	if ((SWIG_ConvertPtr(oidptr,(void **) &oid,SWIGTYPE_p_SmiSubid,1)) == -1) return NULL;
-	if (!(list = PyList_New(0))) return NULL;
-	for (i = 0; i < size; i++) {
-		PyList_Append(list, PyInt_FromLong((long) *(oid+i)));
-	}
-	Py_INCREF(list);
-	return list;
+    if(!PyArg_ParseTuple(args,"Oi:List_FromSmiSubid",&oidptr, &size)) return NULL;
+    if ((SWIG_ConvertPtr(oidptr,(void **) &oid,SWIGTYPE_p_unsigned_int,1)) == -1) return NULL;
+    if (!(list = PyList_New(0))) return NULL;
+    for (i = 0; i < size; i++) {
+        PyList_Append(list, PyInt_FromLong((long) *(oid+i)));
+    }
+    Py_INCREF(list);
+    return list;
 }
 
 /* libsmi_GetNodeByOID is a custom wrapper that takes a Python list of ints as
@@ -135,38 +113,38 @@ List_FromSmiSubid(PyObject *self, PyObject *args)
 static PyObject *
 libsmi_GetNodeByOID(PyObject *self, PyObject *args)
 {
-	PyObject *list;
-	PyObject *resultobj;
-	SmiSubid *oid;
-	SmiNode *result ;
-	unsigned int len, i;
+    PyObject *list;
+    PyObject *resultobj;
+    SmiSubid *oid;
+    SmiNode *result ;
+    unsigned int len, i;
 
-	if(!PyArg_ParseTuple(args,"O:GetNodeByOID",&list)) return NULL;
-	if(!PyList_Check(list)) {
-		PyErr_SetString(PyExc_TypeError, 
-			"GetNodeByOID: parameter must be a list object.");
-		return NULL;
-	}
-	len = PyObject_Length(list);
-	if (!(oid = (SmiSubid *) malloc(len*sizeof(SmiSubid)))) {
-		PyErr_SetString(PyExc_TypeError, "GetNodeByOID: Could not alloc memory.");
-		return NULL;
-	}
-	for (i = 0; i < len; i++) {
-		oid[i] = (SmiSubid) PyInt_AsLong(PyList_GetItem(list, i));
-	}
-	if (PyErr_Occurred()) {
-		return NULL;
-	}
-	result = (SmiNode *) smiGetNodeByOID(len, oid);
-	free(oid);
-	if (result) {
-		resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_SmiNode, 0);
-		return resultobj;
-	} else {
-		Py_INCREF(Py_None);
-		return Py_None;
-	}
+    if(!PyArg_ParseTuple(args,"O:GetNodeByOID",&list)) return NULL;
+    if(!PyList_Check(list)) {
+        PyErr_SetString(PyExc_TypeError,
+            "GetNodeByOID: parameter must be a list object.");
+        return NULL;
+    }
+    len = PyObject_Length(list);
+    if (!(oid = (SmiSubid *) malloc(len*sizeof(SmiSubid)))) {
+        PyErr_SetString(PyExc_TypeError, "GetNodeByOID: Could not alloc memory.");
+        return NULL;
+    }
+    for (i = 0; i < len; i++) {
+        oid[i] = (SmiSubid) PyInt_AsLong(PyList_GetItem(list, i));
+    }
+    if (PyErr_Occurred()) {
+        return NULL;
+    }
+    result = (SmiNode *) smiGetNodeByOID(len, oid);
+    free(oid);
+    if (result) {
+        resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_SmiNode, 0);
+        return resultobj;
+    } else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
 
 }
 
@@ -181,21 +159,24 @@ PyDict_SetItemString(d, "SmiError", SmiError);
 
 %native (Init) libsmi_Init;
 %native (SetErrorHandler) libsmi_SetErrorHandler;
-// %native (SmiSubid_FromList) SmiSubid_FromList;
 %native (List_FromSmiSubid) List_FromSmiSubid;
 %native (GetNodeByOID) libsmi_GetNodeByOID;
 
 
 //%include typemaps.i
 
+%include <pybuffer.i>
 
 %immutable;
 
-#define SMI_LIBRARY_VERSION "2:22:0"
+#define SMI_LIBRARY_VERSION "2:27:0"
+extern const char *smi_library_version;
 #define SMI_VERSION_MAJOR 0
 #define SMI_VERSION_MINOR 4
-#define SMI_VERSION_PATCHLEVEL 2
-#define SMI_VERSION_STRING "0.4.2"
+#define SMI_VERSION_PATCHLEVEL 8
+#define SMI_VERSION_STRING "0.4.8"
+extern const char *smi_version_string;
+
 
 #define SMI_FLAG_NODESCR   0x0800 /* do not load descriptions/references.    */
 #define SMI_FLAG_VIEWALL   0x1000 /* all modules are `known', need no views. */
@@ -208,11 +189,11 @@ PyDict_SetItemString(d, "SmiError", SmiError);
 #define SMI_RENDER_NAME      0x02 /* render as names */
 #define SMI_RENDER_QUALIFIED 0x04 /* render names with module prefix */
 #define SMI_RENDER_FORMAT    0x08 /* render by applying the type's format if
-				     type is given and format is present */
+                     type is given and format is present */
 #define SMI_RENDER_PRINTABLE 0x10 /* render string values as a printable
-				     string if all octets are isprint() */
+                     string if all octets are isprint() */
 #define SMI_RENDER_UNKNOWN   0x20 /* render even unknown items as strings
-  				     ("<unknown>") so that we never get NULL */
+                     ("<unknown>") so that we never get NULL */
 #define SMI_RENDER_ALL       0xff /* render as `human friendly' as possible */
 #define SMI_UNKNOWN_LABEL "<unknown>"
 
@@ -221,8 +202,8 @@ typedef char                    *SmiIdentifier;
 typedef unsigned long           SmiUnsigned32;
 typedef long                    SmiInteger32;
 
-typedef unsigned long long	SmiUnsigned64;
-typedef long long		SmiInteger64;
+typedef unsigned long long  SmiUnsigned64;
+typedef long long       SmiInteger64;
 
 typedef unsigned int            SmiSubid;
 typedef float                   SmiFloat32;
@@ -231,47 +212,47 @@ typedef double                  SmiFloat64;
 
 
 //%pragma make_default
- 
+
 typedef enum SmiLanguage {
-    SMI_LANGUAGE_UNKNOWN                = 0,   
+    SMI_LANGUAGE_UNKNOWN                = 0,
     SMI_LANGUAGE_SMIV1                  = 1,
     SMI_LANGUAGE_SMIV2                  = 2,
     SMI_LANGUAGE_SMING                  = 3,
     SMI_LANGUAGE_SPPI                   = 4
 } SmiLanguage;
 
- 
+
 typedef enum SmiBasetype {
-    SMI_BASETYPE_UNKNOWN                = 0,   
-    SMI_BASETYPE_INTEGER32              = 1,   
+    SMI_BASETYPE_UNKNOWN                = 0,
+    SMI_BASETYPE_INTEGER32              = 1,
     SMI_BASETYPE_OCTETSTRING            = 2,
     SMI_BASETYPE_OBJECTIDENTIFIER       = 3,
     SMI_BASETYPE_UNSIGNED32             = 4,
-    SMI_BASETYPE_INTEGER64              = 5,   
-    SMI_BASETYPE_UNSIGNED64             = 6,   
-    SMI_BASETYPE_FLOAT32                = 7,   
-    SMI_BASETYPE_FLOAT64                = 8,   
-    SMI_BASETYPE_FLOAT128               = 9,   
+    SMI_BASETYPE_INTEGER64              = 5,
+    SMI_BASETYPE_UNSIGNED64             = 6,
+    SMI_BASETYPE_FLOAT32                = 7,
+    SMI_BASETYPE_FLOAT64                = 8,
+    SMI_BASETYPE_FLOAT128               = 9,
     SMI_BASETYPE_ENUM                   = 10,
-    SMI_BASETYPE_BITS                   = 11   
+    SMI_BASETYPE_BITS                   = 11
 } SmiBasetype;
 
- 
+
 typedef enum SmiStatus {
-    SMI_STATUS_UNKNOWN          = 0,  
-    SMI_STATUS_CURRENT          = 1,  
-    SMI_STATUS_DEPRECATED       = 2,  
-    SMI_STATUS_MANDATORY        = 3,  
-    SMI_STATUS_OPTIONAL         = 4,  
-    SMI_STATUS_OBSOLETE         = 5   
+    SMI_STATUS_UNKNOWN          = 0,
+    SMI_STATUS_CURRENT          = 1,
+    SMI_STATUS_DEPRECATED       = 2,
+    SMI_STATUS_MANDATORY        = 3,
+    SMI_STATUS_OPTIONAL         = 4,
+    SMI_STATUS_OBSOLETE         = 5
 } SmiStatus;
 
- 
+
 typedef enum SmiAccess {
-    SMI_ACCESS_UNKNOWN          = 0,  
-    SMI_ACCESS_NOT_IMPLEMENTED  = 1,  
-    SMI_ACCESS_NOT_ACCESSIBLE   = 2,  
-    SMI_ACCESS_NOTIFY           = 3,  
+    SMI_ACCESS_UNKNOWN          = 0,
+    SMI_ACCESS_NOT_IMPLEMENTED  = 1,
+    SMI_ACCESS_NOT_ACCESSIBLE   = 2,
+    SMI_ACCESS_NOTIFY           = 3,
     SMI_ACCESS_READ_ONLY        = 4,
     SMI_ACCESS_READ_WRITE       = 5,
     SMI_ACCESS_INSTALL          = 6,
@@ -279,7 +260,7 @@ typedef enum SmiAccess {
     SMI_ACCESS_REPORT_ONLY      = 8
 } SmiAccess;
 
- 
+
 typedef unsigned int SmiNodekind;
 #define SMI_NODEKIND_UNKNOWN      0x0000     /* should not occur             */
 #define SMI_NODEKIND_NODE         0x0001
@@ -296,25 +277,25 @@ typedef unsigned int SmiNodekind;
 
 
 typedef enum SmiDecl {
-    SMI_DECL_UNKNOWN            = 0,   
+    SMI_DECL_UNKNOWN            = 0,
     SMI_DECL_IMPLICIT_TYPE      = 1,
     SMI_DECL_TYPEASSIGNMENT     = 2,
-    SMI_DECL_IMPL_SEQUENCEOF    = 4,	 
+    SMI_DECL_IMPL_SEQUENCEOF    = 4,
     SMI_DECL_VALUEASSIGNMENT    = 5,
-    SMI_DECL_OBJECTTYPE         = 6,     
-    SMI_DECL_OBJECTIDENTITY     = 7,     
+    SMI_DECL_OBJECTTYPE         = 6,
+    SMI_DECL_OBJECTIDENTITY     = 7,
     SMI_DECL_MODULEIDENTITY     = 8,
     SMI_DECL_NOTIFICATIONTYPE   = 9,
     SMI_DECL_TRAPTYPE           = 10,
-    SMI_DECL_OBJECTGROUP        = 11, 
+    SMI_DECL_OBJECTGROUP        = 11,
     SMI_DECL_NOTIFICATIONGROUP  = 12,
     SMI_DECL_MODULECOMPLIANCE   = 13,
     SMI_DECL_AGENTCAPABILITIES  = 14,
     SMI_DECL_TEXTUALCONVENTION  = 15,
-    SMI_DECL_MACRO	        = 16,
+    SMI_DECL_MACRO          = 16,
     SMI_DECL_COMPL_GROUP        = 17,
     SMI_DECL_COMPL_OBJECT       = 18,
-     
+
     SMI_DECL_MODULE             = 33,
     SMI_DECL_EXTENSION          = 34,
     SMI_DECL_TYPEDEF            = 35,
@@ -328,9 +309,9 @@ typedef enum SmiDecl {
     SMI_DECL_COMPLIANCE         = 43
 } SmiDecl;
 
- 
+
 typedef enum SmiIndexkind {
-    SMI_INDEX_UNKNOWN           = 0, 
+    SMI_INDEX_UNKNOWN           = 0,
     SMI_INDEX_INDEX             = 1,
     SMI_INDEX_AUGMENT           = 2,
     SMI_INDEX_REORDER           = 3,
@@ -338,10 +319,10 @@ typedef enum SmiIndexkind {
     SMI_INDEX_EXPAND            = 5
 } SmiIndexkind;
 
- 
+
 typedef struct SmiValue {
     SmiBasetype             basetype;
-    unsigned int	    len;          
+    unsigned int        len;
     union {
         SmiUnsigned64       unsigned64;
         SmiInteger64        integer64;
@@ -350,23 +331,23 @@ typedef struct SmiValue {
         SmiFloat32          float32;
         SmiFloat64          float64;
 //        SmiFloat128         float128;
-        SmiSubid	    *oid;
-        unsigned char       *ptr;	  
+        SmiSubid        *oid;
+        unsigned char       *ptr;
     } value;
 } SmiValue;
- 
+
 typedef struct SmiNamedNumber {
     SmiIdentifier       name;
     SmiValue            value;
 } SmiNamedNumber;
 
- 
+
 typedef struct SmiRange {
     SmiValue            minValue;
     SmiValue            maxValue;
 } SmiRange;
 
- 
+
 typedef struct SmiModule {
     SmiIdentifier       name;
     char                *path;
@@ -374,23 +355,23 @@ typedef struct SmiModule {
     char                *contactinfo;
     char                *description;
     char                *reference;
-    SmiLanguage		language;
+    SmiLanguage     language;
     int                 conformance;
 } SmiModule;
 
- 
+
 typedef struct SmiRevision {
     time_t              date;
     char                *description;
 } SmiRevision;
 
- 
+
 typedef struct SmiImport {
     SmiIdentifier       module;
     SmiIdentifier       name;
 } SmiImport;
 
- 
+
 typedef struct SmiMacro {
     SmiIdentifier       name;
     SmiDecl             decl;
@@ -399,7 +380,7 @@ typedef struct SmiMacro {
     char                *reference;
 } SmiMacro;
 
- 
+
 typedef struct SmiType {
     SmiIdentifier       name;
     SmiBasetype         basetype;
@@ -412,11 +393,11 @@ typedef struct SmiType {
     char                *reference;
 } SmiType;
 
- 
+
 typedef struct SmiNode {
     SmiIdentifier       name;
-    unsigned int	oidlen;
-    SmiSubid		*oid;          
+    unsigned int    oidlen;
+    SmiSubid        *oid;
     SmiDecl             decl;
     SmiAccess           access;
     SmiStatus           status;
@@ -425,22 +406,22 @@ typedef struct SmiNode {
     char                *units;
     char                *description;
     char                *reference;
-    SmiIndexkind        indexkind;     
-    int                 implied;       
-    int                 create;        
+    SmiIndexkind        indexkind;
+    int                 implied;
+    int                 create;
     SmiNodekind         nodekind;
 } SmiNode;
 
- 
+
 typedef struct SmiElement {
 } SmiElement;
 
- 
+
 typedef struct SmiOption {
     char                *description;
 } SmiOption;
 
- 
+
 typedef struct SmiRefinement {
     SmiAccess           access;
     char                *description;
@@ -450,6 +431,14 @@ typedef struct SmiRefinement {
 %mutable;
 //%pragma no_default
 //%pragma(python) include="libsmi_patch.py"
+
+%pybuffer_string(char *module)
+%pybuffer_string(char *path)
+%pybuffer_string(char *tag)
+%pybuffer_string(char *type)
+%pybuffer_string(char *importedName)
+%pybuffer_string(char *name)
+%pybuffer_string(char *macro)
 
 
 //int smiInit(char *tag);
@@ -461,7 +450,10 @@ char *smiGetPath();
 int smiSetPath(char *path);
 void smiSetSeverity(char *pattern, int severity);
 int smiReadConfig(char *filename, char *tag);
+
+
 char *smiLoadModule(char *module);
+
 int smiIsLoaded(char *module);
 
 
