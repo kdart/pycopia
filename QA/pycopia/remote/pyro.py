@@ -26,7 +26,6 @@ and provide factory functions common to Pycopia.
 It also provides for using a new configuration file, pyro4.conf, which is required.
 """
 
-import sys, os
 import select
 import socket
 
@@ -64,7 +63,7 @@ class PyroAsyncAdapter(asyncio.PollerInterface):
     """Adapt a Pyro4 deamon to the pycopia asyn poller interface."""
 
     def __init__(self, pyrodaemon):
-        self._pyd = pyrodaemon
+        self._pyrod = pyrodaemon
         self._poller = select.epoll()
         self.smap = {}
         self.update()
@@ -72,7 +71,7 @@ class PyroAsyncAdapter(asyncio.PollerInterface):
     def update(self):
         smap = self.smap
         nsmap = {}
-        for s in self._pyd.sockets:
+        for s in self._pyrod.sockets:
             fd = s.fileno()
             if fd not in smap:
                 self._poller.register(fd, select.EPOLLIN)
@@ -96,7 +95,7 @@ class PyroAsyncAdapter(asyncio.PollerInterface):
             try:
                 rl = self._poller.poll(0)
             except IOError as why:
-                if why[0] == EINTR:
+                if why.errno == EINTR:
                     continue
                 else:
                     raise
@@ -107,7 +106,7 @@ class PyroAsyncAdapter(asyncio.PollerInterface):
             sock = self.smap.get(fd)
             if sock is not None:
                 readysocks.append(sock)
-        self._pyd.events(readysocks)
+        self._pyrod.events(readysocks)
         self.update()
 
     def exception_handler(self, ex, val, tb):
