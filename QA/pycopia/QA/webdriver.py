@@ -22,6 +22,9 @@ instance and stashes it in the config object.
 """
 
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions
+
 
 from pycopia.QA import core
 
@@ -31,7 +34,7 @@ CAPS = {
     "ie": webdriver.DesiredCapabilities.INTERNETEXPLORER,
 }
 
-class WebdriverSuite(core.TestSuite):
+class WebdriverRemoteSuite(core.TestSuite):
     """Webdriver test suite.
 
     This suite initializer creates a selenium remote control object. The target
@@ -45,6 +48,26 @@ class WebdriverSuite(core.TestSuite):
         remote_url = "http://{ip}:4444/wd/hub".format(ip=target_host["hostname"])
         self.info("Remote control URL is: {}".format(remote_url))
         cf.webdriver = webdriver.Remote(remote_url, CAPS[cf.get("browser", "firefox")])
+
+    def finalize(self):
+        wd = self.config.webdriver
+        del self.config.webdriver
+        wd.quit()
+
+
+class WebdriverSuite(core.TestSuite):
+    """Webdriver test suite.
+
+    This suite initializer creates a selenium control object.
+    """
+
+    def initialize(self):
+        cf = self.config
+        profile_dir = cf.userconfig.get("firefox_profile")
+        self.info("Firefox profile dir: {}".format(profile_dir))
+        profile = webdriver.FirefoxProfile(profile_dir)
+        profile.accept_untrusted_certs = True
+        cf.webdriver = webdriver.Firefox(profile)
 
     def finalize(self):
         wd = self.config.webdriver

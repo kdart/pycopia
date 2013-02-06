@@ -1405,6 +1405,11 @@ class UseCase(object):
     into a TestSuite using data from the configuration. Then run here.
     """
     @staticmethod
-    def run(config):
-        raise NotImplementedError("Define in subclass")
+    def get_suite(config):
+        return TestSuite(config, name="EmptySuite")
+
+    @classmethod
+    def run(cls, config):
+        suite = cls.get_suite(config)
+        suite.run()
 
