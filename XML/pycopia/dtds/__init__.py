@@ -1,5 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 """
 The dtds package is where compiled DTDs go.
@@ -19,7 +24,7 @@ from pycopia.aid import newclass, Import
 from pycopia.XML import ValidationError
 
 # TODO get from some config.
-USERDTDPATH = os.environ.get("USERDTDPATH", os.path.join("/", "var", "tmp", "dtds"))
+USERDTDPATH = os.environ.get("USERDTDPATH", os.path.join(b"/", b"var", b"tmp", b"dtds"))
 
 # Add user generated dtds to path to pick up user generated dtd files.
 __path__.append(USERDTDPATH)
@@ -28,31 +33,31 @@ __path__.append(USERDTDPATH)
 # Constants to be used as shortcut identifiers. Value os module name for
 # the docutment types compiled DTD.
 # Use one of these as a shortcut name to a document type.
-CONTENTXML = "pycopia.dtds.contentxml"
-GOOGLE = "pycopia.dtds.google"
-LOGML = "pycopia.dtds.logml"
-POMTEST = "pycopia.dtds.pomtest"
-WURFL = "pycopia.dtds.wurfl"
-XFDESKTOP_MENU = "pycopia.dtds.xfdesktop_menu"
-RSS091 = "pycopia.dtds.rss091"
-RSS2 = "pycopia.dtds.rss2"
-SI = "pycopia.dtds.si"
-SL = "pycopia.dtds.sl"
-WCSINVALIDATION = "pycopia.dtds.WCSinvalidation"
-WML11 = "pycopia.dtds.wml11"
-WML12 = "pycopia.dtds.wml12"
-WML13 = "pycopia.dtds.wml13"
-WML20 = "pycopia.dtds.wml20"
-WTA_WML12 = "pycopia.dtds.wta_wml12"
-XHTML11 = "pycopia.dtds.xhtml11"
-XHTML1_FRAMESET = "pycopia.dtds.xhtml1_frameset"
-XHTML1_STRICT = "pycopia.dtds.xhtml1_strict"
-XHTML1_TRANSITIONAL = "pycopia.dtds.xhtml1_transitional"
-XHTML_BASIC10 = "pycopia.dtds.xhtml_basic10"
-XHTML_BASIC11 = "pycopia.dtds.xhtml_basic11"
-XHTML_MOBILE10 = "pycopia.dtds.xhtml_mobile10"
-XMLSCHEMA = "pycopia.dtds.XMLSchema"
-SVG = "pycopia.dtds.svg11_flat_20030114"
+CONTENTXML = b"pycopia.dtds.contentxml"
+GOOGLE = b"pycopia.dtds.google"
+LOGML = b"pycopia.dtds.logml"
+POMTEST = b"pycopia.dtds.pomtest"
+WURFL = b"pycopia.dtds.wurfl"
+XFDESKTOP_MENU = b"pycopia.dtds.xfdesktop_menu"
+RSS091 = b"pycopia.dtds.rss091"
+RSS2 = b"pycopia.dtds.rss2"
+SI = b"pycopia.dtds.si"
+SL = b"pycopia.dtds.sl"
+WCSINVALIDATION = b"pycopia.dtds.WCSinvalidation"
+WML11 = b"pycopia.dtds.wml11"
+WML12 = b"pycopia.dtds.wml12"
+WML13 = b"pycopia.dtds.wml13"
+WML20 = b"pycopia.dtds.wml20"
+WTA_WML12 = b"pycopia.dtds.wta_wml12"
+XHTML11 = b"pycopia.dtds.xhtml11"
+XHTML1_FRAMESET = b"pycopia.dtds.xhtml1_frameset"
+XHTML1_STRICT = b"pycopia.dtds.xhtml1_strict"
+XHTML1_TRANSITIONAL = b"pycopia.dtds.xhtml1_transitional"
+XHTML_BASIC10 = b"pycopia.dtds.xhtml_basic10"
+XHTML_BASIC11 = b"pycopia.dtds.xhtml_basic11"
+XHTML_MOBILE10 = b"pycopia.dtds.xhtml_mobile10"
+XMLSCHEMA = b"pycopia.dtds.XMLSchema"
+SVG = b"pycopia.dtds.svg11_flat_20030114"
 
 # alias for default DTD.
 WML = WML13
@@ -62,15 +67,17 @@ RSS = RSS2
 
 class Doctype(object):
   def __init__(self, name, pubid, sysid):
-    self.name = name
-    self.public = pubid
-    self.system = sysid
+    self.name = name.encode("ascii")
+    self.public = None
+    if pubid:
+        self.public = pubid.encode("ascii")
+    self.system = sysid.encode("ascii")
 
   def __str__(self):
     if self.public:
-      return '<!DOCTYPE %s PUBLIC "%s"\n    "%s">\n' % (self.name, self.public, self.system)
+      return b'<!DOCTYPE %s PUBLIC "%s"\n    "%s">\n' % (self.name, self.public, self.system)
     else:
-      return '<!DOCTYPE %s SYSTEM "%s">\n' % (self.name, self.system)
+      return b'<!DOCTYPE %s SYSTEM "%s">\n' % (self.name, self.system)
 
 
 # It seems DOCTYPE can't always be obtained from the DTD, so there is a
@@ -124,8 +131,8 @@ def get_doctype(keyname):
 def get_dtd_module(doctype_constant):
     try:
         mod = Import(doctype_constant)
-    except ImportError, err:
-        raise ValidationError, ("No compiled DTD found for %r." 
+    except ImportError as err:
+        raise ValidationError("No compiled DTD found for %r."
                                    " Please run dtd2py. : %s" % (doctype_constant, err))
     return mod
 
@@ -142,8 +149,8 @@ def get_mod_file(directory, sourcefilename):
     Converts a file name into a file name importable by Python.
     """
     from pycopia.textutils import maketrans
-    modname = os.path.splitext(os.path.split(sourcefilename)[1])[0]
-    modname = modname.translate(maketrans("-. ", "___"))
-    return (os.path.join(directory, modname + ".py"), 
+    modname = os.path.splitext(os.path.split(sourcefilename.encode("ascii"))[1])[0]
+    modname = modname.translate(maketrans(b"-. ", b"___"))
+    return (os.path.join(directory.encode("ascii"), modname + b".py"),
                 DOCTYPES.get("%s.%s" % (__name__, modname)))
 

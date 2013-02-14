@@ -29,6 +29,9 @@ from pycopia.XML.POMparse import (XMLAttribute, ANY, PCDATA, EMPTY)
 ### DTD compiler components ###
 
 def get_dtd_compiler(fo, mixinmodule=None, doctype=None):
+    import xml
+    if hasattr(xml, "use_pyxml"): # per Gentoo bug #367729
+        xml.use_pyxml()
     from xml.parsers.xmlproc.dtdparser import DTDParser
     generator = sourcegen.get_sourcefile(fo)
     dh = DTDConsumerForSourceGeneration(generator, mixinmodule, doctype)

@@ -1,6 +1,6 @@
-#!/usr/bin/python2
-# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+#!/usr/bin/python2.7
 # -*- coding: utf8 -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
 #    Copyright (C) 1999-2011  Keith Dart <keith@kdart.com>
 #
@@ -32,6 +32,11 @@ import sys, os, re
 import codecs
 import unicodedata
 
+try: # python 3 compatibility
+    maxint = sys.maxint
+except AttributeError:
+    maxint = sys.maxsize
+
 from pycopia.textutils import identifier, keyword_identifier
 from pycopia import dtds
 from pycopia.XML import XMLVisitorContinue, ValidationError, XMLPathError
@@ -54,6 +59,19 @@ def verify_encoding(newcodec):
 
 set_default_encoding("utf-8")
 
+
+if sys.version_info.major == 2:
+    def to_unicode(arg, encoding):
+        if isinstance(arg, unicode):
+            return arg
+        return unicode(str(arg), encoding or DEFAULT_ENCODING)
+else:
+    def to_unicode(arg, encoding):
+        if isinstance(arg, bytes):
+            return str(arg, encoding)
+        return str(arg)
+
+
 # attribute types
 REQUIRED = 11   # attribute is mandatory
 IMPLIED = 12    # inherited from environment if not specified
@@ -72,29 +90,27 @@ class Text(object):
         self._parent = None
         self.set_text(data, encoding)
     def set_text(self, data, encoding=DEFAULT_ENCODING):
-        self.data = unescape(to_unicode(data, encoding))
+        self.data = uunescape(to_unicode(data, encoding))
         self.encoding = encoding
     def get_text(self):
         return self.data
-    def insert(self, data, encoding=None):
-        self.data = unescape(to_unicode(data, encoding or self.encoding)) + self.data
-    def add_text(self,data, encoding=None):
-        self.data += unescape(to_unicode(data, encoding or self.encoding))
+    def insert(self, data):
+        self.data = unescape(data) + self.data
+    def add_text(self,data):
+        self.data += unescape(data)
     append = add_text
     __iadd__ = add_text
     def __add__(self, other):
         return self.__class__(self.data + other.data)
     def emit(self, fo, encoding=None):
-        fo.write( escape(self.data).encode(encoding or self.encoding) )
+        fo.write( escape(self.data.encode(encoding or self.encoding) ))
     def encode(self, encoding):
-        return escape(self.data).encode(encoding)
+        return escape(self.data.encode(encoding))
     def __str__(self):
         return self.encode(self.encoding)
-    def __unicode__(self):
-        return escape(self.data)
     def __repr__(self):
         cl = self.__class__
-        return b"%s.%s(%r)" % (cl.__module__, cl.__name__, escape(self.data))
+        return "%s.%s(%r, %r)" % (cl.__module__, cl.__name__, self.data, self.encoding)
     def __len__(self):
         return len(self.data)
     def __getslice__(self, start, end):
@@ -114,7 +130,7 @@ class Text(object):
         if self._parent:
             return "%s = %r" % (self._parent._fullpath(), self.data)
         else:
-            return `self.data`
+            return repr(self.data)
     fullpath = property(_fullpath)
     def walk(self, visitor):
         visitor(self)
@@ -131,17 +147,19 @@ class Text(object):
 class CDATA(Text):
     def __str__(self):
         return self.encode(self.encoding)
+
     def encode(self, encoding):
         return b"\n<![CDATA[%s]]>\n" % self.data.encode(encoding)
-    def __unicode__(self):
-        return u"<![CDATA[\n%s\n]]>\n" % (self.data,)
+
     def __repr__(self):
         cl = self.__class__
         return b"%s.%s(%r)" % (cl.__module__, cl.__name__, self.data)
+
     def emit(self, fo, encoding=None):
         fo.write(b"\n<![CDATA[")
         fo.write( self.data.encode(encoding or self.encoding) )
         fo.write(b"]]>\n")
+
 
 class Comment(Text):
     def __init__(self, data="", encoding=DEFAULT_ENCODING):
@@ -153,22 +171,20 @@ class Comment(Text):
     def __str__(self):
         return self.encode(self.encoding)
     def encode(self, encoding):
-        return "<!-- %s -->" % self._fix(self.data).encode(encoding)
-    def __unicode__(self):
-        return u"<!-- %s -->" % self._fix(self.data)
+        return b"<!-- %s -->" % self._fix(self.data.encode(encoding))
     def emit(self, fo, encoding=None):
-        fo.write( b"<!-- %s -->" % self._fix(self.data).encode(encoding or self.encoding) )
+        fo.write( b"<!-- %s -->" % self._fix(self.data.encode(encoding or self.encoding) ))
     def get_text(self):
         return self.data
     def insert(self, data, encoding=None):
-        self.data = to_unicode(data, encoding or self.encoding) + self.data
+        self.data = to_unicode(data, encoding) + self.data
     def add_text(self, data, encoding=None):
-        self.data += to_unicode(data, encoding or self.encoding)
+        self.data += to_unicode(data, encoding)
     append = add_text
     def _fix(self, data):
         data = escape(data)
-        if data.find(u"--") != -1:
-            data = data.replace(u"--", u"- ")
+        if data.find("--") != -1:
+            data = data.replace("--", "- ")
         return data
 
 class ASIS(object):
@@ -193,8 +209,6 @@ class ASIS(object):
         return self.data.encode(self.encoding)
     def encode(self, encoding):
         return self.data.encode(encoding)
-    def __unicode__(self):
-        return self.data
     def __repr__(self):
         cl = self.__class__
         return "%s.%s()" % (cl.__module__, cl.__name__)
@@ -235,26 +249,24 @@ class ASIS(object):
 # runtime attribute object
 class POMAttribute(object):
     __slots__ = ["name", "value", "namespace"]
-    def __init__(self, name, value, namespace=u"",
-                            encoding=DEFAULT_ENCODING):
+    def __init__(self, name, value, namespace="", encoding=DEFAULT_ENCODING):
         self.name = to_unicode(name, encoding)
         self.value = to_unicode(value, encoding)
-        self.namespace = namespace
+        self.namespace = to_unicode(namespace, encoding)
 
     def __hash__(self):
         return hash((self.name, self.value, self.namespace))
 
     def __str__(self):
-        return self.encode(DEFAULT_ENCODING)
+        return '%s="%s"' % (name, value)
 
     def encode(self, encoding=DEFAULT_ENCODING):
-        name = self.name.encode(encoding)
-        value = escape(self.value).encode(encoding)
+        name = self.name.encode(encoding or self.encoding)
+        value = escape(self.value.encode(encoding or self.encoding))
         return b'%s="%s"' % (name, value)
 
     def __repr__(self):
-        return "%s(%r, %r, %r)" % (self.__class__.__name__, self.name, self.value, 
-                  self.namespace)
+        return "%s(%r, %r, %r)" % (self.__class__.__name__, self.name, self.value, self.namespace)
 
     def __nonzero__(self):
         return bool(self.name)
@@ -280,14 +292,14 @@ class ElementNode(object):
         self.__dict__["_badattribs"] = badattrs = {}
         self.__dict__["_parent"] = None
         self.__dict__["_children"] = []
-        self.__dict__["_namespace"] = u""
+        self.__dict__["_namespace"] = ""
         self.__dict__["_encoding"] = DEFAULT_ENCODING
         for key, value in attribs.items():
             xmlattr = self.__class__.KWATTRIBUTES.get(key)
             if type(value) is tuple:
                 atns, value = value
             else:
-                atns = u""
+                atns = ""
             if xmlattr:
                 attr[xmlattr.name] = POMAttribute(xmlattr.name, value, atns)
             else:
@@ -308,16 +320,16 @@ class ElementNode(object):
         except KeyError:
             # might be implied, fixed, or enum...
             if xmlattr.a_decl in (FIXED, IMPLIED, DEFAULT):
-                return xmlattr.default or u""
+                return xmlattr.default or ""
         return None
     getAttribute = get_attribute # JS compatibility
 
-    def set_attribute(self, name, val, ns=u""):
+    def set_attribute(self, name, val, ns=""):
         """set_attribute(name, value)
-        Set the element node attribute "name" to "value". 
+        Set the element node attribute "name" to "value".
         The name can be the shorthand identifier, or the real name.
         """
-        if u":" in name:
+        if ":" in name:
             self._attribs[name] = POMAttribute(name, val)
             return True
         try:
@@ -458,7 +470,7 @@ class ElementNode(object):
     def add_text(self, text, encoding=DEFAULT_ENCODING):
         "Adding text to elements is so common, there is a special method for it."
         if self.has_children() and isinstance(self._children[-1], Text):
-            self._children[-1].add_text(text, encoding)
+            self._children[-1].add_text(text)
         else:
             t = Text(text, encoding)
             self.append(t)
@@ -472,7 +484,7 @@ class ElementNode(object):
     def add_cdata(self, text, encoding=DEFAULT_ENCODING):
         """Add character data that is not parsed."""
         if self.has_children() and isinstance(self._children[-1], CDATA):
-            self._children[-1].add_text(text, encoding)
+            self._children[-1].add_text(text)
         else:
             t = CDATA(text, encoding)
             self.append(t)
@@ -564,14 +576,13 @@ class ElementNode(object):
         else:
             return self._non_empty_str(encoding)
 
-    def set_namespace(self, ns, encoding=DEFAULT_ENCODING):
-        self._namespace = to_unicode(ns, encoding)
+    def set_namespace(self, ns):
+        self._namespace = ns
 
     def del_namespace(self):
-        self._namespace = u""
+        self._namespace = ""
 
-    namespace = property(lambda s: s._namespace, set_namespace,
-                del_namespace)
+    namespace = property(lambda s: s._namespace, set_namespace, del_namespace)
 
     def _get_ns(self, encoding):
         return self._namespace.encode(encoding)
@@ -585,7 +596,7 @@ class ElementNode(object):
         return b"".join(s)
 
     def _empty_str(self, encoding):
-        return b"<%s%s%s />" % (self._get_ns(encoding), self._name.encode(encoding), 
+        return b"<%s%s%s />" % (self._get_ns(encoding), self._name.encode(encoding),
                        self._attr_str(encoding))
 
     def _attr_str(self, encoding):
@@ -697,7 +708,7 @@ class ElementNode(object):
         """Return iterator that iterates over list of elements matching elclass"""
         return NodeIterator(self, elclass)
 
-    def getall(self, elclass, depth=sys.maxint, collect=None):
+    def getall(self, elclass, depth=maxint, collect=None):
         if collect is None:
             collection = []
         else:
@@ -727,23 +738,23 @@ class ElementNode(object):
 
     def get_text(self):
         if not self.CONTENTMODEL or self.CONTENTMODEL.is_empty():
-            return u" "
+            return " "
         else:
-            nodes = self.getall(Text, sys.maxint)
-            return u"".join(map(lambda s: s.get_text(), nodes))
+            nodes = self.getall(Text, maxint)
+            return "".join(map(lambda s: s.get_text(), nodes))
 
     # XPath-like functions
     def comment(self):
-        return self.getall(Comment, sys.maxint)
+        return self.getall(Comment, maxint)
 
     def text(self):
-        return self.getall(Text, sys.maxint)
+        return self.getall(Text, maxint)
 
     def processing_instruction(self):
-        return self.getall(ProcessingInstruction, sys.maxint)
+        return self.getall(ProcessingInstruction, maxint)
 
     def node(self):
-        return self.getall(ElementNode, sys.maxint)
+        return self.getall(ElementNode, maxint)
 
 
 class NodeIterator(object):
@@ -795,11 +806,6 @@ class Fragments(ElementNode):
         return False
 
 
-def to_unicode(arg, encoding):
-    if isinstance(arg, unicode):
-        return arg
-    return unicode(str(arg), encoding)
-
 
 class Notation(object):
     def __init__(self, name, pubid, sysid):
@@ -815,7 +821,7 @@ class Notation(object):
 
     def __repr__(self):
         cl = self.__class__
-        return "%s.%s(%r, %r, %r)" % (cl.__module__, cl.__name__, 
+        return "%s.%s(%r, %r, %r)" % (cl.__module__, cl.__name__,
                     self.name, self.public, self.system)
 
 
@@ -866,14 +872,14 @@ class POMDocument(object):
         self.dirty = 0
         self._idmap = {}
         self._COUNTERS = {}
-        if doctype: # implies new document 
+        if doctype: # implies new document
             self.set_doctype(doctype)
         elif dtd:
             self.set_dtd(dtd)
             try:
                 root = self.dtd._Root()
             except AttributeError:
-                print ("Document warning: unknown root element.", stream=sys.stderr)
+                print ("Document warning: unknown root element.", file=sys.stderr)
             else:
                 self.set_root(root)
         self.set_encoding(encoding)
@@ -896,12 +902,12 @@ class POMDocument(object):
     def set_doctype(self, doctype):
         dt = dtds.get_doctype(doctype)
         if dt:
-            self.DOCTYPE = str(dt)
+            self.DOCTYPE = str(dt).encode("ascii")
             self.set_dtd(dtds.get_dtd_module(doctype))
             rootclass = getattr(self.dtd, identifier(dt.name))
             self.set_root(rootclass())
         else:
-            raise ValidationError("Invalid doctype: %s" % (doctype,))
+            raise ValidationError("Invalid doctype: %r" % (doctype,))
 
     def set_root(self, root):
         if isinstance(root, ElementNode):
@@ -931,7 +937,7 @@ class POMDocument(object):
     def encode(self, encoding=DEFAULT_ENCODING):
         if encoding != self.encoding:
             self.set_encoding(encoding)
-        return self.XMLHEADER + self.DOCTYPE + self.root.encode(encoding) + "\n"
+        return self.XMLHEADER + self.DOCTYPE + self.root.encode(encoding) + b"\n"
 
     def emit(self, fo, encoding=DEFAULT_ENCODING):
         if encoding != self.encoding:
@@ -1182,6 +1188,17 @@ def unescape(s):
     s = s.replace(b"&amp;", b"&") # Must be last
     return s
 
+def uunescape(s):
+    if '&' not in s:
+        return s
+    s = s.replace("&lt;", "<")
+    s = s.replace("&gt;", ">")
+    s = s.replace("&apos;", "'")
+    s = s.replace("&quot;", '"')
+    s = s.replace("&amp;", "&") # Must be last
+    return s
+
+
 def escape(s):
     s = s.replace(b"&", b"&amp;") # Must be first
     s = s.replace(b"<", b"&lt;")
@@ -1189,4 +1206,7 @@ def escape(s):
     s = s.replace(b"'", b"&apos;")
     s = s.replace(b'"', b"&quot;")
     return s
+
+if __name__ == "__main__":
+    from pycopia import autodebug
 

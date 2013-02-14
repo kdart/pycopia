@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,8 +13,12 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
-"""
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
+"""
 
 """
 
@@ -50,7 +52,7 @@ class XMLTests(unittest.TestCase):
 
     def test_4doctypefetch(self):
         doctype = pycopia.dtds.get_doctype(pycopia.dtds.XHTML)
-        print doctype
+        print(doctype)
         self.assertEqual(doctype.name.lower(), "html")
 
     def test_4modfile(self):
@@ -62,12 +64,6 @@ class XMLTests(unittest.TestCase):
          pythonfile, doctype = pycopia.dtds.get_mod_file("/var/tmp/dtds", "xhtml11.dtd")
          self.assertEqual(pythonfile, "/var/tmp/dtds/xhtml11.py")
          self.assert_(pycopia.dtds.DOCTYPES[pycopia.dtds.XHTML] is doctype)
-
-    def test_5POMvalidation(self):
-        import pomtest # previous test just created this.
-        doc = POM.POMDocument(dtd=pomtest)
-        doc.set_root(pomtest.Toplevel())
-        self.assertRaises(POM.ValidationError, str, doc)
 
     def test_6POMemit(self):
         import pomtest
