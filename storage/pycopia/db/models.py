@@ -143,12 +143,12 @@ class User(object):
         # Using pycrypto package.
         from Crypto.Cipher import AES
         eng = AES.new(get_key(), AES.MODE_ECB)
-        self._password = hexdigest(eng.encrypt((passwd + "\0"*(16 - len(passwd)))[:16]))
+        self._password = hexdigest(eng.encrypt((passwd + b"\0"*(16 - len(passwd)))[:16]))
 
     def _get_password(self):
         from Crypto.Cipher import AES
         eng = AES.new(get_key(), AES.MODE_ECB)
-        return eng.decrypt(unhexdigest(self._password)).strip("\0")
+        return eng.decrypt(unhexdigest(self._password.encode("ascii"))).strip(b"\0")
 
     password = property(_get_password, _set_password)
 
@@ -178,7 +178,7 @@ def get_key():
         del _get_secret
         h = sha1()
         h.update(SECRET_KEY)
-        h.update("ifucnrdthsurtoocls")
+        h.update(b"ifucnrdthsurtoocls")
         SECRET_KEY = h.digest()[:16]
     return SECRET_KEY
 
