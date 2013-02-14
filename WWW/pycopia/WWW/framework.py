@@ -14,7 +14,7 @@
 #    Lesser General Public License for more details.
 
 # Django BSD licences:
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -25,6 +25,11 @@
 # ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 """
 A lightweight and flexible web application framework.
@@ -52,10 +57,12 @@ from pycopia.WWW import XHTML
 from pycopia.WWW import HTML5
 from pycopia.XML import Plaintext
 
-SESSION_KEY_NAME = "PYCOPIA"
+SESSION_KEY_NAME = b"PYCOPIA"
 
 STATUSCODES = httputils.STATUSCODES
 
+if sys.version_info.major == 3:
+    basestring = str
 
 class Error(Exception):
   "Base framework error"
@@ -76,8 +83,8 @@ class HTTPError(Exception):
             return ""
 
     def __str__(self):
-        return "%s %s\n%s" % (self.code, 
-                STATUSCODES.get(self.code, 'UNKNOWN STATUS CODE'), self.message)
+        return b"%s %s\n%s" % (self.code,
+                STATUSCODES.get(self.code, b'UNKNOWN STATUS CODE'), self.message)
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.message)
@@ -111,15 +118,15 @@ class HttpErrorServerError(HTTPError):
 ELEMENTCACHE = ObjectCache()
 
 # supported mime types.
-SUPPORTED = [ "application/xhtml+xml", "text/html", "text/plain"]
+SUPPORTED = [ b"application/xhtml+xml", b"text/html", b"text/plain"]
 
-RESERVED_CHARS="!*'();:@&=+$,/?%#[]"
+RESERVED_CHARS=b"!*'();:@&=+$,/?%#[]"
 
 
 class HttpResponse(object):
     "A basic HTTP response, with content and dictionary-accessed headers"
     status_code = 200
-    def __init__(self, content='', mimetype=None, charset="utf-8"):
+    def __init__(self, content=b'', mimetype=None, charset=b"utf-8"):
         self.headers = httputils.Headers()
         self.cookies = httputils.CookieJar()
         self._charset = charset
@@ -133,13 +140,12 @@ class HttpResponse(object):
             self._is_string = True
 
     def get_status(self):
-        return "%s %s" % (self.status_code, STATUSCODES.get(self.status_code, 'UNKNOWN STATUS CODE'))
+        return b"%s %s" % (self.status_code, STATUSCODES.get(self.status_code, b'UNKNOWN STATUS CODE'))
 
     def __str__(self):
         "Full HTTP message, including headers"
-        return '\r\n'.join(['%s: %s' % (key, value)
-            for key, value in self.headers.asWSGI()]) \
-            + '\r\n\r\n' + self.content
+        return b'\r\n'.join([b'%s: %s' % (key, value)
+            for key, value in self.headers.asWSGI()]) + b'\r\n\r\n' + self.content
 
     def __setitem__(self, header, value):
         self.headers.add_header(header, value)
@@ -156,12 +162,12 @@ class HttpResponse(object):
     def add_header(self, header, value=None):
         self.headers.add_header(header, value)
 
-    def set_cookie(self, key, value='', max_age=None, path='/', expires=None,
+    def set_cookie(self, key, value=b'', max_age=None, path=b'/', expires=None,
             domain=None, secure=False, httponly=False):
-        self.cookies.add_cookie(key, value, domain=domain, 
+        self.cookies.add_cookie(key, value, domain=domain,
             max_age=max_age, path=path, secure=secure, expires=expires, httponly=httponly)
 
-    def delete_cookie(self, key, path='/', domain=None):
+    def delete_cookie(self, key, path=b'/', domain=None):
         self.cookies.delete_cookie(key, path, domain)
 
     def get_response_headers(self):
@@ -169,10 +175,7 @@ class HttpResponse(object):
         return self.headers.asWSGI()
 
     def _get_content(self):
-        content = ''.join(self._container)
-        if isinstance(content, unicode):
-            content = content.encode(self._charset)
-        return content
+        return b''.join([o.encode(self._charset) for o in self._container])
 
     def _set_content(self, value):
         self._container = [value]
@@ -184,11 +187,10 @@ class HttpResponse(object):
         self._iterator = self._container.__iter__()
         return self
 
-    def next(self):
+    def __next__(self):
         chunk = self._iterator.next()
-        if isinstance(chunk, unicode):
-            chunk = chunk.encode(self._charset)
-        return chunk
+        return chunk.encode(self._charset)
+    next = __next__
 
     def close(self):
         try:
@@ -218,13 +220,13 @@ class HttpResponseRedirect(HttpResponse):
             dest = urlparse.quote(redirect_to, safe=RESERVED_CHARS) + "?" + urlparse.urlencode(kwargs)
         else:
             dest = urlparse.quote(redirect_to, safe=RESERVED_CHARS)
-        self['Location'] = dest
+        self[b'Location'] = dest
 
 class HttpResponsePermanentRedirect(HttpResponse):
     status_code = 301
     def __init__(self, redirect_to):
         HttpResponse.__init__(self)
-        self['Location'] = urlparse.quote(redirect_to, safe=RESERVED_CHARS)
+        self[b'Location'] = urlparse.quote(redirect_to, safe=RESERVED_CHARS)
 
 class HttpResponseNotModified(HttpResponse):
     status_code = 304
@@ -245,13 +247,13 @@ class HttpResponseNotAllowed(HttpResponse):
     status_code = 405
     def __init__(self, permitted_methods):
         super(HttpResponse, self). __init__()
-        self['Allow'] = ', '.join(permitted_methods)
+        self[b'Allow'] = ', '.join(permitted_methods)
 
 class HttpResponseNotAcceptable(HttpResponse):
     status_code = 406
     def __init__(self):
         super(HttpResponse, self). __init__()
-        self['Content-Type'] = ', '.join(SUPPORTED)
+        self[b'Content-Type'] = ', '.join(SUPPORTED)
 
 class HttpResponseGone(HttpResponse):
     status_code = 410
@@ -263,11 +265,11 @@ class HttpResponseServerError(HttpResponse):
 def parse_formdata(contenttype, post_data):
     post = urlparse.URLQuery()
     files = urlparse.URLQuery()
-    boundary = "--" + contenttype.parameters["boundary"]
+    boundary = b"--" + contenttype.parameters[b"boundary"]
     for part in post_data.split(boundary):
         if not part:
             continue
-        if part.startswith("--"):
+        if part.startswith(b"--"):
             continue
         headers, body = httputils.get_headers_and_body(part)
         cd = headers[0]
@@ -281,7 +283,7 @@ def parse_formdata(contenttype, post_data):
 class HTTPRequest(object):
     def __init__(self, environ):
         self.environ = environ
-        self.method = environ['REQUEST_METHOD'].upper()
+        self.method = environ[b'REQUEST_METHOD'].upper()
         self.path = None
         self.get_url = None
         self.get_alias = None
@@ -290,8 +292,8 @@ class HTTPRequest(object):
         self.session = None
 
     def log_error(self, message):
-        fo = self.environ["wsgi.errors"]
-        fo.write(message)
+        fo = self.environ[b"wsgi.errors"]
+        fo.write(message.encode("ascii"))
         fo.flush()
 
     def __repr__(self):
@@ -317,9 +319,9 @@ class HTTPRequest(object):
             (get, post, cookies, meta)
 
     def get_host(self):
-        host = self.environ.get('HTTP_X_FORWARDED_HOST', None)
+        host = self.environ.get(b'HTTP_X_FORWARDED_HOST', None)
         if not host:
-            host = self.environ.get('HTTP_HOST', 'localhost')
+            host = self.environ.get(b'HTTP_HOST', 'localhost')
         return host
 
     def get_domain(self):
@@ -331,7 +333,7 @@ class HTTPRequest(object):
             return host
 
     def get_full_path(self):
-        qs =self.environ.get('QUERY_STRING')
+        qs =self.environ.get(b'QUERY_STRING')
         if qs:
             return '%s?%s' % (self.path, qs)
         else:
@@ -341,12 +343,12 @@ class HTTPRequest(object):
         return self.environ.get('HTTPS', "off") == "on"
 
     def _parse_post_content(self):
-        if self.method == 'POST':
-            content_type = self.environ.get('CONTENT_TYPE', '').lower()
-            if content_type.startswith('multipart/form-data'):
+        if self.method == b'POST':
+            content_type = self.environ.get(b'CONTENT_TYPE', '').lower()
+            if content_type.startswith(b'multipart/form-data'):
                 self._post, self._files = parse_formdata(
                         httputils.ContentType(content_type), self._get_raw_post_data())
-            elif content_type.startswith("application/x-www-form-urlencoded"):
+            elif content_type.startswith(b"application/x-www-form-urlencoded"):
                 self._post = urlparse.queryparse(self._get_raw_post_data())
                 self._files = None
             else: # some buggy clients don't set proper content-type, so
@@ -355,8 +357,8 @@ class HTTPRequest(object):
                 self._post = urlparse.queryparse(data)
                 self._files = {}
                 self._files["body"] = {
-                    'content-type': content_type,
-                    'content': data,
+                    b'content-type': content_type,
+                    b'content': data,
                 }
         else:
             self._post = urlparse.URLQuery()
@@ -378,7 +380,7 @@ class HTTPRequest(object):
             return self._get
         except AttributeError:
             # The WSGI spec says 'QUERY_STRING' may be absent.
-            self._get = urlparse.queryparse(self.environ.get('QUERY_STRING', ''))
+            self._get = urlparse.queryparse(self.environ.get(b'QUERY_STRING', b''))
             return self._get
 
     def _get_post(self):
@@ -393,7 +395,7 @@ class HTTPRequest(object):
             return self._cookies
         except AttributeError:
             self._cookies = cookies = {}
-            for cookie in httputils.parse_cookie(self.environ.get('HTTP_COOKIE', '')):
+            for cookie in httputils.parse_cookie(self.environ.get(b'HTTP_COOKIE', b'')):
                 cookies[cookie.name] = cookie.value
             return cookies
 
@@ -406,10 +408,10 @@ class HTTPRequest(object):
 
     def _get_raw_post_data(self):
         try:
-            content_length = int(self.environ.get("CONTENT_LENGTH"))
+            content_length = int(self.environ.get(b"CONTENT_LENGTH"))
         except ValueError: # if CONTENT_LENGTH was empty string or not an integer
             raise HttpErrorLengthRequired("A Content-Length header is required.")
-        return self.environ['wsgi.input'].read(content_length)
+        return self.environ[b'wsgi.input'].read(content_length)
 
     def _get_headers(self):
         try:
@@ -417,8 +419,8 @@ class HTTPRequest(object):
         except AttributeError:
             self._headers = hdrs = httputils.Headers()
             for k, v in self.environ.iteritems():
-                if k.startswith("HTTP"):
-                    hdrs.append(httputils.make_header(k[5:].replace("_", "-").lower(), v))
+                if k.startswith(b"HTTP"):
+                    hdrs.append(httputils.make_header(k[5:].replace(b"_", b"-").lower(), v))
             return self._headers
 
     GET = property(_get_get)
@@ -467,7 +469,7 @@ def _make_url_form(regexp):
             collect.append(chr(val))
         elif op is sre_parse.SUBPATTERN:
             name = indexmap[val[0]]
-            collect.append(r'%%(%s)s' % name)
+            collect.append(br'%%(%s)s' % name)
     return cre, "".join(collect)
 
 
@@ -479,7 +481,7 @@ class URLAlias(object):
         self._method = URLRedirector(self._format)
 
     def __str__(self):
-        return "%s => %s" % (self._name, self._method)
+        return b"%s => %s" % (self._name, self._method)
 
     def match(self, string):
         mo = self._regexp.match(string)
@@ -497,7 +499,7 @@ class URLRedirector(object):
     def __hash__(self):
         return hash(self._loc)
     def __repr__(self):
-        return "URLRedirector(%r)" % self._loc
+        return b"URLRedirector(%r)" % self._loc
     def __call__(self, request, **kwargs):
         return HttpResponsePermanentRedirect(self._loc % kwargs)
 
@@ -517,8 +519,8 @@ class URLResolver(object):
                 self.register(pattern, methname)
 
     def register(self, pattern, method):
-        if type(method) is str:
-            if "." in method:
+        if isinstance(method, basestring):
+            if b"." in method:
                 method = get_method(method)
             else:
                 self._aliases[method] = URLAlias(pattern, method)
@@ -530,7 +532,7 @@ class URLResolver(object):
         self._reverse[method] = urlmap
 
     def unregister(self, method):
-        if type(method) is str:
+        if isinstance(method, basestring):
             method = get_method(method)
         try:
             m = self._reverse[method]
@@ -554,7 +556,7 @@ class URLResolver(object):
         return None, None
 
     def dispatch(self, request):
-        path = request.environ["PATH_INFO"]
+        path = request.environ[b"PATH_INFO"]
         for mapper in self._patterns:
             method, kwargs = mapper.match(path)
             if method:
@@ -570,7 +572,7 @@ class URLResolver(object):
         """Reverse mapping. Answers the question: How do I reach the
         callable object mapped to in the LOCATIONMAP?
         """
-        if type(method) is str:
+        if isinstance(method, basestring):
             if "." in method:
                 method = get_method(method)
             else:
@@ -610,11 +612,11 @@ class DatabaseContext(object):
 
 
 class WebApplication(object):
-    """Adapt a WSGI server to a framework style request handler. 
+    """Adapt a WSGI server to a framework style request handler.
     """
     def __init__(self, config):
         self._config = config
-        self._resolver = URLResolver(config.LOCATIONMAP, 
+        self._resolver = URLResolver(config.LOCATIONMAP,
                 config.get("BASEPATH", "/%s" % (config.SERVERNAME,)))
         if config.get("DATABASE_URL"):
             from pycopia.db import models
@@ -634,7 +636,7 @@ class WebApplication(object):
         except:
             ex, val, tb = sys.exc_info()
             if issubclass(ex, HTTPError):
-                start_response(str(val), [("Content-Type", "text/plain")], (ex, val, tb))
+                start_response(str(val).encode("ascii"), [(b"Content-Type", b"text/plain")], (ex, val, tb))
                 return [val.message]
             else:
                 raise
@@ -682,25 +684,25 @@ class RequestHandler(object):
     # Override one or more of these in your handler subclass. Invalid
     # requests are automatically handled.
     def get(self, request, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def post(self, request, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def put(self, request, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def delete(self, request, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def head(self, request, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def options(self, request, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def trace(self, request, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError()
 
 # for JSON servers.
 
@@ -708,7 +710,7 @@ class JSONResponse(HttpResponse):
     """Used for asynchronous interfaces needing JSON data returned."""
     def __init__(self, obj):
         json = simplejson.dumps(obj)
-        HttpResponse.__init__(self, json, "application/json")
+        HttpResponse.__init__(self, json, b"application/json")
 
 
 def JSONQuery(request):
@@ -721,12 +723,12 @@ def JSONQuery(request):
 
 def JSON404():
     json = simplejson.dumps(None)
-    return HttpResponseNotFound(json, mimetype="application/json")
+    return HttpResponseNotFound(json, mimetype=b"application/json")
 
 
 def JSONServerError(ex, val, tblist):
     json = simplejson.dumps((str(ex), str(val), tblist))
-    return HttpResponseServerError(json, mimetype="application/json")
+    return HttpResponseServerError(json, mimetype=b"application/json")
 
 
 class JSONRequestHandler(RequestHandler):
@@ -842,24 +844,24 @@ class ResponseDocument(object):
             namepair = self.config.ICONMAP["large"][name]
         except KeyError:
             namepair = self.config.ICONMAP["large"]["default"]
-        return self.nodemaker("Img", {"src": self.get_url("images", name=namepair[1]), 
-                       "alt":name, "width":"24", "height":"24"})
+        return self.nodemaker(b"Img", {b"src": self.get_url(b"images", name=namepair[1]),
+                       b"alt":name, b"width":b"24", b"height":b"24"})
 
     def get_medium_icon(self, name):
         try:
             filename = self.config.ICONMAP["medium"][name]
         except KeyError:
             filename = self.config.ICONMAP["medium"]["default"]
-        return self.nodemaker("Img", {"src": self.get_url("images", name=filename), 
-                       "alt":name, "width":"16", "height":"16"})
+        return self.nodemaker(b"Img", {b"src": self.get_url(b"images", name=filename),
+                       b"alt":name, b"width":b"16", b"height":b"16"})
 
     def get_small_icon(self, name):
         try:
             filename = self.config.ICONMAP["small"][name]
         except KeyError:
             filename = self.config.ICONMAP["small"]["default"]
-        return self.nodemaker("Img", {"src": self.get_url("images", name=filename), 
-                       "alt":name, "width":"10", "height":"10"})
+        return self.nodemaker(b"Img", {b"src": self.get_url(b"images", name=filename),
+                       b"alt":name, b"width":b"10", b"height":b"10"})
 
     def anchor2(self, path, text, **kwargs):
         try:
@@ -897,7 +899,7 @@ def _get_module(name):
 
 if __name__ == "__main__":
 
-    DATA = """------WebKitFormBoundaryLHph2NIrIQTpfNKw\r
+    DATA = b"""------WebKitFormBoundaryLHph2NIrIQTpfNKw\r
 Content-Disposition: form-data; name="name"\r
 \r
 myenvattr\r
@@ -916,8 +918,8 @@ submit\r
 ------WebKitFormBoundaryLHph2NIrIQTpfNKw--\r
 """
 
-    content_type = "multipart/form-data; boundary=----WebKitFormBoundaryLHph2NIrIQTpfNKw"
+    content_type = b"multipart/form-data; boundary=----WebKitFormBoundaryLHph2NIrIQTpfNKw"
     post, files = parse_formdata(httputils.ContentType(content_type), DATA)
 
-    print post.items()
+    print (post.items())
 

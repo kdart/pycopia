@@ -103,7 +103,7 @@ class HTTPResponse(object):
     def __unicode__(self):
         try:
             return unicode(self._make_body(), self.requested_encoding, "strict")
-        except ValueError, err:
+        except ValueError as err:
             raise EncodingError(str(err))
 
     def _body_callback(self, buf):
@@ -271,6 +271,7 @@ class ResponseLine(object):
     # evaluates true on good response
     def __nonzero__(self):
         return self.code == 200
+    __bool__ = __nonzero__
 
 
 class TimingInfo(object):
@@ -386,6 +387,7 @@ class HTTPRequest(Request):
 
     def __nonzero__(self):
         return bool(self._url)
+    __bool__ = __nonzero__
 
     def clear_state(self):
         self._method = "GET"
@@ -575,7 +577,7 @@ class HTTPRequest(Request):
         # The curl library takes control here.
         try:
             c.perform()
-        except pycurl.error, e:
+        except pycurl.error as e:
             resp.error = e
         resp.finalize(c)
         del resp.logfile
