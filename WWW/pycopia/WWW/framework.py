@@ -286,9 +286,8 @@ class HTTPRequest(object):
         self.path = None
         self.get_url = None
         self.get_alias = None
-        self.dbsession = None
         self.config = None
-        self.session = None
+        self.session = None # possibly set by authentication module.
 
     def log_error(self, message):
         fo = self.environ[b"wsgi.errors"]
@@ -594,22 +593,6 @@ class URLResolver(object):
         return urlmap.get_url(**kwargs)
 
 
-class DatabaseContext(object):
-
-    def __init__(self, request):
-        assert request.sessionmaker is not None, "Application does not define a database in DATABASE_URL."
-        self._dbsessionclass = request.sessionmaker
-
-    def __enter__(self):
-        self.dbsession = self._dbsessionclass()
-        return self.dbsession
-
-    def __exit__(self, type, value, traceback):
-        if type is not None:
-            self.dbsession.rollback()
-        self.dbsession.close()
-
-
 
 class FrameworkAdapter(object):
     """Adapt a WSGI server to a framework style request handler.
@@ -663,8 +646,8 @@ class RequestHandler(object):
     def initialize(self):
         pass
 
-    def get_response(self, **kwargs):
-        return ResponseDocument(self._constructor, **kwargs)
+    def get_response(self, request, **kwargs):
+        return ResponseDocument(request, self._constructor, **kwargs)
 
     def __call__(self, request, **kwargs):
         meth = self._methods.get(request.method, self._invalid)
@@ -793,11 +776,14 @@ class ResponseDocument(object):
     """Wraps a text-creator document and supplies helper methods for
     accessing configuration.
     """
-    def __init__(self, _constructor=None, **kwargs):
+    def __init__(self, _request, _constructor=None, **kwargs):
         if _constructor is not None:
             self._doc = _constructor(**kwargs)
         else:
             self._doc = HTML5.new_document(**kwargs)
+        self.get_url = _request.get_url
+        self.get_alias = _request.get_alias
+        self.config = _request.config
 
     doc = property(lambda s: s._doc)
 
@@ -814,6 +800,7 @@ class ResponseDocument(object):
         self.nodemaker = None
         self.creator = None
         self.get_url = None
+        self.get_alias = None
         self.config = None
         adapter = POMadapter.WSGIAdapter(doc)
         doc.emit(adapter)
@@ -836,31 +823,31 @@ class ResponseDocument(object):
             namepair = self.config.ICONMAP["large"][name]
         except KeyError:
             namepair = self.config.ICONMAP["large"]["default"]
-        return self.nodemaker(b"Img", {b"src": self.get_url(b"images", name=namepair[1]),
-                       b"alt":name, b"width":b"24", b"height":b"24"})
+        return self._doc.nodemaker(b"Img", {"src": self.get_url("images", name=namepair[1]),
+                       "alt":name, "width":"24", "height":"24"})
 
     def get_medium_icon(self, name):
         try:
             filename = self.config.ICONMAP["medium"][name]
         except KeyError:
             filename = self.config.ICONMAP["medium"]["default"]
-        return self.nodemaker(b"Img", {b"src": self.get_url(b"images", name=filename),
-                       b"alt":name, b"width":b"16", b"height":b"16"})
+        return self._doc.nodemaker(b"Img", {"src": self.get_url("images", name=filename),
+                       "alt":name, "width":"16", "height":"16"})
 
     def get_small_icon(self, name):
         try:
             filename = self.config.ICONMAP["small"][name]
         except KeyError:
             filename = self.config.ICONMAP["small"]["default"]
-        return self.nodemaker(b"Img", {b"src": self.get_url(b"images", name=filename),
-                       b"alt":name, b"width":b"10", b"height":b"10"})
+        return self._doc.nodemaker(b"Img", {"src": self.get_url("images", name=filename),
+                       "alt":name, "width":"10", "height":"10"})
 
     def anchor2(self, path, text, **kwargs):
         try:
             href = self.get_url(path, **kwargs)
         except InvalidPath:
             href = str(path) # use as-is as a fallback for hard-coded destinations.
-        return self.nodemaker("A", {"href": href}, text)
+        return self.nodemaker(b"A", {"href": href}, text)
 
 
 # general purpose URL scheme "hole" filler. Use as a handler in the URL

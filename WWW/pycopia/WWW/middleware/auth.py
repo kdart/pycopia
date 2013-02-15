@@ -1,6 +1,6 @@
 #!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
-# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:fenc=utf-8
 #
 #    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
 #
@@ -198,7 +198,7 @@ def handle_async_authentication(request):
     cram = request.POST[b"password"]
     key = request.POST[b"key"]
     redir = request.POST[b"redir"]
-    dbsession = request.dbsessionclass()
+    dbsession = models.SessionMaker()
     try:
         user = dbsession.query(models.User).filter_by(username=name).one()
     except models.NoResultFound:
@@ -216,6 +216,7 @@ def handle_async_authentication(request):
                     request.config.get("LOGIN_TIME", 24))
         dbsession.add(session)
         dbsession.commit()
+        dbsession.close()
         return resp
     else:
         request.log_error("Invalid async authentication for %r\n" % (name, ))
@@ -234,7 +235,7 @@ class LogoutHandler(framework.RequestHandler):
     def get(self, request):
         key = request.COOKIES.get(SESSION_KEY_NAME)
         if key is not None:
-            dbsession = request.dbsessionclass()
+            dbsession = models.SessionMaker()
             try:
                 sess = dbsession.query(models.Session).filter_by(session_key=key).one()
             except models.NoResultFound:
@@ -242,6 +243,7 @@ class LogoutHandler(framework.RequestHandler):
             else:
                 dbsession.delete(sess)
                 dbsession.commit()
+                dbsession.close()
         request.session = None
         resp = framework.HttpResponseRedirect("/")
         resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
@@ -258,7 +260,7 @@ def need_login(handler):
         redir = "/auth/login?redir=%s" % request.path
         if not key:
             return framework.HttpResponseRedirect(redir)
-        dbsession = request.dbsessionclass()
+        dbsession = models.SessionMaker()
         try:
             session = dbsession.query(models.Session).filter_by(session_key=key).one()
         except models.NoResultFound:
@@ -269,6 +271,7 @@ def need_login(handler):
         if session.is_expired():
             dbsession.delete(session)
             dbsession.commit()
+            dbsession.close()
             resp = framework.HttpResponseRedirect(redir)
             resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
             return resp
@@ -294,7 +297,7 @@ def need_authentication(handler):
         key = request.COOKIES.get(SESSION_KEY_NAME)
         if not key:
             return framework.HttpResponseNotAuthenticated()
-        dbsession = request.dbsessionclass()
+        dbsession = models.SessionMaker()
         try:
             session = dbsession.query(models.Session).filter_by(session_key=key).one()
         except models.NoResultFound:
@@ -305,6 +308,7 @@ def need_authentication(handler):
         if session.is_expired():
             dbsession.delete(session)
             dbsession.commit()
+            dbsession.close()
             resp = framework.HttpResponseNotAuthenticated()
             resp.delete_cookie(SESSION_KEY_NAME, domain=request.get_host())
             return resp

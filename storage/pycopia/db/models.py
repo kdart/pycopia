@@ -54,8 +54,8 @@ class ModelAttributeError(ModelError):
     pass
 
 
-def create_session(url=None):
-    if url is None:
+def create_sessionmaker(url=None):
+    if not url:
         from pycopia import basicconfig
         cf = basicconfig.get_config("database.conf")
         url = cf["DATABASE_URL"]
@@ -63,12 +63,31 @@ def create_session(url=None):
     tables.metadata.bind = db
     return sessionmaker(bind=db, autoflush=False)
 
+SessionMaker = create_sessionmaker()
 
 # Get a database session instance from a database url. If URL is not
 # provided then get it from the database.conf configuration file.
-def get_session(url=None):
-    session_class = create_session(url)
-    return session_class()
+def get_session():
+    return SessionMaker()
+
+
+class DatabaseContext(object):
+
+    def __init__(self):
+        self._dbsessionclass = SessionMaker
+
+    def __enter__(self):
+        self.dbsession = self._dbsessionclass()
+        return self.dbsession
+
+    def __exit__(self, type, value, traceback):
+        if type is not None:
+            self.dbsession.rollback()
+        else:
+            self.dbsession.commit()
+        dbs = self.dbsession
+        del self.dbsession
+        dbs.close()
 
 
 # Due to the way sqlalchemy instruments attributes you cannot instantiate
@@ -1747,7 +1766,7 @@ if __name__ == "__main__":
     #print get_column_metadata(Equipment, "interfaces")
     #print get_column_metadata(Network, "interfaces")
 
-    sess = get_session()
+    #sess = get_session()
 
     #choices = get_choices(sess, Equipment, "interfaces", order_by=None)
     #print choices
@@ -1793,11 +1812,12 @@ if __name__ == "__main__":
 #
 #    for tr in tc.get_data(sess):
 #        print(tr)
-    for intf in Interface.select_unattached(sess):
-        #print(intf)
-        print(intf)
+    with DatabaseContext() as sess:
+        for intf in Interface.select_unattached(sess):
+            #print(intf)
+            print(intf)
 #    print(type(TestSuite.get_by_implementation(sess, "testcases.unittests.WWW.mobileget.MobileSendSuite")))
 #    print (TestSuite.get_suites(sess))
     #print(get_primary_key(Session))
-    sess.close()
+    #sess.close()
 
