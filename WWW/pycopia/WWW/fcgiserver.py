@@ -44,7 +44,6 @@ class ProcessManager(object):
         self._procmanager.submethod(func, pwent=self._pwent)
 
 
-
 # TODO something better
 def ErrorHandler(exc_info, stream):
     import cgitb
@@ -53,7 +52,6 @@ def ErrorHandler(exc_info, stream):
     stream.write('\r\n')
     stream.write(cgitb.html(exc_info))
     stream.flush()
-
 
 
 # Factory function creats a server instance with our interface
@@ -66,7 +64,7 @@ def get_server(config):
         pwent = None
     pm = ProcessManager(pwent)
 
-    app = framework.WebApplication(config)
+    app = framework.FrameworkAdapter(config)
 
     if "MIDDLEWARE" in config:
         for mwtuple in config["MIDDLEWARE"]:

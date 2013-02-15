@@ -53,7 +53,6 @@ from pycopia.inet import httputils
 from pycopia.dictlib import ObjectCache
 from pycopia.WWW.middleware import POMadapter
 
-from pycopia.WWW import XHTML
 from pycopia.WWW import HTML5
 from pycopia.XML import Plaintext
 
@@ -598,8 +597,8 @@ class URLResolver(object):
 class DatabaseContext(object):
 
     def __init__(self, request):
-        assert request.dbsessionclass is not None, "Application does not define a database in DATABASE_URL."
-        self._dbsessionclass = request.dbsessionclass
+        assert request.sessionmaker is not None, "Application does not define a database in DATABASE_URL."
+        self._dbsessionclass = request.sessionmaker
 
     def __enter__(self):
         self.dbsession = self._dbsessionclass()
@@ -611,26 +610,21 @@ class DatabaseContext(object):
         self.dbsession.close()
 
 
-class WebApplication(object):
+
+class FrameworkAdapter(object):
     """Adapt a WSGI server to a framework style request handler.
     """
     def __init__(self, config):
         self._config = config
         self._resolver = URLResolver(config.LOCATIONMAP,
-                config.get("BASEPATH", "/%s" % (config.SERVERNAME,)))
-        if config.get("DATABASE_URL"):
-            from pycopia.db import models
-            self.dbsessionclass = models.create_session(config.DATABASE_URL)
-        else:
-            self.dbsessionclass = None
+                config.get(b"BASEPATH", "/%s" % (config.SERVERNAME,)))
 
     def __call__(self, environ, start_response):
         request = HTTPRequest(environ)
         request.config = self._config
         request.get_url = self._resolver.get_url
-        request.path = self._resolver._urlbase + environ['PATH_INFO']
+        request.path = self._resolver._urlbase + environ[b'PATH_INFO']
         request.get_alias = self._resolver.get_alias
-        request.dbsessionclass = self.dbsessionclass
         try:
             response = self._resolver.dispatch(request)
         except:
@@ -648,27 +642,29 @@ class WebApplication(object):
 # You can subclass this and set and instance to be called by URL mapping.
 class RequestHandler(object):
     METHODS = ["get", "head", "post", "put", "delete", "options", "trace"]
-    def __init__(self, _constructor=None, **kwargs):
+    def __init__(self, constructor=None, verifier=None):
         self._methods = {}
         impl = []
         for name in self.METHODS:
             key = name.upper()
             if name in self.__class__.__dict__:
                 impl.append(key)
-                self._methods[key] = getattr(self, name)
+                method = getattr(self, name)
+                if verifier:
+                    method = verifier(method)
+                self._methods[key] = method
             else:
                 self._methods[key] = self._invalid
         self._implemented = impl
-        self._constructor = _constructor
+        self._constructor = constructor
         # optional subclass initializer.
-        self.initialize(**kwargs)
+        self.initialize()
 
-    def initialize(self, **kwargs):
+    def initialize(self):
         pass
 
-    def get_response(self, request, **kwargs):
-        if self._constructor is not None:
-            return ResponseDocument(request, self._constructor, **kwargs)
+    def get_response(self, **kwargs):
+        return ResponseDocument(self._constructor, **kwargs)
 
     def __call__(self, request, **kwargs):
         meth = self._methods.get(request.method, self._invalid)
@@ -773,11 +769,9 @@ class JSONRequestHandler(RequestHandler):
     def get_url(self, function):
         return "../%s" % function.func_name # XXX assumes name is end of path.
 
-def get_acceptable_document(request):
-    return HTML5.new_document()
 
-def default_doc_constructor(request, **kwargs):
-    doc = get_acceptable_document(request)
+def default_doc_constructor(**kwargs):
+    doc = HTML5.new_document()
     for name, val in kwargs.items():
         setattr(doc, name, val)
     container = doc.add_section("container")
@@ -799,14 +793,11 @@ class ResponseDocument(object):
     """Wraps a text-creator document and supplies helper methods for
     accessing configuration.
     """
-    def __init__(self, _request, _constructor=default_doc_constructor, **kwargs):
-        self._doc = _constructor(_request, **kwargs)
-        self.nodemaker = self._doc.nodemaker # nodemaker shortcut
-        self.creator = self._doc.creator
-        # shortcuts
-        self.get_url = _request.get_url
-        self.get_alias = _request.get_alias
-        self.config = _request.config
+    def __init__(self, _constructor=None, **kwargs):
+        if _constructor is not None:
+            self._doc = _constructor(**kwargs)
+        else:
+            self._doc = HTML5.new_document(**kwargs)
 
     doc = property(lambda s: s._doc)
 
@@ -817,12 +808,13 @@ class ResponseDocument(object):
         return ELEMENTCACHE.get_object(key, ctor, **kwargs)
 
     def finalize(self):
+        """Handlers should return the return value of this method."""
         doc = self._doc
+        self._doc = None
         self.nodemaker = None
         self.creator = None
         self.get_url = None
         self.config = None
-        self._doc = None
         adapter = POMadapter.WSGIAdapter(doc)
         doc.emit(adapter)
         response = HttpResponse(adapter)
