@@ -23,6 +23,7 @@ Models
 
 .. automodule:: pycopia.db.models
    :members:
+   :undoc-members:
 
 
 Importers

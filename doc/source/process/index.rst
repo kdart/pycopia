@@ -21,6 +21,7 @@ subprocesses.
 
 .. automodule:: pycopia.proctools
    :members:
+   :undoc-members:
 
 Expect
 ------
@@ -31,6 +32,7 @@ function for different events.
 
 .. automodule:: pycopia.expect
    :members:
+   :undoc-members:
 
 Utility Modules
 ---------------

@@ -18,6 +18,7 @@ but also contains more general modules that may be used independently.
 
 .. automodule:: pycopia.asyncio
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.basicconfig
    :members:
@@ -39,6 +40,7 @@ but also contains more general modules that may be used independently.
 
 .. automodule:: pycopia.devhelpers
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.environ
    :members:
@@ -57,12 +59,15 @@ but also contains more general modules that may be used independently.
 
 .. automodule:: pycopia.ipv4
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.jsonconfig
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.logfile
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.makepassword
    :members:
@@ -81,18 +86,22 @@ but also contains more general modules that may be used independently.
 
 .. automodule:: pycopia.protocols
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.re_inverse
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.scheduler
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.sharedbuffer
    :members:
 
 .. automodule:: pycopia.shparser
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.sourcegen
    :members:
@@ -102,6 +111,7 @@ but also contains more general modules that may be used independently.
 
 .. automodule:: pycopia.sysrandom
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.table
    :members:
@@ -120,6 +130,7 @@ Objects for dealing with measurement values with units and supports unit convers
 
 .. automodule:: pycopia.physics.physical_quantities
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.physics.conversions
    :members:

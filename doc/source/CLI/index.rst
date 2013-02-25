@@ -19,12 +19,15 @@ You can use this to wrap other Python objects to interact with them.
 
 .. automodule:: pycopia.CLI
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.UI
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.IO
    :members:
+   :undoc-members:
 
 Examples
 --------

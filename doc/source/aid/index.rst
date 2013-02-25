@@ -10,6 +10,7 @@ better on Linux or integrate better with the rest of Pycopia.
 
 .. automodule:: pycopia.aid
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.ascii
    :members:
@@ -28,18 +29,22 @@ better on Linux or integrate better with the rest of Pycopia.
 
 .. automodule:: pycopia.methods
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.module
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.platutils
    :members:
 
 .. automodule:: pycopia.socket
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.textutils
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.timelib
    :members:
@@ -52,6 +57,7 @@ better on Linux or integrate better with the rest of Pycopia.
 
 .. automodule:: pycopia.UserFile
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.words
    :members:

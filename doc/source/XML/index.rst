@@ -26,6 +26,7 @@ Pythonic Object Model
 
 .. automodule:: pycopia.XML.POM
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.XML.POMparse
    :members:
@@ -35,6 +36,7 @@ DTD Parsing
 
 .. automodule:: pycopia.XML.DTD
    :members:
+   :undoc-members:
 
 
 

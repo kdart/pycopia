@@ -15,18 +15,22 @@ Networking related modules.
 
 .. automodule:: pycopia.clientserver
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.asyncserver
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.httpserver
    :members:
 
 .. automodule:: pycopia.ping
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.slogsink
    :members:
+   :undoc-members:
 
 Protocol modules
 ----------------
@@ -59,6 +63,7 @@ Modules that provide network parameter measurements.
 
 .. automodule:: pycopia.measure.Counters
    :members:
+   :undoc-members:
 
 
 Reporting
@@ -74,4 +79,5 @@ SSL certificate management, including code to manage a certificate authority.
 
 .. automodule:: pycopia.ssl.CA
    :members:
+   :undoc-members:
 

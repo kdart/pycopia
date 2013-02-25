@@ -36,4 +36,5 @@ current line.
 
 .. automodule:: pycopia.debugger
    :members:
+   :undoc-members:
 

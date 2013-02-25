@@ -22,6 +22,7 @@ MIB.
 
 .. automodule:: pycopia.SNMP.SNMP
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.SNMP.trapserver
    :members:
@@ -31,6 +32,7 @@ MIB.
 
 .. automodule:: pycopia.SNMP.Manager
    :members:
+   :undoc-members:
 
 Devices
 -------
@@ -51,6 +53,7 @@ Modules
 
 .. automodule:: pycopia.Devices.EtherSwitch
    :members:
+   :undoc-members:
 
 .. automodule:: pycopia.Devices.APC
    :members:
