@@ -342,15 +342,16 @@ class HTTPRequest(object):
 
     def _parse_post_content(self):
         if self.method == b'POST':
-            content_type = self.environ.get(b'CONTENT_TYPE', '').lower()
-            if content_type.startswith(b'multipart/form-data'):
-                self._post, self._files = parse_formdata(
-                        httputils.ContentType(content_type), self._get_raw_post_data())
-            elif content_type.startswith(b"application/x-www-form-urlencoded"):
+            content_type = httputils.ContentType(self.environ.get(b'CONTENT_TYPE', ''))
+            ctvalue = content_type.value.lower()
+            if ctvalue == b'multipart/form-data':
+                self._post, self._files = parse_formdata(content_type, self._get_raw_post_data())
+            elif ctvalue == b"application/x-www-form-urlencoded":
                 self._post = urlparse.queryparse(self._get_raw_post_data())
                 self._files = None
             else: # some buggy clients don't set proper content-type, so
                   # just preserve the raw data as a file.
+                self.log_error("Bad content-type: {!s}".format(content_type))
                 data = self._get_raw_post_data()
                 self._post = urlparse.queryparse(data)
                 self._files = {}
@@ -897,8 +898,10 @@ submit\r
 ------WebKitFormBoundaryLHph2NIrIQTpfNKw--\r
 """
 
-    content_type = b"multipart/form-data; boundary=----WebKitFormBoundaryLHph2NIrIQTpfNKw"
-    post, files = parse_formdata(httputils.ContentType(content_type), DATA)
+    content_type = b"Multipart/form-data; boundary=----WebKitFormBoundaryLHph2NIrIQTpfNKw"
+    content_type = httputils.ContentType(content_type)
+    print(content_type.value)
+    post, files = parse_formdata(content_type, DATA)
 
     print (post.items())
 
