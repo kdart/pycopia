@@ -1463,11 +1463,9 @@ def get_root(session):
 
 # main program
 def dbcli(argv):
-    """dbcli [-?] [<database_url>]
+    """dbcli [-?]
 
 Provides an interactive session to the database.
-The argument may be a database URL. If not provide the URL specified on
-"database.conf" is used.
 
 Options:
    -?        = This help text.
@@ -1486,18 +1484,10 @@ Options:
             print (dbcli.__doc__)
             return
 
-    if args:
-        database = args[0]
-    else:
-        from pycopia import basicconfig
-        cf = basicconfig.get_config("database.conf")
-        database = cf.DATABASE_URL
-        del basicconfig, cf
-
     io = CLI.ConsoleIO()
     ui = CLI.UserInterface(io)
     cmd = DBSessionCommands(ui)
-    _session = models.get_session(database)
+    _session = models.get_session()
     cmd._setup(_session, "db> ")
     cmd._environ["session"] = _session
     parser = CLI.CommandParser(cmd,
@@ -1512,11 +1502,7 @@ Options:
         parser.interact()
 
 def dbconfig(argv):
-    """dbconfig [-?D] [<database_url>]
-
-Provides an interactive session to the database configuration table.
-The argument may be a database URL. If not provide the URL specified on
-"database.conf" is used.
+    """dbconfig [-?D]
 
 Options:
    -?        = This help text.
@@ -1538,18 +1524,10 @@ Options:
         if opt == "-D":
             from pycopia import autodebug
 
-    if args:
-        database = args[0]
-    else:
-        from pycopia import basicconfig
-        cf = basicconfig.get_config("database.conf")
-        database = cf.DATABASE_URL
-        del basicconfig, cf
-
     io = CLI.ConsoleIO()
     ui = CLI.UserInterface(io)
     cmd = ConfigCommands(ui)
-    _session = models.get_session(database)
+    _session = models.get_session()
     root = get_root(_session)
     cmd._setup(root, "%%Ydbconfig%%N:%s> " % (root.name,))
     cmd._environ["session"] = _session

@@ -65,8 +65,6 @@ def create_sessionmaker(url=None):
 
 SessionMaker = create_sessionmaker()
 
-# Get a database session instance from a database url. If URL is not
-# provided then get it from the database.conf configuration file.
 def get_session():
     return SessionMaker()
 

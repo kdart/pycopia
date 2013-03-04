@@ -144,16 +144,15 @@ class ContentHandler(object):
 
     Manages state and adds interface records when enough host data is collected.
     """
-    def __init__(self, dburl=None):
+    def __init__(self):
         self._state = NOTINTERESTED
-        self.dburl = dburl
         self.network = None
         self.session = None
         self._locator = None
         self._current_interface = None
 
     def startDocument(self):
-        self.session = models.get_session(self.dburl)
+        self.session = models.get_session()
 
     def endDocument(self):
         sess = self.session
@@ -263,8 +262,8 @@ class ErrorHandler(object):
 
 
 
-def get_parser(dburl, logfile=None, namespaces=0, validate=0, external_ges=0):
-    handler = ContentHandler(dburl)
+def get_parser(logfile=None, namespaces=0, validate=0, external_ges=0):
+    handler = ContentHandler()
     # create parser
     parser = xml.sax.sax2exts.XMLParserFactory.make_parser()
     parser.setFeature(xml.sax.handler.feature_namespaces, namespaces)
@@ -280,8 +279,8 @@ def get_parser(dburl, logfile=None, namespaces=0, validate=0, external_ges=0):
     return parser
 
 
-def import_nmap(filename, dburl=None):
-    parser = get_parser(dburl)
+def import_nmap(filename):
+    parser = get_parser()
     parser.parse(filename)
 
 

@@ -168,7 +168,7 @@ class HelpDialog(urwid.WidgetWrap):
 
 
 def main(argv):
-    """dbedit [-d] [<databaseurl>]
+    """dbedit [-d]
     """
     debug = 0
     try:
@@ -184,15 +184,8 @@ def main(argv):
             debug += 1
         elif opt == "-D":
             from pycopia import autodebug
-    if args:
-        database = args[0]
-    else:
-        from pycopia import basicconfig
-        cf = basicconfig.get_config("database.conf")
-        database = cf.DATABASE_URL
-        del basicconfig, cf
 
-    sess = models.get_session(database)
+    sess = models.get_session()
     try:
         app = DBEditor(sess, debug)
         try:
