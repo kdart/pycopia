@@ -23,6 +23,7 @@ Classes and functions for controlling, reading, and writing to co-processes.
 """
 
 import sys, os
+import fcntl
 from signal import signal
 from signal import SIGCHLD, SIGTERM, SIGSTOP, SIGCONT, SIGHUP, SIG_DFL, SIGINT
 from errno import EINTR, EBADF, ECHILD, EAGAIN, EIO
@@ -382,10 +383,13 @@ class ProcessPipe(Process):
         # now, fork the child connected by pipes
         p2cread, self._p_stdin = os.pipe()
         self._p_stdout, c2pwrite = os.pipe()
+        close_on_exec(self._p_stdin)
+        close_on_exec(self._p_stdout)
         if merge:
             self._stderr, c2perr = None, None
         else:
             self._stderr, c2perr = os.pipe()
+            close_on_exec(self._stderr)
         self.childpid = os.fork()
         self.childpid2 = None # for compatibility with pipeline
         if self.childpid == 0:
@@ -396,6 +400,7 @@ class ProcessPipe(Process):
             os.close(2)
             if os.dup(p2cread) != 0:
                 os._exit(127)
+            os.close(p2cread)
             if os.dup(c2pwrite) != 1:
                 os._exit(127)
             if merge:
@@ -404,6 +409,8 @@ class ProcessPipe(Process):
             else:
                 if os.dup(c2perr) != 2:
                     os._exit(127)
+                os.close(c2perr)
+            os.close(c2pwrite)
             remove_poller()
             try:
                 if pwent:
@@ -416,6 +423,7 @@ class ProcessPipe(Process):
                 os._exit(127)
             # Shouldn't come here
             os._exit(127)
+        # parent
         os.close(p2cread)
         os.close(c2pwrite)
         if c2perr:
@@ -519,6 +527,7 @@ class ProcessPty(Process):
         cmd = split_command_line(self.cmdline)
         try:
             pid, self._fd = os.forkpty()
+            close_on_exec(self._fd)
         except OSError as err:
             logging.error(str(err))
         else:
@@ -1128,8 +1137,12 @@ def getstatusoutput(cmd, logfile=None, env=None, callback=None):
     p.wait()
     return p.exitstatus, text
 
+def close_on_exec(fd):
+    flags = fcntl.fcntl(fd, fcntl.F_GETFD)
+    flags |= fcntl.FD_CLOEXEC
+    fcntl.fcntl(fd, fcntl.F_SETFD, flags)
+
 def set_nonblocking(fd, flag=1):
-    import fcntl
     flags = fcntl.fcntl(fd, fcntl.F_GETFL)
     if flag:
         flags |= os.O_NONBLOCK # set non-blocking

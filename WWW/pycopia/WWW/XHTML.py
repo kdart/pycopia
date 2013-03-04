@@ -2,8 +2,6 @@
 # -*- coding: utf8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:fenc=utf-8
 #
-# $Id$
-#
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -17,17 +15,25 @@
 #    Lesser General Public License for more details.
 
 """
-This package implements the XHTML specification using the XML.POM (Python
+This package implements the XHTML specification using the XML.POM (Pythonic
 Object Model).
 
 the XHTMLDocument class can be used to construct new XHTML documents.
 There are many helper methods to construct a document from dtd objects.
 
-You can use this as a pure-Python method of markup generation. No
-templates are required. I even use these classes with the Django
-framework.
+You can use this as a pure-Python method of markup generation. No templates are required. It can be
+used with the Pycopia web server framework, or other frameworks such as Django.
 
+The general pattern of constructor methods is this. If a method starts with *get_* then it is a
+factory method that construct an elemement node that is not attached to the document tree. Methods
+starting with *add_* call the same factory method but also adds (appends) the new object to the
+document tree at the node where it was called. Methods starting with *new_* add new element to the
+document tree that may be a more complex operation, or take additional parameters or build more
+complex subtrees. They also return the new object.
+
+When complete, the tree can be serialized by stringifying it, or by using the `emit` method.
 """
+
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals

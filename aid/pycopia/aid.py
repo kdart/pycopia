@@ -153,11 +153,8 @@ class Enums(list):
 
     def find(self, value):
         """Find the Enum with the given value."""
-        if type(value) is str:
-            return self.findstring(value)
-        else:
-            i = self.index(int(value))
-            return self[i]
+        i = self.index(int(value))
+        return self[i]
 
     def get_mapping(self):
         """Returns the enumerations as a dictionary with naems as keys."""

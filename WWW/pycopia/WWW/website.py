@@ -94,7 +94,6 @@ def start_proc_manager(config, logfile):
     from pycopia import scheduler
     from pycopia import asyncio
 
-    asyncio.start_sigio()
     pm = proctools.get_procmanager()
     libexec = config.get("LIBEXEC", "/usr/libexec/pycopia")
 
@@ -103,7 +102,7 @@ def start_proc_manager(config, logfile):
             print "Starting %s for %s." % (servername, name)
             p = pm.spawnpipe("%s/fcgi_server -n %s" % (libexec, servername), persistent=True, logfile=logfile)
             asyncio.poller.register(p)
-            scheduler.sleep(1.0) # give it time to init...
+            #scheduler.sleep(1.0) # give it time to init...
     if config.USEFRONTEND:
         lighttpd = proctools.which("lighttpd")
         if asyncio.poller:
