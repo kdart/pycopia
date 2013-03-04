@@ -1,10 +1,10 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 # Copyright (c) 2002, 2003, 2005, 2006 Allan Saddi <allan@saddi.com>
 # All rights reserved.
-# 
+
 # Modified for Pycopia (use subprocesses instead of threads) by
 # Keith Dart <keith.dart@gmail.com>.
 #
@@ -29,7 +29,9 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Id$
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
 
 """
 fcgi - a FastCGI/WSGI gateway.
@@ -61,6 +63,7 @@ import sys
 import os
 import signal
 import struct
+import fcntl
 import select
 import errno
 import traceback
@@ -137,6 +140,13 @@ if __debug__:
             f.close()
         except:
             pass
+
+
+def close_on_exec(fd):
+    flags = fcntl.fcntl(fd, fcntl.F_GETFD)
+    flags |= fcntl.FD_CLOEXEC
+    fcntl.fcntl(fd, fcntl.F_SETFD, flags)
+
 
 class InputStream(object):
     """
@@ -838,7 +848,7 @@ class FCGIServer(object):
         else:
             # Run as a server
             oldUmask = None
-            if type(self._bindAddress) is str:
+            if isinstance(self._bindAddress, str):
                 # Unix socket
                 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                 try:
@@ -853,7 +863,7 @@ class FCGIServer(object):
                 assert len(self._bindAddress) == 2
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
+            close_on_exec(sock.fileno())
             sock.bind(self._bindAddress)
             sock.listen(socket.SOMAXCONN)
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
@@ -13,6 +13,10 @@
 #        but WITHOUT ANY WARRANTY; without even the implied warranty of
 #        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the GNU
 #        Lesser General Public License for more details.
+
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
 
 """
 Web server using FCGI interface of lighttpd, adapted to WSGI.
@@ -29,6 +33,7 @@ from pycopia import passwd
 from pycopia import basicconfig
 from pycopia import module
 from pycopia.WWW import framework
+from pycopia import proctools
 
 from pycopia.inet.fcgi import FCGIServer
 
@@ -36,7 +41,6 @@ from pycopia.inet.fcgi import FCGIServer
 class ProcessManager(object):
     """Defines the process model the server uses."""
     def __init__(self, pwent=None):
-        from pycopia import proctools
         self._procmanager = proctools.get_procmanager()
         self._pwent = pwent
 
@@ -98,9 +102,9 @@ def kill_server(config):
     pid = check4server(config)
     if pid:
         os.kill(pid, signal.SIGTERM)
-        print "Killed %s (%s)." % (config.SERVERNAME, pid)
+        print ("Killed %s (%s)." % (config.SERVERNAME, pid))
     else:
-        print "%s not running." % (config.SERVERNAME,)
+        print ("%s not running." % (config.SERVERNAME,))
 
 
 def run_server(argv):
@@ -111,7 +115,7 @@ def run_server(argv):
     try:
         optlist, args = getopt.getopt(argv[1:], "dnh?kl:f:p:s:")
     except getopt.GetoptError:
-        print run_server._doc % (argv[0],)
+        print (run_server._doc % (argv[0],))
         return
 
     if len(args) > 0:
@@ -142,7 +146,7 @@ def run_server(argv):
         elif opt == "-s":
             socketpath = optarg
         elif opt in ("-h", "-?"):
-            print run_server._doc % (argv[0],)
+            print (run_server._doc % (argv[0],))
             return 2
 
     try:
