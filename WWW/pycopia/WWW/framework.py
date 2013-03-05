@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 1999-2007  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -280,6 +280,7 @@ def parse_formdata(contenttype, post_data):
 
 
 class HTTPRequest(object):
+    """The HTTP request that gets passed to handler methods."""
     def __init__(self, environ):
         self.environ = environ
         self.method = environ[b'REQUEST_METHOD'].upper()
@@ -755,6 +756,11 @@ class JSONRequestHandler(RequestHandler):
 
 
 def default_doc_constructor(**kwargs):
+    """Example document constructor.
+
+    This callback contructs the common elements to a response, usually
+    following some theme. It's use is optional.
+    """
     doc = HTML5.new_document()
     for name, val in kwargs.items():
         setattr(doc, name, val)
@@ -781,7 +787,9 @@ class ResponseDocument(object):
         if _constructor is not None:
             self._doc = _constructor(**kwargs)
         else:
-            self._doc = HTML5.new_document(**kwargs)
+            self._doc = doc = HTML5.new_document()
+            for name, val in kwargs.items():
+                setattr(doc, name, val)
         self.get_url = _request.get_url
         self.get_alias = _request.get_alias
         self.config = _request.config
