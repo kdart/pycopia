@@ -73,6 +73,7 @@ class Poll(object):
         self._idle_callbacks = {}
         self._idle_handle = 0
         self.pollster = select.epoll()
+        self.closed = False
         fd = self.pollster.fileno()
         flags = fcntl.fcntl(fd, fcntl.F_GETFD)
         flags |= fcntl.FD_CLOEXEC
@@ -106,7 +107,10 @@ class Poll(object):
             del self.smap[fd]
         except KeyError:
             return
-        self.pollster.unregister(fd)
+        try:
+            self.pollster.unregister(fd)
+        except IOError:
+            print("unregister of inactive fd:", fd, file=sys.stderr)
 
     def register_fd(self, fd, flags, callback):
         self.pollster.register(fd, flags)
@@ -215,6 +219,11 @@ class Poll(object):
     # instance. Therefore, supports the async interface itself.
     def fileno(self):
         return self.pollster.fileno()
+
+    def close(self):
+        if not self.closed:
+            self.pollster.close()
+            self.closed = True
 
     def readable(self):
         return bool(self.smap) or bool(self._fd_callbacks)
@@ -430,6 +439,14 @@ class AsyncWorkerHandler(PollerInterface):
         poller.modify(self)
         return len(data)
 
+    def inq(self):
+        """How many bytes are still in the kernel's input buffer?"""
+        return struct.unpack("I", fcntl.ioctl(self._sock.fileno(), SIOCINQ, '\0\0\0\0'))[0]
+
+    def outq(sock):
+        """How many bytes are still in the kernel's output buffer?"""
+        return struct.unpack("I", fcntl.ioctl(self._sock.fileno(), SIOCOUTQ, '\0\0\0\0'))[0]
+
     def readable(self):
         return self._state == CONNECTED
 
@@ -465,14 +482,6 @@ class AsyncWorkerHandler(PollerInterface):
 
     def exception_handler(self, ex, val, tb):
         print("AsyncWorkerHandler error: %s (%s)" % (ex, val), file=sys.stderr)
-
-    def inq(self):
-        """How many bytes are still in the kernel's input buffer?"""
-        return struct.unpack("I", fcntl.ioctl(self._sock.fileno(), SIOCINQ, '\0\0\0\0'))[0]
-
-    def outq(sock):
-        """How many bytes are still in the kernel's output buffer?"""
-        return struct.unpack("I", fcntl.ioctl(self._sock.fileno(), SIOCOUTQ, '\0\0\0\0'))[0]
 
 
 class AsyncClientHandler(PollerInterface):

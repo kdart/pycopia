@@ -48,29 +48,29 @@ class AuthenticationError(Exception):
     pass
 
 
-# global poller set when async operation is used.
-poller = None
-
-def get_poller():
-    global poller
-    from pycopia import asyncio
-    if poller is None:
+class _PollerCreator(object):
+    def __getattr__(self, name):
+        global poller
+        from pycopia import asyncio
         poller = asyncio.Poll()
-    return poller
+        return getattr(poller, name)
+
+# global poller set when async operation is used.
+poller = _PollerCreator()
 
 def remove_poller():
     global poller
-    if poller is not None:
+    if type(poller) is not _PollerCreator:
         poller.unregister_all()
-        poller = None
+        poller.close()
+        poller = _PollerCreator()
 
 
 class Process(object):
     """Abstract base class for Processes. Handles all process handling, and
     some common functionality. I/O is handled in subclasses.
     """
-    def __init__(self, cmdline, logfile=None, callback=None, async=False,
-            flags=0, devnull=False):
+    def __init__(self, cmdline, logfile=None, callback=None, async=False):
         self.cmdline = cmdline
         self.deadchild = 0
         self.closed = False
@@ -83,7 +83,6 @@ class Process(object):
         self.exitstatus = None
         self._environment = None
         self._async = bool(async) # use asyncio, or not
-        self._flags = int(flags)
         self._authtoken = None
 
     def __enter__(self):
@@ -101,7 +100,8 @@ class Process(object):
         self.closed = True
 
     def __repr__(self):
-        return "%s(%r, %r)" % (self.__class__.__name__, self.cmdline, self._log)
+        return "{0}({1!r}, async={2!r})".format(
+                self.__class__.__name__, self.cmdline, self._async)
 
     def __str__(self):
         if self.deadchild:
@@ -411,7 +411,6 @@ class ProcessPipe(Process):
                     os._exit(127)
                 os.close(c2perr)
             os.close(c2pwrite)
-            remove_poller()
             try:
                 if pwent:
                     run_as(pwent)
@@ -532,7 +531,6 @@ class ProcessPty(Process):
             logging.error(str(err))
         else:
             if pid == 0: # child
-                remove_poller()
                 if devnull:
                     # Redirect standard file descriptors.
                     sys.stdout.flush()
@@ -641,11 +639,6 @@ class ProcessPty(Process):
         return next
 
 
-# A process connected by a named pipe
-# XXX
-class ProcessNamedPipe(Process):
-    pass
-
 
 class CoProcessPty(ProcessPty):
     def __init__(self, method, logfile=None, env=None,
@@ -706,7 +699,7 @@ class SubProcess(Process):
         self.childpid = pid
         self.childpid2 = None # for compatibility with pipeline
 
-# XXX need a more general pipeline
+# TODO need a more general pipeline
 class ProcessPipeline(ProcessPipe):
     """Connects two commands via a pipe, they appear as one process object."""
     def __init__(self, cmdline, logfile=None,  env=None, callback=None,
@@ -763,12 +756,6 @@ class ProcessPipeline(ProcessPipe):
             os.execvp(cmd[0], cmd)
 
 
-# this is the SIGCHLD signal handler
-def _child_handler(sig, stack):
-    procmanager.waitpid(-1, os.WNOHANG)
-    # reset handler
-    signal(SIGCHLD, _child_handler)
-
 class ProcManager(object):
     """An instance of ProcManager manages a collection of child processes. It
 is a singleton, and you should use the get_procmanager() factory function
@@ -777,7 +764,7 @@ to get the instance.  """
     def __init__(self):
         self._pgid = os.getpgid(0)
         self._procs = {}
-        signal(SIGCHLD, _child_handler)
+        signal(SIGCHLD, self._child_handler)
 
     def __len__(self):
         return len(self._procs)
@@ -787,6 +774,12 @@ to get the instance.  """
         for p in self.getprocs():
             s.append(str(p))
         return "\n".join(s)
+
+    # this is the SIGCHLD signal handler
+    def _child_handler(self, sig, stack):
+        self.waitpid(-1, os.WNOHANG)
+        # reset handler
+        signal(SIGCHLD, self._child_handler)
 
     def spawnprocess(self, pklass, cmd, logfile=None, env=None, callback=None,
                 persistent=False, merge=True, pwent=None, async=False, devnull=False):
@@ -800,12 +793,12 @@ ProcessPipe.  """
         proc = pklass(cmd, logfile=logfile, env=env, callback=callback,
                     merge=merge, pwent=pwent, async=async, devnull=devnull, _pgid=self._pgid)
         self._procs[proc.childpid] = proc
-        # XXX need a more general pipeline
+        # TODO need a more general pipeline
         if proc.childpid2:
             self._procs[proc.childpid2] = proc
-        signal(SIGCHLD, _child_handler)
         if proc._async:
-            get_poller().register(proc)
+            poller.register(proc)
+        signal(SIGCHLD, self._child_handler)
         return proc
 
     def spawnpipe(self, cmd, logfile=None, env=None, callback=None,
@@ -859,9 +852,9 @@ times the process will be respawned if the previous invocation dies.  """
                 rv = 0
             os._exit(rv)
         self._procs[proc.childpid] = proc
-        signal(SIGCHLD, _child_handler)
+        signal(SIGCHLD, self._child_handler)
         if proc._async:
-            get_poller().register(proc)
+            poller.register(proc)
         return proc
 
     def subprocess(self, _method, *args, **kwargs):
@@ -905,7 +898,7 @@ times the process will be respawned if the previous invocation dies.  """
             os._exit(rv)
         else:
             self._procs[proc.childpid] = proc
-            signal(SIGCHLD, _child_handler)
+            signal(SIGCHLD, self._child_handler)
             return proc
 
     # introspection and query methods
@@ -969,7 +962,7 @@ times the process will be respawned if the previous invocation dies.  """
         signal(SIGCHLD, SIG_DFL) # critical area
         newproc = proc.clone()
         self._procs[newproc.childpid] = newproc
-        signal(SIGCHLD, _child_handler)
+        signal(SIGCHLD, self._child_handler)
         return newproc
 
     def respawn_callback(self, deadproc):
@@ -1029,18 +1022,17 @@ times the process will be respawned if the previous invocation dies.  """
                     es = ExitStatus(proc.cmdline, sts)
                     proc.set_exitstatus(es)
                     if es.state != ExitStatus.STOPPED: # XXX untested with stopped processes
-                        if proc._async:
-                            poller.unregister(proc)
                         proc.dead()
+                        if proc._async and not proc.closed:
+                            poller.unregister(proc)
                         del self._procs[pid]
 
     def loop(self, timeout=-1.0, callback=NULL):
-        while True:
-            poller.loop(timeout, callback)
-            # If a respawn is scheduled don't exit yet.
-            if not scheduler.get_scheduler():
-                break
-            else:
+        while self._procs:
+            poller.poll(timeout)
+            self.waitpid(-1, os.WNOHANG) # check for zombies
+            callback(self)
+            if scheduler.get_scheduler(): # wait for any restarts
                 scheduler.sleep(1.5)
 
     def flushlogs(self):
