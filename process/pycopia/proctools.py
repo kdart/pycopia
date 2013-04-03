@@ -24,7 +24,7 @@ Classes and functions for controlling, reading, and writing to co-processes.
 
 import sys, os
 import fcntl
-from signal import signal
+import signal
 from signal import SIGCHLD, SIGTERM, SIGSTOP, SIGCONT, SIGHUP, SIG_DFL, SIGINT
 from errno import EINTR, EBADF, ECHILD, EAGAIN, EIO
 
@@ -764,7 +764,8 @@ to get the instance.  """
     def __init__(self):
         self._pgid = os.getpgid(0)
         self._procs = {}
-        signal(SIGCHLD, self._child_handler)
+        signal.signal(SIGCHLD, self._child_handler)
+        signal.siginterrupt(SIGCHLD, False)
 
     def __len__(self):
         return len(self._procs)
@@ -775,11 +776,6 @@ to get the instance.  """
             s.append(str(p))
         return "\n".join(s)
 
-    # this is the SIGCHLD signal handler
-    def _child_handler(self, sig, stack):
-        self.waitpid(-1, os.WNOHANG)
-        # reset handler
-        signal(SIGCHLD, self._child_handler)
 
     def spawnprocess(self, pklass, cmd, logfile=None, env=None, callback=None,
                 persistent=False, merge=True, pwent=None, async=False, devnull=False):
@@ -789,7 +785,7 @@ ProcessPipe.  """
 
         if persistent and (callback is None):
             callback = self.respawn_callback
-        signal(SIGCHLD, SIG_DFL) # critical area
+        signal.signal(SIGCHLD, SIG_DFL) # critical area
         proc = pklass(cmd, logfile=logfile, env=env, callback=callback,
                     merge=merge, pwent=pwent, async=async, devnull=devnull, _pgid=self._pgid)
         self._procs[proc.childpid] = proc
@@ -798,7 +794,8 @@ ProcessPipe.  """
             self._procs[proc.childpid2] = proc
         if proc._async:
             poller.register(proc)
-        signal(SIGCHLD, self._child_handler)
+        signal.signal(SIGCHLD, self._child_handler)
+        signal.siginterrupt(SIGCHLD, False)
         return proc
 
     def spawnpipe(self, cmd, logfile=None, env=None, callback=None,
@@ -824,7 +821,7 @@ times the process will be respawned if the previous invocation dies.  """
                     persistent, merge, pwent, async, devnull)
 
     def coprocess(self, method, args=(), logfile=None, env=None, callback=None, async=False):
-        signal(SIGCHLD, SIG_DFL) # critical area
+        signal.signal(SIGCHLD, SIG_DFL) # critical area
         proc = CoProcessPipe(method, logfile=logfile, env=env, callback=callback, async=async)
         if proc.childpid == 0:
             os.setpgid(0, self._pgid)
@@ -852,7 +849,8 @@ times the process will be respawned if the previous invocation dies.  """
                 rv = 0
             os._exit(rv)
         self._procs[proc.childpid] = proc
-        signal(SIGCHLD, self._child_handler)
+        signal.signal(SIGCHLD, self._child_handler)
+        signal.siginterrupt(SIGCHLD, False)
         if proc._async:
             poller.register(proc)
         return proc
@@ -863,7 +861,7 @@ times the process will be respawned if the previous invocation dies.  """
     def submethod(self, _method, args=None, kwargs=None, pwent=None):
         args = args or ()
         kwargs = kwargs or {}
-        signal(SIGCHLD, SIG_DFL) # critical area
+        signal.signal(SIGCHLD, SIG_DFL) # critical area
         proc = SubProcess(pwent=pwent)
         if proc.childpid == 0: # in child
             os.setpgid(0, self._pgid)
@@ -898,7 +896,8 @@ times the process will be respawned if the previous invocation dies.  """
             os._exit(rv)
         else:
             self._procs[proc.childpid] = proc
-            signal(SIGCHLD, self._child_handler)
+            signal.signal(SIGCHLD, self._child_handler)
+            signal.siginterrupt(SIGCHLD, False)
             return proc
 
     # introspection and query methods
@@ -959,10 +958,11 @@ times the process will be respawned if the previous invocation dies.  """
                 del procs
             else:
                 return
-        signal(SIGCHLD, SIG_DFL) # critical area
+        signal.signal(SIGCHLD, SIG_DFL) # critical area
         newproc = proc.clone()
         self._procs[newproc.childpid] = newproc
-        signal(SIGCHLD, self._child_handler)
+        signal.signal(SIGCHLD, self._child_handler)
+        signal.siginterrupt(SIGCHLD, False)
         return newproc
 
     def respawn_callback(self, deadproc):
@@ -988,49 +988,64 @@ times the process will be respawned if the previous invocation dies.  """
         if new._async:
             poller.register(new)
 
+    # this is the SIGCHLD signal handler
+    def _child_handler(self, sig, stack):
+        #self.waitpid(-1, os.WNOHANG)
+        # reset handler
+        #signal.signal(SIGCHLD, self._child_handler)
+        pid = -1
+        while pid != 0: # loop to collect all pending exited processes
+            try:
+                pid, sts = os.waitpid(-1, os.WNOHANG)
+            except OSError as why:
+                if why.errno == ECHILD: # no children left
+                    break
+                else:
+                    raise
+            self._proc_status(pid, sts)
+        signal.signal(SIGCHLD, self._child_handler)
+        signal.siginterrupt(SIGCHLD, False)
+
+    def waitpid(self, pid, option=0):
+        while 1:
+            try:
+                pid, sts = os.waitpid(pid, option)
+            except EnvironmentError as why:
+                if why.errno == ECHILD: # no children left
+                    return None
+                elif why.errno == EINTR:
+                    continue
+                else:
+                    raise
+        return self._proc_status(pid, sts)
+
     def waitproc(self, proc, option=0): # waits for a Process object.
         """waitproc(process, [option])
         Waits for a process object to finish. Works like os.waitpid, but takes a
         process object instead of a process ID.
         """
-        pid = int(proc)
-        if pid in self._procs:
-            if (option & os.WNOHANG):
-                return
-            self.waitpid(pid, 0)
+        return self.waitpid(proc.childpid, option)
 
-    def waitpid(self, pid, option=0):
-        while 1: # loop to collect all pending exited processes
-            try:
-                pid, sts = os.waitpid(pid, option)
-            except EnvironmentError as why:
-                if why.errno == ECHILD: # no children left
-                    break
-                elif why.errno == EINTR:
-                    continue
-                else:
-                    raise
-            else:
-                if pid == 0: # no child ready
-                    break
-                else:
-                    try:
-                        proc = self._procs[pid]
-                    except KeyError:
-                        logging.warning("warning: caught SIGCHLD for unmanaged process (pid: %s).\n" % pid)
-                        continue
-                    es = ExitStatus(proc.cmdline, sts)
-                    proc.set_exitstatus(es)
-                    if es.state != ExitStatus.STOPPED: # XXX untested with stopped processes
-                        proc.dead()
-                        if proc._async and not proc.closed:
-                            poller.unregister(proc)
-                        del self._procs[pid]
+    def _proc_status(self, pid, sts):
+        try:
+            proc = self._procs[pid]
+        except KeyError:
+            logging.warning("Wait on unmanaged process (pid: %s)." % pid)
+            cmdline = ProcStat(pid).cmdline
+            return ExitStatus(cmdline, sts)
+        es = ExitStatus(proc.cmdline, sts)
+        proc.set_exitstatus(es)
+        if es.state != ExitStatus.STOPPED: # XXX untested with stopped processes
+            proc.dead()
+            if proc._async and not proc.closed:
+                poller.unregister(proc)
+            del self._procs[pid]
+        return es
 
     def loop(self, timeout=-1.0, callback=NULL):
         while self._procs:
             poller.poll(timeout)
-            self.waitpid(-1, os.WNOHANG) # check for zombies
+            #self.waitpid(-1, os.WNOHANG) # check for zombies
             callback(self)
             if scheduler.get_scheduler(): # wait for any restarts
                 scheduler.sleep(1.5)
@@ -1054,7 +1069,7 @@ instance. Always use this factory function to get it."""
 
 def remove_procmanager():
     global procmanager
-    signal(SIGCHLD, SIG_DFL)
+    signal.signal(SIGCHLD, SIG_DFL)
     del procmanager
 
 #######################################
