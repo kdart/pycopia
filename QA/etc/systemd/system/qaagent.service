@@ -1,0 +1,12 @@
+[Unit]
+Description=Pycopia QA Agent
+
+[Service]
+Type=forking
+PIDFile=/run/qaagentd.pid
+User=root
+ExecStart=/usr/local/bin/qaagentd -p /run/qaagentd.pid
+
+[Install]
+WantedBy=multi-user.target
+

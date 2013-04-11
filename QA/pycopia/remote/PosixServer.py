@@ -498,20 +498,22 @@ class PosixAgent(object):
 ###################################
 ######## main program #############
 
-_DOC = """qaagentd [-nh?]
+_DOC = """qaagentd [-nh?] [-p <pidfile>]
 
 Starts the Posix QA agent (server).
 
 Where:
     -n = Do NOT run as a daemon, but stay in foreground.
+    -p = Write the process ID to this file.
 
 """
 
 def run_server(argv):
     import getopt
     do_daemon = True
+    pidfile = None
     try:
-        optlist, args = getopt.getopt(argv[1:], "nh?")
+        optlist, args = getopt.getopt(argv[1:], "nh?p:")
     except getopt.GetoptError:
         print(_DOC)
         sys.exit(2)
@@ -522,17 +524,23 @@ def run_server(argv):
             return
         elif opt == "-n":
             do_daemon = False
+        elif opt == "-p":
+            pidfile = optarg
 
     if do_daemon:
         from pycopia import daemonize
-        daemonize.daemonize()
+        daemonize.daemonize(pidfile=pidfile)
 
     logging.msg("qaagent", "initializing")
     h = pyro.register_server(PosixAgent())
     def _exit_checker(poller):
         if _EXIT:
             pyro.unregister_server(h)
-    pyro.loop(2.0, _exit_checker)
+    try:
+        pyro.loop(2.0, _exit_checker)
+    finally:
+        if do_daemon and pidfile:
+            os.unlink(pidfile)
 
 
 

@@ -50,6 +50,8 @@ if platinfo.is_linux():
         DATA_FILES.append(('/etc/init.d', glob("etc/init.d/gentoo/*")))
     elif platinfo.is_redhat():
         DATA_FILES.append(('/etc/init.d', glob("etc/init.d/redhat/*")))
+    if os.path.isdir("/etc/systemd/system"):
+        DATA_FILES.append(('/etc/systemd/system', glob("etc/systemd/system/*")))
     SCRIPTS = glob("bin/*")
 
     WEBSITE = os.environ.get("WEBSITE", "localhost")
