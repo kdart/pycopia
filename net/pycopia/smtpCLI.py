@@ -15,6 +15,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+
 """
 Defines an interactive command line that wraps an SMTP session.
 
@@ -248,7 +250,7 @@ Provides an interactive session at a protocol level to an SMTP server.
     try:
         optlist, longopts, args = getopt.getopt(argv[1:], "b:hp:s:l:g")
     except getopt.GetoptError:
-            print smtpcli.__doc__
+            print (smtpcli.__doc__)
             return
     for opt, val in optlist:
         if opt == "-b":
@@ -260,13 +262,13 @@ Provides an interactive session at a protocol level to an SMTP server.
         elif opt == "-g":
             paged = True
         elif opt == "-h":
-            print smtpcli.__doc__
+            print (smtpcli.__doc__)
             return
         elif opt == "-p":
             try:
                 port = int(val)
             except ValueError:
-                print smtpcli.__doc__
+                print (smtpcli.__doc__)
                 return
 
     theme = UI.DefaultTheme(PROMPT)

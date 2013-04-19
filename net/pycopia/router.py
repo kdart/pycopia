@@ -625,6 +625,7 @@ class Impairment(object):
 
     def __nonzero__(self):
         return len(self._impairments)
+    __bool__ = __nonzero__
 
     def __add__(self, other):
         return self._perform_op(other, operator.add)

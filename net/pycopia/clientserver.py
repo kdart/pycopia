@@ -17,12 +17,19 @@
 """
 Generic server builder for creating networked client-server protocols that are
 text based. Provides both a thread based and subprocess based handler model.
+Intended to simplify simple, low-volume client-server applications.
 """
 
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
+__all__ = ['ForkingModel', 'ThreadProcessModel', 'SyncronousModel',
+        'StreamWorker', 'DatagramWorker', 'TCPWorker', 'UDPWorker', 'UnixStreamWorker',
+        'UnixDatagramWorker', 'Server', 'StreamServer', 'DatagramServer', 'TCPServer',
+        'UDPServer', 'UnixStreamServer', 'UnixDatagramServer', 'TCPClient',
+        'UnixStreamClient', 'UDPClient', 'UnixDatagramClient', 'get_client', 'get_server'
+    ]
 
 import sys
 
@@ -378,21 +385,18 @@ class DefaultProtocol(protocols.Protocol):
 
 
 # helper to import a named object
-def _get_module(name):
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
+def _get_class(name):
+    parts = name.split(".")
+    modname = ".".join(parts[:-1])
+    __import__(modname)
+    return getattr(sys.modules[modname], parts[-1])
 
 def get_client(name, dest, protocol, port=None, logfile=None):
     """Factory function for getting a proper client object.
-    Provide the name of the client class, proper destination addrss, and protcol object.
+    Provide the name of the client class, proper destination address, and protocol object.
     """
     if type(name) is str:
-        parts = name.split(".")
-        mod = _get_module(".".join(parts[:-1]))
-        clientclass = getattr(mod, parts[-1])
+        clientclass = _get_class(name)
     elif type(name) is type:
         clientclass = name
     else:
@@ -415,9 +419,7 @@ def get_server(name, protocol, host=None, port=None, path=None, debug=False):
     Returns the appropriate type of server for it.
     """
     if type(name) is str:
-        parts = name.split(".")
-        mod = _get_module(".".join(parts[:-1]))
-        workerclass = getattr(mod, parts[-1])
+        workerclass = _get_class(name)
     elif type(name) is type:
         workerclass = name
     else:

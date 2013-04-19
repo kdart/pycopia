@@ -27,14 +27,25 @@ from __future__ import division
 
 
 from pycopia.ssl import certs
+from pycopia.ssl import operations
 from pycopia import CLI
 
 
 class SSLCommands(CLI.BaseCommands):
+
+    def key(self, argv):
+        """key {generate | load | save}
+    Create or load and save a private key.  """
+        subcmd = argv[1]
+        if subcmd.startswith("gen"):
+            pass
+
+
+class ClientCommands(SSLCommands):
     pass
 
 
-class CertsCommands(CLI.BaseCommands):
+class CACommands(SSLCommands):
     pass
 
 

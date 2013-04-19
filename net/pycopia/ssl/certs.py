@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 2012 and onwards, Keith Dart <keith@dartworks.biz>
+#    Copyright (C) 2012- Keith Dart <keith@dartworks.biz>
 #
 # LICENSE: Apache 2 due to use of pyOpenSSL module (This is a derived work).
 #
@@ -53,6 +53,13 @@ _FILETYPES = {
 VERSION_1 = 0
 VERSION_2 = 1
 VERSION_3 = 2
+
+
+class CertError(Exception):
+    pass
+
+class ExtensionEncodingError(CertError):
+    pass
 
 
 class CertificateRequest(object):
@@ -131,7 +138,7 @@ class CertificateRequest(object):
 
 
 class PrivateKey(object):
-    def __init__(self, filename=None, text=None, passphrase=None, 
+    def __init__(self, filename=None, text=None, passphrase=None,
             filetype="pem", bits=2048, _key=None):
         self.__passphrase = passphrase # can also be a callable
         if _key is not None:
@@ -192,10 +199,10 @@ class Certificate(object):
         self._cert = cert
 
     def _get_subject(self):
-        return self._cert.get_subject()
+        return DistinguishedName(_dn=self._cert.get_subject())
 
     def _set_subject(self, subj):
-        return DistinguishedName(_dn=self._cert.set_subject(subj))
+        self._cert.set_subject(subj)
 
     subject = property(_get_subject, _set_subject)
 
@@ -369,6 +376,10 @@ class Extension(object):
                 ext.get_short_name(),
                 "critical," if self._ext.get_critical() else "",
                 str(ext).strip())
+
+    def _der_(self):
+        return self._ext.get_data()
+
 
 # The following are specialized extensions with appropriate constructors.
 
@@ -614,6 +625,12 @@ def get_type_and_text(filename):
     return ftype, text
 
 
+def der(obj):
+    try:
+        return obj._der_()
+    except AttributeError:
+        raise ExtensionEncodingError("Not an extension object: {!r}".format(obj))
+
 
 if __name__ == "__main__":
     import sys
@@ -630,7 +647,7 @@ if __name__ == "__main__":
     ektext = pw.encrypt(b"secret")
     print(repr(ektext))
     npw = PrivateKey(text=ektext, passphrase=b"secret")
-    npw.emit(sys.stdout)
+    #npw.emit(sys.stdout)
 
     cert = Certificate()
     dt = now_utc()
@@ -642,14 +659,14 @@ if __name__ == "__main__":
         print(gext)
         print('----------')
 
-    cacert = Certificate(filename="/etc/pycopia/ssl/CA/cacert.pem")
+    #cacert = Certificate(filename="/etc/pycopia/ssl/CA/cacert.pem")
 
     cert = Certificate(filename="/var/tmp/github.pem")
     print(cert.subject)
     print(cert.issuer)
     print(cert.notafter)
 
-    print("Extensions")
+    print(b"\n== Extensions :")
     rawext = crypto.X509Extension("keyUsage", False, "digitalSignature, nonRepudiation")
     ext = Extension(_ext=rawext)
     print(ext)
@@ -660,7 +677,7 @@ if __name__ == "__main__":
     print( BasicConstraints(is_ca=False) )
     print( ExtendedKeyUsage( ["serverAuth", "clientAuth"] ) )
     print( SubjectKeyIdentifier(cert) )
-    print( AuthorityKeyIdentifier(cacert) )
+    #print( AuthorityKeyIdentifier(cacert) )
     print( SubjectAltName(["my@other.address", "http://my.url.here/"]) )
     print( SubjectAltName(["192.168.7.1"]) )
     print( SubjectAltName(["13::17"]) )
@@ -700,4 +717,6 @@ if __name__ == "__main__":
     req.sign(npw)
     with open("/tmp/testreq.pem", "w+") as fo:
         req.emit(fo)
+    with open("/tmp/testreq.key", "w+") as fo:
+        npw.emit(fo)
 

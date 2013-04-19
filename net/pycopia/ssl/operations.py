@@ -60,6 +60,8 @@ def certificate_request(filename, country=None, state=None, locality=None, organ
         fo.write(ektext)
 
 
+def certificate_sign():
+    pass
 
 
 if __name__ == "__main__":
