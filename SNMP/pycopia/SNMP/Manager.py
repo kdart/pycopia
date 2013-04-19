@@ -1,7 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -12,9 +12,13 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
-
+Base objects for Manager roles.
 """
 
 import sys
@@ -45,7 +49,7 @@ class InterfaceEntry(object):
         self.adminstatus = int(adminstatus)
         self.mtu = int(mtu)
         self.address = str(address)
-        self.speed = long(speed)
+        self.speed = int(speed)
         self.iftype = int(iftype)
 
     def __str__(self):
@@ -57,25 +61,25 @@ class InterfaceTable(object):
         self.hostname = hostname
         self._entries = {}
         self._byindex = {}
-    
+
     def __str__(self):
         s = ["Interfaces for %s:\n  Name                 (ifindex)" % (self.hostname,)]
-        names = self._entries.keys()
+        names = list(self._entries.keys())
         names.sort()
         for name in names:
             s.append(str(self._entries[name]))
         return "\n".join(s)
-    
+
     def add_entry(self, If):
         name = str(If.ifDescr)
         ifindex = int(If.ifIndex)
-        e = InterfaceEntry(name, ifindex, If.ifAdminStatus, If.ifMtu, 
+        e = InterfaceEntry(name, ifindex, If.ifAdminStatus, If.ifMtu,
                 If.ifPhysAddress, If.ifSpeed, If.ifType)
         self._entries[name] = e
         self._byindex[ifindex] = e
-    
+
     def __iter__(self):
-        return self._entries.itervalues()
+        return iter(self._entries.values())
 
     def __getitem__(self, key):
         if type(key) is str:
@@ -83,7 +87,7 @@ class InterfaceTable(object):
         elif type(key) is int:
             return self._byindex[key]
         else:
-            raise KeyError, "invalid key type"
+            raise KeyError("invalid key type")
 
 
 
@@ -104,7 +108,7 @@ device = Manager( snmp_session )
         if hasattr(sess, "get"):
             self.__dict__["session"] = sess
         else:
-            raise TypeError, "Manager: must instantiate with SNMP session."
+            raise TypeError("Manager: must instantiate with SNMP session.")
         self.__dict__["hostname"] = self.session.sessiondata.agent
         self.__dict__["scalars"] = {}
         self.__dict__["rows"] = {}
@@ -139,7 +143,7 @@ device = Manager( snmp_session )
 
     # introspection interfaces
     def get_row_names(self):
-        l = self.rows.keys()
+        l = list(self.rows.keys())
         l.sort()
         return l
     # alias methods
@@ -150,25 +154,20 @@ device = Manager( snmp_session )
         """get_scalar_names()
         returns a list of scalar attributes for the managed device.
         """
-        l = self.scalars.keys()
-        l.sort()
-        return l
-    get_attributes = get_scalar_names 
+        return sorted(self.scalars.keys())
+    get_attributes = get_scalar_names
 
     def get_notification_names(self):
-        l = self.notifications.keys()
-        l.sort()
-        return l
+        return sorted(self.notifications.keys())
 
     ### object retrieval methods
     # get_scalars is most efficient way of getting a set of scalars
     def get_scalars(self, *args):
         vbl = Basetypes.VarBindList()
-        scalar_c = map(lambda on: self.scalars[on], args)
-        map(lambda o: vbl.append(Basetypes.VarBind(o.OID+[0])), scalar_c)
+        for o in [self.scalars[on] for on in args]:
+            vbl.append(Basetypes.VarBind(o.OID+[0]))
         return_vbl = self.session.get_varbindlist(vbl)
-        rv = map(lambda vb: vb.value, return_vbl)
-        return tuple(rv)
+        return tuple([vb.value for vb in return_vbl])
 
     def getall(self, mangledname, indexoid=None):
         """getall(tablename, [indexoid=False])
@@ -177,7 +176,6 @@ device = Manager( snmp_session )
         objects retrieved to that index value. If the row has multiple indexes,
         you must supply a value in the order that the index is listed in the
         MIB.
-
         """
         t = Objects.ObjectTable(self.rows[mangledname])
         t.fetch(self.session)
@@ -222,7 +220,7 @@ device = Manager( snmp_session )
     def create(self, rowname, *indexargs, **kwargs):
         rowobj = self.rows[rowname]()
         args = (self.session,)+indexargs
-        row = apply(rowobj.createAndGo, args, kwargs)
+        row = rowobj.createAndGo(*args, **kwargs)
         row.set_session(self.session)
         return row
 
@@ -234,7 +232,7 @@ device = Manager( snmp_session )
     def create_wait(self, rowname, *indexargs, **kwargs):
         rowobj = self.rows[rowname]()
         args = (self.session,) + indexargs
-        row = apply(rowobj.createAndWait, args, kwargs)
+        row = rowobj.createAndWait(*args, **kwargs)
         row.set_session(self.session)
         return row
 
@@ -256,7 +254,7 @@ def get_manager(device, community, manager_class=Manager, mibs=None):
     dev = manager_class(sess)
     if mibs:
         if type(mibs[0]) is str:
-            mibs = map(lambda n: __import__("pycopia.mibs.%s" % n, globals(), locals(), ["*"]), mibs)
+            mibs = list([__import__("pycopia.mibs.%s" % n, globals(), locals(), ["*"]) for n in mibs])
         dev.add_mibs(mibs)
     return dev
 

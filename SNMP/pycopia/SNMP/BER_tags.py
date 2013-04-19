@@ -1,7 +1,5 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -14,10 +12,14 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 from pycopia.aid import Enum
 
-_FLAGS = { 
+_FLAGS = {
     'UNIVERSAL': 0x00,
     'APPLICATION' : 0x40,
     'CONTEXT' : 0x80,
@@ -70,12 +72,12 @@ ENDOFMIBVIEW            = Enum(0x02|_FLAGS['CONTEXT'], 'endOfMibView')
 if __name__ == "__main__":
     import sys
     from pycopia.aid import str2hex
-    print "%20s | %6s | %6.6s | %s" % ("Token name", "intval", "hexstr", "Enum name")
-    print "--------------------------------------------------------------------------"
+    print ("%20s | %6s | %6.6s | %s" % ("Token name", "intval", "hexstr", "Enum name"))
+    print ("--------------------------------------------------------------------------")
     for _tn in dir(sys.modules[__name__]):
         if _tn.startswith("_"):
             continue
         val = getattr(sys.modules[__name__], _tn)
         if type(val) is Enum:
-            print "%20s | %6d | %6.6s | %s" % (_tn, val, str2hex(chr(val)), val)
+            print ("%20s | %6d | %6.6s | %s" % (_tn, val, str2hex(chr(val)), val))
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -12,13 +12,16 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
 Device manager for the APC managed power.
 Note that the APC uses SNMPv1.
 
 """
-
 
 import sys
 
@@ -120,7 +123,7 @@ class OutletConfigReport(object):
         self._entries.sort()
     def __str__(self):
         s = ["Outlet Name               Mode"]
-        s.extend(map(lambda t: "%-6.6s %-18.18s %s" % t, self._entries))
+        s.extend(["%-6.6s %-18.18s %s" % t for t in self._entries])
         return "\n".join(s)
 
 class OutletControls(object):
@@ -131,8 +134,8 @@ class OutletControls(object):
     def __str__(self):
         s = []
         for outlet in self._entries:
-            s.append("%-6.6s %-18.18s %s" % (outlet.sPDUOutletControlMSPOutletIndex, 
-                outlet.sPDUOutletControlMSPOutletName, 
+            s.append("%-6.6s %-18.18s %s" % (outlet.sPDUOutletControlMSPOutletIndex,
+                outlet.sPDUOutletControlMSPOutletName,
                 outlet.sPDUOutletControlMSPOutletCommand))
         s.insert(0, "Outlet Name               Status")
         return "\n".join(s)
@@ -176,7 +179,7 @@ class OutletControlMSP(PowerNet_MIB.sPDUOutletControlMSPEntry):
         """Setting this variable to gracefulshutdownMSP (6) will cause the outlet to wait for
        device confirmation (if applicable) and then turn the outlet off after the
        sPDUOutletConfigMSPPowerOffDelay OID time has elapsed.  The outlet will then turn
-       on after the sum of the sPDUOutletConfigMSPRestartTime OID time and the 
+       on after the sum of the sPDUOutletConfigMSPRestartTime OID time and the
        sPDUOutletConfigMSPPowerOnDelay OID time has elapsed. """
         self._control( self._get_enums(5))
 

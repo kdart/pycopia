@@ -1,9 +1,7 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -40,7 +38,7 @@ box.add_mibs("SNMPv2_MIB", "UDP_MIB")
 # 5. now do stuff with the device!
 print "System Name       :", box.sysName
 print "System Uptime     :", box.sysUpTime
- 
+
 """
 
 __all__ = ["Basetypes", "Manager", "Agent", "Objects"]
@@ -55,7 +53,7 @@ class NMSException(Exception):
 
 class SNMPException(NMSException):
     value = -1
-    
+
 # SNMP module specific exceptions
 class SNMPBadParameters(SNMPException):
     value = 0
@@ -115,7 +113,7 @@ class BERBadArgument(BERError):
 class SNMPError(SNMPException):
     value = -1
     def __str__(self):
-        return _SNMP_ERROR_STRINGS[self.__class__.value] 
+        return _SNMP_ERROR_STRINGS[self.__class__.value]
 
 class SNMPnoError(SNMPError):
     value = 0

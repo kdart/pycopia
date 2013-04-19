@@ -2,6 +2,9 @@
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=0:smarttab
 
+from __future__ import print_function
+from __future__ import division
+
 import sys
 
 from pycopia.Devices import EtherSwitch
@@ -11,10 +14,10 @@ def get_vlan_table(argv):
         agent = argv[1]
         community = argv[2]
     except IndexError:
-        print "%s <hostname> <communityname>" % (argv[0],)
+        print ("%s <hostname> <communityname>" % (argv[0],))
         return
     manager = EtherSwitch.get_manager(agent, community)
-    print manager.get_vlan_table()
+    print (manager.get_vlan_table())
 
 get_vlan_table(sys.argv)
 

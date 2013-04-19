@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -12,6 +12,13 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
+"""
+Decode BER.
+"""
 
 import sys
 from struct import pack, unpack
@@ -38,7 +45,7 @@ class TLV(object):
         try:
             return DECODE_METHODS[self.tag](self.length, self.value)
         except KeyError:
-            raise BERUnknownTag, "TLV.decode: tag %r is unknown" % (str2hex(self.tag),)
+            raise BERUnknownTag("TLV.decode: tag %r is unknown" % (str2hex(self.tag),))
 
 def get_tlv(message):
     if len(message) > 1:
@@ -47,7 +54,7 @@ def get_tlv(message):
         value = message[inc:length+inc]
         return TLV(tag, length, value, inc)
     else:
-        raise BERBadArgument, "ber.get_tlv: message too small"
+        raise BERBadArgument("ber.get_tlv: message too small")
 
 def _decode_message_length(message):
     # message[0] is the tag
@@ -76,7 +83,7 @@ def decode_boolean(length, message):
     return Basetypes.Boolean(ord(message[0]))
 
 # this decodes any basic integer type, and returns a long to handle
-# unsigned types. 
+# unsigned types.
 def _decode_an_integer(length, message):
     if ord(message[0]) & 0x80:
         val = -1
@@ -87,10 +94,10 @@ def _decode_an_integer(length, message):
     return val
 
 def _decode_an_unsigned(length, message):
-    val = 0L
-    for i in xrange(length):
+    val = 0
+    for i in range(length):
         val = (val << 8) + ord(message[i])
-    return val 
+    return val
 
 def decode_integer(length, message):
     return Basetypes.Integer32(_decode_an_integer(length, message))
@@ -111,13 +118,13 @@ def decode_exception(length, message):
 
 def decode_nosuchobject(length, message):
     return Basetypes.noSuchObject()
-    
+
 def decode_nosuchinstance(length, message):
     return Basetypes.noSuchInstance()
-    
+
 def decode_endofmibview(length, message):
     return Basetypes.endOfMibView()
-    
+
 
 def decode_oid(length, message):
     """decode ASN.1 object ID"""
@@ -164,7 +171,7 @@ def decode_ipv4(length, message):
 
 def decode_counter32(length, message):
     return Basetypes.Counter32(_decode_an_unsigned(length, message))
-    
+
 def decode_gauge32(length, message):
     return Basetypes.Gauge32(_decode_an_unsigned(length, message))
 
@@ -193,7 +200,7 @@ def _decode_a_varbindlist(vbl_tuple):
         obj = _find_object(oid)
         if obj is not None:
             if value is not None:
-                if (isinstance(value, Basetypes.noSuchInstance) or 
+                if (isinstance(value, Basetypes.noSuchInstance) or
                             isinstance(value, Basetypes.noSuchObject)):
                     vbl.append(Basetypes.VarBind(oid, value))
                     continue

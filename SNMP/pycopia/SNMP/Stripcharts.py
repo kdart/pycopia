@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -14,10 +12,13 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
 Objects for running strip charts for IF-MIB variables.
-
 
 """
 
@@ -30,9 +31,9 @@ import gtk
 try:
     import rtgraph
 except ImportError:
-    print >>sys.stderr, """The 'rtgraph' module is not installed. Obtain this from 
+    print("""The 'rtgraph' module is not installed. Obtain this from
     http://navi.cx/svn/misc/trunk/rtgraph/web/index.html
-    or run 'emerge dev-python/rtgraph' in Gentoo Linux."""
+    or run 'emerge dev-python/rtgraph' in Gentoo Linux.""", file=sys.stderr)
     raise
 
 from pycopia.SNMP import SNMP, SNMPNoResponse
@@ -87,7 +88,7 @@ def unicast_packets(argv, community="public"):
             pollInterval = 1000,
             size       = (384,128),
             gridSize   = 32,
-            channels   = [SNMPChannel(sess, IF_MIB.ifInUcastPkts, ifindex, color=(1,0,0)), 
+            channels   = [SNMPChannel(sess, IF_MIB.ifInUcastPkts, ifindex, color=(1,0,0)),
                           SNMPChannel(sess, IF_MIB.ifOutUcastPkts, ifindex, color=(0,1,0))],
             bgColor    = (0, 0, 0.3),
             gridColor  = (0, 0, 0.5),

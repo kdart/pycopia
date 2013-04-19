@@ -1,9 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -14,6 +12,11 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
 Pure Python SNMP module. This implementation supports SNMPv1 and SNMPv2c.
@@ -47,10 +50,10 @@ import sys
 import select # XXX Fix this to use asyncio
 #import asyncio # XXX
 
-from pycopia import socket 
-from pycopia.aid import Enum 
+from pycopia import socket
+from pycopia.aid import Enum
 from pycopia.SMI.Basetypes import *
-from pycopia.SNMP import (SNMPNoResponse, SNMPBadCommunity, 
+from pycopia.SNMP import (SNMPNoResponse, SNMPBadCommunity,
         SNMPNotConnected, SNMPBadParameters)
 
 from pycopia.SNMP import (
@@ -108,7 +111,7 @@ class CommunityName(object):
         self.name = name
         self.access = access
     def __repr__(self):
-        return "%s(name=%s, access=%s)" % (self.__class__.__name__, 
+        return "%s(name=%s, access=%s)" % (self.__class__.__name__,
                         self.name, self.access)
 
 class CommunitySet(list):
@@ -136,9 +139,9 @@ class CommunitySet(list):
 # framworks. Use what you need. The new_session() function figures out
 # what framework to use based on what is contained in this object.
 # However, only community based is currently implemented. So, just add
-# community names to this object to use community based framework. 
+# community names to this object to use community based framework.
 class sessionData(object):
-    def __init__(self, agent=None, communities=None, retries=3, timeout=10, polltime=20, 
+    def __init__(self, agent=None, communities=None, retries=3, timeout=10, polltime=20,
             port=161, version=1, user=None, context=None):
         self.communities = CommunitySet(communities or CommunitySet())
         self.default_community = None
@@ -178,13 +181,13 @@ class sessionData(object):
         return self.communities.get_by_access(RW)
     def new_communities(self, cset):
         if not isinstance(cset, communitySet):
-            raise ValueError, "new_communities: must pass in communitySet instance"
+            raise ValueError("new_communities: must pass in communitySet instance")
         self.communities = cset
     def set_default_community(self, access):
         self.default_community = self.communities.get_by_access(access)
     def get_default_community(self):
         if self.default_community is None:
-            return intern("public")
+            return "public"
         else:
             return self.default_community
 
@@ -205,15 +208,15 @@ class CommunityBasedMessage(Message):
     def __repr__(self):
         return "%s(%r, %r, %r)" % (self.__class__.__name__, self.community, \
                     self.pdu, self.version )
-    
+
     def _ber_(self):
         return ber(SequenceOf([self.version, self.community, self.pdu]))
-    
+
     def set_pdu(self, pdu):
         if isinstance(pdu, _ImplicitPDU) or isinstance(pdu, _BulkPDU):
             self.pdu = pdu
         else:
-            raise ValueError, "Given PDU must be a PDU type."
+            raise ValueError("Given PDU must be a PDU type.")
 
     def set_community(self, community_string):
         self.community = OctetString(community_string)
@@ -249,7 +252,6 @@ class Session(object):
             self.sessiondata = sessiondata
         if self.sessiondata:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-#           self.socket = SNMPDispatcher(self._receiver)
             self.socket.connect((self.sessiondata.agent, self.sessiondata.port))
 
     def __repr__(self):
@@ -275,12 +277,12 @@ class Session(object):
     # send request and receive a reply
     def _send_and_receive(self, msgobj):
         if not self.socket:
-            raise SNMPNotConnected, "Not connected."
+            raise SNMPNotConnected("Not connected.")
         sent_request_id = msgobj.pdu.request_id
         self._OUTSTANDING[sent_request_id] = msgobj
         msg = ber(msgobj)
         if not msg:
-            raise SNMPBadParameters, "No message"
+            raise SNMPBadParameters("No message")
         retries = 0
         # send request till response or retry counter hits the limit
         while retries < self.sessiondata.retries:
@@ -291,28 +293,27 @@ class Session(object):
                 response = self._receive()
                 if response:
                     resp = self._decode_message(response)
-                    orig = self._OUTSTANDING.pop(resp.pdu.request_id, None) 
+                    orig = self._OUTSTANDING.pop(resp.pdu.request_id, None)
                     if orig is None:
-                        print >>sys.stderr, "warning: got strange response (ID %s)" % (resp.pdu.request_id,)
+                        print("warning: got strange response (ID %s)" % (resp.pdu.request_id,), file=sys.stderr)
                         continue
                     else:
                         if resp.pdu.request_id == sent_request_id:
                             return resp
                         else:
-                            print >>sys.stderr, "warning: This is not the response we are looking for (ID %s)" % (resp.pdu.request_id,)
+                            print("warning: This is not the response we are looking for (ID %s)" % (resp.pdu.request_id,), file=sys.stderr)
                             continue
-                            #raise SNMPBadRequestID, "SNMP response has wrong ID: should be %s, is %s" % (sent_request_id, resp.pdu.request_id)
                 # otherwise, try it again
                 break
             retries += 1
         # no answer
-        raise SNMPNoResponse, "No resonse from agent after %d tries." % (retries,)
+        raise SNMPNoResponse("No resonse from agent after %d tries." % (retries,))
 
     def close(self):
         """close UDP socket to SNMP agent"""
         if self.socket:
             self.socket.close()
-            self.socket = None  
+            self.socket = None
 
     # note theses get_table implementations are simplified. They always get the whole table.
     def get_table(self, rowobj, insert_cb):
@@ -327,7 +328,7 @@ class Session(object):
         while True:
             try:
                 varbinds = self.getnext(fetchoid)
-            except SNMPError, e:
+            except SNMPError as e:
                 if varbinds:
                     for vb in varbinds:
                         if vb.name[:prefixlen] == rowoid:
@@ -351,14 +352,7 @@ class Session(object):
         prefixlen = len(rowoid)
         gblist = None
         while True:
-#           try:
             gblist = self.getbulk(bpdu)
-#           except SNMPError, e:
-#               if gblist:
-#                   for vb in gblist:
-#                       if vb.name[:prefixlen] == rowoid:
-#                           insert_cb(vb)
-#               return
             if gblist:
                 for vb in gblist:
                     if vb.name[:prefixlen] != rowoid:
@@ -381,19 +375,19 @@ class Session(object):
 
     # override these in a subclass implementing security framework
     def set(self, *args):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def get(self, *args):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def getnext(self, *args):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def getbulk(self, *args):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def inform(self, *args):
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 
@@ -409,19 +403,20 @@ class CommunityBasedSession(Session):
         if not comm: # then try to use a RW community if no RO community
             comm = self.sessiondata.get_community(RW)
             if not comm:
-                raise SNMPBadCommunity, "No community strings!"
+                raise SNMPBadCommunity("No community strings!")
         return CommunityBasedMessage(comm, GetRequestPDU(), self.sessiondata.version )
 
     def get_varbindlist(self, vbl):
         try:
             mo = self._get_request_message()
-            map(mo.add_varbind, vbl)
+            for vb in vbl:
+                mo.add_varbind(vb)
             rv = self._send_mo(mo)
         except SNMPtooBig: # ack, agent reports response would be too big
             return self._get_varbindlist_big(vbl)
         else:
             return rv
-    
+
     # a nifty double-recursion halving algorithm
     def _get_varbindlist_big(self, vbl):
         middle = len(vbl)/2
@@ -438,7 +433,7 @@ class CommunityBasedSession(Session):
     def _send_mo(self, mo):
         resp = self._send_and_receive(mo)
         if resp.pdu.error_status:
-            raise EXCEPTION_MAP[resp.pdu.error_status], resp.pdu.error_index
+            raise EXCEPTION_MAP[resp.pdu.error_status](resp.pdu.error_index)
         else:
             return resp.pdu.varbinds
 
@@ -450,12 +445,13 @@ Where varbindlist is a VarBindList containing VarBind objects.
         """
         comm = self.sessiondata.get_community(RW)
         if not comm:
-            raise SNMPBadCommunity, "No community!"
+            raise SNMPBadCommunity("No community!")
         mo = CommunityBasedMessage(comm, SetRequestPDU() , self.sessiondata.version )
-        map(mo.add_varbind, varbindlist)
+        for vb in varbindlist:
+            mo.add_varbind(vb)
         resp = self._send_and_receive(mo)
         if resp.pdu.error_status:
-            raise EXCEPTION_MAP[resp.pdu.error_status], resp.pdu.error_index
+            raise EXCEPTION_MAP[resp.pdu.error_status](resp.pdu.error_index)
         else:
             return resp.pdu.varbinds
 
@@ -463,22 +459,22 @@ Where varbindlist is a VarBindList containing VarBind objects.
         vbl = VarBindList()
         vbl.append(varbind)
         return self.set(vbl)
-    
+
     def getnext(self, *oids):
         comm = self.sessiondata.get_community(RO)
         if not comm: # then try to use a RW community if no RO community
             comm = self.sessiondata.get_community(RW)
             if not comm:
-                raise SNMPBadCommunity, "No community!"
+                raise SNMPBadCommunity("No community!")
         mo = CommunityBasedMessage(comm, GetNextRequestPDU(), self.sessiondata.version  )
         for oid in oids:
             mo.add_oid(oid)
         resp = self._send_and_receive(mo)
         if resp.pdu.error_status:
-            raise EXCEPTION_MAP[resp.pdu.error_status], resp.pdu.error_index
+            raise EXCEPTION_MAP[resp.pdu.error_status](resp.pdu.error_index)
         else:
             return resp.pdu.varbinds
-    
+
     # The getbulk method has a different interface. Pass in a
     # GetBulkRequestPDU instance instead of OIDs. This gives the user a
     # chance to set the repeaters and nonrepeaters. This module has
@@ -488,28 +484,28 @@ Where varbindlist is a VarBindList containing VarBind objects.
         if not comm: # then try to use a RW community if no RO community
             comm = self.sessiondata.get_community(RW)
             if not comm:
-                raise SNMPBadCommunity, "No community!"
+                raise SNMPBadCommunity("No community!")
         mo = CommunityBasedMessage(comm, bulkpdu, self.sessiondata.version  )
         resp = self._send_and_receive(mo)
         if resp.pdu.error_status:
-            raise EXCEPTION_MAP[resp.pdu.error_status], resp.pdu.error_index
+            raise EXCEPTION_MAP[resp.pdu.error_status](resp.pdu.error_index)
         else:
             return resp.pdu.varbinds
-    
+
     def inform(self, varbindlist):
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 ### User based administrative framework session
 class UserBasedSession(Session):
     def __init__(self, sessiondata):
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 ### View based administrative framework session
 class ViewBasedSession(Session):
     def __init__(self, sessiondata):
-        raise NotImplementedError
+        raise NotImplementedError()
 
 
 ### use these factory functions
@@ -523,9 +519,9 @@ def new_session(sessiondata):
     elif sessiondata.user:
         return UserBasedSession(sessiondata)
     else:
-        raise ValueError, "new_session: cannot determine Administrative Framework. Are communities set?"
+        raise ValueError("new_session: cannot determine Administrative Framework. Are communities set?")
 
-# simplified method of getting an SNMPv2c or v1 session. 
+# simplified method of getting an SNMPv2c or v1 session.
 def get_session(host, readcommunity, writecommunity=None, version=1):
     sd = sessionData(host, version=version)
     sd.add_community(readcommunity, RO)

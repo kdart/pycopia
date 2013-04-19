@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -14,12 +12,18 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
 Module to assist mapping networks using devices that support CDP and LLDP protocols.
 
 """
-
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
 
 from pycopia import ipv4
 from pycopia.SNMP import SNMP
@@ -62,7 +66,7 @@ class CDPCapabilityString(OctetString):
             if bits & val:
                 s.append(desc[si])
         return joiner.join(s)
-    
+
     def is_router(self):
         return 0x01 & self.__int__()
 
@@ -96,7 +100,7 @@ class ARPEntry(object):
         self.ip = ip
         self.mac = mac
         self.ifindex = ifindex
-    
+
     def __str__(self):
         return "%16.16s -> %s (%s)" % (self.ip, self.mac, self.ifindex)
 
@@ -104,9 +108,9 @@ class ARPTable(object):
     def __init__(self, hostname):
         self.hostname = hostname
         self._entries = {}
-    
+
     def __iter__(self):
-        return self._entries.iteritems()
+        return iter(self._entries.items())
 
     def __getitem__(self, key):
         return self._entries[str(key)]
@@ -116,9 +120,7 @@ class ARPTable(object):
 
     def __str__(self):
         s = ["ARP table for %s\nIP                  MAC               IfIndex" % (self.hostname,)]
-        iplist = self._entries.keys()
-        iplist.sort()
-        for ip in iplist:
+        for ip in sorted(self._entries.keys()):
             ae = self._entries[ip]
             s.append(str(ae))
         return "\n".join(s)
@@ -135,9 +137,9 @@ class CDPEntry(object):
     def __init__(self, iface, entry):
         self.iface = iface
         self.deviceId = entry.cdpCacheDeviceId
-        self.capabilities = entry.cdpCacheCapabilities 
+        self.capabilities = entry.cdpCacheCapabilities
         self.devicePort = entry.cdpCacheDevicePort
-        self.platform = entry.cdpCachePlatform 
+        self.platform = entry.cdpCachePlatform
 
     def __str__(self):
         return "%s  ->\n    %s:%s (%s) %s"  % \
@@ -149,10 +151,10 @@ class CDPTable(object):
     def __init__(self, hostname):
         self.hostname = hostname
         self._entries = []
-    
+
     def __iter__(self):
         return iter(self._entries)
-    
+
     def __getitem__(self, i):
         return self._entries[i]
 
@@ -169,21 +171,21 @@ class CDPTable(object):
 class LLDPEntry(object):
     def __init__(self):
         pass
-    
+
 class LLDPTable(object):
     def __init__(self, hostname):
         self.hostname = hostname
         self._entries = []
-    
+
     def __iter__(self):
         return iter(self._entries) # XXX
-    
+
     def __str__(self):
         s = ["LLDP Table for %s\n " % (self.hostname,)]
         for entry in self._entries:
             s.append(str(entry))
         return "\n".join(s)
-    
+
     def add_entry(self, entry):
         self._entries.append(entry) # XXX
 
@@ -194,20 +196,20 @@ class IPAddressTable(object):
         self._entries = {}
 
     def __iter__(self):
-        return self._entries.iteritems()
-    
+        return iter(self._entries.items())
+
     def __getitem__(self, i):
         return self._entries[i]
-    
+
     def get(self, i, default=None):
         return self._entries.get(i, default)
-    
+
     def __str__(self):
         s = ["Address table for %s\n IfIndex IP Address" % (self.hostname,)]
         for i, ip in self._entries.items():
             s.append("%8d %s" % (i, ip.CIDR))
         return "\n".join(s)
-    
+
     def add_entry(self, entry):
         ip = ipv4.IPv4(entry.ipAdEntAddr.address, entry.ipAdEntNetMask.address)
         self._entries[int(entry.ipAdEntIfIndex)] = ip
@@ -274,9 +276,9 @@ def show_neighbors(dev):
         else:
             d[port] = [e]
     for pn, dl in d.items():
-        print pn, "->"
+        print (pn, "->")
         for dest in dl:
-            print "        ", "%s:%s (%s)" % dest
+            print ("        ", "%s:%s (%s)" % dest)
 
 
 def get_manager(host, community):
@@ -291,19 +293,19 @@ def _test(argv):
     host = argv[1]
     community = argv[2]
     dev = get_manager(host, community)
-    print dev.get_tables()
+    print (dev.get_tables())
     #for cdpiface in dev.cdpinterfaces:
     #   print cdpiface
     #for entry in dev.cdpcache:
-    #   print entry.cdpCacheDeviceId, 
+    #   print entry.cdpCacheDeviceId,
     #   print "(", entry.cdpCacheCapabilities.description(), ")",
     #   print
     #show_neighbors(dev)
-    print dev.InterfaceTable
-    print dev.ARPTable
-    print dev.IPAddressTable
-    print dev.CDPTable
-    print dev.LLDPTable
+    print (dev.InterfaceTable)
+    print (dev.ARPTable)
+    print (dev.IPAddressTable)
+    print (dev.CDPTable)
+    print (dev.LLDPTable)
     return dev
 
 if __name__ == "__main__":

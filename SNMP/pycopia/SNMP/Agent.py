@@ -1,7 +1,5 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -14,6 +12,11 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
 Implements an SNMP agent role.
@@ -35,12 +38,12 @@ a specific Agent.
 
     def open(self, socket=161):
         pass
-    
+
     def send_trap(self, XXX):
         pass
-    
+
     def register_managed_object(self, oid, callback):
         pass
 
-    
+
 

@@ -1,6 +1,6 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 2009 Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -56,7 +56,7 @@ MIBNAMES = [
  "SNMPv2_SMI",
 ]
 
-MIBS = map(lambda n: __import__("pycopia.mibs.%s" % n, globals(), locals(), ["*"]), MIBNAMES)
+MIBS = [__import__("pycopia.mibs.%s" % n, globals(), locals(), ["*"]) for n in MIBNAMES]
 
 # main manager object
 class DellSwitchManager(Manager.Manager):

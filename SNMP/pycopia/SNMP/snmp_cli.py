@@ -1,6 +1,6 @@
-#!/usr/bin/python2
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 2009 Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -12,6 +12,11 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
+
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
 
 """
 Defines an interactive command line that wraps an SMTP session.
@@ -122,7 +127,7 @@ Provides an interactive session to an SNMP agent.
     try:
         optlist, longopts, args = getopt.getopt(argv[1:], "hl:p:s:m:")
     except getopt.GetoptError:
-            print snmpcli.__doc__
+            print(snmpcli.__doc__)
             return
     for opt, val in optlist:
         if opt == "-s":
@@ -130,19 +135,19 @@ Provides an interactive session to an SNMP agent.
         elif opt == "-l":
             logfile = val
         elif opt == "-h":
-            print snmpcli.__doc__
+            print(snmpcli.__doc__)
             return
         elif opt == "-p":
             try:
                 port = int(val)
             except ValueError:
-                print snmpcli.__doc__
+                print(snmpcli.__doc__)
                 return
         elif opt == "-m":
             modname = val
 
     if not args:
-        print snmpcli.__doc__
+        print(snmpcli.__doc__)
         return
 
     host = args[0]

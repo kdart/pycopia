@@ -1,9 +1,7 @@
-#!/usr/bin/python3.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
+#    Copyright (C) 1999-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -15,14 +13,17 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import absolute_import
+from __future__ import print_function
+#from __future__ import unicode_literals
+from __future__ import division
+
 """
 SNMP trap dispatcher. This uses the straps program as a simple proxy to allow
 non-root programs and scripts to receive traps.
 See straps(8) for details on how this works.
 
 """
-
-
 
 import struct
 from pycopia import socket
@@ -36,12 +37,13 @@ from pycopia.mibs.SNMPv2_MIB import (sysUpTime, snmpTrapOID, snmpTrapEnterprise,
 
 from pycopia.mibs.IF_MIB import linkDown, linkUp
 from pycopia.mibs.SNMP_COMMUNITY_MIB import snmpTrapAddress, snmpTrapCommunity
+import collections
 
 # egpNeighborLoss not in mibs! So fake it here. This should occur only
 # rarely, anyway...
 class _egpNeighborLoss(object):
     status = 1
-    OID = ObjectIdentifier([1,3,6,1,6,3,1,1,5,6]) 
+    OID = ObjectIdentifier([1,3,6,1,6,3,1,1,5,6])
     def __init__(self, value=None):
         self.value=value
 
@@ -78,7 +80,7 @@ def _translate2v2(ip, community, pdu):
 
 # all trap callbacks should match this signature.
 def _default_trap_handler(traprecord):
-    print traprecord
+    print(traprecord)
 
 
 class TrapRecord(object):
@@ -93,7 +95,7 @@ class TrapRecord(object):
     def __str__(self):
         pdu = self.pdu
         trapoid = pdu.varbinds[1]
-        s = ["Trap from %s with ID %s for %s at %s:" % (self.ip, pdu.request_id, 
+        s = ["Trap from %s with ID %s for %s at %s:" % (self.ip, pdu.request_id,
                                 self.community, self.timestamp)]
         s.append("  Uptime: %s" % (pdu.varbinds[0],))
         obj = trapoid.value.get_object()
@@ -135,7 +137,7 @@ class TrapDispatcher(socket.AsyncSocket):
     debug = property(_get_debug, _set_debug, _del_debug)
 
     def register_handler(self, handler):
-        if callable(handler):
+        if isinstance(handler, collections.Callable):
             self._handlers.append(handler)
 
     def readable(self):
@@ -176,9 +178,6 @@ class TrapDispatcher(socket.AsyncSocket):
         else:
             import traceback
             traceback.print_exception(ex, val, tb)
-
-
-
 
 
 def start_straps(port=162):
