@@ -329,13 +329,13 @@ class UserInterface(object):
     def edit_text(self, text, prompt=None):
         return cliutils.edit_text(text, self._get_prompt("PS4", prompt))
 
-    def get_int(prompt="", default=None):
+    def get_int(self, prompt="", default=None):
         return cliutils.get_int(prompt, default, input=self._io.raw_input, error=self.error)
 
-    def get_float(prompt="", default=None):
+    def get_float(self, prompt="", default=None):
         return cliutils.get_float(prompt, default, input=self._io.raw_input, error=self.error)
 
-    def get_bool(prompt="", default=None):
+    def get_bool(self, prompt="", default=None):
         return cliutils.get_bool(prompt, default, input=self._io.raw_input, error=self.error)
 
     def yes_no(self, prompt, default=True):
