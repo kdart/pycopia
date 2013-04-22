@@ -329,6 +329,15 @@ class UserInterface(object):
     def edit_text(self, text, prompt=None):
         return cliutils.edit_text(text, self._get_prompt("PS4", prompt))
 
+    def get_int(prompt="", default=None):
+        return cliutils.get_int(prompt, default, input=self._io.raw_input, error=self.error)
+
+    def get_float(prompt="", default=None):
+        return cliutils.get_float(prompt, default, input=self._io.raw_input, error=self.error)
+
+    def get_bool(prompt="", default=None):
+        return cliutils.get_bool(prompt, default, input=self._io.raw_input, error=self.error)
+
     def yes_no(self, prompt, default=True):
         yesno = cliutils.get_input(self.prompt_format(prompt), "Y" if default else "N", self._io.raw_input)
         return yesno.upper().startswith("Y")

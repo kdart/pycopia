@@ -28,6 +28,7 @@ __all__ = ['get_text', 'get_input', 'default_error', 'choose',
         'print_menu_list', 'print_menu_map']
 
 import sys, os
+import ast
 
 # python 3 compatibility
 try:
@@ -47,6 +48,10 @@ LINES, COLUMNS = _get_winsize(0)
 del _get_winsize
 
 
+def default_error(text):
+    print(text, file=sys.stderr)
+
+
 def get_text(prompt="", msg=None, input=raw_input):
     """Prompt user to enter multiple lines of text."""
 
@@ -62,6 +67,7 @@ def get_text(prompt="", msg=None, input=raw_input):
         lines.append(line)
     return "\n".join(lines)
 
+
 def get_input(prompt="", default=None, input=raw_input):
     """Get user input with an optional default value."""
     if default is not None:
@@ -73,8 +79,39 @@ def get_input(prompt="", default=None, input=raw_input):
     else:
         return input("%s> " % (prompt, ))
 
-def default_error(text):
-    print(text, file=sys.stderr)
+def get_type(atype, prompt="", default=None, input=raw_input, error=default_error):
+    """Get user input of a particular base type."""
+    while 1:
+        if default is not None:
+            text = input("%s [%s]> " % (prompt, default))
+            if not text:
+                return default
+        else:
+            text = input("%s> " % (prompt, ))
+        try:
+            val = ast.literal_eval(text)
+        except (SyntaxError, ValueError):
+            error("Error in input. Please enter a {} value.".format(atype.__name__))
+            continue
+        if type(val) is atype:
+            return val
+        else:
+            error("Please enter a {} value.".format(atype.__name__))
+
+def get_int(prompt="", default=None, input=raw_input, error=default_error):
+    return get_type(int, prompt, default, input, error)
+
+def get_float(prompt="", default=None, input=raw_input, error=default_error):
+    return get_type(float, prompt, default, input, error)
+
+def get_bool(prompt="", default=None, input=raw_input, error=default_error):
+    return get_type(bool, prompt, default, input, error)
+
+def get_tuple(prompt="", default=None, input=raw_input, error=default_error):
+    return get_type(tuple, prompt, default, input, error)
+
+def get_list(prompt="", default=None, input=raw_input, error=default_error):
+    return get_type(list, prompt, default, input, error)
 
 def choose(somelist, defidx=0, prompt="choose", input=raw_input, error=default_error):
     """Select an item from a list. Returns the object selected from the
@@ -335,6 +372,9 @@ def _test(argv):
     #print("----")
     choose_multiple(l, prompt="choose")
     #print_menu_map(dict(enumerate(l)))
+    print(repr(get_int("age")))
+    print(repr(get_int("age", 22)))
+    print(repr(get_float("weight")))
 
 if __name__ == "__main__":
     import sys
