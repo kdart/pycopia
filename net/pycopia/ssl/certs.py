@@ -50,9 +50,9 @@ _FILETYPES = {
    b"asn1": crypto.FILETYPE_ASN1,
 }
 
-VERSION_1 = 0
-VERSION_2 = 1
-VERSION_3 = 2
+VERSION_1 = 1
+VERSION_2 = 2
+VERSION_3 = 3
 
 
 class CertError(Exception):
@@ -109,7 +109,7 @@ class CertificateRequest(object):
         return PrivateKey(_key=self._req.get_pubkey())
 
     def _set_pubkey(self, pkey):
-        if type(pkey) is PrivateKey:
+        if isinstance(pkey, PrivateKey):
             pkey = pkey._key
         self._req.set_pubkey(pkey)
 
@@ -118,9 +118,9 @@ class CertificateRequest(object):
     def _set_extensions(self, extlist):
         nx = []
         for ext in extlist:
-            if type(ext) is Extension:
+            if isinstance(ext, Extension):
                 nx.append(ext._ext)
-            elif type(ext) is crypto.X509ExtensionType:
+            elif isinstance(ext, crypto.X509ExtensionType):
                 nx.append(ext)
         self._req.add_extensions(nx)
         self._req.set_version(VERSION_3)
@@ -248,9 +248,9 @@ class Certificate(object):
     def _set_extensions(self, extlist):
         nx = []
         for ext in extlist:
-            if type(ext) is Extension:
+            if isinstance(ext, Extension):
                 nx.append(ext._ext)
-            elif type(ext) is crypto.X509ExtensionType:
+            elif isinstance(ext, crypto.X509ExtensionType):
                 nx.append(ext)
         self._req.set_version(VERSION_3)
         self._cert.add_extensions(nx)
@@ -269,7 +269,7 @@ class Certificate(object):
         return PrivateKey(_key=self._cert.get_pubkey())
 
     def _set_pubkey(self, pubkey):
-        if type(pubkey) is PrivateKey:
+        if isinstance(pubkey, PrivateKey):
             pubkey = pubkey._key
         self._cert.set_pubkey(pubkey)
 
@@ -283,7 +283,7 @@ class Certificate(object):
         return self._cert.digest(digest_name)
 
     def sign(self, pkey, digest_name):
-        if type(pkey) is PrivateKey:
+        if isinstance(pkey, PrivateKey):
             pkey = pkey._key
         return self._cert.sign(pkey, digest_name)
 
@@ -608,7 +608,7 @@ def get_asn1time(when):
     """Return an ASN1 normalized time from a datetime object or ISO 8601 string."""
     if when is None:
         when = now_utc()
-    if type(when) is str:
+    if isinstance(when, str):
         import iso8601
         when = iso8601.parse_date(when)
     assert type(when) is datetime

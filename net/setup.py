@@ -26,7 +26,10 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = find_packages(),
 #    install_requires = ['pycopia-process>=1.0.dev-r138,==dev',
-#                        'pycopia-CLI>=1.0.dev-r138,==dev'],
+#                        'pycopia-CLI>=1.0.dev-r138,==dev',
+#                        'pyopenssl>=0.13',
+#                        'iso8601>=0.1.4',
+#                        ],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
