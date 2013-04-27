@@ -526,11 +526,12 @@ class ProcessPty(Process):
         cmd = split_command_line(self.cmdline)
         try:
             pid, self._fd = os.forkpty()
-            close_on_exec(self._fd)
         except OSError as err:
-            logging.error(str(err))
+            logging.error("ProcessPty error: {}".format(err))
+            raise
         else:
             if pid == 0: # child
+                sys.excepthook = sys.__excepthook__
                 if devnull:
                     # Redirect standard file descriptors.
                     sys.stdout.flush()
@@ -562,6 +563,7 @@ class ProcessPty(Process):
                     os._exit(127) # should not be reached
 
             else: # parent
+                close_on_exec(self._fd)
                 self.childpid = pid
                 self.childpid2 = None # for compatibility with pipeline
                 self._intr = None
