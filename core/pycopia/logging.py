@@ -60,7 +60,7 @@ else:
 del basicconfig
 
 
-syslog.openlog(sys.argv[0], syslog.LOG_PID, getattr(syslog, "LOG_" + FACILITY))
+syslog.openlog(sys.argv[0].split("/")[-1], syslog.LOG_PID, getattr(syslog, "LOG_" + FACILITY))
 
 _oldloglevel = syslog.setlogmask(syslog.LOG_UPTO(getattr(syslog, "LOG_" + LEVEL)))
 
@@ -129,11 +129,11 @@ def loglevel_alert():
 # common logging patterns
 def exception_error(prefix):
     ex, val, tb = sys.exc_info()
-    error("{}: {}: {}".format(prefix, ex, val))
+    error("{}: {}: {}".format(prefix, ex.__name__, val))
 
 def exception_warning(prefix):
     ex, val, tb = sys.exc_info()
-    warning("{}: {}: {}".format(prefix, ex, val))
+    warning("{}: {}: {}".format(prefix, ex.__name__, val))
 
 # compatibility functions
 
