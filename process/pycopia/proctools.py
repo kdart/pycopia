@@ -1004,7 +1004,8 @@ times the process will be respawned if the previous invocation dies.  """
                     break
                 else:
                     raise
-            self._proc_status(pid, sts)
+            if pid != 0:
+                self._proc_status(pid, sts)
         signal.signal(SIGCHLD, self._child_handler)
         signal.siginterrupt(SIGCHLD, False)
 

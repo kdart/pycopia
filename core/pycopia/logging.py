@@ -60,7 +60,7 @@ else:
 del basicconfig
 
 
-syslog.openlog("pycopia", syslog.LOG_PID, getattr(syslog, "LOG_" + FACILITY))
+syslog.openlog(sys.argv[0], syslog.LOG_PID, getattr(syslog, "LOG_" + FACILITY))
 
 _oldloglevel = syslog.setlogmask(syslog.LOG_UPTO(getattr(syslog, "LOG_" + LEVEL)))
 

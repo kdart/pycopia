@@ -173,6 +173,9 @@ argument must match a name of a method.
         return getopt.getopt(argv[1:], shortopts)
         # returns: optlist, longoptdict, args
 
+    def getarg(self, argv, index, default=None):
+        return argv[index] if len(argv) > index else default
+
     # dispatch commands by calling the instance
     def __call__(self, argv):
         if not argv or not argv[0] or argv[0].startswith("_"):
