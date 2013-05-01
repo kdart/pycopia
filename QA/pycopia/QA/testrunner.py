@@ -162,10 +162,11 @@ class TestRunner(object):
                 from pycopia import debugger
                 debugger.post_mortem(tb, ex, val)
             rpt.add_message("MODULEENDTIME", timelib.now())
-            rpt.failed("Container exception: %s (%s)" % (ex, val))
+            rpt.incomplete("Container exception: %s (%s)" % (ex, val))
+            return constants.INCOMPLETE
         else:
             rpt.add_message("MODULEENDTIME", timelib.now())
-        return rv
+            return rv
 
     def run_module(self, mod):
         """Run a test module.
