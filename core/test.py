@@ -58,8 +58,6 @@ if os.environ.get("DISPLAY"):
     from pycopia import gtktools
 
 from pycopia.inet import ABNF
-from pycopia.inet import CGI
-from pycopia.inet import cgi_test
 from pycopia.inet import DICT
 from pycopia.inet import fcgi
 from pycopia.inet import HTTP

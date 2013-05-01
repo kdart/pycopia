@@ -125,7 +125,7 @@ class AidTests(unittest.TestCase):
 
         self.assertRaises(ValueError, p.parse, "12m -m")
 
-    def test_tty_SerialPort(self):
+    def XXXtest_tty_SerialPort(self):
         # just call some setup methods. This really needs some serial
         # loopback to fully test.
         sp = tty.SerialPort("/dev/ttyS0")

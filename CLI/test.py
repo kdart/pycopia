@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -15,6 +13,8 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
 
+from __future__ import print_function
+
 """
 
 
@@ -23,10 +23,16 @@
 import unittest
 
 
-from pycopia import CLI
-from pycopia import UI
 from pycopia import IO
-from pycopia import cursesio
+from pycopia import UI
+from pycopia import CLI
+
+
+class TestCommands(CLI.BaseCommands):
+
+    def f(self, argv):
+        """command"""
+        return argv[0]
 
 
 class CLITests(unittest.TestCase):
@@ -34,13 +40,10 @@ class CLITests(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_CLI(self):
-        """This is an interactive test."""
-        testui = cursesio.get_curses_ui()
-        cmd = CLI.GenericCLI(testui)
-        parser = CLI.CommandParser(cmd)
-        testui.Print("Type 'exit' when finished.")
-        parser.interact()
+    def test_build_CLI(self):
+        cli = CLI.get_cli(TestCommands)
+        #print(dir(cli))
+        cli.interact()
 
 
 

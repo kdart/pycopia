@@ -16,7 +16,6 @@ def fixssh(argv):
         print __doc__
         return
     for hostname in argv[1:]:
-        hostname = argv[1]
         print "removing known_hosts entry for %s." % (hostname,)
         sshlib.remove_known_host(hostname)
     print "Done!"
