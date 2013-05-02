@@ -696,8 +696,10 @@ class SubProcess(Process):
     def __init__(self, pwent=None, _pgid=0):
         Process.__init__(self, sys.argv[0])
         pid = os.fork()
-        if pid == 0 and pwent:
-            run_as(pwent)
+        if pid == 0:
+            sys.excepthook = sys.__excepthook__ # remove any debugger hook
+            if pwent:
+                run_as(pwent)
         self.childpid = pid
         self.childpid2 = None # for compatibility with pipeline
 
