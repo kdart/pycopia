@@ -195,9 +195,11 @@ class Process(object):
         """wait() retrieves process exit status. Note that this may block if
         the process is still running.
         """
-        pm = get_procmanager()
-        pm.waitproc(self, option)
-        return self.exitstatus
+        if self.exitstatus is not None:
+            return self.exitstatus
+        else:
+            pm = get_procmanager()
+            return pm.waitproc(self)
 
     def setpgid(self, pgid):
         os.setpgid(self.childpid, pgid)
@@ -218,10 +220,7 @@ ProcManager uses this."""
             self.callback(self)
 
     def stat(self):
-        if not self.deadchild:
-            return ProcStat(self.childpid)
-        else:
-            return self.exitstatus
+        return ProcStat(self.childpid)
 
     def fstat(self):
         return os.fstat(self.fileno())
@@ -994,63 +993,49 @@ times the process will be respawned if the previous invocation dies.  """
 
     # this is the SIGCHLD signal handler
     def _child_handler(self, sig, stack):
-        #self.waitpid(-1, os.WNOHANG)
-        # reset handler
-        #signal.signal(SIGCHLD, self._child_handler)
-        pid = -1
-        while pid != 0: # loop to collect all pending exited processes
-            try:
-                pid, sts = os.waitpid(-1, os.WNOHANG)
-            except OSError as why:
-                if why.errno == ECHILD: # no children left
-                    break
-                else:
-                    raise
-            if pid != 0:
-                self._proc_status(pid, sts)
+        pid, sts = os.waitpid(-1, os.WNOHANG)
+        proc = self._procs[pid]
+        self._proc_status(proc, sts)
         signal.signal(SIGCHLD, self._child_handler)
         signal.siginterrupt(SIGCHLD, False)
 
     def waitpid(self, pid, option=0):
-        while 1:
-            try:
-                pid, sts = os.waitpid(pid, option)
-            except EnvironmentError as why:
-                if why.errno == ECHILD: # no children left
-                    return None
-                elif why.errno == EINTR:
-                    continue
-                else:
-                    raise
-        return self._proc_status(pid, sts)
-
-    def waitproc(self, proc, option=0): # waits for a Process object.
-        """waitproc(process, [option])
-        Waits for a process object to finish. Works like os.waitpid, but takes a
-        process object instead of a process ID.
-        """
-        return self.waitpid(proc.childpid, option)
-
-    def _proc_status(self, pid, sts):
         try:
             proc = self._procs[pid]
         except KeyError:
             logging.warning("Wait on unmanaged process (pid: %s)." % pid)
             cmdline = ProcStat(pid).cmdline
+            pid, sts = os.waitpid(pid, option)
             return ExitStatus(cmdline, sts)
+        return self.waitproc(proc)
+
+    def waitproc(self, proc, option=0): # waits for a Process object.
+        """waitproc(process, [option])
+        Waits for a process object to finish. Depends on signal handler.
+        """
+        if proc.exitstatus is not None:
+            return proc.exitstatus
+        signal.signal(SIGCHLD, SIG_DFL)
+        try:
+            pid, sts = os.waitpid(proc.childpid, option)
+        finally:
+            signal.signal(SIGCHLD, self._child_handler)
+            signal.siginterrupt(SIGCHLD, False)
+        return self._proc_status(proc, sts)
+
+    def _proc_status(self, proc, sts):
         es = ExitStatus(proc.cmdline, sts)
         proc.set_exitstatus(es)
         if es.state != ExitStatus.STOPPED: # XXX untested with stopped processes
             proc.dead()
             if proc._async and not proc.closed:
                 poller.unregister(proc)
-            del self._procs[pid]
+            del self._procs[proc.childpid]
         return es
 
     def loop(self, timeout=-1.0, callback=NULL):
         while self._procs:
             poller.poll(timeout)
-            #self.waitpid(-1, os.WNOHANG) # check for zombies
             callback(self)
             if scheduler.get_scheduler(): # wait for any restarts
                 scheduler.sleep(1.5)
@@ -1186,6 +1171,5 @@ split_command_line = shparser.get_command_splitter()
 
 
 if __name__ == "__main__":
-    pass
-    #print (system("runtest testcases.unittests.process.proctools"))
+    print (system("runtest testcases.unittests.process.proctools"))
 
