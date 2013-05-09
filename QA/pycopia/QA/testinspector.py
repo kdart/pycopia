@@ -46,10 +46,10 @@ def get_ast(modname):
 
 class TestmoduleVisitor(ast.NodeVisitor):
 
-    def __init__(self, all=True):
+    def __init__(self, findall=True):
         self._classes = {}
         self._currentclass = None
-        self.findall = all
+        self.findall = findall
 
     def visit_ClassDef(self, node):
         #print((node.body[0]))
@@ -86,16 +86,16 @@ class TestmoduleVisitor(ast.NodeVisitor):
                 return
 
 
-def find_classes(modname, all=True):
+def find_classes(modname, findall=True):
     ast = get_ast(modname)
-    nv = TestmoduleVisitor(all)
+    nv = TestmoduleVisitor(findall)
     nv.visit(ast)
     return nv._classes
 
 def get_class(cls):
     """Return  TestModuleVisitor report from a class instance."""
     ast = get_ast(cls.__module__)
-    nv = TestmoduleVisitor(all)
+    nv = TestmoduleVisitor()
     nv.visit(ast)
     return nv._classes[cls.__name__]
 

@@ -43,7 +43,7 @@ def DEBUG(*args, **kwargs):
     parts = []
     for name, value in kwargs.items():
         parts.append("{}: {!r}".format(name, value))
-    print("DEBUG", " ".join(args), ", ".join(parts), file=sys.stderr)
+    print("DEBUG", " ".join(str(o) for o in args), ", ".join(parts), file=sys.stderr)
 
 # config file is optional here
 try:
