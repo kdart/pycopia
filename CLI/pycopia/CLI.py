@@ -571,8 +571,9 @@ argument must match a name of a method.
 
     def cycle(self, argv):
         """cycle <range> <command> [<arg>...]
-    Cycle the variable symbol % through the range, and re-evaluate the command
+    Cycle the variable symbol "%" through the range, and re-evaluate the command
     for each value.
+
     Range is of the form [start':']end[':' step]
     Where start defaults to zero and step defaults to one.
     Or, range may be a list of values separated by ','.
@@ -584,10 +585,11 @@ argument must match a name of a method.
         rangetoken = argv.pop(0)
         argv = self._expand_aliases(argv)
         meth = getattr(self, argv[0])
+        slocs = []
         for sloc, arg in enumerate(argv):
             if arg.find("%") >= 0:
-                break
-        else:
+                slocs.append(sloc)
+        if not slocs:
             self._ui.error("No %% substitution found.")
             return
         try:
@@ -596,7 +598,8 @@ argument must match a name of a method.
             raise CLISyntaxError(err)
         for i in therange:
             newargs = argv[:]
-            newargs[sloc] = newargs[sloc].replace("%", str(i))
+            for sloc in slocs:
+                newargs[sloc] = newargs[sloc].replace("%", str(i))
             self._ui.Print(" ".join(newargs))
             meth(newargs)
 
