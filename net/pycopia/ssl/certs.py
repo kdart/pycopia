@@ -136,6 +136,9 @@ class CertificateRequest(object):
     def emit(self, fo, filetype="pem"):
         fo.write(crypto.dump_certificate_request(_FILETYPES[filetype], self._req))
 
+    def get_pem(self):
+        return crypto.dump_certificate_request(crypto.FILETYPE_PEM, self._req)
+
 
 class PrivateKey(object):
     def __init__(self, filename=None, text=None, passphrase=None,
@@ -185,6 +188,9 @@ class PrivateKey(object):
         else:
             text = crypto.dump_privatekey(crypto.FILETYPE_PEM, self._key)
         fo.write(text)
+
+    def get_pem(self):
+        return crypto.dump_privatekey(crypto.FILETYPE_PEM, self._key)
 
 
 class Certificate(object):
@@ -289,6 +295,9 @@ class Certificate(object):
 
     def emit(self, fo, filetype="pem"):
         fo.write(crypto.dump_certificate(_FILETYPES[filetype], self._cert))
+
+    def get_pem(self):
+        return crypto.dump_certificate(crypto.FILETYPE_PEM, self._cert)
 
 
 class DistinguishedName(object):
