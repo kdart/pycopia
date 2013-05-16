@@ -435,7 +435,7 @@ class Telnet(object):
                     os.close(fd)
                 except:
                     pass
-            os.write(0, "rz -e\r") # needed with -e flag on sz
+            os.write(0, "rz -e -q -s +30\r") # needed with -e flag on sz
             os.execlp("sz", "sz", "-e", "-q", "-y", "-L", "128", filename)
             os._exit(1) # not normally reached
         # parent

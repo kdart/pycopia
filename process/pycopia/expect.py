@@ -15,7 +15,7 @@
 
 from __future__ import print_function
 from __future__ import division
-from __future__ import unicode_literals
+#from __future__ import unicode_literals
 
 """
 This module contains classes and functions that perform Expect-like operations
