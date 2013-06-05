@@ -1,6 +1,6 @@
 # python wrapper for setitimer and getitimer.
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 2007  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
@@ -17,6 +17,7 @@
 # int getitimer(int which, struct itimerval *value);
 # int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue);
 
+from posix.unistd cimport close, read
 
 cdef extern from "Python.h":
     int PyErr_CheckSignals()
@@ -26,24 +27,36 @@ cdef extern from "Python.h":
 cdef extern from "time.h":
 
     cdef struct timeval:
-        long int tv_sec
-        long int tv_usec
+       long int tv_sec
+       long int tv_usec
 
     cdef struct itimerval:
-        timeval it_interval
-        timeval it_value
+       timeval it_interval
+       timeval it_value
 
     cdef struct timespec:
        long int tv_sec
        long int tv_nsec
 
-    int c_getitimer "getitimer" (int which, itimerval *value)
-    int c_setitimer "setitimer" (int which, itimerval *value, itimerval *ovalue)
-    int c_nanosleep "nanosleep" (timespec *req, timespec *rem)
+    cdef struct itimerspec:
+        timespec it_interval
+        timespec it_value
+
+
+    int c_getitimer "getitimer" (int , itimerval *)
+    int c_setitimer "setitimer" (int , itimerval *, itimerval *)
+    int c_nanosleep "nanosleep" (timespec *, timespec *)
 
     int clock_gettime(int timerid, timespec *value)
     int clock_nanosleep(int clock_id, int flags, timespec *rqtp, timespec *rmtp)
 
+cdef extern from "sys/timerfd.h":
+    int timerfd_create (int, int)
+    int timerfd_settime (int, int, itimerspec *, itimerspec *)
+    int timerfd_gettime (int, itimerspec *)
+
+DEF TFD_CLOEXEC = 02000000
+DEF TFD_NONBLOCK = 00004000
 
 cdef extern from "string.h":
     char *strerror(int errnum)
@@ -60,6 +73,7 @@ ITIMER_PROF = 2
 
 CLOCK_REALTIME = 0
 CLOCK_MONOTONIC = 1
+DEF CLOCK_MONOTONIC = 1
 
 TIMER_ABSTIME = 0x01
 
@@ -160,5 +174,73 @@ def absolutesleep(double delay):
             raise OSError("absolutesleep: (%d) %s" % (rv, strerror(rv)))
     return 0
 
+
+cdef extern from "stdint.h":
+#if __WORDSIZE == 64
+    ctypedef unsigned long int uint64_t
+#else
+    ctypedef unsigned long long int uint64_t
+#endif
+
+
+cdef class FDTimer:
+    """A timer that is a file-like object. It may be added to select or poll. A
+    read returns the number of times timer has expired since last read.
+    """
+    cdef int _fd
+
+    def __init__(self, int flags=TFD_CLOEXEC):
+        cdef int fd
+        fd = timerfd_create (CLOCK_MONOTONIC, flags)
+        if fd == -1:
+            raise OSError("FDTimer: (%d) %s" % (errno, strerror(errno)))
+        self._fd = fd
+
+    def __dealloc__(self):
+        self.close()
+
+    def close(self):
+        if self._fd != -1:
+            close(self._fd)
+            self._fd = -1
+
+    def fileno(self):
+        return self._fd
+
+    property closed:
+        def __get__(self):
+            return self._fd == -1
+
+    def settime(self, double expire, double interval):
+        """Set time for initial timeout, and subsequent intervals. Set interval
+        to zero for one-shot timer.
+        """
+        cdef itimerspec ts
+        cdef timespec ts_interval
+        cdef timespec ts_expire
+        _set_timespec(&ts_expire, expire)
+        _set_timespec(&ts_interval, interval)
+        ts.it_interval = ts_interval
+        ts.it_value = ts_expire
+        rv =  timerfd_settime(self._fd, 0, &ts, NULL)
+        if rv == -1:
+            raise OSError("FDTimer.settime: (%d) %s" % (errno, strerror(errno)))
+
+    def gettime(self):
+        """Returns tuple of (time until next expiration, interval).
+        If next is zero, timer is disabled. If interval is zero time is one-shot"""
+        cdef itimerspec ts
+        rv = timerfd_gettime(self._fd, &ts)
+        if rv == -1:
+            raise OSError("FDTimer.gettime: (%d) %s" % (errno, strerror(errno)))
+        return _timespec2float(&ts.it_value), _timespec2float(&ts.it_interval)
+
+    def read(self, int amt=-1):
+        """Returns number of times timer has expired since last read."""
+        cdef uint64_t buf
+        if read(self._fd, &buf, 8) == 8:
+            return <unsigned long long> buf
+        else:
+            return None
 
 

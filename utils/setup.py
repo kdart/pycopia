@@ -6,8 +6,12 @@ from __future__ import print_function
 import sys
 import os
 
-from setuptools import setup, Extension
+from setuptools import setup
+from distutils.extension import Extension
 from glob import glob
+
+from Cython.Distutils import build_ext
+
 
 NAME = "pycopia-utils"
 VERSION = "1.0"
@@ -18,7 +22,7 @@ EXTENSIONS = []
 if sys.platform == "darwin":
     EXTENSIONS.append(Extension('pycopia.itimer', ['pycopia.itimer.c']))
 elif sys.platform.startswith("linux"):
-    EXTENSIONS.append(Extension('pycopia.itimer', ['pycopia.itimer.c'], libraries=["rt"]))
+    EXTENSIONS.append(Extension('pycopia.itimer', ['pycopia.itimer.pyx'], libraries=["rt"]))
     SCRIPTS = glob("bin/*")
 
 
@@ -27,6 +31,7 @@ setup (name=NAME, version=VERSION,
     packages = ["pycopia"],
     scripts = SCRIPTS,
     ext_modules = EXTENSIONS,
+    cmdclass={"build_ext": build_ext},
 #    install_requires = ['pycopia-aid>=1.0.dev-r138,==dev'],
     dependency_links = [
             "http://www.pycopia.net/download/"

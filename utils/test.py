@@ -98,5 +98,20 @@ class UtilsTests(unittest.TestCase):
             signal.signal(signal.SIGALRM, signal.SIG_DFL)
         self.assertAlmostEqual(time.time()-start, 10.0, places=2)
 
+    def test_FDTimer(self):
+        t = itimer.FDTimer()
+        t.settime(5.0, 2.0)
+        start = time.time()
+        print(t.read())
+        self.assertAlmostEqual(time.time()-start, 5.0, places=2)
+        print(t.read())
+        self.assertAlmostEqual(time.time()-start, 7.0, places=2)
+        print(t.read())
+        self.assertAlmostEqual(time.time()-start, 9.0, places=2)
+        t.close()
+        self.assertTrue(t.closed)
+
+
+
 if __name__ == '__main__':
     unittest.main()
