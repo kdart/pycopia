@@ -40,8 +40,12 @@ from errno import EINTR
 from pycopia.aid import NULL
 
 
-class ExitNow(Exception):
+class AsyncIOException(Exception):
     pass
+
+class UnregisterNow(AsyncIOException):
+    def __init__(self, obj):
+        self.obj = obj
 
 # fix up the os module to include more Linux/BSD constants.
 os.ACCMODE = 3
@@ -185,7 +189,9 @@ class Poll(object):
                     hobj.write_handler()
                 if (flags & EPOLLHUP):
                     hobj.hangup_handler()
-            except (ExitNow, KeyboardInterrupt, SystemExit):
+            except UnregisterNow as unr:
+                self.unregister(unr.obj)
+            except (KeyboardInterrupt, SystemExit):
                 raise
             except:
                 ex, val, tb = sys.exc_info()

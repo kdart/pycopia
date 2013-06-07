@@ -42,7 +42,6 @@ cdef extern from "time.h":
         timespec it_interval
         timespec it_value
 
-
     int c_getitimer "getitimer" (int , itimerval *)
     int c_setitimer "setitimer" (int , itimerval *, itimerval *)
     int c_nanosleep "nanosleep" (timespec *, timespec *)
@@ -71,28 +70,30 @@ ITIMER_REAL = 0
 ITIMER_VIRTUAL = 1
 ITIMER_PROF = 2
 
+
 CLOCK_REALTIME = 0
 CLOCK_MONOTONIC = 1
+DEF CLOCK_REALTIME = 0
 DEF CLOCK_MONOTONIC = 1
 
-TIMER_ABSTIME = 0x01
-
-EINTR = 4
+DEF TIMER_ABSTIME = 0x01
+DEF TFD_TIMER_ABSTIME = 1
+DEF EINTR = 4
 
 class ItimerError(Exception):
   pass
 
-cdef double _timeval2float(timeval *tv):
+cdef inline double _timeval2float(timeval *tv):
     return <double> tv.tv_sec + (<double> tv.tv_usec / 1000000.0)
 
-cdef double _timespec2float(timespec *tv):
+cdef inline double _timespec2float(timespec *tv):
     return <double> tv.tv_sec + (<double> tv.tv_nsec / 1000000000.0)
 
-cdef void _set_timeval(timeval *tv, double n):
+cdef inline void _set_timeval(timeval *tv, double n):
     tv.tv_sec = <long> floor(n)
     tv.tv_usec = <long> (fmod(n, 1.0) * 1000000.0)
 
-cdef void _set_timespec(timespec *ts, double n):
+cdef inline void _set_timespec(timespec *ts, double n):
     ts.tv_sec = <long> floor(n)
     ts.tv_nsec = <long> (fmod(n, 1.0) * 1000000000.0)
 
@@ -118,7 +119,6 @@ def getitimer(int which):
 Returns current value of given itimer.
     """
     cdef itimerval old
-
     if c_getitimer(which, &old) == -1:
         raise ItimerError, "Could not get itimer %d" % which
     return _timeval2float(&old.it_value), _timeval2float(&old.it_interval)
@@ -149,30 +149,32 @@ def nanosleep(double delay):
         if errno == EINTR:
             PyErr_CheckSignals()
         else:
-            raise OSError("nanosleep: (%d) %s" % (errno, strerror(errno)))
+            raise OSError((errno, strerror(errno)))
     return 0
 
 
-def absolutesleep(double delay):
-    """Sleep for <delay> seconds, with nanosecond precision. Signal
+def absolutesleep(double time, int clockid=CLOCK_REALTIME):
+    """Sleep until <time>, with nanosecond precision. Signal
     handlers are run while sleeping."""
     cdef timespec ts_delay
-    cdef double expire
     cdef int rv
 
-    clock_gettime(CLOCK_REALTIME, &ts_delay)
-    expire = _timespec2float(&ts_delay) + delay
-    _set_timespec(&ts_delay, expire)
-
+    _set_timespec(&ts_delay, time)
     while 1:
-        rv = clock_nanosleep(CLOCK_REALTIME, TIMER_ABSTIME, &ts_delay, NULL)
-        if rv == 0:
-            break
-        elif rv == EINTR:
+        rv = clock_nanosleep(clockid, TIMER_ABSTIME, &ts_delay, NULL)
+        if rv == EINTR:
             PyErr_CheckSignals()
+        elif rv == 0:
+            return 0
         else:
-            raise OSError("absolutesleep: (%d) %s" % (rv, strerror(rv)))
-    return 0
+            raise OSError((rv, strerror(rv)))
+
+
+def gettime(int clockid=CLOCK_REALTIME):
+    cdef timespec time
+    if clock_gettime(clockid, &time) == -1:
+        raise OSError((errno, strerror(errno)))
+    return _timespec2float(&time)
 
 
 cdef extern from "stdint.h":
@@ -189,11 +191,11 @@ cdef class FDTimer:
     """
     cdef int _fd
 
-    def __init__(self, int flags=TFD_CLOEXEC):
-        cdef int fd
-        fd = timerfd_create (CLOCK_MONOTONIC, flags)
+    def __init__(self, int clockid=CLOCK_MONOTONIC, int flags=TFD_CLOEXEC):
+        cdef int fd = -1
+        fd = timerfd_create(clockid, flags)
         if fd == -1:
-            raise OSError("FDTimer: (%d) %s" % (errno, strerror(errno)))
+            raise OSError((errno, strerror(errno)))
         self._fd = fd
 
     def __dealloc__(self):
@@ -211,36 +213,39 @@ cdef class FDTimer:
         def __get__(self):
             return self._fd == -1
 
-    def settime(self, double expire, double interval):
+    def settime(self, double expire, double interval, int absolute=0):
         """Set time for initial timeout, and subsequent intervals. Set interval
         to zero for one-shot timer.
         """
         cdef itimerspec ts
         cdef timespec ts_interval
         cdef timespec ts_expire
+        cdef int flags
         _set_timespec(&ts_expire, expire)
         _set_timespec(&ts_interval, interval)
         ts.it_interval = ts_interval
         ts.it_value = ts_expire
-        rv =  timerfd_settime(self._fd, 0, &ts, NULL)
-        if rv == -1:
-            raise OSError("FDTimer.settime: (%d) %s" % (errno, strerror(errno)))
+        if timerfd_settime(self._fd, TFD_TIMER_ABSTIME if absolute else 0, &ts, NULL) == -1:
+            raise OSError((errno, strerror(errno)))
 
     def gettime(self):
         """Returns tuple of (time until next expiration, interval).
         If next is zero, timer is disabled. If interval is zero time is one-shot"""
         cdef itimerspec ts
-        rv = timerfd_gettime(self._fd, &ts)
-        if rv == -1:
-            raise OSError("FDTimer.gettime: (%d) %s" % (errno, strerror(errno)))
+        if timerfd_gettime(self._fd, &ts) == -1:
+            raise OSError((errno, strerror(errno)))
         return _timespec2float(&ts.it_value), _timespec2float(&ts.it_interval)
 
     def read(self, int amt=-1):
         """Returns number of times timer has expired since last read."""
         cdef uint64_t buf
-        if read(self._fd, &buf, 8) == 8:
-            return <unsigned long long> buf
-        else:
-            return None
-
+        cdef int rv
+        while 1:
+            rv = read(self._fd, &buf, 8)
+            if rv == 8:
+                return <unsigned long long> buf
+            elif rv == -1 and errno == EINTR:
+                PyErr_CheckSignals()
+            else:
+                raise OSError((errno, strerror(errno)))
 

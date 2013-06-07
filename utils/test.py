@@ -79,6 +79,7 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(oldinterval, 0.0)
 
     def test_nanosleep(self):
+        global s
         signal.signal(signal.SIGALRM, catcher)
         start = s = time.time()
         try:
@@ -89,11 +90,12 @@ class UtilsTests(unittest.TestCase):
         self.assertAlmostEqual(time.time()-start, 10.0, places=2)
 
     def test_absolutesleep(self):
+        global s
         signal.signal(signal.SIGALRM, catcher)
         start = s = time.time()
         try:
             itimer.alarm(2.0)
-            itimer.absolutesleep(10.0)
+            itimer.absolutesleep(start + 10.0)
         finally:
             signal.signal(signal.SIGALRM, signal.SIG_DFL)
         self.assertAlmostEqual(time.time()-start, 10.0, places=2)
@@ -111,7 +113,13 @@ class UtilsTests(unittest.TestCase):
         t.close()
         self.assertTrue(t.closed)
 
-
+    def test_FDTimer_absolute(self):
+        t = itimer.FDTimer(itimer.CLOCK_MONOTONIC)
+        start = time.time()
+        t.settime(itimer.gettime(itimer.CLOCK_MONOTONIC)+5.0, 0.0, absolute=True)
+        print(t.read())
+        t.close()
+        self.assertAlmostEqual(time.time()-start, 5.0, places=2)
 
 if __name__ == '__main__':
     unittest.main()

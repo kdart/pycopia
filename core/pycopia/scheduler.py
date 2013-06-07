@@ -34,7 +34,7 @@ alarm = itimer.alarm # allows subsecond precision using floats
 __all__ = ["get_scheduler"]
 
 # Save a function call by making a simple reference.
-sleep = itimer.absolutesleep
+sleep = itimer.nanosleep
 
 def insort(a, x, lo=0, hi=None):
     if hi is None:
@@ -214,7 +214,7 @@ interval. If the repeat flag is given the job is rescheduled indefinitely."""
 Pause the current thread of execution for <secs> seconds. Use this
 instead of time.sleep() since it works with the scheduler, and allows
 other events to run.  """
-        itimer.absolutesleep(delay)
+        itimer.nanosleep(delay)
 
     def _timeout_cb(self):
         raise TimeoutError("timer expired")

@@ -32,7 +32,7 @@ setup (name=NAME, version=VERSION,
     scripts = SCRIPTS,
     ext_modules = EXTENSIONS,
     cmdclass={"build_ext": build_ext},
-#    install_requires = ['pycopia-aid>=1.0.dev-r138,==dev'],
+#    install_requires = ['pycopia-aid>=1.0.dev-r138', 'cython>=0.18'],
     dependency_links = [
             "http://www.pycopia.net/download/"
                 ],
