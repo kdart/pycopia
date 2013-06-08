@@ -126,7 +126,34 @@ class TestRunner(object):
             else:
                 logging.warn("%r is not a runnable object." % (obj,))
         if testcases:
-            rv = self.run_tests(testcases)
+            if len(testcases) > 1:
+                rv = self.run_tests(testcases)
+            else:
+                args = []
+                kwargs = {}
+                opts = self.config.options_override.copy()
+                for name, value in opts.items():
+                    if name.startswith("arg"):
+                        try:
+                            index = int(name[3]) # use --arg1=XXX to place argument XXX
+                        except (ValueError, IndexError):
+                            logging.warn("{!r} not converted to argument.".format(name))
+                        else:
+                            try:
+                                args[index] = value
+                            except IndexError:
+                                need = index - len(args)
+                                while need:
+                                    args.append(None)
+                                    need -= 1
+                                args.append(value)
+                        del self.config.options_override[name]
+                        del self.config[name]
+                    elif name.startswith("kwarg_"): # use --kwarg_XXX to place keyword argument XXX
+                        kwargs[name[6:]] = value
+                        del self.config.options_override[name]
+                        del self.config[name]
+                rv = self.run_test(testcases[0], *args, **kwargs)
         return rv
 
     def run_class(self, cls):
