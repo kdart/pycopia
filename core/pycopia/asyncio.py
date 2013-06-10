@@ -47,6 +47,10 @@ class UnregisterNow(AsyncIOException):
     def __init__(self, obj):
         self.obj = obj
 
+class UnregisterFDNow(AsyncIOException):
+    def __init__(self, fd):
+        self.filedescriptor = fd
+
 # fix up the os module to include more Linux/BSD constants.
 os.ACCMODE = 3
 # flag for ASYNC I/O support. Note cygwin/win32 does not support it.
@@ -86,8 +90,10 @@ class Poll(object):
     def __str__(self):
         return "Polling descriptors: %r" % (self.smap.keys(),)
 
-    def __bool__(self):
-        return bool(self.smap)
+    def __nonzero__(self):
+        return bool(self.smap) or bool(self._fd_callbacks)
+
+    __bool__ = __nonzero__
 
     def __iter__(self):
         return self.smap.values()
@@ -98,6 +104,9 @@ class Poll(object):
             fd = obj.fileno()
             self.pollster.register(fd, flags)
             self.smap[fd] = obj
+
+    def is_registered(self, obj):
+        return obj.fileno() in self.smap
 
     def modify(self, obj):
         fd = obj.fileno()
@@ -120,6 +129,9 @@ class Poll(object):
         self.pollster.register(fd, flags)
         self.smap[fd] = None
         self._fd_callbacks[fd] = callback
+
+    def is_registered_fd(self, fd):
+        return fd in self._fd_callbacks
 
     def unregister_fd(self, fd):
         try:
@@ -191,13 +203,15 @@ class Poll(object):
                     hobj.hangup_handler()
             except UnregisterNow as unr:
                 self.unregister(unr.obj)
+            except UnregisterFDNow as unr:
+                self.unregister_fd(unr.filedescriptor)
             except (KeyboardInterrupt, SystemExit):
                 raise
             except:
                 ex, val, tb = sys.exc_info()
                 hobj.exception_handler(ex, val, tb)
 
-    def loop(self, timeout=-1.0, callback=NULL):
+    def loop(self, timeout=5.0, callback=NULL):
         while self.smap:
             self.poll(timeout)
             self._run_idle()

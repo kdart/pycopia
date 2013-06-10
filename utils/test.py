@@ -102,7 +102,9 @@ class UtilsTests(unittest.TestCase):
 
     def test_FDTimer(self):
         t = itimer.FDTimer()
+        self.assertFalse(t)
         t.settime(5.0, 2.0)
+        self.assertTrue(t)
         start = time.time()
         print(t.read())
         self.assertAlmostEqual(time.time()-start, 5.0, places=2)
@@ -111,6 +113,7 @@ class UtilsTests(unittest.TestCase):
         print(t.read())
         self.assertAlmostEqual(time.time()-start, 9.0, places=2)
         t.close()
+        self.assertFalse(t)
         self.assertTrue(t.closed)
 
     def test_FDTimer_absolute(self):

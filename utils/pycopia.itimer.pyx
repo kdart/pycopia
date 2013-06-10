@@ -201,6 +201,15 @@ cdef class FDTimer:
     def __dealloc__(self):
         self.close()
 
+    def __nonzero__(self):
+        cdef itimerspec ts
+        if self._fd == -1:
+            return False
+        if timerfd_gettime(self._fd, &ts) == -1:
+            raise OSError((errno, strerror(errno)))
+        return not (ts.it_value.tv_sec == 0 and ts.it_value.tv_nsec == 0 and
+                ts.it_interval.tv_sec == 0 and ts.it_interval.tv_nsec == 0)
+
     def close(self):
         if self._fd != -1:
             close(self._fd)
