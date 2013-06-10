@@ -28,8 +28,6 @@ things simple. ;-)
 import sys, os
 from email import *
 
-from pycopia.emailplus import *
-
 from pycopia import socket
 from pycopia import timelib
 
