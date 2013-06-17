@@ -41,7 +41,10 @@ from __future__ import division
 
 import itertools
 
-import Image  # from PIL, for automated image size
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 from pycopia.urlparse import quote_plus
 from pycopia.textutils import identifier
@@ -235,19 +238,20 @@ class FlowMixin(object):
 
     def new_image(self, _imagefile, _alt=None, **kwargs):
         check_flag(kwargs, "ismap")
-        try:
-            im = Image.open(_imagefile)
-        except IOError:
-            pass
-        else:
-            x, y = im.size
-            kwargs["width"] = str(x)
-            kwargs["height"] = str(y)
+        if Image is not None:
             try:
-                im.close()
-            except:
+                im = Image.open(_imagefile)
+            except IOError:
                 pass
-            del im
+            else:
+                x, y = im.size
+                kwargs["width"] = str(x)
+                kwargs["height"] = str(y)
+                try:
+                    im.close()
+                except:
+                    pass
+                del im
         kwargs["src"] = _imagefile # XXX adjust for server alias?
         if _alt:
             kwargs["alt"] = _alt
