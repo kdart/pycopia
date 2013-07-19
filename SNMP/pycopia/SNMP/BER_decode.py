@@ -131,7 +131,7 @@ def decode_oid(length, message):
     oid = []
     # get the first subid
     subid = ord(message[0])
-    oid.append(subid / 40)
+    oid.append(subid // 40)
     oid.append(subid % 40)
 
     index = 1
