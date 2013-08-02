@@ -1387,6 +1387,18 @@ mapper(TestSuite, tables.test_suites,
     },
 )
 
+# A UseCase is a dynamic suite constructor (construct pycopia.QA.core.TestSuite objects at run time).
+class UseCase(object):
+    ROW_DISPLAY = ("name", "purpose")
+
+    def __str__(self):
+        return str(self.name)
+
+    def __repr__(self):
+        return "UseCase(name=%r)" % (self.name,)
+
+mapper(UseCase, tables.use_cases)
+
 
 class TestJob(object):
     ROW_DISPLAY = ("name", "schedule")

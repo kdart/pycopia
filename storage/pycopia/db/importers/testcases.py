@@ -3,6 +3,7 @@
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 # this module is a real hack job, but at least it works.
+# It imports Test, TestSuite, and UseCase objects from code into the database.
 
 from __future__ import absolute_import
 from __future__ import print_function
@@ -259,6 +260,35 @@ class TestCaseData(object):
         _dbsession.commit()
 
 
+class UseCaseData(object):
+    """Collect UseCase record data here.
+    """
+    def __init__(self):
+        data = self._data = {}
+        # Pre-populate all column names with default data.
+        data["name"]               = None             # mandatory
+        data["purpose"]         = None
+        data["notes"]         = None
+
+    def create(self):
+        dbcase = models.create(models.UseCase, **self._data)
+        _dbsession.add(dbcase)
+        _dbsession.commit()
+        return dbcase
+
+    def update(self, dbusecase):
+        for key, value in self._data.items():
+            if value is not None:
+                setattr(dbusecase, key, value)
+        _dbsession.commit()
+
+    def set_from_UseCase(self, ucclass):
+        """Extract available data from UseCase instance."""
+        data = self._data
+        data["name"] = mangle_test_name("{}.{}".format(ucclass.__module__, ucclass.__name__))
+        data["purpose"] = textwrap.dedent(ucclass.__doc__ if ucclass.__doc__ is not None else "")
+
+
 _MODNAME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9\.]+$")
 
 def _valid_prereq(pathname):
@@ -300,7 +330,7 @@ def do_module(mod, config):
     except module.ObjectImportError, err:
         pass
     else:
-        return do_TestSuite(suite)
+        do_TestSuite(suite)
 
     # No suite factory function, so just import objects from module.
     for name in dir(mod):
@@ -316,6 +346,9 @@ def do_module(mod, config):
                 test = obj(config)
                 do_Test(test)
                 continue
+        if issubclass(obj, core.UseCase):
+            do_UseCase(obj)
+            continue
 
 
 def do_TestSuite(suite):
@@ -388,6 +421,16 @@ def do_TestEntry(entry):
     return dbcase
 
 
+def do_UseCase(ucclass):
+    name = mangle_test_name("{}.{}".format(ucclass.__module__, ucclass.__name__))
+    try:
+        dbuc = _dbsession.query(models.UseCase).filter(models.UseCase.name==name).one()
+    except models.NoResultFound:
+        dbuc = create_UseCase(ucclass)
+    else:
+        update_UseCase(ucclass, dbuc)
+    return dbuc
+
 def mangle_test_name(name):
     return name.replace("testcases.", "")
 
@@ -397,11 +440,21 @@ def create_TestCase(testinstance):
     testcase_holder.set_from_TestCase(testinstance)
     return testcase_holder.create()
 
-
 def update_TestCase(testinstance, dbtestcase):
     testcase_holder = TestCaseData()
     testcase_holder.set_from_TestCase(testinstance)
     return testcase_holder.update(dbtestcase)
+
+
+def create_UseCase(ucclass):
+    holder = UseCaseData()
+    holder.set_from_UseCase(ucclass)
+    return holder.create()
+
+def update_UseCase(ucclass, dbusecase):
+    holder = UseCaseData()
+    holder.set_from_UseCase(ucclass)
+    return holder.update(dbusecase)
 
 
 def get_or_create_TestSuite(**kwargs):

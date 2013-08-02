@@ -330,7 +330,7 @@ class StandardFormatter(NullFormatter):
         s = str(s)
         if len(s) <= 66:
             return s
-        halflen = (min(66, len(s))/2)-2
+        halflen = (min(66, len(s))//2)-2
         return s[:halflen]+"[..]"+s[-halflen:]
 
     def page(self):

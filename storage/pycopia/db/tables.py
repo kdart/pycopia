@@ -579,6 +579,15 @@ test_suites_testcases =  Table('test_suites_testcases', metadata,
     schema='public')
 Index('index_test_suites_testcases_testsuite_id_key', test_suites_testcases.c.testsuite_id, test_suites_testcases.c.testcase_id, unique=True)
 
+
+use_cases =  Table('use_cases', metadata,
+    Column('id', INTEGER(), primary_key=True, nullable=False),
+            Column('name', VARCHAR(length=255, convert_unicode=False), primary_key=False, nullable=False), # full path
+            Column('purpose', TEXT(length=None, convert_unicode=False), primary_key=False),
+            Column('notes', TEXT(length=None, convert_unicode=False), primary_key=False),
+    schema='public')
+Index('index_use_case_name', use_cases.c.name, unique=True)
+
 # risk managmnet schema
 risk_factors =  Table('risk_factors', metadata,
     Column('id', INTEGER(), primary_key=True, nullable=False),

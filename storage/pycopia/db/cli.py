@@ -1442,6 +1442,8 @@ def get_root(session):
     if _user is None:
         user_pwent = passwd.getpwself()
         _user = models.User.get_by_username(session, user_pwent.name)
+    if _user is None:
+        raise config.ConfigError("User {} not in database.".format(user_pwent.name))
     root = config.get_root(session)
     if _user.is_superuser:
         return root

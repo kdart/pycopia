@@ -339,8 +339,15 @@ class UserInterface(object):
         return cliutils.get_bool(prompt, default, input=self._io.raw_input, error=self.error)
 
     def yes_no(self, prompt, default=True):
-        yesno = cliutils.get_input(self.prompt_format(prompt), "Y" if default else "N", self._io.raw_input)
-        return yesno.upper().startswith("Y")
+        while 1:
+            yesno = cliutils.get_input(self.prompt_format(prompt), "Y" if default else "N", self._io.raw_input)
+            yesno = yesno.upper()
+            if yesno.startswith("Y"):
+                return True
+            elif yesno.startswith("N"):
+                return False
+            else:
+                self.Print("Please enter yes or no.")
 
     def get_key(self, prompt=""):
         return tty.get_key(prompt)
