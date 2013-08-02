@@ -319,3 +319,8 @@ def need_authentication(handler):
 
 
 
+def init(config):
+    global SESSION_KEY_NAME
+    SESSION_KEY_NAME = config.SESSION_KEY_NAME
+
+

@@ -54,9 +54,7 @@ from pycopia.dictlib import ObjectCache
 from pycopia.WWW.middleware import POMadapter
 
 from pycopia.WWW import HTML5
-from pycopia.XML import Plaintext
 
-SESSION_KEY_NAME = b"PYCOPIA"
 
 STATUSCODES = httputils.STATUSCODES
 
@@ -281,13 +279,12 @@ def parse_formdata(contenttype, post_data):
 
 class HTTPRequest(object):
     """The HTTP request that gets passed to handler methods."""
-    def __init__(self, environ):
+    def __init__(self, environ, config, resolver, path):
         self.environ = environ
-        self.method = environ[b'REQUEST_METHOD'].upper()
-        self.path = None
-        self.get_url = None
-        self.get_alias = None
-        self.config = None
+        self.config = config
+        self.resolver = resolver
+        self.method = environ[b'REQUEST_METHOD']
+        self.path = path
         self.session = None # possibly set by authentication module.
 
     def log_error(self, message):
@@ -506,17 +503,13 @@ class URLRedirector(object):
 
 class URLResolver(object):
     """Supports mapping URL paths to handler functions."""
-    def __init__(self, mapconfig=None, urlbase=None):
+    def __init__(self, mapconfig, urlbase=""):
         self._reverse = {}
         self._aliases = {}
         self._patterns = []
-        if urlbase:
-            self._urlbase = urlbase
-        else:
-            self._urlbase = ""
-        if mapconfig:
-            for pattern, methname in mapconfig:
-                self.register(pattern, methname)
+        self._urlbase = urlbase
+        for pattern, methname in mapconfig:
+            self.register(pattern, methname)
 
     def register(self, pattern, method):
         if isinstance(method, basestring):
@@ -601,15 +594,11 @@ class FrameworkAdapter(object):
     """
     def __init__(self, config):
         self._config = config
-        self._resolver = URLResolver(config.LOCATIONMAP,
-                config.get(b"BASEPATH", "/%s" % (config.SERVERNAME,)))
+        self._urlbase = config.get(b"BASEPATH", "/" + config.SERVERNAME)
+        self._resolver = URLResolver(config.LOCATIONMAP, self._urlbase)
 
     def __call__(self, environ, start_response):
-        request = HTTPRequest(environ)
-        request.config = self._config
-        request.get_url = self._resolver.get_url
-        request.path = self._resolver._urlbase + environ[b'PATH_INFO']
-        request.get_alias = self._resolver.get_alias
+        request = HTTPRequest(environ, self._config, self._resolver, self._urlbase + environ[b'PATH_INFO'])
         try:
             response = self._resolver.dispatch(request)
         except:
@@ -702,8 +691,8 @@ def JSONQuery(request):
     return rv
 
 
-def JSON404():
-    json = simplejson.dumps(None)
+def JSON404(message=None):
+    json = simplejson.dumps(message)
     return HttpResponseNotFound(json, mimetype=b"application/json")
 
 
@@ -751,11 +740,9 @@ class JSONRequestHandler(RequestHandler):
     def get_response(self, request, **kwargs):
         return None # should not be used for JSON handlers.
 
-    def get_url(self, function):
-        return "../%s" % function.func_name # XXX assumes name is end of path.
 
 
-def default_doc_constructor(**kwargs):
+def default_doc_constructor(request, **kwargs):
     """Example document constructor.
 
     This callback contructs the common elements to a response, usually
@@ -783,16 +770,15 @@ class ResponseDocument(object):
     """Wraps a text-creator document and supplies helper methods for
     accessing configuration.
     """
-    def __init__(self, _request, _constructor=None, **kwargs):
+    def __init__(self, request, _constructor=None, **kwargs):
+        self.config = request.config
+        self.resolver = request.resolver
         if _constructor is not None:
-            self._doc = _constructor(**kwargs)
+            self._doc = _constructor(request, **kwargs)
         else:
             self._doc = doc = HTML5.new_document()
             for name, val in kwargs.items():
                 setattr(doc, name, val)
-        self.get_url = _request.get_url
-        self.get_alias = _request.get_alias
-        self.config = _request.config
 
     doc = property(lambda s: s._doc)
 
@@ -806,11 +792,8 @@ class ResponseDocument(object):
         """Handlers should return the return value of this method."""
         doc = self._doc
         self._doc = None
-        self.nodemaker = None
-        self.creator = None
-        self.get_url = None
-        self.get_alias = None
         self.config = None
+        self.resolver = None
         adapter = POMadapter.WSGIAdapter(doc)
         doc.emit(adapter)
         response = HttpResponse(adapter)
@@ -832,7 +815,7 @@ class ResponseDocument(object):
             namepair = self.config.ICONMAP["large"][name]
         except KeyError:
             namepair = self.config.ICONMAP["large"]["default"]
-        return self._doc.nodemaker(b"Img", {"src": self.get_url("images", name=namepair[1]),
+        return self._doc.nodemaker(b"Img", {"src": self.resolver.get_url("images", name=namepair[1]),
                        "alt":name, "width":"24", "height":"24"})
 
     def get_medium_icon(self, name):
@@ -840,7 +823,7 @@ class ResponseDocument(object):
             filename = self.config.ICONMAP["medium"][name]
         except KeyError:
             filename = self.config.ICONMAP["medium"]["default"]
-        return self._doc.nodemaker(b"Img", {"src": self.get_url("images", name=filename),
+        return self._doc.nodemaker(b"Img", {"src": self.resolver.get_url("images", name=filename),
                        "alt":name, "width":"16", "height":"16"})
 
     def get_small_icon(self, name):
@@ -848,15 +831,16 @@ class ResponseDocument(object):
             filename = self.config.ICONMAP["small"][name]
         except KeyError:
             filename = self.config.ICONMAP["small"]["default"]
-        return self._doc.nodemaker(b"Img", {"src": self.get_url("images", name=filename),
+        return self._doc.nodemaker(b"Img", {"src": self.resolver.get_url("images", name=filename),
                        "alt":name, "width":"10", "height":"10"})
 
     def anchor2(self, path, text, **kwargs):
+        """Adds a hyperlink to a handler."""
         try:
-            href = self.get_url(path, **kwargs)
+            href = self.resolver.get_url(path, **kwargs)
         except InvalidPath:
             href = str(path) # use as-is as a fallback for hard-coded destinations.
-        return self.nodemaker(b"A", {"href": href}, text)
+        return self._doc.nodemaker(b"A", {"href": href}, text)
 
 
 # general purpose URL scheme "hole" filler. Use as a handler in the URL
