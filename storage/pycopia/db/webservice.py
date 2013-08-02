@@ -33,6 +33,7 @@ from pycopia.db import webhelpers
 #from pycopia.dictlib import AttrDict
 from pycopia.WWW import json
 from pycopia.WWW import framework
+from pycopia.WWW import HTML5
 from pycopia.WWW.middleware import auth
 
 from sqlalchemy.exc import DataError, IntegrityError
@@ -238,7 +239,7 @@ dispatcher = auth.need_authentication(webhelpers.setup_dbsession(dispatcher))
 ##### Code below here will eventually disappear.
 
 def doc_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
+    doc = HTML5.new_document()
     doc.stylesheets = ["common.css", "ui.css", "db.css"]
     doc.scripts = ["MochiKit.js", "proxy.js", "ui.js", "sorttable.js", "db.js"]
     for name, val in kwargs.items():

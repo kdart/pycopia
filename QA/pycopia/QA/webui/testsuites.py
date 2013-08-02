@@ -21,19 +21,21 @@ Javascript and CSS. This is all you need. :-)
 """
 
 from pycopia.WWW import framework
+from pycopia.WWW import HTML5
 from pycopia.WWW.middleware import auth
 
 
 def ts_page_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="common.css")
-    doc.stylesheet = request.get_url("css", name="ui.css")
-    doc.stylesheet = request.get_url("css", name="db.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="ui.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="testsuites.js"))
+    doc = HTML5.new_document()
+    res = request.resolver
+    doc.stylesheet = res.get_url("css", name="common.css")
+    doc.stylesheet = res.get_url("css", name="ui.css")
+    doc.stylesheet = res.get_url("css", name="db.css")
+    doc.add_javascript2head(url=res.get_url("js", name="MochiKit.js"))
+    doc.add_javascript2head(url=res.get_url("js", name="proxy.js"))
+    doc.add_javascript2head(url=res.get_url("js", name="ui.js"))
+    doc.add_javascript2head(url=res.get_url("js", name="db.js"))
+    doc.add_javascript2head(url=res.get_url("js", name="testsuites.js"))
     for name, val in kwargs.items():
         setattr(doc, name, val)
     nav = doc.add_section("navigation")

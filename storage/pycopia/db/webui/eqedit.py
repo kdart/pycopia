@@ -26,6 +26,7 @@ from __future__ import division
 
 
 from pycopia.WWW import framework
+from pycopia.WWW import HTML5
 from pycopia.WWW import json
 from pycopia.WWW.middleware import auth
 
@@ -35,7 +36,7 @@ from pycopia.db import models
 
 
 def eqedit_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
+    doc = HTML5.new_document()
     for name, val in kwargs.items():
         setattr(doc, name, val)
     doc.title = "Equipment Editor"
@@ -78,8 +79,7 @@ def get_equipment_list(filt=None, start=0, end=20, order_by=None):
             q = q.limit(end)
     return q.all()
 
-_exported = [get_equipment_list]
 
-dispatcher = json.JSONDispatcher(_exported)
+dispatcher = json.JSONDispatcher([get_equipment_list])
 dispatcher = auth.need_authentication(webhelpers.setup_dbsession(dispatcher))
 

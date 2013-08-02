@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 #    Copyright (C) 2007  Keith Dart <keith@dartworks.biz>
 #
 #    This library is free software; you can redistribute it and/or
@@ -21,6 +21,7 @@ Web tools.
 from pycopia.WWW import framework
 from pycopia.WWW import XHTML
 from pycopia.aid import partial
+from pycopia.WWW import HTML5
 
 from pycopia import ezmail
 
@@ -29,7 +30,7 @@ EMAILBODY = """Here is the header information you requested.
 """
 
 def doc_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
+    doc = HTML5.new_document()
     for name, val in kwargs.items():
         setattr(doc, name, val)
     container = doc.add_section("container")
@@ -57,8 +58,8 @@ def get_header_table(section, environ):
 
 
 def main(request):
-    resp = framework.ResponseDocument(request, doc_constructor, 
-                title="Web Tools", 
+    resp = framework.ResponseDocument(request, doc_constructor,
+                title="Web Tools",
                 stylesheet=request.get_url("css", name="default.css"))
     resp.doc.header.add_header(1, "Web Utilities and Tools")
     resp.doc.nav.append(resp.anchor2("/", "Home"))
@@ -67,7 +68,7 @@ def main(request):
 
 
 def headers(request):
-    resp = framework.ResponseDocument(request, doc_constructor, 
+    resp = framework.ResponseDocument(request, doc_constructor,
              title="Request Headers",
              stylesheet=request.get_url("css", name="headers.css"))
     resp.doc.nav.append(resp.anchor2("/", "Home"))
@@ -97,7 +98,7 @@ def emailrequest(request):
         body["Content-Disposition"] = 'inline'
         msg = ezmail.AutoMessage(str(rpt), mimetype=rpt.MIMETYPE, charset=rpt.encoding)
         msg["Content-Disposition"] = 'attachment; filename=headers.html'
-        ezmail.mail([body, msg], To=recipients, 
+        ezmail.mail([body, msg], To=recipients,
                   subject="Webtool header request from %s." % (request.environ.get("REMOTE_ADDR", "<unknown>"),))
 
     get_header_table(resp.doc.content, request.environ)

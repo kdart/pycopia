@@ -16,7 +16,7 @@
 
 """
 Supply server-side components of the countryset editor. A country set is
-an arbitrary set of countries selected from a list. 
+an arbitrary set of countries selected from a list.
 
 This also serves as an example of dynamic web applications using the
 Pycopia framework.
@@ -25,11 +25,12 @@ Pycopia framework.
 
 
 from pycopia.WWW import framework
+from pycopia.WWW import HTML5
 from pycopia.WWW.middleware import auth
 
 
 def cs_page_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
+    doc = HTML5.new_document()
     doc.stylesheets = ["common.css", "ui.css", "db.css"]
     doc.scripts = ["MochiKit.js", "proxy.js", "ui.js", "db.js", "countryset.js"]
     for name, val in kwargs.items():

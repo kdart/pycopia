@@ -58,7 +58,7 @@ class GlobalDatabaseContext(object):
 # decorator for top-level handlers that sets up DB session.
 def setup_dbsession(handler):
     def newhandler(request, *args, **kwargs):
-        with models.DatabaseContext(request) as dbsession:
+        with models.DatabaseContext() as dbsession:
             with GlobalDatabaseContext(dbsession):
                 return handler(request, *args, **kwargs)
     return newhandler

@@ -1,7 +1,7 @@
 #!/usr/bin/python2.6
 # -*- coding: us-ascii -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 # $Id$
 #
 #    Copyright (C) 2009 Keith Dart <keith@dartworks.biz>
@@ -27,6 +27,7 @@ import itertools
 
 from pycopia.WWW import framework
 from pycopia.WWW.middleware import auth
+from pycopia.WWW import HTML5
 
 from pycopia.aid import IF
 from pycopia.db import types
@@ -44,9 +45,9 @@ TC_METAMAP = dict((c.colname, c) for c in models.get_metadata(models.TestCase))
 
 
 TINY_MCE_EDIT_INIT="""
-    tinyMCE.init({ 
-        mode : "textareas", 
-        theme : "advanced", 
+    tinyMCE.init({
+        mode : "textareas",
+        theme : "advanced",
         editor_selector : "TEXT",
         theme_advanced_buttons1 : "bold,italic,underline,separator,strikethrough,justifyleft,justifycenter,justifyright,justifyfull,bullist,numlist,undo,redo,|,formatselect,fontselect,fontsizeselect",
         theme_advanced_buttons2 : "",
@@ -59,12 +60,9 @@ TINY_MCE_EDIT_INIT="""
 
 
 def testcase_edit_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="qawebui.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="tiny_mce/tiny_mce.js"))
+    doc = HTML5.new_document()
+    doc.stylesheet = request.resolver.get_url("css", name="qawebui.css")
+    doc.scripts = [ "MochiKit.js", "proxy.js", "db.js", "tiny_mce/tiny_mce.js"]
     doc.add_javascript2head(text=TINY_MCE_EDIT_INIT)
     for name, val in kwargs.items():
         setattr(doc, name, val)
@@ -73,19 +71,17 @@ def testcase_edit_constructor(request, **kwargs):
 
 
 def testcase_view_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="qawebui.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
+    doc = HTML5.new_document()
+    doc.stylesheet = request.resolver.get_url("css", name="qawebui.css")
+    doc.scripts = [ "MochiKit.js", "proxy.js", "db.js"]
     for name, val in kwargs.items():
         setattr(doc, name, val)
     build_framing(request, doc, "Test Case")
     return doc
 
 #def testcase_delete_constructor(request, **kwargs):
-#    doc = framework.get_acceptable_document(request)
-#    doc.stylesheet = request.get_url("css", name="qawebui.css")
+#    doc = HTML5.new_document()
+#    doc.stylesheet = request.resolver.get_url("css", name="qawebui.css")
 #    for name, val in kwargs.items():
 #        setattr(doc, name, val)
 #    build_framing(request, doc, "Delete Test Case")
@@ -93,8 +89,8 @@ def testcase_view_constructor(request, **kwargs):
 
 
 def testcase_run_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="qawebui.css")
+    doc = HTML5.new_document()
+    doc.stylesheet = request.resolver.get_url("css", name="qawebui.css")
     for name, val in kwargs.items():
         setattr(doc, name, val)
     build_framing(request, doc, "Run Test Case")
@@ -102,11 +98,9 @@ def testcase_run_constructor(request, **kwargs):
 
 
 def testcase_list_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="qawebui.css")
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
+    doc = HTML5.new_document()
+    doc.stylesheet = request.resolver.get_url("css", name="qawebui.css")
+    doc.scripts = [ "MochiKit.js", "proxy.js", "db.js"]
     for name, val in kwargs.items():
         setattr(doc, name, val)
     build_framing(request, doc, "Test Cases")
@@ -114,14 +108,11 @@ def testcase_list_constructor(request, **kwargs):
 
 
 def testcase_create_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="qawebui.css")
+    doc = HTML5.new_document()
+    doc.stylesheet = request.resolver.get_url("css", name="qawebui.css")
     for name, val in kwargs.items():
         setattr(doc, name, val)
-    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
-    doc.add_javascript2head(url=request.get_url("js", name="tiny_mce/tiny_mce.js"))
+    doc.scripts = [ "MochiKit.js", "proxy.js", "db.js", "tiny_mce/tiny_mce.js"]
     doc.add_javascript2head(text=TINY_MCE_EDIT_INIT)
     build_framing(request, doc, "New Test Case")
     return doc
@@ -135,7 +126,7 @@ def build_framing(request, doc, title):
          IF(request.path.count("/") > 2, NM("A", {"href":".."}, "Up")), NM("_", None),
     ))
     nav.append(NM("P", {"class_": "title"}, title))
-    nav.append(NM("P", None, 
+    nav.append(NM("P", None,
             NM("A", {"href": "/auth/logout"}, "logout")))
     doc.add_section("messages", id="messages")
 
@@ -153,7 +144,7 @@ def render_testcase(doc, dbrow):
     sect.add_header(3, "Implementation")
     if dbrow.automated:
         if dbrow.testimplementation:
-            sect.new_para("Implemented in: '%s'%s." % (dbrow.testimplementation, 
+            sect.new_para("Implemented in: '%s'%s." % (dbrow.testimplementation,
                     IF(dbrow.interactive, " (user interactive test)", "")))
         else:
             sect.new_para("Test is automated but has no implementation!", class_="error")
@@ -167,7 +158,7 @@ def render_testcase(doc, dbrow):
         sect.add_header(3, colname.capitalize())
         sect.append(NM("ASIS", None, getattr(dbrow, colname))) # these entries stored as XHTML markup already.
 
-#        form = doc.add_form(action=request.get_url(testcase_edit, tcid=dbrow.id))
+#        form = doc.add_form(action=request.resolver.get_url(testcase_edit, tcid=dbrow.id))
 #        BR = form.get_new_element("Br")
 #        outerfs = form.add_fieldset(modelclass.__name__)
 #        for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
@@ -191,10 +182,10 @@ class TestcaseViewer(framework.RequestHandler):
         doc = resp.doc
         NM = doc.nodemaker
         doc.new_para(
-                NM("Fragments", None, 
-                    NM("A", {"href": request.get_url(testcase_run, tcid=dbrow.id)}, resp.get_icon("go")),
-                    NM("A", {"href": request.get_url(testcase_edit, tcid=dbrow.id)}, resp.get_icon("edit")),
-                    NM("A", {"href": "javascript:doDeleteRow(%r, %r);" % ("TestCase", dbrow.id)}, 
+                NM("Fragments", None,
+                    NM("A", {"href": request.resolver.get_url(testcase_run, tcid=dbrow.id)}, resp.get_icon("go")),
+                    NM("A", {"href": request.resolver.get_url(testcase_edit, tcid=dbrow.id)}, resp.get_icon("edit")),
+                    NM("A", {"href": "javascript:doDeleteRow(%r, %r);" % ("TestCase", dbrow.id)},
                         resp.get_icon("delete")),
                 )
         )
@@ -225,7 +216,7 @@ class TestcaseEditor(framework.RequestHandler):
             resp = self.get_page(request, dbrow, err)
             return resp.finalize()
         else:
-            return framework.HttpResponseRedirect(request.get_url(testcase_list))
+            return framework.HttpResponseRedirect(request.resolver.get_url(testcase_list))
 
     def get_page(self, request, dbrow, error=None):
         title = "Edit test case %r." % (dbrow.name,)
@@ -234,7 +225,7 @@ class TestcaseEditor(framework.RequestHandler):
         resp.new_para(title)
         if error is not None:
             resp.new_para(error, class_="error")
-        form = resp.add_form(action=request.get_url(testcase_edit, tcid=dbrow.id))
+        form = resp.add_form(action=request.resolver.get_url(testcase_edit, tcid=dbrow.id))
         BR = form.get_new_element("Br")
         outerfs = form.add_fieldset(modelclass.__name__)
         for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
@@ -262,7 +253,7 @@ class TestcaseRunner(framework.RequestHandler):
         resp = framework.ResponseDocument(request, testcase_run_constructor, title=title)
         render_testcase(resp.doc, dbrow)
         if not dbrow.automated:
-            form = resp.doc.add_form(action=request.get_url(testcase_run, tcid=dbrow.id))
+            form = resp.doc.add_form(action=request.resolver.get_url(testcase_run, tcid=dbrow.id))
             BR = form.get_new_element("Br")
             outerfs = form.add_fieldset("Run the test.")
             outerfs.add_textinput("build", "Build")
@@ -280,7 +271,7 @@ class TestcaseRunner(framework.RequestHandler):
             resp.doc.new_para("""
             This is an automated test. Running automated tests from the
             web interface is not yet supported.
-            """, 
+            """,
             class_="error")
         return resp.finalize()
 
@@ -299,7 +290,7 @@ class TestcaseRunner(framework.RequestHandler):
         tester = models.User.get_by_username(webhelpers.dbsession, username)
         build=webhelpers.resolve_build(data.get("build"))
 
-        rr = models.create(models.TestResult, 
+        rr = models.create(models.TestResult,
                 objecttype=webhelpers.RUNNER,
                 testcase=None,
                 environment=webhelpers.resolve_environment(data.get("environment")),
@@ -316,7 +307,7 @@ class TestcaseRunner(framework.RequestHandler):
                 valid=True,
             )
         webhelpers.dbsession.add(rr)
-        tr = models.create(models.TestResult, 
+        tr = models.create(models.TestResult,
                 objecttype=webhelpers.TEST,
                 testcase=dbrow,
                 environment=None,
@@ -342,7 +333,7 @@ class TestcaseRunner(framework.RequestHandler):
             resp.doc.new_para(err, class_="error")
             resp.doc.new_para("There was an error recording this test. Please try again.")
             return resp.finalize()
-        return framework.HttpResponseRedirect(request.get_url(testcase_list))
+        return framework.HttpResponseRedirect(request.resolver.get_url(testcase_list))
 
 
 class TestcaseCreator(framework.RequestHandler):
@@ -354,7 +345,7 @@ class TestcaseCreator(framework.RequestHandler):
         resp.new_para(title)
         if error is not None:
             resp.new_para(error, class_="error")
-        form = resp.add_form(action=request.get_url(testcase_create))
+        form = resp.add_form(action=request.resolver.get_url(testcase_create))
         outerfs = form.add_fieldset(modelclass.__name__)
         BR = form.get_new_element("Br")
         for colname in ('name', 'purpose', 'passcriteria', 'startcondition', 'endcondition',
@@ -394,7 +385,7 @@ class TestcaseCreator(framework.RequestHandler):
             resp = self.get_page(request, err)
             return resp.finalize()
         else:
-            return framework.HttpResponseRedirect(request.get_url(testcase_list))
+            return framework.HttpResponseRedirect(request.resolver.get_url(testcase_list))
 
 
 
@@ -404,7 +395,7 @@ class TestcaseLister(framework.RequestHandler):
         resp = framework.ResponseDocument(request, testcase_list_constructor, title="Test cases")
         tableclass = models.TestCase
         NM = resp.nodemaker
-        resp.new_para(NM("A", {"href": request.get_url(testcase_create)}, 
+        resp.new_para(NM("A", {"href": request.resolver.get_url(testcase_create)},
                 resp.get_icon("add")))
         cycler = itertools.cycle(["row1", "row2"])
         tbl = resp.doc.add_table(width="100%")
@@ -414,18 +405,18 @@ class TestcaseLister(framework.RequestHandler):
         for dbrow in webhelpers.query(tableclass, {}):
             row = tbl.new_row(id="rowid_%s" % dbrow.id, class_=cycler.next())
             col = row.new_column(
-                NM("Fragments", {}, 
-                    NM("A", {"href": "run/%s" % (dbrow.id,)}, 
+                NM("Fragments", {},
+                    NM("A", {"href": "run/%s" % (dbrow.id,)},
                         resp.get_small_icon("go")),
-                    NM("A", {"href": "edit/%s" % (dbrow.id,)}, 
+                    NM("A", {"href": "edit/%s" % (dbrow.id,)},
                         resp.get_small_icon("edit")),
-                    NM("A", {"href": "javascript:doDeleteRow(%r, %r);" % (tableclass.__name__, dbrow.id)}, 
+                    NM("A", {"href": "javascript:doDeleteRow(%r, %r);" % (tableclass.__name__, dbrow.id)},
                         resp.get_small_icon("delete")),
                 )
             )
             firstname = colnames[0]
             row.new_column(
-                NM("A", {"href": request.get_url(testcase_view, tcid=dbrow.id)}, 
+                NM("A", {"href": request.resolver.get_url(testcase_view, tcid=dbrow.id)},
                         getattr(dbrow, firstname))
             )
             for colname in colnames[1:]:
@@ -446,11 +437,8 @@ def get_testcase(rowid):
 
 
 def main_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="qawebui.css")
-#    doc.add_javascript2head(url=request.get_url("js", name="MochiKit.js"))
-#    doc.add_javascript2head(url=request.get_url("js", name="proxy.js"))
-#    doc.add_javascript2head(url=request.get_url("js", name="db.js"))
+    doc = HTML5.new_document()
+    doc.stylesheet = request.resolver.get_url("css", name="qawebui.css")
     for name, val in kwargs.items():
         setattr(doc, name, val)
     build_framing(request, doc, "Test Management")
@@ -465,11 +453,11 @@ class MainHandler(framework.RequestHandler):
         resp.new_para("Test Management.")
         resp.doc.append(
           NM("UL", None,
-            NM("LI", None, 
-                    NM("A", {"href": request.get_url(testcase_list)}, "Test cases."),
+            NM("LI", None,
+                    NM("A", {"href": request.resolver.get_url(testcase_list)}, "Test cases."),
             ),
-#            NM("LI", None, 
-#                    NM("A", {"href": request.get_url(testresults_list)}, "Latest test results."),
+#            NM("LI", None,
+#                    NM("A", {"href": request.resolver.get_url(testresults_list)}, "Latest test results."),
 #            ),
           )
         )

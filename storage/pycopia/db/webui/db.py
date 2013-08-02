@@ -19,12 +19,13 @@ Basic database editor, server side.
 """
 
 from pycopia.WWW import framework
+from pycopia.WWW import HTML5
 from pycopia.WWW.middleware import auth
 
 CHARSET = "utf-8"
 
 def dbedit_page_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
+    doc = HTML5.new_document()
     doc.stylesheets = ["common.css", "ui.css", "db.css"]
     doc.scripts = [ "MochiKit.js", "proxy.js", "ui.js", "db.js", "dbedit.js"]
     for name, val in kwargs.items():
@@ -38,7 +39,7 @@ def dbedit_page_constructor(request, **kwargs):
 
 
 def metadata_page_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
+    doc = HTML5.new_document()
     doc.stylesheets = ["common.css", "ui.css", "db.css"]
     doc.scripts = [ "MochiKit.js", "proxy.js", "ui.js", "db.js", "dbmetaapp.js"]
     for name, val in kwargs.items():

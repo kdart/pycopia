@@ -26,14 +26,16 @@ from pycopia.db import config
 from pycopia.db import webhelpers
 
 from pycopia.WWW import framework
+from pycopia.WWW import HTML5
 from pycopia.WWW import json
 from pycopia.WWW.middleware import auth
 
 
 
 def config_page_constructor(request, **kwargs):
-    doc = framework.get_acceptable_document(request)
-    doc.stylesheet = request.get_url("css", name="tableedit.css")
+    doc = HTML5.new_document()
+    res = request.resolver
+    doc.stylesheet = res.get_url("css", name="tableedit.css")
     doc.scripts = ["MochiKit.js", "proxy.js", "ui.js", "db.js", "config.js"]
     for name, val in kwargs.items():
         setattr(doc, name, val)
