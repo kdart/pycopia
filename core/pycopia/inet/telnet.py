@@ -417,7 +417,7 @@ class Telnet(object):
         else:
             raise TelnetError("Use of COM option when not negotiated.")
 
-    def upload(self, filename):
+    def upload_zmodem(self, filename):
         """Call external ZMODEM program to upload a file.
         Return an ExitStatus object that should indicate success or failure.
         """
@@ -448,6 +448,16 @@ class Telnet(object):
         es = ExitStatus("sz {}".format(filename), es)
         es.output = errout
         return es
+
+    def upload(self, filename):
+        """Basic upload using cat.
+        """
+        text = open(filename).read()
+        sockfd = self.sock.fileno()
+        os.write(sockfd, "cat - > {}\r".format(os.path.basename(filename)))
+        os.write(sockfd, text)
+        os.write(sockfd, "\r" + chr(4))
+        return ExitStatus("cat", 0) # fake exitstatus to be compatible with upload_zmodem.
 
     # asyncio interface TODO
     def readable(self):
