@@ -38,11 +38,14 @@ except NameError:
 
 
 def _get_winsize(fd):
-    import fcntl, struct, termios
-    WINSIZEFMT = b"HHHH"
-    winsize = fcntl.ioctl(fd, termios.TIOCGWINSZ, b"\0"*struct.calcsize(WINSIZEFMT))
-    l, c = struct.unpack(WINSIZEFMT, winsize)[:2] # row, col, xpix, ypix
-    return max(l, 24), max(c, 80)
+    if os.isatty(fd):
+        import fcntl, struct, termios
+        WINSIZEFMT = b"HHHH"
+        winsize = fcntl.ioctl(fd, termios.TIOCGWINSZ, b"\0"*struct.calcsize(WINSIZEFMT))
+        l, c = struct.unpack(WINSIZEFMT, winsize)[:2] # row, col, xpix, ypix
+        return max(l, 24), max(c, 80)
+    else:
+        return 24, 80
 
 LINES, COLUMNS = _get_winsize(0)
 del _get_winsize
