@@ -243,8 +243,8 @@ def main(argv):
     except IndexError:
         print(DOC)
         return 1
-    mainrev = get_svn_revision()
-    os.environ["PYCOPIA_REVISION"] = str(mainrev)
+#    mainrev = get_svn_revision()
+#    os.environ["PYCOPIA_REVISION"] = str(mainrev)
     try:
         method = globals()["do_" + cmd]
     except KeyError:

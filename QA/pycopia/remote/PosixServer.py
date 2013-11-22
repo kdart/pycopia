@@ -296,6 +296,7 @@ class PosixAgent(object):
         proc = pm.spawnpty(cmd, pwent=user)
         text = proc.read()
         sts = proc.wait()
+        proc.close()
         return sts, text
 
     def pipe(self, cmd, user=None):
@@ -307,6 +308,7 @@ class PosixAgent(object):
         proc = pm.spawnpipe(cmd, pwent=user, callback=self._status_cb)
         text = proc.read()
         sts = proc.wait()
+        proc.close()
         return sts, text
 
     def spawn(self, cmd, user=None, async=False):

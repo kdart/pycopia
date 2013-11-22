@@ -116,7 +116,7 @@ class PyroAsyncAdapter(asyncio.PollerInterface):
 
 def register_server(serverobject, host=None, port=0, unixsocket=None, nathost=None, natport=None):
     """Regiseter the server with Pycopia asyncio event handler."""
-    host = host or Pyro4.config.HOST or Pyro4.socketutil.getMyIpAddress()
+    host = host or Pyro4.config.HOST or Pyro4.socketutil.getIpAddress(socket.getfqdn())
     pyrodaemon = Pyro4.Daemon(host=host, port=port,
             unixsocket=unixsocket, nathost=nathost, natport=natport)
     uri = pyrodaemon.register(serverobject)
