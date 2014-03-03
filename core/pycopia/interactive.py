@@ -157,9 +157,10 @@ def info(obj=None):
 def mydisplayhook(obj):
     pprint(obj)
     setattr(sys.modules["__main__"], "_", obj)
+sys.displayhook = mydisplayhook
 setattr(sys.modules["__main__"], "_", None)
 
-sys.displayhook = mydisplayhook
+
 
 # Add some functions useful for interactive use to builtins.
 # This is done to provide better interactive functionality without
