@@ -2429,7 +2429,7 @@ def get_related_choices(session, modelclass, metadata, order_by=None):
             q = session.query(relmodel)
         else:
             # only those that are currently unassigned
-            rs = mycol.property.remote_side[0]
+            rs = mycol.property.local_remote_pairs[0][1]
             q = session.query(relmodel).filter(rs == None)
     else:
         q = session.query(relmodel)
@@ -2455,7 +2455,6 @@ def update_row(session, modelclass, dbrow, data):
             if isinstance(value, list):
                 if not value:
                     continue
-                #t = session.query(relmodel).filter(relmodel.id.in_(value)).all()
                 t = value
                 if metadata.collection == "MappedCollection":
                     setattr(dbrow, metadata.colname, dict((o.name, o) for o in t))

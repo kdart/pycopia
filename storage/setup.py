@@ -44,7 +44,7 @@ setup (name=NAME, version=VERSION,
 #    install_requires = [
 #        'pycopia-core>=1.0.dev-r138,==dev',
 #        'pycopia-CLI>=1.0.dev-r138,==dev',
-#        'sqlalchemy>=0.6.0',
+#        'sqlalchemy>=0.9.0',
 #        'pycrypto>=2.0',
 #        'urwid>=1.0',
 #        #'psycopg>=2.0',

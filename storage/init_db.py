@@ -20,8 +20,10 @@ Place initial values in database.
 """
 
 import sys
+import os
 
 from pycopia import aid
+from pycopia import urlparse
 from pycopia.db import models
 from pycopia.db import config
 
@@ -498,13 +500,13 @@ def do_riskcategory(session):
 def create_db(url):
     url = urlparse.UniversalResourceLocator(url, True)
     scheme = url.scheme
-    if scheme == "postgres":
+    if scheme == "postgresql":
         cmd = 'sudo su postgres -c "createuser --host %s --createdb --no-superuser --no-createrole %s"' % (url.host, url.user)
         os.system(cmd)
         cmd = 'sudo su postgres -c "createdb --host %s --owner %s --encoding utf-8 %s"' % (url.host, url.user, url.path[1:])
         os.system(cmd)
     else:
-        raise NotImplementedError
+        raise NotImplementedError("unhandled scheme: {}".format(scheme))
 
 
 def do_config(session):
@@ -562,6 +564,7 @@ def init_database(argv):
         from pycopia import basicconfig
         cf = basicconfig.get_config("database.conf")
         url = cf["DATABASE_URL"]
+    create_db(url)
     dbsession = models.get_session(url)
     try:
         do_schedules(dbsession)

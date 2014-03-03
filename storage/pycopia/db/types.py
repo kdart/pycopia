@@ -56,6 +56,7 @@ from sqlalchemy.dialects.postgresql import (INTEGER, BIGINT, SMALLINT,
         DATE, BYTEA, BOOLEAN, INTERVAL, ARRAY, ENUM)
 
 from sqlalchemy import types
+from sqlalchemy.ext.mutable import Mutable
 
 
 class ValidationError(AssertionError):
@@ -64,7 +65,7 @@ class ValidationError(AssertionError):
 
 # custom column types.
 
-class Cidr(types.MutableType, types.TypeDecorator):
+class Cidr(Mutable, types.TypeDecorator):
     """Cidr reprsents networks without host part."""
 
     impl = CIDR
@@ -84,7 +85,7 @@ class Cidr(types.MutableType, types.TypeDecorator):
             return None
         return IPv4(value)
 
-class Inet(types.MutableType, types.TypeDecorator):
+class Inet(Mutable, types.TypeDecorator):
     """An IPv4 address type. Columns with this type take and receive IPv4
     objects from the database.
     """
@@ -254,8 +255,8 @@ class TestResultType(types.TypeDecorator):
         return cls.enumerations.find(int(value))
 
 
-OBJECTTYPES = Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
-OBJ_MODULE, OBJ_TESTSUITE, OBJ_TEST, OBJ_TESTRUNNER, OBJ_UNKNOWN = OBJECTTYPES
+OBJECTTYPES = Enums("UseCase", "TestSuite", "Test", "TestRunner", "unknown")
+OBJ_USECASE, OBJ_TESTSUITE, OBJ_TEST, OBJ_TESTRUNNER, OBJ_UNKNOWN = OBJECTTYPES
 
 class TestObjectType(types.TypeDecorator):
     """Possible test runner objects that produce results."""

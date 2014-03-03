@@ -31,7 +31,7 @@ import collections
 from datetime import timedelta
 from hashlib import sha1
 
-from sqlalchemy import create_engine, and_, or_, not_, func, exists
+from sqlalchemy import create_engine, inspect, and_, or_, not_, func, exists
 from sqlalchemy.orm import (sessionmaker, mapper, relationship, class_mapper,
         backref, synonym, _mapper_registry, validates)
 from sqlalchemy.orm.properties import ColumnProperty, RelationshipProperty
@@ -1626,7 +1626,7 @@ def class_names():
 
 def get_primary_key(class_):
     """Return the primary key column."""
-    return class_mapper(class_).primary_key
+    return inspect(class_).primary_key
 
 
 def get_primary_key_value(dbrow):
@@ -1639,8 +1639,7 @@ def get_primary_key_value(dbrow):
 
 def get_primary_key_name(class_):
     """Return name or names of primary key column. Return None if not defined."""
-    mapper = class_mapper(class_)
-    pk = mapper.primary_key
+    pk = inspect(class_).primary_key
     pk_l = len(pk)
     if pk_l == 0:
         return None
@@ -1650,55 +1649,12 @@ def get_primary_key_name(class_):
         return tuple(p.name for p in pk)
 
 
-def get_choices(session, modelclass, colname, order_by=None):
-    """Get possible choices for a field.
-
-    Returns a list of tuples, (id/value, name/label) of available choices.
-    """
-
-    # first check for column type with get_choices method.
-    mapper = class_mapper(modelclass)
-    try:
-        return mapper.columns[colname].type.get_choices()
-    except (AttributeError, KeyError):
-        pass
-    mycol = getattr(modelclass, colname)
-    try:
-        relmodel = mycol.property.mapper.class_
-    except AttributeError:
-        return []
-
-    # no choices in type, but has a related model table...
-    mymeta = get_column_metadata(modelclass, colname)
-    if mymeta.uselist:
-        if mymeta.m2m:
-            q = session.query(relmodel)
-        else:
-            # only those that are currently unassigned
-            rs = mycol.property.remote_side[0]
-            q = session.query(relmodel).filter(rs == None)
-    else:
-        q = session.query(relmodel)
-
-    # add optional order_by, default to ordering by first ROW_DISPLAY column.
-    try:
-        order_by = order_by or relmodel.ROW_DISPLAY[0]
-    except (AttributeError, IndexError):
-        pass
-    if order_by:
-        q = q.order_by(getattr(relmodel, order_by))
-    # Return the list of (id, stringrep) tuples.
-    # This structure is usable by the XHTML form generator...
-    return [(relrow.id, str(relrow)) for relrow in q]
-
-
 # structure returned by get_metadata function.
 MetaDataTuple = collections.namedtuple("MetaDataTuple",
         "coltype, colname, default, m2m, nullable, uselist, collection")
 
-
 def get_metadata_iterator(class_):
-    for prop in class_mapper(class_).iterate_properties:
+    for prop in inspect(class_).iterate_properties:
         name = prop.key
         if name.startswith("_") or name == "id" or name.endswith("_id"):
             continue
@@ -1707,14 +1663,12 @@ def get_metadata_iterator(class_):
             continue
         yield md
 
-
 def get_column_metadata(class_, colname):
-    prop = class_mapper(class_).get_property(colname)
+    prop = inspect(class_).get_property(colname)
     md = _get_column_metadata(prop)
     if md is None:
         raise ValueError("Not a column name: %r." % (colname,))
     return md
-
 
 def _get_column_metadata(prop):
     name = prop.key
@@ -1737,7 +1691,7 @@ def _get_column_metadata(prop):
     elif proptype is RelationshipProperty:
         coltype = RelationshipProperty.__name__
         m2m = prop.secondary is not None
-        nullable = prop.local_side[0].nullable
+        nullable = prop.local_remote_pairs[0][0].nullable
         uselist = prop.uselist
         if prop.collection_class is not None:
             collection = type(prop.collection_class()).__name__
@@ -1746,6 +1700,46 @@ def _get_column_metadata(prop):
     else:
         return None
     return MetaDataTuple(coltype, str(name), default, m2m, nullable, uselist, collection)
+
+
+def get_choices(session, modelclass, colname, order_by=None):
+    """Get possible choices for a field.
+
+    Returns a list of tuples, (id/value, name/label) of available choices.
+    """
+    # first check for column type with get_choices method.
+    mapper = inspect(modelclass)
+    try:
+        return mapper.columns[colname].type.get_choices()
+    except (AttributeError, KeyError):
+        pass
+    mycol = getattr(modelclass, colname)
+    try:
+        relmodel = mycol.property.mapper.class_
+    except AttributeError:
+        return []
+    # no choices in type, but has a related model table...
+    mymeta = get_column_metadata(modelclass, colname)
+    if mymeta.uselist:
+        if mymeta.m2m:
+            q = session.query(relmodel)
+        else:
+            # only those that are currently unassigned
+            rs = mycol.property.local_remote_pairs[0][1]
+            q = session.query(relmodel).filter(rs == None)
+    else:
+        q = session.query(relmodel)
+
+    # add optional order_by, default to ordering by first ROW_DISPLAY column.
+    try:
+        order_by = order_by or relmodel.ROW_DISPLAY[0]
+    except (AttributeError, IndexError):
+        pass
+    if order_by:
+        q = q.order_by(getattr(relmodel, order_by))
+    # Return the list of (id, stringrep) tuples.
+    # This structure is usable by the XHTML form generator...
+    return [(relrow.id, str(relrow)) for relrow in q]
 
 
 def get_metadata(class_):
@@ -1770,19 +1764,23 @@ if __name__ == "__main__":
     from pycopia import autodebug
     if sys.flags.interactive:
         from pycopia import interactive
-    #prop = class_mapper(Equipment).get_property("interfaces")
-    #print prop
-    #print get_metadata(Equipment)
-    #print get_column_metadata(Equipment, "interfaces")
-    #print get_column_metadata(Network, "interfaces")
 
-    #sess = get_session()
+    print (get_metadata(Equipment))
 
-    #choices = get_choices(sess, Equipment, "interfaces", order_by=None)
-    #print choices
-    #choices = get_choices(sess, TestCase, "priority", order_by=None)
-    #print choices
+    print(inspect(Equipment).get_property("name"))
+    assert get_primary_key_name(Equipment) == "id"
+    print(get_primary_key_name(Session))
 
+    #print (get_column_metadata(Equipment, "interfaces"))
+    #print (get_column_metadata(Network, "interfaces"))
+
+    sess = get_session()
+
+    #choices = XXXget_choices(sess, Equipment, "interfaces", order_by=None)
+    #print (choices)
+    choices = get_choices(sess, TestCase, "priority", order_by=None)
+    print (choices)
+    print (get_choices(sess, Equipment, "interfaces", order_by=None))
     # assumes your host name is in the db for testing.
     #eq = sess.query(Equipment).filter(Equipment.name.like(os.uname()[1] + "%")).one()
     #print "eq = ", eq
@@ -1795,7 +1793,7 @@ if __name__ == "__main__":
 #    print eq.capabilities
 
 #    for res in  TestResult.get_latest_results(sess):
-#        print res
+#        print (res)
 
 #    print "\nlatest run:"
 #    user = User.get_by_username(sess, "keith")
@@ -1822,12 +1820,11 @@ if __name__ == "__main__":
 #
 #    for tr in tc.get_data(sess):
 #        print(tr)
-    with DatabaseContext() as sess:
-        for intf in Interface.select_unattached(sess):
-            #print(intf)
-            print(intf)
+#    with DatabaseContext() as sess:
+#        for intf in Interface.select_unattached(sess):
+#            print(intf)
 #    print(type(TestSuite.get_by_implementation(sess, "testcases.unittests.WWW.mobileget.MobileSendSuite")))
 #    print (TestSuite.get_suites(sess))
     #print(get_primary_key(Session))
-    #sess.close()
+    sess.close()
 
