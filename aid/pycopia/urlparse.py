@@ -160,7 +160,7 @@ def paramparse(params):
     return params.split(";")
 
 
-def queryparse(query):
+def queryparse(query, evaluator=lambda x: x):
     q = URLQuery()
     parts = query.split("&")
     for part in parts:
@@ -170,7 +170,7 @@ def queryparse(query):
             except ValueError:
                 l, r = part, ""
             key = unquote_plus(l)
-            val = unquote_plus(r)
+            val = evaluator(unquote_plus(r))
             q[key] = val
     return q
 
