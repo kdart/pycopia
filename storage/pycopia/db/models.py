@@ -1713,7 +1713,13 @@ def get_choices(session, modelclass, colname, order_by=None):
         return mapper.columns[colname].type.get_choices()
     except (AttributeError, KeyError):
         pass
-    mycol = getattr(modelclass, colname)
+    try:
+        mycol = getattr(modelclass, colname)
+    except AttributeError:
+        # If attribute is a backref, it won't exist initially. It needs to be triggered by using in
+        # a query and fetched again.
+        session.query(modelclass)
+        mycol = getattr(modelclass, colname)
     try:
         relmodel = mycol.property.mapper.class_
     except AttributeError:
@@ -1736,7 +1742,10 @@ def get_choices(session, modelclass, colname, order_by=None):
     except (AttributeError, IndexError):
         pass
     if order_by:
-        q = q.order_by(getattr(relmodel, order_by))
+        order_by = getattr(relmodel, order_by)
+        if type(order_by.property) is RelationshipProperty:
+            q = q.join(order_by)
+        q = q.order_by(order_by)
     # Return the list of (id, stringrep) tuples.
     # This structure is usable by the XHTML form generator...
     return [(relrow.id, str(relrow)) for relrow in q]
@@ -1765,27 +1774,33 @@ if __name__ == "__main__":
     if sys.flags.interactive:
         from pycopia import interactive
 
-    print (get_metadata(Equipment))
+    #print (get_metadata(Equipment))
 
-    print(inspect(Equipment).get_property("name"))
+    #print(inspect(Equipment).get_property("name"))
     assert get_primary_key_name(Equipment) == "id"
-    print(get_primary_key_name(Session))
+    #print(get_primary_key_name(Session))
 
     #print (get_column_metadata(Equipment, "interfaces"))
     #print (get_column_metadata(Network, "interfaces"))
 
     sess = get_session()
 
-    #choices = XXXget_choices(sess, Equipment, "interfaces", order_by=None)
     #print (choices)
-    choices = get_choices(sess, TestCase, "priority", order_by=None)
-    print (choices)
+    #choices = get_choices(sess, TestCase, "priority", order_by=None)
+    #print (choices)
     print (get_choices(sess, Equipment, "interfaces", order_by=None))
-    # assumes your host name is in the db for testing.
+    #q = sess.query(Interface).filter(Interface.equipment == None)
+
+    ## assumes your host name is in the db for testing.
+    #print (Equipment.attributes)
+    #print (Equipment.interfaces)
     #eq = sess.query(Equipment).filter(Equipment.name.like(os.uname()[1] + "%")).one()
+    #print (eq.attributes)
+    #print (Equipment.attributes)
+    #print (Equipment.interfaces)
     #print "eq = ", eq
     #print "Atributes:"
-    #print eq.attributes
+    #print (eq.attributes)
     #print "Interfaces:"
     #print eq.interfaces
     #eq.add_interface(sess, "eth1", interface_type="ethernetCsmacd", ipaddr="172.17.101.2/24")
