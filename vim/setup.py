@@ -59,6 +59,7 @@ setup (name=NAME, version=VERSION,
     namespace_packages = ["pycopia"],
     packages = ["pycopia", "pycopia.vimlib"],
     test_suite = "test.VimTests",
+    zip_safe=False, # vim can't import from zip file.
     data_files = DATA_FILES,
     scripts = glob("bin/*"),
 #    install_requires = [
