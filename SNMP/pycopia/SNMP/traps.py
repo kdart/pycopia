@@ -27,7 +27,7 @@ See straps(8) for details on how this works.
 
 import struct
 from pycopia import socket
-from pycopia.timelib import now
+from pycopia.timelib import now, localtimestamp
 
 from pycopia.SNMP import BER_decode
 from pycopia.SNMP.SNMP import SNMPv2TrapPDU, TimeTicks, ObjectIdentifier, IpAddress
@@ -96,7 +96,7 @@ class TrapRecord(object):
         pdu = self.pdu
         trapoid = pdu.varbinds[1]
         s = ["Trap from %s with ID %s for %s at %s:" % (self.ip, pdu.request_id,
-                                self.community, self.timestamp)]
+                                self.community, localtimestamp(self.timestamp))]
         s.append("  Uptime: %s" % (pdu.varbinds[0],))
         obj = trapoid.value.get_object()
         if obj:
