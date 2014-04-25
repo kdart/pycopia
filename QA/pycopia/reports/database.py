@@ -1,5 +1,5 @@
 #!/usr/bin/python2.7
-# -*- coding: us-ascii -*-
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 
 
@@ -30,6 +30,10 @@ from pycopia.db import models
 from pycopia.db import types
 
 
+[USECASE, SUITE, TEST, RUNNER, UNKNOWN] = types.OBJECTTYPES
+[EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = types.TESTRESULTS
+
+
 PROJECT_RE = re.compile(r"(\w+)[ \-.:](\d+)\.(\d+)\.(\d+)[\.\-](\d+)")
 
 _COLUMNS = {
@@ -43,7 +47,7 @@ _COLUMNS = {
     "starttime": None,          # STARTTIME (Test, Suite),    RUNNERSTART (module)
     "endtime": None,            # ENDTIME (Test, Suite), RUNNEREND (module)
     "arguments": None,          # TESTARGUMENTS (Test), RUNNERARGUMENTS (module)
-    "result": None,             # PASSED, FAILED, EXPECTED_FAIL, INCOMPLETE, ABORT
+    "result": NA,               # PASSED, FAILED, EXPECTED_FAIL, INCOMPLETE, ABORT
     "diagnostic": None,         # The diagnostic message before failure.
     "resultslocation": None,    # url
     "testimplementation": None, # implementation
@@ -52,9 +56,6 @@ _COLUMNS = {
     "valid": True,
     "testsuite": None,          # an associated suite
 }
-
-[MODULE, SUITE, TEST, RUNNER, UNKNOWN] = types.OBJECTTYPES
-[EXPECTED_FAIL, NA, ABORT, INCOMPLETE, FAILED, PASSED] = types.TESTRESULTS
 
 
 class ResultHolder(object):
@@ -205,11 +206,11 @@ def get_environment(conf):
 
 # When constructing a report from report messages:
 # transition table:
-#from: to: RUNNER MODULE         SUITE         TEST
-# RUNNER     NA         push             push            push
-# MODULE     pop        add                push            push
-# SUITE        pop        pop                add             push
-# TEST         pop        pop                pop             add
+# from:      to:        RUNNER     USECASE      SUITE         TEST
+# RUNNER                NA         push        push          push
+# USECASE               pop        add         push          push
+# SUITE                 pop        pop         add           push
+# TEST                  pop        pop         pop           add
 
 class DatabaseReport(reports.NullReport):
 
@@ -285,8 +286,8 @@ class DatabaseReport(reports.NullReport):
         currenttype = self._currentresult.get("objecttype")
         if currenttype == RUNNER:
             self.push_result(level)     # runner -> (suite | test)
-        elif currenttype == MODULE:
-            self.push_result(level)     # module -> (suite | test)
+        elif currenttype == USECASE:
+            self.push_result(level)     # module/usecase -> (suite | test)
         elif currenttype == SUITE:
             if level == 1:                        # suite -> suite
                 self.add_result(level)
@@ -320,18 +321,18 @@ class DatabaseReport(reports.NullReport):
             self._currentresult.set("endtime", datetime.fromtimestamp(msg))
         elif msgtype == "MODULEVERSION":
             self._testid = msg
-        elif msgtype == "MODULESTARTTIME":
+        elif msgtype == "USECASESTARTTIME":
             currenttype = self._currentresult.get("objecttype")
             if currenttype == RUNNER:
                 self.push_result(0)    # runner -> module
                 self._currentresult.set("starttime", datetime.fromtimestamp(msg))
-            elif currenttype == MODULE:
-                self.add_result(0)            # module -> module
+            elif currenttype == USECASE:
+                self.add_result(0)            # module/usecase -> module/usecase
                 self._currentresult.set("starttime", datetime.fromtimestamp(msg))
             elif currenttype == SUITE:
-                self.pop_result()             # suite -> module
+                self.pop_result()             # suite -> module/usecase
             elif currenttype == TEST:
-                self.pop_result()             # test -> module
+                self.pop_result()             # test -> module/usecase
         elif msgtype == "MODULEENDTIME":
             currenttype = self._currentresult.get("objecttype")
             if currenttype == SUITE:

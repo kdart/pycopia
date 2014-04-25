@@ -21,7 +21,7 @@ Possible test outcomes:
 - NA: A result that is not applicable (e.g. it is a holder of tests).
 
 - EXPECTED_FAIL: Means the test is failing due to a bug, and is already
-  known to fail. 
+  known to fail.
 
 """
 
@@ -41,6 +41,6 @@ TESTRESULTS.sort()
 
 # Type of objects the TestRunner can run, and reports can be generated
 # from.
-OBJECTTYPES = aid.Enums("module", "TestSuite", "Test", "TestRunner", "unknown")
-[MODULE, SUITE, TEST, RUNNER, UNKNOWN] = OBJECTTYPES
+OBJECTTYPES = aid.Enums("UseCase", "TestSuite", "Test", "TestRunner", "unknown")
+[USECASE, SUITE, TEST, RUNNER, UNKNOWN] = OBJECTTYPES
 

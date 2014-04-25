@@ -76,6 +76,7 @@ setup (name=NAME, version=VERSION,
 #        'pycopia-storage>=1.0.dev-r138,<=dev',
 #        'pycopia-WWW>=1.0.dev-r279,<=dev',
 #        'Pyro4>=4.13',
+#        'chardet>=2.2',
 #        ],
     dependency_links = [
             "http://www.pycopia.net/download/"

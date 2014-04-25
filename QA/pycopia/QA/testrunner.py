@@ -176,7 +176,7 @@ class TestRunner(object):
         cls.test_name = ".".join([cls.__module__, cls.__name__])
         ID = get_module_version(sys.modules[cls.__module__])
         rpt.add_message("MODULEVERSION", ID)
-        rpt.add_message("MODULESTARTTIME", timelib.now())
+        rpt.add_message("USECASESTARTTIME", timelib.now())
         try:
             rv = self.run_object(cls)
         except KeyboardInterrupt:
@@ -215,7 +215,7 @@ class TestRunner(object):
         mod.test_name = mod.__name__
         ID = get_module_version(mod)
         cf.report.add_message("MODULEVERSION", ID)
-        cf.report.add_message("MODULESTARTTIME", timelib.now())
+        cf.report.add_message("USECASESTARTTIME", timelib.now())
         try:
             rv = self.run_object(mod)
         except KeyboardInterrupt:
