@@ -122,7 +122,7 @@ class TestReporter(object):
         ui = self.config.UI
         ui.printf(REPORT_MODULE.format(name=mod.__name__, file=mod.__file__))
         ui.Print("This module defines the following test cases.")
-        clsdict = testinspector.find_classes(mod.__name__, all=False)
+        clsdict = testinspector.find_classes(mod.__name__, findall=False)
         for name, params in clsdict.items():
             ui.printf("  %y{name}%N {using}".format(name=name, using="with config parameters:" if params else "using no config parameters."))
             if params:
