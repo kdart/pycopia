@@ -22,9 +22,12 @@ Place initial values in database.
 import sys
 import os
 
+from sqlalchemy import create_engine
+
 from pycopia import aid
 from pycopia import urlparse
 from pycopia.db import models
+from pycopia.db import tables
 from pycopia.db import config
 
 from pycopia.ISO import iso639a
@@ -565,7 +568,14 @@ def init_database(argv):
         cf = basicconfig.get_config("database.conf")
         url = cf["DATABASE_URL"]
     create_db(url)
-    dbsession = models.get_session(url)
+
+    db = create_engine(unicode(url))
+    tables.metadata.bind = db
+    tables.metadata.create_all()
+    db.close()
+
+    SM = models.create_sessionmaker(url)
+    dbsession = SM()
     try:
         do_schedules(dbsession)
         do_functional_areas(dbsession)
