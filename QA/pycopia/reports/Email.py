@@ -1,6 +1,6 @@
 #!/usr/bin/python2.4
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
+#
 # $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
@@ -23,13 +23,15 @@ Report objects that sends a text email.
 import os
 from cStringIO import StringIO
 
+import chardet
+
 from pycopia import reports
 NO_MESSAGE = reports.NO_MESSAGE
 
 from pycopia import ezmail
 
 class EmailReport(reports.NullReport):
-    """Create an a report that is emailed, rather than written to a file. 
+    """Create an a report that is emailed, rather than written to a file.
     EmailReport(
         [formatter="text/plain"],  # formatter type
         [recipients=None],         # list of recipients, or None. If none the
@@ -67,17 +69,17 @@ class EmailReport(reports.NullReport):
     def finalize(self):
         """finalizing this Report sends off the email."""
         self.write(self._formatter.finalize())
-        report = ezmail.MIMEText.MIMEText(self._fo.getvalue(), 
+        report = ezmail.MIMEText.MIMEText(self._fo.getvalue(),
                         self._formatter.MIMETYPE.split("/")[1])
         report["Content-Disposition"] = "inline"
         self._message.attach(report)
         if self._attach_logfile and self._logfile:
             try:
-                lfd = open(self._logfile).read()
+                lfd = open(self._logfile, "rb").read()
             except:
                 pass # non-fatal
             else:
-                logmsg = ezmail.MIMEText.MIMEText(lfd)
+                logmsg = ezmail.MIMEText.MIMEText(lfd, charset=chardet.detect(lfd))
                 logmsg["Content-Disposition"] = 'attachment; filename=%s' % (
                         os.path.basename(self._logfile), )
                 self._message.attach(logmsg)

@@ -41,7 +41,7 @@ Example:
       sendmail-bugs@sendmail.org.
   For local information send email to Postmaster at your site.
   End of HELP info
-  >>> s.putcmd("vrfy","someone@here")
+  >>> s.putcmd(b"vrfy","someone@here")
   >>> s.getreply()
   (250, "Somebody OverHere <somebody@here.my.org>")
   >>> s.quit()
@@ -71,7 +71,8 @@ from pycopia import scheduler
 
 
 SMTP_PORT = 25
-CRLF="\r\n"
+CRLF=b"\r\n"
+DOTCRLF=b".\r\n"
 
 OLDSTYLE_AUTH = re.compile(r"auth=(.*)", re.I)
 
@@ -324,7 +325,7 @@ class SMTP(object):
     def send(self, s):
         """Send string to the server."""
         if self.logfile:
-            self.logfile.write('send: %r\n' % (s,))
+            self.logfile.write(b'send: %r\n' % (s,))
         if self.sock:
             try:
                 self.sock.sendall(s)
@@ -337,9 +338,9 @@ class SMTP(object):
     def putcmd(self, cmd, args=""):
         """Send a command to the server."""
         if args == "":
-            out = '%s%s' % (cmd, CRLF)
+            out = b'%s%s' % (cmd, CRLF)
         else:
-            out = '%s %s%s' % (cmd, args, CRLF)
+            out = b'%s %s%s' % (cmd, args, CRLF)
         self.send(out.encode("ascii"))
 
     def getreply(self):
@@ -390,7 +391,7 @@ class SMTP(object):
 
     def docmd(self, cmd, args=""):
         """Send a command, and return its response code."""
-        self.putcmd(cmd,args)
+        self.putcmd(cmd, args)
         return self.getreply()
 
     # std smtp commands
@@ -401,9 +402,9 @@ class SMTP(object):
         """
         name = name or self._bindto
         if name:
-            self.putcmd("helo", name)
+            self.putcmd(b"helo", name)
         else:
-            self.putcmd("helo", socket.getfqdn())
+            self.putcmd(b"helo", socket.getfqdn())
         (code,msg)=self.getreply()
         self.helo_resp=msg
         return (code,msg)
@@ -416,9 +417,9 @@ class SMTP(object):
         self.esmtp_features = {}
         name = name or self._bindto
         if name:
-            self.putcmd("ehlo", name)
+            self.putcmd(b"ehlo", name)
         else:
-            self.putcmd("ehlo", socket.getfqdn())
+            self.putcmd(b"ehlo", socket.getfqdn())
         (code,msg)=self.getreply()
         # According to RFC1869 some (badly written)
         # MTA's will disconnect on an ehlo. Toss an exception if
@@ -469,7 +470,7 @@ class SMTP(object):
     def help(self, args=''):
         """SMTP 'help' command.
         Returns help text from server."""
-        self.putcmd("help", args)
+        self.putcmd(b"help", args)
         return self.getreply()
 
     def rset(self):
@@ -480,20 +481,20 @@ class SMTP(object):
         """SMTP 'noop' command -- doesn't do anything :>"""
         return self.docmd("noop")
 
-    def mail(self,sender, options=[]):
+    def mail(self,sender, options=None):
         """SMTP 'mail' command -- begins mail xfer session."""
         optionlist = ''
         if options and self.does_esmtp:
             optionlist = ' ' + ' '.join(options)
-        self.putcmd("mail", "FROM:%s%s" % (quoteaddr(sender) ,optionlist))
+        self.putcmd(b"mail", b"FROM:%s%s" % (quoteaddr(sender) ,optionlist))
         return self.getreply()
 
-    def rcpt(self,recip,options=[]):
+    def rcpt(self,recip, options=None):
         """SMTP 'rcpt' command -- indicates 1 recipient for this mail."""
         optionlist = ''
         if options and self.does_esmtp:
             optionlist = ' ' + ' '.join(options)
-        self.putcmd("rcpt","TO:%s%s" % (quoteaddr(recip),optionlist))
+        self.putcmd(b"rcpt", b"TO:%s%s" % (quoteaddr(recip),optionlist))
         return self.getreply()
 
     def data(self,msg):
@@ -504,7 +505,7 @@ class SMTP(object):
         DATA command; the return value from this method is the final
         response code received when the all data is sent.
         """
-        self.putcmd("data")
+        self.putcmd(b"data")
         (code,repl)=self.getreply()
         if self.logfile:
             self.logfile.write("data: %s %s\n" % (code,repl))
@@ -513,8 +514,8 @@ class SMTP(object):
         else:
             q = quotedata(msg)
             if q[-2:] != CRLF:
-                q = q + CRLF
-            q = q + "." + CRLF
+                q += CRLF
+            q += DOTCRLF
             self.send(q)
             (code, msg)=self.getreply()
             if self.logfile:
@@ -523,14 +524,14 @@ class SMTP(object):
 
     def verify(self, address):
         """SMTP 'verify' command -- checks for address validity."""
-        self.putcmd("vrfy", quoteaddr(address))
+        self.putcmd(b"vrfy", quoteaddr(address))
         return self.getreply()
     # a.k.a.
     vrfy=verify
 
     def expn(self, address):
         """SMTP 'verify' command -- checks for address validity."""
-        self.putcmd("expn", quoteaddr(address))
+        self.putcmd(b"expn", quoteaddr(address))
         return self.getreply()
 
     # some useful methods
@@ -566,9 +567,9 @@ class SMTP(object):
             return encode_base64("%s\0%s\0%s" % (user, user, password), eol="")
 
 
-        AUTH_PLAIN = "PLAIN"
-        AUTH_CRAM_MD5 = "CRAM-MD5"
-        AUTH_LOGIN = "LOGIN"
+        AUTH_PLAIN = b"PLAIN"
+        AUTH_CRAM_MD5 = b"CRAM-MD5"
+        AUTH_LOGIN = b"LOGIN"
 
         if self.helo_resp is None and self.ehlo_resp is None:
             if not (200 <= self.ehlo()[0] <= 299):
@@ -633,8 +634,7 @@ class SMTP(object):
             self.file = SSLFakeFile(sslobj)
         return (resp, reply)
 
-    def sendmail(self, from_addr, to_addrs, msg, mail_options=[],
-                 rcpt_options=[]):
+    def sendmail(self, from_addr, to_addrs, msg, mail_options=None, rcpt_options=None):
         """This command performs an entire mail transaction.
 
         The arguments are::
@@ -691,7 +691,6 @@ class SMTP(object):
         empty dictionary.
 
         """
-        msg = msg.encode("ascii")
         if self.helo_resp is None and self.ehlo_resp is None:
             if not (200 <= self.ehlo()[0] <= 299):
                 (code,resp) = self.helo()
@@ -701,8 +700,9 @@ class SMTP(object):
         if self.does_esmtp:
             if self.has_extn('size'):
                 esmtp_opts.append("size={0:d}".format(len(msg)))
-            for option in mail_options:
-                esmtp_opts.append(option)
+            if mail_options:
+                for option in mail_options:
+                    esmtp_opts.append(option)
 
         (code,resp) = self.mail(from_addr, esmtp_opts)
         if code != 250:
@@ -815,9 +815,8 @@ attribute using the supplied parser object. A 'message' attribute is an
             if self.message:
                 self.data = None
 
-    def send(self, smtp, mail_options=[], rcpt_options=[]):
-        """send(smtp_client, mail_options=[], rcpt_options=[])
-Mails this envelope using the supplied SMTP client object."""
+    def send(self, smtp, mail_options=None, rcpt_options=None):
+        """Mails this envelope using the supplied SMTP client object."""
         if self.message:
             return smtp.sendmail(self.mail_from, self.rcpt_to, self.message.as_string(), mail_options, rcpt_options)
         elif self.data:

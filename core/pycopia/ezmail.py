@@ -1,7 +1,5 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-#
-# $Id$
 #
 #    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
 #
@@ -59,7 +57,7 @@ def formatdate(timeval=None):
 
 
 class SimpleMessage(Message.Message):
-    def __init__(self, _text, mimetype="text/plain", charset="us-ascii"):
+    def __init__(self, _text, mimetype="text/plain", charset="utf-8"):
         Message.Message.__init__(self)
         self['MIME-Version'] = '1.0'
         self.add_header('Content-Type', mimetype)
@@ -146,8 +144,7 @@ class AutoMessageMixin(object):
 
 
 class AutoMessage(SimpleMessage, AutoMessageMixin):
-    def __init__(self, text, mimetype="text/plain", charset="us-ascii",
-                    From=None, To=None):
+    def __init__(self, text, mimetype="text/plain", charset="utf-8", From=None, To=None):
         AutoMessageMixin.__init__(self, From, To)
         SimpleMessage.__init__(self, text, mimetype, charset)
 
@@ -193,14 +190,14 @@ def message_from_string(s, klass=SimpleMessage, strict=0):
     parser = get_parser(klass, strict)
     return parser.parsestr(s)
 
-def self_address():
+def self_address(domain=None):
     """self_address()
 Returns address string referring to user running this (yourself)."""
     global CONFIG
     name, longname = getuser()
-    domain = CONFIG.get("domain")
-    if domain:
-        return "%s@%s" % (name, domain), longname
+    dom = domain or CONFIG.get("domain")
+    if dom:
+        return "%s@%s" % (name, dom), longname
     else:
         return "%s@%s" % (name, _get_hostname()), longname
 
@@ -235,8 +232,7 @@ def _do_attach(multipart, obj):
         multipart.attach(msg)
 
 
-def ezmail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
-        extra_headers=None):
+def ezmail(obj, To=None, From=None, subject=None, cc=None, bcc=None, extra_headers=None, mailhost=None):
     """A generic mailer that sends a multipart-mixed message with attachments.
     The 'obj' parameter may be a MIME* message, or another type of object that
     will be converted to text. If it is a list, each element of the list will
@@ -251,8 +247,10 @@ def ezmail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
             outer = MultipartMessage()
             for part in obj:
                 _do_attach(outer, part)
+        elif isinstance(obj, unicode):
+            outer = AutoMessage(obj, charset="utf-8")
         else:
-            outer = AutoMessage(str(obj).encode("us-ascii"))
+            outer = AutoMessage(unicode(obj), charset="utf-8")
 
     outer.From(From)
     if To:
@@ -268,16 +266,16 @@ def ezmail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
         for name, value in extra_headers.items():
             outer[name] = value
 
-    mailhost = CONFIG.get("mailhost", "localhost")
+    mhost = mailhost or CONFIG.get("mailhost", "localhost")
 
-    if mailhost == "localhost":
+    if mhost == "localhost":
         smtp = LocalSender()
         status = outer.send(smtp)
         if not status:
             raise MailError(str(status))
     else:
         from pycopia.inet import SMTP
-        smtp = SMTP.SMTP(mailhost, bindto=CONFIG.get("bindto"))
+        smtp = SMTP.SMTP(mhost, bindto=CONFIG.get("bindto"))
         errs = outer.send(smtp)
         smtp.quit()
         if errs:
@@ -286,10 +284,9 @@ def ezmail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
     return outer["Message-ID"]
 
 
-def mail(obj, To=None, From=None, subject=None, cc=None, bcc=None,
-        extra_headers=None):
+def mail(obj, To=None, From=None, subject=None, cc=None, bcc=None, extra_headers=None, mailhost=None):
     try:
-        return ezmail(obj, To, From, subject, cc, bcc, extra_headers)
+        return ezmail(obj, To, From, subject, cc, bcc, extra_headers, mailhost)
     except MailError as err:
         print("Error while sending mail!", file=sys.stderr)
         print(err, file=sys.stderr)
@@ -316,8 +313,6 @@ class LocalSender(object):
         proc.wait()
         return proc.exitstatus
 
-def dp(proc):
-    print(proc)
 
 # global configuration
 CONFIG = get_config()
