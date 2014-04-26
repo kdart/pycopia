@@ -1,7 +1,7 @@
 #!/usr/bin/python2.7
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
 #
-#    Copyright (C) 2012  Keith Dart <keith@kdart.com>
+#    Copyright (C) 2012-  Keith Dart <keith@kdart.com>
 #
 #    This library is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU Lesser General Public
@@ -338,7 +338,7 @@ class RootContainer(config.Container):
         try:
             acct = db.query(models.LoginAccount).filter(models.LoginAccount.identifier==identifier).one()
         except config.NoResultFound as err:
-            raise config.ConfigError("Bad account identifier %r: %s" % (name, err))
+            raise config.ConfigError("Bad account identifier %r: %s" % (identifier, err))
         return acct.login, acct.password
 
     def get_equipment(self, name):
