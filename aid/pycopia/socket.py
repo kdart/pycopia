@@ -87,8 +87,6 @@ else:
 class socket(_socket.socket):
     """A subclass of _socket.socket adding the makefile() method."""
 
-    __slots__ = ["__weakref__", "_io_refs", "_closed"]
-
     def __init__(self, family=AF_INET, type=SOCK_STREAM, proto=0, fileno=None):
         _compatsocket(self, family, type, proto, fileno)
         self._io_refs = 0

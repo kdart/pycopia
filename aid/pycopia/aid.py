@@ -127,6 +127,8 @@ class Enum(int):
         return self._name
     def __repr__(self):
         return "{}({:d}, {!r})".format(self.__class__.__name__, self, self._name)
+    def for_json(self):
+        return {"_class_": "Enum", "_str_": self._name, "value": int(self)}
 
 class Enums(list):
     """A list of Enum objects."""
