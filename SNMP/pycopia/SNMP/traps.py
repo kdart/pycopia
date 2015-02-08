@@ -72,7 +72,10 @@ def _translate2v2(ip, community, pdu):
         trapoid = _TRAPMAP[pdu.generic]
     varbinds.insert(1, snmpTrapOID(trapoid).varbind)
     # 3.1.(4)
-    varbinds.append(snmpTrapAddress(ip).varbind)
+    try:
+        varbinds.append(snmpTrapAddress(pdu.agent).varbind)
+    except AttributeError:
+        varbinds.append(snmpTrapAddress(ip).varbind)
     varbinds.append(snmpTrapCommunity(community).varbind)
     varbinds.append(snmpTrapEnterprise(pdu.enterprise).varbind)
     return SNMPv2TrapPDU(varbinds=varbinds)
