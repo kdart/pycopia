@@ -19,7 +19,6 @@ Pycopia name server control module.
 """
 from __future__ import absolute_import
 from __future__ import print_function
-#from __future__ import unicode_literals
 from __future__ import division
 
 
@@ -28,10 +27,25 @@ from pycopia.remote import pyro
 
 def print_listing(listing):
     for name, uri in sorted(listing.items()):
-        if len(uri) > 45:
-            print("{:>35.35s} --> \n{:>79.79s}".format(name, uri))
-        else:
-            print("{:>35.35s} --> {}".format(name, uri))
+        print("{} -->\n    {}".format(name, uri))
+
+
+def nsexport(nameserver, fname):
+    with open(fname, "wb") as fo:
+        for name, uri in nameserver.list().items():
+            fo.write("{}\t{}\n".format(name, uri))
+
+
+def nsimport(nameserver, fname):
+    with open(fname, "rb") as fo:
+        for line in fo:
+            name, uri = line.split("\t", 1)
+            try:
+                nameserver.register(name.strip(), uri.strip(), safe=True)
+            except pyro.NamingError:
+                print("Warning: {} already registered.".format(name))
+            else:
+                print("Registered: {}".format(name))
 
 
 _DOC = """nsc [-h?]
@@ -42,7 +56,8 @@ Subcommands:
     list - show current objects.
     ping - No error if server is reachable.
     remove <name> - remove the named agent entry.
-
+    export <filename> - export agent entries to a file.
+    import <filename> - import agent entries from a file.
 """
 
 def nsc(argv):
@@ -74,12 +89,22 @@ def nsc(argv):
     elif subcmd.startswith("pi"):
         nameserver.ping()
         print("Name server is alive.")
-    if subcmd.startswith("rem"):
+    elif subcmd.startswith("rem"):
         if args:
             nameserver.remove(name=args[0])
         else:
             print(_DOC)
             return 2
+    elif subcmd.startswith("imp"):
+        fname = args[0] if len(args) > 0 else "nsentries.txt"
+        nsimport(nameserver, fname)
+    elif subcmd.startswith("exp"):
+        fname = args[0] if len(args) > 0 else "nsentries.txt"
+        nsexport(nameserver, fname)
+        print("exported to {}.".format(fname))
+    else:
+        print(_DOC)
+        return 2
 
 
 if __name__ == "__main__":
