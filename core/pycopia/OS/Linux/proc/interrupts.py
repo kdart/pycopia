@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 Interface to the /proc/interrupts file.
@@ -36,7 +35,7 @@ class _InterruptLine(object):
         self.handlername = None
         self.actions = None
         self._cpus = []
-    
+
     def __hash__(self):
         return hash(self.name)
 
@@ -44,7 +43,7 @@ class _InterruptLine(object):
         #  5:       3306          XT-PIC  Ensoniq AudioPCI
         cs = "".join(map(lambda c: "%10u " % (c.count,), self._cpus))
         return "%-3s: %s %14s  %s" % (self.name, cs, self.handlername, self.actions)
-    
+
 #  15:    1539950          XT-PIC  aic7xxx, usb-uhci
     def update(self, line, cpus):
         self._cpus = []
@@ -85,7 +84,7 @@ class Interrupts(object):
         for rcpu in lines[0].split():
             idx = int(rcpu[3:])
             self._cpus.append(_CPU(idx))
-        
+
         for line in lines[1:]:
             if line.startswith("ERR"):
                 self._err = long(line.split(":")[1])
@@ -107,7 +106,7 @@ class Interrupts(object):
         s.append("ERR: %10u" % (self._err,))
         s.append("MIS: %10u" % (self._mis,))
         return "\n".join(s)
-    
+
     def __getitem__(self, idx):
         return self._irqs[idx]
 

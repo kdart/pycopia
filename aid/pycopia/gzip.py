@@ -1,31 +1,30 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """Functions that read and write gzipped streams.
 
 The user of the file doesn't have to worry about the compression,
 but random access is not allowed.
 
-Based on the standard gzip module. That module requires a seekable file. 
+Based on the standard gzip module. That module requires a seekable file.
 This module buffers data and is useful for decompressing streams.
 
 This module can also handle multiple segments.
 
-Useful for sockets. supports reading only. 
+Useful for sockets. supports reading only.
 
 TODO: writing has not been tested.
 
@@ -142,7 +141,7 @@ class GzipHeader(object):
             flags = flags | FCOMMENT
         if self.hcrc: # XXX compute this
             flags = flags | FHCRC
-        fixed = struct.pack("<2sBBLBB", self.MAGIC, self.method, flags, 
+        fixed = struct.pack("<2sBBLBB", self.MAGIC, self.method, flags,
                         self.mtime, self.extraflag, self.os)
         fo.write_raw(fixed)
         if self.extra:
@@ -235,7 +234,7 @@ class GzipFile(UserFile.FileWrapper):
             # Ending case: we've come to the end of a member in the file.
             self.segments += 1
             self._check_end()
-    
+
     def _check_end(self):
         # Check the CRC and file size, and set the new_memeber flag so we read
         # a new member on the next call.
@@ -269,7 +268,7 @@ class GzipFile(UserFile.FileWrapper):
         if self._rawq:
             self._process_rawq()
             return self._read_uncompressed(amt)
-        
+
         while not self.eof and self._bufsize <= amt:
             buf = super(GzipFile, self).read(min(4096, amt)) # read compressed data, may block
             if not buf:

@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from basicconfig import ConfigHolder
 
@@ -44,14 +43,14 @@ formal parameters for user interfaces.
             self.update(kwargs)
         else:
             raise ValueError, "MethodHolder: invalid initializer type"
-    
+
     def __str__(self):
         m = self.__dict__["_methodname"]
         params = ", ".join(["%s=%r" % (n, v) for n, v in self.items()])
         return "%s: %s" % (m, params)
 
     def __repr__(self):
-        return "%s(%r, %s)" % (self.__class__.__name__, self.__dict__["_methodname"], 
+        return "%s(%r, %s)" % (self.__class__.__name__, self.__dict__["_methodname"],
         ", ".join(["%s=%r" % (n, v) for n, v in self.items()]) )
 
     def _methodname(self):
@@ -82,7 +81,7 @@ def _test(argv):
     class TestMe(object):
         def mymethod(self, arg1=1, arg2=2, arg3=3):
             print arg1, arg2, arg3
-    
+
     mh = MethodHolder(TestMe.mymethod)
     print mh
 

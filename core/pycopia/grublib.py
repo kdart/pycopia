@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 GRUB library. Used to read and write GRUB config files.
@@ -24,11 +23,11 @@ from pycopia import dictlib
 import re
 
 BUILTIN_CMDLINE     = 0x1   # Run in the command-line.
-BUILTIN_MENU        = 0x2   # Run in the menu.  
+BUILTIN_MENU        = 0x2   # Run in the menu.
 BUILTIN_TITLE       = 0x4   # Only for the command title.
-BUILTIN_SCRIPT      = 0x8   # Run in the script.  
+BUILTIN_SCRIPT      = 0x8   # Run in the script.
 BUILTIN_NO_ECHO     = 0x10  # Don't print command on booting.
-BUILTIN_HELP_LIST   = 0x20  # Show help in listing. 
+BUILTIN_HELP_LIST   = 0x20  # Show help in listing.
 
 
 class GrubCommand(object):

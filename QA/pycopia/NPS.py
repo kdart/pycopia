@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 Module to provide a callable interface to a WTI Network Power Switch.
@@ -40,7 +39,7 @@ This class represents a plug (port) on an NPS.
     def __str__(self):
         return "%-3d | %-15s | %-6s | %-5d | %-15s | %-4s" % \
             (self.number, self.name, self.status, self.bootdelay, self.password, self.defaultstate)
-    
+
     def __repr__(self):
         return "NPSPlug(%d, %s, %s, %d, %s, %s)" % \
             (self.number, self.name, self.status, self.bootdelay, self.password, self.defaultstate)
@@ -60,13 +59,13 @@ This class represents a plug (port) on an NPS.
 # /Boot <n>  Boot Plug n
 # /On <n>    Turn On Plug n
 # /Off <n>   Turn Off Plug n
-# 
+#
 # [n] = optional plug name or number
 # <n> = required plug name or number
 # n+n = plug n and plug n
 # n:n = plug n through plug n
 # * = all plugs with access
-# 
+#
 
 class NPS(object):
     """
@@ -84,7 +83,7 @@ boot(plugnum)
 
 status([plugnum])
     If a plug number is given, return a string that is either "ON", or "OFF".
-    If no parameter is given, return a list of tuples of all plug object's status. 
+    If no parameter is given, return a list of tuples of all plug object's status.
 
 You can also view the current status of the NPS by simply printing the instance.
 
@@ -177,7 +176,7 @@ are finished with it.
             raise ValueError
         return self.plugs[pl].status
 
-    def _loginAndGetStats(self): 
+    def _loginAndGetStats(self):
         """
 Perform the login process by giving the password at the login prompt. Since the
 NPS seems to dump its current status without asking for it at this time, might
@@ -200,8 +199,8 @@ as well grab that while it's available.
             if plug.name == name:
                 return plug.number
         # plug name not found
-        raise ValueError, "NPS: plug named '%s' not found in list" % name 
-        
+        raise ValueError, "NPS: plug named '%s' not found in list" % name
+
     def _parsestats(self, rawstats):
         plug_re = re.compile("^[0-9]")
         lines = string.split(rawstats, "\n")
@@ -246,7 +245,7 @@ Network Power System device.
         self.nps = NPS(npsname)
         self.prompt = "NPS:%s> " % (npsname)
         self.intro = """
-Network Power System remote control. 
+Network Power System remote control.
 Type "help" for a list of commands.
 WARNING: session will fail after NPS's timeout period (default is 2 minutes).
 """
@@ -268,7 +267,7 @@ WARNING: session will fail after NPS's timeout period (default is 2 minutes).
 
     def do_on(self, arg):
         return self._doCommand(self.nps.on, arg)
-    
+
     def do_off(self, arg):
         return self._doCommand(self.nps.off, arg)
 

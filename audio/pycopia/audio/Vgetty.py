@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 Interface to the vgetty voice library.
@@ -22,7 +21,7 @@ Interface to the vgetty voice library.
 
 import sys, os
 import signal
-SIGPIPE = signal.SIGPIPE 
+SIGPIPE = signal.SIGPIPE
 from errno import EINTR
 
 from pycopia import scheduler
@@ -216,15 +215,15 @@ class CallProgram(object):
     # possible values for device() method.
     NO_DEVICE = "NO_DEVICE"
     DIALUP_LINE = "DIALUP_LINE"
-    INTERNAL_MICROPHONE = "INTERNAL_MICROPHONE" 
-    EXTERNAL_MICROPHONE = "EXTERNAL_MICROPHONE" 
+    INTERNAL_MICROPHONE = "INTERNAL_MICROPHONE"
+    EXTERNAL_MICROPHONE = "EXTERNAL_MICROPHONE"
     INTERNAL_SPEAKER = "INTERNAL_SPEAKER"
     LOCAL_HANDSET = "LOCAL_HANDSET"
     EXTERNAL_SPEAKER = "EXTERNAL_SPEAKER"
     DIALUP_WITH_INT_SPEAKER = "DIALUP_WITH_INT_SPEAKER"
-    DIALUP_WITH_EXT_SPEAKER = "DIALUP_WITH_EXT_SPEAKER" 
-    DIALUP_WITH_INTERNAL_MIC_AND_SPEAKER = "DIALUP_WITH_INTERNAL_MIC_AND_SPEAKER" 
-    DIALUP_WITH_EXTERNAL_MIC_AND_SPEAKER = "DIALUP_WITH_EXTERNAL_MIC_AND_SPEAKER" 
+    DIALUP_WITH_EXT_SPEAKER = "DIALUP_WITH_EXT_SPEAKER"
+    DIALUP_WITH_INTERNAL_MIC_AND_SPEAKER = "DIALUP_WITH_INTERNAL_MIC_AND_SPEAKER"
+    DIALUP_WITH_EXTERNAL_MIC_AND_SPEAKER = "DIALUP_WITH_EXTERNAL_MIC_AND_SPEAKER"
     DIALUP_WITH_LOCAL_HANDSET = "DIALUP_WITH_LOCAL_HANDSET"
 
     def beep(self, freq=None, duration=None):
@@ -240,7 +239,7 @@ class CallProgram(object):
         if i == 0:
             i = self.expect("READY", "ERROR")
             if i == 0:
-                return True 
+                return True
             else:
                 raise VgettyError, "beep: failed to beep"
         elif i == 1:
@@ -353,7 +352,7 @@ class CallProgram(object):
         your modem's format!!! See section 7). Use 'linger' with autostop on
         for better DTMF performance."""
         self.send("PLAY %s %d" % (fname, linger))
-        while True: 
+        while True:
             try:
                 i = self.expect("PLAYING", "ERROR")
             except _AsyncEvent, event:
@@ -435,7 +434,7 @@ class CallProgram(object):
         """Waits for 'seconds' seconds. During waiting, events will be
         detected and reported!"""
         self.send("WAIT %s" % (secs,))
-        while True: 
+        while True:
             try:
                 i = self.expect("WAITING", "ERROR")
             except _AsyncEvent, event:
@@ -501,7 +500,7 @@ class BasicCallProgram(CallProgram):
     def initialize(self):
         self.enable_events()
         self._do_dtmf = self._default_dtmf_handler
-        self._dtmf = [] 
+        self._dtmf = []
         self.register("RECEIVED_DTMF", self._handle_dtmf)
 
         signal.signal(signal.SIGHUP, self._quit)
@@ -528,7 +527,7 @@ class BasicCallProgram(CallProgram):
         digit = self._receive()
         self.log("DTMF", digit)
         if digit == "*":
-            self._dtmf = [] 
+            self._dtmf = []
             if self._state == "PLAYING" and not self._autostop:
                 self.stop()
         elif digit == "#":
@@ -576,7 +575,7 @@ def answering_machine(config, logfile=None, dtmf_handler=None):
         print >>sys.stderr, "%s: %s" % (time.ctime(), err)
         cp.beep(6000, 3)
     else:
-        print >>sys.stderr, "%s:%s|%s|%s|%s" % (time.ctime(), cp._device, inname, 
+        print >>sys.stderr, "%s:%s|%s|%s|%s" % (time.ctime(), cp._device, inname,
                     cp.caller_id, cp.caller_name)
     cp.close()
     return 0

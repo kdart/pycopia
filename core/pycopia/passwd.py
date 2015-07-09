@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 User objects from passwd entries. Funtionally enchanced PWEntry object is
@@ -36,12 +35,12 @@ class PWEntry(object):
         self.fullname = _ut[4]  # alias
         self.home = _ut[5]
         self.shell = _ut[6]
-        self._INDEX = {0:self.name, 1:self.passwd, 2:self.uid, 3:self.gid, 
+        self._INDEX = {0:self.name, 1:self.passwd, 2:self.uid, 3:self.gid,
                        4:self.gecos, 5:self.home, 6:self.shell}
         self._groups = None
 
     def __repr__(self):
-        return "%s:%s:%s:%s:%s:%s:%s" % (self.name, self.passwd, 
+        return "%s:%s:%s:%s:%s:%s:%s" % (self.name, self.passwd,
                      self.uid, self.gid, self.gecos, self.home, self.shell)
 
     def __str__(self):
@@ -54,7 +53,7 @@ class PWEntry(object):
     def __getitem__(self, idx):
         return self._INDEX[idx]
 
-    groupname = property(lambda self: grp.getgrgid(self.gid)[0], 
+    groupname = property(lambda self: grp.getgrgid(self.gid)[0],
                doc="Primary group name.")
 
     def _get_groups(self):

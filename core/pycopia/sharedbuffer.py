@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 I shared memory object for IPC support using coprocesses.
@@ -27,7 +26,7 @@ class SharedBuffer(object):
     def __init__(self, size=8192):
         assert size % os.sysconf("SC_PAGESIZE") == 0, "size must be a multiple of system's page size."
         self.bufsize = size
-        self._buf = mmap.mmap(-1, size, flags=mmap.MAP_SHARED|mmap.MAP_ANONYMOUS, 
+        self._buf = mmap.mmap(-1, size, flags=mmap.MAP_SHARED|mmap.MAP_ANONYMOUS,
                     prot=mmap.PROT_READ|mmap.PROT_WRITE )
         self._lock = 0 # simple locking
 
@@ -36,7 +35,7 @@ class SharedBuffer(object):
 
     def __del__(self):
         self.close()
-    
+
     def close(self):
         self._buf.close()
         self._buf = None
@@ -50,7 +49,7 @@ class SharedBuffer(object):
         self._lock = 1
         self._buf.write(data)
         self._lock = 0
-    
+
     def read(self, amt):
         if self._lock:
             raise OSError, (errno.EAGAIN, "memory busy. try again.")
@@ -59,7 +58,7 @@ class SharedBuffer(object):
         self._lock = 0
         return d
 
-    
+
     def unget(self, c):
         self.write(c)
         self.seek(-len(c), 2)
@@ -67,7 +66,7 @@ class SharedBuffer(object):
     # auto-delegate most attributes
     def __getattr__(self, name):
         return getattr(self._buf, name)
-    
+
     def __getitem__(self, i):
         return self._buf[i]
 

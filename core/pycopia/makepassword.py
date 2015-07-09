@@ -1,21 +1,18 @@
 #!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
 
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 Make a hard to guess set of passwords.
@@ -27,7 +24,12 @@ Basic algorithm:
     * Munge the word in various randomly selected ways.
 """
 
-import os, sys
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+
+import os
+import sys
 import random
 
 if sys.version_info.major == 3:
@@ -36,6 +38,7 @@ if sys.version_info.major == 3:
 from pycopia import textutils
 
 WORDPLACES = ["/usr/dict/words", "/usr/share/dict/words"]
+
 
 def getrandomlist():
     """
@@ -49,6 +52,7 @@ def getrandomlist():
         os.close(fd)
     return list(randnums)
 
+
 def getrandomwords(N=2):
     """
     Get a word at random from the system word list.
@@ -57,13 +61,16 @@ def getrandomwords(N=2):
     wordlist = []
     wordfile = list(filter(os.path.isfile, WORDPLACES))[0]
     words = open(wordfile, "r").readlines()
-    plainword = "" ; i = 0
+    plainword = ""
+    i = 0
     while i < N:
         while len(plainword) < 6 or len(plainword) > 15:
-            plainword = words[random.randint(1,len(words))]
+            plainword = words[random.randint(1, len(words))]
         wordlist.append(plainword.strip())
-        plainword = "" ; i += 1
+        plainword = ""
+        i += 1
     return tuple(wordlist)
+
 
 def hashword(plaintext):
     """
@@ -78,9 +85,11 @@ def hashword(plaintext):
         plaintext = plaintext.swapcase()
     # 0.50 chance of vowels being translated one of two ways.
     if rb[rb[2]] > 127:
-        plaintext = plaintext.translate(textutils.maketrans('aeiou AEIOU', '@3!0& 4#10%'))
+        plaintext = plaintext.translate(textutils.maketrans('aeiou AEIOU',
+                                                            '@3!0& 4#10%'))
     else:
-        plaintext = plaintext.translate(textutils.maketrans('aeiou AEIOU', '^#1$~ $3!0&'))
+        plaintext = plaintext.translate(textutils.maketrans('aeiou AEIOU',
+                                                            '^#1$~ $3!0&'))
     # 0.1 chance of some additional consonant translation
     if rb[rb[4]] < 25:
         plaintext = plaintext.translate(textutils.maketrans('cglt CGLT', '(<1+ (<1+'))
@@ -91,6 +100,7 @@ def hashword(plaintext):
     if rb[rb[3]] < 51:
         plaintext = plaintext + repr(rb[205])
     return plaintext
+
 
 def get_hashed_password():
     word = getrandomwords(1)[0]
@@ -115,4 +125,3 @@ def main(argv):
 if __name__ == "__main__":
     for pw, mnemonic in main(sys.argv):
         print ("password is: %s (mnemonic is: %s)" % (pw, mnemonic))
-

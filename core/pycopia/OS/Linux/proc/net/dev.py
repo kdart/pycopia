@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 Read /proc/net/dev data.
@@ -32,9 +31,9 @@ class ReceiveData(object):
         self.frame = frame
         self.compressed = compressed
         self.multicast = multicast
-    
+
     def __str__(self):
-        return "%10d %10d %6d %6d %6d %6d %10d %10d" % (self.bytes, self.packets, 
+        return "%10d %10d %6d %6d %6d %6d %10d %10d" % (self.bytes, self.packets,
             self.errs, self.drop, self.fifo, self.frame, self.compressed, self.multicast)
 
 class TransmitData(object):
@@ -49,7 +48,7 @@ class TransmitData(object):
         self.compressed = compressed
 
     def __str__(self):
-        return "%10d %10d %6d %6d %6d %6d %8d %10d" % (self.bytes, self.packets, 
+        return "%10d %10d %6d %6d %6d %6d %8d %10d" % (self.bytes, self.packets,
             self.errs, self.drop, self.fifo, self.colls, self.carrier, self.compressed)
 
 class Interface(object):
@@ -57,7 +56,7 @@ class Interface(object):
         self.name = name
         self.rx = None
         self.tx = None
-    
+
     def __str__(self):
         return "%5s: %s %s" % (self.name, self.rx, self.tx)
 
@@ -74,7 +73,7 @@ Inter-|   Receive                                                             | 
         for dev in self._devs.values():
             s.append(str(dev))
         return "\n".join(s)
-    
+
     def _get_names(self):
         names = self._devs.keys()
         names.sort()

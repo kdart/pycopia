@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 This is a high-level object interface the the Smartbits test system. It
@@ -25,7 +24,7 @@ programmer. This module also defines some utility functions.
 
 """
 
-from pycopia.smartbits.SMARTBITS import * 
+from pycopia.smartbits.SMARTBITS import *
 from pycopia.smartbits.smartbits_struct import *
 from pycopia.smartbits.smartbits_func import *
 
@@ -110,7 +109,7 @@ def setVFD1(h1, s1, p1):
 def setTrigger(h1, s1, p1):
     """
 setTrigger
-    Sets a trigger to match the base source MAC address.  Since we have a 
+    Sets a trigger to match the base source MAC address.  Since we have a
     cycle count of five on the VFD1 we are triggering on, our trigger will fire
     every fifth packet.
     """
@@ -123,7 +122,7 @@ setTrigger
 # XXX future interface, use typemaps to allow python list assignment to
 # memeber arrays.
     MyTrigger.Pattern = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66]
-    #  send config to card 
+    #  send config to card
     HTTrigger( HTTRIGGER_1, HTTRIGGER_ON, MyTrigger, h1, s1, p1)
 
 
@@ -177,7 +176,7 @@ showCounters
     """
     cs = HTCount()
     HTGetCounters( cs, h1, s1, p1)
-    print "=========================================" 
+    print "========================================="
     print "Counter Data Card", (s1 + 1)
     print "========================================="
     print " Transmitted Pkts  " , cs.TmtPkt

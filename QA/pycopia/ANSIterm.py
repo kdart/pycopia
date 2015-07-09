@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 An ANSI/VT102 terminal. Thanks to Noah Spurrier for code from which to start.
@@ -25,7 +24,7 @@ An ANSI/VT102 terminal. Thanks to Noah Spurrier for code from which to start.
 # http://vt100.net/docs/vt102-ug/contents.html
 # http://vt100.net/docs/vt220-rm/
 # http://www.termsys.demon.co.uk/vtansi.htm
-# 
+#
 
 import sys
 import os
@@ -94,7 +93,7 @@ class ANSIScreen(Screen):
 
     def ShiftIn(self): # select G0 character set
         pass
-    
+
     def ShiftOut(self): # select G1 character set
         pass
 
@@ -366,7 +365,7 @@ class ANSITerminal(Terminal):
     def AbsoluteRelative(self, val):
         self._relative = val # zero is absolute, one is relative addressing
 
-    _MODES = { 
+    _MODES = {
                 1: CursorKey, # application/cursor
                 2: ModeNoop, # vt52
                 3: SetColumns, # 80/132 column
@@ -379,7 +378,7 @@ class ANSITerminal(Terminal):
                 19: ModeNoop, # print extent full screen/region
                 40: ModeNoop, # XXX
     }
-    _BASICMODES = { 
+    _BASICMODES = {
                 0: ModeNoop, # error
                 2: KeyboardAction, # keyboard action locked/unlocked
                 4: InsertMode,      # insert/replace
@@ -522,11 +521,11 @@ class ANSITerminal(Terminal):
         fsm.add_transition ('g', 'NUMBER_1', self.DoTabClear, 'INIT')
         fsm.add_transition ('m', 'NUMBER_1', self.DoAttributes, 'INIT')
         fsm.add_transition ('n', 'NUMBER_1', self.Reports, 'INIT')
-        fsm.add_transition ('q', 'NUMBER_1', None, 'INIT') 
+        fsm.add_transition ('q', 'NUMBER_1', None, 'INIT')
         fsm.add_transition_list ('\0\r\n\t\b\x0b\x0c\x0e\x0f\x07', 'NUMBER_1', self.DoBasic, 'NUMBER_1')
         fsm.add_transition_list (ascii.digits, 'MODECRAP', self.StartNumber, 'MODECRAP_NUM')
         fsm.add_transition_list (ascii.digits, 'MODECRAP_NUM', self.BuildNumber, 'MODECRAP_NUM')
-        
+
         fsm.add_transition ('l', 'MODECRAP_NUM', self.DoMode, 'INIT')
         fsm.add_transition ('h', 'MODECRAP_NUM', self.DoMode, 'INIT')
 
@@ -539,8 +538,8 @@ class ANSITerminal(Terminal):
         fsm.add_transition ('f', 'NUMBER_2', self.DoHome, 'INIT')
         fsm.add_transition ('r', 'NUMBER_2', self.DoScrollRegion, 'INIT')
         fsm.add_transition ('m', 'NUMBER_2', self.DoAttributes, 'INIT')
-        ### LED control. 
-        fsm.add_transition ('q', 'NUMBER_2', None, 'INIT') 
+        ### LED control.
+        fsm.add_transition ('q', 'NUMBER_2', None, 'INIT')
         fsm.add_transition (self.ANY, 'NUMBER_2', self.log, 'INIT')
 
 

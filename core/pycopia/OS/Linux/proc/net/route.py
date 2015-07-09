@@ -1,19 +1,18 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2006  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 Routing table via /proc/net/route.
@@ -45,7 +44,7 @@ def _hex(i):
 class RouteEntry(object):
     """Represents a routing table entry. """
     def __init__(self, Iface, Destination=None, Gateway=None,
-                Flags=0, RefCnt=0, Use=0, Metric=0, Mask=None, 
+                Flags=0, RefCnt=0, Use=0, Metric=0, Mask=None,
                 MTU=0, Window=0, IRTT=0):
         self.Iface = Iface
         self.Destination = Destination
@@ -58,20 +57,20 @@ class RouteEntry(object):
         self.MTU = MTU
         self.Window = Window
         self.IRTT = IRTT
-    
+
     def __str__(self):
         return "\t".join([self.Iface]+map(_hex, [self.Destination, self.Gateway])+map(str, [
-                self.Flags, self.RefCnt, self.Use, self.Metric]) + [_hex(self.Mask)] + 
+                self.Flags, self.RefCnt, self.Use, self.Metric]) + [_hex(self.Mask)] +
                 map(str, [self.MTU, self.Window, self.IRTT]))
 
     # informational methods
     def is_up(self):
         return self.Flags & RTF_UP
     is_active = is_up # alias
-    
+
     def is_gateway(self):
         return self.Flags & RTF_GATEWAY
-    
+
     def is_host(self):
         return self.Flags & RTF_HOST
 
@@ -83,23 +82,23 @@ class RouteFlags(int):
         return int.__new__(cls, int(v, 16))
     def __str__(self):
         return "%04X" %(self,)
-    
+
 
 HEADER="Iface   Destination Gateway     Flags   RefCnt  Use Metric  Mask        MTU Window  IRTT"
 class RouteTable(object):
     """Represents the kernel FIB. Supports sequence operators."""
     def __init__(self):
         self._entries = []
-    
+
     def __str__(self):
         return "\n".join([HEADER] + map(str, self._entries))
-    
+
     def __getitem__(self, idx):
         return self._entries[idx]
-    
+
     def __iter__(self):
         return iter(self._entries)
-    
+
     def update(self, filt=None):
         """update([filter])
 Update the RouteTable with current values. If a filter function is supplied
@@ -109,20 +108,20 @@ If true, the RouterEntry will be included in the table. If false, it will not.
         self._entries = []
         lines = open(FILE).readlines()
         for line in lines[1:]:
-            [iface, dest, gateway, flags, refcnt, use, metric, mask, 
+            [iface, dest, gateway, flags, refcnt, use, metric, mask,
                 mtu, window, irtt] = line.split()
-            rt = RouteEntry(iface, 
-                    Destination=ntohl(int(dest, 16)), 
+            rt = RouteEntry(iface,
+                    Destination=ntohl(int(dest, 16)),
                     Gateway=ntohl(int(gateway, 16)),
-                    Flags=RouteFlags(flags), 
-                    RefCnt=int(refcnt, 16), 
-                    Use=int(use, 16), 
-                    Metric=int(metric, 16), 
-                    Mask=ntohl(int(mask, 16)), 
-                    MTU=int(mtu, 16), 
-                    Window=int(window, 16), 
+                    Flags=RouteFlags(flags),
+                    RefCnt=int(refcnt, 16),
+                    Use=int(use, 16),
+                    Metric=int(metric, 16),
+                    Mask=ntohl(int(mask, 16)),
+                    MTU=int(mtu, 16),
+                    Window=int(window, 16),
                     IRTT=int(irtt, 16))
-            if filt: 
+            if filt:
                 if filt(rt):
                     self._entries.append(rt)
             else:

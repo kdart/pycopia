@@ -1,30 +1,29 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
 # vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
-# 
-# $Id$
-#
-#    Copyright (C) 1999-2008  Keith Dart <keith@kdart.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 slogsink is a module (that is used in conjuctions with the slogsink C
 program) that receives syslog messages over a network. This is not a full
 syslog implementation, but a simple syslog protocol receiver that listens
 on the standard syslog/udp port for incoming messages and forwards them
-to your callback function. 
+to your callback function.
 
 The slogsink C program is used because the syslog port is a privileged
 port, and requires root access to open. The slogsink program should have
-been install SUID to root. 
+been install SUID to root.
 
 """
 
@@ -72,7 +71,7 @@ PRIORITY = {
     3: "err",
     4: "warning",
     5: "notice",
-    6: "info", 
+    6: "info",
     7: "debug",
 }
 
@@ -97,7 +96,7 @@ class SyslogMessage(object):
         return "<%s>%s %s %s: %s" % ((self.facility<<3) + self.priority, ts, self.tag, self.message)
 
     def __repr__(self):
-        return "%s(%r, %r, %r, %r, %r)" % (self.__class__.__name__, self.message, self.facility, self.priority, 
+        return "%s(%r, %r, %r, %r, %r)" % (self.__class__.__name__, self.message, self.facility, self.priority,
                 self.host, self.timestamp)
 
 
@@ -248,7 +247,7 @@ class SyslogCLI(CLI.BaseCommands):
         """flush
     Flush all of the log files."""
         self._obj.flush()
-    
+
     def ctime(self, argv):
         """ctime <timeval>
     Expand <timeval> (a float) to a readable form."""

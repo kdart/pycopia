@@ -1,23 +1,22 @@
 #! ironpython
-# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab:ft=python
-# 
-# $Id$
-#
-#    Copyright (C) 2009  Keith Dart <keith@dartworks.com>
-#
-#    This library is free software; you can redistribute it and/or
-#    modify it under the terms of the GNU Lesser General Public
-#    License as published by the Free Software Foundation; either
-#    version 2.1 of the License, or (at your option) any later version.
-#
-#    This library is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    Lesser General Public License for more details.
+# -*- coding: utf-8 -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 Debugger that can be used instead of the pdb module. This one provides a nicer
-command interface by using the CLI module. 
+command interface by using the CLI module.
 
 """
 
@@ -198,7 +197,7 @@ class Debugger(bdb.Bdb):
         frame.f_locals['__exception__'] = exc_type, exc_value
         if type(exc_type) == type(''):
             exc_type_name = exc_type
-        else: 
+        else:
             exc_type_name = exc_type.__name__
         self.print_exc(exc_type_name, exc_value)
         self.interaction(frame, exc_traceback)
@@ -274,7 +273,7 @@ class Debugger(bdb.Bdb):
             id = idstring[1].strip()
         else:
             return failed
-        if id == '': 
+        if id == '':
             return failed
         parts = id.split('.')
         # Protection for derived debuggers
@@ -339,7 +338,7 @@ class Debugger(bdb.Bdb):
             s.append(self._ui.format('%I->%N'))
             s.append(_saferepr(rv))
         line = linecache.getline(filename, lineno)
-        if line: 
+        if line:
             s.append("\n  ")
             s.append(line.strip())
         return "".join(s)
@@ -362,7 +361,7 @@ class DebuggerParser(CLI.CommandParser):
         # slashes
         f.add_transition("\\", 0, None, 1)
         f.add_transition(ANY, 1, self._slashescape, 0)
-        # vars 
+        # vars
         f.add_transition("$", 0, self._startvar, 7)
         f.add_transition("{", 7, self._vartext, 9)
         f.add_transition_list(self.VARCHARS, 7, self._vartext, 7)
@@ -481,7 +480,7 @@ class DebuggerCommands(CLI.BaseCommands):
         if line:
             # now set the break point
             err = self._dbg.set_break(filename, line, temporary, cond)
-            if err: 
+            if err:
                 self._print('***', err)
             else:
                 bp = self._dbg.get_breaks(filename, line)[-1]
@@ -596,7 +595,7 @@ class DebuggerCommands(CLI.BaseCommands):
                 err = "Invalid line number (%s)" % arg
             else:
                 err = self._dbg.clear_break(filename, lineno)
-            if err: 
+            if err:
                 self._print('***', err)
             return
         numberlist = arg.split()
@@ -710,9 +709,9 @@ class DebuggerCommands(CLI.BaseCommands):
         for i in range(n):
             name = co.co_varnames[i]
             self._print(name, '=', None)
-            if name in dict: 
+            if name in dict:
                 self._print(dict[name])
-            else: 
+            else:
                 self._print("*** undefined ***")
 
     def retval(self, argv):
@@ -738,9 +737,9 @@ class DebuggerCommands(CLI.BaseCommands):
             self._ui.printf("%%I%s%%N (" % (f.f_code.co_name or "<lambda>",))
             co = f.f_code
             n = co.co_argcount
-            if co.co_flags & 4: 
+            if co.co_flags & 4:
                 n += 1
-            if co.co_flags & 8: 
+            if co.co_flags & 8:
                 n += 1
             local = f.f_locals
             for name in co.co_varnames[:n]:
@@ -824,17 +823,17 @@ class DebuggerCommands(CLI.BaseCommands):
             self._print('***', exc_type_name + ':', `v`)
             return
         # Is it a function?
-        try: 
+        try:
             code = value.func_code
-        except: 
+        except:
             pass
         else:
             self._print('Function', code.co_name)
             return
         # Is it an instance method?
-        try: 
+        try:
             code = value.im_func.func_code
-        except: 
+        except:
             pass
         else:
             self._print('Method', code.co_name)
