@@ -74,6 +74,9 @@ class OSInfo(object):
         dist = self.distribution
         return dist.startswith("Red") or dist.startswith("Cent")
 
+    def is_osx(self):
+        return self.distribution.startswith("Mac OS X")
+
 
 def _get_linux_dist():
     for fname in LINUX_RELEASE_FILES:
@@ -86,6 +89,13 @@ def _get_linux_dist():
                 pass
     return "Unknown", "Unknown"
 
+
+def _get_darwin_dist():
+    import subprocess
+    text = subprocess.check_output(["sw_vers"], shell=False)
+    return re.search(r"^ProductName:\t(.*)\nProductVersion:\t(.*)", text, re.M).groups()
+
+
 def get_platform():
     global os 
     rv = OSInfo()
@@ -97,6 +107,13 @@ def get_platform():
         rv.osname = osname
         rv.osversion = kernel
         rv.distribution, rv.release = _get_linux_dist()
+    elif sys.platform.startswith("darwin"):
+        import os # making this global breaks on IronPython
+        osname, _, kernel, _, arch = os.uname()
+        rv.arch = arch
+        rv.osname = osname
+        rv.osversion = kernel
+        rv.distribution, rv.release = _get_darwin_dist()
     elif sys.platform in ("win32", "cli"):
         import os
         rv.arch = os.environ["PROCESSOR_ARCHITECTURE"]
