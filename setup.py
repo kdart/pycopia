@@ -152,7 +152,10 @@ def _do_scripts(name, scriptdir, root=False):
     rv = True
     try:
         if os.path.isdir("bin"):
-            cmd = "%scp -dR --preserve=mode  bin/* %s" % (sudo, scriptdir)
+            if sys.platform == "darwin":
+                cmd = "%scp -a bin/* %s" % (sudo, scriptdir)
+            else:
+                cmd = "%scp -dR --preserve=mode  bin/* %s" % (sudo, scriptdir)
             print("======== SCRIPTS", name, "==", cmd)
             rv = WEXITSTATUS(os.system(cmd)) == 0
     finally:
