@@ -55,11 +55,12 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-import sys, os, types
+__all__ = ['info']
+
+import sys
+import os, types
 from pprint import pprint
 from inspect import *
-
-from pycopia import devenviron
 
 
 try:
@@ -75,10 +76,7 @@ except ImportError:
             pass
     readline = Readline()
 
-try:
-    from importlib import import_module
-except ImportError: # older python
-    from pycopia.module import get_module as import_module
+from importlib import import_module
 
 if sys.platform == "win32":
     _default_hist = os.path.join(os.environ["USERPROFILE"], "_pythonhist")
@@ -101,29 +99,22 @@ except ImportError:
     def savehist():
         readline.write_history_file(PYHISTFILE)
     atexit.register( savehist )
-    readline.parse_and_bind("tab: complete")
 
 
 # import some pycopia functions that are helpful for interactive use.
-from pycopia.cliutils import *
 from pycopia.textutils import *
-from pycopia.aid import add2builtin, execfile
-from pycopia.devhelpers import *
 
-__all__ = ['info']
 
 def _add_all(modname):
     mod = import_module(modname)
     __all__.extend([n for n in dir(mod) if n[0] != "_" and callable(getattr(mod, n))])
-
 _add_all("pycopia.textutils")
-_add_all("pycopia.cliutils")
-_add_all("pycopia.devhelpers")
 _add_all("inspect")
 del _add_all
 
 sys.ps1 = os.environ.get("PYPS1", "Python{0}> ".format(sys.version_info[0]))
 sys.ps2 = os.environ.get("PYPS2", "more...> ")
+
 
 def info(obj=None):
     """Print some helpful information about the given object. Usually the
@@ -161,25 +152,30 @@ sys.displayhook = mydisplayhook
 setattr(sys.modules["__main__"], "_", None)
 
 
-
 # Add some functions useful for interactive use to builtins.
 # This is done to provide better interactive functionality without
 # cluttering the __main__ namespace.
 def _add_builtins(names=__all__):
+    me = sys.modules[__name__]
     for name in names:
         try:
-            add2builtin(name, getattr(sys.modules[__name__], name))
+            obj = getattr(me, name)
+            if not hasattr(__builtins__, name):
+                setattr(__builtins__, name, obj)
         except AttributeError:
             pass
-
 _add_builtins()
 del _add_builtins
 
 
 ## readline key bindings
+if sys.platform =="darwin":
+    readline.parse_and_bind("bind ^I rl_complete")
+else:
+    readline.parse_and_bind("tab: complete")
 ##readline.parse_and_bind("tab: menu-complete")
 #readline.parse_and_bind('"?": possible-completions')
-readline.parse_and_bind('"\M-?": possible-completions')
+    readline.parse_and_bind('"\M-?": possible-completions')
 #readline.parse_and_bind('"\M-h": "help()\n"')
 #readline.parse_and_bind('"\eOP": "help()\n"')
 #readline.parse_and_bind('"\M-f": dump-functions')

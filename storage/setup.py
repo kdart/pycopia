@@ -33,6 +33,11 @@ if platinfo.is_linux():
         #(os.path.join("/var", "www", WEBSITE, 'media', 'images'), glob("media/images/*.png")),
     ])
     SCRIPTS = glob("bin/*")
+elif platinfo.is_osx():
+    DATAFILES = [
+        ('/etc/pycopia', glob("etc/*.example") + glob("etc/*.dist")),
+    ]
+    SCRIPTS = glob("bin/*")
 else:
     DATAFILES = []
     SCRIPTS = []
